@@ -1,0 +1,14 @@
+{
+  "ensemble": {
+    "header": {
+      "title": "Ensemble AI",
+      "tagline": "The smartest AI is an ensemble."
+    },
+    "steps": {
+      "config": "Config",
+      "ensemble": "Ensemble",
+      "prompt": "Prompt",
+      "review": "Review"
+    }
+  }
+}

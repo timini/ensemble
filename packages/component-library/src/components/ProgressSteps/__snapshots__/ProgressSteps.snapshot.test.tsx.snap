@@ -11,18 +11,18 @@ exports[`ProgressSteps Snapshots > matches snapshot for config step 1`] = `
       class="flex flex-col items-center"
     >
       <div
-        class="w-12 h-12 rounded-full flex items-center justify-center font-semibold text-sm transition-colors bg-blue-500 text-white"
+        class="w-12 h-12 rounded-full flex items-center justify-center font-semibold text-sm transition-colors bg-blue-500 text-white dark:bg-blue-600"
       >
         1
       </div>
       <span
-        class="mt-2 text-sm font-medium transition-colors text-blue-600"
+        class="mt-2 text-sm font-medium transition-colors text-blue-600 dark:text-blue-400"
       >
         Config
       </span>
     </div>
     <div
-      class="w-16 h-0.5 mx-4 transition-colors bg-gray-300"
+      class="w-16 h-0.5 mx-4 transition-colors bg-muted"
     />
   </div>
   <div
@@ -32,18 +32,18 @@ exports[`ProgressSteps Snapshots > matches snapshot for config step 1`] = `
       class="flex flex-col items-center"
     >
       <div
-        class="w-12 h-12 rounded-full flex items-center justify-center font-semibold text-sm transition-colors bg-gray-300 text-gray-600"
+        class="w-12 h-12 rounded-full flex items-center justify-center font-semibold text-sm transition-colors bg-muted text-muted-foreground"
       >
         2
       </div>
       <span
-        class="mt-2 text-sm font-medium transition-colors text-gray-500"
+        class="mt-2 text-sm font-medium transition-colors text-muted-foreground"
       >
         Ensemble
       </span>
     </div>
     <div
-      class="w-16 h-0.5 mx-4 transition-colors bg-gray-300"
+      class="w-16 h-0.5 mx-4 transition-colors bg-muted"
     />
   </div>
   <div
@@ -53,18 +53,18 @@ exports[`ProgressSteps Snapshots > matches snapshot for config step 1`] = `
       class="flex flex-col items-center"
     >
       <div
-        class="w-12 h-12 rounded-full flex items-center justify-center font-semibold text-sm transition-colors bg-gray-300 text-gray-600"
+        class="w-12 h-12 rounded-full flex items-center justify-center font-semibold text-sm transition-colors bg-muted text-muted-foreground"
       >
         3
       </div>
       <span
-        class="mt-2 text-sm font-medium transition-colors text-gray-500"
+        class="mt-2 text-sm font-medium transition-colors text-muted-foreground"
       >
         Prompt
       </span>
     </div>
     <div
-      class="w-16 h-0.5 mx-4 transition-colors bg-gray-300"
+      class="w-16 h-0.5 mx-4 transition-colors bg-muted"
     />
   </div>
   <div
@@ -74,12 +74,12 @@ exports[`ProgressSteps Snapshots > matches snapshot for config step 1`] = `
       class="flex flex-col items-center"
     >
       <div
-        class="w-12 h-12 rounded-full flex items-center justify-center font-semibold text-sm transition-colors bg-gray-300 text-gray-600"
+        class="w-12 h-12 rounded-full flex items-center justify-center font-semibold text-sm transition-colors bg-muted text-muted-foreground"
       >
         4
       </div>
       <span
-        class="mt-2 text-sm font-medium transition-colors text-gray-500"
+        class="mt-2 text-sm font-medium transition-colors text-muted-foreground"
       >
         Review
       </span>
@@ -99,7 +99,7 @@ exports[`ProgressSteps Snapshots > matches snapshot for ensemble step 1`] = `
       class="flex flex-col items-center"
     >
       <div
-        class="w-12 h-12 rounded-full flex items-center justify-center font-semibold text-sm transition-colors bg-green-500 text-white"
+        class="w-12 h-12 rounded-full flex items-center justify-center font-semibold text-sm transition-colors bg-green-500 text-white dark:bg-green-600"
       >
         <svg
           class="lucide lucide-check w-4 h-4"
@@ -120,13 +120,13 @@ exports[`ProgressSteps Snapshots > matches snapshot for ensemble step 1`] = `
         </svg>
       </div>
       <span
-        class="mt-2 text-sm font-medium transition-colors text-green-600"
+        class="mt-2 text-sm font-medium transition-colors text-green-600 dark:text-green-400"
       >
         Config
       </span>
     </div>
     <div
-      class="w-16 h-0.5 mx-4 transition-colors bg-green-500"
+      class="w-16 h-0.5 mx-4 transition-colors bg-green-500 dark:bg-green-600"
     />
   </div>
   <div
@@ -136,18 +136,18 @@ exports[`ProgressSteps Snapshots > matches snapshot for ensemble step 1`] = `
       class="flex flex-col items-center"
     >
       <div
-        class="w-12 h-12 rounded-full flex items-center justify-center font-semibold text-sm transition-colors bg-blue-500 text-white"
+        class="w-12 h-12 rounded-full flex items-center justify-center font-semibold text-sm transition-colors bg-blue-500 text-white dark:bg-blue-600"
       >
         2
       </div>
       <span
-        class="mt-2 text-sm font-medium transition-colors text-blue-600"
+        class="mt-2 text-sm font-medium transition-colors text-blue-600 dark:text-blue-400"
       >
         Ensemble
       </span>
     </div>
     <div
-      class="w-16 h-0.5 mx-4 transition-colors bg-gray-300"
+      class="w-16 h-0.5 mx-4 transition-colors bg-muted"
     />
   </div>
   <div
@@ -157,18 +157,18 @@ exports[`ProgressSteps Snapshots > matches snapshot for ensemble step 1`] = `
       class="flex flex-col items-center"
     >
       <div
-        class="w-12 h-12 rounded-full flex items-center justify-center font-semibold text-sm transition-colors bg-gray-300 text-gray-600"
+        class="w-12 h-12 rounded-full flex items-center justify-center font-semibold text-sm transition-colors bg-muted text-muted-foreground"
       >
         3
       </div>
       <span
-        class="mt-2 text-sm font-medium transition-colors text-gray-500"
+        class="mt-2 text-sm font-medium transition-colors text-muted-foreground"
       >
         Prompt
       </span>
     </div>
     <div
-      class="w-16 h-0.5 mx-4 transition-colors bg-gray-300"
+      class="w-16 h-0.5 mx-4 transition-colors bg-muted"
     />
   </div>
   <div
@@ -178,12 +178,12 @@ exports[`ProgressSteps Snapshots > matches snapshot for ensemble step 1`] = `
       class="flex flex-col items-center"
     >
       <div
-        class="w-12 h-12 rounded-full flex items-center justify-center font-semibold text-sm transition-colors bg-gray-300 text-gray-600"
+        class="w-12 h-12 rounded-full flex items-center justify-center font-semibold text-sm transition-colors bg-muted text-muted-foreground"
       >
         4
       </div>
       <span
-        class="mt-2 text-sm font-medium transition-colors text-gray-500"
+        class="mt-2 text-sm font-medium transition-colors text-muted-foreground"
       >
         Review
       </span>
@@ -203,7 +203,7 @@ exports[`ProgressSteps Snapshots > matches snapshot for prompt step 1`] = `
       class="flex flex-col items-center"
     >
       <div
-        class="w-12 h-12 rounded-full flex items-center justify-center font-semibold text-sm transition-colors bg-green-500 text-white"
+        class="w-12 h-12 rounded-full flex items-center justify-center font-semibold text-sm transition-colors bg-green-500 text-white dark:bg-green-600"
       >
         <svg
           class="lucide lucide-check w-4 h-4"
@@ -224,13 +224,13 @@ exports[`ProgressSteps Snapshots > matches snapshot for prompt step 1`] = `
         </svg>
       </div>
       <span
-        class="mt-2 text-sm font-medium transition-colors text-green-600"
+        class="mt-2 text-sm font-medium transition-colors text-green-600 dark:text-green-400"
       >
         Config
       </span>
     </div>
     <div
-      class="w-16 h-0.5 mx-4 transition-colors bg-green-500"
+      class="w-16 h-0.5 mx-4 transition-colors bg-green-500 dark:bg-green-600"
     />
   </div>
   <div
@@ -240,7 +240,7 @@ exports[`ProgressSteps Snapshots > matches snapshot for prompt step 1`] = `
       class="flex flex-col items-center"
     >
       <div
-        class="w-12 h-12 rounded-full flex items-center justify-center font-semibold text-sm transition-colors bg-green-500 text-white"
+        class="w-12 h-12 rounded-full flex items-center justify-center font-semibold text-sm transition-colors bg-green-500 text-white dark:bg-green-600"
       >
         <svg
           class="lucide lucide-check w-4 h-4"
@@ -261,13 +261,13 @@ exports[`ProgressSteps Snapshots > matches snapshot for prompt step 1`] = `
         </svg>
       </div>
       <span
-        class="mt-2 text-sm font-medium transition-colors text-green-600"
+        class="mt-2 text-sm font-medium transition-colors text-green-600 dark:text-green-400"
       >
         Ensemble
       </span>
     </div>
     <div
-      class="w-16 h-0.5 mx-4 transition-colors bg-green-500"
+      class="w-16 h-0.5 mx-4 transition-colors bg-green-500 dark:bg-green-600"
     />
   </div>
   <div
@@ -277,18 +277,18 @@ exports[`ProgressSteps Snapshots > matches snapshot for prompt step 1`] = `
       class="flex flex-col items-center"
     >
       <div
-        class="w-12 h-12 rounded-full flex items-center justify-center font-semibold text-sm transition-colors bg-blue-500 text-white"
+        class="w-12 h-12 rounded-full flex items-center justify-center font-semibold text-sm transition-colors bg-blue-500 text-white dark:bg-blue-600"
       >
         3
       </div>
       <span
-        class="mt-2 text-sm font-medium transition-colors text-blue-600"
+        class="mt-2 text-sm font-medium transition-colors text-blue-600 dark:text-blue-400"
       >
         Prompt
       </span>
     </div>
     <div
-      class="w-16 h-0.5 mx-4 transition-colors bg-gray-300"
+      class="w-16 h-0.5 mx-4 transition-colors bg-muted"
     />
   </div>
   <div
@@ -298,12 +298,12 @@ exports[`ProgressSteps Snapshots > matches snapshot for prompt step 1`] = `
       class="flex flex-col items-center"
     >
       <div
-        class="w-12 h-12 rounded-full flex items-center justify-center font-semibold text-sm transition-colors bg-gray-300 text-gray-600"
+        class="w-12 h-12 rounded-full flex items-center justify-center font-semibold text-sm transition-colors bg-muted text-muted-foreground"
       >
         4
       </div>
       <span
-        class="mt-2 text-sm font-medium transition-colors text-gray-500"
+        class="mt-2 text-sm font-medium transition-colors text-muted-foreground"
       >
         Review
       </span>
@@ -323,7 +323,7 @@ exports[`ProgressSteps Snapshots > matches snapshot for review step 1`] = `
       class="flex flex-col items-center"
     >
       <div
-        class="w-12 h-12 rounded-full flex items-center justify-center font-semibold text-sm transition-colors bg-green-500 text-white"
+        class="w-12 h-12 rounded-full flex items-center justify-center font-semibold text-sm transition-colors bg-green-500 text-white dark:bg-green-600"
       >
         <svg
           class="lucide lucide-check w-4 h-4"
@@ -344,13 +344,13 @@ exports[`ProgressSteps Snapshots > matches snapshot for review step 1`] = `
         </svg>
       </div>
       <span
-        class="mt-2 text-sm font-medium transition-colors text-green-600"
+        class="mt-2 text-sm font-medium transition-colors text-green-600 dark:text-green-400"
       >
         Config
       </span>
     </div>
     <div
-      class="w-16 h-0.5 mx-4 transition-colors bg-green-500"
+      class="w-16 h-0.5 mx-4 transition-colors bg-green-500 dark:bg-green-600"
     />
   </div>
   <div
@@ -360,7 +360,7 @@ exports[`ProgressSteps Snapshots > matches snapshot for review step 1`] = `
       class="flex flex-col items-center"
     >
       <div
-        class="w-12 h-12 rounded-full flex items-center justify-center font-semibold text-sm transition-colors bg-green-500 text-white"
+        class="w-12 h-12 rounded-full flex items-center justify-center font-semibold text-sm transition-colors bg-green-500 text-white dark:bg-green-600"
       >
         <svg
           class="lucide lucide-check w-4 h-4"
@@ -381,13 +381,13 @@ exports[`ProgressSteps Snapshots > matches snapshot for review step 1`] = `
         </svg>
       </div>
       <span
-        class="mt-2 text-sm font-medium transition-colors text-green-600"
+        class="mt-2 text-sm font-medium transition-colors text-green-600 dark:text-green-400"
       >
         Ensemble
       </span>
     </div>
     <div
-      class="w-16 h-0.5 mx-4 transition-colors bg-green-500"
+      class="w-16 h-0.5 mx-4 transition-colors bg-green-500 dark:bg-green-600"
     />
   </div>
   <div
@@ -397,7 +397,7 @@ exports[`ProgressSteps Snapshots > matches snapshot for review step 1`] = `
       class="flex flex-col items-center"
     >
       <div
-        class="w-12 h-12 rounded-full flex items-center justify-center font-semibold text-sm transition-colors bg-green-500 text-white"
+        class="w-12 h-12 rounded-full flex items-center justify-center font-semibold text-sm transition-colors bg-green-500 text-white dark:bg-green-600"
       >
         <svg
           class="lucide lucide-check w-4 h-4"
@@ -418,13 +418,13 @@ exports[`ProgressSteps Snapshots > matches snapshot for review step 1`] = `
         </svg>
       </div>
       <span
-        class="mt-2 text-sm font-medium transition-colors text-green-600"
+        class="mt-2 text-sm font-medium transition-colors text-green-600 dark:text-green-400"
       >
         Prompt
       </span>
     </div>
     <div
-      class="w-16 h-0.5 mx-4 transition-colors bg-green-500"
+      class="w-16 h-0.5 mx-4 transition-colors bg-green-500 dark:bg-green-600"
     />
   </div>
   <div
@@ -434,12 +434,12 @@ exports[`ProgressSteps Snapshots > matches snapshot for review step 1`] = `
       class="flex flex-col items-center"
     >
       <div
-        class="w-12 h-12 rounded-full flex items-center justify-center font-semibold text-sm transition-colors bg-blue-500 text-white"
+        class="w-12 h-12 rounded-full flex items-center justify-center font-semibold text-sm transition-colors bg-blue-500 text-white dark:bg-blue-600"
       >
         4
       </div>
       <span
-        class="mt-2 text-sm font-medium transition-colors text-blue-600"
+        class="mt-2 text-sm font-medium transition-colors text-blue-600 dark:text-blue-400"
       >
         Review
       </span>

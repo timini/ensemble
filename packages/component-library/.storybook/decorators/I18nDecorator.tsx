@@ -15,8 +15,18 @@ i18n.use(initReactI18next).init({
   resources: {
     en: {
       translation: {
-        // Placeholder translations for component development
-        // Real translations will be added in Phase 1.1 (T021-T023)
+        ensemble: {
+          header: {
+            title: 'Ensemble AI',
+            tagline: 'The smartest AI is an ensemble.',
+          },
+          steps: {
+            config: 'Config',
+            ensemble: 'Ensemble',
+            prompt: 'Prompt',
+            review: 'Review',
+          },
+        },
         'app.name': 'Ensemble AI',
         'common.loading': 'Loading...',
         'common.error': 'Error',
@@ -26,7 +36,18 @@ i18n.use(initReactI18next).init({
     },
     fr: {
       translation: {
-        // Placeholder French translations
+        ensemble: {
+          header: {
+            title: 'IA Ensemble',
+            tagline: "L'IA la plus intelligente est un ensemble.",
+          },
+          steps: {
+            config: 'Configuration',
+            ensemble: 'Ensemble',
+            prompt: 'Invite',
+            review: 'Révision',
+          },
+        },
         'app.name': 'Ensemble IA',
         'common.loading': 'Chargement...',
         'common.error': 'Erreur',

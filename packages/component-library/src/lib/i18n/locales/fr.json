@@ -1,0 +1,14 @@
+{
+  "ensemble": {
+    "header": {
+      "title": "IA Ensemble",
+      "tagline": "L'IA la plus intelligente est un ensemble."
+    },
+    "steps": {
+      "config": "Configuration",
+      "ensemble": "Ensemble",
+      "prompt": "Invite",
+      "review": "Révision"
+    }
+  }
+}
