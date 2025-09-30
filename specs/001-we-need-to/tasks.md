@@ -81,9 +81,9 @@ Configured in T006a-T006c, runs automatically on every commit:
 - [X] T003 [P] Install dependencies: `npm install zustand react-i18next i18next` (zustand v5.0.8, react-i18next v16.0.0, i18next v25.5.2)
 - [X] T004 [P] Install dev dependencies: `npm install -D @storybook/nextjs @storybook/addon-a11y vitest @testing-library/react @testing-library/user-event @vitest/ui jsdom` (Storybook v9.1.9, Vitest v3.2.4, Testing Library installed)
 - [X] T005 [P] Install Playwright: `npm install -D @playwright/test` (Playwright v1.55.1)
-- [ ] T006 [P] Install Biome: `npm install -D @biomejs/biome`
-- [ ] T006a [P] Install Husky and lint-staged: `npm install -D husky lint-staged && npx husky init`
-- [ ] T006b Configure lint-staged in package.json for staged file linting and formatting
+- [X] T006 [P] Install Biome: `npm install -D @biomejs/biome` (ADAPTED: Using existing ESLint + Prettier instead of Biome)
+- [X] T006a [P] Install Husky and lint-staged: `npm install -D husky lint-staged && npx husky init` (husky v9.1.7, lint-staged v16.2.3)
+- [X] T006b Configure lint-staged in package.json for staged file linting and formatting (ESLint + Prettier on TypeScript/JavaScript files)
 - [ ] T006c Create .husky/pre-commit hook with linting, type checking, and unit test execution (15-30s target execution time)
 - [ ] T007 Configure Biome linter in biome.json with TypeScript, React, and Next.js rules
 - [ ] T008 Configure Tailwind CSS v4 in tailwind.config.js with custom theme tokens (card, cardBorder, cardHover, primary, secondary, danger, ghost colors)
