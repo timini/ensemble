@@ -1,0 +1,14 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+# Run Storybook visual tests before push
+cd packages/component-library
+
+# Check if Storybook is already running on port 6006
+if ! lsof -ti:6006 > /dev/null 2>&1; then
+  echo "Starting Storybook for visual tests..."
+  npm run test:storybook:ci
+else
+  echo "Storybook is already running, running tests against existing instance..."
+  npm run test:storybook
+fi

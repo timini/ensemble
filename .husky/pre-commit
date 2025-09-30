@@ -1,0 +1,7 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+# Run tests in component library
+cd packages/component-library
+npm run test:unit
+npm run lint
