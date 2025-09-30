@@ -1,0 +1,51 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`Tag > snapshots > matches snapshot for default state 1`] = `
+<span
+  class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-medium transition-colors border bg-secondary text-secondary-foreground border-border"
+>
+  Tag
+</span>
+`;
+
+exports[`Tag > snapshots > matches snapshot for removable state 1`] = `
+<div
+  class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-medium transition-colors border bg-secondary text-secondary-foreground border-border"
+>
+  Tag
+  <button
+    aria-label="Remove"
+    class="inline-flex items-center justify-center rounded-full hover:bg-black/10 dark:hover:bg-white/10 p-0.5 transition-colors"
+    type="button"
+  >
+    <svg
+      aria-hidden="true"
+      class="lucide lucide-x h-3 w-3"
+      fill="none"
+      height="24"
+      stroke="currentColor"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      stroke-width="2"
+      viewBox="0 0 24 24"
+      width="24"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="M18 6 6 18"
+      />
+      <path
+        d="m6 6 12 12"
+      />
+    </svg>
+  </button>
+</div>
+`;
+
+exports[`Tag > snapshots > matches snapshot for selected state 1`] = `
+<span
+  class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-medium transition-colors border bg-secondary text-secondary-foreground border-blue-500 dark:border-blue-400"
+>
+  Tag
+</span>
+`;
