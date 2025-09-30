@@ -2,6 +2,7 @@
 . "$(dirname -- "$0")/_/husky.sh"
 
 # Run Storybook visual tests before push
+echo "🎨 Running Storybook visual tests..."
 cd packages/component-library
 
 # Check if Storybook is already running on port 6006
@@ -12,3 +13,8 @@ else
   echo "Storybook is already running, running tests against existing instance..."
   npm run test:storybook
 fi
+
+# Run e2e tests for app
+echo "🧪 Running app e2e tests..."
+cd ../app
+npm run test:e2e

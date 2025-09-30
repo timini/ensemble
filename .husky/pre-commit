@@ -1,7 +1,15 @@
 #!/usr/bin/env sh
 . "$(dirname -- "$0")/_/husky.sh"
 
-# Run tests in component library
+# Run tests and checks in component library
+echo "🧪 Running component library tests..."
 cd packages/component-library
 npm run test:unit
 npm run lint
+
+# Run checks in app
+echo "🏗️  Running app checks..."
+cd ../app
+npm run lint
+npm run typecheck
+npm run build
