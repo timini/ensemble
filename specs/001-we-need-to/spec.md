@@ -281,7 +281,7 @@ Ensemble AI is a web application that allows users to query multiple Large Langu
 - **Test Data**: Use fixed, deterministic test data for reproducible results
 
 ### Visual Regression Testing
-- **Framework**: Chromatic (Storybook visual regression)
+- **Framework**: Playwright screenshot testing (automated visual regression, self-hosted)
 - **Baseline**: Established at Phase 1 completion (T110)
 - **Execution**: Visual regression run before phase completion and PR merge
 - **Scope**: All Storybook stories across light/dark themes and EN/FR languages

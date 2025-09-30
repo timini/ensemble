@@ -88,9 +88,9 @@
 
 **Testing**:
 - Vitest + React Testing Library (unit/integration)
-- Playwright (E2E testing)
+- Playwright (E2E testing + visual screenshots)
 - Storybook interaction tests
-- Chromatic (visual regression)
+- Screenshot testing (automated visual regression, replaces Chromatic)
 
 **Target Platform**:
 - Modern web browsers with Web Crypto API support
@@ -198,7 +198,7 @@
   4. Write unit tests BEFORE implementation
   5. Implement until tests pass
   6. Visual validation in Storybook
-  7. Run Chromatic visual regression
+  7. Run screenshot testing (npx tsx scripts/screenshot-stories.ts)
   8. Update SPEC.md to mark COMPLETE
   9. Then may be used in pages
 
@@ -482,7 +482,7 @@ prisma/                     # Prisma migrations (Phase 4, if Prisma)
 - De facto standard for component catalogs
 - Excellent Next.js support via @storybook/nextjs
 - Addons: a11y (accessibility), docs (auto-generated docs), controls (interactive props)
-- Chromatic integration for visual regression testing
+- Playwright screenshot testing for visual regression (replaces Chromatic)
 **Alternatives Considered**:
 - Docz (rejected: less mature, smaller ecosystem)
 - Styleguidist (rejected: not React-first, limited features)
@@ -924,7 +924,7 @@ All design decisions align with constitutional principles:
 ✓ Both languages (EN/FR) working across all components
 ✓ Storybook catalog fully populated and navigable
 ✓ Zero linting errors, zero TypeScript errors, zero accessibility violations
-✓ Visual regression baseline established (Chromatic)
+✓ Visual regression baseline established (38 screenshot PNGs in git)
 ✓ Documentation complete (SPEC.md v1.0, /docs/*, README.md)
 
 **Phase 2 Success Criteria**:
@@ -983,7 +983,7 @@ All design decisions align with constitutional principles:
 - [ ] Review this plan with stakeholders
 - [ ] Confirm tech stack decisions (Next.js 14, Tailwind v4, Zustand, tRPC)
 - [ ] Set up development environment (Node.js 18+, npm/yarn/pnpm)
-- [ ] Provision services (Chromatic account, GitHub repo, domain)
+- [ ] Provision services (GitHub repo, domain) - No Chromatic needed (self-hosted screenshots)
 - [ ] Assign Phase 1 tasks to developers
 
 **After Phase 1 Completion** (Day 25):
