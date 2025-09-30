@@ -14,7 +14,7 @@
     "test": "npm run test --workspaces --if-present",
     "test:unit": "npm run test:unit --workspaces --if-present",
     "typecheck": "npm run typecheck --workspaces --if-present",
-    "prepare": "npm run prepare --workspaces --if-present"
+    "prepare": "husky"
   },
   "devDependencies": {
     "prettier": "^3.6.2",

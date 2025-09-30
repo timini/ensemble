@@ -67,7 +67,7 @@ const Tag = React.forwardRef<HTMLButtonElement | HTMLSpanElement, TagProps>(
 
     const handleClick = (e: React.MouseEvent<HTMLDivElement | HTMLButtonElement>) => {
       if (disabled) return;
-      onClick?.(e as any);
+      onClick?.(e as React.MouseEvent<HTMLButtonElement | HTMLSpanElement>);
     };
 
     const handleRemove = (e: React.MouseEvent<HTMLButtonElement>) => {
@@ -78,7 +78,7 @@ const Tag = React.forwardRef<HTMLButtonElement | HTMLSpanElement, TagProps>(
 
     return (
       <Comp
-        ref={ref as any}
+        ref={ref as React.Ref<HTMLButtonElement | HTMLSpanElement>}
         className={cn(tagVariants({ variant, selected, clickable: isClickable, disabled, className }))}
         onClick={onClick ? handleClick : undefined}
         disabled={!removable ? disabled : undefined}
