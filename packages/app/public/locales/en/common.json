@@ -1,0 +1,43 @@
+{
+  "app": {
+    "name": "Ensemble AI",
+    "tagline": "Make better decisions with multiple AI perspectives"
+  },
+  "navigation": {
+    "config": "Configuration",
+    "ensemble": "Ensemble",
+    "prompt": "Prompt",
+    "review": "Review"
+  },
+  "common": {
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "submit": "Submit",
+    "cancel": "Cancel",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "back": "Back",
+    "next": "Next",
+    "previous": "Previous",
+    "close": "Close",
+    "confirm": "Confirm"
+  },
+  "theme": {
+    "light": "Light",
+    "dark": "Dark",
+    "toggle": "Toggle theme"
+  },
+  "language": {
+    "en": "English",
+    "fr": "Français",
+    "select": "Select language"
+  },
+  "workflow": {
+    "step1": "Step 1: Configuration",
+    "step2": "Step 2: Build Ensemble",
+    "step3": "Step 3: Enter Prompt",
+    "step4": "Step 4: Review Results"
+  }
+}

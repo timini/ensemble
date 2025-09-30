@@ -1,0 +1,43 @@
+{
+  "app": {
+    "name": "Ensemble IA",
+    "tagline": "Prenez de meilleures décisions avec plusieurs perspectives d'IA"
+  },
+  "navigation": {
+    "config": "Configuration",
+    "ensemble": "Ensemble",
+    "prompt": "Invite",
+    "review": "Révision"
+  },
+  "common": {
+    "loading": "Chargement...",
+    "error": "Erreur",
+    "success": "Succès",
+    "submit": "Soumettre",
+    "cancel": "Annuler",
+    "save": "Enregistrer",
+    "delete": "Supprimer",
+    "edit": "Modifier",
+    "back": "Retour",
+    "next": "Suivant",
+    "previous": "Précédent",
+    "close": "Fermer",
+    "confirm": "Confirmer"
+  },
+  "theme": {
+    "light": "Clair",
+    "dark": "Sombre",
+    "toggle": "Changer de thème"
+  },
+  "language": {
+    "en": "English",
+    "fr": "Français",
+    "select": "Sélectionner la langue"
+  },
+  "workflow": {
+    "step1": "Étape 1 : Configuration",
+    "step2": "Étape 2 : Créer l'ensemble",
+    "step3": "Étape 3 : Entrer l'invite",
+    "step4": "Étape 4 : Examiner les résultats"
+  }
+}
