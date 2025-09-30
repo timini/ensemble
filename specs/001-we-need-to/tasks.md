@@ -88,7 +88,7 @@ Configured in T006a-T006c, runs automatically on every commit:
 - [X] T007 Configure Biome linter in biome.json with TypeScript, React, and Next.js rules (ADAPTED: Using existing ESLint configuration from T3 stack)
 - [X] T008 Configure Tailwind CSS v4 in tailwind.config.js with custom theme tokens (card, cardBorder, cardHover, primary, secondary, danger, ghost colors) (Configured in globals.css using Tailwind v4 @theme directive)
 - [X] T009 Create src/styles/globals.css with Tailwind imports and CSS variables for light/dark themes (Completed with full light/dark theme support and all custom colors)
-- [ ] T010 [P] Initialize Storybook: `npx storybook@latest init`
+- [X] T010 [P] Initialize Storybook: `npx storybook@latest init` (Storybook v9.1.9 with Vite builder initialized in packages/component-library, includes a11y and vitest addons)
 - [ ] T011 Configure Storybook for Next.js in .storybook/main.ts with addons: a11y, docs, controls
 - [ ] T012 Create .storybook/preview.ts with theme decorator and i18n decorator
 - [ ] T013 [P] Create .storybook/decorators/ThemeDecorator.tsx for light/dark theme switching
