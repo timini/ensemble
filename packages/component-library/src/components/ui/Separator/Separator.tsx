@@ -21,15 +21,21 @@ export interface SeparatorProps
 }
 
 const Separator = React.forwardRef<HTMLDivElement, SeparatorProps>(
-  ({ className, orientation = 'horizontal', decorative = true, ...props }, ref) => (
-    <div
-      ref={ref}
-      role={decorative ? 'none' : 'separator'}
-      aria-orientation={decorative ? undefined : orientation}
-      className={cn(separatorVariants({ orientation }), className)}
-      {...props}
-    />
-  )
+  ({ className, orientation = 'horizontal', decorative = true, ...props }, ref) => {
+    const ariaProps = decorative
+      ? {}
+      : { 'aria-orientation': orientation as 'horizontal' | 'vertical' };
+
+    return (
+      <div
+        ref={ref}
+        role={decorative ? 'none' : 'separator'}
+        {...ariaProps}
+        className={cn(separatorVariants({ orientation }), className)}
+        {...props}
+      />
+    );
+  }
 );
 Separator.displayName = 'Separator';
 
