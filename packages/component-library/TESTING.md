@@ -7,7 +7,8 @@ This component library uses a comprehensive testing strategy to ensure component
 - **Vitest**: Unit and snapshot testing
 - **React Testing Library**: Component testing utilities
 - **Storybook Test Runner**: Visual regression and interaction testing
-- **Playwright**: Browser automation for Storybook tests
+- **Playwright**: Browser automation for Storybook tests and visual screenshots
+- **Screenshot Testing**: Automated visual regression via Playwright (replaces Chromatic)
 
 ## Test Types
 
@@ -63,12 +64,47 @@ npx playwright install chromium
 **Run tests:**
 ```bash
 # Development: Requires Storybook to be running
-npm run storybook  # Terminal 1
-npm run test:storybook  # Terminal 2
+npm run storybook           # Terminal 1
+npm run test:storybook      # Terminal 2
 
 # CI: Builds Storybook and runs tests
 npm run test:storybook:ci
 ```
+
+### 4. Screenshot Testing (Visual Regression)
+
+**Our standard approach for visual testing** - Automated screenshots of all Storybook stories using Playwright.
+
+**Why screenshot testing?**
+- ✅ Catch visual regressions automatically
+- ✅ Review actual component rendering
+- ✅ No external service dependencies (replaced Chromatic)
+- ✅ Store screenshots in git for version control
+- ✅ Perfect for code reviews
+
+**Run screenshot tests:**
+```bash
+# Start Storybook
+npm run storybook
+
+# Take screenshots of all stories
+npx tsx scripts/screenshot-stories.ts
+```
+
+**Screenshots location:**
+```
+packages/component-library/screenshots/
+├── Button-Default.png
+├── Button-Destructive.png
+├── Card-Default.png
+└── ... (all component variants)
+```
+
+**Best practices:**
+1. Run screenshots after CSS/style changes
+2. Review screenshot diffs in PRs
+3. Commit screenshot updates when intentional
+4. Use for visual QA during code reviews
 
 ## Test Coverage
 
@@ -96,9 +132,13 @@ coverage: {
 # Unit + Snapshot tests
 npm run test:unit
 
-# Storybook tests (requires Storybook running)
+# Storybook interaction tests (requires Storybook running)
 npm run storybook
 npm run test:storybook
+
+# Visual regression tests (screenshots)
+npm run storybook
+npx tsx scripts/screenshot-stories.ts
 
 # All tests in CI
 npm run test:unit && npm run test:storybook:ci

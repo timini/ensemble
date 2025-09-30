@@ -9,7 +9,7 @@ import {
 } from './decorators/I18nDecorator';
 
 // Import Tailwind CSS for styling
-import '../../app/src/styles/globals.css';
+import '../src/styles/globals.css';
 
 const preview: Preview = {
   parameters: {
