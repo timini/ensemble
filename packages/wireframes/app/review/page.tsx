@@ -47,7 +47,7 @@ export default function ReviewPage() {
         <div className="text-center mb-8">
           <h2 className="text-3xl font-bold text-gray-900 mb-4">Ensemble Response</h2>
           <p className="text-gray-600">
-            Compare each model's answer, inspect agreement, and read the consensus summary before finalising.
+            Compare each model&apos;s answer, inspect agreement, and read the consensus summary before finalising.
           </p>
         </div>
 
@@ -139,7 +139,7 @@ export default function ReviewPage() {
           <h3 className="font-semibold mb-6">Individual Responses</h3>
 
           <div className="space-y-6">
-            {responses.map((response, index) => (
+            {responses.map((response) => (
               <Card key={response.id}>
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between mb-4">
