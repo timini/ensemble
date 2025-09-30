@@ -1,5 +1,4 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import { action } from '@storybook/addon-actions';
 import { Tag } from './Tag';
 
 const meta = {
@@ -55,7 +54,7 @@ export const Removable: Story = {
   args: {
     children: 'GPT-4o',
     removable: true,
-    onRemove: action('removed'),
+    onRemove: () => console.log('removed'),
   },
 };
 
@@ -64,7 +63,7 @@ export const RemovableSelected: Story = {
     children: 'Claude Sonnet',
     removable: true,
     selected: true,
-    onRemove: action('removed'),
+    onRemove: () => console.log('removed'),
   },
 };
 
@@ -87,7 +86,7 @@ export const Success: Story = {
 export const Clickable: Story = {
   args: {
     children: 'Click me',
-    onClick: action('clicked'),
+    onClick: () => console.log('clicked'),
   },
 };
 
@@ -95,7 +94,7 @@ export const ClickableSelected: Story = {
   args: {
     children: 'GPT-4 Turbo',
     selected: true,
-    onClick: action('clicked'),
+    onClick: () => console.log('clicked'),
   },
 };
 
@@ -119,12 +118,12 @@ export const DisabledRemovable: Story = {
 export const ModelSelection: Story = {
   render: () => (
     <div className="flex flex-wrap gap-2">
-      <Tag selected onClick={action('clicked')}>GPT-4</Tag>
-      <Tag selected onClick={action('clicked')}>Claude 3 Opus</Tag>
-      <Tag onClick={action('clicked')}>GPT-4 Turbo</Tag>
-      <Tag onClick={action('clicked')}>Claude 3 Sonnet</Tag>
-      <Tag onClick={action('clicked')}>Gemini Pro</Tag>
-      <Tag onClick={action('clicked')}>Grok</Tag>
+      <Tag selected onClick={() => console.log('clicked GPT-4')}>GPT-4</Tag>
+      <Tag selected onClick={() => console.log('clicked Claude 3 Opus')}>Claude 3 Opus</Tag>
+      <Tag onClick={() => console.log('clicked GPT-4 Turbo')}>GPT-4 Turbo</Tag>
+      <Tag onClick={() => console.log('clicked Claude 3 Sonnet')}>Claude 3 Sonnet</Tag>
+      <Tag onClick={() => console.log('clicked Gemini Pro')}>Gemini Pro</Tag>
+      <Tag onClick={() => console.log('clicked Grok')}>Grok</Tag>
     </div>
   ),
 };
@@ -133,9 +132,9 @@ export const ModelSelection: Story = {
 export const RemovableTags: Story = {
   render: () => (
     <div className="flex flex-wrap gap-2">
-      <Tag removable onRemove={action('removed GPT-4')}>GPT-4</Tag>
-      <Tag removable onRemove={action('removed Claude')}>Claude 3 Opus</Tag>
-      <Tag removable onRemove={action('removed Gemini')}>Gemini Pro</Tag>
+      <Tag removable onRemove={() => console.log('removed GPT-4')}>GPT-4</Tag>
+      <Tag removable onRemove={() => console.log('removed Claude')}>Claude 3 Opus</Tag>
+      <Tag removable onRemove={() => console.log('removed Gemini')}>Gemini Pro</Tag>
     </div>
   ),
 };
