@@ -9,7 +9,6 @@ const config: StorybookConfig = {
     '@storybook/addon-onboarding',
     '@storybook/addon-docs',
     '@storybook/addon-a11y', // Accessibility testing
-    '@chromatic-com/storybook', // Visual regression testing
     '@storybook/addon-vitest', // Vitest integration
   ],
   framework: {
