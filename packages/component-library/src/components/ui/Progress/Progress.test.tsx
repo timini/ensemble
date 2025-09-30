@@ -93,4 +93,36 @@ describe('Progress', () => {
     const indicator = progress.firstChild as HTMLElement;
     expect(indicator.style.width).toBe('25%');
   });
+
+  describe('snapshots', () => {
+    it('matches snapshot for default variant', () => {
+      const { container } = render(<Progress value={50} />);
+      expect(container.firstChild).toMatchSnapshot();
+    });
+
+    it('matches snapshot for destructive variant', () => {
+      const { container } = render(<Progress variant="destructive" value={75} />);
+      expect(container.firstChild).toMatchSnapshot();
+    });
+
+    it('matches snapshot for success variant', () => {
+      const { container } = render(<Progress variant="success" value={100} />);
+      expect(container.firstChild).toMatchSnapshot();
+    });
+
+    it('matches snapshot for warning variant', () => {
+      const { container } = render(<Progress variant="warning" value={25} />);
+      expect(container.firstChild).toMatchSnapshot();
+    });
+
+    it('matches snapshot with custom className', () => {
+      const { container } = render(<Progress value={60} className="h-4" />);
+      expect(container.firstChild).toMatchSnapshot();
+    });
+
+    it('matches snapshot at 0%', () => {
+      const { container } = render(<Progress value={0} />);
+      expect(container.firstChild).toMatchSnapshot();
+    });
+  });
 });

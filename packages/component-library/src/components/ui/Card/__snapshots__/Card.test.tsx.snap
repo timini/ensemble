@@ -1,0 +1,88 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`Card > snapshots > matches snapshot for CardDescription alone 1`] = `
+<div
+  class="text-sm text-muted-foreground"
+>
+  Description text
+</div>
+`;
+
+exports[`Card > snapshots > matches snapshot for CardFooter alone 1`] = `
+<div
+  class="flex items-center p-6 pt-0"
+>
+  Footer content
+</div>
+`;
+
+exports[`Card > snapshots > matches snapshot for CardHeader alone 1`] = `
+<div
+  class="flex flex-col space-y-1.5 p-6"
+>
+  Header content
+</div>
+`;
+
+exports[`Card > snapshots > matches snapshot for CardTitle alone 1`] = `
+<div
+  class="font-semibold leading-none tracking-tight"
+>
+  Title text
+</div>
+`;
+
+exports[`Card > snapshots > matches snapshot for basic card 1`] = `
+<div
+  class="rounded-xl border bg-card text-card-foreground shadow"
+>
+  <div
+    class="p-6 pt-0"
+  >
+    Simple content
+  </div>
+</div>
+`;
+
+exports[`Card > snapshots > matches snapshot for complete card structure 1`] = `
+<div
+  class="rounded-xl border bg-card text-card-foreground shadow"
+>
+  <div
+    class="flex flex-col space-y-1.5 p-6"
+  >
+    <div
+      class="font-semibold leading-none tracking-tight"
+    >
+      Card Title
+    </div>
+    <div
+      class="text-sm text-muted-foreground"
+    >
+      Card Description
+    </div>
+  </div>
+  <div
+    class="p-6 pt-0"
+  >
+    Card Content
+  </div>
+  <div
+    class="flex items-center p-6 pt-0"
+  >
+    Card Footer
+  </div>
+</div>
+`;
+
+exports[`Card > snapshots > matches snapshot with custom className 1`] = `
+<div
+  class="rounded-xl bg-card text-card-foreground shadow border-2"
+>
+  <div
+    class="p-6 pt-0"
+  >
+    Custom styled card
+  </div>
+</div>
+`;

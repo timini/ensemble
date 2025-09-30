@@ -36,4 +36,31 @@ describe('Badge', () => {
     render(<Badge>Inline Badge</Badge>);
     expect(screen.getByText('Inline Badge')).toHaveClass('inline-flex');
   });
+
+  describe('snapshots', () => {
+    it('matches snapshot for default variant', () => {
+      const { container } = render(<Badge>Default</Badge>);
+      expect(container.firstChild).toMatchSnapshot();
+    });
+
+    it('matches snapshot for secondary variant', () => {
+      const { container } = render(<Badge variant="secondary">Secondary</Badge>);
+      expect(container.firstChild).toMatchSnapshot();
+    });
+
+    it('matches snapshot for destructive variant', () => {
+      const { container } = render(<Badge variant="destructive">Error</Badge>);
+      expect(container.firstChild).toMatchSnapshot();
+    });
+
+    it('matches snapshot for outline variant', () => {
+      const { container } = render(<Badge variant="outline">Outline</Badge>);
+      expect(container.firstChild).toMatchSnapshot();
+    });
+
+    it('matches snapshot with custom className', () => {
+      const { container } = render(<Badge className="text-lg">Custom</Badge>);
+      expect(container.firstChild).toMatchSnapshot();
+    });
+  });
 });

@@ -42,4 +42,26 @@ describe('ProgressSteps', () => {
     const completedSteps = container.querySelectorAll('.bg-green-500');
     expect(completedSteps.length).toBeGreaterThan(0);
   });
+
+  describe('snapshots', () => {
+    it('matches snapshot for config step', () => {
+      const { container } = render(<ProgressSteps currentStep="config" />);
+      expect(container.firstChild).toMatchSnapshot();
+    });
+
+    it('matches snapshot for ensemble step', () => {
+      const { container } = render(<ProgressSteps currentStep="ensemble" />);
+      expect(container.firstChild).toMatchSnapshot();
+    });
+
+    it('matches snapshot for prompt step', () => {
+      const { container } = render(<ProgressSteps currentStep="prompt" />);
+      expect(container.firstChild).toMatchSnapshot();
+    });
+
+    it('matches snapshot for review step', () => {
+      const { container } = render(<ProgressSteps currentStep="review" />);
+      expect(container.firstChild).toMatchSnapshot();
+    });
+  });
 });

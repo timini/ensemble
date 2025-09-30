@@ -1,0 +1,38 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`Separator > snapshots > matches snapshot for horizontal decorative separator 1`] = `
+<div
+  class="shrink-0 bg-border h-[1px] w-full"
+  role="none"
+/>
+`;
+
+exports[`Separator > snapshots > matches snapshot for horizontal semantic separator 1`] = `
+<div
+  aria-orientation="horizontal"
+  class="shrink-0 bg-border h-[1px] w-full"
+  role="separator"
+/>
+`;
+
+exports[`Separator > snapshots > matches snapshot for vertical decorative separator 1`] = `
+<div
+  class="shrink-0 bg-border h-full w-[1px]"
+  role="none"
+/>
+`;
+
+exports[`Separator > snapshots > matches snapshot for vertical semantic separator 1`] = `
+<div
+  aria-orientation="vertical"
+  class="shrink-0 bg-border h-full w-[1px]"
+  role="separator"
+/>
+`;
+
+exports[`Separator > snapshots > matches snapshot with custom className 1`] = `
+<div
+  class="shrink-0 bg-border h-[1px] w-full my-4"
+  role="none"
+/>
+`;

@@ -40,4 +40,26 @@ describe('Textarea', () => {
     render(<Textarea data-testid="textarea" />);
     expect(screen.getByTestId('textarea')).toHaveClass('min-h-[80px]');
   });
+
+  describe('snapshots', () => {
+    it('matches snapshot for default textarea', () => {
+      const { container } = render(<Textarea placeholder="Enter text" />);
+      expect(container.firstChild).toMatchSnapshot();
+    });
+
+    it('matches snapshot for disabled state', () => {
+      const { container } = render(<Textarea disabled placeholder="Disabled" />);
+      expect(container.firstChild).toMatchSnapshot();
+    });
+
+    it('matches snapshot with custom className', () => {
+      const { container } = render(<Textarea className="min-h-[200px]" />);
+      expect(container.firstChild).toMatchSnapshot();
+    });
+
+    it('matches snapshot with value', () => {
+      const { container } = render(<Textarea defaultValue="Initial text content" />);
+      expect(container.firstChild).toMatchSnapshot();
+    });
+  });
 });

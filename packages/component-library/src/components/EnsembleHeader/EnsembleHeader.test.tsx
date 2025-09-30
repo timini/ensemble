@@ -24,4 +24,11 @@ describe('EnsembleHeader', () => {
     const header = container.firstChild;
     expect(header).toHaveClass('bg-white', 'border-b');
   });
+
+  describe('snapshots', () => {
+    it('matches snapshot for default render', () => {
+      const { container } = render(<EnsembleHeader />);
+      expect(container.firstChild).toMatchSnapshot();
+    });
+  });
 });

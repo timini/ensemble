@@ -42,4 +42,21 @@ describe('Label', () => {
     render(<Label data-testid="custom-label">Test Label</Label>);
     expect(screen.getByTestId('custom-label')).toBeInTheDocument();
   });
+
+  describe('snapshots', () => {
+    it('matches snapshot for basic label', () => {
+      const { container } = render(<Label>Email Address</Label>);
+      expect(container.firstChild).toMatchSnapshot();
+    });
+
+    it('matches snapshot with htmlFor', () => {
+      const { container } = render(<Label htmlFor="email-input">Email</Label>);
+      expect(container.firstChild).toMatchSnapshot();
+    });
+
+    it('matches snapshot with custom className', () => {
+      const { container } = render(<Label className="text-red-500">Custom Label</Label>);
+      expect(container.firstChild).toMatchSnapshot();
+    });
+  });
 });
