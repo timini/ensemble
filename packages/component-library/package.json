@@ -28,6 +28,7 @@
   },
   "devDependencies": {
     "@storybook/addon-a11y": "^9.1.9",
+    "@storybook/addon-actions": "^9.0.8",
     "@storybook/addon-docs": "^9.1.9",
     "@storybook/addon-onboarding": "^9.1.9",
     "@storybook/addon-vitest": "^9.1.9",
