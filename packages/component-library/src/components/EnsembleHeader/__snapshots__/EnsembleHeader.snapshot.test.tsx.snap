@@ -1,0 +1,50 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`EnsembleHeader Snapshots > matches snapshot for default header 1`] = `
+<div
+  class="bg-white border-b"
+>
+  <div
+    class="max-w-6xl mx-auto px-6 py-6"
+  >
+    <div
+      class="flex items-center justify-between"
+    >
+      <div>
+        <h1
+          class="text-2xl font-bold text-gray-900"
+        >
+          Ensemble AI
+        </h1>
+        <p
+          class="text-gray-600 mt-1"
+        >
+          The smartest AI is an ensemble.
+        </p>
+      </div>
+      <svg
+        class="lucide lucide-settings w-5 h-5 text-gray-400"
+        fill="none"
+        height="24"
+        role="img"
+        stroke="currentColor"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="2"
+        viewBox="0 0 24 24"
+        width="24"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915"
+        />
+        <circle
+          cx="12"
+          cy="12"
+          r="3"
+        />
+      </svg>
+    </div>
+  </div>
+</div>
+`;
