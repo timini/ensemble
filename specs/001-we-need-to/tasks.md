@@ -79,7 +79,7 @@ Configured in T006a-T006c, runs automatically on every commit:
 - [X] T001 Create Next.js 14 project with TypeScript: `npx create-next-app@latest ensemble-ai --typescript --tailwind --app` (T3 stack with Next.js 15, already created)
 - [X] T002 Initialize Git repository and create .gitignore for Next.js (already initialized)
 - [X] T003 [P] Install dependencies: `npm install zustand react-i18next i18next` (zustand v5.0.8, react-i18next v16.0.0, i18next v25.5.2)
-- [ ] T004 [P] Install dev dependencies: `npm install -D @storybook/nextjs @storybook/addon-a11y vitest @testing-library/react @testing-library/user-event @vitest/ui jsdom`
+- [X] T004 [P] Install dev dependencies: `npm install -D @storybook/nextjs @storybook/addon-a11y vitest @testing-library/react @testing-library/user-event @vitest/ui jsdom` (Storybook v9.1.9, Vitest v3.2.4, Testing Library installed)
 - [ ] T005 [P] Install Playwright: `npm install -D @playwright/test`
 - [ ] T006 [P] Install Biome: `npm install -D @biomejs/biome`
 - [ ] T006a [P] Install Husky and lint-staged: `npm install -D husky lint-staged && npx husky init`
