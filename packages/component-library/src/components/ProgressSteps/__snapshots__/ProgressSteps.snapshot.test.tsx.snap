@@ -1,0 +1,449 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`ProgressSteps Snapshots > matches snapshot for config step 1`] = `
+<div
+  class="flex items-center justify-center mb-12"
+>
+  <div
+    class="flex items-center"
+  >
+    <div
+      class="flex flex-col items-center"
+    >
+      <div
+        class="w-12 h-12 rounded-full flex items-center justify-center font-semibold text-sm transition-colors bg-blue-500 text-white"
+      >
+        1
+      </div>
+      <span
+        class="mt-2 text-sm font-medium transition-colors text-blue-600"
+      >
+        Config
+      </span>
+    </div>
+    <div
+      class="w-16 h-0.5 mx-4 transition-colors bg-gray-300"
+    />
+  </div>
+  <div
+    class="flex items-center"
+  >
+    <div
+      class="flex flex-col items-center"
+    >
+      <div
+        class="w-12 h-12 rounded-full flex items-center justify-center font-semibold text-sm transition-colors bg-gray-300 text-gray-600"
+      >
+        2
+      </div>
+      <span
+        class="mt-2 text-sm font-medium transition-colors text-gray-500"
+      >
+        Ensemble
+      </span>
+    </div>
+    <div
+      class="w-16 h-0.5 mx-4 transition-colors bg-gray-300"
+    />
+  </div>
+  <div
+    class="flex items-center"
+  >
+    <div
+      class="flex flex-col items-center"
+    >
+      <div
+        class="w-12 h-12 rounded-full flex items-center justify-center font-semibold text-sm transition-colors bg-gray-300 text-gray-600"
+      >
+        3
+      </div>
+      <span
+        class="mt-2 text-sm font-medium transition-colors text-gray-500"
+      >
+        Prompt
+      </span>
+    </div>
+    <div
+      class="w-16 h-0.5 mx-4 transition-colors bg-gray-300"
+    />
+  </div>
+  <div
+    class="flex items-center"
+  >
+    <div
+      class="flex flex-col items-center"
+    >
+      <div
+        class="w-12 h-12 rounded-full flex items-center justify-center font-semibold text-sm transition-colors bg-gray-300 text-gray-600"
+      >
+        4
+      </div>
+      <span
+        class="mt-2 text-sm font-medium transition-colors text-gray-500"
+      >
+        Review
+      </span>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`ProgressSteps Snapshots > matches snapshot for ensemble step 1`] = `
+<div
+  class="flex items-center justify-center mb-12"
+>
+  <div
+    class="flex items-center"
+  >
+    <div
+      class="flex flex-col items-center"
+    >
+      <div
+        class="w-12 h-12 rounded-full flex items-center justify-center font-semibold text-sm transition-colors bg-green-500 text-white"
+      >
+        <svg
+          class="lucide lucide-check w-4 h-4"
+          fill="none"
+          height="24"
+          role="img"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="24"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M20 6 9 17l-5-5"
+          />
+        </svg>
+      </div>
+      <span
+        class="mt-2 text-sm font-medium transition-colors text-green-600"
+      >
+        Config
+      </span>
+    </div>
+    <div
+      class="w-16 h-0.5 mx-4 transition-colors bg-green-500"
+    />
+  </div>
+  <div
+    class="flex items-center"
+  >
+    <div
+      class="flex flex-col items-center"
+    >
+      <div
+        class="w-12 h-12 rounded-full flex items-center justify-center font-semibold text-sm transition-colors bg-blue-500 text-white"
+      >
+        2
+      </div>
+      <span
+        class="mt-2 text-sm font-medium transition-colors text-blue-600"
+      >
+        Ensemble
+      </span>
+    </div>
+    <div
+      class="w-16 h-0.5 mx-4 transition-colors bg-gray-300"
+    />
+  </div>
+  <div
+    class="flex items-center"
+  >
+    <div
+      class="flex flex-col items-center"
+    >
+      <div
+        class="w-12 h-12 rounded-full flex items-center justify-center font-semibold text-sm transition-colors bg-gray-300 text-gray-600"
+      >
+        3
+      </div>
+      <span
+        class="mt-2 text-sm font-medium transition-colors text-gray-500"
+      >
+        Prompt
+      </span>
+    </div>
+    <div
+      class="w-16 h-0.5 mx-4 transition-colors bg-gray-300"
+    />
+  </div>
+  <div
+    class="flex items-center"
+  >
+    <div
+      class="flex flex-col items-center"
+    >
+      <div
+        class="w-12 h-12 rounded-full flex items-center justify-center font-semibold text-sm transition-colors bg-gray-300 text-gray-600"
+      >
+        4
+      </div>
+      <span
+        class="mt-2 text-sm font-medium transition-colors text-gray-500"
+      >
+        Review
+      </span>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`ProgressSteps Snapshots > matches snapshot for prompt step 1`] = `
+<div
+  class="flex items-center justify-center mb-12"
+>
+  <div
+    class="flex items-center"
+  >
+    <div
+      class="flex flex-col items-center"
+    >
+      <div
+        class="w-12 h-12 rounded-full flex items-center justify-center font-semibold text-sm transition-colors bg-green-500 text-white"
+      >
+        <svg
+          class="lucide lucide-check w-4 h-4"
+          fill="none"
+          height="24"
+          role="img"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="24"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M20 6 9 17l-5-5"
+          />
+        </svg>
+      </div>
+      <span
+        class="mt-2 text-sm font-medium transition-colors text-green-600"
+      >
+        Config
+      </span>
+    </div>
+    <div
+      class="w-16 h-0.5 mx-4 transition-colors bg-green-500"
+    />
+  </div>
+  <div
+    class="flex items-center"
+  >
+    <div
+      class="flex flex-col items-center"
+    >
+      <div
+        class="w-12 h-12 rounded-full flex items-center justify-center font-semibold text-sm transition-colors bg-green-500 text-white"
+      >
+        <svg
+          class="lucide lucide-check w-4 h-4"
+          fill="none"
+          height="24"
+          role="img"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="24"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M20 6 9 17l-5-5"
+          />
+        </svg>
+      </div>
+      <span
+        class="mt-2 text-sm font-medium transition-colors text-green-600"
+      >
+        Ensemble
+      </span>
+    </div>
+    <div
+      class="w-16 h-0.5 mx-4 transition-colors bg-green-500"
+    />
+  </div>
+  <div
+    class="flex items-center"
+  >
+    <div
+      class="flex flex-col items-center"
+    >
+      <div
+        class="w-12 h-12 rounded-full flex items-center justify-center font-semibold text-sm transition-colors bg-blue-500 text-white"
+      >
+        3
+      </div>
+      <span
+        class="mt-2 text-sm font-medium transition-colors text-blue-600"
+      >
+        Prompt
+      </span>
+    </div>
+    <div
+      class="w-16 h-0.5 mx-4 transition-colors bg-gray-300"
+    />
+  </div>
+  <div
+    class="flex items-center"
+  >
+    <div
+      class="flex flex-col items-center"
+    >
+      <div
+        class="w-12 h-12 rounded-full flex items-center justify-center font-semibold text-sm transition-colors bg-gray-300 text-gray-600"
+      >
+        4
+      </div>
+      <span
+        class="mt-2 text-sm font-medium transition-colors text-gray-500"
+      >
+        Review
+      </span>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`ProgressSteps Snapshots > matches snapshot for review step 1`] = `
+<div
+  class="flex items-center justify-center mb-12"
+>
+  <div
+    class="flex items-center"
+  >
+    <div
+      class="flex flex-col items-center"
+    >
+      <div
+        class="w-12 h-12 rounded-full flex items-center justify-center font-semibold text-sm transition-colors bg-green-500 text-white"
+      >
+        <svg
+          class="lucide lucide-check w-4 h-4"
+          fill="none"
+          height="24"
+          role="img"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="24"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M20 6 9 17l-5-5"
+          />
+        </svg>
+      </div>
+      <span
+        class="mt-2 text-sm font-medium transition-colors text-green-600"
+      >
+        Config
+      </span>
+    </div>
+    <div
+      class="w-16 h-0.5 mx-4 transition-colors bg-green-500"
+    />
+  </div>
+  <div
+    class="flex items-center"
+  >
+    <div
+      class="flex flex-col items-center"
+    >
+      <div
+        class="w-12 h-12 rounded-full flex items-center justify-center font-semibold text-sm transition-colors bg-green-500 text-white"
+      >
+        <svg
+          class="lucide lucide-check w-4 h-4"
+          fill="none"
+          height="24"
+          role="img"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="24"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M20 6 9 17l-5-5"
+          />
+        </svg>
+      </div>
+      <span
+        class="mt-2 text-sm font-medium transition-colors text-green-600"
+      >
+        Ensemble
+      </span>
+    </div>
+    <div
+      class="w-16 h-0.5 mx-4 transition-colors bg-green-500"
+    />
+  </div>
+  <div
+    class="flex items-center"
+  >
+    <div
+      class="flex flex-col items-center"
+    >
+      <div
+        class="w-12 h-12 rounded-full flex items-center justify-center font-semibold text-sm transition-colors bg-green-500 text-white"
+      >
+        <svg
+          class="lucide lucide-check w-4 h-4"
+          fill="none"
+          height="24"
+          role="img"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="24"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M20 6 9 17l-5-5"
+          />
+        </svg>
+      </div>
+      <span
+        class="mt-2 text-sm font-medium transition-colors text-green-600"
+      >
+        Prompt
+      </span>
+    </div>
+    <div
+      class="w-16 h-0.5 mx-4 transition-colors bg-green-500"
+    />
+  </div>
+  <div
+    class="flex items-center"
+  >
+    <div
+      class="flex flex-col items-center"
+    >
+      <div
+        class="w-12 h-12 rounded-full flex items-center justify-center font-semibold text-sm transition-colors bg-blue-500 text-white"
+      >
+        4
+      </div>
+      <span
+        class="mt-2 text-sm font-medium transition-colors text-blue-600"
+      >
+        Review
+      </span>
+    </div>
+  </div>
+</div>
+`;

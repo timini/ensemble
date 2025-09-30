@@ -1,0 +1,58 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`Card Snapshots > matches snapshot for basic card 1`] = `
+<div
+  class="rounded-xl border bg-card text-card-foreground shadow"
+>
+  <div
+    class="p-6 pt-0"
+  >
+    Basic card content
+  </div>
+</div>
+`;
+
+exports[`Card Snapshots > matches snapshot for card with custom className 1`] = `
+<div
+  class="rounded-xl border bg-card text-card-foreground shadow custom-class"
+>
+  <div
+    class="p-6 pt-0"
+  >
+    Custom styled card
+  </div>
+</div>
+`;
+
+exports[`Card Snapshots > matches snapshot for complete card structure 1`] = `
+<div
+  class="rounded-xl border bg-card text-card-foreground shadow"
+>
+  <div
+    class="flex flex-col space-y-1.5 p-6"
+  >
+    <div
+      class="font-semibold leading-none tracking-tight"
+    >
+      Card Title
+    </div>
+    <div
+      class="text-sm text-muted-foreground"
+    >
+      Card Description
+    </div>
+  </div>
+  <div
+    class="p-6 pt-0"
+  >
+    <p>
+      This is the main content area.
+    </p>
+  </div>
+  <div
+    class="flex items-center p-6 pt-0"
+  >
+    Footer content
+  </div>
+</div>
+`;
