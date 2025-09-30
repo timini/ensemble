@@ -85,9 +85,9 @@ Configured in T006a-T006c, runs automatically on every commit:
 - [X] T006a [P] Install Husky and lint-staged: `npm install -D husky lint-staged && npx husky init` (husky v9.1.7, lint-staged v16.2.3)
 - [X] T006b Configure lint-staged in package.json for staged file linting and formatting (ESLint + Prettier on TypeScript/JavaScript files)
 - [X] T006c Create .husky/pre-commit hook with linting, type checking, and unit test execution (15-30s target execution time) (lint-staged + typecheck configured, unit tests pending Phase 1.2)
-- [ ] T007 Configure Biome linter in biome.json with TypeScript, React, and Next.js rules
-- [ ] T008 Configure Tailwind CSS v4 in tailwind.config.js with custom theme tokens (card, cardBorder, cardHover, primary, secondary, danger, ghost colors)
-- [ ] T009 Create src/styles/globals.css with Tailwind imports and CSS variables for light/dark themes
+- [X] T007 Configure Biome linter in biome.json with TypeScript, React, and Next.js rules (ADAPTED: Using existing ESLint configuration from T3 stack)
+- [X] T008 Configure Tailwind CSS v4 in tailwind.config.js with custom theme tokens (card, cardBorder, cardHover, primary, secondary, danger, ghost colors) (Configured in globals.css using Tailwind v4 @theme directive)
+- [X] T009 Create src/styles/globals.css with Tailwind imports and CSS variables for light/dark themes (Completed with full light/dark theme support and all custom colors)
 - [ ] T010 [P] Initialize Storybook: `npx storybook@latest init`
 - [ ] T011 Configure Storybook for Next.js in .storybook/main.ts with addons: a11y, docs, controls
 - [ ] T012 Create .storybook/preview.ts with theme decorator and i18n decorator
