@@ -102,8 +102,8 @@ Configured in T006a-T006c, runs automatically on every commit:
 - [X] T021 Create public/locales/en/common.json with initial EN translations (app name, navigation, common labels) (Complete with app info, navigation, common actions, theme, language, workflow labels)
 - [X] T022 Create public/locales/fr/common.json with initial FR translations (Complete French translations for all EN keys)
 - [X] T023 Configure react-i18next in src/lib/i18n.ts with EN/FR resources (Initialized with synchronous resources loading, EN fallback, common namespace)
-- [ ] T024 Create src/app/layout.tsx with root layout, theme provider, i18n provider, and Zustand provider
-- [ ] T025 Create src/app/page.tsx with landing page redirecting to /config
+- [X] T024 Create src/app/layout.tsx with root layout, theme provider, i18n provider, and Zustand provider (Client component with theme/language sync, i18n initialization, Zustand store integration)
+- [X] T025 Create src/app/page.tsx with landing page redirecting to /config (Auto-redirect to /config with loading message)
 - [ ] T026 Create package.json scripts: `dev`, `build`, `start`, `storybook`, `test`, `test:unit`, `test:e2e`, `lint`, `type-check`, `prepare` (Husky)
 - [ ] T027 Create README.md with project overview, setup instructions, available scripts, and commit discipline guidelines
 - [ ] T028 [P] Create docs/TAILWIND_DESIGN_SYSTEM.md documenting custom theme tokens and usage
