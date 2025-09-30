@@ -76,6 +76,28 @@ const stories = [
   { id: 'ui-separator--custom-styling', name: 'Separator-CustomStyling' },
   { id: 'ui-separator--in-card', name: 'Separator-InCard' },
 
+  // Avatar stories
+  { id: 'ui-avatar--default', name: 'Avatar-Default' },
+  { id: 'ui-avatar--with-image', name: 'Avatar-WithImage' },
+  { id: 'ui-avatar--fallback', name: 'Avatar-Fallback' },
+  { id: 'ui-avatar--small', name: 'Avatar-Small' },
+  { id: 'ui-avatar--large', name: 'Avatar-Large' },
+  { id: 'ui-avatar--with-icon', name: 'Avatar-WithIcon' },
+  { id: 'ui-avatar--anthropic', name: 'Avatar-Anthropic' },
+  { id: 'ui-avatar--open-ai', name: 'Avatar-OpenAI' },
+  { id: 'ui-avatar--google', name: 'Avatar-Google' },
+  { id: 'ui-avatar--custom', name: 'Avatar-Custom' },
+
+  // Rating stories
+  { id: 'ui-rating--default', name: 'Rating-Default' },
+  { id: 'ui-rating--three-stars', name: 'Rating-ThreeStars' },
+  { id: 'ui-rating--five-stars', name: 'Rating-FiveStars' },
+  { id: 'ui-rating--read-only', name: 'Rating-ReadOnly' },
+  { id: 'ui-rating--disabled', name: 'Rating-Disabled' },
+  { id: 'ui-rating--small', name: 'Rating-Small' },
+  { id: 'ui-rating--large', name: 'Rating-Large' },
+  { id: 'ui-rating--interactive', name: 'Rating-Interactive' },
+
   // ProgressSteps stories
   { id: 'components-progresssteps--config', name: 'ProgressSteps-Config' },
   { id: 'components-progresssteps--ensemble', name: 'ProgressSteps-Ensemble' },
