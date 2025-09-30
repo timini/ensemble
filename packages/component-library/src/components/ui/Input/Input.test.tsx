@@ -46,4 +46,31 @@ describe('Input', () => {
     render(<Input ref={ref} />);
     expect(ref.current).toBeInstanceOf(HTMLInputElement);
   });
+
+  describe('snapshots', () => {
+    it('matches snapshot for default input', () => {
+      const { container } = render(<Input placeholder="Enter text" />);
+      expect(container.firstChild).toMatchSnapshot();
+    });
+
+    it('matches snapshot for email type', () => {
+      const { container } = render(<Input type="email" placeholder="Email" />);
+      expect(container.firstChild).toMatchSnapshot();
+    });
+
+    it('matches snapshot for password type', () => {
+      const { container } = render(<Input type="password" placeholder="Password" />);
+      expect(container.firstChild).toMatchSnapshot();
+    });
+
+    it('matches snapshot for disabled state', () => {
+      const { container } = render(<Input disabled placeholder="Disabled" />);
+      expect(container.firstChild).toMatchSnapshot();
+    });
+
+    it('matches snapshot with custom className', () => {
+      const { container } = render(<Input className="border-red-500" />);
+      expect(container.firstChild).toMatchSnapshot();
+    });
+  });
 });

@@ -65,4 +65,33 @@ describe('Separator', () => {
     const separator = screen.getByTestId('separator');
     expect(separator).toHaveAttribute('aria-orientation', 'vertical');
   });
+
+  describe('snapshots', () => {
+    it('matches snapshot for horizontal decorative separator', () => {
+      const { container } = render(<Separator />);
+      expect(container.firstChild).toMatchSnapshot();
+    });
+
+    it('matches snapshot for vertical decorative separator', () => {
+      const { container } = render(<Separator orientation="vertical" />);
+      expect(container.firstChild).toMatchSnapshot();
+    });
+
+    it('matches snapshot for horizontal semantic separator', () => {
+      const { container } = render(<Separator decorative={false} />);
+      expect(container.firstChild).toMatchSnapshot();
+    });
+
+    it('matches snapshot for vertical semantic separator', () => {
+      const { container } = render(
+        <Separator orientation="vertical" decorative={false} />
+      );
+      expect(container.firstChild).toMatchSnapshot();
+    });
+
+    it('matches snapshot with custom className', () => {
+      const { container } = render(<Separator className="my-4" />);
+      expect(container.firstChild).toMatchSnapshot();
+    });
+  });
 });

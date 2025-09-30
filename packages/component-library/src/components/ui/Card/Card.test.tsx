@@ -81,4 +81,58 @@ describe('Card', () => {
     );
     expect(ref.current).toBeInstanceOf(HTMLDivElement);
   });
+
+  describe('snapshots', () => {
+    it('matches snapshot for basic card', () => {
+      const { container } = render(
+        <Card>
+          <CardContent>Simple content</CardContent>
+        </Card>
+      );
+      expect(container.firstChild).toMatchSnapshot();
+    });
+
+    it('matches snapshot for complete card structure', () => {
+      const { container } = render(
+        <Card>
+          <CardHeader>
+            <CardTitle>Card Title</CardTitle>
+            <CardDescription>Card Description</CardDescription>
+          </CardHeader>
+          <CardContent>Card Content</CardContent>
+          <CardFooter>Card Footer</CardFooter>
+        </Card>
+      );
+      expect(container.firstChild).toMatchSnapshot();
+    });
+
+    it('matches snapshot with custom className', () => {
+      const { container } = render(
+        <Card className="border-2">
+          <CardContent>Custom styled card</CardContent>
+        </Card>
+      );
+      expect(container.firstChild).toMatchSnapshot();
+    });
+
+    it('matches snapshot for CardHeader alone', () => {
+      const { container } = render(<CardHeader>Header content</CardHeader>);
+      expect(container.firstChild).toMatchSnapshot();
+    });
+
+    it('matches snapshot for CardTitle alone', () => {
+      const { container } = render(<CardTitle>Title text</CardTitle>);
+      expect(container.firstChild).toMatchSnapshot();
+    });
+
+    it('matches snapshot for CardDescription alone', () => {
+      const { container } = render(<CardDescription>Description text</CardDescription>);
+      expect(container.firstChild).toMatchSnapshot();
+    });
+
+    it('matches snapshot for CardFooter alone', () => {
+      const { container } = render(<CardFooter>Footer content</CardFooter>);
+      expect(container.firstChild).toMatchSnapshot();
+    });
+  });
 });
