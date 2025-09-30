@@ -61,7 +61,7 @@
 - **E2E Tests**: Playwright, chromium ONLY (for speed), Mock mode by default, minimal critical path coverage
 - **TDD Required**: Write tests BEFORE implementation (Constitution Principle VIII)
 - **E2E Execution**: Before phase completion only (not every commit due to execution time)
-- **Visual Regression**: Chromatic on phase completion and PR merge
+- **Visual Regression**: Screenshot testing (npx tsx scripts/screenshot-stories.ts) on phase completion and PR merge
 
 ### Pre-Commit Hook (Husky)
 Configured in T006a-T006c, runs automatically on every commit:
@@ -89,7 +89,7 @@ Configured in T006a-T006c, runs automatically on every commit:
 - [X] T008 Configure Tailwind CSS v4 in tailwind.config.js with custom theme tokens (card, cardBorder, cardHover, primary, secondary, danger, ghost colors) (Configured in globals.css using Tailwind v4 @theme directive)
 - [X] T009 Create src/styles/globals.css with Tailwind imports and CSS variables for light/dark themes (Completed with full light/dark theme support and all custom colors)
 - [X] T010 [P] Initialize Storybook: `npx storybook@latest init` (Storybook v9.1.9 with Vite builder initialized in packages/component-library, includes a11y and vitest addons)
-- [X] T011 Configure Storybook for Next.js in .storybook/main.ts with addons: a11y, docs, controls (Configured with Vite builder, stories path updated to src/components, addons: onboarding, docs, a11y, chromatic, vitest)
+- [X] T011 Configure Storybook for Next.js in .storybook/main.ts with addons: a11y, docs, controls (Configured with Vite builder, stories path updated to src/components, addons: onboarding, docs, a11y, vitest - Chromatic removed, using screenshot testing)
 - [X] T012 Create .storybook/preview.ts with theme decorator and i18n decorator (Configured with ThemeDecorator, I18nDecorator, imported Tailwind CSS, added toolbar controls)
 - [X] T013 [P] Create .storybook/decorators/ThemeDecorator.tsx for light/dark theme switching (Theme switching with toolbar control for light/dark modes)
 - [X] T014 [P] Create .storybook/decorators/I18nDecorator.tsx for EN/FR language switching (I18n support with toolbar control for EN/FR, initialized with placeholder translations)
@@ -240,7 +240,7 @@ Configured in T006a-T006c, runs automatically on every commit:
 - [ ] T107 [P] Create docs/STATE_MANAGEMENT.md documenting Zustand store architecture and slice responsibilities
 - [ ] T108 [P] Create docs/PROVIDER_ARCHITECTURE.md documenting AIProvider interface and 3 client modes (Mock/Free/Pro)
 - [ ] T109 [P] Create docs/MOCK_CLIENT_SPECIFICATION.md with lorem ipsum streaming behavior specification
-- [ ] T110 Run Chromatic visual regression baseline: `npx chromatic --project-token=<token>` (establishes Phase 1 baseline)
+- [X] T110 Run screenshot testing baseline: `npx tsx scripts/screenshot-stories.ts` (38 PNGs captured and committed to git)
 - [ ] T111 Run full test suite: `npm run test` and verify 80%+ overall coverage
 - [ ] T112 Run E2E placeholder test: `npm run test:e2e` (basic smoke test, real tests in Phase 2)
 - [ ] T113 Run accessibility audit in Storybook (a11y addon) and fix any violations
@@ -345,7 +345,7 @@ Configured in T006a-T006c, runs automatically on every commit:
 - [ ] T180 Test agreement analysis: Verify similarity matrix displays correctly for 2, 3, 4, 5, 6 responses
 - [ ] T181 Run accessibility audit on all 4 pages: `npm run test:e2e -- --project=accessibility`
 - [ ] T182 Fix any accessibility violations (WCAG 2.1 AA compliance required per plan.md)
-- [ ] T183 Run Chromatic visual regression: `npx chromatic` and review diffs from Phase 1 baseline
+- [ ] T183 Run screenshot testing: `npx tsx scripts/screenshot-stories.ts` and review visual diffs from Phase 1 baseline (git diff screenshots/)
 - [ ] T184 Update README.md with Phase 2 quickstart instructions (how to run Mock mode workflow)
 - [ ] T185 Update spec.md to Version 2.0: mark Phase 2 functional requirements (FR-016 to FR-024) as COMPLETED
 - [ ] T186 Create docs/FREE_MODE_GUIDE.md as placeholder for Phase 3 (not yet implemented)
