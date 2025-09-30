@@ -93,7 +93,7 @@ Configured in T006a-T006c, runs automatically on every commit:
 - [X] T012 Create .storybook/preview.ts with theme decorator and i18n decorator (Configured with ThemeDecorator, I18nDecorator, imported Tailwind CSS, added toolbar controls)
 - [X] T013 [P] Create .storybook/decorators/ThemeDecorator.tsx for light/dark theme switching (Theme switching with toolbar control for light/dark modes)
 - [X] T014 [P] Create .storybook/decorators/I18nDecorator.tsx for EN/FR language switching (I18n support with toolbar control for EN/FR, initialized with placeholder translations)
-- [ ] T015 Configure Vitest in vitest.config.ts with jsdom environment and React Testing Library
+- [X] T015 Configure Vitest in vitest.config.ts with jsdom environment and React Testing Library (Configured with jsdom, React Testing Library, 80% coverage thresholds, vitest.setup.ts with jest-dom matchers)
 - [ ] T016 Configure Playwright in playwright.config.ts with chromium ONLY (for speed; cross-browser testing deferred to pre-release)
 - [ ] T017 Create src/store/index.ts with Zustand root store and persistence middleware
 - [ ] T018 [P] Create src/store/slices/themeSlice.ts with light/dark theme state
