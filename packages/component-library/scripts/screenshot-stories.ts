@@ -49,6 +49,33 @@ const stories = [
   { id: 'ui-textarea--custom-height', name: 'Textarea-CustomHeight' },
   { id: 'ui-textarea--with-label', name: 'Textarea-WithLabel' },
 
+  // Label stories
+  { id: 'ui-label--default', name: 'Label-Default' },
+  { id: 'ui-label--with-input', name: 'Label-WithInput' },
+  { id: 'ui-label--required', name: 'Label-Required' },
+  { id: 'ui-label--disabled', name: 'Label-Disabled' },
+  { id: 'ui-label--custom-styling', name: 'Label-CustomStyling' },
+  { id: 'ui-label--form-example', name: 'Label-FormExample' },
+
+  // Progress stories
+  { id: 'ui-progress--default', name: 'Progress-Default' },
+  { id: 'ui-progress--zero', name: 'Progress-Zero' },
+  { id: 'ui-progress--complete', name: 'Progress-Complete' },
+  { id: 'ui-progress--destructive', name: 'Progress-Destructive' },
+  { id: 'ui-progress--success', name: 'Progress-Success' },
+  { id: 'ui-progress--warning', name: 'Progress-Warning' },
+  { id: 'ui-progress--custom-height', name: 'Progress-CustomHeight' },
+  { id: 'ui-progress--multiple-progress', name: 'Progress-MultipleProgress' },
+  { id: 'ui-progress--agreement-analysis', name: 'Progress-AgreementAnalysis' },
+
+  // Separator stories
+  { id: 'ui-separator--horizontal', name: 'Separator-Horizontal' },
+  { id: 'ui-separator--vertical', name: 'Separator-Vertical' },
+  { id: 'ui-separator--in-content', name: 'Separator-InContent' },
+  { id: 'ui-separator--in-navigation', name: 'Separator-InNavigation' },
+  { id: 'ui-separator--custom-styling', name: 'Separator-CustomStyling' },
+  { id: 'ui-separator--in-card', name: 'Separator-InCard' },
+
   // ProgressSteps stories
   { id: 'components-progresssteps--config', name: 'ProgressSteps-Config' },
   { id: 'components-progresssteps--ensemble', name: 'ProgressSteps-Ensemble' },

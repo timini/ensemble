@@ -14,6 +14,18 @@ export {
 export { Input } from './components/ui/Input';
 export { Badge, badgeVariants, type BadgeProps } from './components/ui/Badge';
 export { Textarea, type TextareaProps } from './components/ui/Textarea';
+export { Label, labelVariants, type LabelProps } from './components/ui/Label';
+export {
+  Progress,
+  progressVariants,
+  progressIndicatorVariants,
+  type ProgressProps,
+} from './components/ui/Progress';
+export {
+  Separator,
+  separatorVariants,
+  type SeparatorProps,
+} from './components/ui/Separator';
 
 // Composite Components
 export { EnsembleHeader } from './components/EnsembleHeader';
