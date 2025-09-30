@@ -1,5 +1,4 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import { action } from '@storybook/addon-actions';
 import { InlineAlert } from './InlineAlert';
 
 const meta = {
@@ -59,7 +58,7 @@ export const InfoDismissible: Story = {
   args: {
     variant: 'info',
     dismissible: true,
-    onDismiss: action('dismissed'),
+    onDismiss: () => console.log('dismissed'),
     children: 'This message can be dismissed.',
   },
 };
@@ -68,7 +67,7 @@ export const SuccessDismissible: Story = {
   args: {
     variant: 'success',
     dismissible: true,
-    onDismiss: action('dismissed'),
+    onDismiss: () => console.log('dismissed'),
     children: 'Configuration updated successfully.',
   },
 };
@@ -77,7 +76,7 @@ export const WarningDismissible: Story = {
   args: {
     variant: 'warning',
     dismissible: true,
-    onDismiss: action('dismissed'),
+    onDismiss: () => console.log('dismissed'),
     children: 'Your trial period ends in 3 days.',
   },
 };
@@ -86,7 +85,7 @@ export const ErrorDismissible: Story = {
   args: {
     variant: 'error',
     dismissible: true,
-    onDismiss: action('dismissed'),
+    onDismiss: () => console.log('dismissed'),
     children: 'Network error. Please try again.',
   },
 };
