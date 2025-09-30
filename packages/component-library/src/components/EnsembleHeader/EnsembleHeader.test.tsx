@@ -22,7 +22,7 @@ describe('EnsembleHeader', () => {
   it('applies correct styling classes', () => {
     const { container } = render(<EnsembleHeader />);
     const header = container.firstChild;
-    expect(header).toHaveClass('bg-white', 'border-b');
+    expect(header).toHaveClass('bg-background', 'border-b');
   });
 
   describe('snapshots', () => {
