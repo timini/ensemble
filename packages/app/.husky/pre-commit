@@ -1,0 +1,12 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+# Run lint-staged (ESLint + Prettier on staged files)
+npx lint-staged
+
+# Run type checking
+npm run typecheck
+
+# Unit tests will be added in Phase 1.2 when test suite is configured
+# Uncomment when test:unit script is ready:
+# npm run test:unit
