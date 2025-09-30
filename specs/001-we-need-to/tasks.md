@@ -95,10 +95,10 @@ Configured in T006a-T006c, runs automatically on every commit:
 - [X] T014 [P] Create .storybook/decorators/I18nDecorator.tsx for EN/FR language switching (I18n support with toolbar control for EN/FR, initialized with placeholder translations)
 - [X] T015 Configure Vitest in vitest.config.ts with jsdom environment and React Testing Library (Configured with jsdom, React Testing Library, 80% coverage thresholds, vitest.setup.ts with jest-dom matchers)
 - [X] T016 Configure Playwright in playwright.config.ts with chromium ONLY (for speed; cross-browser testing deferred to pre-release) (Configured in packages/app with chromium only, local dev server, added test:e2e scripts)
-- [ ] T017 Create src/store/index.ts with Zustand root store and persistence middleware
-- [ ] T018 [P] Create src/store/slices/themeSlice.ts with light/dark theme state
-- [ ] T019 [P] Create src/store/slices/languageSlice.ts with EN/FR language state
-- [ ] T020 [P] Create src/store/middleware/persistenceMiddleware.ts for localStorage sync
+- [X] T017 Create src/store/index.ts with Zustand root store and persistence middleware (Combined themeSlice and languageSlice with persistence middleware)
+- [X] T018 [P] Create src/store/slices/themeSlice.ts with light/dark theme state (Theme management with toggleTheme and document class application)
+- [X] T019 [P] Create src/store/slices/languageSlice.ts with EN/FR language state (Language management for i18n integration)
+- [X] T020 [P] Create src/store/middleware/persistenceMiddleware.ts for localStorage sync (localStorage persistence with automatic state syncing)
 - [ ] T021 Create public/locales/en/common.json with initial EN translations (app name, navigation, common labels)
 - [ ] T022 Create public/locales/fr/common.json with initial FR translations
 - [ ] T023 Configure react-i18next in src/lib/i18n.ts with EN/FR resources
