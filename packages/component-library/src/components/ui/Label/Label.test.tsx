@@ -1,3 +1,4 @@
+import * as React from 'react';
 import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { Label } from './Label';
@@ -15,7 +16,7 @@ describe('Label', () => {
   });
 
   it('forwards ref correctly', () => {
-    const ref = { current: null } as React.RefObject<HTMLLabelElement>;
+    const ref = React.createRef<HTMLLabelElement>();
     render(<Label ref={ref}>Label Text</Label>);
     expect(ref.current).toBeInstanceOf(HTMLLabelElement);
   });

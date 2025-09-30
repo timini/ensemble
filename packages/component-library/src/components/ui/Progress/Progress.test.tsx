@@ -1,3 +1,4 @@
+import * as React from 'react';
 import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { Progress } from './Progress';
@@ -81,7 +82,7 @@ describe('Progress', () => {
   });
 
   it('forwards ref correctly', () => {
-    const ref = { current: null } as React.RefObject<HTMLDivElement>;
+    const ref = React.createRef<HTMLDivElement>();
     render(<Progress ref={ref} value={50} />);
     expect(ref.current).toBeInstanceOf(HTMLDivElement);
   });

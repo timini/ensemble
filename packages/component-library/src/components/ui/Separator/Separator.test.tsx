@@ -1,3 +1,4 @@
+import * as React from 'react';
 import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { Separator } from './Separator';
@@ -42,7 +43,7 @@ describe('Separator', () => {
   });
 
   it('forwards ref correctly', () => {
-    const ref = { current: null } as React.RefObject<HTMLDivElement>;
+    const ref = React.createRef<HTMLDivElement>();
     render(<Separator ref={ref} />);
     expect(ref.current).toBeInstanceOf(HTMLDivElement);
   });
