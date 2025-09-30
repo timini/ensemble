@@ -1,4 +1,4 @@
-import { StateCreator, StoreMutatorIdentifier } from 'zustand';
+import type { StateCreator, StoreMutatorIdentifier } from 'zustand';
 
 /**
  * Persistence middleware for Zustand store
@@ -22,15 +22,20 @@ export const persist = <
   options: PersistOptions,
 ) => {
   return ((set, get, api) => {
+    // Only run persistence logic on client side
+    if (typeof window === 'undefined') {
+      return config(set, get, api);
+    }
+
     const { name, storage = localStorage } = options;
 
     // Load initial state from localStorage
     const storedValue = storage.getItem(name);
     if (storedValue) {
       try {
-        const parsedState = JSON.parse(storedValue);
+        const parsedState = JSON.parse(storedValue) as Partial<T>;
         // Merge persisted state with initial state
-        set(parsedState as Partial<T>);
+        set(parsedState);
       } catch (error) {
         console.error('Failed to parse stored state:', error);
       }
