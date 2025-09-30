@@ -1,0 +1,83 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`Avatar > snapshots > matches snapshot for anthropic variant 1`] = `
+<div
+  class="relative flex shrink-0 overflow-hidden rounded-full items-center justify-center font-semibold h-10 w-10 text-sm bg-orange-100 text-orange-600"
+>
+  <span>
+    A
+  </span>
+</div>
+`;
+
+exports[`Avatar > snapshots > matches snapshot for avatar with image 1`] = `
+<div
+  class="relative flex shrink-0 overflow-hidden rounded-full items-center justify-center font-semibold h-10 w-10 text-sm bg-muted text-muted-foreground"
+>
+  <img
+    alt="Avatar"
+    class="aspect-square h-full w-full object-cover"
+    src="https://example.com/avatar.png"
+  />
+</div>
+`;
+
+exports[`Avatar > snapshots > matches snapshot for default avatar 1`] = `
+<div
+  class="relative flex shrink-0 overflow-hidden rounded-full items-center justify-center font-semibold h-10 w-10 text-sm bg-muted text-muted-foreground"
+>
+  <span>
+    AB
+  </span>
+</div>
+`;
+
+exports[`Avatar > snapshots > matches snapshot for google variant 1`] = `
+<div
+  class="relative flex shrink-0 overflow-hidden rounded-full items-center justify-center font-semibold h-10 w-10 text-sm bg-green-100 text-green-600"
+>
+  <span>
+    G
+  </span>
+</div>
+`;
+
+exports[`Avatar > snapshots > matches snapshot for large size 1`] = `
+<div
+  class="relative flex shrink-0 overflow-hidden rounded-full items-center justify-center font-semibold h-12 w-12 text-base bg-muted text-muted-foreground"
+>
+  <span>
+    LG
+  </span>
+</div>
+`;
+
+exports[`Avatar > snapshots > matches snapshot for openai variant 1`] = `
+<div
+  class="relative flex shrink-0 overflow-hidden rounded-full items-center justify-center font-semibold h-10 w-10 text-sm bg-blue-100 text-blue-600"
+>
+  <span>
+    O
+  </span>
+</div>
+`;
+
+exports[`Avatar > snapshots > matches snapshot for small size 1`] = `
+<div
+  class="relative flex shrink-0 overflow-hidden rounded-full items-center justify-center font-semibold h-8 w-8 text-xs bg-muted text-muted-foreground"
+>
+  <span>
+    SM
+  </span>
+</div>
+`;
+
+exports[`Avatar > snapshots > matches snapshot with icon 1`] = `
+<div
+  class="relative flex shrink-0 overflow-hidden rounded-full items-center justify-center font-semibold h-10 w-10 text-sm bg-muted text-muted-foreground"
+>
+  <span>
+    🤖
+  </span>
+</div>
+`;
