@@ -67,14 +67,20 @@ export const Large: Story = {
   },
 };
 
+const InteractiveRating = () => {
+  const [rating, setRating] = useState(0);
+  return (
+    <div className="flex flex-col items-center space-y-4">
+      <Rating value={rating} onChange={setRating} max={5} />
+      <p className="text-sm text-gray-600">Selected: {rating} stars</p>
+    </div>
+  );
+};
+
 export const Interactive: Story = {
-  render: () => {
-    const [rating, setRating] = useState(0);
-    return (
-      <div className="flex flex-col items-center space-y-4">
-        <Rating value={rating} onChange={setRating} max={5} />
-        <p className="text-sm text-gray-600">Selected: {rating} stars</p>
-      </div>
-    );
+  args: {
+    value: 0,
+    max: 5,
   },
+  render: () => <InteractiveRating />,
 };
