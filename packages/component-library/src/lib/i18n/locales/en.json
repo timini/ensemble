@@ -10,5 +10,163 @@
       "prompt": "Prompt",
       "review": "Review"
     }
+  },
+  "atoms": {
+    "inlineAlert": {
+      "dismiss": "Dismiss"
+    },
+    "rating": {
+      "star": "{{count}} star",
+      "star_other": "{{count}} stars"
+    }
+  },
+  "molecules": {
+    "apiKeyInput": {
+      "hideKey": "Hide API key",
+      "showKey": "Show API key",
+      "validKey": "Valid API key",
+      "invalidKey": "Invalid API key"
+    },
+    "modelCard": {
+      "summarizer": "Summarizer"
+    },
+    "modeSelectionCard": {
+      "free": {
+        "title": "Free Mode",
+        "description": "Bring your own API keys. Completely secure, your keys are encrypted and never leave your browser.",
+        "buttonText": "Start in Free Mode"
+      },
+      "pro": {
+        "title": "Pro Mode",
+        "description": "Buy credits to get access to the latest models across all providers.",
+        "buttonText": "Go Pro"
+      }
+    },
+    "responseCard": {
+      "manual": "Manual",
+      "streaming": "Streaming",
+      "collapse": "Collapse",
+      "expand": "Expand",
+      "copy": "Copy",
+      "rateResponse": "Rate response:",
+      "responseTime": "Response time: {{time}}"
+    },
+    "summarizerIndicator": {
+      "label": "Summarizer Model:"
+    }
+  },
+  "organisms": {
+    "agreementAnalysis": {
+      "title": "Agreement analysis",
+      "overallAgreement": "Overall Agreement",
+      "highAgreement": "High Agreement",
+      "mediumAgreement": "Medium Agreement",
+      "lowAgreement": "Low Agreement",
+      "pairwiseComparisons": "Pairwise Comparisons",
+      "vs": "vs",
+      "confidence": "Confidence: {{percent}}%",
+      "responsesAnalyzed": "RESPONSES ANALYZED",
+      "comparisons": "COMPARISONS",
+      "avgConfidence": "AVG CONFIDENCE"
+    },
+    "apiKeyConfiguration": {
+      "heading": "Configure API Keys"
+    },
+    "consensusCard": {
+      "heading": "Consensus",
+      "description": "Combined summary provided by {{model}}.",
+      "shareText": "Share this consensus response",
+      "shareButton": "Share"
+    },
+    "ensembleConfigurationSummary": {
+      "heading": "Your Ensemble Configuration",
+      "description": "These models will receive the prompt and contribute to the comparison.",
+      "selectedModels": "Selected Models ({{count}})",
+      "summarizer": "Summarizer"
+    },
+    "ensembleManagementPanel": {
+      "quickPresets": "Quick presets",
+      "quickPresetsDescription": "Start from a curated ensemble tuned for common workflows.",
+      "noPresets": "No saved presets yet. Save your first ensemble below to get started.",
+      "usePreset": "Use preset",
+      "deletePreset": "Delete preset {{name}}",
+      "summarizerLabel": "Summarizer: {{name}}",
+      "saveCurrentEnsemble": "Save current ensemble",
+      "saveDescription": "Save this combination for future reviews.",
+      "ensembleNameLabel": "Ensemble Name",
+      "ensembleNamePlaceholder": "e.g. Research Ensemble",
+      "saveButton": "Save Ensemble",
+      "saveInfoText": "Save your favourite model combinations to load them instantly later."
+    },
+    "ensembleSidebar": {
+      "heading": "Ensemble Summary",
+      "description": "Review your current selections before saving or continuing.",
+      "selectedModels": "Selected Models ({{count}})",
+      "summarizerLabel": "Summarizer",
+      "noModels": "No models selected yet",
+      "quickPresets": "Quick presets",
+      "quickPresetsDescription": "Start from a curated ensemble tuned for common workflows.",
+      "noPresets": "No saved presets yet. Save your first ensemble below to get started.",
+      "usePreset": "Use preset",
+      "deletePreset": "Delete preset {{name}}",
+      "summarizerInfo": "Summarizer: {{name}}",
+      "saveCurrentEnsemble": "Save current ensemble",
+      "saveDescription": "Save this combination for future reviews.",
+      "ensembleNameLabel": "Ensemble Name",
+      "ensembleNamePlaceholder": "e.g. Research Ensemble",
+      "saveButton": "Save Ensemble",
+      "saveInfoText": "Save your favourite model combinations to load them instantly later.",
+      "manualResponses": "Manual Responses",
+      "manualResponsesDescription": "Add reference answers or benchmark outputs to include in the review step.",
+      "manualResponsesInfo": "Include custom responses to compare against live model outputs.",
+      "addManualResponse": "Add Manual Response",
+      "manualResponsesNote": "Add reference answers or benchmark outputs to compare against live model responses."
+    },
+    "manualResponseModal": {
+      "title": "Manual Response",
+      "description": "Enter a manual response for the current prompt",
+      "modelNameLabel": "Model Name",
+      "modelNamePlaceholder": "e.g., GPT-4",
+      "modelProviderLabel": "Model Provider",
+      "modelProviderPlaceholder": "e.g., OpenAI",
+      "responseLabel": "Response",
+      "responsePlaceholder": "Enter your response here...",
+      "cancelButton": "Cancel",
+      "submitButton": "Submit"
+    },
+    "modeSelector": {
+      "heading": "Select Your Mode"
+    },
+    "modelSelectionList": {
+      "noModels": "No models available"
+    },
+    "pageHero": {
+      "breadcrumb": "Breadcrumb"
+    },
+    "settingsModal": {
+      "title": "Settings",
+      "description": "Configure your application preferences including theme, language, and data management",
+      "appearance": "Appearance",
+      "themeLabel": "Theme",
+      "themeLight": "Light",
+      "themeDark": "Dark",
+      "languageLabel": "Language",
+      "dataManagement": "Data Management",
+      "exportSettings": "Export Settings",
+      "importSettings": "Import Settings",
+      "dangerZone": "Danger Zone",
+      "dangerZoneWarning": "These actions cannot be undone.",
+      "clearAllData": "Clear All Data",
+      "doneButton": "Done"
+    },
+    "workflowNavigator": {
+      "continue": "Continue"
+    }
+  },
+  "providers": {
+    "openai": "OpenAI",
+    "anthropic": "Anthropic",
+    "google": "Google",
+    "xai": "XAI"
   }
 }
