@@ -31,6 +31,31 @@ export {
   type SeparatorProps,
 } from './components/atoms/Separator';
 export { Rating, ratingVariants, type RatingProps } from './components/atoms/Rating';
+export { Heading, headingVariants, type HeadingProps } from './components/atoms/Heading';
+export {
+  Dialog,
+  DialogPortal,
+  DialogOverlay,
+  DialogClose,
+  DialogTrigger,
+  DialogContent,
+  DialogHeader,
+  DialogFooter,
+  DialogTitle,
+  DialogDescription,
+} from './components/atoms/Dialog';
+export {
+  Select,
+  SelectGroup,
+  SelectValue,
+  SelectTrigger,
+  SelectContent,
+  SelectLabel,
+  SelectItem,
+  SelectSeparator,
+  SelectScrollUpButton,
+  SelectScrollDownButton,
+} from './components/atoms/Select';
 
 // Molecules (Level 2: Simple combinations of atoms)
 export { ApiKeyInput, type ApiKeyInputProps, type Provider, type ValidationStatus } from './components/molecules/ApiKeyInput';
@@ -44,3 +69,11 @@ export {
   type Step,
   type ProgressStepsProps,
 } from './components/molecules/ProgressSteps';
+
+// Organisms (Level 3: Complex UI sections)
+export { ModeSelector, type ModeSelectorProps, type Mode as ModeType } from './components/organisms/ModeSelector';
+export { ApiKeyConfiguration, type ApiKeyConfigurationProps, type ApiKeyConfigurationItem } from './components/organisms/ApiKeyConfiguration';
+export { EnsembleConfigurationSummary, type EnsembleConfigurationSummaryProps } from './components/organisms/EnsembleConfigurationSummary';
+export { ConsensusCard, type ConsensusCardProps } from './components/organisms/ConsensusCard';
+export { SettingsModal, type SettingsModalProps, type Theme, type Language } from './components/organisms/SettingsModal';
+export { ManualResponseModal, type ManualResponseModalProps } from './components/organisms/ManualResponseModal';

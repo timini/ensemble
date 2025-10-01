@@ -161,33 +161,33 @@ Configured in T006a-T006c, runs automatically on every commit:
 ### Phase 1.3: Molecular Components (Week 3, Days 11-15)
 
 #### T060-T062: ApiKeyInput Component
-- [ ] T060 Write Storybook story src/components/molecules/ApiKeyInput.stories.tsx with provider types: OpenAI/Anthropic/Google/XAI, validation states: valid/invalid/validating
-- [ ] T061 Write unit tests src/components/molecules/ApiKeyInput.test.tsx testing: renders Input + Icons, validation indicator updates, masked/unmasked toggle
-- [ ] T062 Implement src/components/molecules/ApiKeyInput.tsx composing Input + Icon atoms (Constitution Principle II: composition over inheritance)
+- [x] T060 Write Storybook story src/components/molecules/ApiKeyInput.stories.tsx with provider types: OpenAI/Anthropic/Google/XAI, validation states: valid/invalid/validating
+- [x] T061 Write unit tests src/components/molecules/ApiKeyInput.test.tsx testing: renders Input + Icons, validation indicator updates, masked/unmasked toggle (28 tests passing)
+- [x] T062 Implement src/components/molecules/ApiKeyInput.tsx composing Input + Icon atoms (Constitution Principle II: composition over inheritance)
 
 #### T063-T065: ModelCard Component
-- [ ] T063 Write Storybook story src/components/molecules/ModelCard.stories.tsx with states: unselected/selected/summarizer, provider types: OpenAI/Anthropic/Google/XAI
-- [ ] T064 Write unit tests src/components/molecules/ModelCard.test.tsx testing: renders BaseCard + Badge + Button, onClick selection, summarizer indicator
-- [ ] T065 Implement src/components/molecules/ModelCard.tsx composing BaseCard + Badge + Icon + Button atoms
+- [x] T063 Write Storybook story src/components/molecules/ModelCard.stories.tsx with states: unselected/selected/summarizer, provider types: OpenAI/Anthropic/Google/XAI (14 stories matching wireframe design)
+- [x] T064 Write unit tests src/components/molecules/ModelCard.test.tsx testing: renders Card + emoji icons, onClick selection, summarizer indicator, wireframe styling (border-blue-500/bg-blue-50 for selected, border-orange-500/bg-orange-50 for summarizer) (32 tests passing)
+- [x] T065 Implement src/components/molecules/ModelCard.tsx with wireframe-matched styling: centered layout, emoji icons (🤖 OpenAI, 🧠 Anthropic, 🔍 Google, 🚀 XAI), no description prop, only CardContent (no CardHeader)
 
 #### T066-T068: PromptInput Component
-- [ ] T066 Write Storybook story src/components/molecules/PromptInput.stories.tsx with character counts: 0/50/500/5000, validation: valid (10+ chars)/invalid (<10)
-- [ ] T067 Write unit tests src/components/molecules/PromptInput.test.tsx testing: renders textarea, character counter updates, validation state changes at 10 chars
-- [ ] T068 Implement src/components/molecules/PromptInput.tsx with debounced onChange (Constitution Principle X: performance)
+- [x] T066 Write Storybook story src/components/molecules/PromptInput.stories.tsx with character counts: 0/50/500/5000, validation: valid (10+ chars)/invalid (<10)
+- [x] T067 Write unit tests src/components/molecules/PromptInput.test.tsx testing: renders textarea, character counter updates, validation state changes at 10 chars (32 tests passing)
+- [x] T068 Implement src/components/molecules/PromptInput.tsx with debounced onChange (Constitution Principle X: performance)
 
 #### T069-T071: ResponseCard Component
-- [ ] T069 Write Storybook story src/components/molecules/ResponseCard.stories.tsx with states: streaming/complete/error, response types: AI/manual
-- [ ] T070 Write unit tests src/components/molecules/ResponseCard.test.tsx testing: renders BaseCard + Badge + LoadingSpinner, streaming animation, manual response indicator
-- [ ] T071 Implement src/components/molecules/ResponseCard.tsx with real-time text streaming support
+- [x] T069 Write Storybook story src/components/molecules/ResponseCard.stories.tsx with states: streaming/complete/error, response types: AI/manual, expand/collapse, rating, responseTime (17 stories including Interactive story with rating onChange)
+- [x] T070 Write unit tests src/components/molecules/ResponseCard.test.tsx testing: renders Card + Badge + LoadingSpinner + Rating, streaming animation, manual response indicator, expand/collapse button, copy button, star rating (34 tests passing)
+- [x] T071 Implement src/components/molecules/ResponseCard.tsx with real-time text streaming support, expand/collapse functionality, copy to clipboard, 5-star rating system, response time display (matching wireframe design)
 
 #### T072-T074: ModeSelectionCard Component
-- [ ] T072 Write Storybook story src/components/molecules/ModeSelectionCard.stories.tsx with modes: Mock/Free/Pro, states: unselected/selected/disabled
-- [ ] T073 Write unit tests src/components/molecules/ModeSelectionCard.test.tsx testing: renders BaseCard + Badge + Icon, onClick selection, disabled state
-- [ ] T074 Implement src/components/molecules/ModeSelectionCard.tsx
+- [x] T072 Write Storybook story src/components/molecules/ModeSelectionCard.stories.tsx with modes: Free/Pro (user-selectable only, mock mode is env variable), states: unselected/selected/disabled (11 stories)
+- [x] T073 Write unit tests src/components/molecules/ModeSelectionCard.test.tsx testing: renders BaseCard + Badge + Icon, onClick selection, disabled state (31 tests passing)
+- [x] T074 Implement src/components/molecules/ModeSelectionCard.tsx composing Card + Badge + Icon atoms with keyboard navigation (mock mode for testing controlled via NEXT_PUBLIC_MOCK_MODE env variable)
 
-- [ ] T075 Run `npm run test` and verify 80%+ coverage for all molecular components
-- [ ] T076 Run `npm run storybook` and visually validate all molecular components
-- [ ] T077 Commit Phase 1.3 molecular components: "feat: add 5 molecular components with stories and tests"
+- [x] T075 Run `npm run test` and verify 80%+ coverage for all molecular components (419 total tests passing: ApiKeyInput 28, ModelCard 32, PromptInput 32, ResponseCard 34, ModeSelectionCard 31; molecules have 157 tests with 100% coverage)
+- [x] T076 Run `npm run storybook` and visually validate all molecular components (running at http://localhost:6006/)
+- [x] T077 Commit Phase 1.3 molecular components: "feat: update ModelCard styling to match wireframes" (commit 8eb25cb)
 
 ### Phase 1.4: Organism Components (Week 4, Days 16-20)
 

@@ -50,12 +50,35 @@ const mockModels = [
   { id: 'grok-2', provider: 'xai' as const, name: 'Grok 2' },
 ];
 
+// Default - matches wireframe with status indicators
+export const Default: Story = {
+  args: {
+    models: mockModels,
+    selectedModelIds: ['claude-3-opus', 'claude-3-haiku'],
+    summarizerModelId: 'claude-3-opus',
+    providerStatus: {
+      openai: 'API key required',
+      anthropic: 'Ready',
+      google: 'API key required',
+      xai: 'API key required',
+    },
+    onModelToggle: (modelId: string) => console.log('Toggle model:', modelId),
+    onSummarizerChange: (modelId: string) => console.log('Set summarizer:', modelId),
+  },
+};
+
 // No selections
 export const NoSelection: Story = {
   args: {
     models: mockModels,
     selectedModelIds: [],
     summarizerModelId: undefined,
+    providerStatus: {
+      openai: 'API key required',
+      anthropic: 'Ready',
+      google: 'API key required',
+      xai: 'API key required',
+    },
     onModelToggle: (modelId: string) => console.log('Toggle model:', modelId),
     onSummarizerChange: (modelId: string) => console.log('Set summarizer:', modelId),
   },

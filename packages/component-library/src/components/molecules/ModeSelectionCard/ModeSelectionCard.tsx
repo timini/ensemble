@@ -1,9 +1,7 @@
 import * as React from 'react';
-import { Card, CardHeader, CardContent } from '../../atoms/Card';
-import { Badge } from '../../atoms/Badge';
-import { Icon } from '../../atoms/Icon';
+import { Card, CardContent } from '../../atoms/Card';
+import { Button } from '../../atoms/Button';
 import { cn } from '@/lib/utils';
-import { Zap, Sparkles } from 'lucide-react';
 
 export type Mode = 'free' | 'pro';
 
@@ -11,7 +9,7 @@ export interface ModeSelectionCardProps {
   /** The mode type (free or pro) */
   mode: Mode;
   /** Whether the mode is currently selected */
-  selected: boolean;
+  selected?: boolean;
   /** Whether the mode is disabled */
   disabled?: boolean;
   /** Callback when mode is clicked */
@@ -21,24 +19,23 @@ export interface ModeSelectionCardProps {
 const MODE_CONFIG = {
   free: {
     title: 'Free Mode',
-    description: 'Use a single AI provider with your API key.',
-    icon: Zap,
+    description: 'Bring your own API keys. Completely secure, your keys are encrypted and never leave your browser.',
+    icon: '🔧',
+    buttonText: 'Start in Free Mode',
   },
   pro: {
     title: 'Pro Mode',
-    description: 'Use multiple AI providers simultaneously for ensemble responses.',
-    icon: Sparkles,
+    description: 'Buy credits to get access to the latest models across all providers.',
+    icon: '⭐',
+    buttonText: 'Go Pro',
   },
 } as const;
 
 /**
  * ModeSelectionCard molecule for selecting application mode.
  *
- * Combines Card, Badge, and Icon atoms to create a selectable mode card
- * with proper keyboard navigation and accessibility.
- *
- * Note: Mock mode for testing/development is controlled via environment
- * variable (e.g., NEXT_PUBLIC_MOCK_MODE=true) and is not user-selectable.
+ * Displays a mode option with icon, title, description, and action button.
+ * Matches the wireframe design from config page.
  *
  * @example
  * ```tsx
@@ -50,66 +47,35 @@ const MODE_CONFIG = {
  * ```
  */
 export const ModeSelectionCard = React.forwardRef<HTMLDivElement, ModeSelectionCardProps>(
-  ({ mode, selected, disabled = false, onClick }, ref) => {
+  ({ mode, selected = false, disabled = false, onClick }, ref) => {
     const config = MODE_CONFIG[mode];
-    const IconComponent = config.icon;
-
-    const handleClick = () => {
-      if (!disabled && onClick) {
-        onClick();
-      }
-    };
-
-    const handleKeyDown = (e: React.KeyboardEvent) => {
-      if (disabled) return;
-
-      if (e.key === 'Enter' || e.key === ' ') {
-        e.preventDefault();
-        if (onClick) {
-          onClick();
-        }
-      }
-    };
 
     return (
       <Card
         ref={ref}
-        role="button"
-        tabIndex={disabled ? -1 : 0}
-        aria-pressed={selected}
-        aria-disabled={disabled}
         data-mode={mode}
         data-selected={selected}
         data-disabled={disabled}
-        onClick={handleClick}
-        onKeyDown={handleKeyDown}
         className={cn(
-          'w-full cursor-pointer transition-all',
-          'hover:shadow-md',
-          selected && 'border-primary ring-2 ring-primary ring-offset-2',
-          disabled && 'opacity-50 cursor-not-allowed hover:shadow-none',
-          !disabled && 'focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2'
+          'border-2 hover:border-blue-200 transition-colors',
+          selected && 'border-blue-500 bg-blue-50'
         )}
       >
-        <CardHeader className="pb-3">
-          <div className="flex items-start justify-between gap-2">
-            <div className="flex items-center gap-3">
-              <Icon size="lg" className="text-primary">
-                <IconComponent />
-              </Icon>
-              <h3 className="font-semibold text-base">{config.title}</h3>
+        <CardContent className="p-6">
+          <div className="flex items-center space-x-3 mb-4">
+            <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+              <span className="text-blue-600 text-lg">{config.icon}</span>
             </div>
-
-            {selected && (
-              <Badge variant="default">Selected</Badge>
-            )}
+            <h4 className="text-xl font-semibold">{config.title}</h4>
           </div>
-        </CardHeader>
-
-        <CardContent className="pt-0">
-          <p className="text-sm text-muted-foreground">
-            {config.description}
-          </p>
+          <p className="text-gray-600 mb-6">{config.description}</p>
+          <Button
+            className="w-full bg-blue-600 hover:bg-blue-700"
+            onClick={onClick}
+            disabled={disabled}
+          >
+            {config.buttonText}
+          </Button>
         </CardContent>
       </Card>
     );

@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { ChevronRight } from 'lucide-react';
+import { Heading } from '../../atoms/Heading';
 import { cn } from '@/lib/utils';
 
 export interface Breadcrumb {
@@ -66,7 +67,7 @@ export const PageHero = React.forwardRef<HTMLDivElement, PageHeroProps>(
 
         {/* Hero Section */}
         <div className="text-center mb-8">
-          <h2 className="text-3xl font-bold text-gray-900 mb-4">{title}</h2>
+          <Heading level={2} size="3xl" className="text-gray-900 mb-4">{title}</Heading>
           <p className="text-gray-600">{description}</p>
         </div>
       </div>

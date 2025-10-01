@@ -1,0 +1,251 @@
+import * as React from 'react';
+import { Card, CardContent } from '../../atoms/Card';
+import { Button } from '../../atoms/Button';
+import { Input } from '../../atoms/Input';
+import { Badge } from '../../atoms/Badge';
+import { Heading } from '../../atoms/Heading';
+import { Info, Trash2 } from 'lucide-react';
+
+export interface SelectedModel {
+  id: string;
+  name: string;
+}
+
+export interface Preset {
+  id: string;
+  name: string;
+  description: string;
+  modelIds: string[];
+  summarizerId: string;
+  summarizerName: string;
+}
+
+export interface EnsembleSidebarProps {
+  /** Array of selected models */
+  selectedModels: SelectedModel[];
+  /** ID of the summarizer model */
+  summarizerId?: string;
+  /** Array of available presets */
+  presets: Preset[];
+  /** Name of the current ensemble being edited */
+  currentEnsembleName: string;
+  /** Whether to show delete buttons on presets */
+  showDeleteButtons?: boolean;
+  /** Callback when a preset is loaded */
+  onLoadPreset: (presetId: string) => void;
+  /** Callback when a preset is saved */
+  onSavePreset: (name: string) => void;
+  /** Callback when a preset is deleted */
+  onDeletePreset: (presetId: string) => void;
+  /** Callback when add manual response is clicked */
+  onAddManualResponse: () => void;
+}
+
+/**
+ * EnsembleSidebar organism for managing ensemble configuration.
+ *
+ * Complete sidebar component that displays:
+ * - Ensemble summary with description
+ * - List of selected models with summarizer indication
+ * - Quick presets for loading saved ensembles
+ * - Save current ensemble form
+ * - Manual responses section
+ *
+ * @example
+ * ```tsx
+ * <EnsembleSidebar
+ *   selectedModels={[
+ *     { id: 'claude-3-opus', name: 'Claude 3 Opus' },
+ *     { id: 'gpt-4o', name: 'GPT-4o' }
+ *   ]}
+ *   summarizerId="claude-3-opus"
+ *   presets={savedPresets}
+ *   currentEnsembleName=""
+ *   onLoadPreset={(id) => loadPreset(id)}
+ *   onSavePreset={(name) => saveEnsemble(name)}
+ *   onDeletePreset={(id) => deletePreset(id)}
+ *   onAddManualResponse={() => openModal()}
+ * />
+ * ```
+ */
+export const EnsembleSidebar = React.forwardRef<HTMLDivElement, EnsembleSidebarProps>(
+  (
+    {
+      selectedModels,
+      summarizerId,
+      presets,
+      currentEnsembleName,
+      showDeleteButtons = false,
+      onLoadPreset,
+      onSavePreset,
+      onDeletePreset,
+      onAddManualResponse,
+    },
+    ref
+  ) => {
+    const [ensembleName, setEnsembleName] = React.useState(currentEnsembleName);
+
+    // Update local state when prop changes
+    React.useEffect(() => {
+      setEnsembleName(currentEnsembleName);
+    }, [currentEnsembleName]);
+
+    const handleSave = () => {
+      if (ensembleName.trim()) {
+        onSavePreset(ensembleName.trim());
+      }
+    };
+
+    return (
+      <Card ref={ref} className="sticky top-8" data-testid="ensemble-sidebar">
+        <CardContent className="p-6">
+          {/* Ensemble Summary */}
+          <Heading level={3} size="lg" className="mb-4">Ensemble Summary</Heading>
+          <p className="text-sm text-gray-600 mb-6">
+            Review your current selections before saving or continuing.
+          </p>
+
+          {/* Selected Models */}
+          <div className="mb-6">
+            <div className="flex items-center justify-between mb-3">
+              <Heading level={4} size="sm" className="mb-0">
+                Selected Models ({selectedModels.length})
+              </Heading>
+              {summarizerId && <span className="text-sm text-blue-600">Summarizer</span>}
+            </div>
+            <div className="space-y-2">
+              {selectedModels.length === 0 ? (
+                <p className="text-sm text-gray-500">No models selected yet</p>
+              ) : (
+                selectedModels.map((model) => (
+                  <div key={model.id} className="flex items-center justify-between text-sm">
+                    <span>{model.name}</span>
+                    {model.id === summarizerId && (
+                      <Badge
+                        variant="outline"
+                        className="text-xs bg-blue-50 text-blue-600 border-blue-200"
+                      >
+                        {model.name}
+                      </Badge>
+                    )}
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+
+          {/* Quick Presets */}
+          <div className="mb-6">
+            <Heading level={4} size="sm" className="mb-3">Quick presets</Heading>
+            <p className="text-xs text-gray-500 mb-4">
+              Start from a curated ensemble tuned for common workflows.
+            </p>
+
+            {presets.length === 0 ? (
+              <div className="text-center py-6 text-sm text-gray-500">
+                No saved presets yet. Save your first ensemble below to get started.
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {presets.map((preset) => (
+                  <div key={preset.id} className="border rounded-lg p-3 relative">
+                    <div className="flex items-center justify-between mb-2">
+                      <Heading level={5} size="sm">{preset.name}</Heading>
+                      <div className="flex items-center gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="text-xs bg-transparent"
+                          onClick={() => onLoadPreset(preset.id)}
+                        >
+                          Use preset
+                        </Button>
+                        {showDeleteButtons && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="text-xs text-red-600 hover:text-red-700 hover:bg-red-50"
+                            onClick={() => onDeletePreset(preset.id)}
+                            aria-label={`Delete preset ${preset.name}`}
+                          >
+                            <Trash2 className="w-3 h-3" />
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                    <p className="text-xs text-gray-600 mb-2">{preset.description}</p>
+                    <p className="text-xs text-gray-500">Summarizer: {preset.summarizerName}</p>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Save Current Ensemble */}
+          <div className="mb-6">
+            <Heading level={4} size="sm" className="mb-3">Save current ensemble</Heading>
+            <p className="text-xs text-gray-500 mb-3">Save this combination for future reviews.</p>
+
+            <div className="space-y-3">
+              <div>
+                <label className="text-xs font-medium text-gray-700">Ensemble Name</label>
+                <Input
+                  placeholder="e.g. Research Ensemble"
+                  value={ensembleName}
+                  onChange={(e) => setEnsembleName(e.target.value)}
+                  className="mt-1"
+                />
+              </div>
+              <Button
+                variant="outline"
+                className="w-full text-sm bg-transparent"
+                onClick={handleSave}
+                disabled={!ensembleName.trim()}
+              >
+                Save Ensemble
+              </Button>
+            </div>
+
+            <div className="mt-4 p-3 bg-blue-50 rounded-lg">
+              <div className="flex items-start space-x-2">
+                <Info className="w-4 h-4 text-blue-500 mt-0.5 flex-shrink-0" />
+                <p className="text-xs text-blue-700">
+                  Save your favourite model combinations to load them instantly later.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Manual Responses */}
+          <div>
+            <Heading level={4} size="sm" className="mb-2">Manual Responses</Heading>
+            <p className="text-xs text-gray-500 mb-3">
+              Add reference answers or benchmark outputs to include in the review step.
+            </p>
+            <p className="text-xs text-gray-600 mb-3">
+              Include custom responses to compare against live model outputs.
+            </p>
+            <Button
+              variant="outline"
+              className="w-full text-sm bg-transparent"
+              onClick={onAddManualResponse}
+            >
+              Add Manual Response
+            </Button>
+
+            <div className="mt-4 p-3 bg-blue-50 rounded-lg">
+              <div className="flex items-start space-x-2">
+                <Info className="w-4 h-4 text-blue-500 mt-0.5 flex-shrink-0" />
+                <p className="text-xs text-blue-700">
+                  Add reference answers or benchmark outputs to compare against live model responses.
+                </p>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+);
+
+EnsembleSidebar.displayName = 'EnsembleSidebar';

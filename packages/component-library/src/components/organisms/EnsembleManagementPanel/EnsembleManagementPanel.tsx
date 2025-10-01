@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { Button } from '../../atoms/Button';
 import { Input } from '../../atoms/Input';
+import { Heading } from '../../atoms/Heading';
 import { Info, Trash2 } from 'lucide-react';
 
 export interface Preset {
@@ -77,7 +78,7 @@ export const EnsembleManagementPanel = React.forwardRef<
       <div ref={ref} data-testid="ensemble-management-panel">
         {/* Quick Presets */}
         <div className="mb-6">
-          <h4 className="font-medium text-sm mb-3">Quick presets</h4>
+          <Heading level={4} size="sm" className="mb-3">Quick presets</Heading>
           <p className="text-xs text-gray-500 mb-4">
             Start from a curated ensemble tuned for common workflows.
           </p>
@@ -91,7 +92,7 @@ export const EnsembleManagementPanel = React.forwardRef<
               {presets.map((preset) => (
                 <div key={preset.id} className="border rounded-lg p-3 relative">
                   <div className="flex items-center justify-between mb-2">
-                    <h5 className="font-medium text-sm">{preset.name}</h5>
+                    <Heading level={5} size="sm">{preset.name}</Heading>
                     <div className="flex items-center gap-2">
                       <Button
                         variant="outline"
@@ -124,7 +125,7 @@ export const EnsembleManagementPanel = React.forwardRef<
 
         {/* Save Current Ensemble */}
         <div className="mb-6">
-          <h4 className="font-medium text-sm mb-3">Save current ensemble</h4>
+          <Heading level={4} size="sm" className="mb-3">Save current ensemble</Heading>
           <p className="text-xs text-gray-500 mb-3">Save this combination for future reviews.</p>
 
           <div className="space-y-3">
