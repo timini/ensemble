@@ -1,6 +1,8 @@
 import * as React from 'react';
 import { ChevronRight } from 'lucide-react';
 import { Heading } from '../../atoms/Heading';
+import { Text } from '../../atoms/Text';
+import { Link } from '../../atoms/Link';
 import { cn } from '@/lib/utils';
 
 export interface Breadcrumb {
@@ -48,17 +50,17 @@ export const PageHero = React.forwardRef<HTMLDivElement, PageHeroProps>(
                   {index > 0 && (
                     <ChevronRight className="w-4 h-4 mx-2 text-gray-400" aria-hidden="true" />
                   )}
-                  <a
+                  <Link
                     href={breadcrumb.href}
+                    variant="subtle"
                     className={cn(
-                      'hover:text-gray-900',
                       index === breadcrumbs.length - 1
-                        ? 'text-gray-900 font-medium'
-                        : 'text-gray-600'
+                        ? 'text-gray-900 font-medium no-underline'
+                        : ''
                     )}
                   >
                     {breadcrumb.label}
-                  </a>
+                  </Link>
                 </li>
               ))}
             </ol>
@@ -68,7 +70,7 @@ export const PageHero = React.forwardRef<HTMLDivElement, PageHeroProps>(
         {/* Hero Section */}
         <div className="text-center mb-8">
           <Heading level={2} size="3xl" className="text-gray-900 mb-4">{title}</Heading>
-          <p className="text-gray-600">{description}</p>
+          <Text color="muted">{description}</Text>
         </div>
       </div>
     );

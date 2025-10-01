@@ -2,6 +2,7 @@ import * as React from 'react';
 import { Button } from '../../atoms/Button';
 import { Input } from '../../atoms/Input';
 import { Heading } from '../../atoms/Heading';
+import { Text } from '../../atoms/Text';
 import { Info, Trash2 } from 'lucide-react';
 
 export interface Preset {
@@ -79,9 +80,9 @@ export const EnsembleManagementPanel = React.forwardRef<
         {/* Quick Presets */}
         <div className="mb-6">
           <Heading level={4} size="sm" className="mb-3">Quick presets</Heading>
-          <p className="text-xs text-gray-500 mb-4">
+          <Text variant="caption" color="muted" className="mb-4">
             Start from a curated ensemble tuned for common workflows.
-          </p>
+          </Text>
 
           {presets.length === 0 ? (
             <div className="text-center py-6 text-sm text-gray-500">
@@ -115,8 +116,8 @@ export const EnsembleManagementPanel = React.forwardRef<
                       )}
                     </div>
                   </div>
-                  <p className="text-xs text-gray-600 mb-2">{preset.description}</p>
-                  <p className="text-xs text-gray-500">Summarizer: {preset.summarizerName}</p>
+                  <Text variant="caption" className="text-gray-600 mb-2">{preset.description}</Text>
+                  <Text variant="caption" color="muted">Summarizer: {preset.summarizerName}</Text>
                 </div>
               ))}
             </div>
@@ -126,7 +127,7 @@ export const EnsembleManagementPanel = React.forwardRef<
         {/* Save Current Ensemble */}
         <div className="mb-6">
           <Heading level={4} size="sm" className="mb-3">Save current ensemble</Heading>
-          <p className="text-xs text-gray-500 mb-3">Save this combination for future reviews.</p>
+          <Text variant="caption" color="muted" className="mb-3">Save this combination for future reviews.</Text>
 
           <div className="space-y-3">
             <div>
@@ -150,9 +151,9 @@ export const EnsembleManagementPanel = React.forwardRef<
           <div className="mt-4 p-3 bg-blue-50 rounded-lg">
             <div className="flex items-start space-x-2">
               <Info className="w-4 h-4 text-blue-500 mt-0.5 flex-shrink-0" />
-              <p className="text-xs text-blue-700">
+              <Text variant="caption" className="text-blue-700">
                 Save your favourite model combinations to load them instantly later.
-              </p>
+              </Text>
             </div>
           </div>
         </div>
