@@ -8,16 +8,17 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useStore } from '~/store';
 import { PageHero } from '@/components/organisms/PageHero';
 import { ModelSelectionList } from '@/components/organisms/ModelSelectionList';
 import { EnsembleManagementPanel, type Preset } from '@/components/organisms/EnsembleManagementPanel';
 import { WorkflowNavigator } from '@/components/organisms/WorkflowNavigator';
-import { ApiKeyConfiguration } from '@/components/organisms/ApiKeyConfiguration';
+import { ApiKeyConfigurationModal } from '@/components/organisms/ApiKeyConfigurationModal';
 import type { Provider, ValidationStatus } from '@/components/molecules/ApiKeyInput';
 import { AVAILABLE_MODELS } from '~/lib/models';
+import { validateApiKey, createDebouncedValidator } from '~/lib/validation';
 
 export default function EnsemblePage() {
   const { t } = useTranslation('common');
@@ -58,13 +59,32 @@ export default function EnsemblePage() {
   const [configModalOpen, setConfigModalOpen] = useState(false);
   const [selectedProvider, setSelectedProvider] = useState<Provider | null>(null);
 
-  // Validation status (placeholder - validation happens on config page)
-  const [validationStatus] = useState<Record<Provider, ValidationStatus>>({
+  // Validation status for the modal
+  const [validationStatus, setValidationStatus] = useState<Record<Provider, ValidationStatus>>({
     openai: 'idle',
     anthropic: 'idle',
     google: 'idle',
     xai: 'idle',
   });
+
+  // Store timeout IDs for debouncing
+  const timeoutRefs = useRef<Record<Provider, NodeJS.Timeout | null>>({
+    openai: null,
+    anthropic: null,
+    google: null,
+    xai: null,
+  });
+
+  // Handler for validation status changes
+  const handleValidationStatusChange = (provider: Provider, status: ValidationStatus) => {
+    setValidationStatus(prev => ({ ...prev, [provider]: status }));
+  };
+
+  // Create debounced validator using the reusable utility
+  const debouncedValidate = createDebouncedValidator(
+    timeoutRefs,
+    validateApiKey
+  );
 
   const handleModelToggle = (modelId: string) => {
     const isSelected = selectedModels.some((m) => m.id === modelId);
@@ -117,11 +137,22 @@ export default function EnsemblePage() {
 
   const handleKeyChange = (provider: Provider, value: string) => {
     setApiKey(provider, value);
+    debouncedValidate(provider, value, mode, handleValidationStatusChange);
   };
 
   const handleToggleShow = (provider: Provider) => {
     toggleApiKeyVisibility(provider);
   };
+
+  // Cleanup timeouts on unmount
+  useEffect(() => {
+    const timeouts = timeoutRefs.current;
+    return () => {
+      Object.values(timeouts).forEach((timeout) => {
+        if (timeout) clearTimeout(timeout);
+      });
+    };
+  }, []);
 
   // Filter API key items to show only the selected provider
   const apiKeyItems = selectedProvider
@@ -131,7 +162,11 @@ export default function EnsemblePage() {
           label: `${selectedProvider.charAt(0).toUpperCase() + selectedProvider.slice(1)} API Key`,
           value: apiKeys[selectedProvider]?.key ?? '',
           placeholder: selectedProvider === 'openai' ? 'sk-...' : selectedProvider === 'anthropic' ? 'sk-ant-...' : selectedProvider === 'google' ? 'AIza...' : 'xai-...',
-          helperText: `Enter your ${selectedProvider} API key`,
+          helperText: validationStatus[selectedProvider] === 'valid'
+            ? 'API key configured'
+            : validationStatus[selectedProvider] === 'validating'
+            ? 'Validating...'
+            : `Enter your ${selectedProvider} API key`,
           validationStatus: validationStatus[selectedProvider],
           showKey: apiKeys[selectedProvider]?.visible ?? false,
         },
@@ -185,43 +220,14 @@ export default function EnsemblePage() {
       </div>
 
       {/* API Key Configuration Modal */}
-      {configModalOpen && selectedProvider && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
-            <div className="p-6">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-2xl font-bold text-gray-900">
-                  Configure API Key
-                </h2>
-                <button
-                  onClick={() => setConfigModalOpen(false)}
-                  className="p-2 hover:bg-gray-100 rounded-full transition-colors"
-                  aria-label="Close modal"
-                >
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </button>
-              </div>
-
-              <ApiKeyConfiguration
-                items={apiKeyItems}
-                onKeyChange={handleKeyChange}
-                onToggleShow={handleToggleShow}
-              />
-
-              <div className="mt-6 flex justify-end">
-                <button
-                  onClick={() => setConfigModalOpen(false)}
-                  className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors font-medium"
-                >
-                  Done
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      <ApiKeyConfigurationModal
+        open={configModalOpen}
+        onOpenChange={setConfigModalOpen}
+        provider={selectedProvider}
+        items={apiKeyItems}
+        onKeyChange={handleKeyChange}
+        onToggleShow={handleToggleShow}
+      />
     </div>
   );
 }

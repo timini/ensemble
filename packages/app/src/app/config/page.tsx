@@ -7,7 +7,7 @@
 
 'use client';
 
-import { useEffect, useState, useCallback, useRef } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslation } from 'react-i18next';
 import { useStore } from '~/store';
@@ -17,7 +17,7 @@ import { ApiKeyConfiguration } from '@/components/organisms/ApiKeyConfiguration'
 import { WorkflowNavigator } from '@/components/organisms/WorkflowNavigator';
 import type { Provider } from '@/components/molecules/ApiKeyInput';
 import type { ValidationStatus } from '@/components/molecules/ApiKeyInput';
-import { ProviderRegistry } from '~/providers/ProviderRegistry';
+import { validateApiKey, createDebouncedValidator } from '~/lib/validation';
 
 export default function ConfigPage() {
   const { t } = useTranslation('common');
@@ -60,50 +60,20 @@ export default function ConfigPage() {
     configureModeComplete();
   };
 
-  // Validate API key using provider (using mock mode for validation)
-  const validateApiKey = useCallback(async (provider: Provider, apiKey: string, currentMode: string) => {
-    if (!apiKey || apiKey.length === 0) {
-      setValidationStatus(prev => ({ ...prev, [provider]: 'idle' }));
-      return;
-    }
+  // Handler for validation status changes
+  const handleValidationStatusChange = (provider: Provider, status: ValidationStatus) => {
+    setValidationStatus(prev => ({ ...prev, [provider]: status }));
+  };
 
-    // Only validate in Free mode
-    if (currentMode !== 'free') {
-      return;
-    }
-
-    // Set validating status
-    setValidationStatus(prev => ({ ...prev, [provider]: 'validating' }));
-
-    try {
-      const providerRegistry = ProviderRegistry.getInstance();
-      // Use 'mock' mode for validation (simulates network call with random delay)
-      const providerInstance = providerRegistry.getProvider(provider, 'mock');
-
-      const result = await providerInstance.validateApiKey(apiKey);
-
-      setValidationStatus(prev => ({
-        ...prev,
-        [provider]: result.valid ? 'valid' : 'invalid'
-      }));
-    } catch (error) {
-      console.error(`Error validating ${provider} API key:`, error);
-      setValidationStatus(prev => ({ ...prev, [provider]: 'invalid' }));
-    }
-  }, []);
+  // Create debounced validator using the reusable utility
+  const debouncedValidate = createDebouncedValidator(
+    timeoutRefs,
+    validateApiKey
+  );
 
   const handleKeyChange = (provider: Provider, value: string) => {
     setApiKey(provider, value);
-
-    // Clear existing timeout for this provider
-    if (timeoutRefs.current[provider]) {
-      clearTimeout(timeoutRefs.current[provider]);
-    }
-
-    // Validate after a short debounce (500ms)
-    timeoutRefs.current[provider] = setTimeout(() => {
-      void validateApiKey(provider, value, mode);
-    }, 500);
+    debouncedValidate(provider, value, mode, handleValidationStatusChange);
   };
 
   const handleToggleShow = (provider: Provider) => {

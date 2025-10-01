@@ -77,6 +77,10 @@
       "apiKeysConfigured_other": "{{count}} clés API configurées.",
       "configureMoreOrContinue": "Configurez-en plus ou continuez à sélectionner des modèles."
     },
+    "apiKeyConfigurationModal": {
+      "title": "Configurer la clé API",
+      "done": "Terminé"
+    },
     "consensusCard": {
       "heading": "Consensus",
       "description": "Résumé combiné fourni par {{model}}.",
