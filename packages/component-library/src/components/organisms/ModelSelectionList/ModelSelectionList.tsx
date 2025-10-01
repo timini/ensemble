@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { useTranslation } from 'react-i18next';
 import { ModelCard, type Provider } from '../../molecules/ModelCard';
 import { Heading } from '../../atoms/Heading';
 
@@ -64,6 +65,8 @@ export const ModelSelectionList = React.forwardRef<HTMLDivElement, ModelSelectio
     },
     ref
   ) => {
+    const { t } = useTranslation();
+
     // Group models by provider
     const modelsByProvider = React.useMemo(() => {
       const grouped: Record<Provider, Model[]> = {
@@ -89,7 +92,7 @@ export const ModelSelectionList = React.forwardRef<HTMLDivElement, ModelSelectio
     if (models.length === 0) {
       return (
         <div ref={ref} className="text-center py-8 text-gray-500">
-          No models available
+          {t('organisms.modelSelectionList.noModels')}
         </div>
       );
     }

@@ -2,6 +2,7 @@ import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { ModelCard } from './ModelCard';
+import { renderWithI18n } from '../../../lib/test-utils/i18n-test-wrapper';
 
 describe('ModelCard', () => {
   describe('rendering', () => {
@@ -236,6 +237,28 @@ describe('ModelCard', () => {
       const { container } = render(<ModelCard provider="openai" modelName="GPT-4" selected={false} isSummarizer={false} />);
       const badge = container.querySelector('.inline-flex.items-center.rounded-full');
       expect(badge).not.toBeInTheDocument();
+    });
+  });
+
+  describe('internationalization', () => {
+    it('renders summarizer badge in English', () => {
+      renderWithI18n(<ModelCard provider="openai" modelName="GPT-4" selected={true} isSummarizer={true} />, { language: 'en' });
+      expect(screen.getByText('Summarizer')).toBeInTheDocument();
+    });
+
+    it('renders summarizer badge in French', () => {
+      renderWithI18n(<ModelCard provider="openai" modelName="GPT-4" selected={true} isSummarizer={true} />, { language: 'fr' });
+      expect(screen.getByText('Synthétiseur')).toBeInTheDocument();
+    });
+
+    it('does not render summarizer badge when isSummarizer is false in English', () => {
+      renderWithI18n(<ModelCard provider="openai" modelName="GPT-4" selected={true} isSummarizer={false} />, { language: 'en' });
+      expect(screen.queryByText('Summarizer')).not.toBeInTheDocument();
+    });
+
+    it('does not render summarizer badge when isSummarizer is false in French', () => {
+      renderWithI18n(<ModelCard provider="openai" modelName="GPT-4" selected={true} isSummarizer={false} />, { language: 'fr' });
+      expect(screen.queryByText('Synthétiseur')).not.toBeInTheDocument();
     });
   });
 });

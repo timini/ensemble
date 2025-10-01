@@ -2,6 +2,7 @@ import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { ModelSelectionList } from './ModelSelectionList';
+import { renderWithI18n } from '../../../lib/test-utils/i18n-test-wrapper';
 
 const mockModels = [
   { id: 'gpt-4', provider: 'openai' as const, name: 'GPT-4' },
@@ -488,6 +489,34 @@ describe('ModelSelectionList', () => {
 
       // Should not call onModelToggle for disabled models
       expect(onModelToggle).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('internationalization', () => {
+    it('renders English empty state message', () => {
+      renderWithI18n(
+        <ModelSelectionList
+          models={[]}
+          selectedModelIds={[]}
+          onModelToggle={vi.fn()}
+          onSummarizerChange={vi.fn()}
+        />,
+        { language: 'en' }
+      );
+      expect(screen.getByText('No models available')).toBeInTheDocument();
+    });
+
+    it('renders French empty state message', () => {
+      renderWithI18n(
+        <ModelSelectionList
+          models={[]}
+          selectedModelIds={[]}
+          onModelToggle={vi.fn()}
+          onSummarizerChange={vi.fn()}
+        />,
+        { language: 'fr' }
+      );
+      expect(screen.getByText('Aucun modèle disponible')).toBeInTheDocument();
     });
   });
 });

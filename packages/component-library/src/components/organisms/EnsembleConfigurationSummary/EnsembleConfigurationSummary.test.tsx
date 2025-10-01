@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { EnsembleConfigurationSummary } from './EnsembleConfigurationSummary';
+import { renderWithI18n } from '../../../lib/test-utils/i18n-test-wrapper';
 
 const mockSelectedModels = [
   'claude-3-haiku-20240307',
@@ -367,6 +368,36 @@ describe('EnsembleConfigurationSummary', () => {
       );
 
       expect(screen.getByText(specialModel)).toBeInTheDocument();
+    });
+  });
+
+  describe('internationalization', () => {
+    it('renders English text', () => {
+      renderWithI18n(
+        <EnsembleConfigurationSummary
+          selectedModels={mockSelectedModels}
+          summarizerModel={mockSummarizerModel}
+        />,
+        { language: 'en' }
+      );
+      expect(screen.getByText('Your Ensemble Configuration')).toBeInTheDocument();
+      expect(screen.getByText('These models will receive the prompt and contribute to the comparison.')).toBeInTheDocument();
+      expect(screen.getByText('Selected Models (3)')).toBeInTheDocument();
+      expect(screen.getByText('Summarizer')).toBeInTheDocument();
+    });
+
+    it('renders French text', () => {
+      renderWithI18n(
+        <EnsembleConfigurationSummary
+          selectedModels={mockSelectedModels}
+          summarizerModel={mockSummarizerModel}
+        />,
+        { language: 'fr' }
+      );
+      expect(screen.getByText('Configuration de Votre Ensemble')).toBeInTheDocument();
+      expect(screen.getByText('Ces modèles recevront l\'invite et contribueront à la comparaison.')).toBeInTheDocument();
+      expect(screen.getByText('Modèles Sélectionnés (3)')).toBeInTheDocument();
+      expect(screen.getByText('Synthétiseur')).toBeInTheDocument();
     });
   });
 });

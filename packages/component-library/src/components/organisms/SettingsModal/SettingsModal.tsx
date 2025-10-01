@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   Dialog,
   DialogContent,
@@ -94,12 +95,14 @@ export const SettingsModal = React.forwardRef<HTMLDivElement, SettingsModalProps
     },
     ref
   ) => {
+    const { t } = useTranslation();
+
     return (
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent ref={ref} className="max-w-2xl" data-testid="settings-modal">
-          <DialogTitle>Settings</DialogTitle>
+          <DialogTitle>{t('organisms.settingsModal.title')}</DialogTitle>
           <DialogDescription className="sr-only">
-            Configure your application preferences including theme, language, and data management
+            {t('organisms.settingsModal.description')}
           </DialogDescription>
 
           {/* Appearance Section */}
@@ -110,13 +113,13 @@ export const SettingsModal = React.forwardRef<HTMLDivElement, SettingsModalProps
                   <BookOpen />
                 </Icon>
                 <Heading level={3} size="lg">
-                  Appearance
+                  {t('organisms.settingsModal.appearance')}
                 </Heading>
               </div>
 
               {/* Theme */}
               <div className="mb-6">
-                <Label className="mb-3 block">Theme</Label>
+                <Label className="mb-3 block">{t('organisms.settingsModal.themeLabel')}</Label>
                 <div className="grid grid-cols-2 gap-4">
                   <Card
                     className={cn(
@@ -129,7 +132,7 @@ export const SettingsModal = React.forwardRef<HTMLDivElement, SettingsModalProps
                     <div className="p-6 flex flex-col items-center">
                       <div className="w-16 h-16 bg-white border border-gray-300 rounded mb-3" />
                       <span className={cn('font-medium', theme === 'light' && 'text-blue-600')}>
-                        Light
+                        {t('organisms.settingsModal.themeLight')}
                       </span>
                     </div>
                   </Card>
@@ -144,7 +147,7 @@ export const SettingsModal = React.forwardRef<HTMLDivElement, SettingsModalProps
                     <div className="p-6 flex flex-col items-center">
                       <div className="w-16 h-16 bg-gray-800 border border-gray-600 rounded mb-3" />
                       <span className={cn('font-medium', theme === 'dark' && 'text-blue-600')}>
-                        Dark
+                        {t('organisms.settingsModal.themeDark')}
                       </span>
                     </div>
                   </Card>
@@ -154,7 +157,7 @@ export const SettingsModal = React.forwardRef<HTMLDivElement, SettingsModalProps
               {/* Language */}
               <div>
                 <Label htmlFor="language-select" className="mb-3 block">
-                  Language
+                  {t('organisms.settingsModal.languageLabel')}
                 </Label>
                 <Select value={language} onValueChange={(value) => onLanguageChange(value as Language)}>
                   <SelectTrigger className="w-full" data-testid="language-select">
@@ -178,7 +181,7 @@ export const SettingsModal = React.forwardRef<HTMLDivElement, SettingsModalProps
                   <Database />
                 </Icon>
                 <Heading level={3} size="lg">
-                  Data Management
+                  {t('organisms.settingsModal.dataManagement')}
                 </Heading>
               </div>
 
@@ -190,7 +193,7 @@ export const SettingsModal = React.forwardRef<HTMLDivElement, SettingsModalProps
                   data-testid="export-button"
                 >
                   <FileDown className="w-4 h-4 mr-2" />
-                  Export Settings
+                  {t('organisms.settingsModal.exportSettings')}
                 </Button>
                 <Button
                   variant="outline"
@@ -199,7 +202,7 @@ export const SettingsModal = React.forwardRef<HTMLDivElement, SettingsModalProps
                   data-testid="import-button"
                 >
                   <Upload className="w-4 h-4 mr-2" />
-                  Import Settings
+                  {t('organisms.settingsModal.importSettings')}
                 </Button>
               </div>
             </section>
@@ -211,11 +214,11 @@ export const SettingsModal = React.forwardRef<HTMLDivElement, SettingsModalProps
                   <TriangleAlert />
                 </Icon>
                 <Heading level={3} size="lg">
-                  Danger Zone
+                  {t('organisms.settingsModal.dangerZone')}
                 </Heading>
               </div>
 
-              <p className="text-sm text-gray-600 mb-4">These actions cannot be undone.</p>
+              <p className="text-sm text-gray-600 mb-4">{t('organisms.settingsModal.dangerZoneWarning')}</p>
 
               <Button
                 variant="outline"
@@ -224,7 +227,7 @@ export const SettingsModal = React.forwardRef<HTMLDivElement, SettingsModalProps
                 data-testid="clear-data-button"
               >
                 <Trash2 className="w-4 h-4 mr-2" />
-                Clear All Data
+                {t('organisms.settingsModal.clearAllData')}
               </Button>
             </section>
           </div>
@@ -235,7 +238,7 @@ export const SettingsModal = React.forwardRef<HTMLDivElement, SettingsModalProps
               onClick={onDone}
               data-testid="done-button"
             >
-              Done
+              {t('organisms.settingsModal.doneButton')}
             </Button>
           </DialogFooter>
         </DialogContent>

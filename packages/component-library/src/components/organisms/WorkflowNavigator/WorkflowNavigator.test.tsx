@@ -2,6 +2,7 @@ import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { WorkflowNavigator } from './WorkflowNavigator';
+import { renderWithI18n } from '../../../lib/test-utils/i18n-test-wrapper';
 
 describe('WorkflowNavigator', () => {
   describe('rendering', () => {
@@ -295,6 +296,32 @@ describe('WorkflowNavigator', () => {
 
       const continueButton = screen.getByText('Continue');
       expect(continueButton).toHaveClass('inline-flex');
+    });
+  });
+
+  describe('internationalization', () => {
+    it('renders English button label', () => {
+      renderWithI18n(
+        <WorkflowNavigator
+          currentStep="config"
+          continueLabel="Continue"
+          onContinue={vi.fn()}
+        />,
+        { language: 'en' }
+      );
+      expect(screen.getByText('Continue')).toBeInTheDocument();
+    });
+
+    it('renders French button label', () => {
+      renderWithI18n(
+        <WorkflowNavigator
+          currentStep="config"
+          continueLabel="Continuer"
+          onContinue={vi.fn()}
+        />,
+        { language: 'fr' }
+      );
+      expect(screen.getByText('Continuer')).toBeInTheDocument();
     });
   });
 });

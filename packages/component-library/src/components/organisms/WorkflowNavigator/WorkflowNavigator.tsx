@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Button } from '../../atoms/Button';
 import { cn } from '@/lib/utils';
 
@@ -41,13 +42,15 @@ export const WorkflowNavigator = React.forwardRef<HTMLElement, WorkflowNavigator
     {
       currentStep,
       backLabel,
-      continueLabel = 'Continue',
+      continueLabel,
       continueDisabled = false,
       onBack,
       onContinue,
     },
     ref
   ) => {
+    const { t } = useTranslation();
+    const displayContinueLabel = continueLabel || t('organisms.workflowNavigator.continue');
     const showBackButton = currentStep !== 'config' && onBack;
 
     return (
@@ -74,7 +77,7 @@ export const WorkflowNavigator = React.forwardRef<HTMLElement, WorkflowNavigator
             onClick={onContinue}
             disabled={continueDisabled}
           >
-            {continueLabel}
+            {displayContinueLabel}
           </Button>
         )}
       </nav>

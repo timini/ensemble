@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { AgreementAnalysis } from './AgreementAnalysis';
+import { renderWithI18n } from '../../../lib/test-utils/i18n-test-wrapper';
 
 const mockComparisons = [
   {
@@ -450,6 +451,50 @@ describe('AgreementAnalysis', () => {
 
       expect(screen.getByText('80%')).toBeInTheDocument();
       expect(screen.getByText('Medium Agreement')).toBeInTheDocument();
+    });
+  });
+
+  describe('internationalization', () => {
+    it('renders English text', () => {
+      renderWithI18n(
+        <AgreementAnalysis
+          overallAgreement={0.68}
+          pairwiseComparisons={mockComparisons}
+          responseCount={2}
+          comparisonCount={1}
+          averageConfidence={0.95}
+        />,
+        { language: 'en' }
+      );
+      expect(screen.getByText('Agreement analysis')).toBeInTheDocument();
+      expect(screen.getByText('Overall Agreement')).toBeInTheDocument();
+      expect(screen.getByText('Medium Agreement')).toBeInTheDocument();
+      expect(screen.getByText('Pairwise Comparisons')).toBeInTheDocument();
+      expect(screen.getByText('vs')).toBeInTheDocument();
+      expect(screen.getByText('RESPONSES ANALYZED')).toBeInTheDocument();
+      expect(screen.getByText('COMPARISONS')).toBeInTheDocument();
+      expect(screen.getByText('AVG CONFIDENCE')).toBeInTheDocument();
+    });
+
+    it('renders French text', () => {
+      renderWithI18n(
+        <AgreementAnalysis
+          overallAgreement={0.68}
+          pairwiseComparisons={mockComparisons}
+          responseCount={2}
+          comparisonCount={1}
+          averageConfidence={0.95}
+        />,
+        { language: 'fr' }
+      );
+      expect(screen.getByText('Analyse de concordance')).toBeInTheDocument();
+      expect(screen.getByText('Concordance Globale')).toBeInTheDocument();
+      expect(screen.getByText('Concordance Moyenne')).toBeInTheDocument();
+      expect(screen.getByText('Comparaisons par Paires')).toBeInTheDocument();
+      expect(screen.getByText('vs')).toBeInTheDocument();
+      expect(screen.getByText('RÉPONSES ANALYSÉES')).toBeInTheDocument();
+      expect(screen.getByText('COMPARAISONS')).toBeInTheDocument();
+      expect(screen.getByText('CONFIANCE MOYENNE')).toBeInTheDocument();
     });
   });
 });

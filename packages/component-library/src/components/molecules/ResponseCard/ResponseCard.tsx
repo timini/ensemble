@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Card, CardHeader, CardContent } from '../../atoms/Card';
 import { Badge } from '../../atoms/Badge';
 import { LoadingSpinner } from '../../atoms/LoadingSpinner';
@@ -78,6 +79,7 @@ export const ResponseCard = React.forwardRef<HTMLDivElement, ResponseCardProps>(
     },
     ref
   ) => {
+    const { t } = useTranslation();
     const [isExpanded, setIsExpanded] = React.useState(defaultExpanded);
     const isStreaming = status === 'streaming';
     const isError = status === 'error';
@@ -108,7 +110,7 @@ export const ResponseCard = React.forwardRef<HTMLDivElement, ResponseCardProps>(
           <div className="flex items-start justify-between gap-2">
             <div className="flex items-center gap-2">
               {isManual ? (
-                <Badge variant="secondary">Manual</Badge>
+                <Badge variant="secondary">{t('molecules.responseCard.manual')}</Badge>
               ) : (
                 <>
                   {provider && <Badge variant="outline">{PROVIDER_NAMES[provider]}</Badge>}
@@ -121,7 +123,7 @@ export const ResponseCard = React.forwardRef<HTMLDivElement, ResponseCardProps>(
               {isStreaming && (
                 <>
                   <LoadingSpinner size="sm" data-testid="loading-spinner" />
-                  <Badge variant="default">Streaming</Badge>
+                  <Badge variant="default">{t('molecules.responseCard.streaming')}</Badge>
                 </>
               )}
               {isComplete && !isError && (
@@ -135,12 +137,12 @@ export const ResponseCard = React.forwardRef<HTMLDivElement, ResponseCardProps>(
                   {isExpanded ? (
                     <>
                       <ChevronUp className="h-4 w-4" />
-                      <span className="text-sm">Collapse</span>
+                      <span className="text-sm">{t('molecules.responseCard.collapse')}</span>
                     </>
                   ) : (
                     <>
                       <ChevronDown className="h-4 w-4" />
-                      <span className="text-sm">Expand</span>
+                      <span className="text-sm">{t('molecules.responseCard.expand')}</span>
                     </>
                   )}
                 </Button>
@@ -172,12 +174,12 @@ export const ResponseCard = React.forwardRef<HTMLDivElement, ResponseCardProps>(
                     data-testid="copy-button"
                   >
                     <Copy className="h-4 w-4" />
-                    <span className="text-sm">Copy</span>
+                    <span className="text-sm">{t('molecules.responseCard.copy')}</span>
                   </Button>
 
                   <div className="flex items-center gap-4">
                     <div className="flex items-center gap-2">
-                      <span className="text-sm text-muted-foreground">Rate response:</span>
+                      <span className="text-sm text-muted-foreground">{t('molecules.responseCard.rateResponse')}</span>
                       <Rating
                         value={rating}
                         size="sm"
@@ -187,7 +189,7 @@ export const ResponseCard = React.forwardRef<HTMLDivElement, ResponseCardProps>(
                     </div>
                     {responseTime && (
                       <span className="text-sm text-muted-foreground">
-                        Response time: {responseTime}
+                        {t('molecules.responseCard.responseTime', { time: responseTime })}
                       </span>
                     )}
                   </div>

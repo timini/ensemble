@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Button } from '../../atoms/Button';
 import { Input } from '../../atoms/Input';
 import { Heading } from '../../atoms/Heading';
@@ -62,6 +63,7 @@ export const EnsembleManagementPanel = React.forwardRef<
     },
     ref
   ) => {
+    const { t } = useTranslation();
     const [ensembleName, setEnsembleName] = React.useState(currentEnsembleName);
 
     // Update local state when prop changes
@@ -79,14 +81,14 @@ export const EnsembleManagementPanel = React.forwardRef<
       <div ref={ref} data-testid="ensemble-management-panel">
         {/* Quick Presets */}
         <div className="mb-6">
-          <Heading level={4} size="sm" className="mb-3">Quick presets</Heading>
+          <Heading level={4} size="sm" className="mb-3">{t('organisms.ensembleManagementPanel.quickPresets')}</Heading>
           <Text variant="caption" color="muted" className="mb-4">
-            Start from a curated ensemble tuned for common workflows.
+            {t('organisms.ensembleManagementPanel.quickPresetsDescription')}
           </Text>
 
           {presets.length === 0 ? (
             <div className="text-center py-6 text-sm text-gray-500">
-              No saved presets yet. Save your first ensemble below to get started.
+              {t('organisms.ensembleManagementPanel.noPresets')}
             </div>
           ) : (
             <div className="space-y-3">
@@ -101,7 +103,7 @@ export const EnsembleManagementPanel = React.forwardRef<
                         className="text-xs bg-transparent"
                         onClick={() => onLoadPreset(preset.id)}
                       >
-                        Use preset
+                        {t('organisms.ensembleManagementPanel.usePreset')}
                       </Button>
                       {showDeleteButtons && (
                         <Button
@@ -109,7 +111,7 @@ export const EnsembleManagementPanel = React.forwardRef<
                           size="sm"
                           className="text-xs text-red-600 hover:text-red-700 hover:bg-red-50"
                           onClick={() => onDeletePreset(preset.id)}
-                          aria-label={`Delete preset ${preset.name}`}
+                          aria-label={t('organisms.ensembleManagementPanel.deletePreset', { name: preset.name })}
                         >
                           <Trash2 className="w-3 h-3" />
                         </Button>
@@ -117,7 +119,7 @@ export const EnsembleManagementPanel = React.forwardRef<
                     </div>
                   </div>
                   <Text variant="caption" className="text-gray-600 mb-2">{preset.description}</Text>
-                  <Text variant="caption" color="muted">Summarizer: {preset.summarizerName}</Text>
+                  <Text variant="caption" color="muted">{t('organisms.ensembleManagementPanel.summarizerLabel', { name: preset.summarizerName })}</Text>
                 </div>
               ))}
             </div>
@@ -126,14 +128,14 @@ export const EnsembleManagementPanel = React.forwardRef<
 
         {/* Save Current Ensemble */}
         <div className="mb-6">
-          <Heading level={4} size="sm" className="mb-3">Save current ensemble</Heading>
-          <Text variant="caption" color="muted" className="mb-3">Save this combination for future reviews.</Text>
+          <Heading level={4} size="sm" className="mb-3">{t('organisms.ensembleManagementPanel.saveCurrentEnsemble')}</Heading>
+          <Text variant="caption" color="muted" className="mb-3">{t('organisms.ensembleManagementPanel.saveDescription')}</Text>
 
           <div className="space-y-3">
             <div>
-              <label className="text-xs font-medium text-gray-700">Ensemble Name</label>
+              <label className="text-xs font-medium text-gray-700">{t('organisms.ensembleManagementPanel.ensembleNameLabel')}</label>
               <Input
-                placeholder="e.g. Research Ensemble"
+                placeholder={t('organisms.ensembleManagementPanel.ensembleNamePlaceholder')}
                 value={ensembleName}
                 onChange={(e) => setEnsembleName(e.target.value)}
                 className="mt-1"
@@ -144,7 +146,7 @@ export const EnsembleManagementPanel = React.forwardRef<
               className="w-full text-sm bg-transparent"
               onClick={handleSave}
             >
-              Save Ensemble
+              {t('organisms.ensembleManagementPanel.saveButton')}
             </Button>
           </div>
 
@@ -152,7 +154,7 @@ export const EnsembleManagementPanel = React.forwardRef<
             <div className="flex items-start space-x-2">
               <Info className="w-4 h-4 text-blue-500 mt-0.5 flex-shrink-0" />
               <Text variant="caption" className="text-blue-700">
-                Save your favourite model combinations to load them instantly later.
+                {t('organisms.ensembleManagementPanel.saveInfoText')}
               </Text>
             </div>
           </div>

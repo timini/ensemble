@@ -2,6 +2,7 @@ import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { InlineAlert } from './InlineAlert';
+import { renderWithI18n } from '../../../lib/test-utils/i18n-test-wrapper';
 
 describe('InlineAlert', () => {
   describe('rendering', () => {
@@ -121,6 +122,32 @@ describe('InlineAlert', () => {
     it('matches snapshot for dismissible alert', () => {
       const { container } = render(<InlineAlert dismissible>Message</InlineAlert>);
       expect(container.firstChild).toMatchSnapshot();
+    });
+  });
+
+  describe('internationalization', () => {
+    it('renders dismiss button with English label', () => {
+      renderWithI18n(<InlineAlert dismissible>Message</InlineAlert>, { language: 'en' });
+      const dismissButton = screen.getByRole('button');
+      expect(dismissButton).toHaveAttribute('aria-label', 'Dismiss');
+    });
+
+    it('renders dismiss button with French label', () => {
+      renderWithI18n(<InlineAlert dismissible>Message</InlineAlert>, { language: 'fr' });
+      const dismissButton = screen.getByRole('button');
+      expect(dismissButton).toHaveAttribute('aria-label', 'Fermer');
+    });
+
+    it('displays correct English dismiss label for info variant', () => {
+      renderWithI18n(<InlineAlert variant="info" dismissible>Info message</InlineAlert>, { language: 'en' });
+      const dismissButton = screen.getByRole('button');
+      expect(dismissButton).toHaveAttribute('aria-label', 'Dismiss');
+    });
+
+    it('displays correct French dismiss label for error variant', () => {
+      renderWithI18n(<InlineAlert variant="error" dismissible>Error message</InlineAlert>, { language: 'fr' });
+      const dismissButton = screen.getByRole('button');
+      expect(dismissButton).toHaveAttribute('aria-label', 'Fermer');
     });
   });
 });

@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Card, CardContent } from '../../atoms/Card';
 import { Heading } from '../../atoms/Heading';
 import { Text } from '../../atoms/Text';
@@ -48,11 +49,13 @@ export const AgreementAnalysis = React.forwardRef<HTMLDivElement, AgreementAnaly
     { overallAgreement, pairwiseComparisons, responseCount, comparisonCount, averageConfidence },
     ref
   ) => {
+    const { t } = useTranslation();
+
     // Determine agreement level and color
     const getAgreementLevel = (agreement: number) => {
-      if (agreement > 0.8) return { label: 'High Agreement', color: 'text-green-500' };
-      if (agreement >= 0.5) return { label: 'Medium Agreement', color: 'text-yellow-500' };
-      return { label: 'Low Agreement', color: 'text-red-500' };
+      if (agreement > 0.8) return { label: t('organisms.agreementAnalysis.highAgreement'), color: 'text-green-500' };
+      if (agreement >= 0.5) return { label: t('organisms.agreementAnalysis.mediumAgreement'), color: 'text-yellow-500' };
+      return { label: t('organisms.agreementAnalysis.lowAgreement'), color: 'text-red-500' };
     };
 
     const agreementLevel = getAgreementLevel(overallAgreement);
@@ -72,25 +75,25 @@ export const AgreementAnalysis = React.forwardRef<HTMLDivElement, AgreementAnaly
         <CardContent className="p-6">
           {/* Header with Overall Agreement */}
           <div className="flex items-center justify-between mb-6">
-            <Heading level={3} size="lg">Agreement analysis</Heading>
+            <Heading level={3} size="lg">{t('organisms.agreementAnalysis.title')}</Heading>
             <div className="text-right">
               <div className={cn('text-2xl font-bold', agreementLevel.color)}>
                 {formatPercentage(overallAgreement)}%
               </div>
-              <Text variant="small" color="muted">Overall Agreement</Text>
+              <Text variant="small" color="muted">{t('organisms.agreementAnalysis.overallAgreement')}</Text>
               <Text variant="small" className={agreementLevel.color}>{agreementLevel.label}</Text>
             </div>
           </div>
 
           {/* Pairwise Comparisons */}
           <div className="mb-6">
-            <Heading level={4} size="lg" className="mb-4">Pairwise Comparisons</Heading>
+            <Heading level={4} size="lg" className="mb-4">{t('organisms.agreementAnalysis.pairwiseComparisons')}</Heading>
             <div className="space-y-3">
               {pairwiseComparisons.map((comparison, index) => (
                 <div key={index} className="flex items-center justify-between">
                   <div className="flex items-center space-x-3">
                     <Text as="span" variant="small">{comparison.model1}</Text>
-                    <Text as="span" variant="small" className="text-gray-400">vs</Text>
+                    <Text as="span" variant="small" className="text-gray-400">{t('organisms.agreementAnalysis.vs')}</Text>
                     <Text as="span" variant="small">{comparison.model2}</Text>
                   </div>
                   <div className="flex items-center space-x-3">
@@ -104,7 +107,7 @@ export const AgreementAnalysis = React.forwardRef<HTMLDivElement, AgreementAnaly
                       {formatPercentage(comparison.similarity)}%
                     </Text>
                     <Text as="span" variant="caption" color="muted">
-                      Confidence: {formatPercentage(comparison.confidence)}%
+                      {t('organisms.agreementAnalysis.confidence', { percent: formatPercentage(comparison.confidence) })}
                     </Text>
                   </div>
                 </div>
@@ -116,17 +119,17 @@ export const AgreementAnalysis = React.forwardRef<HTMLDivElement, AgreementAnaly
           <div className="grid grid-cols-3 gap-8 text-center">
             <div>
               <div className="text-2xl font-bold text-blue-600">{responseCount}</div>
-              <Text variant="small" color="muted">RESPONSES ANALYZED</Text>
+              <Text variant="small" color="muted">{t('organisms.agreementAnalysis.responsesAnalyzed')}</Text>
             </div>
             <div>
               <div className="text-2xl font-bold text-blue-600">{comparisonCount}</div>
-              <Text variant="small" color="muted">COMPARISONS</Text>
+              <Text variant="small" color="muted">{t('organisms.agreementAnalysis.comparisons')}</Text>
             </div>
             <div>
               <div className="text-2xl font-bold text-blue-600">
                 {formatPercentage(averageConfidence)}%
               </div>
-              <Text variant="small" color="muted">AVG CONFIDENCE</Text>
+              <Text variant="small" color="muted">{t('organisms.agreementAnalysis.avgConfidence')}</Text>
             </div>
           </div>
         </CardContent>

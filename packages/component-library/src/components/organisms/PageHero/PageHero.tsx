@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { useTranslation } from 'react-i18next';
 import { ChevronRight } from 'lucide-react';
 import { Heading } from '../../atoms/Heading';
 import { Text } from '../../atoms/Text';
@@ -39,11 +40,13 @@ export interface PageHeroProps {
  */
 export const PageHero = React.forwardRef<HTMLDivElement, PageHeroProps>(
   ({ title, description, breadcrumbs }, ref) => {
+    const { t } = useTranslation();
+
     return (
       <div ref={ref} data-testid="page-hero">
         {/* Breadcrumb Navigation */}
         {breadcrumbs && breadcrumbs.length > 0 && (
-          <nav aria-label="Breadcrumb" className="mb-4">
+          <nav aria-label={t('organisms.pageHero.breadcrumb')} className="mb-4">
             <ol className="flex items-center space-x-2 text-sm text-gray-600">
               {breadcrumbs.map((breadcrumb, index) => (
                 <li key={index} className="flex items-center">

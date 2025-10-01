@@ -1,6 +1,7 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { renderWithI18n } from '../../../lib/test-utils/i18n-test-wrapper';
 import { EnsembleSidebar } from './EnsembleSidebar';
 
 const mockSelectedModels = [
@@ -668,6 +669,178 @@ describe('EnsembleSidebar', () => {
       );
 
       expect(screen.getByText('Ensemble Name')).toBeInTheDocument();
+    });
+  });
+
+  describe('internationalization', () => {
+    it('renders English text', () => {
+      renderWithI18n(
+        <EnsembleSidebar
+          selectedModels={mockSelectedModels}
+          summarizerId="claude-3-opus"
+          presets={mockPresets}
+          currentEnsembleName=""
+          showDeleteButtons={true}
+          onLoadPreset={vi.fn()}
+          onSavePreset={vi.fn()}
+          onDeletePreset={vi.fn()}
+          onAddManualResponse={vi.fn()}
+        />,
+        { language: 'en' }
+      );
+
+      expect(screen.getByText('Ensemble Summary')).toBeInTheDocument();
+      expect(screen.getByText('Review your current selections before saving or continuing.')).toBeInTheDocument();
+      expect(screen.getByText('Selected Models (2)')).toBeInTheDocument();
+      expect(screen.getByText('Summarizer')).toBeInTheDocument();
+      expect(screen.getByText('Quick presets')).toBeInTheDocument();
+      expect(screen.getByText('Start from a curated ensemble tuned for common workflows.')).toBeInTheDocument();
+      expect(screen.getByText('Save current ensemble')).toBeInTheDocument();
+      expect(screen.getByText('Ensemble Name')).toBeInTheDocument();
+      expect(screen.getByPlaceholderText('e.g. Research Ensemble')).toBeInTheDocument();
+      expect(screen.getByText('Save Ensemble')).toBeInTheDocument();
+      expect(screen.getByText('Manual Responses')).toBeInTheDocument();
+      expect(screen.getByText('Add Manual Response')).toBeInTheDocument();
+      const usePresetButtons = screen.getAllByText('Use preset');
+      expect(usePresetButtons.length).toBeGreaterThan(0);
+      expect(screen.getByLabelText('Delete preset Research Synthesis')).toBeInTheDocument();
+      expect(screen.getByText('Summarizer: Claude 3.5 Sonnet')).toBeInTheDocument();
+    });
+
+    it('renders French text', () => {
+      renderWithI18n(
+        <EnsembleSidebar
+          selectedModels={mockSelectedModels}
+          summarizerId="claude-3-opus"
+          presets={mockPresets}
+          currentEnsembleName=""
+          showDeleteButtons={true}
+          onLoadPreset={vi.fn()}
+          onSavePreset={vi.fn()}
+          onDeletePreset={vi.fn()}
+          onAddManualResponse={vi.fn()}
+        />,
+        { language: 'fr' }
+      );
+
+      expect(screen.getByText('Résumé de l\'Ensemble')).toBeInTheDocument();
+      expect(screen.getByText('Vérifiez vos sélections actuelles avant d\'enregistrer ou de continuer.')).toBeInTheDocument();
+      expect(screen.getByText('Modèles Sélectionnés (2)')).toBeInTheDocument();
+      expect(screen.getByText('Synthétiseur')).toBeInTheDocument();
+      expect(screen.getByText('Préréglages rapides')).toBeInTheDocument();
+      expect(screen.getByText('Démarrez à partir d\'un ensemble organisé et optimisé pour les flux de travail courants.')).toBeInTheDocument();
+      expect(screen.getByText('Enregistrer l\'ensemble actuel')).toBeInTheDocument();
+      expect(screen.getByText('Nom de l\'Ensemble')).toBeInTheDocument();
+      expect(screen.getByPlaceholderText('par ex. Ensemble de Recherche')).toBeInTheDocument();
+      expect(screen.getByText('Enregistrer l\'Ensemble')).toBeInTheDocument();
+      expect(screen.getByText('Réponses Manuelles')).toBeInTheDocument();
+      expect(screen.getByText('Ajouter une Réponse Manuelle')).toBeInTheDocument();
+      const usePresetButtons = screen.getAllByText('Utiliser le préréglage');
+      expect(usePresetButtons.length).toBeGreaterThan(0);
+      expect(screen.getByLabelText('Supprimer le préréglage Research Synthesis')).toBeInTheDocument();
+      expect(screen.getByText('Synthétiseur : Claude 3.5 Sonnet')).toBeInTheDocument();
+    });
+
+    it('handles interpolation for count in English', () => {
+      renderWithI18n(
+        <EnsembleSidebar
+          selectedModels={[mockSelectedModels[0]]}
+          presets={[]}
+          currentEnsembleName=""
+          onLoadPreset={vi.fn()}
+          onSavePreset={vi.fn()}
+          onDeletePreset={vi.fn()}
+          onAddManualResponse={vi.fn()}
+        />,
+        { language: 'en' }
+      );
+
+      expect(screen.getByText('Selected Models (1)')).toBeInTheDocument();
+    });
+
+    it('handles interpolation for count in French', () => {
+      renderWithI18n(
+        <EnsembleSidebar
+          selectedModels={[mockSelectedModels[0]]}
+          presets={[]}
+          currentEnsembleName=""
+          onLoadPreset={vi.fn()}
+          onSavePreset={vi.fn()}
+          onDeletePreset={vi.fn()}
+          onAddManualResponse={vi.fn()}
+        />,
+        { language: 'fr' }
+      );
+
+      expect(screen.getByText('Modèles Sélectionnés (1)')).toBeInTheDocument();
+    });
+
+    it('shows no models message in English', () => {
+      renderWithI18n(
+        <EnsembleSidebar
+          selectedModels={[]}
+          presets={[]}
+          currentEnsembleName=""
+          onLoadPreset={vi.fn()}
+          onSavePreset={vi.fn()}
+          onDeletePreset={vi.fn()}
+          onAddManualResponse={vi.fn()}
+        />,
+        { language: 'en' }
+      );
+
+      expect(screen.getByText('No models selected yet')).toBeInTheDocument();
+    });
+
+    it('shows no models message in French', () => {
+      renderWithI18n(
+        <EnsembleSidebar
+          selectedModels={[]}
+          presets={[]}
+          currentEnsembleName=""
+          onLoadPreset={vi.fn()}
+          onSavePreset={vi.fn()}
+          onDeletePreset={vi.fn()}
+          onAddManualResponse={vi.fn()}
+        />,
+        { language: 'fr' }
+      );
+
+      expect(screen.getByText('Aucun modèle sélectionné pour le moment')).toBeInTheDocument();
+    });
+
+    it('shows no presets message in English', () => {
+      renderWithI18n(
+        <EnsembleSidebar
+          selectedModels={[]}
+          presets={[]}
+          currentEnsembleName=""
+          onLoadPreset={vi.fn()}
+          onSavePreset={vi.fn()}
+          onDeletePreset={vi.fn()}
+          onAddManualResponse={vi.fn()}
+        />,
+        { language: 'en' }
+      );
+
+      expect(screen.getByText('No saved presets yet. Save your first ensemble below to get started.')).toBeInTheDocument();
+    });
+
+    it('shows no presets message in French', () => {
+      renderWithI18n(
+        <EnsembleSidebar
+          selectedModels={[]}
+          presets={[]}
+          currentEnsembleName=""
+          onLoadPreset={vi.fn()}
+          onSavePreset={vi.fn()}
+          onDeletePreset={vi.fn()}
+          onAddManualResponse={vi.fn()}
+        />,
+        { language: 'fr' }
+      );
+
+      expect(screen.getByText('Aucun préréglage enregistré pour le moment. Enregistrez votre premier ensemble ci-dessous pour commencer.')).toBeInTheDocument();
     });
   });
 });

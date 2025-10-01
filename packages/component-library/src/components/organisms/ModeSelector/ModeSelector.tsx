@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { useTranslation } from 'react-i18next';
 import { ModeSelectionCard } from '../../molecules/ModeSelectionCard';
 import { Heading } from '../../atoms/Heading';
 
@@ -33,10 +34,12 @@ export interface ModeSelectorProps {
  */
 export const ModeSelector = React.forwardRef<HTMLDivElement, ModeSelectorProps>(
   ({ selectedMode, onSelectFreeMode, onSelectProMode, disabled = false }, ref) => {
+    const { t } = useTranslation();
+
     return (
       <div ref={ref} data-testid="mode-selector">
         <Heading level={3} size="lg" className="mb-6">
-          Select Your Mode
+          {t('organisms.modeSelector.heading')}
         </Heading>
 
         <div className="grid grid-cols-2 gap-6">

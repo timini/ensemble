@@ -2,6 +2,7 @@ import * as React from 'react';
 import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { SummarizerIndicator } from './SummarizerIndicator';
+import { renderWithI18n } from '../../../lib/test-utils/i18n-test-wrapper';
 
 describe('SummarizerIndicator', () => {
   describe('rendering', () => {
@@ -112,6 +113,28 @@ describe('SummarizerIndicator', () => {
       );
       const indicator = screen.getByTestId('summarizer-indicator');
       expect(indicator).toHaveClass('bg-orange-50', 'border-orange-200', 'mt-4', 'shadow-lg');
+    });
+  });
+
+  describe('internationalization', () => {
+    it('renders label in English', () => {
+      renderWithI18n(<SummarizerIndicator modelName="Claude 3 Opus" />, { language: 'en' });
+      expect(screen.getByText('Summarizer Model:')).toBeInTheDocument();
+    });
+
+    it('renders label in French', () => {
+      renderWithI18n(<SummarizerIndicator modelName="Claude 3 Opus" />, { language: 'fr' });
+      expect(screen.getByText('Modèle de synthèse :')).toBeInTheDocument();
+    });
+
+    it('renders model name in English locale', () => {
+      renderWithI18n(<SummarizerIndicator modelName="GPT-4 Turbo" />, { language: 'en' });
+      expect(screen.getByText('GPT-4 Turbo')).toBeInTheDocument();
+    });
+
+    it('renders model name in French locale', () => {
+      renderWithI18n(<SummarizerIndicator modelName="GPT-4 Turbo" />, { language: 'fr' });
+      expect(screen.getByText('GPT-4 Turbo')).toBeInTheDocument();
     });
   });
 });

@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Card, CardContent } from '../../atoms/Card';
 import { Button } from '../../atoms/Button';
 import { Heading } from '../../atoms/Heading';
@@ -31,15 +32,17 @@ export interface ConsensusCardProps {
  * ```
  */
 export const ConsensusCard = React.forwardRef<HTMLDivElement, ConsensusCardProps>(
-  ({ consensusText, summarizerModel, onShare, heading = 'Consensus' }, ref) => {
+  ({ consensusText, summarizerModel, onShare, heading }, ref) => {
+    const { t } = useTranslation();
+
     return (
       <Card ref={ref} className="bg-blue-50 border-blue-200" data-testid="consensus-card">
         <CardContent className="p-6">
           <Heading level={3} size="lg" className="mb-2 text-blue-900">
-            {heading}
+            {heading || t('organisms.consensusCard.heading')}
           </Heading>
           <p className="text-sm text-blue-700 mb-4">
-            Combined summary provided by {summarizerModel}.
+            {t('organisms.consensusCard.description', { model: summarizerModel })}
           </p>
 
           <div className="bg-white rounded-lg p-4 mb-4">
@@ -49,7 +52,7 @@ export const ConsensusCard = React.forwardRef<HTMLDivElement, ConsensusCardProps
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2">
               <Share className="w-4 h-4 text-blue-600" />
-              <span className="text-sm text-blue-700">Share this consensus response</span>
+              <span className="text-sm text-blue-700">{t('organisms.consensusCard.shareText')}</span>
             </div>
             <Button
               variant="outline"
@@ -58,7 +61,7 @@ export const ConsensusCard = React.forwardRef<HTMLDivElement, ConsensusCardProps
               onClick={onShare}
               data-testid="share-button"
             >
-              Share
+              {t('organisms.consensusCard.shareButton')}
             </Button>
           </div>
         </CardContent>

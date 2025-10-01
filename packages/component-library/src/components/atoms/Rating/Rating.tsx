@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
+import { useTranslation } from 'react-i18next';
 import { cn } from '../../../lib/utils';
 
 const ratingVariants = cva('flex items-center space-x-1', {
@@ -60,6 +61,8 @@ const Rating = React.forwardRef<HTMLDivElement, RatingProps>(
     },
     ref
   ) => {
+    const { t } = useTranslation();
+
     const handleStarClick = (starValue: number) => {
       if (!readOnly && !disabled && onChange) {
         onChange(starValue);
@@ -82,7 +85,7 @@ const Rating = React.forwardRef<HTMLDivElement, RatingProps>(
                 starVariants({ size, filled: isFilled }),
                 (readOnly || disabled) && 'cursor-default hover:text-current'
               )}
-              aria-label={`${starValue} star${starValue !== 1 ? 's' : ''}`}
+              aria-label={t('atoms.rating.star', { count: starValue })}
             >
               {isFilled ? '⭐' : '☆'}
             </button>

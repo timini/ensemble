@@ -2,6 +2,7 @@ import { describe, it, expect, vi } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { EnsembleManagementPanel } from './EnsembleManagementPanel';
+import { renderWithI18n } from '../../../lib/test-utils/i18n-test-wrapper';
 
 const mockPresets = [
   {
@@ -437,6 +438,46 @@ describe('EnsembleManagementPanel', () => {
 
       const input = screen.getByPlaceholderText(/e.g. Research Ensemble/);
       expect(input).toBeInTheDocument();
+    });
+  });
+
+  describe('internationalization', () => {
+    it('renders English text correctly', () => {
+      renderWithI18n(
+        <EnsembleManagementPanel
+          presets={mockPresets}
+          currentEnsembleName=""
+          onLoadPreset={vi.fn()}
+          onSavePreset={vi.fn()}
+          onDeletePreset={vi.fn()}
+        />,
+        { language: 'en' }
+      );
+
+      expect(screen.getByText('Quick presets')).toBeInTheDocument();
+      expect(screen.getByText('Save current ensemble')).toBeInTheDocument();
+      const usePresetButtons = screen.getAllByText('Use preset');
+      expect(usePresetButtons.length).toBeGreaterThan(0);
+      expect(screen.getByText('Save Ensemble')).toBeInTheDocument();
+    });
+
+    it('renders French text correctly', () => {
+      renderWithI18n(
+        <EnsembleManagementPanel
+          presets={mockPresets}
+          currentEnsembleName=""
+          onLoadPreset={vi.fn()}
+          onSavePreset={vi.fn()}
+          onDeletePreset={vi.fn()}
+        />,
+        { language: 'fr' }
+      );
+
+      expect(screen.getByText('Préréglages rapides')).toBeInTheDocument();
+      expect(screen.getByText('Enregistrer l\'ensemble actuel')).toBeInTheDocument();
+      const usePresetButtons = screen.getAllByText('Utiliser le préréglage');
+      expect(usePresetButtons.length).toBeGreaterThan(0);
+      expect(screen.getByText('Enregistrer l\'Ensemble')).toBeInTheDocument();
     });
   });
 });

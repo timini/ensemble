@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { Info, CheckCircle, AlertTriangle, AlertCircle, X } from 'lucide-react';
 import { cva, type VariantProps } from 'class-variance-authority';
+import { useTranslation } from 'react-i18next';
 import { cn } from '@/lib/utils';
 
 const alertVariants = cva(
@@ -66,6 +67,7 @@ const iconMap = {
  */
 const InlineAlert = React.forwardRef<HTMLDivElement, InlineAlertProps>(
   ({ className, variant = 'info', dismissible, onDismiss, children, role = 'alert', ...props }, ref) => {
+    const { t } = useTranslation();
     const Icon = iconMap[variant ?? 'info'];
 
     return (
@@ -81,7 +83,7 @@ const InlineAlert = React.forwardRef<HTMLDivElement, InlineAlertProps>(
           <button
             type="button"
             onClick={onDismiss}
-            aria-label="Dismiss"
+            aria-label={t('atoms.inlineAlert.dismiss')}
             className="shrink-0 rounded-sm opacity-70 hover:opacity-100 transition-opacity"
           >
             <X className="h-4 w-4" />

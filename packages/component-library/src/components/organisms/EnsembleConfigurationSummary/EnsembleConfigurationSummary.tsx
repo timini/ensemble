@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Card, CardContent } from '../../atoms/Card';
 import { Badge } from '../../atoms/Badge';
 import { Heading } from '../../atoms/Heading';
@@ -36,21 +37,27 @@ export const EnsembleConfigurationSummary = React.forwardRef<
     {
       selectedModels,
       summarizerModel,
-      heading = 'Your Ensemble Configuration',
-      description = 'These models will receive the prompt and contribute to the comparison.',
+      heading,
+      description,
     },
     ref
   ) => {
+    const { t } = useTranslation();
+
     return (
       <Card ref={ref} data-testid="ensemble-configuration-summary">
         <CardContent className="p-6">
-          <Heading level={3} size="lg" className="mb-4">{heading}</Heading>
-          <p className="text-sm text-gray-600 mb-4">{description}</p>
+          <Heading level={3} size="lg" className="mb-4">
+            {heading || t('organisms.ensembleConfigurationSummary.heading')}
+          </Heading>
+          <p className="text-sm text-gray-600 mb-4">
+            {description || t('organisms.ensembleConfigurationSummary.description')}
+          </p>
 
           <div className="flex items-center justify-between">
             <div>
               <Heading level={4} size="sm" className="mb-2">
-                Selected Models ({selectedModels.length})
+                {t('organisms.ensembleConfigurationSummary.selectedModels', { count: selectedModels.length })}
               </Heading>
               <div className="flex flex-wrap gap-2">
                 {selectedModels.map((model, index) => (
@@ -67,7 +74,7 @@ export const EnsembleConfigurationSummary = React.forwardRef<
             </div>
 
             <div>
-              <Heading level={4} size="sm" className="mb-2">Summarizer</Heading>
+              <Heading level={4} size="sm" className="mb-2">{t('organisms.ensembleConfigurationSummary.summarizer')}</Heading>
               <Badge
                 className="bg-blue-100 text-blue-800 border-blue-200"
                 data-testid="summarizer-model"

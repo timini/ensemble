@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { ResponseCard } from './ResponseCard';
+import { renderWithI18n } from '../../../lib/test-utils/i18n-test-wrapper';
 
 describe('ResponseCard', () => {
   describe('rendering', () => {
@@ -468,6 +469,78 @@ describe('ResponseCard', () => {
       );
       const alert = container.querySelector('[role="alert"]');
       expect(alert).toBeInTheDocument();
+    });
+  });
+
+  describe('internationalization', () => {
+    it('renders manual badge in English', () => {
+      renderWithI18n(<ResponseCard status="complete" responseType="manual" content="Manual response" />, { language: 'en' });
+      expect(screen.getByText('Manual')).toBeInTheDocument();
+    });
+
+    it('renders manual badge in French', () => {
+      renderWithI18n(<ResponseCard status="complete" responseType="manual" content="Manual response" />, { language: 'fr' });
+      expect(screen.getByText('Manuel')).toBeInTheDocument();
+    });
+
+    it('renders streaming badge in English', () => {
+      renderWithI18n(<ResponseCard modelName="GPT-4" provider="openai" status="streaming" responseType="ai" content="Streaming..." />, { language: 'en' });
+      expect(screen.getByText('Streaming')).toBeInTheDocument();
+    });
+
+    it('renders streaming badge in French', () => {
+      renderWithI18n(<ResponseCard modelName="GPT-4" provider="openai" status="streaming" responseType="ai" content="Streaming..." />, { language: 'fr' });
+      expect(screen.getByText('Diffusion en cours')).toBeInTheDocument();
+    });
+
+    it('renders collapse button in English', () => {
+      renderWithI18n(<ResponseCard modelName="GPT-4" provider="openai" status="complete" responseType="ai" content="Complete" />, { language: 'en' });
+      expect(screen.getByText('Collapse')).toBeInTheDocument();
+    });
+
+    it('renders collapse button in French', () => {
+      renderWithI18n(<ResponseCard modelName="GPT-4" provider="openai" status="complete" responseType="ai" content="Complete" />, { language: 'fr' });
+      expect(screen.getByText('Réduire')).toBeInTheDocument();
+    });
+
+    it('renders expand button in English', () => {
+      renderWithI18n(<ResponseCard modelName="GPT-4" provider="openai" status="complete" responseType="ai" content="Complete" defaultExpanded={false} />, { language: 'en' });
+      expect(screen.getByText('Expand')).toBeInTheDocument();
+    });
+
+    it('renders expand button in French', () => {
+      renderWithI18n(<ResponseCard modelName="GPT-4" provider="openai" status="complete" responseType="ai" content="Complete" defaultExpanded={false} />, { language: 'fr' });
+      expect(screen.getByText('Développer')).toBeInTheDocument();
+    });
+
+    it('renders copy button in English', () => {
+      renderWithI18n(<ResponseCard modelName="GPT-4" provider="openai" status="complete" responseType="ai" content="Complete" />, { language: 'en' });
+      expect(screen.getByText('Copy')).toBeInTheDocument();
+    });
+
+    it('renders copy button in French', () => {
+      renderWithI18n(<ResponseCard modelName="GPT-4" provider="openai" status="complete" responseType="ai" content="Complete" />, { language: 'fr' });
+      expect(screen.getByText('Copier')).toBeInTheDocument();
+    });
+
+    it('renders rate response label in English', () => {
+      renderWithI18n(<ResponseCard modelName="GPT-4" provider="openai" status="complete" responseType="ai" content="Complete" />, { language: 'en' });
+      expect(screen.getByText('Rate response:')).toBeInTheDocument();
+    });
+
+    it('renders rate response label in French', () => {
+      renderWithI18n(<ResponseCard modelName="GPT-4" provider="openai" status="complete" responseType="ai" content="Complete" />, { language: 'fr' });
+      expect(screen.getByText('Évaluer la réponse :')).toBeInTheDocument();
+    });
+
+    it('renders response time in English', () => {
+      renderWithI18n(<ResponseCard modelName="GPT-4" provider="openai" status="complete" responseType="ai" content="Complete" responseTime="1568ms" />, { language: 'en' });
+      expect(screen.getByText('Response time: 1568ms')).toBeInTheDocument();
+    });
+
+    it('renders response time in French', () => {
+      renderWithI18n(<ResponseCard modelName="GPT-4" provider="openai" status="complete" responseType="ai" content="Complete" responseTime="1568ms" />, { language: 'fr' });
+      expect(screen.getByText('Temps de réponse : 1568ms')).toBeInTheDocument();
     });
   });
 });

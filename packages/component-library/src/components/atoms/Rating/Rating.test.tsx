@@ -3,6 +3,7 @@ import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { Rating } from './Rating';
+import { renderWithI18n } from '../../../lib/test-utils/i18n-test-wrapper';
 
 describe('Rating', () => {
   it('renders with correct number of stars', () => {
@@ -119,6 +120,50 @@ describe('Rating', () => {
     it('matches snapshot for large size', () => {
       const { container } = render(<Rating value={4} max={5} size="lg" />);
       expect(container.firstChild).toMatchSnapshot();
+    });
+  });
+
+  describe('internationalization', () => {
+    it('renders English aria-label for single star', () => {
+      const { container } = renderWithI18n(<Rating value={0} max={5} />, { language: 'en' });
+      const firstButton = container.querySelectorAll('button')[0];
+      expect(firstButton).toHaveAttribute('aria-label', '1 star');
+    });
+
+    it('renders English aria-label for multiple stars', () => {
+      const { container } = renderWithI18n(<Rating value={0} max={5} />, { language: 'en' });
+      const thirdButton = container.querySelectorAll('button')[2];
+      expect(thirdButton).toHaveAttribute('aria-label', '3 stars');
+    });
+
+    it('renders French aria-label for single star', () => {
+      const { container } = renderWithI18n(<Rating value={0} max={5} />, { language: 'fr' });
+      const firstButton = container.querySelectorAll('button')[0];
+      expect(firstButton).toHaveAttribute('aria-label', '1 étoile');
+    });
+
+    it('renders French aria-label for multiple stars', () => {
+      const { container } = renderWithI18n(<Rating value={0} max={5} />, { language: 'fr' });
+      const thirdButton = container.querySelectorAll('button')[2];
+      expect(thirdButton).toHaveAttribute('aria-label', '3 étoiles');
+    });
+
+    it('displays correct English labels for all star values', () => {
+      const { container } = renderWithI18n(<Rating value={0} max={5} />, { language: 'en' });
+      const buttons = container.querySelectorAll('button');
+
+      expect(buttons[0]).toHaveAttribute('aria-label', '1 star');
+      expect(buttons[1]).toHaveAttribute('aria-label', '2 stars');
+      expect(buttons[4]).toHaveAttribute('aria-label', '5 stars');
+    });
+
+    it('displays correct French labels for all star values', () => {
+      const { container } = renderWithI18n(<Rating value={0} max={5} />, { language: 'fr' });
+      const buttons = container.querySelectorAll('button');
+
+      expect(buttons[0]).toHaveAttribute('aria-label', '1 étoile');
+      expect(buttons[1]).toHaveAttribute('aria-label', '2 étoiles');
+      expect(buttons[4]).toHaveAttribute('aria-label', '5 étoiles');
     });
   });
 });
