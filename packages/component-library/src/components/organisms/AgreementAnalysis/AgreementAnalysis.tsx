@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { Card, CardContent } from '../../atoms/Card';
 import { Heading } from '../../atoms/Heading';
+import { Text } from '../../atoms/Text';
 import { cn } from '@/lib/utils';
 
 export interface PairwiseComparison {
@@ -76,8 +77,8 @@ export const AgreementAnalysis = React.forwardRef<HTMLDivElement, AgreementAnaly
               <div className={cn('text-2xl font-bold', agreementLevel.color)}>
                 {formatPercentage(overallAgreement)}%
               </div>
-              <div className="text-sm text-gray-500">Overall Agreement</div>
-              <div className={cn('text-sm', agreementLevel.color)}>{agreementLevel.label}</div>
+              <Text variant="small" color="muted">Overall Agreement</Text>
+              <Text variant="small" className={agreementLevel.color}>{agreementLevel.label}</Text>
             </div>
           </div>
 
@@ -88,9 +89,9 @@ export const AgreementAnalysis = React.forwardRef<HTMLDivElement, AgreementAnaly
               {pairwiseComparisons.map((comparison, index) => (
                 <div key={index} className="flex items-center justify-between">
                   <div className="flex items-center space-x-3">
-                    <span className="text-sm">{comparison.model1}</span>
-                    <span className="text-gray-400">vs</span>
-                    <span className="text-sm">{comparison.model2}</span>
+                    <Text as="span" variant="small">{comparison.model1}</Text>
+                    <Text as="span" variant="small" className="text-gray-400">vs</Text>
+                    <Text as="span" variant="small">{comparison.model2}</Text>
                   </div>
                   <div className="flex items-center space-x-3">
                     <div className="w-32 bg-gray-200 rounded-full h-2">
@@ -99,12 +100,12 @@ export const AgreementAnalysis = React.forwardRef<HTMLDivElement, AgreementAnaly
                         style={{ width: `${formatPercentage(comparison.similarity)}%` }}
                       />
                     </div>
-                    <span className="text-sm font-medium">
+                    <Text as="span" variant="small" className="font-medium">
                       {formatPercentage(comparison.similarity)}%
-                    </span>
-                    <span className="text-xs text-gray-500">
+                    </Text>
+                    <Text as="span" variant="caption" color="muted">
                       Confidence: {formatPercentage(comparison.confidence)}%
-                    </span>
+                    </Text>
                   </div>
                 </div>
               ))}
@@ -115,17 +116,17 @@ export const AgreementAnalysis = React.forwardRef<HTMLDivElement, AgreementAnaly
           <div className="grid grid-cols-3 gap-8 text-center">
             <div>
               <div className="text-2xl font-bold text-blue-600">{responseCount}</div>
-              <div className="text-sm text-gray-500">RESPONSES ANALYZED</div>
+              <Text variant="small" color="muted">RESPONSES ANALYZED</Text>
             </div>
             <div>
               <div className="text-2xl font-bold text-blue-600">{comparisonCount}</div>
-              <div className="text-sm text-gray-500">COMPARISONS</div>
+              <Text variant="small" color="muted">COMPARISONS</Text>
             </div>
             <div>
               <div className="text-2xl font-bold text-blue-600">
                 {formatPercentage(averageConfidence)}%
               </div>
-              <div className="text-sm text-gray-500">AVG CONFIDENCE</div>
+              <Text variant="small" color="muted">AVG CONFIDENCE</Text>
             </div>
           </div>
         </CardContent>

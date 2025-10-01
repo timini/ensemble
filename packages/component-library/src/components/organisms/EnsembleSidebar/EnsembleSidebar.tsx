@@ -4,6 +4,7 @@ import { Button } from '../../atoms/Button';
 import { Input } from '../../atoms/Input';
 import { Badge } from '../../atoms/Badge';
 import { Heading } from '../../atoms/Heading';
+import { Text } from '../../atoms/Text';
 import { Info, Trash2 } from 'lucide-react';
 
 export interface SelectedModel {
@@ -101,9 +102,9 @@ export const EnsembleSidebar = React.forwardRef<HTMLDivElement, EnsembleSidebarP
         <CardContent className="p-6">
           {/* Ensemble Summary */}
           <Heading level={3} size="lg" className="mb-4">Ensemble Summary</Heading>
-          <p className="text-sm text-gray-600 mb-6">
+          <Text variant="helper" className="text-gray-600 mb-6">
             Review your current selections before saving or continuing.
-          </p>
+          </Text>
 
           {/* Selected Models */}
           <div className="mb-6">
@@ -111,11 +112,11 @@ export const EnsembleSidebar = React.forwardRef<HTMLDivElement, EnsembleSidebarP
               <Heading level={4} size="sm" className="mb-0">
                 Selected Models ({selectedModels.length})
               </Heading>
-              {summarizerId && <span className="text-sm text-blue-600">Summarizer</span>}
+              {summarizerId && <Text as="span" variant="small" color="primary">Summarizer</Text>}
             </div>
             <div className="space-y-2">
               {selectedModels.length === 0 ? (
-                <p className="text-sm text-gray-500">No models selected yet</p>
+                <Text variant="small" color="muted">No models selected yet</Text>
               ) : (
                 selectedModels.map((model) => (
                   <div key={model.id} className="flex items-center justify-between text-sm">
@@ -137,9 +138,9 @@ export const EnsembleSidebar = React.forwardRef<HTMLDivElement, EnsembleSidebarP
           {/* Quick Presets */}
           <div className="mb-6">
             <Heading level={4} size="sm" className="mb-3">Quick presets</Heading>
-            <p className="text-xs text-gray-500 mb-4">
+            <Text variant="caption" color="muted" className="mb-4">
               Start from a curated ensemble tuned for common workflows.
-            </p>
+            </Text>
 
             {presets.length === 0 ? (
               <div className="text-center py-6 text-sm text-gray-500">
@@ -173,8 +174,8 @@ export const EnsembleSidebar = React.forwardRef<HTMLDivElement, EnsembleSidebarP
                         )}
                       </div>
                     </div>
-                    <p className="text-xs text-gray-600 mb-2">{preset.description}</p>
-                    <p className="text-xs text-gray-500">Summarizer: {preset.summarizerName}</p>
+                    <Text variant="caption" className="text-gray-600 mb-2">{preset.description}</Text>
+                    <Text variant="caption" color="muted">Summarizer: {preset.summarizerName}</Text>
                   </div>
                 ))}
               </div>
@@ -184,7 +185,7 @@ export const EnsembleSidebar = React.forwardRef<HTMLDivElement, EnsembleSidebarP
           {/* Save Current Ensemble */}
           <div className="mb-6">
             <Heading level={4} size="sm" className="mb-3">Save current ensemble</Heading>
-            <p className="text-xs text-gray-500 mb-3">Save this combination for future reviews.</p>
+            <Text variant="caption" color="muted" className="mb-3">Save this combination for future reviews.</Text>
 
             <div className="space-y-3">
               <div>
@@ -209,9 +210,9 @@ export const EnsembleSidebar = React.forwardRef<HTMLDivElement, EnsembleSidebarP
             <div className="mt-4 p-3 bg-blue-50 rounded-lg">
               <div className="flex items-start space-x-2">
                 <Info className="w-4 h-4 text-blue-500 mt-0.5 flex-shrink-0" />
-                <p className="text-xs text-blue-700">
+                <Text variant="caption" className="text-blue-700">
                   Save your favourite model combinations to load them instantly later.
-                </p>
+                </Text>
               </div>
             </div>
           </div>
@@ -219,12 +220,12 @@ export const EnsembleSidebar = React.forwardRef<HTMLDivElement, EnsembleSidebarP
           {/* Manual Responses */}
           <div>
             <Heading level={4} size="sm" className="mb-2">Manual Responses</Heading>
-            <p className="text-xs text-gray-500 mb-3">
+            <Text variant="caption" color="muted" className="mb-3">
               Add reference answers or benchmark outputs to include in the review step.
-            </p>
-            <p className="text-xs text-gray-600 mb-3">
+            </Text>
+            <Text variant="caption" className="text-gray-600 mb-3">
               Include custom responses to compare against live model outputs.
-            </p>
+            </Text>
             <Button
               variant="outline"
               className="w-full text-sm bg-transparent"
@@ -236,9 +237,9 @@ export const EnsembleSidebar = React.forwardRef<HTMLDivElement, EnsembleSidebarP
             <div className="mt-4 p-3 bg-blue-50 rounded-lg">
               <div className="flex items-start space-x-2">
                 <Info className="w-4 h-4 text-blue-500 mt-0.5 flex-shrink-0" />
-                <p className="text-xs text-blue-700">
+                <Text variant="caption" className="text-blue-700">
                   Add reference answers or benchmark outputs to compare against live model responses.
-                </p>
+                </Text>
               </div>
             </div>
           </div>
