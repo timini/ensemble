@@ -7,7 +7,7 @@
 
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslation } from 'react-i18next';
 import { useStore } from '~/store';
@@ -41,6 +41,14 @@ export default function ConfigPage() {
     anthropic: 'idle',
     google: 'idle',
     xai: 'idle',
+  });
+
+  // Store timeout IDs for debouncing
+  const timeoutRefs = useRef<Record<Provider, NodeJS.Timeout | null>>({
+    openai: null,
+    anthropic: null,
+    google: null,
+    xai: null,
   });
 
   const handleSelectFreeMode = () => {
@@ -86,13 +94,16 @@ export default function ConfigPage() {
 
   const handleKeyChange = (provider: Provider, value: string) => {
     setApiKey(provider, value);
-    // Validate after a short debounce
-    const timeoutId = setTimeout(() => {
+
+    // Clear existing timeout for this provider
+    if (timeoutRefs.current[provider]) {
+      clearTimeout(timeoutRefs.current[provider]);
+    }
+
+    // Validate after a short debounce (500ms)
+    timeoutRefs.current[provider] = setTimeout(() => {
       void validateApiKey(provider, value, mode);
     }, 500);
-
-    // Cleanup timeout on next change
-    return () => clearTimeout(timeoutId);
   };
 
   const handleToggleShow = (provider: Provider) => {
@@ -159,6 +170,16 @@ export default function ConfigPage() {
       configureModeComplete();
     }
   }, [mode, hasConfiguredKeys, isModeConfigured, configureModeComplete]);
+
+  // Cleanup timeouts on unmount
+  useEffect(() => {
+    const timeouts = timeoutRefs.current;
+    return () => {
+      Object.values(timeouts).forEach((timeout) => {
+        if (timeout) clearTimeout(timeout);
+      });
+    };
+  }, []);
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-6xl">
