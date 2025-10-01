@@ -1,22 +1,34 @@
 # @ai-ensemble/component-library
 
-Production-ready React component library built with TypeScript, Tailwind CSS, and Storybook. Follows [shadcn/ui](https://ui.shadcn.com/) patterns with full test coverage and visual regression testing.
+Production-ready React component library built with TypeScript, Tailwind CSS, and Storybook. Follows [shadcn/ui](https://ui.shadcn.com/) patterns and **[Atomic Design](https://bradfrost.com/blog/post/atomic-web-design/)** principles with full test coverage and visual regression testing.
 
-## 📦 Components
+## 📦 Components (Atomic Design)
 
-### Atomic Components (8)
-- **Button** - All variants (default, destructive, outline, secondary, ghost, link) and sizes (sm, md, lg, icon)
-- **Card** - Flexible card container with Header, Footer, Title, Description, and Content subcomponents
-- **Input** - Text input with validation states and proper accessibility
-- **Badge** - Status badges with variants (default, secondary, destructive, outline)
-- **Textarea** - Multiline text input with auto-resize support
+This library follows **Atomic Design** principles, organizing components from simple to complex:
+
+### 🔹 Atoms (12) - Basic Building Blocks
+- **Button** - All variants (default, destructive, outline, secondary, ghost, link) and sizes
+- **Card** - Flexible container with Header, Footer, Title, Description, and Content subcomponents
+- **Input** - Text input with validation states and accessibility
+- **Badge** - Status badges with multiple variants
+- **Icon** - Icon wrapper with variants (lucide-react)
+- **LoadingSpinner** - Loading indicator with size variants
+- **Tag** - Chip/tag for filters and selections (removable, selectable)
+- **InlineAlert** - Inline messages (info, success, warning, error)
+- **Textarea** - Multiline text input with auto-resize
 - **Label** - Semantic form labels with proper `htmlFor` association
-- **Progress** - Animated progress bars with variants (default, destructive, success, warning)
-- **Separator** - Horizontal and vertical dividers for content sections
+- **Progress** - Animated progress bars with variants
+- **Separator** - Horizontal and vertical dividers
 
-### Composite Components (2)
+### 🔸 Molecules (2) - Simple Combinations
 - **EnsembleHeader** - Application header with branding
-- **ProgressSteps** - Workflow stepper showing Config → Ensemble → Prompt → Review
+- **ProgressSteps** - Workflow stepper (Config → Ensemble → Prompt → Review)
+
+### 🔶 Organisms (Planned)
+- Navbar, DataTable, Modal, Dropdown, Tabs, CommandPalette
+
+### 📄 Templates (Planned)
+- DashboardLayout, AuthLayout, WizardLayout
 
 ### Utilities
 - **cn()** - Smart className merger using `clsx` + `tailwind-merge` for conflict resolution
@@ -190,24 +202,37 @@ Component.displayName = 'Component';
 
 ## 📁 Project Structure
 
+Organized following **Atomic Design** principles:
+
 ```
 packages/component-library/
 ├── .storybook/              # Storybook configuration
 │   ├── main.ts             # Storybook main config
 │   └── preview.ts          # Global decorators and parameters
+├── docs/                    # Documentation
+│   ├── ATOMIC_DESIGN_ARCHITECTURE.md  # Atomic design guide
+│   ├── COMPONENT_DEVELOPMENT_GUIDE.md # TDD workflow
+│   └── TAILWIND_DESIGN_SYSTEM.md      # Design tokens
 ├── src/
 │   ├── components/
-│   │   ├── ui/             # Atomic components
-│   │   │   ├── Button/
-│   │   │   ├── Card/
-│   │   │   ├── Input/
-│   │   │   ├── Badge/
+│   │   ├── atoms/          # Level 1: Basic building blocks
+│   │   │   ├── Button/     # Action trigger
+│   │   │   ├── Card/       # Container component
+│   │   │   ├── Input/      # Text input
+│   │   │   ├── Badge/      # Status indicator
+│   │   │   ├── Icon/       # Icon wrapper
+│   │   │   ├── LoadingSpinner/
+│   │   │   ├── Tag/        # Chip/filter tag
+│   │   │   ├── InlineAlert/
 │   │   │   ├── Textarea/
 │   │   │   ├── Label/
 │   │   │   ├── Progress/
 │   │   │   └── Separator/
-│   │   ├── EnsembleHeader/  # Composite components
-│   │   └── ProgressSteps/
+│   │   ├── molecules/      # Level 2: Simple combinations
+│   │   │   ├── EnsembleHeader/
+│   │   │   └── ProgressSteps/
+│   │   ├── organisms/      # Level 3: Complex components (planned)
+│   │   └── templates/      # Level 4: Page layouts (planned)
 │   ├── lib/
 │   │   └── utils.ts        # Utility functions (cn, etc.)
 │   ├── styles/
@@ -258,10 +283,11 @@ git commit -m "docs: update README with testing instructions"
 
 ## 📚 Documentation
 
-- **TESTING.md** - Testing strategy and screenshot testing guide
-- **KNOWN_ISSUES.md** - Known issues and solutions
+- **[ATOMIC_DESIGN_ARCHITECTURE.md](docs/ATOMIC_DESIGN_ARCHITECTURE.md)** - Atomic design principles and component organization
+- **[COMPONENT_DEVELOPMENT_GUIDE.md](docs/COMPONENT_DEVELOPMENT_GUIDE.md)** - TDD workflow and best practices
+- **[TAILWIND_DESIGN_SYSTEM.md](docs/TAILWIND_DESIGN_SYSTEM.md)** - Design tokens and styling guidelines
+- **Storybook** - Interactive component documentation at `http://localhost:6006`
 - **tailwind.config.ts** - Tailwind theme configuration
-- **Storybook** - Component documentation at `http://localhost:6006`
 
 ## 🏗️ Tech Stack
 

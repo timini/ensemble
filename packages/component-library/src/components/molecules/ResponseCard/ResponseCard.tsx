@@ -1,0 +1,204 @@
+import * as React from 'react';
+import { Card, CardHeader, CardContent } from '../../atoms/Card';
+import { Badge } from '../../atoms/Badge';
+import { LoadingSpinner } from '../../atoms/LoadingSpinner';
+import { InlineAlert } from '../../atoms/InlineAlert';
+import { Rating } from '../../atoms/Rating';
+import { Button } from '../../atoms/Button';
+import { cn } from '@/lib/utils';
+import { ChevronDown, ChevronUp, Copy } from 'lucide-react';
+
+export type Provider = 'openai' | 'anthropic' | 'google' | 'xai';
+export type ResponseStatus = 'streaming' | 'complete' | 'error';
+export type ResponseType = 'ai' | 'manual';
+
+export interface ResponseCardProps {
+  /** Model name (required for AI responses) */
+  modelName?: string;
+  /** AI provider (required for AI responses) */
+  provider?: Provider;
+  /** Current status of the response */
+  status: ResponseStatus;
+  /** Type of response */
+  responseType: ResponseType;
+  /** Response content */
+  content?: string;
+  /** Error message (when status is 'error') */
+  error?: string;
+  /** Star rating value (0-5) */
+  rating?: number;
+  /** Response time (e.g., "1568ms") */
+  responseTime?: string;
+  /** Callback when rating changes */
+  onRatingChange?: (rating: number) => void;
+  /** Callback when copy button is clicked */
+  onCopy?: () => void;
+  /** Initial expanded state (default: true) */
+  defaultExpanded?: boolean;
+}
+
+const PROVIDER_NAMES = {
+  openai: 'OpenAI',
+  anthropic: 'Anthropic',
+  google: 'Google',
+  xai: 'XAI',
+} as const;
+
+/**
+ * ResponseCard molecule for displaying AI or manual responses.
+ *
+ * Combines Card, Badge, LoadingSpinner, and InlineAlert atoms to create
+ * a complete response display with streaming support and error handling.
+ *
+ * @example
+ * ```tsx
+ * <ResponseCard
+ *   modelName="GPT-4"
+ *   provider="openai"
+ *   status="complete"
+ *   responseType="ai"
+ *   content="This is the AI response"
+ * />
+ * ```
+ */
+export const ResponseCard = React.forwardRef<HTMLDivElement, ResponseCardProps>(
+  (
+    {
+      modelName,
+      provider,
+      status,
+      responseType,
+      content,
+      error,
+      rating = 0,
+      responseTime,
+      onRatingChange,
+      onCopy,
+      defaultExpanded = true,
+    },
+    ref
+  ) => {
+    const [isExpanded, setIsExpanded] = React.useState(defaultExpanded);
+    const isStreaming = status === 'streaming';
+    const isError = status === 'error';
+    const isManual = responseType === 'manual';
+    const isComplete = status === 'complete';
+
+    const handleCopy = () => {
+      if (content) {
+        navigator.clipboard.writeText(content);
+      }
+      onCopy?.();
+    };
+
+    return (
+      <Card
+        ref={ref}
+        role="article"
+        data-status={status}
+        data-response-type={responseType}
+        data-expanded={isExpanded}
+        aria-busy={isStreaming ? 'true' : undefined}
+        className={cn(
+          'w-full',
+          isError && 'border-red-500 dark:border-red-400'
+        )}
+      >
+        <CardHeader className="pb-3">
+          <div className="flex items-start justify-between gap-2">
+            <div className="flex items-center gap-2">
+              {isManual ? (
+                <Badge variant="secondary">Manual</Badge>
+              ) : (
+                <>
+                  {provider && <Badge variant="outline">{PROVIDER_NAMES[provider]}</Badge>}
+                  {modelName && <span className="font-semibold text-base">{modelName}</span>}
+                </>
+              )}
+            </div>
+
+            <div className="flex items-center gap-2">
+              {isStreaming && (
+                <>
+                  <LoadingSpinner size="sm" data-testid="loading-spinner" />
+                  <Badge variant="default">Streaming</Badge>
+                </>
+              )}
+              {isComplete && !isError && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setIsExpanded(!isExpanded)}
+                  className="gap-1"
+                  data-testid="expand-button"
+                >
+                  {isExpanded ? (
+                    <>
+                      <ChevronUp className="h-4 w-4" />
+                      <span className="text-sm">Collapse</span>
+                    </>
+                  ) : (
+                    <>
+                      <ChevronDown className="h-4 w-4" />
+                      <span className="text-sm">Expand</span>
+                    </>
+                  )}
+                </Button>
+              )}
+            </div>
+          </div>
+        </CardHeader>
+
+        <CardContent className="pt-0 space-y-4">
+          {isError ? (
+            <InlineAlert variant="error">
+              {error}
+            </InlineAlert>
+          ) : (
+            <>
+              {isExpanded && (
+                <div className="text-sm text-foreground whitespace-pre-wrap">
+                  {content}
+                </div>
+              )}
+
+              {isComplete && !isError && (
+                <div className="flex items-center justify-between pt-2 border-t">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={handleCopy}
+                    className="gap-1"
+                    data-testid="copy-button"
+                  >
+                    <Copy className="h-4 w-4" />
+                    <span className="text-sm">Copy</span>
+                  </Button>
+
+                  <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm text-muted-foreground">Rate response:</span>
+                      <Rating
+                        value={rating}
+                        size="sm"
+                        onChange={onRatingChange}
+                        data-testid="rating"
+                      />
+                    </div>
+                    {responseTime && (
+                      <span className="text-sm text-muted-foreground">
+                        Response time: {responseTime}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              )}
+            </>
+          )}
+        </CardContent>
+      </Card>
+    );
+  }
+);
+
+ResponseCard.displayName = 'ResponseCard';
