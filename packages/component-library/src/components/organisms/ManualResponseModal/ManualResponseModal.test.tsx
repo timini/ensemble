@@ -7,6 +7,10 @@ describe('ManualResponseModal', () => {
   const mockProps = {
     value: '',
     onChange: vi.fn(),
+    modelName: '',
+    onModelNameChange: vi.fn(),
+    modelProvider: '',
+    onModelProviderChange: vi.fn(),
     onSubmit: vi.fn(),
     onCancel: vi.fn(),
   };
@@ -59,6 +63,20 @@ describe('ManualResponseModal', () => {
       const textarea = screen.getByTestId('response-textarea');
       expect(textarea).toHaveAttribute('placeholder', 'Enter your response here...');
     });
+
+    it('renders model name input', () => {
+      render(<ManualResponseModal {...mockProps} open={true} />);
+
+      expect(screen.getByTestId('model-name-input')).toBeInTheDocument();
+      expect(screen.getByText('Model Name')).toBeInTheDocument();
+    });
+
+    it('renders model provider input', () => {
+      render(<ManualResponseModal {...mockProps} open={true} />);
+
+      expect(screen.getByTestId('model-provider-input')).toBeInTheDocument();
+      expect(screen.getByText('Model Provider')).toBeInTheDocument();
+    });
   });
 
   describe('textarea interactions', () => {
@@ -92,51 +110,111 @@ describe('ManualResponseModal', () => {
     });
   });
 
+  describe('model name input interactions', () => {
+    it('displays current model name value', () => {
+      render(<ManualResponseModal {...mockProps} open={true} modelName="GPT-4" />);
+
+      const input = screen.getByTestId('model-name-input') as HTMLInputElement;
+      expect(input.value).toBe('GPT-4');
+    });
+
+    it('calls onModelNameChange when input value changes', async () => {
+      const user = userEvent.setup();
+      const onModelNameChange = vi.fn();
+
+      render(<ManualResponseModal {...mockProps} onModelNameChange={onModelNameChange} open={true} />);
+
+      const input = screen.getByTestId('model-name-input');
+      await user.type(input, 'GPT-4');
+
+      expect(onModelNameChange).toHaveBeenCalled();
+    });
+  });
+
+  describe('model provider input interactions', () => {
+    it('displays current model provider value', () => {
+      render(<ManualResponseModal {...mockProps} open={true} modelProvider="OpenAI" />);
+
+      const input = screen.getByTestId('model-provider-input') as HTMLInputElement;
+      expect(input.value).toBe('OpenAI');
+    });
+
+    it('calls onModelProviderChange when input value changes', async () => {
+      const user = userEvent.setup();
+      const onModelProviderChange = vi.fn();
+
+      render(<ManualResponseModal {...mockProps} onModelProviderChange={onModelProviderChange} open={true} />);
+
+      const input = screen.getByTestId('model-provider-input');
+      await user.type(input, 'OpenAI');
+
+      expect(onModelProviderChange).toHaveBeenCalled();
+    });
+  });
+
   describe('submit button', () => {
     it('is disabled when value is empty', () => {
-      render(<ManualResponseModal {...mockProps} open={true} value="" />);
+      render(<ManualResponseModal {...mockProps} open={true} value="" modelName="GPT-4" modelProvider="OpenAI" />);
 
       const submitButton = screen.getByTestId('submit-button');
       expect(submitButton).toBeDisabled();
     });
 
     it('is disabled when value is only whitespace', () => {
-      render(<ManualResponseModal {...mockProps} open={true} value="   " />);
+      render(<ManualResponseModal {...mockProps} open={true} value="   " modelName="GPT-4" modelProvider="OpenAI" />);
 
       const submitButton = screen.getByTestId('submit-button');
       expect(submitButton).toBeDisabled();
     });
 
-    it('is enabled when value has content', () => {
-      render(<ManualResponseModal {...mockProps} open={true} value="Some content" />);
+    it('is disabled when model name is empty', () => {
+      render(<ManualResponseModal {...mockProps} open={true} value="Some content" modelName="" modelProvider="OpenAI" />);
+
+      const submitButton = screen.getByTestId('submit-button');
+      expect(submitButton).toBeDisabled();
+    });
+
+    it('is disabled when model provider is empty', () => {
+      render(<ManualResponseModal {...mockProps} open={true} value="Some content" modelName="GPT-4" modelProvider="" />);
+
+      const submitButton = screen.getByTestId('submit-button');
+      expect(submitButton).toBeDisabled();
+    });
+
+    it('is enabled when all fields have content', () => {
+      render(<ManualResponseModal {...mockProps} open={true} value="Some content" modelName="GPT-4" modelProvider="OpenAI" />);
 
       const submitButton = screen.getByTestId('submit-button');
       expect(submitButton).not.toBeDisabled();
     });
 
     it('is disabled when disabled prop is true', () => {
-      render(<ManualResponseModal {...mockProps} open={true} value="Content" disabled={true} />);
+      render(<ManualResponseModal {...mockProps} open={true} value="Content" modelName="GPT-4" modelProvider="OpenAI" disabled={true} />);
 
       const submitButton = screen.getByTestId('submit-button');
       expect(submitButton).toBeDisabled();
     });
 
-    it('calls onSubmit with current value when clicked', async () => {
+    it('calls onSubmit with all data when clicked', async () => {
       const user = userEvent.setup();
       const onSubmit = vi.fn();
 
-      render(<ManualResponseModal {...mockProps} onSubmit={onSubmit} open={true} value="Test response" />);
+      render(<ManualResponseModal {...mockProps} onSubmit={onSubmit} open={true} value="Test response" modelName="GPT-4" modelProvider="OpenAI" />);
 
       await user.click(screen.getByTestId('submit-button'));
 
-      expect(onSubmit).toHaveBeenCalledWith('Test response');
+      expect(onSubmit).toHaveBeenCalledWith({
+        response: 'Test response',
+        modelName: 'GPT-4',
+        modelProvider: 'OpenAI',
+      });
       expect(onSubmit).toHaveBeenCalledTimes(1);
     });
 
     it('does not crash when onSubmit is not provided', async () => {
       const user = userEvent.setup();
 
-      render(<ManualResponseModal {...mockProps} onSubmit={undefined} open={true} value="Test" />);
+      render(<ManualResponseModal {...mockProps} onSubmit={undefined} open={true} value="Test" modelName="GPT-4" modelProvider="OpenAI" />);
 
       await user.click(screen.getByTestId('submit-button'));
 

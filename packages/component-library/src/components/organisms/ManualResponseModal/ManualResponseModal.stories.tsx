@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import { ManualResponseModal } from './ManualResponseModal';
+import { ManualResponseModal, type ManualResponseData } from './ManualResponseModal';
 import { useState } from 'react';
 import { Button } from '../../atoms/Button';
 
@@ -17,8 +17,10 @@ type Story = StoryObj<typeof meta>;
 
 interface ManualResponseModalWithStateProps {
   value?: string;
+  modelName?: string;
+  modelProvider?: string;
   placeholder?: string;
-  onSubmit?: (value: string) => void;
+  onSubmit?: (data: ManualResponseData) => void;
   onCancel?: () => void;
 }
 
@@ -26,6 +28,8 @@ interface ManualResponseModalWithStateProps {
 const ManualResponseModalWithState = (args: ManualResponseModalWithStateProps) => {
   const [open, setOpen] = useState(false);
   const [value, setValue] = useState(args.value || '');
+  const [modelName, setModelName] = useState(args.modelName || '');
+  const [modelProvider, setModelProvider] = useState(args.modelProvider || '');
 
   return (
     <div>
@@ -36,14 +40,22 @@ const ManualResponseModalWithState = (args: ManualResponseModalWithStateProps) =
         onOpenChange={setOpen}
         value={value}
         onChange={setValue}
+        modelName={modelName}
+        onModelNameChange={setModelName}
+        modelProvider={modelProvider}
+        onModelProviderChange={setModelProvider}
         onCancel={() => {
           setOpen(false);
           setValue('');
+          setModelName('');
+          setModelProvider('');
         }}
-        onSubmit={(val) => {
-          console.log('Submitted:', val);
+        onSubmit={(data) => {
+          console.log('Submitted:', data);
           setOpen(false);
           setValue('');
+          setModelName('');
+          setModelProvider('');
         }}
       />
     </div>
@@ -56,11 +68,13 @@ export const Default: Story = {
   args: {},
 };
 
-// With initial value
+// With initial values
 export const WithInitialValue: Story = {
   render: (args) => <ManualResponseModalWithState {...args} />,
   args: {
     value: 'This is a pre-filled response that can be edited before submission.',
+    modelName: 'GPT-4',
+    modelProvider: 'OpenAI',
   },
 };
 
@@ -86,6 +100,8 @@ export const WithLongText: Story = {
   args: {
     value:
       'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.\n\nDuis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.\n\nSed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium.',
+    modelName: 'Claude 3 Opus',
+    modelProvider: 'Anthropic',
   },
 };
 
@@ -94,8 +110,12 @@ export const OpenByDefault: Story = {
   args: {
     open: true,
     value: '',
+    modelName: '',
+    modelProvider: '',
     onChange: (value) => console.log('Changed:', value),
-    onSubmit: (value) => console.log('Submitted:', value),
+    onModelNameChange: (value) => console.log('Model Name Changed:', value),
+    onModelProviderChange: (value) => console.log('Model Provider Changed:', value),
+    onSubmit: (data) => console.log('Submitted:', data),
     onCancel: () => console.log('Cancelled'),
   },
 };
@@ -105,9 +125,13 @@ export const Disabled: Story = {
   args: {
     open: true,
     value: 'This response cannot be submitted',
+    modelName: 'GPT-4',
+    modelProvider: 'OpenAI',
     disabled: true,
     onChange: (value) => console.log('Changed:', value),
-    onSubmit: (value) => console.log('Submitted:', value),
+    onModelNameChange: (value) => console.log('Model Name Changed:', value),
+    onModelProviderChange: (value) => console.log('Model Provider Changed:', value),
+    onSubmit: (data) => console.log('Submitted:', data),
     onCancel: () => console.log('Cancelled'),
   },
 };
