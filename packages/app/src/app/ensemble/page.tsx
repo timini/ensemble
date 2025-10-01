@@ -21,6 +21,8 @@ export default function EnsemblePage() {
   const { t } = useTranslation('common');
   const router = useRouter();
 
+  const mode = useStore((state) => state.mode);
+  const apiKeys = useStore((state) => state.apiKeys);
   const selectedModels = useStore((state) => state.selectedModels);
   const addModel = useStore((state) => state.addModel);
   const removeModel = useStore((state) => state.removeModel);
@@ -33,6 +35,16 @@ export default function EnsemblePage() {
 
   // Track selected model IDs for ModelSelectionList
   const selectedModelIds = selectedModels.map((m) => m.id);
+
+  // Build provider status map based on configured API keys (Free mode only)
+  const providerStatus = mode === 'free'
+    ? {
+        openai: apiKeys.openai?.key ? 'Ready' : 'API key required',
+        anthropic: apiKeys.anthropic?.key ? 'Ready' : 'API key required',
+        google: apiKeys.google?.key ? 'Ready' : 'API key required',
+        xai: apiKeys.xai?.key ? 'Ready' : 'API key required',
+      }
+    : undefined; // Pro mode doesn't show status
 
   // Placeholder presets (will be implemented with preset slice later)
   const [presets] = useState<Preset[]>([]);
@@ -100,6 +112,7 @@ export default function EnsemblePage() {
             selectedModelIds={selectedModelIds}
             summarizerModelId={summarizerModel ?? undefined}
             maxSelection={6}
+            providerStatus={providerStatus}
             onModelToggle={handleModelToggle}
             onSummarizerChange={handleSummarizerChange}
           />
