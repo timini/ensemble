@@ -14,6 +14,8 @@ export interface ModeSelectorProps {
   onSelectProMode: () => void;
   /** Whether the component is disabled */
   disabled?: boolean;
+  /** Whether Pro Mode is disabled (shows "Coming Soon") */
+  proModeDisabled?: boolean;
 }
 
 /**
@@ -33,7 +35,7 @@ export interface ModeSelectorProps {
  * ```
  */
 export const ModeSelector = React.forwardRef<HTMLDivElement, ModeSelectorProps>(
-  ({ selectedMode, onSelectFreeMode, onSelectProMode, disabled = false }, ref) => {
+  ({ selectedMode, onSelectFreeMode, onSelectProMode, disabled = false, proModeDisabled = false }, ref) => {
     const { t } = useTranslation();
 
     return (
@@ -53,8 +55,9 @@ export const ModeSelector = React.forwardRef<HTMLDivElement, ModeSelectorProps>(
           <ModeSelectionCard
             mode="pro"
             selected={selectedMode === 'pro'}
-            disabled={disabled}
+            disabled={disabled || proModeDisabled}
             onClick={onSelectProMode}
+            comingSoon={proModeDisabled}
           />
         </div>
       </div>

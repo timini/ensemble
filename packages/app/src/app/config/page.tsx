@@ -117,6 +117,7 @@ export default function ConfigPage() {
           selectedMode={mode}
           onSelectFreeMode={handleSelectFreeMode}
           onSelectProMode={handleSelectProMode}
+          proModeDisabled
         />
       </div>
 

@@ -15,6 +15,8 @@ export interface ModeSelectionCardProps {
   disabled?: boolean;
   /** Callback when mode is clicked */
   onClick?: () => void;
+  /** Show "Coming Soon" in button (for Pro mode) */
+  comingSoon?: boolean;
 }
 
 const MODE_CONFIG = {
@@ -42,7 +44,7 @@ const MODE_CONFIG = {
  * ```
  */
 export const ModeSelectionCard = React.forwardRef<HTMLDivElement, ModeSelectionCardProps>(
-  ({ mode, selected = false, disabled = false, onClick }, ref) => {
+  ({ mode, selected = false, disabled = false, onClick, comingSoon = false }, ref) => {
     const { t } = useTranslation();
     const config = MODE_CONFIG[mode];
 
@@ -54,7 +56,8 @@ export const ModeSelectionCard = React.forwardRef<HTMLDivElement, ModeSelectionC
         data-disabled={disabled}
         className={cn(
           'border-2 hover:border-blue-200 transition-colors',
-          selected && 'border-blue-500 bg-blue-50'
+          selected && 'border-blue-500 bg-blue-50',
+          disabled && 'opacity-60'
         )}
       >
         <CardContent className="p-6">
@@ -70,7 +73,7 @@ export const ModeSelectionCard = React.forwardRef<HTMLDivElement, ModeSelectionC
             onClick={onClick}
             disabled={disabled}
           >
-            {t(`molecules.modeSelectionCard.${mode}.buttonText`)}
+            {comingSoon ? 'Coming Soon' : t(`molecules.modeSelectionCard.${mode}.buttonText`)}
           </Button>
         </CardContent>
       </Card>
