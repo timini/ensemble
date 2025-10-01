@@ -125,7 +125,7 @@ export default function ConfigPage() {
         <div className="mt-8">
           <div className="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-md">
             <p className="text-sm text-gray-700">
-              💡 {t('pages.config.apiKeyInfo')}
+              💡 <strong>{t('pages.config.apiKeyInfoBold')}</strong> {t('pages.config.apiKeyInfoNormal')}
             </p>
           </div>
           <ApiKeyConfiguration

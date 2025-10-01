@@ -44,7 +44,8 @@
     "config": {
       "title": "Configuration",
       "description": "Choose your operating mode to get started with AI Ensemble",
-      "apiKeyInfo": "Configure an API key to continue."
+      "apiKeyInfoBold": "Configure an API key to continue.",
+      "apiKeyInfoNormal": "Your keys are stored locally and never sent to our servers."
     },
     "ensemble": {
       "title": "Build Your Ensemble",
