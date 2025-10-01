@@ -14,10 +14,10 @@ describe('EnsembleHeader', () => {
     expect(screen.getByText('The smartest AI is an ensemble.')).toBeInTheDocument();
   });
 
-  it('renders the settings icon', () => {
+  it('renders the settings button', () => {
     render(<EnsembleHeader />);
-    const settingsIcon = screen.getByRole('img', { hidden: true });
-    expect(settingsIcon).toBeInTheDocument();
+    const settingsButton = screen.getByRole('button', { name: /open settings/i });
+    expect(settingsButton).toBeInTheDocument();
   });
 
   it('applies correct styling classes', () => {

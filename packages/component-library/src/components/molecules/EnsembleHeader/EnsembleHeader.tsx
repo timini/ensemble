@@ -1,7 +1,12 @@
 import { Settings } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
-export function EnsembleHeader() {
+export interface EnsembleHeaderProps {
+  /** Callback when settings icon is clicked */
+  onSettingsClick?: () => void;
+}
+
+export function EnsembleHeader({ onSettingsClick }: EnsembleHeaderProps) {
   const { t } = useTranslation();
 
   return (
@@ -16,7 +21,13 @@ export function EnsembleHeader() {
               {t('ensemble.header.tagline')}
             </p>
           </div>
-          <Settings className="w-5 h-5 text-muted-foreground" role="img" />
+          <button
+            onClick={onSettingsClick}
+            className="p-2 hover:bg-accent rounded-md transition-colors"
+            aria-label="Open settings"
+          >
+            <Settings className="w-5 h-5 text-muted-foreground" />
+          </button>
         </div>
       </div>
     </div>
