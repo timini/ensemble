@@ -8,6 +8,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
+import { useTranslation } from 'react-i18next';
 import { useStore } from '~/store';
 import { PageHero } from '@/components/organisms/PageHero';
 import { ModeSelector } from '@/components/organisms/ModeSelector';
@@ -16,6 +17,7 @@ import { WorkflowNavigator } from '@/components/organisms/WorkflowNavigator';
 import type { Provider } from '@/components/molecules/ApiKeyInput';
 
 export default function ConfigPage() {
+  const { t } = useTranslation('common');
   const router = useRouter();
 
   const mode = useStore((state) => state.mode);
@@ -106,8 +108,8 @@ export default function ConfigPage() {
   return (
     <div className="container mx-auto px-4 py-8 max-w-6xl">
       <PageHero
-        title="Configuration"
-        description="Choose your operating mode to get started with AI Ensemble"
+        title={t('pages.config.title')}
+        description={t('pages.config.description')}
       />
 
       <div className="mt-8">
@@ -122,7 +124,7 @@ export default function ConfigPage() {
         <div className="mt-8">
           <div className="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-md">
             <p className="text-sm text-gray-700">
-              💡 <strong>Configure all 4 API keys to continue.</strong> Your keys are stored locally and never sent to our servers.
+              💡 {t('pages.config.apiKeyInfo')}
             </p>
           </div>
           <ApiKeyConfiguration
