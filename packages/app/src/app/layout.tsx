@@ -11,6 +11,7 @@ import { useStore } from '~/store';
 import { EnsembleHeader } from '@/components/molecules/EnsembleHeader';
 import { SettingsModal } from '@/components/organisms/SettingsModal';
 import type { Theme, Language } from '@/components/organisms/SettingsModal';
+import { initializeProviders } from '~/providers';
 
 const geist = Geist({
   subsets: ['latin'],
@@ -23,6 +24,11 @@ export default function RootLayout({
   const { theme, language, setTheme, setLanguage } = useStore();
   const { i18n } = useTranslation();
   const [settingsOpen, setSettingsOpen] = useState(false);
+
+  // Initialize providers once on mount
+  useEffect(() => {
+    initializeProviders();
+  }, []);
 
   // Apply theme to document on mount and when theme changes
   useEffect(() => {

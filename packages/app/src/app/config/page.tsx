@@ -7,7 +7,7 @@
 
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslation } from 'react-i18next';
 import { useStore } from '~/store';
@@ -16,6 +16,8 @@ import { ModeSelector } from '@/components/organisms/ModeSelector';
 import { ApiKeyConfiguration } from '@/components/organisms/ApiKeyConfiguration';
 import { WorkflowNavigator } from '@/components/organisms/WorkflowNavigator';
 import type { Provider } from '@/components/molecules/ApiKeyInput';
+import type { ValidationStatus } from '@/components/molecules/ApiKeyInput';
+import { ProviderRegistry } from '~/providers/ProviderRegistry';
 
 export default function ConfigPage() {
   const { t } = useTranslation('common');
@@ -33,6 +35,14 @@ export default function ConfigPage() {
   const setCurrentStep = useStore((state) => state.setCurrentStep);
   const completeStep = useStore((state) => state.completeStep);
 
+  // Validation state for each provider
+  const [validationStatus, setValidationStatus] = useState<Record<Provider, ValidationStatus>>({
+    openai: 'idle',
+    anthropic: 'idle',
+    google: 'idle',
+    xai: 'idle',
+  });
+
   const handleSelectFreeMode = () => {
     setMode('free');
   };
@@ -42,8 +52,47 @@ export default function ConfigPage() {
     configureModeComplete();
   };
 
+  // Validate API key using provider (using mock mode for validation)
+  const validateApiKey = useCallback(async (provider: Provider, apiKey: string, currentMode: string) => {
+    if (!apiKey || apiKey.length === 0) {
+      setValidationStatus(prev => ({ ...prev, [provider]: 'idle' }));
+      return;
+    }
+
+    // Only validate in Free mode
+    if (currentMode !== 'free') {
+      return;
+    }
+
+    // Set validating status
+    setValidationStatus(prev => ({ ...prev, [provider]: 'validating' }));
+
+    try {
+      const providerRegistry = ProviderRegistry.getInstance();
+      // Use 'mock' mode for validation (simulates network call with random delay)
+      const providerInstance = providerRegistry.getProvider(provider, 'mock');
+
+      const result = await providerInstance.validateApiKey(apiKey);
+
+      setValidationStatus(prev => ({
+        ...prev,
+        [provider]: result.valid ? 'valid' : 'invalid'
+      }));
+    } catch (error) {
+      console.error(`Error validating ${provider} API key:`, error);
+      setValidationStatus(prev => ({ ...prev, [provider]: 'invalid' }));
+    }
+  }, []);
+
   const handleKeyChange = (provider: Provider, value: string) => {
     setApiKey(provider, value);
+    // Validate after a short debounce
+    const timeoutId = setTimeout(() => {
+      void validateApiKey(provider, value, mode);
+    }, 500);
+
+    // Cleanup timeout on next change
+    return () => clearTimeout(timeoutId);
   };
 
   const handleToggleShow = (provider: Provider) => {
@@ -63,8 +112,8 @@ export default function ConfigPage() {
       label: 'OpenAI API Key',
       value: apiKeys.openai?.key ?? '',
       placeholder: 'sk-...',
-      helperText: apiKeys.openai?.key ? 'API key configured' : 'Enter your OpenAI API key',
-      validationStatus: apiKeys.openai?.key ? ('valid' as const) : ('idle' as const),
+      helperText: validationStatus.openai === 'valid' ? 'API key configured' : validationStatus.openai === 'validating' ? 'Validating...' : 'Enter your OpenAI API key',
+      validationStatus: validationStatus.openai,
       showKey: apiKeys.openai?.visible ?? false,
     },
     {
@@ -72,8 +121,8 @@ export default function ConfigPage() {
       label: 'Anthropic API Key',
       value: apiKeys.anthropic?.key ?? '',
       placeholder: 'sk-ant-...',
-      helperText: apiKeys.anthropic?.key ? 'API key configured' : 'Enter your Anthropic API key',
-      validationStatus: apiKeys.anthropic?.key ? ('valid' as const) : ('idle' as const),
+      helperText: validationStatus.anthropic === 'valid' ? 'API key configured' : validationStatus.anthropic === 'validating' ? 'Validating...' : 'Enter your Anthropic API key',
+      validationStatus: validationStatus.anthropic,
       showKey: apiKeys.anthropic?.visible ?? false,
     },
     {
@@ -81,8 +130,8 @@ export default function ConfigPage() {
       label: 'Google (Gemini) API Key',
       value: apiKeys.google?.key ?? '',
       placeholder: 'AIza...',
-      helperText: apiKeys.google?.key ? 'API key configured' : 'Enter your Google AI API key',
-      validationStatus: apiKeys.google?.key ? ('valid' as const) : ('idle' as const),
+      helperText: validationStatus.google === 'valid' ? 'API key configured' : validationStatus.google === 'validating' ? 'Validating...' : 'Enter your Google AI API key',
+      validationStatus: validationStatus.google,
       showKey: apiKeys.google?.visible ?? false,
     },
     {
@@ -90,8 +139,8 @@ export default function ConfigPage() {
       label: 'xAI (Grok) API Key',
       value: apiKeys.xai?.key ?? '',
       placeholder: 'xai-...',
-      helperText: apiKeys.xai?.key ? 'API key configured' : 'Enter your xAI API key',
-      validationStatus: apiKeys.xai?.key ? ('valid' as const) : ('idle' as const),
+      helperText: validationStatus.xai === 'valid' ? 'API key configured' : validationStatus.xai === 'validating' ? 'Validating...' : 'Enter your xAI API key',
+      validationStatus: validationStatus.xai,
       showKey: apiKeys.xai?.visible ?? false,
     },
   ] : [];

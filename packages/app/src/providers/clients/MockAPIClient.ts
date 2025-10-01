@@ -115,9 +115,13 @@ export class MockAPIClient implements AIProvider {
   }
 
   /**
-   * Validate API key (mock always returns valid)
+   * Validate API key (mock always returns valid after simulated network delay)
    */
   async validateApiKey(_apiKey: string): Promise<ValidationResult> {
+    // Simulate network delay: 100-300ms
+    const delay = this.randomInt(100, 300);
+    await new Promise(resolve => setTimeout(resolve, delay));
+
     return { valid: true };
   }
 
