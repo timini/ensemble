@@ -10,5 +10,163 @@
       "prompt": "Invite",
       "review": "Révision"
     }
+  },
+  "atoms": {
+    "inlineAlert": {
+      "dismiss": "Fermer"
+    },
+    "rating": {
+      "star": "{{count}} étoile",
+      "star_other": "{{count}} étoiles"
+    }
+  },
+  "molecules": {
+    "apiKeyInput": {
+      "hideKey": "Masquer la clé API",
+      "showKey": "Afficher la clé API",
+      "validKey": "Clé API valide",
+      "invalidKey": "Clé API invalide"
+    },
+    "modelCard": {
+      "summarizer": "Synthétiseur"
+    },
+    "modeSelectionCard": {
+      "free": {
+        "title": "Mode Gratuit",
+        "description": "Utilisez vos propres clés API. Entièrement sécurisé, vos clés sont chiffrées et ne quittent jamais votre navigateur.",
+        "buttonText": "Démarrer en Mode Gratuit"
+      },
+      "pro": {
+        "title": "Mode Pro",
+        "description": "Achetez des crédits pour accéder aux derniers modèles de tous les fournisseurs.",
+        "buttonText": "Passer au Pro"
+      }
+    },
+    "responseCard": {
+      "manual": "Manuel",
+      "streaming": "Diffusion en cours",
+      "collapse": "Réduire",
+      "expand": "Développer",
+      "copy": "Copier",
+      "rateResponse": "Évaluer la réponse :",
+      "responseTime": "Temps de réponse : {{time}}"
+    },
+    "summarizerIndicator": {
+      "label": "Modèle de synthèse :"
+    }
+  },
+  "organisms": {
+    "agreementAnalysis": {
+      "title": "Analyse de concordance",
+      "overallAgreement": "Concordance Globale",
+      "highAgreement": "Concordance Élevée",
+      "mediumAgreement": "Concordance Moyenne",
+      "lowAgreement": "Concordance Faible",
+      "pairwiseComparisons": "Comparaisons par Paires",
+      "vs": "vs",
+      "confidence": "Confiance : {{percent}}%",
+      "responsesAnalyzed": "RÉPONSES ANALYSÉES",
+      "comparisons": "COMPARAISONS",
+      "avgConfidence": "CONFIANCE MOYENNE"
+    },
+    "apiKeyConfiguration": {
+      "heading": "Configurer les Clés API"
+    },
+    "consensusCard": {
+      "heading": "Consensus",
+      "description": "Résumé combiné fourni par {{model}}.",
+      "shareText": "Partager cette réponse consensuelle",
+      "shareButton": "Partager"
+    },
+    "ensembleConfigurationSummary": {
+      "heading": "Configuration de Votre Ensemble",
+      "description": "Ces modèles recevront l'invite et contribueront à la comparaison.",
+      "selectedModels": "Modèles Sélectionnés ({{count}})",
+      "summarizer": "Synthétiseur"
+    },
+    "ensembleManagementPanel": {
+      "quickPresets": "Préréglages rapides",
+      "quickPresetsDescription": "Démarrez à partir d'un ensemble organisé et optimisé pour les flux de travail courants.",
+      "noPresets": "Aucun préréglage enregistré pour le moment. Enregistrez votre premier ensemble ci-dessous pour commencer.",
+      "usePreset": "Utiliser le préréglage",
+      "deletePreset": "Supprimer le préréglage {{name}}",
+      "summarizerLabel": "Synthétiseur : {{name}}",
+      "saveCurrentEnsemble": "Enregistrer l'ensemble actuel",
+      "saveDescription": "Enregistrez cette combinaison pour de futures révisions.",
+      "ensembleNameLabel": "Nom de l'Ensemble",
+      "ensembleNamePlaceholder": "par ex. Ensemble de Recherche",
+      "saveButton": "Enregistrer l'Ensemble",
+      "saveInfoText": "Enregistrez vos combinaisons de modèles préférées pour les charger instantanément plus tard."
+    },
+    "ensembleSidebar": {
+      "heading": "Résumé de l'Ensemble",
+      "description": "Vérifiez vos sélections actuelles avant d'enregistrer ou de continuer.",
+      "selectedModels": "Modèles Sélectionnés ({{count}})",
+      "summarizerLabel": "Synthétiseur",
+      "noModels": "Aucun modèle sélectionné pour le moment",
+      "quickPresets": "Préréglages rapides",
+      "quickPresetsDescription": "Démarrez à partir d'un ensemble organisé et optimisé pour les flux de travail courants.",
+      "noPresets": "Aucun préréglage enregistré pour le moment. Enregistrez votre premier ensemble ci-dessous pour commencer.",
+      "usePreset": "Utiliser le préréglage",
+      "deletePreset": "Supprimer le préréglage {{name}}",
+      "summarizerInfo": "Synthétiseur : {{name}}",
+      "saveCurrentEnsemble": "Enregistrer l'ensemble actuel",
+      "saveDescription": "Enregistrez cette combinaison pour de futures révisions.",
+      "ensembleNameLabel": "Nom de l'Ensemble",
+      "ensembleNamePlaceholder": "par ex. Ensemble de Recherche",
+      "saveButton": "Enregistrer l'Ensemble",
+      "saveInfoText": "Enregistrez vos combinaisons de modèles préférées pour les charger instantanément plus tard.",
+      "manualResponses": "Réponses Manuelles",
+      "manualResponsesDescription": "Ajoutez des réponses de référence ou des résultats de référence à inclure dans l'étape de révision.",
+      "manualResponsesInfo": "Incluez des réponses personnalisées à comparer avec les résultats des modèles en direct.",
+      "addManualResponse": "Ajouter une Réponse Manuelle",
+      "manualResponsesNote": "Ajoutez des réponses de référence ou des résultats de référence à comparer avec les réponses des modèles en direct."
+    },
+    "manualResponseModal": {
+      "title": "Réponse Manuelle",
+      "description": "Entrez une réponse manuelle pour l'invite actuelle",
+      "modelNameLabel": "Nom du Modèle",
+      "modelNamePlaceholder": "par ex., GPT-4",
+      "modelProviderLabel": "Fournisseur du Modèle",
+      "modelProviderPlaceholder": "par ex., OpenAI",
+      "responseLabel": "Réponse",
+      "responsePlaceholder": "Entrez votre réponse ici...",
+      "cancelButton": "Annuler",
+      "submitButton": "Soumettre"
+    },
+    "modeSelector": {
+      "heading": "Sélectionnez Votre Mode"
+    },
+    "modelSelectionList": {
+      "noModels": "Aucun modèle disponible"
+    },
+    "pageHero": {
+      "breadcrumb": "Fil d'Ariane"
+    },
+    "settingsModal": {
+      "title": "Paramètres",
+      "description": "Configurez vos préférences d'application, y compris le thème, la langue et la gestion des données",
+      "appearance": "Apparence",
+      "themeLabel": "Thème",
+      "themeLight": "Clair",
+      "themeDark": "Sombre",
+      "languageLabel": "Langue",
+      "dataManagement": "Gestion des Données",
+      "exportSettings": "Exporter les Paramètres",
+      "importSettings": "Importer les Paramètres",
+      "dangerZone": "Zone de Danger",
+      "dangerZoneWarning": "Ces actions sont irréversibles.",
+      "clearAllData": "Effacer Toutes les Données",
+      "doneButton": "Terminé"
+    },
+    "workflowNavigator": {
+      "continue": "Continuer"
+    }
+  },
+  "providers": {
+    "openai": "OpenAI",
+    "anthropic": "Anthropic",
+    "google": "Google",
+    "xai": "XAI"
   }
 }
