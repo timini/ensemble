@@ -52,16 +52,8 @@ export default function EnsemblePage() {
         google: 'Ready',
         xai: 'Ready',
       }
-    : isMockMode
-    ? {
-        // Mock mode: all providers ready for testing
-        openai: 'Ready',
-        anthropic: 'Ready',
-        google: 'Ready',
-        xai: 'Ready',
-      }
     : {
-        // Free mode: check for configured API keys
+        // Free mode (and mock mode): check for configured API keys
         openai: apiKeys.openai?.key ? 'Ready' : 'API key required',
         anthropic: apiKeys.anthropic?.key ? 'Ready' : 'API key required',
         google: apiKeys.google?.key ? 'Ready' : 'API key required',
@@ -209,6 +201,7 @@ export default function EnsemblePage() {
             summarizerModelId={summarizerModel ?? undefined}
             maxSelection={6}
             providerStatus={providerStatus}
+            isMockMode={isMockMode}
             onModelToggle={handleModelToggle}
             onSummarizerChange={handleSummarizerChange}
             onConfigureApiKey={handleConfigureApiKey}
