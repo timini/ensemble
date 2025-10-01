@@ -15,6 +15,8 @@ import { PageHero } from '@/components/organisms/PageHero';
 import { ModelSelectionList } from '@/components/organisms/ModelSelectionList';
 import { EnsembleManagementPanel, type Preset } from '@/components/organisms/EnsembleManagementPanel';
 import { WorkflowNavigator } from '@/components/organisms/WorkflowNavigator';
+import { ApiKeyConfiguration } from '@/components/organisms/ApiKeyConfiguration';
+import type { Provider, ValidationStatus } from '@/components/molecules/ApiKeyInput';
 import { AVAILABLE_MODELS } from '~/lib/models';
 
 export default function EnsemblePage() {
@@ -23,6 +25,8 @@ export default function EnsemblePage() {
 
   const mode = useStore((state) => state.mode);
   const apiKeys = useStore((state) => state.apiKeys);
+  const setApiKey = useStore((state) => state.setApiKey);
+  const toggleApiKeyVisibility = useStore((state) => state.toggleApiKeyVisibility);
   const selectedModels = useStore((state) => state.selectedModels);
   const addModel = useStore((state) => state.addModel);
   const removeModel = useStore((state) => state.removeModel);
@@ -49,6 +53,18 @@ export default function EnsemblePage() {
   // Placeholder presets (will be implemented with preset slice later)
   const [presets] = useState<Preset[]>([]);
   const [currentEnsembleName] = useState('');
+
+  // Modal state for API key configuration
+  const [configModalOpen, setConfigModalOpen] = useState(false);
+  const [selectedProvider, setSelectedProvider] = useState<Provider | null>(null);
+
+  // Validation status (placeholder - validation happens on config page)
+  const [validationStatus] = useState<Record<Provider, ValidationStatus>>({
+    openai: 'idle',
+    anthropic: 'idle',
+    google: 'idle',
+    xai: 'idle',
+  });
 
   const handleModelToggle = (modelId: string) => {
     const isSelected = selectedModels.some((m) => m.id === modelId);
@@ -94,6 +110,34 @@ export default function EnsemblePage() {
     console.log('Delete preset:', presetId);
   };
 
+  const handleConfigureApiKey = (provider: Provider) => {
+    setSelectedProvider(provider);
+    setConfigModalOpen(true);
+  };
+
+  const handleKeyChange = (provider: Provider, value: string) => {
+    setApiKey(provider, value);
+  };
+
+  const handleToggleShow = (provider: Provider) => {
+    toggleApiKeyVisibility(provider);
+  };
+
+  // Filter API key items to show only the selected provider
+  const apiKeyItems = selectedProvider
+    ? [
+        {
+          provider: selectedProvider,
+          label: `${selectedProvider.charAt(0).toUpperCase() + selectedProvider.slice(1)} API Key`,
+          value: apiKeys[selectedProvider]?.key ?? '',
+          placeholder: selectedProvider === 'openai' ? 'sk-...' : selectedProvider === 'anthropic' ? 'sk-ant-...' : selectedProvider === 'google' ? 'AIza...' : 'xai-...',
+          helperText: `Enter your ${selectedProvider} API key`,
+          validationStatus: validationStatus[selectedProvider],
+          showKey: apiKeys[selectedProvider]?.visible ?? false,
+        },
+      ]
+    : [];
+
   // Continue button enabled if 2-6 models selected
   const isValid = selectedModels.length >= 2 && selectedModels.length <= 6;
 
@@ -115,6 +159,7 @@ export default function EnsemblePage() {
             providerStatus={providerStatus}
             onModelToggle={handleModelToggle}
             onSummarizerChange={handleSummarizerChange}
+            onConfigureApiKey={handleConfigureApiKey}
           />
         </div>
 
@@ -138,6 +183,45 @@ export default function EnsemblePage() {
           continueDisabled={!isValid}
         />
       </div>
+
+      {/* API Key Configuration Modal */}
+      {configModalOpen && selectedProvider && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-2xl font-bold text-gray-900">
+                  Configure API Key
+                </h2>
+                <button
+                  onClick={() => setConfigModalOpen(false)}
+                  className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+                  aria-label="Close modal"
+                >
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+
+              <ApiKeyConfiguration
+                items={apiKeyItems}
+                onKeyChange={handleKeyChange}
+                onToggleShow={handleToggleShow}
+              />
+
+              <div className="mt-6 flex justify-end">
+                <button
+                  onClick={() => setConfigModalOpen(false)}
+                  className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors font-medium"
+                >
+                  Done
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

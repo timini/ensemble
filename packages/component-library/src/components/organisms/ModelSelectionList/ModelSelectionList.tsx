@@ -24,6 +24,8 @@ export interface ModelSelectionListProps {
   onModelToggle: (modelId: string) => void;
   /** Callback when summarizer designation changes */
   onSummarizerChange: (modelId: string) => void;
+  /** Callback when configure API key button is clicked */
+  onConfigureApiKey?: (provider: Provider) => void;
 }
 
 const PROVIDER_LABELS: Record<Provider, string> = {
@@ -62,6 +64,7 @@ export const ModelSelectionList = React.forwardRef<HTMLDivElement, ModelSelectio
       providerStatus,
       onModelToggle,
       onSummarizerChange: _onSummarizerChange,
+      onConfigureApiKey,
     },
     ref
   ) => {
@@ -113,7 +116,25 @@ export const ModelSelectionList = React.forwardRef<HTMLDivElement, ModelSelectio
               <div className="flex items-center justify-between mb-4">
                 <Heading level={4} size="lg" className="text-gray-900">{PROVIDER_LABELS[provider]}</Heading>
                 {providerStatus?.[provider] && (
-                  <span className="text-sm text-blue-600">{providerStatus[provider]}</span>
+                  <div className="flex items-center gap-2">
+                    {providerStatus[provider] === 'Ready' ? (
+                      <span className="text-sm text-green-600 font-medium">
+                        ✓ {providerStatus[provider]}
+                      </span>
+                    ) : (
+                      <>
+                        <span className="text-sm text-gray-600">{providerStatus[provider]}</span>
+                        {onConfigureApiKey && (
+                          <button
+                            onClick={() => onConfigureApiKey(provider)}
+                            className="px-3 py-1 text-xs font-medium text-blue-600 bg-blue-50 hover:bg-blue-100 rounded border border-blue-200 transition-colors"
+                          >
+                            Configure
+                          </button>
+                        )}
+                      </>
+                    )}
+                  </div>
                 )}
               </div>
 
