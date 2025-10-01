@@ -55,19 +55,19 @@ export const ModeSelectionCard = React.forwardRef<HTMLDivElement, ModeSelectionC
         data-selected={selected}
         data-disabled={disabled}
         className={cn(
-          'border-2 hover:border-blue-200 transition-colors',
+          'border-2 hover:border-blue-200 transition-colors flex flex-col',
           selected && 'border-blue-500 bg-blue-50',
           disabled && 'opacity-60'
         )}
       >
-        <CardContent className="p-6">
+        <CardContent className="p-6 flex flex-col flex-1">
           <div className="flex items-center space-x-3 mb-4">
             <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
               <span className="text-blue-600 text-lg">{config.icon}</span>
             </div>
             <h4 className="text-xl font-semibold">{t(`molecules.modeSelectionCard.${mode}.title`)}</h4>
           </div>
-          <p className="text-gray-600 mb-6">{t(`molecules.modeSelectionCard.${mode}.description`)}</p>
+          <p className="text-gray-600 mb-6 flex-1">{t(`molecules.modeSelectionCard.${mode}.description`)}</p>
           <Button
             className="w-full bg-blue-600 hover:bg-blue-700"
             onClick={onClick}
