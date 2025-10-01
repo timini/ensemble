@@ -70,7 +70,12 @@
       "avgConfidence": "AVG CONFIDENCE"
     },
     "apiKeyConfiguration": {
-      "heading": "Configure API Keys"
+      "heading": "Configure API Keys",
+      "apiKeyInfoBold": "Configure an API key to continue.",
+      "apiKeyInfoNormal": "Your keys are stored locally and never sent to our servers.",
+      "apiKeysConfigured": "{{count}} API key configured.",
+      "apiKeysConfigured_other": "{{count}} API keys configured.",
+      "configureMoreOrContinue": "Configure more or continue selecting models."
     },
     "consensusCard": {
       "heading": "Consensus",

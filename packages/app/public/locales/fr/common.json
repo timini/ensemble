@@ -45,7 +45,10 @@
       "title": "Configuration",
       "description": "Choisissez votre mode de fonctionnement pour commencer avec AI Ensemble",
       "apiKeyInfoBold": "Configurez une clé API pour continuer.",
-      "apiKeyInfoNormal": "Vos clés sont stockées localement et ne sont jamais envoyées à nos serveurs."
+      "apiKeyInfoNormal": "Vos clés sont stockées localement et ne sont jamais envoyées à nos serveurs.",
+      "apiKeysConfigured": "{{count}} clé API configurée.",
+      "apiKeysConfigured_other": "{{count}} clés API configurées.",
+      "configureMoreOrContinue": "Configurez-en plus ou continuez à sélectionner des modèles."
     },
     "ensemble": {
       "title": "Construire votre ensemble",

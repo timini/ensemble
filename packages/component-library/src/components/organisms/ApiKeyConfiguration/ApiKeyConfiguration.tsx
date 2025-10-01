@@ -72,8 +72,24 @@ export const ApiKeyConfiguration = React.forwardRef<HTMLDivElement, ApiKeyConfig
     const { t } = useTranslation();
     const displayHeading = heading || t('organisms.apiKeyConfiguration.heading');
 
+    // Calculate configured keys count from items with valid status
+    const configuredCount = items.filter(item => item.validationStatus === 'valid').length;
+
     return (
       <div ref={ref} data-testid="api-key-configuration">
+        <div className="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-md">
+          <p className="text-sm text-gray-700">
+            💡 <strong>
+              {configuredCount > 0
+                ? t('organisms.apiKeyConfiguration.apiKeysConfigured', { count: configuredCount })
+                : t('organisms.apiKeyConfiguration.apiKeyInfoBold')}
+            </strong>{' '}
+            {configuredCount > 0
+              ? t('organisms.apiKeyConfiguration.configureMoreOrContinue')
+              : t('organisms.apiKeyConfiguration.apiKeyInfoNormal')}
+          </p>
+        </div>
+
         <Heading level={3} size="lg" className="mb-6">{displayHeading}</Heading>
 
         <div className="space-y-6">
