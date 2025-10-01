@@ -437,7 +437,7 @@ describe('ModelSelectionList', () => {
       );
 
       expect(screen.getByText('API key required')).toBeInTheDocument();
-      expect(screen.getByText('Ready')).toBeInTheDocument();
+      expect(screen.getByText('✓ Ready')).toBeInTheDocument();
       expect(screen.getByText('Configuring')).toBeInTheDocument();
     });
 
