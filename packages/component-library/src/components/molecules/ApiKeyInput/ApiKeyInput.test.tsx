@@ -2,6 +2,7 @@ import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { ApiKeyInput } from './ApiKeyInput';
+import { renderWithI18n } from '../../../lib/test-utils/i18n-test-wrapper';
 
 describe('ApiKeyInput', () => {
   describe('rendering', () => {
@@ -206,6 +207,56 @@ describe('ApiKeyInput', () => {
       render(<ApiKeyInput provider="openai" label="API Key" disabled validationStatus="idle" />);
       const input = screen.getByLabelText('API Key');
       expect(input).toHaveClass('disabled:opacity-50');
+    });
+  });
+
+  describe('internationalization', () => {
+    it('renders show key button label in English', () => {
+      renderWithI18n(<ApiKeyInput provider="openai" label="API Key" validationStatus="idle" />, { language: 'en' });
+      const toggleButton = screen.getByRole('button', { name: 'Show API key' });
+      expect(toggleButton).toBeInTheDocument();
+    });
+
+    it('renders show key button label in French', () => {
+      renderWithI18n(<ApiKeyInput provider="openai" label="API Key" validationStatus="idle" />, { language: 'fr' });
+      const toggleButton = screen.getByRole('button', { name: 'Afficher la clé API' });
+      expect(toggleButton).toBeInTheDocument();
+    });
+
+    it('renders hide key button label in English', () => {
+      renderWithI18n(<ApiKeyInput provider="openai" label="API Key" showKey={true} validationStatus="idle" />, { language: 'en' });
+      const toggleButton = screen.getByRole('button', { name: 'Hide API key' });
+      expect(toggleButton).toBeInTheDocument();
+    });
+
+    it('renders hide key button label in French', () => {
+      renderWithI18n(<ApiKeyInput provider="openai" label="API Key" showKey={true} validationStatus="idle" />, { language: 'fr' });
+      const toggleButton = screen.getByRole('button', { name: 'Masquer la clé API' });
+      expect(toggleButton).toBeInTheDocument();
+    });
+
+    it('renders valid key aria-label in English', () => {
+      renderWithI18n(<ApiKeyInput provider="openai" label="API Key" validationStatus="valid" value="sk-valid" />, { language: 'en' });
+      const validIcon = screen.getByLabelText('Valid API key');
+      expect(validIcon).toBeInTheDocument();
+    });
+
+    it('renders valid key aria-label in French', () => {
+      renderWithI18n(<ApiKeyInput provider="openai" label="API Key" validationStatus="valid" value="sk-valid" />, { language: 'fr' });
+      const validIcon = screen.getByLabelText('Clé API valide');
+      expect(validIcon).toBeInTheDocument();
+    });
+
+    it('renders invalid key aria-label in English', () => {
+      renderWithI18n(<ApiKeyInput provider="openai" label="API Key" validationStatus="invalid" error="Error" />, { language: 'en' });
+      const invalidIcon = screen.getByLabelText('Invalid API key');
+      expect(invalidIcon).toBeInTheDocument();
+    });
+
+    it('renders invalid key aria-label in French', () => {
+      renderWithI18n(<ApiKeyInput provider="openai" label="API Key" validationStatus="invalid" error="Error" />, { language: 'fr' });
+      const invalidIcon = screen.getByLabelText('Clé API invalide');
+      expect(invalidIcon).toBeInTheDocument();
     });
   });
 });

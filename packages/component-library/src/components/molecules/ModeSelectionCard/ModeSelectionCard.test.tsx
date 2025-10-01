@@ -2,6 +2,7 @@ import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { ModeSelectionCard } from './ModeSelectionCard';
+import { renderWithI18n } from '../../../lib/test-utils/i18n-test-wrapper';
 
 describe('ModeSelectionCard', () => {
   describe('rendering', () => {
@@ -227,6 +228,58 @@ describe('ModeSelectionCard', () => {
       const { container } = render(<ModeSelectionCard mode="pro" />);
       const card = container.querySelector('[data-mode="pro"]');
       expect(card).toBeInTheDocument();
+    });
+  });
+
+  describe('internationalization', () => {
+    it('renders free mode title in English', () => {
+      renderWithI18n(<ModeSelectionCard mode="free" />, { language: 'en' });
+      expect(screen.getByText('Free Mode')).toBeInTheDocument();
+    });
+
+    it('renders free mode title in French', () => {
+      renderWithI18n(<ModeSelectionCard mode="free" />, { language: 'fr' });
+      expect(screen.getByText('Mode Gratuit')).toBeInTheDocument();
+    });
+
+    it('renders pro mode title in English', () => {
+      renderWithI18n(<ModeSelectionCard mode="pro" />, { language: 'en' });
+      expect(screen.getByText('Pro Mode')).toBeInTheDocument();
+    });
+
+    it('renders pro mode title in French', () => {
+      renderWithI18n(<ModeSelectionCard mode="pro" />, { language: 'fr' });
+      expect(screen.getByText('Mode Pro')).toBeInTheDocument();
+    });
+
+    it('renders free mode description in English', () => {
+      renderWithI18n(<ModeSelectionCard mode="free" />, { language: 'en' });
+      expect(screen.getByText(/Bring your own API keys/)).toBeInTheDocument();
+    });
+
+    it('renders free mode description in French', () => {
+      renderWithI18n(<ModeSelectionCard mode="free" />, { language: 'fr' });
+      expect(screen.getByText(/Utilisez vos propres clés API/)).toBeInTheDocument();
+    });
+
+    it('renders free mode button text in English', () => {
+      renderWithI18n(<ModeSelectionCard mode="free" />, { language: 'en' });
+      expect(screen.getByText('Start in Free Mode')).toBeInTheDocument();
+    });
+
+    it('renders free mode button text in French', () => {
+      renderWithI18n(<ModeSelectionCard mode="free" />, { language: 'fr' });
+      expect(screen.getByText('Démarrer en Mode Gratuit')).toBeInTheDocument();
+    });
+
+    it('renders pro mode button text in English', () => {
+      renderWithI18n(<ModeSelectionCard mode="pro" />, { language: 'en' });
+      expect(screen.getByText('Go Pro')).toBeInTheDocument();
+    });
+
+    it('renders pro mode button text in French', () => {
+      renderWithI18n(<ModeSelectionCard mode="pro" />, { language: 'fr' });
+      expect(screen.getByText('Passer au Pro')).toBeInTheDocument();
     });
   });
 });

@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Card, CardContent } from '../../atoms/Card';
 import { Badge } from '../../atoms/Badge';
 import { cn } from '@/lib/utils';
@@ -68,6 +69,7 @@ export const ModelCard = React.forwardRef<HTMLDivElement, ModelCardProps>(
     },
     ref
   ) => {
+    const { t } = useTranslation();
     const config = PROVIDER_CONFIG[provider];
 
     const handleClick = () => {
@@ -114,7 +116,7 @@ export const ModelCard = React.forwardRef<HTMLDivElement, ModelCardProps>(
           <div className="font-medium text-sm">{modelName}</div>
           {isSummarizer && (
             <Badge className="absolute -top-2 -right-2 bg-orange-500 text-white text-xs">
-              Summarizer
+              {t('molecules.modelCard.summarizer')}
             </Badge>
           )}
         </CardContent>

@@ -2,6 +2,7 @@ import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { ManualResponseModal } from './ManualResponseModal';
+import { renderWithI18n } from '../../../lib/test-utils/i18n-test-wrapper';
 
 describe('ManualResponseModal', () => {
   const mockProps = {
@@ -355,6 +356,28 @@ describe('ManualResponseModal', () => {
 
       const textarea = screen.getByTestId('response-textarea') as HTMLTextAreaElement;
       expect(textarea.value).toBe(specialText);
+    });
+  });
+
+  describe('internationalization', () => {
+    it('renders English text', () => {
+      renderWithI18n(<ManualResponseModal {...mockProps} open={true} />, { language: 'en' });
+      expect(screen.getByText('Manual Response')).toBeInTheDocument();
+      expect(screen.getByText('Model Name')).toBeInTheDocument();
+      expect(screen.getByText('Model Provider')).toBeInTheDocument();
+      expect(screen.getByText('Response')).toBeInTheDocument();
+      expect(screen.getByText('Cancel')).toBeInTheDocument();
+      expect(screen.getByText('Submit')).toBeInTheDocument();
+    });
+
+    it('renders French text', () => {
+      renderWithI18n(<ManualResponseModal {...mockProps} open={true} />, { language: 'fr' });
+      expect(screen.getByText('Réponse Manuelle')).toBeInTheDocument();
+      expect(screen.getByText('Nom du Modèle')).toBeInTheDocument();
+      expect(screen.getByText('Fournisseur du Modèle')).toBeInTheDocument();
+      expect(screen.getByText('Réponse')).toBeInTheDocument();
+      expect(screen.getByText('Annuler')).toBeInTheDocument();
+      expect(screen.getByText('Soumettre')).toBeInTheDocument();
     });
   });
 });

@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { Eye, EyeOff, CheckCircle, XCircle } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { Input } from '../../atoms/Input';
 import { Label } from '../../atoms/Label';
 import { LoadingSpinner } from '../../atoms/LoadingSpinner';
@@ -70,6 +71,7 @@ export const ApiKeyInput = React.forwardRef<HTMLInputElement, ApiKeyInputProps>(
     },
     ref
   ) => {
+    const { t } = useTranslation();
     const inputId = React.useId();
     const errorId = React.useId();
     const helperTextId = React.useId();
@@ -97,7 +99,7 @@ export const ApiKeyInput = React.forwardRef<HTMLInputElement, ApiKeyInputProps>(
           <CheckCircle
             data-validation="valid"
             className="h-4 w-4 text-green-500 dark:text-green-400"
-            aria-label="Valid API key"
+            aria-label={t('molecules.apiKeyInput.validKey')}
           />
         );
       }
@@ -107,7 +109,7 @@ export const ApiKeyInput = React.forwardRef<HTMLInputElement, ApiKeyInputProps>(
           <XCircle
             data-validation="invalid"
             className="h-4 w-4 text-red-500 dark:text-red-400"
-            aria-label="Invalid API key"
+            aria-label={t('molecules.apiKeyInput.invalidKey')}
           />
         );
       }
@@ -152,7 +154,7 @@ export const ApiKeyInput = React.forwardRef<HTMLInputElement, ApiKeyInputProps>(
               type="button"
               onClick={handleToggleShow}
               disabled={disabled}
-              aria-label={showKey ? 'Hide API key' : 'Show API key'}
+              aria-label={showKey ? t('molecules.apiKeyInput.hideKey') : t('molecules.apiKeyInput.showKey')}
               className={cn(
                 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors',
                 disabled && 'opacity-50 cursor-not-allowed'

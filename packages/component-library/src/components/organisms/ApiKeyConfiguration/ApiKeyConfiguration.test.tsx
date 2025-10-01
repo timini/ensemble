@@ -3,6 +3,7 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { ApiKeyConfiguration } from './ApiKeyConfiguration';
 import type { ApiKeyConfigurationItem } from './ApiKeyConfiguration';
+import { renderWithI18n } from '../../../lib/test-utils/i18n-test-wrapper';
 
 const mockItems: ApiKeyConfigurationItem[] = [
   {
@@ -530,6 +531,64 @@ describe('ApiKeyConfiguration', () => {
 
       const heading = screen.getByText('Configure API Keys');
       expect(heading).toHaveClass('text-lg', 'font-semibold', 'mb-6');
+    });
+  });
+
+  describe('internationalization', () => {
+    it('renders English heading by default', () => {
+      renderWithI18n(
+        <ApiKeyConfiguration
+          items={mockItems}
+          onKeyChange={vi.fn()}
+          onToggleShow={vi.fn()}
+        />,
+        { language: 'en' }
+      );
+
+      expect(screen.getByText('Configure API Keys')).toBeInTheDocument();
+    });
+
+    it('renders French heading', () => {
+      renderWithI18n(
+        <ApiKeyConfiguration
+          items={mockItems}
+          onKeyChange={vi.fn()}
+          onToggleShow={vi.fn()}
+        />,
+        { language: 'fr' }
+      );
+
+      expect(screen.getByText('Configurer les Clés API')).toBeInTheDocument();
+    });
+
+    it('renders custom heading in English when provided', () => {
+      renderWithI18n(
+        <ApiKeyConfiguration
+          items={mockItems}
+          onKeyChange={vi.fn()}
+          onToggleShow={vi.fn()}
+          heading="Custom Heading"
+        />,
+        { language: 'en' }
+      );
+
+      expect(screen.getByText('Custom Heading')).toBeInTheDocument();
+      expect(screen.queryByText('Configure API Keys')).not.toBeInTheDocument();
+    });
+
+    it('renders custom heading in French when provided', () => {
+      renderWithI18n(
+        <ApiKeyConfiguration
+          items={mockItems}
+          onKeyChange={vi.fn()}
+          onToggleShow={vi.fn()}
+          heading="En-tête personnalisé"
+        />,
+        { language: 'fr' }
+      );
+
+      expect(screen.getByText('En-tête personnalisé')).toBeInTheDocument();
+      expect(screen.queryByText('Configurer les Clés API')).not.toBeInTheDocument();
     });
   });
 });

@@ -2,6 +2,7 @@ import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { ConsensusCard } from './ConsensusCard';
+import { renderWithI18n } from '../../../lib/test-utils/i18n-test-wrapper';
 
 const mockConsensusText =
   'Your question has a clear focus that allows for a direct response. We can examine this through multiple lenses: theoretical foundations, real-world examples, and future considerations.';
@@ -310,6 +311,30 @@ describe('ConsensusCard', () => {
       render(<ConsensusCard consensusText={mockConsensusText} summarizerModel={specialModel} />);
 
       expect(screen.getByText(/Combined summary provided by Claude-3\.5 \(Opus\)/)).toBeInTheDocument();
+    });
+  });
+
+  describe('internationalization', () => {
+    it('renders English text', () => {
+      renderWithI18n(
+        <ConsensusCard consensusText={mockConsensusText} summarizerModel={mockSummarizerModel} />,
+        { language: 'en' }
+      );
+      expect(screen.getByText('Consensus')).toBeInTheDocument();
+      expect(screen.getByText('Combined summary provided by Claude 3 Opus.')).toBeInTheDocument();
+      expect(screen.getByText('Share this consensus response')).toBeInTheDocument();
+      expect(screen.getByText('Share')).toBeInTheDocument();
+    });
+
+    it('renders French text', () => {
+      renderWithI18n(
+        <ConsensusCard consensusText={mockConsensusText} summarizerModel={mockSummarizerModel} />,
+        { language: 'fr' }
+      );
+      expect(screen.getByText('Consensus')).toBeInTheDocument();
+      expect(screen.getByText('Résumé combiné fourni par Claude 3 Opus.')).toBeInTheDocument();
+      expect(screen.getByText('Partager cette réponse consensuelle')).toBeInTheDocument();
+      expect(screen.getByText('Partager')).toBeInTheDocument();
     });
   });
 });

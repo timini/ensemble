@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Card, CardContent } from '../../atoms/Card';
 import { Button } from '../../atoms/Button';
 import { cn } from '@/lib/utils';
@@ -18,16 +19,10 @@ export interface ModeSelectionCardProps {
 
 const MODE_CONFIG = {
   free: {
-    title: 'Free Mode',
-    description: 'Bring your own API keys. Completely secure, your keys are encrypted and never leave your browser.',
     icon: '🔧',
-    buttonText: 'Start in Free Mode',
   },
   pro: {
-    title: 'Pro Mode',
-    description: 'Buy credits to get access to the latest models across all providers.',
     icon: '⭐',
-    buttonText: 'Go Pro',
   },
 } as const;
 
@@ -48,6 +43,7 @@ const MODE_CONFIG = {
  */
 export const ModeSelectionCard = React.forwardRef<HTMLDivElement, ModeSelectionCardProps>(
   ({ mode, selected = false, disabled = false, onClick }, ref) => {
+    const { t } = useTranslation();
     const config = MODE_CONFIG[mode];
 
     return (
@@ -66,15 +62,15 @@ export const ModeSelectionCard = React.forwardRef<HTMLDivElement, ModeSelectionC
             <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
               <span className="text-blue-600 text-lg">{config.icon}</span>
             </div>
-            <h4 className="text-xl font-semibold">{config.title}</h4>
+            <h4 className="text-xl font-semibold">{t(`molecules.modeSelectionCard.${mode}.title`)}</h4>
           </div>
-          <p className="text-gray-600 mb-6">{config.description}</p>
+          <p className="text-gray-600 mb-6">{t(`molecules.modeSelectionCard.${mode}.description`)}</p>
           <Button
             className="w-full bg-blue-600 hover:bg-blue-700"
             onClick={onClick}
             disabled={disabled}
           >
-            {config.buttonText}
+            {t(`molecules.modeSelectionCard.${mode}.buttonText`)}
           </Button>
         </CardContent>
       </Card>

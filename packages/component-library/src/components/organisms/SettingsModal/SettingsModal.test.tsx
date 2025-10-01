@@ -2,6 +2,7 @@ import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { SettingsModal } from './SettingsModal';
+import { renderWithI18n } from '../../../lib/test-utils/i18n-test-wrapper';
 
 describe('SettingsModal', () => {
   const mockProps = {
@@ -306,6 +307,34 @@ describe('SettingsModal', () => {
       expect(screen.getByRole('button', { name: /import settings/i })).toBeInTheDocument();
       expect(screen.getByRole('button', { name: /clear all data/i })).toBeInTheDocument();
       expect(screen.getByRole('button', { name: /done/i })).toBeInTheDocument();
+    });
+  });
+
+  describe('internationalization', () => {
+    it('renders English text', () => {
+      renderWithI18n(<SettingsModal {...mockProps} open={true} />, { language: 'en' });
+      expect(screen.getByText('Settings')).toBeInTheDocument();
+      expect(screen.getByText('Appearance')).toBeInTheDocument();
+      expect(screen.getByText('Theme')).toBeInTheDocument();
+      expect(screen.getByText('Light')).toBeInTheDocument();
+      expect(screen.getByText('Dark')).toBeInTheDocument();
+      expect(screen.getByText('Language')).toBeInTheDocument();
+      expect(screen.getByText('Data Management')).toBeInTheDocument();
+      expect(screen.getByText('Danger Zone')).toBeInTheDocument();
+      expect(screen.getByText('Done')).toBeInTheDocument();
+    });
+
+    it('renders French text', () => {
+      renderWithI18n(<SettingsModal {...mockProps} open={true} />, { language: 'fr' });
+      expect(screen.getByText('Paramètres')).toBeInTheDocument();
+      expect(screen.getByText('Apparence')).toBeInTheDocument();
+      expect(screen.getByText('Thème')).toBeInTheDocument();
+      expect(screen.getByText('Clair')).toBeInTheDocument();
+      expect(screen.getByText('Sombre')).toBeInTheDocument();
+      expect(screen.getByText('Langue')).toBeInTheDocument();
+      expect(screen.getByText('Gestion des Données')).toBeInTheDocument();
+      expect(screen.getByText('Zone de Danger')).toBeInTheDocument();
+      expect(screen.getByText('Terminé')).toBeInTheDocument();
     });
   });
 });

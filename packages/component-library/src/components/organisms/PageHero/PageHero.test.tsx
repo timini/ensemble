@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { PageHero } from './PageHero';
+import { renderWithI18n } from '../../../lib/test-utils/i18n-test-wrapper';
 
 describe('PageHero', () => {
   describe('rendering', () => {
@@ -192,6 +193,40 @@ describe('PageHero', () => {
 
       expect(screen.getByText('Start')).toBeInTheDocument();
       expect(screen.getByText('Go')).toBeInTheDocument();
+    });
+  });
+
+  describe('internationalization', () => {
+    it('renders English breadcrumb label', () => {
+      renderWithI18n(
+        <PageHero
+          title="Test Title"
+          description="Test description"
+          breadcrumbs={[
+            { label: 'Home', href: '/' },
+            { label: 'Config', href: '/config' },
+          ]}
+        />,
+        { language: 'en' }
+      );
+      const breadcrumbNav = screen.getByRole('navigation');
+      expect(breadcrumbNav).toHaveAttribute('aria-label', 'Breadcrumb');
+    });
+
+    it('renders French breadcrumb label', () => {
+      renderWithI18n(
+        <PageHero
+          title="Test Title"
+          description="Test description"
+          breadcrumbs={[
+            { label: 'Home', href: '/' },
+            { label: 'Config', href: '/config' },
+          ]}
+        />,
+        { language: 'fr' }
+      );
+      const breadcrumbNav = screen.getByRole('navigation');
+      expect(breadcrumbNav).toHaveAttribute('aria-label', 'Fil d\'Ariane');
     });
   });
 });

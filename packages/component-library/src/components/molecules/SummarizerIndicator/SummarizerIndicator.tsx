@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Zap } from 'lucide-react';
 import { Icon } from '../../atoms/Icon';
 import { Text } from '../../atoms/Text';
@@ -27,6 +28,8 @@ export const SummarizerIndicator = React.forwardRef<
   HTMLDivElement,
   SummarizerIndicatorProps
 >(({ modelName, className }, ref) => {
+  const { t } = useTranslation();
+
   return (
     <div
       ref={ref}
@@ -41,7 +44,7 @@ export const SummarizerIndicator = React.forwardRef<
       </Icon>
       <Text as="span" className="text-gray-700">
         <Text as="span" className="font-medium text-orange-900">
-          Summarizer Model:
+          {t('molecules.summarizerIndicator.label')}
         </Text>{' '}
         <Text as="span" className="text-gray-900 font-semibold">
           {modelName}

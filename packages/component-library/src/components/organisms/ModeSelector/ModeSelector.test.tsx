@@ -2,6 +2,7 @@ import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { ModeSelector } from './ModeSelector';
+import { renderWithI18n } from '../../../lib/test-utils/i18n-test-wrapper';
 
 describe('ModeSelector', () => {
   describe('rendering', () => {
@@ -319,6 +320,22 @@ describe('ModeSelector', () => {
       );
 
       expect(container.querySelector('[data-mode="pro"]')).toHaveClass('border-blue-500');
+    });
+  });
+
+  describe('internationalization', () => {
+    it('renders English heading text', () => {
+      renderWithI18n(<ModeSelector onSelectFreeMode={vi.fn()} onSelectProMode={vi.fn()} />, {
+        language: 'en',
+      });
+      expect(screen.getByText('Select Your Mode')).toBeInTheDocument();
+    });
+
+    it('renders French heading text', () => {
+      renderWithI18n(<ModeSelector onSelectFreeMode={vi.fn()} onSelectProMode={vi.fn()} />, {
+        language: 'fr',
+      });
+      expect(screen.getByText('Sélectionnez Votre Mode')).toBeInTheDocument();
     });
   });
 });

@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   Dialog,
   DialogContent,
@@ -84,12 +85,14 @@ export const ManualResponseModal = React.forwardRef<HTMLDivElement, ManualRespon
       onModelProviderChange,
       onSubmit,
       onCancel,
-      placeholder = 'Enter your response here...',
-      title = 'Manual Response',
+      placeholder,
+      title,
       disabled = false,
     },
     ref
   ) => {
+    const { t } = useTranslation();
+
     const handleSubmit = () => {
       if (onSubmit) {
         onSubmit({
@@ -112,47 +115,47 @@ export const ManualResponseModal = React.forwardRef<HTMLDivElement, ManualRespon
     return (
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent ref={ref} className="max-w-2xl" data-testid="manual-response-modal">
-          <DialogTitle>{title}</DialogTitle>
+          <DialogTitle>{title || t('organisms.manualResponseModal.title')}</DialogTitle>
           <DialogDescription className="sr-only">
-            Enter a manual response for the current prompt
+            {t('organisms.manualResponseModal.description')}
           </DialogDescription>
 
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <Label htmlFor="model-name">
-                  Model Name
+                  {t('organisms.manualResponseModal.modelNameLabel')}
                 </Label>
                 <Input
                   id="model-name"
                   value={modelName}
                   onChange={(e) => onModelNameChange?.(e.target.value)}
-                  placeholder="e.g., GPT-4"
+                  placeholder={t('organisms.manualResponseModal.modelNamePlaceholder')}
                   data-testid="model-name-input"
                 />
               </div>
               <div>
                 <Label htmlFor="model-provider">
-                  Model Provider
+                  {t('organisms.manualResponseModal.modelProviderLabel')}
                 </Label>
                 <Input
                   id="model-provider"
                   value={modelProvider}
                   onChange={(e) => onModelProviderChange?.(e.target.value)}
-                  placeholder="e.g., OpenAI"
+                  placeholder={t('organisms.manualResponseModal.modelProviderPlaceholder')}
                   data-testid="model-provider-input"
                 />
               </div>
             </div>
             <div>
               <Label htmlFor="manual-response">
-                Response
+                {t('organisms.manualResponseModal.responseLabel')}
               </Label>
               <Textarea
                 id="manual-response"
                 value={value}
                 onChange={(e) => onChange?.(e.target.value)}
-                placeholder={placeholder}
+                placeholder={placeholder || t('organisms.manualResponseModal.responsePlaceholder')}
                 className="min-h-[200px] resize-y"
                 data-testid="response-textarea"
               />
@@ -165,7 +168,7 @@ export const ManualResponseModal = React.forwardRef<HTMLDivElement, ManualRespon
               onClick={handleCancel}
               data-testid="cancel-button"
             >
-              Cancel
+              {t('organisms.manualResponseModal.cancelButton')}
             </Button>
             <Button
               className="bg-blue-600 hover:bg-blue-700"
@@ -173,7 +176,7 @@ export const ManualResponseModal = React.forwardRef<HTMLDivElement, ManualRespon
               disabled={disabled || !value.trim() || !modelName.trim() || !modelProvider.trim()}
               data-testid="submit-button"
             >
-              Submit
+              {t('organisms.manualResponseModal.submitButton')}
             </Button>
           </DialogFooter>
         </DialogContent>

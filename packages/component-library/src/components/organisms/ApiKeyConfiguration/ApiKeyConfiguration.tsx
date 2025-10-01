@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { useTranslation } from 'react-i18next';
 import { ApiKeyInput, type Provider, type ValidationStatus } from '../../molecules/ApiKeyInput';
 import { Heading } from '../../atoms/Heading';
 
@@ -67,10 +68,13 @@ export interface ApiKeyConfigurationProps {
  * ```
  */
 export const ApiKeyConfiguration = React.forwardRef<HTMLDivElement, ApiKeyConfigurationProps>(
-  ({ items, onKeyChange, onToggleShow, heading = 'Configure API Keys', disabled = false }, ref) => {
+  ({ items, onKeyChange, onToggleShow, heading, disabled = false }, ref) => {
+    const { t } = useTranslation();
+    const displayHeading = heading || t('organisms.apiKeyConfiguration.heading');
+
     return (
       <div ref={ref} data-testid="api-key-configuration">
-        <Heading level={3} size="lg" className="mb-6">{heading}</Heading>
+        <Heading level={3} size="lg" className="mb-6">{displayHeading}</Heading>
 
         <div className="space-y-6">
           {items.map((item) => (
