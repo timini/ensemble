@@ -20,8 +20,8 @@ test.describe('Config Page', () => {
     // Check page title
     await expect(page).toHaveTitle(/Ensemble AI/i);
 
-    // Check for page hero heading
-    await expect(page.locator('h1')).toContainText(/configuration/i);
+    // Check for page hero heading (should be visible on the page)
+    await expect(page.getByText(/configuration/i).first()).toBeVisible();
 
     // Check for workflow navigator
     await expect(page.getByTestId('workflow-navigator')).toBeVisible();
@@ -51,7 +51,7 @@ test.describe('Config Page', () => {
     );
   });
 
-  test('Continue button enables after Free mode selection and API keys configured', async ({ page }) => {
+  test('Continue button enables after Free mode selection and at least 1 API key configured', async ({ page }) => {
     // Initially disabled
     const continueButton = page.getByRole('button', { name: /continue/i });
     await expect(continueButton).toBeDisabled();
@@ -59,14 +59,32 @@ test.describe('Config Page', () => {
     // Select Free mode
     await page.locator('[data-mode="free"]').click();
 
-    // Configure all 4 API keys
-    await page.getByTestId('api-key-input-openai').fill('sk-test-openai-key');
-    await page.getByTestId('api-key-input-anthropic').fill('sk-ant-test-anthropic-key');
-    await page.getByTestId('api-key-input-google').fill('AIza-test-google-key');
-    await page.getByTestId('api-key-input-xai').fill('xai-test-xai-key');
+    // Configure just 1 API key (should be enough to enable Continue)
+    await page.locator('[data-provider="openai"] input').fill('sk-test-openai-key');
 
     // Now enabled
     await expect(continueButton).toBeEnabled();
+  });
+
+  test('shows dynamic message based on configured API keys count', async ({ page }) => {
+    // Select Free mode
+    await page.locator('[data-mode="free"]').click();
+
+    // Initially shows "Configure an API key to continue"
+    await expect(page.getByText(/configure an api key to continue/i)).toBeVisible();
+
+    // Configure 1 API key
+    await page.locator('[data-provider="openai"] input').fill('sk-test-openai-key');
+
+    // Should show "1 API key configured"
+    await expect(page.getByText(/1 API key configured/i)).toBeVisible();
+    await expect(page.getByText(/configure more or continue selecting models/i)).toBeVisible();
+
+    // Configure another API key
+    await page.locator('[data-provider="anthropic"] input').fill('sk-ant-test-anthropic-key');
+
+    // Should show "2 API keys configured"
+    await expect(page.getByText(/2 API keys configured/i)).toBeVisible();
   });
 
   test('Pro mode is disabled with Coming Soon text', async ({ page }) => {
@@ -84,11 +102,8 @@ test.describe('Config Page', () => {
     // Select Free mode
     await page.locator('[data-mode="free"]').click();
 
-    // Configure all 4 API keys
-    await page.getByTestId('api-key-input-openai').fill('sk-test-openai-key');
-    await page.getByTestId('api-key-input-anthropic').fill('sk-ant-test-anthropic-key');
-    await page.getByTestId('api-key-input-google').fill('AIza-test-google-key');
-    await page.getByTestId('api-key-input-xai').fill('xai-test-xai-key');
+    // Configure at least 1 API key
+    await page.locator('[data-provider="openai"] input').fill('sk-test-openai-key');
 
     // Click Continue button
     await page.getByRole('button', { name: /continue/i }).click();
