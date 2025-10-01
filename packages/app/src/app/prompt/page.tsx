@@ -16,7 +16,7 @@ import { EnsembleConfigurationSummary } from '@/components/organisms/EnsembleCon
 import { WorkflowNavigator } from '@/components/organisms/WorkflowNavigator';
 
 export default function PromptPage() {
-  const { t } = useTranslation('common');
+  const { t } = useTranslation();
   const router = useRouter();
 
   const selectedModels = useStore((state) => state.selectedModels);

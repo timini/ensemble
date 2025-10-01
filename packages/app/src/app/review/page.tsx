@@ -18,7 +18,7 @@ import { AgreementAnalysis } from '@/components/organisms/AgreementAnalysis';
 import type { Provider } from '@/components/molecules/ResponseCard';
 
 export default function ReviewPage() {
-  const { t } = useTranslation('common');
+  const { t } = useTranslation();
   const router = useRouter();
 
   const prompt = useStore((state) => state.prompt);
