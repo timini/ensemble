@@ -177,5 +177,21 @@
     "anthropic": "Anthropic",
     "google": "Google",
     "xai": "XAI"
+  },
+  "pages": {
+    "prompt": {
+      "title": "Enter Your Prompt",
+      "description": "Your prompt will be sent to all selected models in your ensemble",
+      "placeholder": "Enter your prompt here..."
+    },
+    "review": {
+      "title": "Review Responses",
+      "description": "Compare responses from your ensemble of AI models",
+      "promptLabel": "Your Prompt",
+      "responsesHeading": "Model Responses",
+      "noResponses": "No responses yet. Responses will appear here when models complete.",
+      "backButton": "Back to Prompt",
+      "newPromptButton": "New Prompt"
+    }
   }
 }
