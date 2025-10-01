@@ -32,6 +32,7 @@ export {
 } from './components/atoms/Separator';
 export { Rating, ratingVariants, type RatingProps } from './components/atoms/Rating';
 export { Heading, headingVariants, type HeadingProps } from './components/atoms/Heading';
+export { Text, textVariants, type TextProps } from './components/atoms/Text';
 export {
   Dialog,
   DialogPortal,
