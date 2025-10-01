@@ -9,6 +9,16 @@ import {
 import { Button } from '../../atoms/Button';
 import { Textarea } from '../../atoms/Textarea';
 import { Label } from '../../atoms/Label';
+import { Input } from '../../atoms/Input';
+
+export interface ManualResponseData {
+  /** The response text */
+  response: string;
+  /** The model name */
+  modelName: string;
+  /** The model provider */
+  modelProvider: string;
+}
 
 export interface ManualResponseModalProps {
   /** Whether the modal is open */
@@ -19,8 +29,16 @@ export interface ManualResponseModalProps {
   value?: string;
   /** Callback when response value changes */
   onChange?: (value: string) => void;
+  /** Current model name value */
+  modelName?: string;
+  /** Callback when model name changes */
+  onModelNameChange?: (value: string) => void;
+  /** Current model provider value */
+  modelProvider?: string;
+  /** Callback when model provider changes */
+  onModelProviderChange?: (value: string) => void;
   /** Callback when submit button is clicked */
-  onSubmit?: (value: string) => void;
+  onSubmit?: (data: ManualResponseData) => void;
   /** Callback when cancel button is clicked */
   onCancel?: () => void;
   /** Optional placeholder text for textarea */
@@ -35,7 +53,7 @@ export interface ManualResponseModalProps {
  * ManualResponseModal organism for entering manual responses.
  *
  * Provides a dialog interface for users to manually enter a response
- * with cancel and submit actions.
+ * along with the model name and provider, with cancel and submit actions.
  *
  * @example
  * ```tsx
@@ -44,7 +62,11 @@ export interface ManualResponseModalProps {
  *   onOpenChange={setIsOpen}
  *   value={response}
  *   onChange={setResponse}
- *   onSubmit={(value) => console.log('Submitted:', value)}
+ *   modelName={modelName}
+ *   onModelNameChange={setModelName}
+ *   modelProvider={modelProvider}
+ *   onModelProviderChange={setModelProvider}
+ *   onSubmit={(data) => console.log('Submitted:', data)}
  *   onCancel={() => setIsOpen(false)}
  * />
  * ```
@@ -56,6 +78,10 @@ export const ManualResponseModal = React.forwardRef<HTMLDivElement, ManualRespon
       onOpenChange,
       value = '',
       onChange,
+      modelName = '',
+      onModelNameChange,
+      modelProvider = '',
+      onModelProviderChange,
       onSubmit,
       onCancel,
       placeholder = 'Enter your response here...',
@@ -66,7 +92,11 @@ export const ManualResponseModal = React.forwardRef<HTMLDivElement, ManualRespon
   ) => {
     const handleSubmit = () => {
       if (onSubmit) {
-        onSubmit(value);
+        onSubmit({
+          response: value,
+          modelName,
+          modelProvider,
+        });
       }
     };
 
@@ -88,8 +118,34 @@ export const ManualResponseModal = React.forwardRef<HTMLDivElement, ManualRespon
           </DialogDescription>
 
           <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="model-name">
+                  Model Name
+                </Label>
+                <Input
+                  id="model-name"
+                  value={modelName}
+                  onChange={(e) => onModelNameChange?.(e.target.value)}
+                  placeholder="e.g., GPT-4"
+                  data-testid="model-name-input"
+                />
+              </div>
+              <div>
+                <Label htmlFor="model-provider">
+                  Model Provider
+                </Label>
+                <Input
+                  id="model-provider"
+                  value={modelProvider}
+                  onChange={(e) => onModelProviderChange?.(e.target.value)}
+                  placeholder="e.g., OpenAI"
+                  data-testid="model-provider-input"
+                />
+              </div>
+            </div>
             <div>
-              <Label htmlFor="manual-response" className="sr-only">
+              <Label htmlFor="manual-response">
                 Response
               </Label>
               <Textarea
@@ -114,7 +170,7 @@ export const ManualResponseModal = React.forwardRef<HTMLDivElement, ManualRespon
             <Button
               className="bg-blue-600 hover:bg-blue-700"
               onClick={handleSubmit}
-              disabled={disabled || !value.trim()}
+              disabled={disabled || !value.trim() || !modelName.trim() || !modelProvider.trim()}
               data-testid="submit-button"
             >
               Submit

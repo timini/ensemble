@@ -76,4 +76,4 @@ export { ApiKeyConfiguration, type ApiKeyConfigurationProps, type ApiKeyConfigur
 export { EnsembleConfigurationSummary, type EnsembleConfigurationSummaryProps } from './components/organisms/EnsembleConfigurationSummary';
 export { ConsensusCard, type ConsensusCardProps } from './components/organisms/ConsensusCard';
 export { SettingsModal, type SettingsModalProps, type Theme, type Language } from './components/organisms/SettingsModal';
-export { ManualResponseModal, type ManualResponseModalProps } from './components/organisms/ManualResponseModal';
+export { ManualResponseModal, type ManualResponseModalProps, type ManualResponseData } from './components/organisms/ManualResponseModal';
