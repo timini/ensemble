@@ -39,5 +39,16 @@
     "step2": "Step 2: Build Ensemble",
     "step3": "Step 3: Enter Prompt",
     "step4": "Step 4: Review Results"
+  },
+  "pages": {
+    "config": {
+      "title": "Configuration",
+      "description": "Choose your operating mode to get started with AI Ensemble",
+      "apiKeyInfo": "Configure an API key to continue. Your keys are stored locally and never sent to our servers."
+    },
+    "ensemble": {
+      "title": "Build Your Ensemble",
+      "description": "Select 2-6 AI models to compare their responses"
+    }
   }
 }

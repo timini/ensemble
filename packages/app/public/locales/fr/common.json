@@ -39,5 +39,16 @@
     "step2": "Étape 2 : Créer l'ensemble",
     "step3": "Étape 3 : Entrer l'invite",
     "step4": "Étape 4 : Examiner les résultats"
+  },
+  "pages": {
+    "config": {
+      "title": "Configuration",
+      "description": "Choisissez votre mode de fonctionnement pour commencer avec AI Ensemble",
+      "apiKeyInfo": "Configurez une clé API pour continuer. Vos clés sont stockées localement et ne sont jamais envoyées à nos serveurs."
+    },
+    "ensemble": {
+      "title": "Construire votre ensemble",
+      "description": "Sélectionnez 2 à 6 modèles d'IA pour comparer leurs réponses"
+    }
   }
 }

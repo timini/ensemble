@@ -9,6 +9,7 @@
 
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useStore } from '~/store';
 import { PageHero } from '@/components/organisms/PageHero';
 import { ModelSelectionList } from '@/components/organisms/ModelSelectionList';
@@ -17,6 +18,7 @@ import { WorkflowNavigator } from '@/components/organisms/WorkflowNavigator';
 import { AVAILABLE_MODELS } from '~/lib/models';
 
 export default function EnsemblePage() {
+  const { t } = useTranslation('common');
   const router = useRouter();
 
   const selectedModels = useStore((state) => state.selectedModels);
@@ -86,8 +88,8 @@ export default function EnsemblePage() {
   return (
     <div className="container mx-auto px-4 py-8 max-w-6xl">
       <PageHero
-        title="Build Your Ensemble"
-        description="Select 2-6 AI models to compare their responses"
+        title={t('pages.ensemble.title')}
+        description={t('pages.ensemble.description')}
       />
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-8">
