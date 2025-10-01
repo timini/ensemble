@@ -3,12 +3,14 @@
 import '~/styles/globals.css';
 import '~/lib/i18n'; // Initialize i18next
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Geist } from 'next/font/google';
 import { useTranslation } from 'react-i18next';
 import { TRPCReactProvider } from '~/trpc/react';
 import { useStore } from '~/store';
 import { EnsembleHeader } from '@/components/molecules/EnsembleHeader';
+import { SettingsModal } from '@/components/organisms/SettingsModal';
+import type { Theme, Language } from '@/components/organisms/SettingsModal';
 
 const geist = Geist({
   subsets: ['latin'],
@@ -18,8 +20,9 @@ const geist = Geist({
 export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
-  const { theme, language } = useStore();
+  const { theme, language, setTheme, setLanguage } = useStore();
   const { i18n } = useTranslation();
+  const [settingsOpen, setSettingsOpen] = useState(false);
 
   // Apply theme to document on mount and when theme changes
   useEffect(() => {
@@ -46,8 +49,22 @@ export default function RootLayout({
       </head>
       <body>
         <TRPCReactProvider>
-          <EnsembleHeader />
+          <EnsembleHeader onSettingsClick={() => setSettingsOpen(true)} />
           {children}
+          <SettingsModal
+            open={settingsOpen}
+            onOpenChange={setSettingsOpen}
+            theme={theme as Theme}
+            onThemeChange={(newTheme) => setTheme(newTheme)}
+            language={language as Language}
+            onLanguageChange={(newLang) => {
+              // Only allow supported languages (en, fr)
+              if (newLang === 'en' || newLang === 'fr') {
+                setLanguage(newLang);
+              }
+            }}
+            onDone={() => setSettingsOpen(false)}
+          />
         </TRPCReactProvider>
       </body>
     </html>
