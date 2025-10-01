@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { cosineSimilarity, similarityMatrix, agreementStatistics } from './similarity';
+import { cosineSimilarity, similarityMatrix, agreementStatistics } from './index.js';
 
 describe('cosineSimilarity', () => {
   describe('edge cases', () => {
