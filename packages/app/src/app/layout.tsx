@@ -8,6 +8,7 @@ import { Geist } from 'next/font/google';
 import { useTranslation } from 'react-i18next';
 import { TRPCReactProvider } from '~/trpc/react';
 import { useStore } from '~/store';
+import { EnsembleHeader } from '@/components/molecules/EnsembleHeader';
 
 const geist = Geist({
   subsets: ['latin'],
@@ -44,7 +45,10 @@ export default function RootLayout({
         <link rel="icon" href="/favicon.ico" />
       </head>
       <body>
-        <TRPCReactProvider>{children}</TRPCReactProvider>
+        <TRPCReactProvider>
+          <EnsembleHeader />
+          {children}
+        </TRPCReactProvider>
       </body>
     </html>
   );

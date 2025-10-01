@@ -44,7 +44,7 @@
     "config": {
       "title": "Configuration",
       "description": "Choisissez votre mode de fonctionnement pour commencer avec AI Ensemble",
-      "apiKeyInfo": "Configurez une clé API pour continuer. Vos clés sont stockées localement et ne sont jamais envoyées à nos serveurs."
+      "apiKeyInfo": "Configurez une clé API pour continuer."
     },
     "ensemble": {
       "title": "Construire votre ensemble",
