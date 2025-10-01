@@ -7,6 +7,7 @@
 
 'use client';
 
+import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslation } from 'react-i18next';
 import { useStore } from '~/store';
@@ -95,15 +96,20 @@ export default function ConfigPage() {
     },
   ] : [];
 
-  // For Free mode, all 4 API keys must be configured
-  const allKeysConfigured = mode === 'free'
-    ? apiKeys.openai?.key && apiKeys.anthropic?.key && apiKeys.google?.key && apiKeys.xai?.key
-    : false;
+  // Count configured API keys
+  const configuredKeysCount = mode === 'free'
+    ? [apiKeys.openai?.key, apiKeys.anthropic?.key, apiKeys.google?.key, apiKeys.xai?.key].filter(Boolean).length
+    : 0;
 
-  // Call configureModeComplete when all keys are configured
-  if (mode === 'free' && allKeysConfigured && !isModeConfigured) {
-    configureModeComplete();
-  }
+  // At least 1 API key configured enables Continue button
+  const hasConfiguredKeys = configuredKeysCount > 0;
+
+  // Call configureModeComplete when at least 1 key is configured
+  useEffect(() => {
+    if (mode === 'free' && hasConfiguredKeys && !isModeConfigured) {
+      configureModeComplete();
+    }
+  }, [mode, hasConfiguredKeys, isModeConfigured, configureModeComplete]);
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-6xl">
@@ -123,11 +129,6 @@ export default function ConfigPage() {
 
       {mode === 'free' && (
         <div className="mt-8">
-          <div className="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-md">
-            <p className="text-sm text-gray-700">
-              💡 <strong>{t('pages.config.apiKeyInfoBold')}</strong> {t('pages.config.apiKeyInfoNormal')}
-            </p>
-          </div>
           <ApiKeyConfiguration
             items={apiKeyItems}
             onKeyChange={handleKeyChange}
