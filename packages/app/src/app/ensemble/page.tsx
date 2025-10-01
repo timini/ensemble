@@ -41,17 +41,32 @@ export default function EnsemblePage() {
   // Track selected model IDs for ModelSelectionList
   const selectedModelIds = selectedModels.map((m) => m.id);
 
-  // Build provider status map based on configured API keys (Free mode only)
-  // In Mock mode (NEXT_PUBLIC_MOCK_MODE=true), all providers are ready
+  // Build provider status map based on mode
   const isMockMode = process.env.NEXT_PUBLIC_MOCK_MODE === 'true';
-  const providerStatus = mode === 'free' && !isMockMode
+
+  const providerStatus = mode === 'pro'
     ? {
+        // Pro mode: all providers included in subscription
+        openai: 'Ready',
+        anthropic: 'Ready',
+        google: 'Ready',
+        xai: 'Ready',
+      }
+    : isMockMode
+    ? {
+        // Mock mode: all providers ready for testing
+        openai: 'Ready',
+        anthropic: 'Ready',
+        google: 'Ready',
+        xai: 'Ready',
+      }
+    : {
+        // Free mode: check for configured API keys
         openai: apiKeys.openai?.key ? 'Ready' : 'API key required',
         anthropic: apiKeys.anthropic?.key ? 'Ready' : 'API key required',
         google: apiKeys.google?.key ? 'Ready' : 'API key required',
         xai: apiKeys.xai?.key ? 'Ready' : 'API key required',
-      }
-    : undefined; // Pro mode or Mock mode doesn't show status (all models available)
+      };
 
   // Placeholder presets (will be implemented with preset slice later)
   const [presets] = useState<Preset[]>([]);
