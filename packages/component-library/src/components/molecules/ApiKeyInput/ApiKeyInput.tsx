@@ -138,6 +138,7 @@ export const ApiKeyInput = React.forwardRef<HTMLInputElement, ApiKeyInputProps>(
             }
             className={cn(
               'pr-20',
+              validationStatus === 'valid' && 'border-green-300 bg-green-50',
               validationStatus === 'invalid' && 'border-red-500 dark:border-red-400',
               disabled && 'disabled:opacity-50'
             )}

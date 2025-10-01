@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { ModelCard, type Provider } from '../../molecules/ModelCard';
+import { Heading } from '../../atoms/Heading';
 
 export interface Model {
   id: string;
@@ -16,6 +17,8 @@ export interface ModelSelectionListProps {
   summarizerModelId?: string;
   /** Maximum number of models that can be selected */
   maxSelection?: number;
+  /** Provider status map (e.g., 'Ready', 'API key required') */
+  providerStatus?: Partial<Record<Provider, string>>;
   /** Callback when a model is toggled */
   onModelToggle: (modelId: string) => void;
   /** Callback when summarizer designation changes */
@@ -55,6 +58,7 @@ export const ModelSelectionList = React.forwardRef<HTMLDivElement, ModelSelectio
       selectedModelIds,
       summarizerModelId,
       maxSelection,
+      providerStatus,
       onModelToggle,
       onSummarizerChange: _onSummarizerChange,
     },
@@ -104,7 +108,10 @@ export const ModelSelectionList = React.forwardRef<HTMLDivElement, ModelSelectio
             <div key={provider} data-testid="provider-section" className="mb-8">
               {/* Provider Header */}
               <div className="flex items-center justify-between mb-4">
-                <h4 className="font-semibold text-gray-900">{PROVIDER_LABELS[provider]}</h4>
+                <Heading level={4} size="lg" className="text-gray-900">{PROVIDER_LABELS[provider]}</Heading>
+                {providerStatus?.[provider] && (
+                  <span className="text-sm text-blue-600">{providerStatus[provider]}</span>
+                )}
               </div>
 
               {/* Model Grid */}
@@ -112,7 +119,10 @@ export const ModelSelectionList = React.forwardRef<HTMLDivElement, ModelSelectio
                 {providerModels.map((model) => {
                   const isSelected = selectedModelIds.includes(model.id);
                   const isSummarizer = summarizerModelId === model.id;
-                  const isDisabled = !isSelected && isMaxSelectionReached;
+                  const providerRequiresApiKey =
+                    providerStatus?.[provider]?.toLowerCase().includes('required') ||
+                    providerStatus?.[provider]?.toLowerCase().includes('api key');
+                  const isDisabled = (!isSelected && isMaxSelectionReached) || providerRequiresApiKey;
 
                   return (
                     <ModelCard

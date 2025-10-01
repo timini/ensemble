@@ -6,44 +6,74 @@ import { ModeSelectionCard } from './ModeSelectionCard';
 describe('ModeSelectionCard', () => {
   describe('rendering', () => {
     it('renders free mode with correct title', () => {
-      render(<ModeSelectionCard mode="free" selected={false} />);
+      render(<ModeSelectionCard mode="free" />);
       expect(screen.getByText('Free Mode')).toBeInTheDocument();
     });
 
     it('renders pro mode with correct title', () => {
-      render(<ModeSelectionCard mode="pro" selected={false} />);
+      render(<ModeSelectionCard mode="pro" />);
       expect(screen.getByText('Pro Mode')).toBeInTheDocument();
     });
 
     it('renders free mode description', () => {
-      render(<ModeSelectionCard mode="free" selected={false} />);
-      expect(screen.getByText(/single AI provider/i)).toBeInTheDocument();
+      render(<ModeSelectionCard mode="free" />);
+      expect(
+        screen.getByText(/Bring your own API keys. Completely secure/)
+      ).toBeInTheDocument();
     });
 
     it('renders pro mode description', () => {
-      render(<ModeSelectionCard mode="pro" selected={false} />);
-      expect(screen.getByText(/multiple AI providers/i)).toBeInTheDocument();
+      render(<ModeSelectionCard mode="pro" />);
+      expect(
+        screen.getByText(/Buy credits to get access to the latest models/)
+      ).toBeInTheDocument();
+    });
+
+    it('renders free mode icon', () => {
+      render(<ModeSelectionCard mode="free" />);
+      expect(screen.getByText('🔧')).toBeInTheDocument();
+    });
+
+    it('renders pro mode icon', () => {
+      render(<ModeSelectionCard mode="pro" />);
+      expect(screen.getByText('⭐')).toBeInTheDocument();
+    });
+
+    it('renders free mode button', () => {
+      render(<ModeSelectionCard mode="free" />);
+      expect(screen.getByText('Start in Free Mode')).toBeInTheDocument();
+    });
+
+    it('renders pro mode button', () => {
+      render(<ModeSelectionCard mode="pro" />);
+      expect(screen.getByText('Go Pro')).toBeInTheDocument();
     });
   });
 
   describe('selected state', () => {
-    it('shows selected badge when selected', () => {
-      render(<ModeSelectionCard mode="free" selected={true} />);
-      expect(screen.getByText('Selected')).toBeInTheDocument();
+    it('applies selected styling when selected', () => {
+      const { container } = render(<ModeSelectionCard mode="free" selected={true} />);
+      const card = container.querySelector('[data-selected="true"]');
+      expect(card).toBeInTheDocument();
+      expect(card).toHaveClass('border-blue-500');
+      expect(card).toHaveClass('bg-blue-50');
     });
 
-    it('does not show selected badge when unselected', () => {
-      render(<ModeSelectionCard mode="free" selected={false} />);
-      expect(screen.queryByText('Selected')).not.toBeInTheDocument();
+    it('does not apply selected styling when unselected', () => {
+      const { container } = render(<ModeSelectionCard mode="free" selected={false} />);
+      const card = container.querySelector('[data-selected="false"]');
+      expect(card).toBeInTheDocument();
+      expect(card).not.toHaveClass('border-blue-500');
+      expect(card).not.toHaveClass('bg-blue-50');
     });
 
-    it('applies selected visual style', () => {
+    it('has correct data attribute for selected state', () => {
       const { container } = render(<ModeSelectionCard mode="free" selected={true} />);
       const card = container.querySelector('[data-selected="true"]');
       expect(card).toBeInTheDocument();
     });
 
-    it('applies unselected visual style', () => {
+    it('has correct data attribute for unselected state', () => {
       const { container } = render(<ModeSelectionCard mode="free" selected={false} />);
       const card = container.querySelector('[data-selected="false"]');
       expect(card).toBeInTheDocument();
@@ -51,204 +81,152 @@ describe('ModeSelectionCard', () => {
   });
 
   describe('disabled state', () => {
-    it('applies disabled visual style', () => {
-      const { container } = render(<ModeSelectionCard mode="free" selected={false} disabled={true} />);
+    it('applies disabled data attribute', () => {
+      const { container } = render(<ModeSelectionCard mode="free" disabled={true} />);
       const card = container.querySelector('[data-disabled="true"]');
       expect(card).toBeInTheDocument();
+    });
+
+    it('disables the button when disabled', () => {
+      render(<ModeSelectionCard mode="free" disabled={true} />);
+      const button = screen.getByText('Start in Free Mode');
+      expect(button).toBeDisabled();
     });
 
     it('does not call onClick when disabled', async () => {
       const user = userEvent.setup();
       const onClick = vi.fn();
 
-      render(<ModeSelectionCard mode="free" selected={false} disabled={true} onClick={onClick} />);
+      render(<ModeSelectionCard mode="free" disabled={true} onClick={onClick} />);
 
-      const card = screen.getByText('Free Mode').closest('[role="button"]');
-      if (card) await user.click(card);
+      const button = screen.getByText('Start in Free Mode');
+      await user.click(button);
 
       expect(onClick).not.toHaveBeenCalled();
     });
 
-    it('is not keyboard accessible when disabled', () => {
-      const { container } = render(<ModeSelectionCard mode="free" selected={false} disabled={true} />);
-      const card = container.querySelector('[tabindex="-1"]');
+    it('does not have disabled attribute when enabled', () => {
+      const { container } = render(<ModeSelectionCard mode="free" disabled={false} />);
+      const card = container.querySelector('[data-disabled="false"]');
       expect(card).toBeInTheDocument();
     });
 
-    it('does not have disabled attribute when enabled', () => {
-      const { container } = render(<ModeSelectionCard mode="free" selected={false} disabled={false} />);
-      const card = container.querySelector('[data-disabled="false"]');
-      expect(card).toBeInTheDocument();
+    it('enables the button when not disabled', () => {
+      render(<ModeSelectionCard mode="free" disabled={false} />);
+      const button = screen.getByText('Start in Free Mode');
+      expect(button).not.toBeDisabled();
     });
   });
 
   describe('user interactions', () => {
-    it('calls onClick when clicked', async () => {
+    it('calls onClick when button is clicked', async () => {
       const user = userEvent.setup();
       const onClick = vi.fn();
 
-      render(<ModeSelectionCard mode="free" selected={false} onClick={onClick} />);
+      render(<ModeSelectionCard mode="free" onClick={onClick} />);
 
-      const card = screen.getByText('Free Mode').closest('[role="button"]');
-      if (card) await user.click(card);
+      const button = screen.getByText('Start in Free Mode');
+      await user.click(button);
 
       expect(onClick).toHaveBeenCalledTimes(1);
     });
 
-    it('calls onClick when Enter key is pressed', async () => {
+    it('calls onClick for pro mode button', async () => {
       const user = userEvent.setup();
       const onClick = vi.fn();
 
-      render(<ModeSelectionCard mode="free" selected={false} onClick={onClick} />);
+      render(<ModeSelectionCard mode="pro" onClick={onClick} />);
 
-      const card = screen.getByText('Free Mode').closest('[role="button"]') as HTMLElement;
-      if (card) {
-        card.focus();
-        await user.keyboard('{Enter}');
-      }
+      const button = screen.getByText('Go Pro');
+      await user.click(button);
 
       expect(onClick).toHaveBeenCalledTimes(1);
     });
 
-    it('calls onClick when Space key is pressed', async () => {
+    it('handles multiple clicks', async () => {
       const user = userEvent.setup();
       const onClick = vi.fn();
 
-      render(<ModeSelectionCard mode="free" selected={false} onClick={onClick} />);
+      render(<ModeSelectionCard mode="free" onClick={onClick} />);
 
-      const card = screen.getByText('Free Mode').closest('[role="button"]') as HTMLElement;
-      if (card) {
-        card.focus();
-        await user.keyboard(' ');
-      }
+      const button = screen.getByText('Start in Free Mode');
+      await user.click(button);
+      await user.click(button);
+      await user.click(button);
 
-      expect(onClick).toHaveBeenCalledTimes(1);
+      expect(onClick).toHaveBeenCalledTimes(3);
     });
 
-    it('does not call onClick when other keys are pressed', async () => {
-      const user = userEvent.setup();
-      const onClick = vi.fn();
-
-      render(<ModeSelectionCard mode="free" selected={false} onClick={onClick} />);
-
-      const card = screen.getByText('Free Mode').closest('[role="button"]') as HTMLElement;
-      if (card) {
-        card.focus();
-        await user.keyboard('{Escape}');
-        await user.keyboard('a');
-      }
-
-      expect(onClick).not.toHaveBeenCalled();
-    });
-
-    it('does not call onClick when not provided', async () => {
+    it('does not call onClick when no handler is provided', async () => {
       const user = userEvent.setup();
 
-      render(<ModeSelectionCard mode="free" selected={false} />);
+      render(<ModeSelectionCard mode="free" />);
 
-      const card = screen.getByText('Free Mode').closest('[role="button"]');
-      // Should not throw error
-      if (card) await user.click(card);
+      const button = screen.getByText('Start in Free Mode');
+      await user.click(button);
 
-      expect(true).toBe(true); // No error thrown
+      // Should not throw
+      expect(button).toBeInTheDocument();
     });
   });
 
-  describe('mode-specific icons', () => {
-    it('renders icon for free mode', () => {
-      const { container } = render(<ModeSelectionCard mode="free" selected={false} />);
-      const icon = container.querySelector('svg');
-      expect(icon).toBeInTheDocument();
+  describe('styling', () => {
+    it('applies hover border style', () => {
+      const { container } = render(<ModeSelectionCard mode="free" />);
+      const card = container.querySelector('.hover\\:border-blue-200');
+      expect(card).toBeInTheDocument();
     });
 
-    it('renders icon for pro mode', () => {
-      const { container } = render(<ModeSelectionCard mode="pro" selected={false} />);
-      const icon = container.querySelector('svg');
-      expect(icon).toBeInTheDocument();
+    it('applies transition classes', () => {
+      const { container } = render(<ModeSelectionCard mode="free" />);
+      const card = container.querySelector('.transition-colors');
+      expect(card).toBeInTheDocument();
+    });
+
+    it('applies correct icon circle styling', () => {
+      const { container } = render(<ModeSelectionCard mode="free" />);
+      const iconCircle = container.querySelector('.bg-blue-100.rounded-full');
+      expect(iconCircle).toBeInTheDocument();
+    });
+
+    it('applies full-width button styling', () => {
+      const { container } = render(<ModeSelectionCard mode="free" />);
+      const button = container.querySelector('.w-full');
+      expect(button).toBeInTheDocument();
     });
   });
 
   describe('accessibility', () => {
-    it('has button role', () => {
-      const { container } = render(<ModeSelectionCard mode="free" selected={false} />);
-      const card = container.querySelector('[role="button"]');
-      expect(card).toBeInTheDocument();
+    it('has a heading for the mode title', () => {
+      render(<ModeSelectionCard mode="free" />);
+      const heading = screen.getByRole('heading', { name: /Free Mode/i });
+      expect(heading).toBeInTheDocument();
     });
 
-    it('is keyboard accessible when enabled', () => {
-      const { container } = render(<ModeSelectionCard mode="free" selected={false} />);
-      const card = container.querySelector('[tabindex="0"]');
-      expect(card).toBeInTheDocument();
+    it('has a clickable button', () => {
+      render(<ModeSelectionCard mode="free" />);
+      const button = screen.getByRole('button');
+      expect(button).toBeInTheDocument();
     });
 
-    it('has aria-pressed attribute when selected', () => {
-      const { container } = render(<ModeSelectionCard mode="free" selected={true} />);
-      const card = container.querySelector('[aria-pressed="true"]');
-      expect(card).toBeInTheDocument();
-    });
-
-    it('has aria-pressed false when unselected', () => {
-      const { container } = render(<ModeSelectionCard mode="free" selected={false} />);
-      const card = container.querySelector('[aria-pressed="false"]');
-      expect(card).toBeInTheDocument();
-    });
-
-    it('has aria-disabled when disabled', () => {
-      const { container } = render(<ModeSelectionCard mode="free" selected={false} disabled={true} />);
-      const card = container.querySelector('[aria-disabled="true"]');
-      expect(card).toBeInTheDocument();
-    });
-
-    it('does not have aria-disabled when enabled', () => {
-      const { container } = render(<ModeSelectionCard mode="free" selected={false} disabled={false} />);
-      const card = container.querySelector('[aria-disabled="false"]');
-      expect(card).toBeInTheDocument();
+    it('button has accessible text', () => {
+      render(<ModeSelectionCard mode="free" />);
+      const button = screen.getByRole('button', { name: /Start in Free Mode/i });
+      expect(button).toBeInTheDocument();
     });
   });
 
-  describe('composition', () => {
-    it('uses Card atom for structure', () => {
-      const { container } = render(<ModeSelectionCard mode="free" selected={false} />);
-      // Card will have rounded corners
-      const card = container.querySelector('.rounded-xl');
-      expect(card).toBeInTheDocument();
-    });
-
-    it('uses Badge atom for selected indicator', () => {
-      const { container } = render(<ModeSelectionCard mode="free" selected={true} />);
-      const badge = container.querySelector('.inline-flex.items-center.rounded-full');
-      expect(badge).toBeInTheDocument();
-    });
-
-    it('uses Icon atom for mode icon', () => {
-      const { container } = render(<ModeSelectionCard mode="free" selected={false} />);
-      const icon = container.querySelector('svg');
-      expect(icon).toBeInTheDocument();
-    });
-  });
-
-  describe('mode data attributes', () => {
-    it('sets data-mode attribute for free', () => {
-      const { container } = render(<ModeSelectionCard mode="free" selected={false} />);
+  describe('data attributes', () => {
+    it('sets data-mode attribute for free mode', () => {
+      const { container } = render(<ModeSelectionCard mode="free" />);
       const card = container.querySelector('[data-mode="free"]');
       expect(card).toBeInTheDocument();
     });
 
-    it('sets data-mode attribute for pro', () => {
-      const { container } = render(<ModeSelectionCard mode="pro" selected={false} />);
+    it('sets data-mode attribute for pro mode', () => {
+      const { container } = render(<ModeSelectionCard mode="pro" />);
       const card = container.querySelector('[data-mode="pro"]');
       expect(card).toBeInTheDocument();
     });
   });
-
-  describe('forwarding ref', () => {
-    it('forwards ref to card element', () => {
-      const ref = React.createRef<HTMLDivElement>();
-      render(<ModeSelectionCard mode="free" selected={false} ref={ref} />);
-      expect(ref.current).toBeInstanceOf(HTMLDivElement);
-    });
-  });
 });
-
-// Add React import for ref test
-import * as React from 'react';

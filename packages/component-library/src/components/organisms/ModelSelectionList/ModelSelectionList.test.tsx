@@ -418,4 +418,76 @@ describe('ModelSelectionList', () => {
       expect(gpt4Card).toHaveAttribute('data-summarizer', 'true');
     });
   });
+
+  describe('provider status', () => {
+    it('displays provider status indicators', () => {
+      render(
+        <ModelSelectionList
+          models={mockModels}
+          selectedModelIds={[]}
+          providerStatus={{
+            openai: 'API key required',
+            anthropic: 'Ready',
+            google: 'Configuring',
+          }}
+          onModelToggle={vi.fn()}
+          onSummarizerChange={vi.fn()}
+        />
+      );
+
+      expect(screen.getByText('API key required')).toBeInTheDocument();
+      expect(screen.getByText('Ready')).toBeInTheDocument();
+      expect(screen.getByText('Configuring')).toBeInTheDocument();
+    });
+
+    it('disables models when API key is required', () => {
+      const { container } = render(
+        <ModelSelectionList
+          models={mockModels}
+          selectedModelIds={[]}
+          providerStatus={{
+            openai: 'API key required',
+            anthropic: 'Ready',
+          }}
+          onModelToggle={vi.fn()}
+          onSummarizerChange={vi.fn()}
+        />
+      );
+
+      // OpenAI models should be disabled
+      const openaiCards = container.querySelectorAll('[data-provider="openai"]');
+      openaiCards.forEach((card) => {
+        expect(card).toHaveAttribute('data-disabled', 'true');
+      });
+
+      // Anthropic models should not be disabled
+      const anthropicCards = container.querySelectorAll('[data-provider="anthropic"]');
+      anthropicCards.forEach((card) => {
+        expect(card).toHaveAttribute('data-disabled', 'false');
+      });
+    });
+
+    it('prevents selection when API key is required', async () => {
+      const onModelToggle = vi.fn();
+      const user = userEvent.setup();
+
+      render(
+        <ModelSelectionList
+          models={mockModels}
+          selectedModelIds={[]}
+          providerStatus={{
+            openai: 'API key required',
+          }}
+          onModelToggle={onModelToggle}
+          onSummarizerChange={vi.fn()}
+        />
+      );
+
+      const gpt4Card = screen.getByText('GPT-4').closest('div[data-provider]');
+      await user.click(gpt4Card!);
+
+      // Should not call onModelToggle for disabled models
+      expect(onModelToggle).not.toHaveBeenCalled();
+    });
+  });
 });
