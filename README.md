@@ -20,6 +20,7 @@ This is a monorepo with npm workspaces:
 ai-ensemble/
 ├── packages/
 │   ├── component-library/    # Reusable UI components with Storybook
+│   ├── shared-utils/         # Domain utilities (similarity, crypto, embeddings, streaming)
 │   └── wireframes/           # Reference wireframe implementation (design source of truth)
 ├── specs/                    # Feature specifications and planning documents
 ├── package.json             # Root workspace configuration
@@ -40,8 +41,11 @@ Reusable UI components built with:
 - **Molecules (8)**: ApiKeyInput, EnsembleHeader, ModelCard, ModeSelectionCard, ProgressSteps, PromptInput, ResponseCard, SummarizerIndicator
 - **Organisms (12)**: AgreementAnalysis, ApiKeyConfiguration, ConsensusCard, EnsembleConfigurationSummary, EnsembleManagementPanel, EnsembleSidebar, ManualResponseModal, ModelSelectionList, ModeSelector, PageHero, SettingsModal, WorkflowNavigator
 
-**Core Utilities:**
+### Shared Utilities (`packages/shared-utils/`)
+
+Domain utilities (non-UI) used across the monorepo:
 - **Similarity Calculations**: Cosine similarity, similarity matrix, agreement statistics for AI response analysis
+- **Future utilities**: Encryption (AES-256), embeddings, streaming (Phase 2-3)
 
 ### Wireframes (`packages/wireframes/`)
 
@@ -231,12 +235,13 @@ The application supports **English (EN)** and **French (FR)**.
 
 **Component Library Development - COMPLETED**
 - ✅ **39 components** with 100% test coverage (19 atoms, 8 molecules, 12 organisms)
-- ✅ **970 passing tests** - Exceeded 80% coverage requirement
+- ✅ **948 passing tests** (component library) - Exceeded 80% coverage requirement
+- ✅ **22 passing tests** (shared utilities) - Similarity calculations
 - ✅ **Full i18n support** - English & French translations for all components
 - ✅ **Storybook catalog** - 39+ stories documenting all component variants
 - ✅ **Accessibility compliance** - WCAG 2.1 AA standards with aria-labels
 - ✅ **Dark mode support** - Seamless light/dark theme switching
-- ✅ **Core utilities** - Similarity calculations for agreement analysis
+- ✅ **Shared utilities package** - Domain utilities (similarity, crypto, embeddings, streaming)
 - ✅ **Complete documentation** - Design system, component guides, testing strategy
 
 **Key Achievements:**

@@ -1,0 +1,44 @@
+{
+  "name": "@ensemble-ai/shared-utils",
+  "version": "1.0.0",
+  "description": "Shared utilities for Ensemble AI (similarity, crypto, embeddings, streaming)",
+  "type": "module",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./similarity": {
+      "types": "./dist/similarity/index.d.ts",
+      "import": "./dist/similarity/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:ui": "vitest --ui",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint . --max-warnings 0",
+    "clean": "rm -rf dist"
+  },
+  "keywords": [
+    "similarity",
+    "cosine-similarity",
+    "embeddings",
+    "crypto",
+    "streaming",
+    "utilities"
+  ],
+  "author": "",
+  "license": "UNLICENSED",
+  "private": true,
+  "devDependencies": {
+    "@types/node": "^22.7.9",
+    "typescript": "^5.6.3",
+    "vitest": "^2.1.3"
+  }
+}
