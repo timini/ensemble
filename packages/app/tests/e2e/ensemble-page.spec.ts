@@ -24,7 +24,7 @@ test.describe('Ensemble Page', () => {
 
   test('loads ensemble page successfully', async ({ page }) => {
     // Check page title
-    await expect(page).toHaveTitle(/AI Ensemble/i);
+    await expect(page).toHaveTitle(/Ensemble AI/i);
 
     // Check for page hero heading
     await expect(page.locator('h1')).toBeVisible();

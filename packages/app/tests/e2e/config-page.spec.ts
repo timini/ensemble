@@ -18,7 +18,7 @@ test.describe('Config Page', () => {
 
   test('loads config page successfully', async ({ page }) => {
     // Check page title
-    await expect(page).toHaveTitle(/AI Ensemble/i);
+    await expect(page).toHaveTitle(/Ensemble AI/i);
 
     // Check for page hero heading
     await expect(page.locator('h1')).toContainText(/configuration/i);
@@ -51,7 +51,7 @@ test.describe('Config Page', () => {
     );
   });
 
-  test('Continue button enables after mode selection', async ({ page }) => {
+  test('Continue button enables after Free mode selection and API keys configured', async ({ page }) => {
     // Initially disabled
     const continueButton = page.getByRole('button', { name: /continue/i });
     await expect(continueButton).toBeDisabled();
@@ -59,33 +59,36 @@ test.describe('Config Page', () => {
     // Select Free mode
     await page.locator('[data-mode="free"]').click();
 
+    // Configure all 4 API keys
+    await page.getByTestId('api-key-input-openai').fill('sk-test-openai-key');
+    await page.getByTestId('api-key-input-anthropic').fill('sk-ant-test-anthropic-key');
+    await page.getByTestId('api-key-input-google').fill('AIza-test-google-key');
+    await page.getByTestId('api-key-input-xai').fill('xai-test-xai-key');
+
     // Now enabled
     await expect(continueButton).toBeEnabled();
   });
 
-  test('can toggle between Free and Pro modes', async ({ page }) => {
-    // Select Free mode
-    await page.locator('[data-mode="free"]').click();
-    await expect(page.locator('[data-mode="free"]')).toHaveAttribute(
-      'data-selected',
-      'true'
-    );
+  test('Pro mode is disabled with Coming Soon text', async ({ page }) => {
+    // Pro mode card should be visible but disabled
+    const proModeCard = page.locator('[data-mode="pro"]');
+    await expect(proModeCard).toBeVisible();
+    await expect(proModeCard).toHaveAttribute('data-disabled', 'true');
 
-    // Select Pro mode
-    await page.locator('[data-mode="pro"]').click();
-    await expect(page.locator('[data-mode="pro"]')).toHaveAttribute(
-      'data-selected',
-      'true'
-    );
-    await expect(page.locator('[data-mode="free"]')).toHaveAttribute(
-      'data-selected',
-      'false'
-    );
+    // Button should show "Coming Soon"
+    await expect(proModeCard.getByRole('button')).toContainText(/coming soon/i);
+    await expect(proModeCard.getByRole('button')).toBeDisabled();
   });
 
   test('navigates to /ensemble after clicking Continue', async ({ page }) => {
     // Select Free mode
     await page.locator('[data-mode="free"]').click();
+
+    // Configure all 4 API keys
+    await page.getByTestId('api-key-input-openai').fill('sk-test-openai-key');
+    await page.getByTestId('api-key-input-anthropic').fill('sk-ant-test-anthropic-key');
+    await page.getByTestId('api-key-input-google').fill('AIza-test-google-key');
+    await page.getByTestId('api-key-input-xai').fill('xai-test-xai-key');
 
     // Click Continue button
     await page.getByRole('button', { name: /continue/i }).click();
