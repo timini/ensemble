@@ -77,6 +77,10 @@
       "apiKeysConfigured_other": "{{count}} API keys configured.",
       "configureMoreOrContinue": "Configure more or continue selecting models."
     },
+    "apiKeyConfigurationModal": {
+      "title": "Configure API Key",
+      "done": "Done"
+    },
     "consensusCard": {
       "heading": "Consensus",
       "description": "Combined summary provided by {{model}}.",
