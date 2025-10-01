@@ -177,5 +177,21 @@
     "anthropic": "Anthropic",
     "google": "Google",
     "xai": "XAI"
+  },
+  "pages": {
+    "prompt": {
+      "title": "Entrez Votre Invite",
+      "description": "Votre invite sera envoyée à tous les modèles sélectionnés dans votre ensemble",
+      "placeholder": "Entrez votre invite ici..."
+    },
+    "review": {
+      "title": "Réviser les Réponses",
+      "description": "Comparez les réponses de votre ensemble de modèles d'IA",
+      "promptLabel": "Votre Invite",
+      "responsesHeading": "Réponses des Modèles",
+      "noResponses": "Aucune réponse pour le moment. Les réponses apparaîtront ici lorsque les modèles seront terminés.",
+      "backButton": "Retour à l'Invite",
+      "newPromptButton": "Nouvelle Invite"
+    }
   }
 }

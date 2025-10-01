@@ -30,7 +30,7 @@ describe('ApiKeyConfigurationModal', () => {
       );
 
       expect(screen.getByTestId('api-key-configuration-modal')).toBeInTheDocument();
-      expect(screen.getByText('organisms.apiKeyConfigurationModal.title')).toBeInTheDocument();
+      expect(screen.getByText('Configure API Key')).toBeInTheDocument();
     });
 
     it('does not render when open is false', () => {
@@ -105,7 +105,7 @@ describe('ApiKeyConfigurationModal', () => {
         />
       );
 
-      expect(screen.getByText('organisms.apiKeyConfigurationModal.done')).toBeInTheDocument();
+      expect(screen.getByText('Done')).toBeInTheDocument();
     });
   });
 
@@ -145,7 +145,7 @@ describe('ApiKeyConfigurationModal', () => {
         />
       );
 
-      await user.click(screen.getByText('organisms.apiKeyConfigurationModal.done'));
+      await user.click(screen.getByText('Done'));
 
       expect(onOpenChange).toHaveBeenCalledWith(false);
     });

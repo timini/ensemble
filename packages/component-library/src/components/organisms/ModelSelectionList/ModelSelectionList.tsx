@@ -20,6 +20,8 @@ export interface ModelSelectionListProps {
   maxSelection?: number;
   /** Provider status map (e.g., 'Ready', 'API key required') */
   providerStatus?: Partial<Record<Provider, string>>;
+  /** Whether in mock mode (allows selection even without API keys) */
+  isMockMode?: boolean;
   /** Callback when a model is toggled */
   onModelToggle: (modelId: string) => void;
   /** Callback when summarizer designation changes */
@@ -62,6 +64,7 @@ export const ModelSelectionList = React.forwardRef<HTMLDivElement, ModelSelectio
       summarizerModelId,
       maxSelection,
       providerStatus,
+      isMockMode = false,
       onModelToggle,
       onSummarizerChange: _onSummarizerChange,
       onConfigureApiKey,
@@ -144,8 +147,9 @@ export const ModelSelectionList = React.forwardRef<HTMLDivElement, ModelSelectio
                   const isSelected = selectedModelIds.includes(model.id);
                   const isSummarizer = summarizerModelId === model.id;
                   const providerRequiresApiKey =
-                    providerStatus?.[provider]?.toLowerCase().includes('required') ||
-                    providerStatus?.[provider]?.toLowerCase().includes('api key');
+                    !isMockMode &&
+                    (providerStatus?.[provider]?.toLowerCase().includes('required') ||
+                    providerStatus?.[provider]?.toLowerCase().includes('api key'));
                   const isDisabled = (!isSelected && isMaxSelectionReached) || providerRequiresApiKey;
 
                   return (
