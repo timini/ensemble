@@ -182,7 +182,16 @@
     "prompt": {
       "title": "Entrez Votre Invite",
       "description": "Votre invite sera envoyée à tous les modèles sélectionnés dans votre ensemble",
-      "placeholder": "Entrez votre invite ici..."
+      "placeholder": "Entrez votre invite ici...",
+      "inputLabel": "Entrez Votre Invite",
+      "keyboardHint": "⌘+Entrée pour soumettre",
+      "tipsHeading": "Conseils pour de meilleures invites",
+      "tipsDescription": "De petits ajustements conduisent souvent à des résultats nettement plus alignés.",
+      "tip1": "Soyez précis et clair sur le résultat souhaité.",
+      "tip2": "Fournissez du contexte, des exemples ou des contraintes lorsqu'ils sont importants.",
+      "tip3": "Expérimentez avec le ton : analytique, conversationnel ou créatif.",
+      "tip4": "Itérez sur la longueur et la structure pour explorer différents comportements.",
+      "generateButton": "Générer les Réponses"
     },
     "review": {
       "title": "Réviser les Réponses",
