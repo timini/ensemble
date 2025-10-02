@@ -14,8 +14,8 @@ import { useStore } from '~/store';
 import { PageHero } from '@/components/organisms/PageHero';
 import { EnsembleConfigurationSummary } from '@/components/organisms/EnsembleConfigurationSummary';
 import { WorkflowNavigator } from '@/components/organisms/WorkflowNavigator';
+import { PromptTips } from '@/components/organisms/PromptTips';
 import { ProgressSteps } from '@/components/molecules/ProgressSteps';
-import { Card } from '@/components/atoms/Card';
 import { Heading } from '@/components/atoms/Heading';
 import { Text } from '@/components/atoms/Text';
 
@@ -90,30 +90,7 @@ export default function PromptPage() {
         </div>
 
         {/* Tips for better prompts */}
-        <Card className="bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800">
-          <div className="p-6">
-            <Heading level={3} size="lg" className="mb-4 text-blue-900 dark:text-blue-100">
-              {t('pages.prompt.tipsHeading')}
-            </Heading>
-            <Text variant="body" color="muted" className="mb-4 text-blue-800 dark:text-blue-200">
-              {t('pages.prompt.tipsDescription')}
-            </Text>
-            <ul className="space-y-2 text-sm text-blue-800 dark:text-blue-200">
-              <li>
-                <strong>{t('pages.prompt.tip1')}</strong>
-              </li>
-              <li>
-                <strong>{t('pages.prompt.tip2')}</strong>
-              </li>
-              <li>
-                <strong>{t('pages.prompt.tip3')}</strong>
-              </li>
-              <li>
-                <strong>{t('pages.prompt.tip4')}</strong>
-              </li>
-            </ul>
-          </div>
-        </Card>
+        <PromptTips />
       </div>
 
       <div className="mt-12">
