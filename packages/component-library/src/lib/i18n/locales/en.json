@@ -182,7 +182,16 @@
     "prompt": {
       "title": "Enter Your Prompt",
       "description": "Your prompt will be sent to all selected models in your ensemble",
-      "placeholder": "Enter your prompt here..."
+      "placeholder": "Enter your prompt here...",
+      "inputLabel": "Enter Your Prompt",
+      "keyboardHint": "⌘+Enter to submit",
+      "tipsHeading": "Tips for better prompts",
+      "tipsDescription": "Small adjustments often lead to noticeably more aligned outputs.",
+      "tip1": "Be specific and clear about the desired outcome.",
+      "tip2": "Provide context, examples, or constraints when they matter.",
+      "tip3": "Experiment with tone: analytical, conversational, or creative.",
+      "tip4": "Iterate on length and structure to probe different behaviours.",
+      "generateButton": "Generate Responses"
     },
     "review": {
       "title": "Review Responses",
