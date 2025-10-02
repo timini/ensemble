@@ -15,6 +15,7 @@ import { PageHero } from '@/components/organisms/PageHero';
 import { ModeSelector } from '@/components/organisms/ModeSelector';
 import { ApiKeyConfiguration } from '@/components/organisms/ApiKeyConfiguration';
 import { WorkflowNavigator } from '@/components/organisms/WorkflowNavigator';
+import { ProgressSteps } from '@/components/molecules/ProgressSteps';
 import type { Provider } from '@/components/molecules/ApiKeyInput';
 import type { ValidationStatus } from '@/components/molecules/ApiKeyInput';
 import { validateApiKey, createDebouncedValidator } from '~/lib/validation';
@@ -153,6 +154,8 @@ export default function ConfigPage() {
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-6xl">
+      <ProgressSteps currentStep={currentStep} />
+
       <PageHero
         title={t('pages.config.title')}
         description={t('pages.config.description')}
