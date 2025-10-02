@@ -15,9 +15,8 @@ import { PageHero } from '@/components/organisms/PageHero';
 import { EnsembleConfigurationSummary } from '@/components/organisms/EnsembleConfigurationSummary';
 import { WorkflowNavigator } from '@/components/organisms/WorkflowNavigator';
 import { PromptTips } from '@/components/organisms/PromptTips';
+import { PromptInputWithHint } from '@/components/organisms/PromptInputWithHint';
 import { ProgressSteps } from '@/components/molecules/ProgressSteps';
-import { Heading } from '@/components/atoms/Heading';
-import { Text } from '@/components/atoms/Text';
 
 export default function PromptPage() {
   const { t } = useTranslation();
@@ -75,19 +74,10 @@ export default function PromptPage() {
         )}
 
         {/* Prompt Input */}
-        <div>
-          <div className="flex items-center justify-between mb-4">
-            <Heading level={3} size="lg">{t('pages.prompt.inputLabel')}</Heading>
-            <Text variant="caption" color="muted">{t('pages.prompt.keyboardHint')}</Text>
-          </div>
-          <textarea
-            value={localPrompt}
-            onChange={(e) => handlePromptChange(e.target.value)}
-            placeholder={t('pages.prompt.placeholder')}
-            className="w-full min-h-[200px] p-4 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-y bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
-            data-testid="prompt-textarea"
-          />
-        </div>
+        <PromptInputWithHint
+          value={localPrompt}
+          onChange={handlePromptChange}
+        />
 
         {/* Tips for better prompts */}
         <PromptTips />
