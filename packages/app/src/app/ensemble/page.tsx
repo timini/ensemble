@@ -16,6 +16,7 @@ import { ModelSelectionList } from '@/components/organisms/ModelSelectionList';
 import { EnsembleManagementPanel, type Preset } from '@/components/organisms/EnsembleManagementPanel';
 import { WorkflowNavigator } from '@/components/organisms/WorkflowNavigator';
 import { ApiKeyConfigurationModal } from '@/components/organisms/ApiKeyConfigurationModal';
+import { ProgressSteps } from '@/components/molecules/ProgressSteps';
 import type { Provider, ValidationStatus } from '@/components/molecules/ApiKeyInput';
 import { AVAILABLE_MODELS } from '~/lib/models';
 import { validateApiKey, createDebouncedValidator } from '~/lib/validation';
@@ -60,8 +61,33 @@ export default function EnsemblePage() {
         xai: apiKeys.xai?.key ? 'Ready' : 'API key required',
       };
 
-  // Placeholder presets (will be implemented with preset slice later)
-  const [presets] = useState<Preset[]>([]);
+  // Presets matching wireframe design
+  const [presets] = useState<Preset[]>([
+    {
+      id: 'research-synthesis',
+      name: 'Research Synthesis',
+      description: 'Deep reasoning stack mixing GPT-4, Claude, and Gemini for comprehensive analysis.',
+      modelIds: ['gpt-4o', 'claude-3-5-sonnet', 'gemini-1-5-pro'],
+      summarizerId: 'claude-3-5-sonnet',
+      summarizerName: 'Claude 3.5 Sonnet',
+    },
+    {
+      id: 'rapid-drafting',
+      name: 'Rapid Drafting',
+      description: 'Fast, budget-friendly models tuned for quick ideation and iteration.',
+      modelIds: ['gpt-4o-mini', 'claude-3-haiku', 'gemini-1-5-flash'],
+      summarizerId: 'gpt-4o-mini',
+      summarizerName: 'GPT-4o Mini',
+    },
+    {
+      id: 'balanced-perspective',
+      name: 'Balanced Perspective',
+      description: 'Balanced trio for contrasting opinions and concise summaries.',
+      modelIds: ['gpt-4o', 'claude-3-5-sonnet', 'gemini-1-5-pro'],
+      summarizerId: 'gpt-4o',
+      summarizerName: 'GPT-4o',
+    },
+  ]);
   const [currentEnsembleName] = useState('');
 
   // Modal state for API key configuration
@@ -187,6 +213,8 @@ export default function EnsemblePage() {
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-6xl">
+      <ProgressSteps currentStep={currentStep} />
+
       <PageHero
         title={t('pages.ensemble.title')}
         description={t('pages.ensemble.description')}
