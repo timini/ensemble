@@ -407,18 +407,18 @@ Ready to proceed to **Phase 2: UI Integration with Mock API Clients**
 - [X] T161 Run E2E test: `npm run test:e2e tests/e2e/ensemble-page.spec.ts` and verify passing (commits: 91643c1, bbec3ce, 2ee4d80)
 
 #### T162-T166: Prompt Page (/prompt)
-- [ ] T162 Write E2E test tests/e2e/prompt-page.spec.ts (chromium only, Mock mode) testing: page loads, prompt input (min 10 chars), character counter updates, Submit button disabled until valid, manual response modal opens, navigation to /review
-- [ ] T163 Create src/app/prompt/page.tsx composing PageHero + PromptInput + ManualResponseModal + WorkflowNavigator organisms
-- [ ] T164 Wire src/app/prompt/page.tsx to promptSlice, responsesSlice, and workflowSlice
-- [ ] T165 Add translations for Prompt page (placeholders, validation, manual response labels)
-- [ ] T166 Run E2E test: `npm run test:e2e tests/e2e/prompt-page.spec.ts` and verify passing
+- [X] T162 Write E2E test tests/e2e/prompt-page.spec.ts (chromium only, Mock mode) testing: page loads, prompt input, Generate Responses button validation, tips card, keyboard hint, navigation to /review
+- [X] T163 Create src/app/prompt/page.tsx composing PageHero + PromptInputWithHint + PromptTips + EnsembleConfigurationSummary + WorkflowNavigator organisms
+- [X] T164 Wire src/app/prompt/page.tsx to promptSlice, responsesSlice, and workflowSlice
+- [X] T165 Add translations for Prompt page (placeholders, validation, tips, keyboard hint, button labels)
+- [X] T166 Run E2E test: `npm run test:e2e tests/e2e/prompt-page.spec.ts` and verify passing (12 tests)
 
 #### T167-T171: Review Page (/review)
-- [ ] T167 Write E2E test tests/e2e/review-page.spec.ts (chromium only, Mock mode) testing: page loads, responses stream in (MockAPIClient), agreement analysis displays, meta-analysis displays, manual response can be added, New Prompt button navigates to /prompt
-- [ ] T168 Create src/app/review/page.tsx composing PageHero + ResponseCard (multiple) + AgreementAnalysis + ManualResponseModal + WorkflowNavigator organisms
-- [ ] T169 Wire src/app/review/page.tsx to responsesSlice, promptSlice, modelsSlice for real-time streaming updates
-- [ ] T170 Add translations for Review page (agreement labels, similarity scores, meta-analysis header)
-- [ ] T171 Run E2E test: `npm run test:e2e tests/e2e/review-page.spec.ts` and verify passing
+- [X] T167 Write E2E test tests/e2e/review-page.spec.ts (chromium only, Mock mode) testing: page loads, prompt display in Card, responses section, 3 navigation buttons, redirects
+- [X] T168 Create src/app/review/page.tsx composing PageHero + Card (prompt) + ResponseCard + ConsensusCard + AgreementAnalysis organisms
+- [X] T169 Wire src/app/review/page.tsx to responsesSlice, promptSlice, ensembleSlice for real-time streaming updates
+- [X] T170 Add translations for Review page (prompt label, navigation button labels)
+- [X] T171 Run E2E test: `npm run test:e2e tests/e2e/review-page.spec.ts` and verify passing (12 tests)
 
 - [ ] T172 Run full E2E suite (chromium only): `npm run test:e2e` and verify all 4 pages pass
 - [ ] T173 Test responsive design (chromium only): Run E2E tests on mobile (375px), tablet (768px), desktop (1440px) viewports
