@@ -15,6 +15,8 @@ import { PageHero } from '@/components/organisms/PageHero';
 import { ResponseCard } from '@/components/molecules/ResponseCard';
 import { ConsensusCard } from '@/components/organisms/ConsensusCard';
 import { AgreementAnalysis } from '@/components/organisms/AgreementAnalysis';
+import { ProgressSteps } from '@/components/molecules/ProgressSteps';
+import { Card } from '@/components/atoms/Card';
 import type { Provider } from '@/components/molecules/ResponseCard';
 
 export default function ReviewPage() {
@@ -46,23 +48,34 @@ export default function ReviewPage() {
     router.push('/prompt');
   };
 
-  const handleNewPrompt = () => {
+  const handleNewComparison = () => {
     setCurrentStep('prompt');
     router.push('/prompt');
   };
 
+  const handleStartOver = () => {
+    setCurrentStep('config');
+    router.push('/config');
+  };
+
   return (
     <div className="container mx-auto px-4 py-8 max-w-6xl">
+      <ProgressSteps currentStep="review" />
+
       <PageHero
         title={t('pages.review.title')}
         description={t('pages.review.description')}
       />
 
       {/* Display the prompt */}
-      <div className="mt-8 p-6 bg-gray-50 dark:bg-gray-800 rounded-lg">
-        <h3 className="text-lg font-semibold mb-2">{t('pages.review.promptLabel')}</h3>
-        <p className="text-gray-700 dark:text-gray-300">{prompt}</p>
-      </div>
+      <Card className="mt-8">
+        <div className="p-6">
+          <h3 className="text-lg font-semibold mb-4">{t('pages.review.promptLabel')}</h3>
+          <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
+            <p className="text-gray-900 dark:text-gray-100">{prompt}</p>
+          </div>
+        </div>
+      </Card>
 
       {/* Responses Section */}
       <div className="mt-8 space-y-4">
@@ -129,16 +142,24 @@ export default function ReviewPage() {
       <div className="mt-12 flex gap-4 justify-between">
         <button
           onClick={handleBack}
-          className="px-6 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+          className="px-6 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
         >
           {t('pages.review.backButton')}
         </button>
-        <button
-          onClick={handleNewPrompt}
-          className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-        >
-          {t('pages.review.newPromptButton')}
-        </button>
+        <div className="flex gap-3">
+          <button
+            onClick={handleNewComparison}
+            className="px-6 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+          >
+            {t('pages.review.newComparisonButton')}
+          </button>
+          <button
+            onClick={handleStartOver}
+            className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+          >
+            {t('pages.review.startOverButton')}
+          </button>
+        </div>
       </div>
     </div>
   );
