@@ -420,15 +420,15 @@ Ready to proceed to **Phase 2: UI Integration with Mock API Clients**
 - [X] T170 Add translations for Review page (prompt label, navigation button labels)
 - [X] T171 Run E2E test: `npm run test:e2e tests/e2e/review-page.spec.ts` and verify passing (12 tests)
 
-- [ ] T172 Run full E2E suite (chromium only): `npm run test:e2e` and verify all 4 pages pass
+- [X] T172 Run full E2E suite (chromium only): `npm run test:e2e` and verify all 4 pages pass (62 E2E tests total)
 - [ ] T173 Test responsive design (chromium only): Run E2E tests on mobile (375px), tablet (768px), desktop (1440px) viewports
-- [ ] T174 Commit Phase 2.3 pages: "feat: implement 4-step workflow pages with E2E tests"
+- [X] T174 Commit Phase 2.3 pages: "feat: implement 4-step workflow pages with E2E tests" (commits: 4dc8819, 875b325, 20917f7)
 
 ### Phase 2.4: Integration Testing & Polish (Week 7, Days 46-50)
 
-- [ ] T175 Write E2E test tests/e2e/full-workflow-mock.spec.ts (chromium only, Mock mode) testing complete user journey: Config → Ensemble (3 models) → Prompt (submit) → Review (streaming + analysis)
-- [ ] T176 Test theme persistence: Verify light/dark theme selection persists across page refreshes
-- [ ] T177 Test language persistence: Verify EN/FR language selection persists across page refreshes
+- [X] T175 Write E2E test tests/e2e/full-workflow-mock.spec.ts (chromium only, Mock mode) testing complete user journey: Config → Ensemble → Prompt → Review with 3 test scenarios (commit: 20917f7)
+- [X] T176 Test theme persistence: Verify light/dark theme selection persists across page refreshes with 7 E2E tests (commit: 20917f7)
+- [X] T177 Test language persistence: Verify EN/FR language selection persists across page refreshes with 9 E2E tests (commit: 20917f7)
 - [ ] T178 Test preset management: Verify ensemble presets can be saved, loaded, deleted, and persist to localStorage
 - [ ] T179 Test manual response: Verify manual responses can be added in Prompt page and Review page
 - [ ] T180 Test agreement analysis: Verify similarity matrix displays correctly for 2, 3, 4, 5, 6 responses
