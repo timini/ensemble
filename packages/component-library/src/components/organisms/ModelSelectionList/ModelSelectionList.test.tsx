@@ -89,7 +89,7 @@ describe('ModelSelectionList', () => {
         />
       );
 
-      const gpt4Card = container.querySelector('[data-testid="model-card"][data-provider="openai"]');
+      const gpt4Card = container.querySelector('[data-testid="model-card-gpt-4"]');
       expect(gpt4Card).toHaveAttribute('data-selected', 'true');
     });
 
@@ -224,7 +224,7 @@ describe('ModelSelectionList', () => {
 
       // Most cards should be enabled
       const enabledCards = container.querySelectorAll(
-        '[data-testid="model-card"]:not([data-disabled="true"])'
+        '[data-testid^="model-card"]:not([data-disabled="true"])'
       );
       expect(enabledCards.length).toBeGreaterThan(0);
     });
@@ -241,7 +241,7 @@ describe('ModelSelectionList', () => {
 
       // No cards should be disabled due to max limit
       const disabledDueToMax = container.querySelectorAll(
-        '[data-testid="model-card"][data-disabled="true"]:not([data-selected="true"])'
+        '[data-testid^="model-card"][data-disabled="true"]:not([data-selected="true"])'
       );
       // When no max is set, disabled cards should be minimal or none
       expect(disabledDueToMax.length).toBe(0);
@@ -399,7 +399,7 @@ describe('ModelSelectionList', () => {
         />
       );
 
-      const modelCards = container.querySelectorAll('[data-testid="model-card"]');
+      const modelCards = container.querySelectorAll('[data-testid^="model-card"]');
       expect(modelCards.length).toBe(mockModels.length);
     });
 

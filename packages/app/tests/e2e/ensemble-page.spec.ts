@@ -16,6 +16,10 @@ test.describe('Ensemble Page', () => {
     // Navigate through config first
     await page.goto('/config');
     await page.locator('[data-mode="free"]').click();
+
+    // Configure at least 1 API key to enable Continue button
+    await page.locator('[data-provider="openai"] input').fill('sk-test-openai-key');
+
     await page.getByRole('button', { name: /continue/i }).click();
 
     // Should now be on ensemble page
