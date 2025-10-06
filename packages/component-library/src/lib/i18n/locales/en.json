@@ -200,7 +200,8 @@
       "responsesHeading": "Model Responses",
       "noResponses": "No responses yet. Responses will appear here when models complete.",
       "backButton": "Back to Prompt",
-      "newPromptButton": "New Prompt"
+      "newComparisonButton": "New Comparison",
+      "startOverButton": "Start Over"
     }
   }
 }

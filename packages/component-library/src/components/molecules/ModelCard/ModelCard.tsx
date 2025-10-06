@@ -11,6 +11,8 @@ export interface ModelCardProps {
   provider: Provider;
   /** Display name of the model */
   modelName: string;
+  /** Unique model identifier (e.g., 'gpt-4o', 'claude-3-5-sonnet') */
+  modelId?: string;
   /** Whether the model is currently selected */
   selected: boolean;
   /** Whether this model is designated as the summarizer */
@@ -62,6 +64,7 @@ export const ModelCard = React.forwardRef<HTMLDivElement, ModelCardProps>(
     {
       provider,
       modelName,
+      modelId,
       selected,
       isSummarizer = false,
       disabled = false,
@@ -87,10 +90,13 @@ export const ModelCard = React.forwardRef<HTMLDivElement, ModelCardProps>(
       }
     };
 
+    // Generate unique test ID if modelId is provided
+    const testId = modelId ? `model-card-${modelId}` : 'model-card';
+
     return (
       <Card
         ref={ref}
-        data-testid="model-card"
+        data-testid={testId}
         data-provider={provider}
         data-selected={selected}
         data-summarizer={isSummarizer}

@@ -80,3 +80,5 @@ export { EnsembleConfigurationSummary, type EnsembleConfigurationSummaryProps } 
 export { ConsensusCard, type ConsensusCardProps } from './components/organisms/ConsensusCard';
 export { SettingsModal, type SettingsModalProps, type Theme, type Language } from './components/organisms/SettingsModal';
 export { ManualResponseModal, type ManualResponseModalProps, type ManualResponseData } from './components/organisms/ManualResponseModal';
+export { PromptTips, type PromptTipsProps } from './components/organisms/PromptTips';
+export { PromptInputWithHint, type PromptInputWithHintProps } from './components/organisms/PromptInputWithHint';

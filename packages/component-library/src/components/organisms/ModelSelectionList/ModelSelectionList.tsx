@@ -155,6 +155,7 @@ export const ModelSelectionList = React.forwardRef<HTMLDivElement, ModelSelectio
                   return (
                     <ModelCard
                       key={model.id}
+                      modelId={model.id}
                       provider={model.provider}
                       modelName={model.name}
                       selected={isSelected}

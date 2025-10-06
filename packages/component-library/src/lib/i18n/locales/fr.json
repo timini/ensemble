@@ -200,7 +200,8 @@
       "responsesHeading": "Réponses des Modèles",
       "noResponses": "Aucune réponse pour le moment. Les réponses apparaîtront ici lorsque les modèles seront terminés.",
       "backButton": "Retour à l'Invite",
-      "newPromptButton": "Nouvelle Invite"
+      "newComparisonButton": "Nouvelle Comparaison",
+      "startOverButton": "Recommencer"
     }
   }
 }
