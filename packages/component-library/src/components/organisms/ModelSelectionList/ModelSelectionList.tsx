@@ -66,7 +66,7 @@ export const ModelSelectionList = React.forwardRef<HTMLDivElement, ModelSelectio
       providerStatus,
       isMockMode = false,
       onModelToggle,
-      onSummarizerChange: _onSummarizerChange,
+      onSummarizerChange,
       onConfigureApiKey,
     },
     ref
@@ -162,6 +162,7 @@ export const ModelSelectionList = React.forwardRef<HTMLDivElement, ModelSelectio
                       isSummarizer={isSummarizer}
                       disabled={isDisabled}
                       onClick={() => onModelToggle(model.id)}
+                      onSummarizerClick={isSelected ? () => onSummarizerChange(model.id) : undefined}
                     />
                   );
                 })}

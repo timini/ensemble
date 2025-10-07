@@ -160,7 +160,7 @@ describe('ModelSelectionList', () => {
     });
 
     it('does not show summarizer badge on non-summarizer models', () => {
-      render(
+      const { container } = render(
         <ModelSelectionList
           models={mockModels}
           selectedModelIds={['gpt-4', 'claude-3-opus']}
@@ -170,9 +170,13 @@ describe('ModelSelectionList', () => {
         />
       );
 
-      // Should only have one Summarizer badge
-      const badges = screen.getAllByText(/Summarizer/i);
-      expect(badges).toHaveLength(1);
+      // Should have badge on summarizer model
+      const claudeCard = container.querySelector('[data-testid="model-card-claude-3-opus"]');
+      expect(claudeCard).toHaveAttribute('data-summarizer', 'true');
+
+      // Non-summarizer selected model should not have summarizer badge
+      const gpt4Card = container.querySelector('[data-testid="model-card-gpt-4"]');
+      expect(gpt4Card).toHaveAttribute('data-summarizer', 'false');
     });
   });
 
