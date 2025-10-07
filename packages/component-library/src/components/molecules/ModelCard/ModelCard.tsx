@@ -21,6 +21,8 @@ export interface ModelCardProps {
   disabled?: boolean;
   /** Callback when card is clicked */
   onClick?: () => void;
+  /** Callback when summarizer button is clicked */
+  onSummarizerClick?: () => void;
 }
 
 const PROVIDER_CONFIG = {
@@ -69,6 +71,7 @@ export const ModelCard = React.forwardRef<HTMLDivElement, ModelCardProps>(
       isSummarizer = false,
       disabled = false,
       onClick,
+      onSummarizerClick,
     },
     ref
   ) => {
@@ -90,8 +93,16 @@ export const ModelCard = React.forwardRef<HTMLDivElement, ModelCardProps>(
       }
     };
 
+    const handleSummarizerClick = (e: React.MouseEvent) => {
+      e.stopPropagation(); // Prevent card click
+      if (onSummarizerClick) {
+        onSummarizerClick();
+      }
+    };
+
     // Generate unique test ID if modelId is provided
     const testId = modelId ? `model-card-${modelId}` : 'model-card';
+    const summarizerButtonTestId = modelId ? `summarizer-button-${modelId}` : 'summarizer-button';
 
     return (
       <Card
@@ -124,6 +135,21 @@ export const ModelCard = React.forwardRef<HTMLDivElement, ModelCardProps>(
             <Badge className="absolute -top-2 -right-2 bg-orange-500 text-white text-xs">
               {t('molecules.modelCard.summarizer')}
             </Badge>
+          )}
+          {selected && onSummarizerClick && (
+            <button
+              data-testid={summarizerButtonTestId}
+              onClick={handleSummarizerClick}
+              className={cn(
+                'mt-2 w-full px-2 py-1 text-xs font-medium rounded transition-colors',
+                isSummarizer
+                  ? 'bg-orange-500 text-white hover:bg-orange-600'
+                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+              )}
+              aria-label={isSummarizer ? 'Remove as summarizer' : 'Set as summarizer'}
+            >
+              {isSummarizer ? '★ Summarizer' : 'Set as Summarizer'}
+            </button>
           )}
         </CardContent>
       </Card>
