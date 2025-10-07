@@ -8,7 +8,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useStore } from '~/store';
 import { PageHero } from '@/components/organisms/PageHero';
@@ -32,6 +32,11 @@ export default function PromptPage() {
   const completeStep = useStore((state) => state.completeStep);
 
   const [localPrompt, setLocalPrompt] = useState(prompt ?? '');
+
+  // Sync local state with Zustand when component mounts or prompt changes
+  useEffect(() => {
+    setLocalPrompt(prompt ?? '');
+  }, [prompt]);
 
   const handlePromptChange = (value: string) => {
     setLocalPrompt(value);

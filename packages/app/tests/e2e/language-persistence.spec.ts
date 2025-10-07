@@ -32,8 +32,8 @@ test.describe('Language Persistence', () => {
     // Wait for settings modal
     await expect(page.getByRole('dialog')).toBeVisible();
 
-    // Switch to French
-    await page.getByLabel(/language/i).click();
+    // Switch to French using Select component
+    await page.getByTestId('language-select').click();
     await page.getByRole('option', { name: /français/i }).click();
 
     // Close modal
@@ -99,7 +99,7 @@ test.describe('Language Persistence', () => {
 
     // Switch back to English
     await page.getByRole('button', { name: /paramètres|settings/i }).click();
-    await page.getByLabel(/langue|language/i).click();
+    await page.getByTestId('language-select').click();
     await page.getByRole('option', { name: /english/i }).click();
     await page.getByRole('button', { name: /done|terminé/i }).click();
 
@@ -131,9 +131,9 @@ test.describe('Language Persistence', () => {
     // Capture English text
     const configTitleEN = await page.locator('h1').first().textContent();
 
-    // Switch to French
+    // Switch to French using Select component
     await page.getByRole('button', { name: /settings/i }).click();
-    await page.getByLabel(/language/i).click();
+    await page.getByTestId('language-select').click();
     await page.getByRole('option', { name: /français/i }).click();
     await page.getByRole('button', { name: /terminé|done/i }).click();
 
@@ -151,9 +151,9 @@ test.describe('Language Persistence', () => {
   });
 
   test('all pages respect language preference', async ({ page }) => {
-    // Set French
+    // Set French using Select component
     await page.getByRole('button', { name: /settings/i }).click();
-    await page.getByLabel(/language/i).click();
+    await page.getByTestId('language-select').click();
     await page.getByRole('option', { name: /français/i }).click();
     await page.getByRole('button', { name: /terminé|done/i }).click();
 
@@ -189,7 +189,7 @@ test.describe('Language Persistence', () => {
     await page.getByRole('button', { name: /settings/i }).click();
 
     // Check language dropdown
-    await page.getByLabel(/language/i).click();
+    await page.getByTestId('language-select').click();
 
     // Should only show English and Français (not ES, DE, JA, ZH)
     await expect(page.getByRole('option', { name: /english/i })).toBeVisible();

@@ -148,13 +148,13 @@ describe('SettingsModal', () => {
     });
 
     it('shows different language when prop changes', () => {
-      const { rerender } = render(<SettingsModal {...mockProps} language="ja" open={true} />);
+      const { rerender } = render(<SettingsModal {...mockProps} language="en" open={true} />);
 
-      expect(screen.getByText('日本語')).toBeInTheDocument();
+      expect(screen.getByText('English')).toBeInTheDocument();
 
-      rerender(<SettingsModal {...mockProps} language="es" open={true} />);
+      rerender(<SettingsModal {...mockProps} language="fr" open={true} />);
 
-      expect(screen.getByText('Español')).toBeInTheDocument();
+      expect(screen.getByText('Français')).toBeInTheDocument();
     });
 
     it('displays label for language selector', () => {
