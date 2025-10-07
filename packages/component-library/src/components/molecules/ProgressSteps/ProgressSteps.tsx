@@ -27,7 +27,12 @@ export function ProgressSteps({ currentStep }: ProgressStepsProps) {
     <div className="flex items-center justify-center mb-12">
       {steps.map((step, index) => (
         <div key={step.id} className="flex items-center">
-          <div className="flex flex-col items-center">
+          <div
+            className="flex flex-col items-center"
+            data-testid={`progress-step-${step.id}`}
+            data-active={index === currentIndex}
+            data-completed={index < currentIndex}
+          >
             <div
               className={`w-12 h-12 rounded-full flex items-center justify-center font-semibold text-sm transition-colors ${
                 index < currentIndex

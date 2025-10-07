@@ -50,6 +50,7 @@ export const WorkflowNavigator = React.forwardRef<HTMLElement, WorkflowNavigator
     ref
   ) => {
     const { t } = useTranslation();
+    const displayBackLabel = backLabel || t('organisms.workflowNavigator.back');
     const displayContinueLabel = continueLabel || t('organisms.workflowNavigator.continue');
     const showBackButton = currentStep !== 'config' && onBack;
 
@@ -67,7 +68,7 @@ export const WorkflowNavigator = React.forwardRef<HTMLElement, WorkflowNavigator
             variant="outline"
             onClick={onBack}
           >
-            {backLabel}
+            {displayBackLabel}
           </Button>
         )}
 

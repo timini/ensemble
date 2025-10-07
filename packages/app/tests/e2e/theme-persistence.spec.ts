@@ -28,9 +28,8 @@ test.describe('Theme Persistence', () => {
     // Wait for settings modal to appear
     await expect(page.getByRole('dialog')).toBeVisible();
 
-    // Find and click dark theme option
-    await page.getByLabel(/theme/i).click();
-    await page.getByRole('option', { name: /dark/i }).click();
+    // Click dark theme card
+    await page.getByTestId('theme-dark').click();
 
     // Close modal
     await page.getByRole('button', { name: /done/i }).click();
@@ -43,8 +42,7 @@ test.describe('Theme Persistence', () => {
   test('dark theme persists across page refresh', async ({ page }) => {
     // Set dark theme
     await page.getByRole('button', { name: /settings/i }).click();
-    await page.getByLabel(/theme/i).click();
-    await page.getByRole('option', { name: /dark/i }).click();
+    await page.getByTestId('theme-dark').click();
     await page.getByRole('button', { name: /done/i }).click();
 
     // Verify dark theme applied
@@ -60,8 +58,7 @@ test.describe('Theme Persistence', () => {
   test('dark theme persists across navigation', async ({ page }) => {
     // Set dark theme on config page
     await page.getByRole('button', { name: /settings/i }).click();
-    await page.getByLabel(/theme/i).click();
-    await page.getByRole('option', { name: /dark/i }).click();
+    await page.getByTestId('theme-dark').click();
     await page.getByRole('button', { name: /done/i }).click();
 
     // Navigate to ensemble page
@@ -84,8 +81,7 @@ test.describe('Theme Persistence', () => {
   test('can switch back to light theme', async ({ page }) => {
     // Set dark theme
     await page.getByRole('button', { name: /settings/i }).click();
-    await page.getByLabel(/theme/i).click();
-    await page.getByRole('option', { name: /dark/i }).click();
+    await page.getByTestId('theme-dark').click();
     await page.getByRole('button', { name: /done/i }).click();
 
     // Verify dark theme
@@ -93,8 +89,7 @@ test.describe('Theme Persistence', () => {
 
     // Switch back to light
     await page.getByRole('button', { name: /settings/i }).click();
-    await page.getByLabel(/theme/i).click();
-    await page.getByRole('option', { name: /light/i }).click();
+    await page.getByTestId('theme-light').click();
     await page.getByRole('button', { name: /done/i }).click();
 
     // Verify light theme
@@ -104,8 +99,7 @@ test.describe('Theme Persistence', () => {
   test('theme persists in localStorage', async ({ page, context }) => {
     // Set dark theme
     await page.getByRole('button', { name: /settings/i }).click();
-    await page.getByLabel(/theme/i).click();
-    await page.getByRole('option', { name: /dark/i }).click();
+    await page.getByTestId('theme-dark').click();
     await page.getByRole('button', { name: /done/i }).click();
 
     // Check localStorage contains theme
@@ -128,8 +122,7 @@ test.describe('Theme Persistence', () => {
 
     // Switch to dark theme
     await page.getByRole('button', { name: /settings/i }).click();
-    await page.getByLabel(/theme/i).click();
-    await page.getByRole('option', { name: /dark/i }).click();
+    await page.getByTestId('theme-dark').click();
     await page.getByRole('button', { name: /done/i }).click();
 
     // UI should adapt to dark theme (dark mode classes applied)

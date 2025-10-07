@@ -169,6 +169,7 @@
       "doneButton": "Terminé"
     },
     "workflowNavigator": {
+      "back": "Retour",
       "continue": "Continuer"
     }
   },

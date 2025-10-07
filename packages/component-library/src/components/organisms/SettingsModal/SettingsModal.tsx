@@ -23,7 +23,7 @@ import { FileDown, Upload, Trash2, BookOpen, Database, TriangleAlert } from 'luc
 import { cn } from '../../../lib/utils';
 
 export type Theme = 'light' | 'dark';
-export type Language = 'en' | 'es' | 'fr' | 'de' | 'ja' | 'zh';
+export type Language = 'en' | 'fr';
 
 export interface SettingsModalProps {
   /** Whether the modal is open */
@@ -50,11 +50,7 @@ export interface SettingsModalProps {
 
 const LANGUAGE_LABELS: Record<Language, string> = {
   en: 'English',
-  es: 'Español',
   fr: 'Français',
-  de: 'Deutsch',
-  ja: '日本語',
-  zh: '中文',
 };
 
 /**
