@@ -40,7 +40,8 @@ export default function EnsemblePage() {
   const completeStep = useStore((state) => state.completeStep);
 
   // Track selected model IDs for ModelSelectionList
-  const selectedModelIds = selectedModels.map((m) => m.id);
+  // NOTE: We use the 'model' field (e.g., 'gpt-4o'), not the dynamic 'id' field
+  const selectedModelIds = selectedModels.map((m) => m.model);
 
   // Build provider status map based on mode
   const isMockMode = process.env.NEXT_PUBLIC_MOCK_MODE === 'true';
@@ -122,10 +123,13 @@ export default function EnsemblePage() {
   );
 
   const handleModelToggle = (modelId: string) => {
-    const isSelected = selectedModels.some((m) => m.id === modelId);
+    // Check if selected by comparing the 'model' field (not the dynamic 'id' field)
+    const selectedModel = selectedModels.find((m) => m.model === modelId);
+    const isSelected = !!selectedModel;
 
     if (isSelected) {
-      removeModel(modelId);
+      // Remove using the dynamic ID from the store
+      removeModel(selectedModel.id);
     } else {
       // Add model if under limit
       if (selectedModels.length < 6) {
