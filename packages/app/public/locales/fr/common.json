@@ -40,6 +40,49 @@
     "step3": "Étape 3 : Entrer l'invite",
     "step4": "Étape 4 : Examiner les résultats"
   },
+  "molecules": {
+    "modeSelectionCard": {
+      "free": {
+        "title": "Mode Gratuit",
+        "description": "Apportez vos propres clés API d'OpenAI, Anthropic, Google et xAI. Les clés sont stockées en toute sécurité dans votre navigateur.",
+        "buttonText": "Utiliser le mode gratuit"
+      },
+      "pro": {
+        "title": "Mode Pro",
+        "description": "Achetez des crédits pour accéder à tous les fournisseurs sans gérer les clés API. Simple, sécurisé et sans tracas.",
+        "buttonText": "Utiliser le mode pro"
+      }
+    }
+  },
+  "organisms": {
+    "modeSelector": {
+      "heading": "Choisissez votre mode"
+    },
+    "ensembleSidebar": {
+      "heading": "Résumé de l'ensemble",
+      "description": "Passez en revue vos sélections avant d'enregistrer ou de continuer.",
+      "selectedModels": "Modèles sélectionnés ({{count}})",
+      "summarizerLabel": "Synthèse",
+      "noModels": "Aucun modèle sélectionné pour le moment",
+      "quickPresets": "Presets rapides",
+      "quickPresetsDescription": "Commencez à partir d'un ensemble sélectionné pour les flux de travail courants.",
+      "noPresets": "Aucun preset enregistré. Enregistrez votre premier ensemble ci-dessous pour commencer.",
+      "usePreset": "Utiliser le preset",
+      "deletePreset": "Supprimer le preset {{name}}",
+      "summarizerInfo": "Modèle de synthèse : {{name}}",
+      "saveCurrentEnsemble": "Enregistrer l'ensemble actuel",
+      "saveDescription": "Enregistrez cette combinaison pour de futures analyses.",
+      "ensembleNameLabel": "Nom de l'ensemble",
+      "ensembleNamePlaceholder": "ex. Ensemble de recherche",
+      "saveButton": "Enregistrer l'ensemble",
+      "saveInfoText": "Enregistrez vos combinaisons favorites pour les recharger instantanément.",
+      "manualResponses": "Réponses manuelles",
+      "manualResponsesDescription": "Ajoutez des réponses de référence ou des sorties de benchmark pour l'étape de révision.",
+      "manualResponsesInfo": "Incluez des réponses personnalisées à comparer aux modèles en direct.",
+      "addManualResponse": "Ajouter une réponse manuelle",
+      "manualResponsesNote": "Ajoutez des réponses de référence ou des benchmarks à comparer aux réponses des modèles."
+    }
+  },
   "pages": {
     "config": {
       "title": "Configuration",
