@@ -13,7 +13,7 @@ import { useTranslation } from 'react-i18next';
 import { useStore } from '~/store';
 import { PageHero } from '@/components/organisms/PageHero';
 import { ModelSelectionList } from '@/components/organisms/ModelSelectionList';
-import { EnsembleManagementPanel, type Preset } from '@/components/organisms/EnsembleManagementPanel';
+import { EnsembleSidebar, type Preset } from '@/components/organisms/EnsembleSidebar';
 import { WorkflowNavigator } from '@/components/organisms/WorkflowNavigator';
 import { ApiKeyConfigurationModal } from '@/components/organisms/ApiKeyConfigurationModal';
 import { ProgressSteps } from '@/components/molecules/ProgressSteps';
@@ -183,6 +183,11 @@ export default function EnsemblePage() {
     toggleApiKeyVisibility(provider);
   };
 
+  // Set current step to 'ensemble' on mount
+  useEffect(() => {
+    setCurrentStep('ensemble');
+  }, [setCurrentStep]);
+
   // Cleanup timeouts on unmount
   useEffect(() => {
     const timeouts = timeoutRefs.current;
@@ -212,8 +217,21 @@ export default function EnsemblePage() {
       ]
     : [];
 
+  // Map selected model metadata for the sidebar display
+  const sidebarModels = selectedModels.map((selection) => {
+    const model = AVAILABLE_MODELS.find((m) => m.id === selection.model);
+    return {
+      id: selection.model,
+      name: model?.name ?? selection.model,
+    };
+  });
+
   // Continue button enabled if 2-6 models selected
   const isValid = selectedModels.length >= 2 && selectedModels.length <= 6;
+
+  const handleAddManualResponse = () => {
+    console.log('Add manual response');
+  };
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-6xl">
@@ -240,14 +258,17 @@ export default function EnsemblePage() {
           />
         </div>
 
-        {/* Ensemble Management Panel - Takes 1/3 width on large screens */}
+        {/* Ensemble Sidebar - Takes 1/3 width on large screens */}
         <div className="lg:col-span-1">
-          <EnsembleManagementPanel
+          <EnsembleSidebar
+            selectedModels={sidebarModels}
+            summarizerId={summarizerModel ?? undefined}
             presets={presets}
             currentEnsembleName={currentEnsembleName}
             onLoadPreset={handleLoadPreset}
             onSavePreset={handleSavePreset}
             onDeletePreset={handleDeletePreset}
+            onAddManualResponse={handleAddManualResponse}
           />
         </div>
       </div>
