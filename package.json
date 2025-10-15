@@ -6,7 +6,8 @@
     "packages/*"
   ],
   "scripts": {
-    "dev": "npm run dev --workspace=packages/wireframes",
+    "dev": "npm run dev --workspace=packages/app",
+    "dev:wireframes": "npm run dev --workspace=packages/wireframes",
     "dev:components": "npm run storybook --workspace=packages/component-library",
     "build": "npm run build --workspaces --if-present",
     "lint": "npm run lint --workspaces --if-present",
