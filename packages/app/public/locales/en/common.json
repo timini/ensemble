@@ -40,6 +40,49 @@
     "step3": "Step 3: Enter Prompt",
     "step4": "Step 4: Review Results"
   },
+  "molecules": {
+    "modeSelectionCard": {
+      "free": {
+        "title": "Free Mode",
+        "description": "Bring your own API keys from OpenAI, Anthropic, Google, and xAI. Keys are stored securely in your browser.",
+        "buttonText": "Use Free Mode"
+      },
+      "pro": {
+        "title": "Pro Mode",
+        "description": "Purchase credits to access all providers without managing API keys. Simple, secure, and hassle-free.",
+        "buttonText": "Use Pro Mode"
+      }
+    }
+  },
+  "organisms": {
+    "modeSelector": {
+      "heading": "Choose Your Mode"
+    },
+    "ensembleSidebar": {
+      "heading": "Ensemble Summary",
+      "description": "Review your current selections before saving or continuing.",
+      "selectedModels": "Selected Models ({{count}})",
+      "summarizerLabel": "Summarizer",
+      "noModels": "No models selected yet",
+      "quickPresets": "Quick presets",
+      "quickPresetsDescription": "Start from a curated ensemble tuned for common workflows.",
+      "noPresets": "No saved presets yet. Save your first ensemble below to get started.",
+      "usePreset": "Use preset",
+      "deletePreset": "Delete preset {{name}}",
+      "summarizerInfo": "Summarizer: {{name}}",
+      "saveCurrentEnsemble": "Save current ensemble",
+      "saveDescription": "Save this combination for future reviews.",
+      "ensembleNameLabel": "Ensemble Name",
+      "ensembleNamePlaceholder": "e.g. Research Ensemble",
+      "saveButton": "Save Ensemble",
+      "saveInfoText": "Save your favourite model combinations to load them instantly later.",
+      "manualResponses": "Manual Responses",
+      "manualResponsesDescription": "Add reference answers or benchmark outputs to include in the review step.",
+      "manualResponsesInfo": "Include custom responses to compare against live model outputs.",
+      "addManualResponse": "Add Manual Response",
+      "manualResponsesNote": "Add reference answers or benchmark outputs to compare against live model responses."
+    }
+  },
   "pages": {
     "config": {
       "title": "Configuration",
