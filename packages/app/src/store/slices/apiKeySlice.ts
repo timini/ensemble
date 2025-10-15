@@ -44,15 +44,19 @@ export const createApiKeySlice: StateCreator<ApiKeySlice> = (set, get) => ({
   },
 
   setApiKey: (provider, key) => {
-    set((state) => ({
-      apiKeys: {
-        ...state.apiKeys,
-        [provider]: {
-          key,
-          visible: false,
+    set((state) => {
+      // Preserve existing visibility state when updating key
+      const existingData = state.apiKeys[provider];
+      return {
+        apiKeys: {
+          ...state.apiKeys,
+          [provider]: {
+            key,
+            visible: existingData?.visible ?? false,
+          },
         },
-      },
-    }));
+      };
+    });
   },
 
   toggleApiKeyVisibility: (provider) => {
