@@ -135,6 +135,11 @@ export default function ConfigPage() {
   // At least 1 API key configured enables Continue button
   const hasConfiguredKeys = configuredKeysCount > 0;
 
+  // Set current step to 'config' on mount
+  useEffect(() => {
+    setCurrentStep('config');
+  }, [setCurrentStep]);
+
   // Call configureModeComplete when at least 1 key is configured
   useEffect(() => {
     if (mode === 'free' && hasConfiguredKeys && !isModeConfigured) {
