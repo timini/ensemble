@@ -10,7 +10,10 @@
  * This test validates the entire application flow end-to-end.
  */
 
-import { test, expect } from '@playwright/test';
+import { test, expect, type Page } from '@playwright/test';
+
+const enabledModels = (page: Page) =>
+  page.locator('[data-testid^="model-card-"][data-disabled="false"]');
 
 test.describe('Full Workflow - Mock Mode', () => {
   test('completes full user journey from config to review', async ({ page }) => {
@@ -73,9 +76,9 @@ test.describe('Full Workflow - Mock Mode', () => {
       await expect(continueButton).toBeDisabled();
 
       // Select 3 models
-      await page.locator('[data-testid^="model-card-"]').first().click();
-      await page.locator('[data-testid^="model-card-"]').nth(1).click();
-      await page.locator('[data-testid^="model-card-"]').nth(2).click();
+      await enabledModels(page).first().click();
+      await enabledModels(page).nth(1).click();
+      await enabledModels(page).nth(2).click();
 
       // Verify 3 models selected
       const selectedCards = page.locator('[data-testid^="model-card-"][data-selected="true"]');

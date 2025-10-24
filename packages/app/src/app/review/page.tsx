@@ -77,7 +77,7 @@ export default function ReviewPage() {
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-6xl">
-      <ProgressSteps currentStep="review" />
+      <ProgressSteps currentStep="review" fallbackStep="review" />
 
       <PageHero
         title={t('pages.review.title')}

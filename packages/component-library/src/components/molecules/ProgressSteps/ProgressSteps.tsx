@@ -1,14 +1,27 @@
 import { Check } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { useEffect, useState } from 'react';
 
 type Step = 'config' | 'ensemble' | 'prompt' | 'review';
 
 interface ProgressStepsProps {
   currentStep: Step;
+  fallbackStep?: Step;
 }
 
-export function ProgressSteps({ currentStep }: ProgressStepsProps) {
+function useHasHydrated() {
+  const [hydrated, setHydrated] = useState(false);
+
+  useEffect(() => {
+    setHydrated(true);
+  }, []);
+
+  return hydrated;
+}
+
+export function ProgressSteps({ currentStep, fallbackStep }: ProgressStepsProps) {
   const { t } = useTranslation();
+  const hasHydrated = useHasHydrated();
 
   const steps = [
     { id: 'config' as const, label: t('ensemble.steps.config'), number: 1 },
@@ -17,8 +30,10 @@ export function ProgressSteps({ currentStep }: ProgressStepsProps) {
     { id: 'review' as const, label: t('ensemble.steps.review'), number: 4 },
   ];
 
+  const displayStep = hasHydrated ? currentStep : fallbackStep ?? currentStep;
+
   const getCurrentStepIndex = () => {
-    return steps.findIndex((step) => step.id === currentStep);
+    return steps.findIndex((step) => step.id === displayStep);
   };
 
   const currentIndex = getCurrentStepIndex();

@@ -11,7 +11,10 @@
  * - Navigation to /review after submission
  */
 
-import { test, expect } from '@playwright/test';
+import { test, expect, type Page } from '@playwright/test';
+
+const enabledModels = (page: Page) =>
+  page.locator('[data-testid^="model-card-"][data-disabled="false"]');
 
 test.describe('Prompt Page', () => {
   test.beforeEach(async ({ page }) => {
@@ -25,8 +28,8 @@ test.describe('Prompt Page', () => {
     await page.getByRole('button', { name: /continue/i }).click();
 
     // Select 2 models on ensemble page
-    await page.locator('[data-testid^="model-card-"]').first().click();
-    await page.locator('[data-testid^="model-card-"]').nth(1).click();
+    await enabledModels(page).first().click();
+    await enabledModels(page).nth(1).click();
     await page.getByRole('button', { name: /continue/i }).click();
 
     // Should now be on prompt page
