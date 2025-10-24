@@ -153,7 +153,7 @@ export const ModelSelectionList = React.forwardRef<HTMLDivElement, ModelSelectio
                   // Disable model if:
                   // 1. Max selection reached AND model is not already selected
                   // 2. Provider requires API key (regardless of selection state)
-                  const isDisabled = (!isSelected && isMaxSelectionReached) || providerRequiresApiKey;
+                  const isDisabled = !isSelected && (isMaxSelectionReached || providerRequiresApiKey);
 
                   return (
                     <ModelCard
