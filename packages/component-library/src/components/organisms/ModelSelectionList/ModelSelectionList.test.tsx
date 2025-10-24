@@ -252,6 +252,38 @@ describe('ModelSelectionList', () => {
     });
   });
 
+  describe('provider api key requirement', () => {
+    it('disables models for providers requiring API keys when not mock mode', () => {
+      const { container } = render(
+        <ModelSelectionList
+          models={mockModels}
+          selectedModelIds={[]}
+          providerStatus={{ openai: 'API key required' }}
+          onModelToggle={vi.fn()}
+          onSummarizerChange={vi.fn()}
+        />
+      );
+
+      const disabledCards = container.querySelectorAll('[data-provider="openai"][data-disabled="true"]');
+      expect(disabledCards.length).toBeGreaterThan(0);
+    });
+
+    it('keeps already selected models enabled even if provider requires API key', () => {
+      const { container } = render(
+        <ModelSelectionList
+          models={mockModels}
+          selectedModelIds={['gpt-4']}
+          providerStatus={{ openai: 'API key required' }}
+          onModelToggle={vi.fn()}
+          onSummarizerChange={vi.fn()}
+        />
+      );
+
+      const selectedCard = container.querySelector('[data-testid="model-card-gpt-4"]');
+      expect(selectedCard).toHaveAttribute('data-disabled', 'false');
+    });
+  });
+
   describe('provider grouping', () => {
     it('displays OpenAI models in OpenAI section', () => {
       render(
