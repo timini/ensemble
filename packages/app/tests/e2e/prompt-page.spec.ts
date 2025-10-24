@@ -16,6 +16,15 @@ import { test, expect, type Page } from '@playwright/test';
 const enabledModels = (page: Page) =>
   page.locator('[data-testid^="model-card-"][data-disabled="false"]');
 
+const addManualResponse = async (page: Page) => {
+  await page.getByTestId('add-manual-response').click();
+  await page.getByTestId('model-name-input').fill('Manual Test');
+  await page.getByTestId('model-provider-input').fill('Provider');
+  await page.getByTestId('response-textarea').fill('Manual preview content');
+  await page.getByTestId('submit-button').click();
+  await expect(page.getByTestId('manual-responses-list')).toContainText('Manual Test');
+};
+
 test.describe('Prompt Page', () => {
   test.beforeEach(async ({ page }) => {
     // Navigate through config and ensemble pages first
@@ -135,5 +144,14 @@ test.describe('Prompt Page', () => {
     // Check that prompt step is active in progress steps
     const promptStep = page.getByTestId('progress-step-prompt');
     await expect(promptStep).toBeVisible();
+  });
+
+  test('displays manual responses preview when manual responses exist', async ({ page }) => {
+    await page.goto('/ensemble');
+    await addManualResponse(page);
+    await expect(page.getByRole('button', { name: /continue/i })).toBeEnabled();
+    await page.getByRole('button', { name: /continue/i }).click();
+
+    await expect(page.getByTestId('manual-responses-preview')).toContainText('Manual Test');
   });
 });

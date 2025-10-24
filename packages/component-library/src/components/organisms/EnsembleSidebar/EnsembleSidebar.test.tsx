@@ -284,6 +284,24 @@ describe('EnsembleSidebar', () => {
       expect(useButtons).toHaveLength(2);
     });
 
+    it('renders manual response entries when provided', () => {
+      render(
+        <EnsembleSidebar
+          selectedModels={[]}
+          presets={[]}
+          currentEnsembleName=""
+          onLoadPreset={vi.fn()}
+          onSavePreset={vi.fn()}
+          onDeletePreset={vi.fn()}
+          onAddManualResponse={vi.fn()}
+          manualResponses={[{ id: 'manual-1', label: 'Manual Response A', response: 'Custom content' }]}
+        />
+      );
+
+      expect(screen.getByText('Manual Response A')).toBeInTheDocument();
+      expect(screen.getByText('Custom content')).toBeInTheDocument();
+    });
+
     it('shows delete buttons when enabled', () => {
       render(
         <EnsembleSidebar

@@ -177,4 +177,14 @@ test.beforeEach(async ({ page }) => {
 
     await expect(googleCard).not.toHaveAttribute('data-selected', 'true');
   });
+
+  test('shows manual responses in sidebar after creation', async ({ page }) => {
+    await page.getByTestId('add-manual-response').click();
+    await page.getByTestId('model-name-input').fill('Manual Test');
+    await page.getByTestId('model-provider-input').fill('Provider');
+    await page.getByTestId('response-textarea').fill('Manual content');
+    await page.getByTestId('submit-button').click();
+
+    await expect(page.getByTestId('manual-responses-list')).toContainText('Manual Test');
+  });
 });
