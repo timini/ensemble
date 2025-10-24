@@ -8,7 +8,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useStore } from '~/store';
 import { PageHero } from '@/components/organisms/PageHero';
@@ -16,6 +16,7 @@ import { ResponseCard } from '@/components/molecules/ResponseCard';
 import { ConsensusCard } from '@/components/organisms/ConsensusCard';
 import { AgreementAnalysis } from '@/components/organisms/AgreementAnalysis';
 import { ProgressSteps } from '@/components/molecules/ProgressSteps';
+import { WorkflowNavigator } from '@/components/organisms/WorkflowNavigator';
 import { Card } from '@/components/atoms/Card';
 import type { Provider } from '@/components/molecules/ResponseCard';
 
@@ -30,18 +31,31 @@ export default function ReviewPage() {
   const metaAnalysis = useStore((state) => state.metaAnalysis);
 
   const setCurrentStep = useStore((state) => state.setCurrentStep);
+  const completeStep = useStore((state) => state.completeStep);
+  const clearResponses = useStore((state) => state.clearResponses);
+  const resetStreamingState = useStore((state) => state.resetStreamingState);
+
+  const skipRedirectRef = useRef(false);
 
   // Mock responses for Phase 2 (will be replaced with real API calls in Phase 3/4)
   useEffect(() => {
-    // If no prompt, redirect back to prompt page
+    // If no prompt, redirect back to prompt page unless a manual navigation already triggered a redirect.
     if (!prompt) {
+      if (skipRedirectRef.current) {
+        skipRedirectRef.current = false;
+        return;
+      }
+
       router.push('/prompt');
       return;
     }
 
+    setCurrentStep('review');
+    completeStep('review');
+
     // TODO: In Phase 3/4, trigger actual API calls here
     // For now, we just display empty state or mock data
-  }, [prompt, router]);
+  }, [completeStep, prompt, router, setCurrentStep]);
 
   const handleBack = () => {
     setCurrentStep('prompt');
@@ -49,11 +63,14 @@ export default function ReviewPage() {
   };
 
   const handleNewComparison = () => {
+    resetStreamingState();
     setCurrentStep('prompt');
     router.push('/prompt');
   };
 
   const handleStartOver = () => {
+    skipRedirectRef.current = true;
+    clearResponses();
     setCurrentStep('config');
     router.push('/config');
   };
@@ -139,27 +156,20 @@ export default function ReviewPage() {
       )}
 
       {/* Action Buttons */}
-      <div className="mt-12 flex gap-4 justify-between">
+      <div className="mt-12 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+        <WorkflowNavigator
+          currentStep="review"
+          backLabel={t('pages.review.backButton')}
+          continueLabel={t('pages.review.startOverButton')}
+          onBack={handleBack}
+          onContinue={handleStartOver}
+        />
         <button
-          onClick={handleBack}
-          className="px-6 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+          onClick={handleNewComparison}
+          className="px-6 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors self-end md:self-auto"
         >
-          {t('pages.review.backButton')}
+          {t('pages.review.newComparisonButton')}
         </button>
-        <div className="flex gap-3">
-          <button
-            onClick={handleNewComparison}
-            className="px-6 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
-          >
-            {t('pages.review.newComparisonButton')}
-          </button>
-          <button
-            onClick={handleStartOver}
-            className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-          >
-            {t('pages.review.startOverButton')}
-          </button>
-        </div>
       </div>
     </div>
   );

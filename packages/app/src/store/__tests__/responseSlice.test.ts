@@ -162,6 +162,24 @@ describe('responseSlice', () => {
     expect(state.metaAnalysis).toBeNull();
   });
 
+  it('resets streaming state without clearing prompt', () => {
+    store.getState().setPrompt('Persisted prompt');
+    store.getState().startStreaming('model-1', 'openai', 'gpt-4o');
+    store.getState().addManualResponse('Manual', 'Response');
+    store.getState().setMetaAnalysis('Meta');
+
+    store.getState().resetStreamingState();
+
+    const state = store.getState();
+    expect(state.prompt).toBe('Persisted prompt');
+    expect(state.responses).toEqual([]);
+    expect(state.manualResponses).toEqual([]);
+    expect(state.embeddings).toEqual([]);
+    expect(state.similarityMatrix).toBeNull();
+    expect(state.agreementStats).toBeNull();
+    expect(state.metaAnalysis).toBeNull();
+  });
+
   it('restarts streaming for same model', () => {
     store.getState().startStreaming('model-1', 'openai', 'gpt-4o');
     store.getState().appendStreamChunk('model-1', 'First attempt');

@@ -79,7 +79,7 @@ describe('ProgressSteps', () => {
     it('renders all step labels in French', () => {
       renderWithI18n(<ProgressSteps currentStep="config" />, { language: 'fr' });
 
-      expect(screen.getByText('Configuration')).toBeInTheDocument();
+      expect(screen.getByText('Config')).toBeInTheDocument();
       expect(screen.getByText('Ensemble')).toBeInTheDocument();
       expect(screen.getByText('Invite')).toBeInTheDocument();
       expect(screen.getByText('Révision')).toBeInTheDocument();
@@ -95,7 +95,7 @@ describe('ProgressSteps', () => {
     it('displays current step label in French when on config step', () => {
       renderWithI18n(<ProgressSteps currentStep="config" />, { language: 'fr' });
 
-      const configLabel = screen.getByText('Configuration');
+      const configLabel = screen.getByText('Config');
       expect(configLabel).toHaveClass('text-blue-600');
     });
 
@@ -110,7 +110,7 @@ describe('ProgressSteps', () => {
     it('displays completed step labels in French when on review step', () => {
       renderWithI18n(<ProgressSteps currentStep="review" />, { language: 'fr' });
 
-      expect(screen.getByText('Configuration')).toHaveClass('text-green-600');
+      expect(screen.getByText('Config')).toHaveClass('text-green-600');
       expect(screen.getByText('Ensemble')).toHaveClass('text-green-600');
       expect(screen.getByText('Invite')).toHaveClass('text-green-600');
     });
@@ -127,7 +127,7 @@ describe('ProgressSteps', () => {
     it('displays French labels correctly for prompt step', () => {
       renderWithI18n(<ProgressSteps currentStep="prompt" />, { language: 'fr' });
 
-      expect(screen.getByText('Configuration')).toHaveClass('text-green-600');
+      expect(screen.getByText('Config')).toHaveClass('text-green-600');
       expect(screen.getByText('Ensemble')).toHaveClass('text-green-600');
       expect(screen.getByText('Invite')).toHaveClass('text-blue-600');
       expect(screen.getByText('Révision')).toHaveClass('text-muted-foreground');

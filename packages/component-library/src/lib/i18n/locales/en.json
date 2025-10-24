@@ -91,7 +91,8 @@
       "heading": "Your Ensemble Configuration",
       "description": "These models will receive the prompt and contribute to the comparison.",
       "selectedModels": "Selected Models ({{count}})",
-      "summarizer": "Summarizer"
+      "summarizer": "Summarizer",
+      "noSummarizer": "Not selected"
     },
     "ensembleManagementPanel": {
       "quickPresets": "Quick presets",

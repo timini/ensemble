@@ -43,6 +43,11 @@ export default function RootLayout({
     });
   }, [language, i18n]);
 
+  // Ensure html lang attribute always reflects current language (hydration-safe)
+  useEffect(() => {
+    document.documentElement.setAttribute('lang', language);
+  }, [language]);
+
   return (
     <html lang={language} className={`${geist.variable} ${theme}`}>
       <head>
@@ -52,6 +57,35 @@ export default function RootLayout({
           content="Make better decisions with multiple AI perspectives"
         />
         <link rel="icon" href="/favicon.ico" />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(() => {
+              if (typeof window === 'undefined') return;
+              try {
+                const navigationEntries = performance.getEntriesByType('navigation');
+                const navType = navigationEntries && navigationEntries[0] ? navigationEntries[0].type : undefined;
+                if (window.location.pathname === '/review' && navType === 'navigate') {
+                  const raw = window.localStorage.getItem('ensemble-ai-store');
+                  if (raw) {
+                    const parsed = JSON.parse(raw);
+                    if (parsed && typeof parsed === 'object') {
+                      parsed.prompt = null;
+                      parsed.responses = [];
+                      parsed.manualResponses = [];
+                      parsed.embeddings = [];
+                      parsed.similarityMatrix = null;
+                      parsed.agreementStats = null;
+                      parsed.metaAnalysis = null;
+                    }
+                    window.localStorage.setItem('ensemble-ai-store', JSON.stringify(parsed));
+                  }
+                }
+              } catch (error) {
+                console.error('Failed to clear stale review state', error);
+              }
+            })();`,
+          }}
+        />
       </head>
       <body>
         <TRPCReactProvider>

@@ -7,7 +7,7 @@
 
 'use client';
 
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useCallback, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslation } from 'react-i18next';
 import { useStore } from '~/store';
@@ -62,15 +62,41 @@ export default function ConfigPage() {
   };
 
   // Handler for validation status changes
-  const handleValidationStatusChange = (provider: Provider, status: ValidationStatus) => {
-    setValidationStatus(prev => ({ ...prev, [provider]: status }));
-  };
+  const handleValidationStatusChange = useCallback(
+    (provider: Provider, status: ValidationStatus) => {
+      setValidationStatus((prev) => ({ ...prev, [provider]: status }));
+    },
+    [],
+  );
 
   // Create debounced validator using the reusable utility
   const debouncedValidate = createDebouncedValidator(
     timeoutRefs,
     validateApiKey
   );
+
+  // Validate any pre-populated API keys on initial render or when keys change
+  useEffect(() => {
+    if (mode !== 'free') {
+      return;
+    }
+
+    (['openai', 'anthropic', 'google', 'xai'] as Provider[]).forEach((provider) => {
+      const existingKey = apiKeys[provider]?.key ?? '';
+      if (existingKey.length === 0) {
+        return;
+      }
+
+      if (validationStatus[provider] === 'idle') {
+        void validateApiKey({
+          provider,
+          apiKey: existingKey,
+          userMode: mode,
+          onStatusChange: handleValidationStatusChange,
+        });
+      }
+    });
+  }, [apiKeys, handleValidationStatusChange, mode, validationStatus]);
 
   const handleKeyChange = (provider: Provider, value: string) => {
     setApiKey(provider, value);
@@ -127,13 +153,20 @@ export default function ConfigPage() {
     },
   ] : [];
 
-  // Count configured API keys
+  // Count configured API keys (Free mode only)
   const configuredKeysCount = mode === 'free'
     ? [apiKeys.openai?.key, apiKeys.anthropic?.key, apiKeys.google?.key, apiKeys.xai?.key].filter(Boolean).length
     : 0;
 
-  // At least 1 API key configured enables Continue button
+  // At least 1 API key configured enables Continue button in Free mode
   const hasConfiguredKeys = configuredKeysCount > 0;
+  const hasHydrated = useHasHydrated();
+  const allowContinue = useMemo(() => {
+    if (!hasHydrated) {
+      return mode === 'free' ? false : isModeConfigured;
+    }
+    return mode === 'free' ? hasConfiguredKeys : isModeConfigured;
+  }, [hasHydrated, mode, hasConfiguredKeys, isModeConfigured]);
 
   // Set current step to 'config' on mount
   useEffect(() => {
@@ -189,9 +222,19 @@ export default function ConfigPage() {
         <WorkflowNavigator
           currentStep={currentStep}
           onContinue={handleContinue}
-          continueDisabled={!isModeConfigured}
+          continueDisabled={!allowContinue}
         />
       </div>
     </div>
   );
+}
+
+function useHasHydrated() {
+  const [hydrated, setHydrated] = useState(false);
+
+  useEffect(() => {
+    setHydrated(true);
+  }, []);
+
+  return hydrated;
 }

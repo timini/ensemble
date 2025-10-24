@@ -22,26 +22,34 @@ export const persist = <
   options: PersistOptions,
 ) => {
   return ((set, get, api) => {
-    // Only run persistence logic on client side
+    const baseState = config(set, get, api);
+
     if (typeof window === 'undefined') {
-      return config(set, get, api);
+      return baseState;
     }
 
     const { name, storage = localStorage } = options;
 
-    // Load initial state from localStorage
-    const storedValue = storage.getItem(name);
-    if (storedValue) {
-      try {
+    let hydratedState = baseState;
+
+    try {
+      const storedValue = storage.getItem(name);
+      if (storedValue) {
         const parsedState = JSON.parse(storedValue) as Partial<T>;
-        // Merge persisted state with initial state
-        set(parsedState);
-      } catch (error) {
-        console.error('Failed to parse stored state:', error);
+        hydratedState = {
+          ...baseState,
+          ...parsedState,
+        };
       }
+    } catch (error) {
+      console.error('Failed to parse stored state:', error);
     }
 
-    // Subscribe to state changes and persist to localStorage
+    // Replace the current state with the hydrated version so selectors re-run
+    set(() => hydratedState, true);
+
+    // Persist future updates. Functions are ignored by JSON.stringify, so only
+    // serialisable data is stored.
     api.subscribe((state) => {
       try {
         storage.setItem(name, JSON.stringify(state));
@@ -50,6 +58,6 @@ export const persist = <
       }
     });
 
-    return config(set, get, api);
+    return hydratedState;
   }) as StateCreator<T, Mps, Mcs>;
 };

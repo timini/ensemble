@@ -156,7 +156,11 @@ export const SettingsModal = React.forwardRef<HTMLDivElement, SettingsModalProps
                   {t('organisms.settingsModal.languageLabel')}
                 </Label>
                 <Select value={language} onValueChange={(value) => onLanguageChange(value as Language)}>
-                  <SelectTrigger className="w-full" data-testid="language-select">
+                  <SelectTrigger
+                    className="w-full"
+                    data-testid="language-select"
+                    id="language-select"
+                  >
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>

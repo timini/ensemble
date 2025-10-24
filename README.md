@@ -87,6 +87,9 @@ npm run dev
 # Run all tests
 npm test
 
+# Run E2E tests (Playwright list reporter, headless)
+npm run test:e2e
+
 # Run linter
 npm run lint
 
