@@ -5,7 +5,7 @@
       "tagline": "L'IA la plus intelligente est un ensemble."
     },
     "steps": {
-      "config": "Configuration",
+      "config": "Config",
       "ensemble": "Ensemble",
       "prompt": "Invite",
       "review": "Révision"
@@ -91,7 +91,8 @@
       "heading": "Configuration de Votre Ensemble",
       "description": "Ces modèles recevront l'invite et contribueront à la comparaison.",
       "selectedModels": "Modèles Sélectionnés ({{count}})",
-      "summarizer": "Synthétiseur"
+      "summarizer": "Synthétiseur",
+      "noSummarizer": "Non sélectionné"
     },
     "ensembleManagementPanel": {
       "quickPresets": "Préréglages rapides",

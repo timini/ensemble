@@ -54,6 +54,7 @@ export interface ResponseSlice {
   calculateAgreement: () => void;
   setMetaAnalysis: (analysis: string) => void;
   clearResponses: () => void;
+  resetStreamingState: () => void;
 }
 
 export const createResponseSlice: StateCreator<ResponseSlice> = (set, get) => ({
@@ -215,9 +216,8 @@ export const createResponseSlice: StateCreator<ResponseSlice> = (set, get) => ({
     set({ metaAnalysis: analysis });
   },
 
-  clearResponses: () => {
+  resetStreamingState: () => {
     set({
-      prompt: null,
       responses: [],
       manualResponses: [],
       embeddings: [],
@@ -225,6 +225,11 @@ export const createResponseSlice: StateCreator<ResponseSlice> = (set, get) => ({
       agreementStats: null,
       metaAnalysis: null,
     });
+  },
+
+  clearResponses: () => {
+    set({ prompt: null });
+    get().resetStreamingState();
   },
 });
 

@@ -8,7 +8,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useStore } from '~/store';
 import { PageHero } from '@/components/organisms/PageHero';
@@ -32,6 +32,19 @@ export default function PromptPage() {
   const completeStep = useStore((state) => state.completeStep);
 
   const [localPrompt, setLocalPrompt] = useState(prompt ?? '');
+
+  const selectedModelIds = useMemo(
+    () => selectedModels.map((m) => m.model),
+    [selectedModels],
+  );
+
+  const summarizerForSummary = useMemo(() => {
+    if (summarizerModel) return summarizerModel;
+    if (selectedModelIds.length > 0) {
+      return selectedModelIds[0]!;
+    }
+    return t('organisms.ensembleConfigurationSummary.noSummarizer');
+  }, [selectedModelIds, summarizerModel, t]);
 
   // Sync local state with Zustand when component mounts or prompt changes
   useEffect(() => {
@@ -58,7 +71,7 @@ export default function PromptPage() {
   const isValid = localPrompt.trim().length > 0;
 
   // Get model names for the summary
-  const modelNames = selectedModels.map((m) => m.id);
+  const modelNames = selectedModelIds;
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-4xl">
@@ -71,10 +84,10 @@ export default function PromptPage() {
 
       <div className="mt-8 space-y-8">
         {/* Ensemble Configuration Summary */}
-        {summarizerModel && (
+        {selectedModelIds.length > 0 && (
           <EnsembleConfigurationSummary
             selectedModels={modelNames}
-            summarizerModel={summarizerModel}
+            summarizerModel={summarizerForSummary}
           />
         )}
 

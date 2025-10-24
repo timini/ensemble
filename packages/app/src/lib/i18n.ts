@@ -31,6 +31,7 @@ i18n
     },
     lng: 'en',
     fallbackLng: 'en',
+    initImmediate: false,
     defaultNS: 'translation', // Component library uses 'translation' namespace
     ns: ['translation', 'common'],
     debug: false,

@@ -2,7 +2,7 @@
 
 exports[`ProgressSteps Snapshots > matches snapshot for config step 1`] = `
 <div
-  class="flex items-center justify-center mb-12"
+  class="progress-steps flex items-center justify-center mb-12"
 >
   <div
     class="flex items-center"
@@ -14,15 +14,22 @@ exports[`ProgressSteps Snapshots > matches snapshot for config step 1`] = `
       data-testid="progress-step-config"
     >
       <div
-        class="w-12 h-12 rounded-full flex items-center justify-center font-semibold text-sm transition-colors bg-blue-500 text-white dark:bg-blue-600"
+        class="flex flex-col items-center"
+        data-active="true"
+        data-completed="false"
+        data-testid="workflow-step-config"
       >
-        1
+        <div
+          class="w-12 h-12 rounded-full flex items-center justify-center font-semibold text-sm transition-colors bg-blue-500 text-white dark:bg-blue-600"
+        >
+          1
+        </div>
+        <span
+          class="mt-2 text-sm font-medium transition-colors text-blue-600 dark:text-blue-400"
+        >
+          Config
+        </span>
       </div>
-      <span
-        class="mt-2 text-sm font-medium transition-colors text-blue-600 dark:text-blue-400"
-      >
-        Config
-      </span>
     </div>
     <div
       class="w-16 h-0.5 mx-4 transition-colors bg-muted"
@@ -38,15 +45,22 @@ exports[`ProgressSteps Snapshots > matches snapshot for config step 1`] = `
       data-testid="progress-step-ensemble"
     >
       <div
-        class="w-12 h-12 rounded-full flex items-center justify-center font-semibold text-sm transition-colors bg-muted text-muted-foreground"
+        class="flex flex-col items-center"
+        data-active="false"
+        data-completed="false"
+        data-testid="workflow-step-ensemble"
       >
-        2
+        <div
+          class="w-12 h-12 rounded-full flex items-center justify-center font-semibold text-sm transition-colors bg-muted text-muted-foreground"
+        >
+          2
+        </div>
+        <span
+          class="mt-2 text-sm font-medium transition-colors text-muted-foreground"
+        >
+          Ensemble
+        </span>
       </div>
-      <span
-        class="mt-2 text-sm font-medium transition-colors text-muted-foreground"
-      >
-        Ensemble
-      </span>
     </div>
     <div
       class="w-16 h-0.5 mx-4 transition-colors bg-muted"
@@ -62,15 +76,22 @@ exports[`ProgressSteps Snapshots > matches snapshot for config step 1`] = `
       data-testid="progress-step-prompt"
     >
       <div
-        class="w-12 h-12 rounded-full flex items-center justify-center font-semibold text-sm transition-colors bg-muted text-muted-foreground"
+        class="flex flex-col items-center"
+        data-active="false"
+        data-completed="false"
+        data-testid="workflow-step-prompt"
       >
-        3
+        <div
+          class="w-12 h-12 rounded-full flex items-center justify-center font-semibold text-sm transition-colors bg-muted text-muted-foreground"
+        >
+          3
+        </div>
+        <span
+          class="mt-2 text-sm font-medium transition-colors text-muted-foreground"
+        >
+          Prompt
+        </span>
       </div>
-      <span
-        class="mt-2 text-sm font-medium transition-colors text-muted-foreground"
-      >
-        Prompt
-      </span>
     </div>
     <div
       class="w-16 h-0.5 mx-4 transition-colors bg-muted"
@@ -86,15 +107,22 @@ exports[`ProgressSteps Snapshots > matches snapshot for config step 1`] = `
       data-testid="progress-step-review"
     >
       <div
-        class="w-12 h-12 rounded-full flex items-center justify-center font-semibold text-sm transition-colors bg-muted text-muted-foreground"
+        class="flex flex-col items-center"
+        data-active="false"
+        data-completed="false"
+        data-testid="workflow-step-review"
       >
-        4
+        <div
+          class="w-12 h-12 rounded-full flex items-center justify-center font-semibold text-sm transition-colors bg-muted text-muted-foreground"
+        >
+          4
+        </div>
+        <span
+          class="mt-2 text-sm font-medium transition-colors text-muted-foreground"
+        >
+          Review
+        </span>
       </div>
-      <span
-        class="mt-2 text-sm font-medium transition-colors text-muted-foreground"
-      >
-        Review
-      </span>
     </div>
   </div>
 </div>
@@ -102,7 +130,7 @@ exports[`ProgressSteps Snapshots > matches snapshot for config step 1`] = `
 
 exports[`ProgressSteps Snapshots > matches snapshot for ensemble step 1`] = `
 <div
-  class="flex items-center justify-center mb-12"
+  class="progress-steps flex items-center justify-center mb-12"
 >
   <div
     class="flex items-center"
@@ -114,31 +142,38 @@ exports[`ProgressSteps Snapshots > matches snapshot for ensemble step 1`] = `
       data-testid="progress-step-config"
     >
       <div
-        class="w-12 h-12 rounded-full flex items-center justify-center font-semibold text-sm transition-colors bg-green-500 text-white dark:bg-green-600"
+        class="flex flex-col items-center"
+        data-active="false"
+        data-completed="true"
+        data-testid="workflow-step-config"
       >
-        <svg
-          class="lucide lucide-check w-4 h-4"
-          fill="none"
-          height="24"
-          role="img"
-          stroke="currentColor"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          stroke-width="2"
-          viewBox="0 0 24 24"
-          width="24"
-          xmlns="http://www.w3.org/2000/svg"
+        <div
+          class="w-12 h-12 rounded-full flex items-center justify-center font-semibold text-sm transition-colors bg-green-500 text-white dark:bg-green-600"
         >
-          <path
-            d="M20 6 9 17l-5-5"
-          />
-        </svg>
+          <svg
+            class="lucide lucide-check w-4 h-4"
+            fill="none"
+            height="24"
+            role="img"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            width="24"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M20 6 9 17l-5-5"
+            />
+          </svg>
+        </div>
+        <span
+          class="mt-2 text-sm font-medium transition-colors text-green-600 dark:text-green-400"
+        >
+          Config
+        </span>
       </div>
-      <span
-        class="mt-2 text-sm font-medium transition-colors text-green-600 dark:text-green-400"
-      >
-        Config
-      </span>
     </div>
     <div
       class="w-16 h-0.5 mx-4 transition-colors bg-green-500 dark:bg-green-600"
@@ -154,15 +189,22 @@ exports[`ProgressSteps Snapshots > matches snapshot for ensemble step 1`] = `
       data-testid="progress-step-ensemble"
     >
       <div
-        class="w-12 h-12 rounded-full flex items-center justify-center font-semibold text-sm transition-colors bg-blue-500 text-white dark:bg-blue-600"
+        class="flex flex-col items-center"
+        data-active="true"
+        data-completed="false"
+        data-testid="workflow-step-ensemble"
       >
-        2
+        <div
+          class="w-12 h-12 rounded-full flex items-center justify-center font-semibold text-sm transition-colors bg-blue-500 text-white dark:bg-blue-600"
+        >
+          2
+        </div>
+        <span
+          class="mt-2 text-sm font-medium transition-colors text-blue-600 dark:text-blue-400"
+        >
+          Ensemble
+        </span>
       </div>
-      <span
-        class="mt-2 text-sm font-medium transition-colors text-blue-600 dark:text-blue-400"
-      >
-        Ensemble
-      </span>
     </div>
     <div
       class="w-16 h-0.5 mx-4 transition-colors bg-muted"
@@ -178,15 +220,22 @@ exports[`ProgressSteps Snapshots > matches snapshot for ensemble step 1`] = `
       data-testid="progress-step-prompt"
     >
       <div
-        class="w-12 h-12 rounded-full flex items-center justify-center font-semibold text-sm transition-colors bg-muted text-muted-foreground"
+        class="flex flex-col items-center"
+        data-active="false"
+        data-completed="false"
+        data-testid="workflow-step-prompt"
       >
-        3
+        <div
+          class="w-12 h-12 rounded-full flex items-center justify-center font-semibold text-sm transition-colors bg-muted text-muted-foreground"
+        >
+          3
+        </div>
+        <span
+          class="mt-2 text-sm font-medium transition-colors text-muted-foreground"
+        >
+          Prompt
+        </span>
       </div>
-      <span
-        class="mt-2 text-sm font-medium transition-colors text-muted-foreground"
-      >
-        Prompt
-      </span>
     </div>
     <div
       class="w-16 h-0.5 mx-4 transition-colors bg-muted"
@@ -202,15 +251,22 @@ exports[`ProgressSteps Snapshots > matches snapshot for ensemble step 1`] = `
       data-testid="progress-step-review"
     >
       <div
-        class="w-12 h-12 rounded-full flex items-center justify-center font-semibold text-sm transition-colors bg-muted text-muted-foreground"
+        class="flex flex-col items-center"
+        data-active="false"
+        data-completed="false"
+        data-testid="workflow-step-review"
       >
-        4
+        <div
+          class="w-12 h-12 rounded-full flex items-center justify-center font-semibold text-sm transition-colors bg-muted text-muted-foreground"
+        >
+          4
+        </div>
+        <span
+          class="mt-2 text-sm font-medium transition-colors text-muted-foreground"
+        >
+          Review
+        </span>
       </div>
-      <span
-        class="mt-2 text-sm font-medium transition-colors text-muted-foreground"
-      >
-        Review
-      </span>
     </div>
   </div>
 </div>
@@ -218,7 +274,7 @@ exports[`ProgressSteps Snapshots > matches snapshot for ensemble step 1`] = `
 
 exports[`ProgressSteps Snapshots > matches snapshot for prompt step 1`] = `
 <div
-  class="flex items-center justify-center mb-12"
+  class="progress-steps flex items-center justify-center mb-12"
 >
   <div
     class="flex items-center"
@@ -230,31 +286,38 @@ exports[`ProgressSteps Snapshots > matches snapshot for prompt step 1`] = `
       data-testid="progress-step-config"
     >
       <div
-        class="w-12 h-12 rounded-full flex items-center justify-center font-semibold text-sm transition-colors bg-green-500 text-white dark:bg-green-600"
+        class="flex flex-col items-center"
+        data-active="false"
+        data-completed="true"
+        data-testid="workflow-step-config"
       >
-        <svg
-          class="lucide lucide-check w-4 h-4"
-          fill="none"
-          height="24"
-          role="img"
-          stroke="currentColor"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          stroke-width="2"
-          viewBox="0 0 24 24"
-          width="24"
-          xmlns="http://www.w3.org/2000/svg"
+        <div
+          class="w-12 h-12 rounded-full flex items-center justify-center font-semibold text-sm transition-colors bg-green-500 text-white dark:bg-green-600"
         >
-          <path
-            d="M20 6 9 17l-5-5"
-          />
-        </svg>
+          <svg
+            class="lucide lucide-check w-4 h-4"
+            fill="none"
+            height="24"
+            role="img"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            width="24"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M20 6 9 17l-5-5"
+            />
+          </svg>
+        </div>
+        <span
+          class="mt-2 text-sm font-medium transition-colors text-green-600 dark:text-green-400"
+        >
+          Config
+        </span>
       </div>
-      <span
-        class="mt-2 text-sm font-medium transition-colors text-green-600 dark:text-green-400"
-      >
-        Config
-      </span>
     </div>
     <div
       class="w-16 h-0.5 mx-4 transition-colors bg-green-500 dark:bg-green-600"
@@ -270,31 +333,38 @@ exports[`ProgressSteps Snapshots > matches snapshot for prompt step 1`] = `
       data-testid="progress-step-ensemble"
     >
       <div
-        class="w-12 h-12 rounded-full flex items-center justify-center font-semibold text-sm transition-colors bg-green-500 text-white dark:bg-green-600"
+        class="flex flex-col items-center"
+        data-active="false"
+        data-completed="true"
+        data-testid="workflow-step-ensemble"
       >
-        <svg
-          class="lucide lucide-check w-4 h-4"
-          fill="none"
-          height="24"
-          role="img"
-          stroke="currentColor"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          stroke-width="2"
-          viewBox="0 0 24 24"
-          width="24"
-          xmlns="http://www.w3.org/2000/svg"
+        <div
+          class="w-12 h-12 rounded-full flex items-center justify-center font-semibold text-sm transition-colors bg-green-500 text-white dark:bg-green-600"
         >
-          <path
-            d="M20 6 9 17l-5-5"
-          />
-        </svg>
+          <svg
+            class="lucide lucide-check w-4 h-4"
+            fill="none"
+            height="24"
+            role="img"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            width="24"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M20 6 9 17l-5-5"
+            />
+          </svg>
+        </div>
+        <span
+          class="mt-2 text-sm font-medium transition-colors text-green-600 dark:text-green-400"
+        >
+          Ensemble
+        </span>
       </div>
-      <span
-        class="mt-2 text-sm font-medium transition-colors text-green-600 dark:text-green-400"
-      >
-        Ensemble
-      </span>
     </div>
     <div
       class="w-16 h-0.5 mx-4 transition-colors bg-green-500 dark:bg-green-600"
@@ -310,15 +380,22 @@ exports[`ProgressSteps Snapshots > matches snapshot for prompt step 1`] = `
       data-testid="progress-step-prompt"
     >
       <div
-        class="w-12 h-12 rounded-full flex items-center justify-center font-semibold text-sm transition-colors bg-blue-500 text-white dark:bg-blue-600"
+        class="flex flex-col items-center"
+        data-active="true"
+        data-completed="false"
+        data-testid="workflow-step-prompt"
       >
-        3
+        <div
+          class="w-12 h-12 rounded-full flex items-center justify-center font-semibold text-sm transition-colors bg-blue-500 text-white dark:bg-blue-600"
+        >
+          3
+        </div>
+        <span
+          class="mt-2 text-sm font-medium transition-colors text-blue-600 dark:text-blue-400"
+        >
+          Prompt
+        </span>
       </div>
-      <span
-        class="mt-2 text-sm font-medium transition-colors text-blue-600 dark:text-blue-400"
-      >
-        Prompt
-      </span>
     </div>
     <div
       class="w-16 h-0.5 mx-4 transition-colors bg-muted"
@@ -334,15 +411,22 @@ exports[`ProgressSteps Snapshots > matches snapshot for prompt step 1`] = `
       data-testid="progress-step-review"
     >
       <div
-        class="w-12 h-12 rounded-full flex items-center justify-center font-semibold text-sm transition-colors bg-muted text-muted-foreground"
+        class="flex flex-col items-center"
+        data-active="false"
+        data-completed="false"
+        data-testid="workflow-step-review"
       >
-        4
+        <div
+          class="w-12 h-12 rounded-full flex items-center justify-center font-semibold text-sm transition-colors bg-muted text-muted-foreground"
+        >
+          4
+        </div>
+        <span
+          class="mt-2 text-sm font-medium transition-colors text-muted-foreground"
+        >
+          Review
+        </span>
       </div>
-      <span
-        class="mt-2 text-sm font-medium transition-colors text-muted-foreground"
-      >
-        Review
-      </span>
     </div>
   </div>
 </div>
@@ -350,7 +434,7 @@ exports[`ProgressSteps Snapshots > matches snapshot for prompt step 1`] = `
 
 exports[`ProgressSteps Snapshots > matches snapshot for review step 1`] = `
 <div
-  class="flex items-center justify-center mb-12"
+  class="progress-steps flex items-center justify-center mb-12"
 >
   <div
     class="flex items-center"
@@ -362,31 +446,38 @@ exports[`ProgressSteps Snapshots > matches snapshot for review step 1`] = `
       data-testid="progress-step-config"
     >
       <div
-        class="w-12 h-12 rounded-full flex items-center justify-center font-semibold text-sm transition-colors bg-green-500 text-white dark:bg-green-600"
+        class="flex flex-col items-center"
+        data-active="false"
+        data-completed="true"
+        data-testid="workflow-step-config"
       >
-        <svg
-          class="lucide lucide-check w-4 h-4"
-          fill="none"
-          height="24"
-          role="img"
-          stroke="currentColor"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          stroke-width="2"
-          viewBox="0 0 24 24"
-          width="24"
-          xmlns="http://www.w3.org/2000/svg"
+        <div
+          class="w-12 h-12 rounded-full flex items-center justify-center font-semibold text-sm transition-colors bg-green-500 text-white dark:bg-green-600"
         >
-          <path
-            d="M20 6 9 17l-5-5"
-          />
-        </svg>
+          <svg
+            class="lucide lucide-check w-4 h-4"
+            fill="none"
+            height="24"
+            role="img"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            width="24"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M20 6 9 17l-5-5"
+            />
+          </svg>
+        </div>
+        <span
+          class="mt-2 text-sm font-medium transition-colors text-green-600 dark:text-green-400"
+        >
+          Config
+        </span>
       </div>
-      <span
-        class="mt-2 text-sm font-medium transition-colors text-green-600 dark:text-green-400"
-      >
-        Config
-      </span>
     </div>
     <div
       class="w-16 h-0.5 mx-4 transition-colors bg-green-500 dark:bg-green-600"
@@ -402,31 +493,38 @@ exports[`ProgressSteps Snapshots > matches snapshot for review step 1`] = `
       data-testid="progress-step-ensemble"
     >
       <div
-        class="w-12 h-12 rounded-full flex items-center justify-center font-semibold text-sm transition-colors bg-green-500 text-white dark:bg-green-600"
+        class="flex flex-col items-center"
+        data-active="false"
+        data-completed="true"
+        data-testid="workflow-step-ensemble"
       >
-        <svg
-          class="lucide lucide-check w-4 h-4"
-          fill="none"
-          height="24"
-          role="img"
-          stroke="currentColor"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          stroke-width="2"
-          viewBox="0 0 24 24"
-          width="24"
-          xmlns="http://www.w3.org/2000/svg"
+        <div
+          class="w-12 h-12 rounded-full flex items-center justify-center font-semibold text-sm transition-colors bg-green-500 text-white dark:bg-green-600"
         >
-          <path
-            d="M20 6 9 17l-5-5"
-          />
-        </svg>
+          <svg
+            class="lucide lucide-check w-4 h-4"
+            fill="none"
+            height="24"
+            role="img"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            width="24"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M20 6 9 17l-5-5"
+            />
+          </svg>
+        </div>
+        <span
+          class="mt-2 text-sm font-medium transition-colors text-green-600 dark:text-green-400"
+        >
+          Ensemble
+        </span>
       </div>
-      <span
-        class="mt-2 text-sm font-medium transition-colors text-green-600 dark:text-green-400"
-      >
-        Ensemble
-      </span>
     </div>
     <div
       class="w-16 h-0.5 mx-4 transition-colors bg-green-500 dark:bg-green-600"
@@ -442,31 +540,38 @@ exports[`ProgressSteps Snapshots > matches snapshot for review step 1`] = `
       data-testid="progress-step-prompt"
     >
       <div
-        class="w-12 h-12 rounded-full flex items-center justify-center font-semibold text-sm transition-colors bg-green-500 text-white dark:bg-green-600"
+        class="flex flex-col items-center"
+        data-active="false"
+        data-completed="true"
+        data-testid="workflow-step-prompt"
       >
-        <svg
-          class="lucide lucide-check w-4 h-4"
-          fill="none"
-          height="24"
-          role="img"
-          stroke="currentColor"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          stroke-width="2"
-          viewBox="0 0 24 24"
-          width="24"
-          xmlns="http://www.w3.org/2000/svg"
+        <div
+          class="w-12 h-12 rounded-full flex items-center justify-center font-semibold text-sm transition-colors bg-green-500 text-white dark:bg-green-600"
         >
-          <path
-            d="M20 6 9 17l-5-5"
-          />
-        </svg>
+          <svg
+            class="lucide lucide-check w-4 h-4"
+            fill="none"
+            height="24"
+            role="img"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            width="24"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M20 6 9 17l-5-5"
+            />
+          </svg>
+        </div>
+        <span
+          class="mt-2 text-sm font-medium transition-colors text-green-600 dark:text-green-400"
+        >
+          Prompt
+        </span>
       </div>
-      <span
-        class="mt-2 text-sm font-medium transition-colors text-green-600 dark:text-green-400"
-      >
-        Prompt
-      </span>
     </div>
     <div
       class="w-16 h-0.5 mx-4 transition-colors bg-green-500 dark:bg-green-600"
@@ -482,15 +587,22 @@ exports[`ProgressSteps Snapshots > matches snapshot for review step 1`] = `
       data-testid="progress-step-review"
     >
       <div
-        class="w-12 h-12 rounded-full flex items-center justify-center font-semibold text-sm transition-colors bg-blue-500 text-white dark:bg-blue-600"
+        class="flex flex-col items-center"
+        data-active="true"
+        data-completed="false"
+        data-testid="workflow-step-review"
       >
-        4
+        <div
+          class="w-12 h-12 rounded-full flex items-center justify-center font-semibold text-sm transition-colors bg-blue-500 text-white dark:bg-blue-600"
+        >
+          4
+        </div>
+        <span
+          class="mt-2 text-sm font-medium transition-colors text-blue-600 dark:text-blue-400"
+        >
+          Review
+        </span>
       </div>
-      <span
-        class="mt-2 text-sm font-medium transition-colors text-blue-600 dark:text-blue-400"
-      >
-        Review
-      </span>
     </div>
   </div>
 </div>

@@ -24,7 +24,7 @@ export function ProgressSteps({ currentStep }: ProgressStepsProps) {
   const currentIndex = getCurrentStepIndex();
 
   return (
-    <div className="flex items-center justify-center mb-12">
+    <div className="progress-steps flex items-center justify-center mb-12">
       {steps.map((step, index) => (
         <div key={step.id} className="flex items-center">
           <div
@@ -34,31 +34,38 @@ export function ProgressSteps({ currentStep }: ProgressStepsProps) {
             data-completed={index < currentIndex}
           >
             <div
-              className={`w-12 h-12 rounded-full flex items-center justify-center font-semibold text-sm transition-colors ${
-                index < currentIndex
-                  ? 'bg-green-500 text-white dark:bg-green-600'
-                  : index === currentIndex
-                    ? 'bg-blue-500 text-white dark:bg-blue-600'
-                    : 'bg-muted text-muted-foreground'
-              }`}
+              className="flex flex-col items-center"
+              data-testid={`workflow-step-${step.id}`}
+              data-active={index === currentIndex}
+              data-completed={index < currentIndex}
             >
-              {index < currentIndex ? (
-                <Check className="w-4 h-4" role="img" />
-              ) : (
-                step.number
-              )}
+              <div
+                className={`w-12 h-12 rounded-full flex items-center justify-center font-semibold text-sm transition-colors ${
+                  index < currentIndex
+                    ? 'bg-green-500 text-white dark:bg-green-600'
+                    : index === currentIndex
+                      ? 'bg-blue-500 text-white dark:bg-blue-600'
+                      : 'bg-muted text-muted-foreground'
+                }`}
+              >
+                {index < currentIndex ? (
+                  <Check className="w-4 h-4" role="img" />
+                ) : (
+                  step.number
+                )}
+              </div>
+              <span
+                className={`mt-2 text-sm font-medium transition-colors ${
+                  index < currentIndex
+                    ? 'text-green-600 dark:text-green-400'
+                    : index === currentIndex
+                      ? 'text-blue-600 dark:text-blue-400'
+                      : 'text-muted-foreground'
+                }`}
+              >
+                {step.label}
+              </span>
             </div>
-            <span
-              className={`mt-2 text-sm font-medium transition-colors ${
-                index < currentIndex
-                  ? 'text-green-600 dark:text-green-400'
-                  : index === currentIndex
-                    ? 'text-blue-600 dark:text-blue-400'
-                    : 'text-muted-foreground'
-              }`}
-            >
-              {step.label}
-            </span>
           </div>
 
           {index < steps.length - 1 && (
