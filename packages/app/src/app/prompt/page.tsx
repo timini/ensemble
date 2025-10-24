@@ -18,6 +18,8 @@ import { PromptTips } from '@/components/organisms/PromptTips';
 import { PromptInputWithHint } from '@/components/organisms/PromptInputWithHint';
 import { ProgressSteps } from '@/components/molecules/ProgressSteps';
 import { ResponseCard } from '@/components/molecules/ResponseCard';
+import { ProviderRegistry } from '~/providers';
+import { AVAILABLE_MODELS } from '~/lib/models';
 
 export default function PromptPage() {
   const { t } = useTranslation();
@@ -28,6 +30,12 @@ export default function PromptPage() {
   const prompt = useStore((state) => state.prompt);
   const setPrompt = useStore((state) => state.setPrompt);
   const manualResponses = useStore((state) => state.manualResponses);
+  const resetStreamingState = useStore((state) => state.resetStreamingState);
+  const startStreaming = useStore((state) => state.startStreaming);
+  const appendStreamChunk = useStore((state) => state.appendStreamChunk);
+  const completeResponse = useStore((state) => state.completeResponse);
+  const setError = useStore((state) => state.setError);
+  const mode = useStore((state) => state.mode);
 
   const currentStep = useStore((state) => state.currentStep);
   const setCurrentStep = useStore((state) => state.setCurrentStep);
@@ -59,6 +67,49 @@ export default function PromptPage() {
   };
 
   const handleSubmit = () => {
+    if (!isValid) return;
+
+    resetStreamingState();
+
+    const registry = ProviderRegistry.getInstance();
+    const clientMode: 'mock' | 'free' | 'pro' =
+      process.env.NEXT_PUBLIC_MOCK_MODE === 'true'
+        ? 'mock'
+        : mode === 'pro'
+        ? 'pro'
+        : 'free';
+
+    const currentPrompt = localPrompt.trim();
+
+    selectedModels.forEach((selection) => {
+      const displayName =
+        AVAILABLE_MODELS.find((model) => model.id === selection.model)?.name ??
+        selection.model;
+
+      startStreaming(selection.id, selection.provider, displayName);
+
+    let provider;
+    try {
+      provider = registry.getProvider(selection.provider, clientMode);
+    } catch {
+      provider = registry.getProvider(selection.provider, 'mock');
+    }
+
+      void provider
+        .streamResponse(
+          currentPrompt,
+          selection.model,
+          (chunk) => appendStreamChunk(selection.id, chunk),
+          (_fullResponse, responseTime) => {
+            completeResponse(selection.id, responseTime);
+          },
+          (error) => {
+            setError(selection.id, error.message);
+          },
+        )
+        .catch((error) => setError(selection.id, (error as Error).message));
+    });
+
     completeStep('prompt');
     setCurrentStep('review');
     router.push('/review');
@@ -108,6 +159,7 @@ export default function PromptPage() {
                   content={manual.response}
                   modelName={manual.label}
                   defaultExpanded={false}
+                  testId={`manual-preview-${manual.id}`}
                 />
               ))}
             </div>

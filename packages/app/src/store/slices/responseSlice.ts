@@ -219,7 +219,6 @@ export const createResponseSlice: StateCreator<ResponseSlice> = (set, get) => ({
   resetStreamingState: () => {
     set({
       responses: [],
-      manualResponses: [],
       embeddings: [],
       similarityMatrix: null,
       agreementStats: null,
@@ -228,7 +227,7 @@ export const createResponseSlice: StateCreator<ResponseSlice> = (set, get) => ({
   },
 
   clearResponses: () => {
-    set({ prompt: null });
+    set({ prompt: null, manualResponses: [] });
     get().resetStreamingState();
   },
 });
