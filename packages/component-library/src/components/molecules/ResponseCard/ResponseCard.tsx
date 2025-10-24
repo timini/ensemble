@@ -110,7 +110,14 @@ export const ResponseCard = React.forwardRef<HTMLDivElement, ResponseCardProps>(
           <div className="flex items-start justify-between gap-2">
             <div className="flex items-center gap-2">
               {isManual ? (
-                <Badge variant="secondary">{t('molecules.responseCard.manual')}</Badge>
+                <div className="flex flex-col items-start">
+                  <Badge variant="secondary">{t('molecules.responseCard.manual')}</Badge>
+                  {modelName && (
+                    <span className="mt-1 font-semibold text-base text-foreground">
+                      {modelName}
+                    </span>
+                  )}
+                </div>
               ) : (
                 <>
                   {provider && <Badge variant="outline">{PROVIDER_NAMES[provider]}</Badge>}

@@ -29,6 +29,7 @@ export default function ReviewPage() {
   const responses = useStore((state) => state.responses);
   const agreementStats = useStore((state) => state.agreementStats);
   const metaAnalysis = useStore((state) => state.metaAnalysis);
+  const manualResponses = useStore((state) => state.manualResponses);
 
   const setCurrentStep = useStore((state) => state.setCurrentStep);
   const completeStep = useStore((state) => state.completeStep);
@@ -98,7 +99,7 @@ export default function ReviewPage() {
       <div className="mt-8 space-y-4">
         <h3 className="text-xl font-semibold">{t('pages.review.responsesHeading')}</h3>
 
-        {responses.length === 0 ? (
+        {responses.length === 0 && manualResponses.length === 0 ? (
           <div className="p-8 text-center bg-gray-50 dark:bg-gray-800 rounded-lg">
             <p className="text-gray-600 dark:text-gray-400">
               {t('pages.review.noResponses')}
@@ -126,6 +127,16 @@ export default function ReviewPage() {
                     ? `${response.responseTime}ms`
                     : undefined
                 }
+              />
+            ))}
+            {manualResponses.map((manual) => (
+              <ResponseCard
+                key={manual.id}
+                modelName={manual.label}
+                status="complete"
+                responseType="manual"
+                content={manual.response}
+                defaultExpanded={false}
               />
             ))}
           </div>

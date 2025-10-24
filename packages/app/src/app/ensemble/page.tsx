@@ -36,6 +36,7 @@ export default function EnsemblePage() {
   const summarizerModel = useStore((state) => state.summarizerModel);
   const setSummarizer = useStore((state) => state.setSummarizer);
   const addManualResponse = useStore((state) => state.addManualResponse);
+  const manualResponses = useStore((state) => state.manualResponses);
 
   const currentStep = useStore((state) => state.currentStep);
   const setCurrentStep = useStore((state) => state.setCurrentStep);
@@ -301,6 +302,7 @@ export default function EnsemblePage() {
             onSavePreset={handleSavePreset}
             onDeletePreset={handleDeletePreset}
             onAddManualResponse={handleAddManualResponse}
+            manualResponses={manualResponses}
           />
         </div>
       </div>

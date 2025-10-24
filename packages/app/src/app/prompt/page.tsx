@@ -17,6 +17,7 @@ import { WorkflowNavigator } from '@/components/organisms/WorkflowNavigator';
 import { PromptTips } from '@/components/organisms/PromptTips';
 import { PromptInputWithHint } from '@/components/organisms/PromptInputWithHint';
 import { ProgressSteps } from '@/components/molecules/ProgressSteps';
+import { ResponseCard } from '@/components/molecules/ResponseCard';
 
 export default function PromptPage() {
   const { t } = useTranslation();
@@ -26,6 +27,7 @@ export default function PromptPage() {
   const summarizerModel = useStore((state) => state.summarizerModel);
   const prompt = useStore((state) => state.prompt);
   const setPrompt = useStore((state) => state.setPrompt);
+  const manualResponses = useStore((state) => state.manualResponses);
 
   const currentStep = useStore((state) => state.currentStep);
   const setCurrentStep = useStore((state) => state.setCurrentStep);
@@ -89,6 +91,27 @@ export default function PromptPage() {
             selectedModels={modelNames}
             summarizerModel={summarizerForSummary}
           />
+        )}
+
+        {/* Manual Responses Preview */}
+        {manualResponses.length > 0 && (
+          <div data-testid="manual-responses-preview" className="space-y-4">
+            <h3 className="text-lg font-semibold">
+              {t('organisms.ensembleSidebar.manualResponses')}
+            </h3>
+            <div className="space-y-4">
+              {manualResponses.map((manual) => (
+                <ResponseCard
+                  key={manual.id}
+                  responseType="manual"
+                  status="complete"
+                  content={manual.response}
+                  modelName={manual.label}
+                  defaultExpanded={false}
+                />
+              ))}
+            </div>
+          </div>
         )}
 
         {/* Prompt Input */}
