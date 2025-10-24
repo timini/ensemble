@@ -300,6 +300,25 @@ describe('ModelSelectionList', () => {
       await user.click(screen.getByText('GPT-4'));
       expect(onModelToggle).not.toHaveBeenCalled();
     });
+
+    it('still blocks selection when in mock mode without API keys', async () => {
+      const user = userEvent.setup();
+      const onModelToggle = vi.fn();
+
+      render(
+        <ModelSelectionList
+          models={mockModels}
+          selectedModelIds={[]}
+          providerStatus={{ openai: 'API key required' }}
+          isMockMode
+          onModelToggle={onModelToggle}
+          onSummarizerChange={vi.fn()}
+        />
+      );
+
+      await user.click(screen.getByText('GPT-4'));
+      expect(onModelToggle).not.toHaveBeenCalled();
+    });
   });
 
   describe('provider grouping', () => {

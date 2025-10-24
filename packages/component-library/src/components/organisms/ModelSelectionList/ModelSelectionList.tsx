@@ -20,14 +20,14 @@ export interface ModelSelectionListProps {
   maxSelection?: number;
   /** Provider status map (e.g., 'Ready', 'API key required') */
   providerStatus?: Partial<Record<Provider, string>>;
-  /** Whether in mock mode (allows selection even without API keys) */
-  isMockMode?: boolean;
   /** Callback when a model is toggled */
   onModelToggle: (modelId: string) => void;
   /** Callback when summarizer designation changes */
   onSummarizerChange: (modelId: string) => void;
   /** Callback when configure API key button is clicked */
   onConfigureApiKey?: (provider: Provider) => void;
+  /** @deprecated No longer used. Selection is always gated by provider status. */
+  isMockMode?: boolean;
 }
 
 const PROVIDER_LABELS: Record<Provider, string> = {
@@ -64,7 +64,7 @@ export const ModelSelectionList = React.forwardRef<HTMLDivElement, ModelSelectio
       summarizerModelId,
       maxSelection,
       providerStatus,
-      isMockMode = false,
+      isMockMode: _deprecatedIsMockMode,
       onModelToggle,
       onSummarizerChange,
       onConfigureApiKey,
@@ -72,6 +72,7 @@ export const ModelSelectionList = React.forwardRef<HTMLDivElement, ModelSelectio
     ref
   ) => {
     const { t } = useTranslation();
+    void _deprecatedIsMockMode;
 
     // Group models by provider
     const modelsByProvider = React.useMemo(() => {
@@ -146,10 +147,10 @@ export const ModelSelectionList = React.forwardRef<HTMLDivElement, ModelSelectio
                 {providerModels.map((model) => {
                   const isSelected = selectedModelIds.includes(model.id);
                   const isSummarizer = summarizerModelId === model.id;
+                  const providerStatusMessage = providerStatus?.[provider]?.toLowerCase() ?? '';
                   const providerRequiresApiKey =
-                    !isMockMode &&
-                    (providerStatus?.[provider]?.toLowerCase().includes('required') ||
-                    providerStatus?.[provider]?.toLowerCase().includes('api key'));
+                    providerStatusMessage.includes('required') ||
+                    providerStatusMessage.includes('api key');
                   // Disable model if:
                   // 1. Max selection reached AND model is not already selected
                   // 2. Provider requires API key (regardless of selection state)
