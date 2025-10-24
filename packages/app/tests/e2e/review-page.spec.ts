@@ -78,16 +78,10 @@ test.describe('Review Page', () => {
     await expect(page.getByText(/model responses/i)).toBeVisible();
   });
 
-  test('shows empty state when no responses yet', async ({ page }) => {
-    // Since we're using Mock mode but responses aren't implemented yet,
-    // should show empty state or "No responses yet" message
-    const emptyMessage = page.getByText(/no responses yet|responses will appear here/i);
-
-    // Either empty message is visible OR response cards are visible
-    const hasEmptyMessage = await emptyMessage.isVisible().catch(() => false);
-    const hasResponseCards = await page.locator('[data-testid^="response-card-"]').count() > 0;
-
-    expect(hasEmptyMessage || hasResponseCards).toBeTruthy();
+  test('streams responses on review page', async ({ page }) => {
+    await expect(page.locator('[data-testid^="response-card-"]').first()).toBeVisible({
+      timeout: 20000,
+    });
   });
 
   test('can navigate back to prompt page', async ({ page }) => {

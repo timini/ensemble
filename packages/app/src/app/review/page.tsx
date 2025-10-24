@@ -127,6 +127,7 @@ export default function ReviewPage() {
                     ? `${response.responseTime}ms`
                     : undefined
                 }
+                testId={`response-card-${response.modelId}`}
               />
             ))}
             {manualResponses.map((manual) => (
@@ -137,6 +138,7 @@ export default function ReviewPage() {
                 responseType="manual"
                 content={manual.response}
                 defaultExpanded={false}
+                testId={`manual-response-card-${manual.id}`}
               />
             ))}
           </div>

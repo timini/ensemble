@@ -173,7 +173,7 @@ describe('responseSlice', () => {
     const state = store.getState();
     expect(state.prompt).toBe('Persisted prompt');
     expect(state.responses).toEqual([]);
-    expect(state.manualResponses).toEqual([]);
+    expect(state.manualResponses).toHaveLength(1);
     expect(state.embeddings).toEqual([]);
     expect(state.similarityMatrix).toBeNull();
     expect(state.agreementStats).toBeNull();

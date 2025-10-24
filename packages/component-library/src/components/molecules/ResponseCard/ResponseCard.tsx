@@ -36,6 +36,8 @@ export interface ResponseCardProps {
   onCopy?: () => void;
   /** Initial expanded state (default: true) */
   defaultExpanded?: boolean;
+  /** Optional test id for querying */
+  testId?: string;
 }
 
 const PROVIDER_NAMES = {
@@ -76,6 +78,7 @@ export const ResponseCard = React.forwardRef<HTMLDivElement, ResponseCardProps>(
       onRatingChange,
       onCopy,
       defaultExpanded = true,
+      testId,
     },
     ref
   ) => {
@@ -105,6 +108,7 @@ export const ResponseCard = React.forwardRef<HTMLDivElement, ResponseCardProps>(
           'w-full',
           isError && 'border-red-500 dark:border-red-400'
         )}
+        data-testid={testId}
       >
         <CardHeader className="pb-3">
           <div className="flex items-start justify-between gap-2">
