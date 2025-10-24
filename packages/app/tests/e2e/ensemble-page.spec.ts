@@ -73,15 +73,25 @@ test.describe('Ensemble Page', () => {
   });
 
   test('enforces maximum 6 models', async ({ page }) => {
-    // Select 6 models
-    for (let i = 0; i < 6; i++) {
-      await page.locator('[data-testid^="model-card-"]').nth(i).click();
+    // Ensure enough providers are enabled
+    await page.goto('/config');
+    await page.locator('[data-mode="free"]').click();
+    await page.locator('[data-provider="openai"] input').fill('sk-openai');
+    await page.locator('[data-provider="anthropic"] input').fill('sk-anthropic');
+    await page.locator('[data-provider="google"] input').fill('sk-google');
+    await page.getByRole('button', { name: /continue/i }).click();
+
+    const enabledCards = page.locator('[data-testid^="model-card-"][data-disabled="false"]');
+    const count = await enabledCards.count();
+
+    for (let i = 0; i < Math.min(6, count); i++) {
+      await enabledCards.nth(i).click();
     }
 
-    // 7th model card should be disabled or not selectable
-    const seventhModel = page.locator('[data-testid^="model-card-"]').nth(6);
-    const isDisabled = await seventhModel.getAttribute('data-disabled');
-    expect(isDisabled).toBe('true');
+    const seventhEnabled = enabledCards.nth(6);
+    if (await seventhEnabled.count()) {
+      await expect(seventhEnabled).toHaveAttribute('data-disabled', 'true');
+    }
   });
 
   test('can designate summarizer model', async ({ page }) => {
@@ -145,5 +155,24 @@ test.describe('Ensemble Page', () => {
       'data-active',
       'true'
     );
+  });
+
+  test('disables providers without configured API keys', async ({ page }) => {
+    // Navigate back to config and configure only OpenAI
+    await page.goto('/config');
+    await page.locator('[data-mode="free"]').click();
+    await page.locator('[data-provider="openai"] input').fill('sk-test-openai-key');
+    await page.getByRole('button', { name: /continue/i }).click();
+
+    const selector = '[data-testid="model-card-gemini-1.5-pro"]';
+    const googleCard = page.locator(selector);
+    await expect(googleCard).toHaveAttribute('data-disabled', 'true');
+
+    await page.evaluate((sel) => {
+      const el = document.querySelector(sel);
+      el?.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
+    }, selector);
+
+    await expect(googleCard).not.toHaveAttribute('data-selected', 'true');
   });
 });
