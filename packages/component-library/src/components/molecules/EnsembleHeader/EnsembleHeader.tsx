@@ -7,7 +7,15 @@ export interface EnsembleHeaderProps {
 }
 
 export function EnsembleHeader({ onSettingsClick }: EnsembleHeaderProps) {
-  const { t } = useTranslation();
+  const { t, i18n, ready } = useTranslation();
+
+  const title = (ready || i18n.isInitialized)
+    ? t('ensemble.header.title')
+    : 'Ensemble AI';
+
+  const tagline = (ready || i18n.isInitialized)
+    ? t('ensemble.header.tagline')
+    : 'The smartest AI is an ensemble.';
 
   return (
     <div className="bg-background border-b border-border">
@@ -15,10 +23,10 @@ export function EnsembleHeader({ onSettingsClick }: EnsembleHeaderProps) {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold text-foreground">
-              {t('ensemble.header.title')}
+              {title}
             </h1>
             <p className="text-muted-foreground mt-1">
-              {t('ensemble.header.tagline')}
+              {tagline}
             </p>
           </div>
           <button
