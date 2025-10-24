@@ -8,7 +8,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useStore } from '~/store';
 import { PageHero } from '@/components/organisms/PageHero';
@@ -17,6 +17,7 @@ import { EnsembleSidebar, type Preset } from '@/components/organisms/EnsembleSid
 import { WorkflowNavigator } from '@/components/organisms/WorkflowNavigator';
 import { ApiKeyConfigurationModal } from '@/components/organisms/ApiKeyConfigurationModal';
 import { ProgressSteps } from '@/components/molecules/ProgressSteps';
+import { ManualResponseModal } from '@/components/organisms/ManualResponseModal';
 import type { Provider, ValidationStatus } from '@/components/molecules/ApiKeyInput';
 import { AVAILABLE_MODELS } from '~/lib/models';
 import { validateApiKey, createDebouncedValidator } from '~/lib/validation';
@@ -34,6 +35,7 @@ export default function EnsemblePage() {
   const removeModel = useStore((state) => state.removeModel);
   const summarizerModel = useStore((state) => state.summarizerModel);
   const setSummarizer = useStore((state) => state.setSummarizer);
+  const addManualResponse = useStore((state) => state.addManualResponse);
 
   const currentStep = useStore((state) => state.currentStep);
   const setCurrentStep = useStore((state) => state.setCurrentStep);
@@ -41,7 +43,7 @@ export default function EnsemblePage() {
 
   // Track selected model IDs for ModelSelectionList
   // NOTE: We use the 'model' field (e.g., 'gpt-4o'), not the dynamic 'id' field
-  const selectedModelIds = selectedModels.map((m) => m.model);
+  const selectedModelIds = useMemo(() => selectedModels.map((m) => m.model), [selectedModels]);
 
   // Build provider status map based on mode
   const isMockMode = process.env.NEXT_PUBLIC_MOCK_MODE === 'true';
@@ -94,6 +96,10 @@ export default function EnsemblePage() {
   // Modal state for API key configuration
   const [configModalOpen, setConfigModalOpen] = useState(false);
   const [selectedProvider, setSelectedProvider] = useState<Provider | null>(null);
+  const [manualModalOpen, setManualModalOpen] = useState(false);
+  const [manualResponse, setManualResponse] = useState('');
+  const [manualModelName, setManualModelName] = useState('');
+  const [manualModelProvider, setManualModelProvider] = useState('');
 
   // Validation status for the modal
   const [validationStatus, setValidationStatus] = useState<Record<Provider, ValidationStatus>>({
@@ -230,7 +236,33 @@ export default function EnsemblePage() {
   const isValid = selectedModels.length >= 2 && selectedModels.length <= 6;
 
   const handleAddManualResponse = () => {
-    console.log('Add manual response');
+    setManualModalOpen(true);
+  };
+
+  const resetManualForm = () => {
+    setManualResponse('');
+    setManualModelName('');
+    setManualModelProvider('');
+  };
+
+  const handleManualSubmit = (data: {
+    response: string;
+    modelName: string;
+    modelProvider: string;
+  }) => {
+    const labelBase = data.modelName.trim() || t('organisms.manualResponseModal.title', { defaultValue: 'Manual Response' });
+    const providerSuffix = data.modelProvider.trim()
+      ? ` (${data.modelProvider.trim()})`
+      : '';
+
+    addManualResponse(`${labelBase}${providerSuffix}`, data.response.trim());
+    resetManualForm();
+    setManualModalOpen(false);
+  };
+
+  const handleManualCancel = () => {
+    resetManualForm();
+    setManualModalOpen(false);
   };
 
   return (
@@ -290,6 +322,24 @@ export default function EnsemblePage() {
         items={apiKeyItems}
         onKeyChange={handleKeyChange}
         onToggleShow={handleToggleShow}
+      />
+
+      <ManualResponseModal
+        open={manualModalOpen}
+        onOpenChange={(open) => {
+          setManualModalOpen(open);
+          if (!open) {
+            resetManualForm();
+          }
+        }}
+        value={manualResponse}
+        onChange={setManualResponse}
+        modelName={manualModelName}
+        onModelNameChange={setManualModelName}
+        modelProvider={manualModelProvider}
+        onModelProviderChange={setManualModelProvider}
+        onSubmit={handleManualSubmit}
+        onCancel={handleManualCancel}
       />
     </div>
   );
