@@ -282,6 +282,24 @@ describe('ModelSelectionList', () => {
       const selectedCard = container.querySelector('[data-testid="model-card-gpt-4"]');
       expect(selectedCard).toHaveAttribute('data-disabled', 'false');
     });
+
+    it('does not call toggle handler when provider requires API key', async () => {
+      const user = userEvent.setup();
+      const onModelToggle = vi.fn();
+
+      render(
+        <ModelSelectionList
+          models={mockModels}
+          selectedModelIds={[]}
+          providerStatus={{ openai: 'API key required' }}
+          onModelToggle={onModelToggle}
+          onSummarizerChange={vi.fn()}
+        />
+      );
+
+      await user.click(screen.getByText('GPT-4'));
+      expect(onModelToggle).not.toHaveBeenCalled();
+    });
   });
 
   describe('provider grouping', () => {
