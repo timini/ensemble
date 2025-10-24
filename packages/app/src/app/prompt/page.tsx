@@ -75,7 +75,7 @@ export default function PromptPage() {
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-4xl">
-      <ProgressSteps currentStep={currentStep} />
+      <ProgressSteps currentStep={currentStep} fallbackStep="prompt" />
 
       <PageHero
         title={t('pages.prompt.title')}

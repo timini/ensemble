@@ -9,18 +9,21 @@
  * - Navigation to /prompt after valid selection
  */
 
-import { test, expect } from '@playwright/test';
+import { test, expect, type Page } from '@playwright/test';
 
 test.describe('Ensemble Page', () => {
-  test.beforeEach(async ({ page }) => {
-    // Navigate through config first
-    await page.goto('/config');
-    await page.locator('[data-mode="free"]').click();
+const enabledModels = (page: Page) =>
+  page.locator('[data-testid^="model-card-"][data-disabled="false"]');
 
-    // Configure at least 1 API key to enable Continue button
-    await page.locator('[data-provider="openai"] input').fill('sk-test-openai-key');
+test.beforeEach(async ({ page }) => {
+  // Navigate through config first
+  await page.goto('/config');
+  await page.locator('[data-mode="free"]').click();
 
-    await page.getByRole('button', { name: /continue/i }).click();
+  // Configure at least 1 API key to enable Continue button
+  await page.locator('[data-provider="openai"] input').fill('sk-test-openai-key');
+
+  await page.getByRole('button', { name: /continue/i }).click();
 
     // Should now be on ensemble page
     await expect(page).toHaveURL('/ensemble');
@@ -52,8 +55,7 @@ test.describe('Ensemble Page', () => {
   });
 
   test('can select models', async ({ page }) => {
-    // Select first model
-    const firstModel = page.locator('[data-testid^="model-card-"]').first();
+    const firstModel = enabledModels(page).first();
     await firstModel.click();
 
     // Should be selected
@@ -64,11 +66,11 @@ test.describe('Ensemble Page', () => {
     const continueButton = page.getByRole('button', { name: /continue/i });
 
     // Select 1 model - button still disabled
-    await page.locator('[data-testid^="model-card-"]').first().click();
+    await enabledModels(page).first().click();
     await expect(continueButton).toBeDisabled();
 
     // Select 2nd model - button now enabled
-    await page.locator('[data-testid^="model-card-"]').nth(1).click();
+    await enabledModels(page).nth(1).click();
     await expect(continueButton).toBeEnabled();
   });
 
@@ -81,7 +83,7 @@ test.describe('Ensemble Page', () => {
     await page.locator('[data-provider="google"] input').fill('sk-google');
     await page.getByRole('button', { name: /continue/i }).click();
 
-    const enabledCards = page.locator('[data-testid^="model-card-"][data-disabled="false"]');
+    const enabledCards = enabledModels(page);
     const count = await enabledCards.count();
 
     for (let i = 0; i < Math.min(6, count); i++) {
@@ -96,8 +98,8 @@ test.describe('Ensemble Page', () => {
 
   test('can designate summarizer model', async ({ page }) => {
     // Select 2 models
-    await page.locator('[data-testid^="model-card-"]').first().click();
-    await page.locator('[data-testid^="model-card-"]').nth(1).click();
+    await enabledModels(page).first().click();
+    await enabledModels(page).nth(1).click();
 
     // Click summarizer button on first model
     const summarizerButton = page.locator('[data-testid^="summarizer-button-"]').first();
@@ -112,8 +114,8 @@ test.describe('Ensemble Page', () => {
 
   test('navigates to /prompt after clicking Continue', async ({ page }) => {
     // Select 2 models
-    await page.locator('[data-testid^="model-card-"]').first().click();
-    await page.locator('[data-testid^="model-card-"]').nth(1).click();
+    await enabledModels(page).first().click();
+    await enabledModels(page).nth(1).click();
 
     // Click Continue button
     await page.getByRole('button', { name: /continue/i }).click();
@@ -132,8 +134,8 @@ test.describe('Ensemble Page', () => {
 
   test('model selection persists across page refreshes', async ({ page }) => {
     // Select 2 models
-    await page.locator('[data-testid^="model-card-"]').first().click();
-    await page.locator('[data-testid^="model-card-"]').nth(1).click();
+    await enabledModels(page).first().click();
+    await enabledModels(page).nth(1).click();
 
     // Reload page
     await page.reload();
