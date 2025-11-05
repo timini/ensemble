@@ -9,7 +9,9 @@ import { OpenAIProvider } from './implementations/OpenAIProvider';
 import { AnthropicProvider } from './implementations/AnthropicProvider';
 import { GoogleProvider } from './implementations/GoogleProvider';
 import { XAIProvider } from './implementations/XAIProvider';
+import { FreeAPIClient } from './clients/FreeAPIClient';
 import type { AIProvider } from './interfaces/AIProvider';
+import { useStore } from '~/store';
 
 /**
  * Initialize provider registry with all providers
@@ -27,17 +29,25 @@ export function initializeProviders(): void {
 
   const registerIfMissing = (
     providerName: 'openai' | 'anthropic' | 'google' | 'xai',
+    mode: 'mock' | 'free',
     factory: () => AIProvider,
   ) => {
-    if (!registry.hasProvider(providerName, 'mock')) {
-      registry.register(providerName, 'mock', factory());
+    if (!registry.hasProvider(providerName, mode)) {
+      registry.register(providerName, mode, factory());
     }
   };
 
-  registerIfMissing('openai', () => new OpenAIProvider());
-  registerIfMissing('anthropic', () => new AnthropicProvider());
-  registerIfMissing('google', () => new GoogleProvider());
-  registerIfMissing('xai', () => new XAIProvider());
+  registerIfMissing('openai', 'mock', () => new OpenAIProvider());
+  registerIfMissing('anthropic', 'mock', () => new AnthropicProvider());
+  registerIfMissing('google', 'mock', () => new GoogleProvider());
+  registerIfMissing('xai', 'mock', () => new XAIProvider());
+
+  const storeGetter = () => useStore.getState();
+
+  registerIfMissing('openai', 'free', () => new FreeAPIClient('openai', () => storeGetter().apiKeys.openai?.key ?? null));
+  registerIfMissing('anthropic', 'free', () => new FreeAPIClient('anthropic', () => storeGetter().apiKeys.anthropic?.key ?? null));
+  registerIfMissing('google', 'free', () => new FreeAPIClient('google', () => storeGetter().apiKeys.google?.key ?? null));
+  registerIfMissing('xai', 'free', () => new FreeAPIClient('xai', () => storeGetter().apiKeys.xai?.key ?? null));
 }
 
 // Export registry and providers for convenience
@@ -47,4 +57,5 @@ export { AnthropicProvider } from './implementations/AnthropicProvider';
 export { GoogleProvider } from './implementations/GoogleProvider';
 export { XAIProvider } from './implementations/XAIProvider';
 export { MockAPIClient } from './clients/MockAPIClient';
+export { FreeAPIClient } from './clients/FreeAPIClient';
 export type { AIProvider, ModelMetadata, ValidationResult } from './interfaces/AIProvider';
