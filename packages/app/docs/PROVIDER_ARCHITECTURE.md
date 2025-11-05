@@ -45,29 +45,33 @@ Each provider (OpenAI, Anthropic, Google, XAI) has its own implementation:
                   ▼
 ┌─────────────────────────────────────────────────────────────┐
 │                   Provider Registry                         │
-│  - getProvider(mode, provider)                              │
-│  - Returns: AIProvider instance                             │
+│  - getProvider(provider, mode)                              │
+│  - Delegates to provider-specific factories                 │
 └─────────────────┬───────────────────────────────────────────┘
                   │
-        ┌─────────┴─────────┬─────────────────────┐
-        ▼                   ▼                     ▼
-┌───────────────┐   ┌───────────────┐   ┌────────────────┐
-│ MockAPIClient │   │ FreeAPIClient │   │ ProAPIClient   │
-│  (Phase 2)    │   │  (Phase 3)    │   │  (Phase 4)     │
-└───────┬───────┘   └───────┬───────┘   └────────┬───────┘
-        │                   │                     │
-        ▼                   ▼                     ▼
-┌───────────────┐   ┌───────────────┐   ┌────────────────┐
-│ Lorem Ipsum   │   │ Provider SDKs │   │ tRPC Backend   │
-│ Generator     │   │ (direct API)  │   │ (managed APIs) │
-└───────────────┘   └───────────────┘   └────────────────┘
-                            │                     │
-                    ┌───────┴────────┐   ┌────────┴───────┐
-                    ▼                ▼   ▼                ▼
-              ┌──────────┐  ┌─────────┐ ┌──────────┐  ┌─────────┐
-              │  OpenAI  │  │Anthropic│ │  Google  │  │   XAI   │
-              │Provider  │  │Provider │ │ Provider │  │Provider │
-              └──────────┘  └─────────┘ └──────────┘  └─────────┘
+         ┌────────┴────────┐
+         ▼                 ▼
+┌────────────────┐  ┌─────────────────────────────┐
+│ Provider       │  │ Provider client factories   │
+│ implementations│  │  (createProviderClient)     │
+│ (OpenAI, etc.) │  │   ├─ openai/mock|free|pro   │
+└───────┬────────┘  │   ├─ anthropic/mock|free|pro│
+        │           │   ├─ google/mock|free|pro   │
+        │           │   └─ xai/mock|free|pro      │
+        │           └─────────────────────────────┘
+        │                          │
+        ▼                          ▼
+┌───────────────┐        ┌──────────────────────┐
+│ Mock clients  │        │ Free-mode clients     │
+│ (lorem ipsum) │        │ (SDK integrations)    │
+└──────┬────────┘        └─────────┬────────────┘
+       │                           │
+       ▼                           ▼
+┌──────────────┐         ┌──────────────────────┐
+│ Lorem Ipsum  │         │ Provider SDKs / APIs │
+└──────────────┘         └──────────────────────┘
+
+(Phase 4 introduces Pro clients backed by the tRPC backend.)
 ```
 
 ---
@@ -130,7 +134,7 @@ export interface AIProvider {
 
 ## Client Implementations
 
-### 1. MockAPIClient (Phase 2)
+### 1. Mock Clients (Phase 2)
 
 **Purpose**: Lorem ipsum streaming for UI development and E2E testing
 
@@ -186,91 +190,38 @@ export class MockAPIClient implements AIProvider {
 
 ---
 
-### 2. FreeAPIClient (Phase 3)
+### 2. Free Clients (Phase 3)
 
-**Purpose**: Direct API calls to providers with user-supplied API keys
+**Purpose**: Direct API calls to providers with user-supplied API keys.
 
-**Location**: `src/providers/clients/FreeAPIClient.ts`
+**Location**: `src/providers/clients/<provider>/Free<Provider>Client.ts`
 
 **Behavior**:
-- User provides API keys for each provider
-- Keys encrypted with AES-256-GCM before localStorage storage
-- Direct API calls from browser to provider APIs
-- Real streaming via provider SDKs
-- Real embeddings generation
-- API key validation via test requests
+- Each provider owns its Free-mode implementation (e.g., `FreeOpenAIClient`, `FreeAnthropicClient`).
+- Keys encrypted with AES-256-GCM before localStorage storage.
+- Direct API calls from browser to provider SDKs.
+- API key validation via lightweight test requests.
+- Streaming/embeddings implemented per provider (falling back to mock responses until finished).
 
-**Implementation**:
+**Factory Pattern**:
 ```typescript
-export class FreeAPIClient implements AIProvider {
-  private providerClients: Map<string, ProviderClient>;
-
-  constructor(apiKeys: Record<string, string>) {
-    this.providerClients = new Map([
-      ['openai', new OpenAIProvider(apiKeys.openai)],
-      ['anthropic', new AnthropicProvider(apiKeys.anthropic)],
-      ['google', new GoogleProvider(apiKeys.google)],
-      ['xai', new XAIProvider(apiKeys.xai)],
-    ]);
-  }
-
-  async streamResponse(
-    prompt: string,
-    model: string,
-    onChunk: (chunk: string) => void,
-    onComplete: (fullResponse: string, responseTime: number) => void,
-    onError: (error: Error) => void
-  ): Promise<void> {
-    const provider = this.getProviderForModel(model);
-    const client = this.providerClients.get(provider);
-
-    if (!client) {
-      onError(new Error(`No API key configured for ${provider}`));
-      return;
-    }
-
-    try {
-      await client.streamResponse(prompt, model, onChunk, onComplete, onError);
-    } catch (error) {
-      onError(error as Error);
-    }
-  }
-
-  async generateEmbeddings(text: string): Promise<number[]> {
-    const embeddingsProvider = useStore.getState().embeddingsProvider;
-    const client = this.providerClients.get(embeddingsProvider);
-
-    if (!client) {
-      throw new Error(`No API key configured for ${embeddingsProvider}`);
-    }
-
-    return client.generateEmbeddings(text);
-  }
-
-  async validateApiKey(apiKey: string): Promise<{ valid: boolean; error?: string }> {
-    // Make test API call to validate key
-    try {
-      await this.testApiKey(apiKey);
-      return { valid: true };
-    } catch (error) {
-      return { valid: false, error: error.message };
-    }
-  }
-
-  listAvailableModels() {
-    // Return models for providers with configured API keys
-    return this.getConfiguredModels();
-  }
+// factories/createProviderClient.ts
+export function createProviderClient(
+  provider: ProviderName,
+  mode: 'mock' | 'free' | 'pro',
+  getApiKey: () => string | null,
+): AIProvider {
+  if (mode === 'mock') return new Mock<Provider>Client();
+  if (mode === 'free') return new Free<Provider>Client(getApiKey);
+  // Phase 4
+  return new Pro<Provider>Client();
 }
 ```
 
 **Security**:
-- API keys encrypted before localStorage
-- Web Crypto API (AES-256-GCM)
-- Device-specific encryption key
-- Keys never logged or exposed
-
-**Usage**: Free Mode (Phase 3) - Users bring their own API keys
+- API keys encrypted before localStorage.
+- Web Crypto API (AES-256-GCM) with device-derived entropy.
+- Keys never logged or exposed.
 
 ---
 
