@@ -119,6 +119,25 @@ describe('ModeSelector', () => {
       expect(onSelectFreeMode).not.toHaveBeenCalled();
       expect(onSelectProMode).not.toHaveBeenCalled();
     });
+
+    it('disables Free Mode when freeModeDisabled is true', async () => {
+      const onSelectFreeMode = vi.fn();
+      const user = userEvent.setup();
+
+      render(
+        <ModeSelector
+          onSelectFreeMode={onSelectFreeMode}
+          onSelectProMode={vi.fn()}
+          freeModeDisabled
+        />
+      );
+
+      const freeButton = screen.getByText('Start in Free Mode');
+      expect(freeButton).toBeDisabled();
+
+      await user.click(freeButton);
+      expect(onSelectFreeMode).not.toHaveBeenCalled();
+    });
   });
 
   describe('selected state', () => {

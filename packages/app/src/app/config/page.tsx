@@ -19,6 +19,8 @@ import { ProgressSteps } from '@/components/molecules/ProgressSteps';
 import type { Provider } from '@/components/molecules/ApiKeyInput';
 import type { ValidationStatus } from '@/components/molecules/ApiKeyInput';
 import { validateApiKey, createDebouncedValidator } from '~/lib/validation';
+import { InlineAlert } from '@/components/atoms/InlineAlert';
+import { isWebCryptoAvailable } from '~/lib/webCryptoDetection';
 
 export default function ConfigPage() {
   const { t } = useTranslation('common');
@@ -51,8 +53,12 @@ export default function ConfigPage() {
     google: null,
     xai: null,
   });
+  const [webCryptoSupported, setWebCryptoSupported] = useState(true);
 
   const handleSelectFreeMode = () => {
+    if (!webCryptoSupported) {
+      return;
+    }
     setMode('free');
   };
 
@@ -77,7 +83,11 @@ export default function ConfigPage() {
 
   // Validate any pre-populated API keys on initial render or when keys change
   useEffect(() => {
-    if (mode !== 'free') {
+    setWebCryptoSupported(isWebCryptoAvailable());
+  }, []);
+
+  useEffect(() => {
+    if (mode !== 'free' || !webCryptoSupported) {
       return;
     }
 
@@ -99,7 +109,9 @@ export default function ConfigPage() {
   }, [apiKeys, handleValidationStatusChange, mode, validationStatus]);
 
   const handleKeyChange = (provider: Provider, value: string) => {
-    setApiKey(provider, value);
+    void setApiKey(provider, value).catch((error) => {
+      console.error(`Failed to store ${provider} API key`, error);
+    });
     debouncedValidate(provider, value, mode, handleValidationStatusChange);
   };
 
@@ -114,7 +126,9 @@ export default function ConfigPage() {
   };
 
   // Prepare API key configuration items for Free mode
-  const apiKeyItems = mode === 'free' ? [
+  const isFreeModeActive = mode === 'free' && webCryptoSupported;
+
+  const apiKeyItems = isFreeModeActive ? [
     {
       provider: 'openai' as Provider,
       label: 'OpenAI API Key',
@@ -154,7 +168,7 @@ export default function ConfigPage() {
   ] : [];
 
   // Count configured API keys (Free mode only)
-  const configuredKeysCount = mode === 'free'
+  const configuredKeysCount = isFreeModeActive
     ? [apiKeys.openai?.key, apiKeys.anthropic?.key, apiKeys.google?.key, apiKeys.xai?.key].filter(Boolean).length
     : 0;
 
@@ -163,10 +177,10 @@ export default function ConfigPage() {
   const hasHydrated = useHasHydrated();
   const allowContinue = useMemo(() => {
     if (!hasHydrated) {
-      return mode === 'free' ? false : isModeConfigured;
+      return isFreeModeActive ? false : isModeConfigured;
     }
-    return mode === 'free' ? hasConfiguredKeys : isModeConfigured;
-  }, [hasHydrated, mode, hasConfiguredKeys, isModeConfigured]);
+    return isFreeModeActive ? hasConfiguredKeys : isModeConfigured;
+  }, [hasHydrated, isFreeModeActive, hasConfiguredKeys, isModeConfigured]);
 
   // Set current step to 'config' on mount
   useEffect(() => {
@@ -175,10 +189,10 @@ export default function ConfigPage() {
 
   // Call configureModeComplete when at least 1 key is configured
   useEffect(() => {
-    if (mode === 'free' && hasConfiguredKeys && !isModeConfigured) {
+    if (isFreeModeActive && hasConfiguredKeys && !isModeConfigured) {
       configureModeComplete();
     }
-  }, [mode, hasConfiguredKeys, isModeConfigured, configureModeComplete]);
+  }, [isFreeModeActive, hasConfiguredKeys, isModeConfigured, configureModeComplete]);
 
   // Cleanup timeouts on unmount
   useEffect(() => {
@@ -200,12 +214,26 @@ export default function ConfigPage() {
       />
 
       <div className="mt-8">
-        <ModeSelector
-          selectedMode={mode}
-          onSelectFreeMode={handleSelectFreeMode}
-          onSelectProMode={handleSelectProMode}
-          proModeDisabled
-        />
+      <ModeSelector
+        selectedMode={mode}
+        onSelectFreeMode={handleSelectFreeMode}
+        onSelectProMode={handleSelectProMode}
+        freeModeDisabled={!webCryptoSupported}
+        proModeDisabled
+      />
+
+      {!webCryptoSupported && (
+        <div className="mt-6">
+          <InlineAlert variant="error">
+            <p className="font-semibold">
+              {t('pages.config.webCryptoUnsupportedTitle')}
+            </p>
+            <p className="mt-1">
+              {t('pages.config.webCryptoUnsupportedDescription')}
+            </p>
+          </InlineAlert>
+        </div>
+      )}
       </div>
 
       {mode === 'free' && (

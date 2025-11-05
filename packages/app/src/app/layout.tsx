@@ -22,6 +22,7 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   const { theme, language, setTheme, setLanguage } = useStore();
+  const initializeEncryption = useStore((state) => state.initializeEncryption);
   const { i18n } = useTranslation();
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [hasHydrated, setHasHydrated] = useState(false);
@@ -35,6 +36,9 @@ export default function RootLayout({
   useEffect(() => {
     initializeProviders();
   }, []);
+  useEffect(() => {
+    void initializeEncryption();
+  }, [initializeEncryption]);
   useEffect(() => {
     setHasHydrated(true);
   }, []);

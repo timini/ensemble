@@ -6,9 +6,11 @@
  */
 
 import type { StateCreator } from 'zustand';
+import { decrypt, encrypt } from '~/lib/encryption';
 import type { ProviderType } from './ensembleSlice';
 
 export interface ApiKeyData {
+  encrypted: string | null;
   key: string;
   visible: boolean;
 }
@@ -20,13 +22,13 @@ export interface ApiKeySlice {
     google: ApiKeyData | null;
     xai: ApiKeyData | null;
   };
-  encryptionKey: string | null;
+  encryptionInitialized: boolean;
 
-  setApiKey: (provider: ProviderType, key: string) => void;
+  setApiKey: (provider: ProviderType, key: string) => Promise<void>;
   toggleApiKeyVisibility: (provider: ProviderType) => void;
   getApiKey: (provider: ProviderType) => string | null;
   clearApiKeys: () => void;
-  initializeEncryption: () => void;
+  initializeEncryption: () => Promise<void>;
 }
 
 export const createApiKeySlice: StateCreator<ApiKeySlice> = (set, get) => ({
@@ -36,27 +38,85 @@ export const createApiKeySlice: StateCreator<ApiKeySlice> = (set, get) => ({
     google: null,
     xai: null,
   },
-  encryptionKey: null,
+  encryptionInitialized: false,
 
-  initializeEncryption: () => {
-    // Placeholder for future encryption implementation
-    // For now, keys are stored in plain text in localStorage
+  initializeEncryption: async () => {
+    const { encryptionInitialized } = get();
+    if (encryptionInitialized) {
+      return;
+    }
+
+    const providers: ProviderType[] = ['openai', 'anthropic', 'google', 'xai'];
+
+    await Promise.all(
+      providers.map(async (provider) => {
+        const entry = get().apiKeys[provider];
+        if (!entry?.encrypted) {
+          return;
+        }
+
+        try {
+          const decrypted = await decrypt(entry.encrypted);
+          set((state) => ({
+            apiKeys: {
+              ...state.apiKeys,
+              [provider]: {
+                ...state.apiKeys[provider]!,
+                key: decrypted,
+              },
+            },
+          }));
+        } catch (error) {
+          console.error(`Failed to decrypt ${provider} API key`, error);
+          set((state) => ({
+            apiKeys: {
+              ...state.apiKeys,
+              [provider]: state.apiKeys[provider]
+                ? {
+                    ...state.apiKeys[provider]!,
+                    key: '',
+                    encrypted: null,
+                  }
+                : null,
+            },
+          }));
+        }
+      }),
+    );
+
+    set({ encryptionInitialized: true });
   },
 
-  setApiKey: (provider, key) => {
-    set((state) => {
-      // Preserve existing visibility state when updating key
-      const existingData = state.apiKeys[provider];
-      return {
+  setApiKey: async (provider, key) => {
+    const trimmedKey = key.trim();
+    if (trimmedKey.length === 0) {
+      set((state) => ({
+        apiKeys: {
+          ...state.apiKeys,
+          [provider]: null,
+        },
+      }));
+      return;
+    }
+
+    const previousVisibility = get().apiKeys[provider]?.visible ?? false;
+
+    try {
+      const encrypted = await encrypt(trimmedKey);
+      set((state) => ({
         apiKeys: {
           ...state.apiKeys,
           [provider]: {
-            key,
-            visible: existingData?.visible ?? false,
+            key: trimmedKey,
+            encrypted,
+            visible: previousVisibility,
           },
         },
-      };
-    });
+      }));
+    } catch (error) {
+      console.error(`Failed to encrypt ${provider} API key`, error);
+      throw error;
+    }
   },
 
   toggleApiKeyVisibility: (provider) => {
@@ -89,10 +149,7 @@ export const createApiKeySlice: StateCreator<ApiKeySlice> = (set, get) => ({
         google: null,
         xai: null,
       },
+      encryptionInitialized: false,
     });
   },
 });
-
-// TODO: Implement proper AES-256-GCM encryption for API keys
-// For now, keys are stored in plain text in localStorage
-// This should be replaced with proper encryption before production

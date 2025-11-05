@@ -451,10 +451,10 @@ Ready to proceed to **Phase 2: UI Integration with Mock API Clients**
 
 - [X] T191 Implement src/lib/encryption.ts with AES-256-GCM encryption using Web Crypto API: `encrypt(plaintext)`, `decrypt(ciphertext)`, `deriveKey()` (device entropy hashing + IV/payload base64 format)
 - [X] T192 Write unit tests tests/unit/lib/encryption.test.ts testing: encryption/decryption round-trip, key derivation consistency, error handling (unsupported browser) (Vitest targeted run 2024-09-30)
-- [ ] T193 Update src/store/slices/apiKeysSlice.ts to use encryption utilities before localStorage storage
-- [ ] T194 Write integration tests tests/integration/store/apiKeysSlice.test.ts testing: API keys stored encrypted in localStorage, keys decrypted on retrieval
-- [ ] T195 Create src/lib/webCryptoDetection.ts with feature detection for Web Crypto API support
-- [ ] T196 Update src/app/config/page.tsx to disable Free mode with InlineAlert if Web Crypto API not supported (FR-059)
+- [X] T193 Update src/store/slices/apiKeysSlice.ts to use encryption utilities before localStorage storage (async AES-GCM, sanitized persist, initializeEncryption)
+- [X] T194 Write integration tests tests/integration/store/apiKeysSlice.test.ts testing: API keys stored encrypted in localStorage, keys decrypted on retrieval (new memory storage harness)
+- [X] T195 Create src/lib/webCryptoDetection.ts with feature detection for Web Crypto API support (boolean helper)
+- [X] T196 Update src/app/config/page.tsx to disable Free mode with InlineAlert if Web Crypto API not supported (FR-059) (ModeSelector gating + translations)
 - [ ] T197 Commit Phase 3.1 security: "feat: implement AES-256-GCM encryption for API keys with Web Crypto API"
 
 ### Phase 3.2: FreeAPIClient Implementation (Week 8-9, Days 54-60)

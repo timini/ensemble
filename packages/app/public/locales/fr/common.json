@@ -91,7 +91,9 @@
       "apiKeyInfoNormal": "Vos clés sont stockées localement et ne sont jamais envoyées à nos serveurs.",
       "apiKeysConfigured": "{{count}} clé API configurée.",
       "apiKeysConfigured_other": "{{count}} clés API configurées.",
-      "configureMoreOrContinue": "Configurez-en plus ou continuez à sélectionner des modèles."
+      "configureMoreOrContinue": "Configurez-en plus ou continuez à sélectionner des modèles.",
+      "webCryptoUnsupportedTitle": "Navigateur incompatible avec le mode gratuit",
+      "webCryptoUnsupportedDescription": "Le mode gratuit nécessite l'API Web Crypto pour chiffrer vos clés API localement. Utilisez un navigateur moderne ou passez au mode Pro lorsqu'il sera disponible."
     },
     "ensemble": {
       "title": "Construire votre ensemble",

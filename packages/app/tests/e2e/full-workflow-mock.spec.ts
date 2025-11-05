@@ -214,7 +214,9 @@ test.describe('Full Workflow - Mock Mode', () => {
       await expect(page.locator('[data-mode="free"]')).toHaveAttribute('data-selected', 'true');
 
       // Navigate to ensemble page
-      await page.getByRole('button', { name: /continue/i }).click();
+      const continueButton = page.getByRole('button', { name: /continue/i });
+      await expect(continueButton).toBeEnabled();
+      await continueButton.click();
 
       // Models should still be selected
       const selectedCards = page.locator('[data-testid^="model-card-"][data-selected="true"]');
@@ -230,7 +232,9 @@ test.describe('Full Workflow - Mock Mode', () => {
       // Select Free mode with only 1 API key
       await page.locator('[data-mode="free"]').click();
       await page.locator('[data-provider="openai"] input').fill('sk-test-minimal');
-      await page.getByRole('button', { name: /continue/i }).click();
+      const continueButton = page.getByRole('button', { name: /continue/i });
+      await expect(continueButton).toBeEnabled();
+      await continueButton.click();
 
       // Select exactly 2 models (minimum)
       await page.locator('[data-testid^="model-card-"]').first().click();
@@ -261,7 +265,9 @@ test.describe('Full Workflow - Mock Mode', () => {
       await page.goto('/config');
       await page.locator('[data-mode="free"]').click();
       await page.locator('[data-provider="openai"] input').fill('sk-test-key');
-      await page.getByRole('button', { name: /continue/i }).click();
+      const continueButtonConfig = page.getByRole('button', { name: /continue/i });
+      await expect(continueButtonConfig).toBeEnabled();
+      await continueButtonConfig.click();
 
       // Now ensemble Continue should work after selecting models
       await page.locator('[data-testid^="model-card-"]').first().click();

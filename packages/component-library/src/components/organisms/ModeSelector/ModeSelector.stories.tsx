@@ -18,6 +18,10 @@ const meta = {
       control: 'boolean',
       description: 'Whether the component is disabled',
     },
+    freeModeDisabled: {
+      control: 'boolean',
+      description: 'Disable Free Mode independently',
+    },
   },
 } satisfies Meta<typeof ModeSelector>;
 
