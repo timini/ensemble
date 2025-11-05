@@ -438,8 +438,8 @@ Ready to proceed to **Phase 2: UI Integration with Mock API Clients**
 - [ ] T184 Update README.md with Phase 2 quickstart instructions (how to run Mock mode workflow)
 - [ ] T185 Update spec.md to Version 2.0: mark Phase 2 functional requirements (FR-016 to FR-024) as COMPLETED
 - [ ] T186 Create docs/FREE_MODE_GUIDE.md as placeholder for Phase 3 (not yet implemented)
-- [ ] T187 Run full test suite: `npm run test && npm run test:e2e` and verify all passing
-- [ ] T188 Run production build: `npm run build` and verify no errors
+- [X] T187 Run full test suite: `npm run test && npm run test:e2e` and verify all passing (2024-09-30: vitest + Playwright chromium suite clean)
+- [X] T188 Run production build: `npm run build` and verify no errors (2024-09-30: latest husky + manual runs succeed)
 - [ ] T189 Commit Phase 2.4 integration: "feat: complete Phase 2 with full Mock mode workflow and E2E tests"
 - [ ] T190 Git tag Phase 2 completion: `git tag v2.0.0-phase2`
 
@@ -449,8 +449,8 @@ Ready to proceed to **Phase 2: UI Integration with Mock API Clients**
 
 ### Phase 3.1: Security & Encryption (Week 8, Days 51-53)
 
-- [ ] T191 Implement src/lib/encryption.ts with AES-256-GCM encryption using Web Crypto API: `encrypt(plaintext)`, `decrypt(ciphertext)`, `deriveKey()`
-- [ ] T192 Write unit tests tests/unit/lib/encryption.test.ts testing: encryption/decryption round-trip, key derivation consistency, error handling (unsupported browser)
+- [X] T191 Implement src/lib/encryption.ts with AES-256-GCM encryption using Web Crypto API: `encrypt(plaintext)`, `decrypt(ciphertext)`, `deriveKey()` (device entropy hashing + IV/payload base64 format)
+- [X] T192 Write unit tests tests/unit/lib/encryption.test.ts testing: encryption/decryption round-trip, key derivation consistency, error handling (unsupported browser) (Vitest targeted run 2024-09-30)
 - [ ] T193 Update src/store/slices/apiKeysSlice.ts to use encryption utilities before localStorage storage
 - [ ] T194 Write integration tests tests/integration/store/apiKeysSlice.test.ts testing: API keys stored encrypted in localStorage, keys decrypted on retrieval
 - [ ] T195 Create src/lib/webCryptoDetection.ts with feature detection for Web Crypto API support
