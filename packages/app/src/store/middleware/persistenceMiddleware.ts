@@ -8,9 +8,11 @@ import type { StateCreator, StoreMutatorIdentifier } from 'zustand';
  * Transient data (responses, streaming state) is NOT persisted
  */
 
-type PersistOptions = {
+type PersistOptions<T> = {
   name: string;
   storage?: Storage;
+  serialize?: (state: T) => unknown;
+  deserialize?: (storedState: Partial<T>) => Partial<T>;
 };
 
 export const persist = <
@@ -19,7 +21,7 @@ export const persist = <
   Mcs extends [StoreMutatorIdentifier, unknown][] = [],
 >(
   config: StateCreator<T, Mps, Mcs>,
-  options: PersistOptions,
+  options: PersistOptions<T>,
 ) => {
   return ((set, get, api) => {
     const baseState = config(set, get, api);
@@ -28,7 +30,12 @@ export const persist = <
       return baseState;
     }
 
-    const { name, storage = localStorage } = options;
+    const {
+      name,
+      storage = localStorage,
+      serialize,
+      deserialize,
+    } = options;
 
     let hydratedState = baseState;
 
@@ -36,9 +43,12 @@ export const persist = <
       const storedValue = storage.getItem(name);
       if (storedValue) {
         const parsedState = JSON.parse(storedValue) as Partial<T>;
+        const transformedState = deserialize
+          ? deserialize(parsedState)
+          : parsedState;
         hydratedState = {
           ...baseState,
-          ...parsedState,
+          ...transformedState,
         };
       }
     } catch (error) {
@@ -52,7 +62,10 @@ export const persist = <
     // serialisable data is stored.
     api.subscribe((state) => {
       try {
-        storage.setItem(name, JSON.stringify(state));
+        const stateToPersist = serialize
+          ? serialize(state as T)
+          : state;
+        storage.setItem(name, JSON.stringify(stateToPersist));
       } catch (error) {
         console.error('Failed to persist state:', error);
       }

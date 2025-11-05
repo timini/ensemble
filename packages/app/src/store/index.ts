@@ -45,6 +45,43 @@ export type StoreState = ThemeSlice &
   EnsembleSlice &
   ResponseSlice;
 
+const sanitizeStateForPersist = (state: StoreState): StoreState => {
+  const sanitized = { ...state };
+  const providers: Array<keyof StoreState['apiKeys']> = [
+    'openai',
+    'anthropic',
+    'google',
+    'xai',
+  ];
+
+  sanitized.apiKeys = {
+    openai: null,
+    anthropic: null,
+    google: null,
+    xai: null,
+  };
+
+  providers.forEach((provider) => {
+    const entry = state.apiKeys[provider];
+    if (entry) {
+      sanitized.apiKeys = {
+        ...sanitized.apiKeys,
+        [provider]: {
+          encrypted: entry.encrypted,
+          key: '',
+          visible: entry.visible,
+        },
+      };
+    }
+  });
+
+  sanitized.encryptionInitialized = false;
+
+  return sanitized;
+};
+
+export const serializeStoreState = sanitizeStateForPersist;
+
 export const useStore = create<StoreState>()(
   persist(
     (...a) => ({
@@ -58,6 +95,7 @@ export const useStore = create<StoreState>()(
     }),
     {
       name: 'ensemble-ai-store',
+      serialize: serializeStoreState,
     },
   ),
 );

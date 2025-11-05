@@ -95,7 +95,10 @@ export async function deriveKey(): Promise<CryptoKey> {
 
   const cryptoImplementation = ensureCrypto();
   const entropy = getDeviceEntropy();
-  const hash = await cryptoImplementation.subtle.digest('SHA-256', entropy);
+  const hash = await cryptoImplementation.subtle.digest(
+    'SHA-256',
+    entropy as unknown as BufferSource,
+  );
 
   cachedKey = await cryptoImplementation.subtle.importKey(
     'raw',
@@ -142,7 +145,7 @@ export async function decrypt(ciphertext: string): Promise<string> {
 
   try {
     const decryptedBuffer = await cryptoImplementation.subtle.decrypt(
-      { name: 'AES-GCM', iv: new Uint8Array(ivBuffer) },
+      { name: 'AES-GCM', iv: ivBuffer },
       key,
       payloadBuffer,
     );

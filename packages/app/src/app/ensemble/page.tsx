@@ -182,7 +182,9 @@ export default function EnsemblePage() {
   };
 
   const handleKeyChange = (provider: Provider, value: string) => {
-    setApiKey(provider, value);
+    void setApiKey(provider, value).catch((error) => {
+      console.error(`Failed to store ${provider} API key`, error);
+    });
     debouncedValidate(provider, value, mode, handleValidationStatusChange);
   };
 

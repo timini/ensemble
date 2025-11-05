@@ -91,7 +91,9 @@
       "apiKeyInfoNormal": "Your keys are stored locally and never sent to our servers.",
       "apiKeysConfigured": "{{count}} API key configured.",
       "apiKeysConfigured_other": "{{count}} API keys configured.",
-      "configureMoreOrContinue": "Configure more or continue selecting models."
+      "configureMoreOrContinue": "Configure more or continue selecting models.",
+      "webCryptoUnsupportedTitle": "Browser not supported for Free Mode",
+      "webCryptoUnsupportedDescription": "Free Mode requires the Web Crypto API to encrypt your API keys locally. Switch to a modern browser or use Pro Mode when it becomes available."
     },
     "ensemble": {
       "title": "Build Your Ensemble",
