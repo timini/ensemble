@@ -9,6 +9,7 @@ import { OpenAIProvider } from './implementations/OpenAIProvider';
 import { AnthropicProvider } from './implementations/AnthropicProvider';
 import { GoogleProvider } from './implementations/GoogleProvider';
 import { XAIProvider } from './implementations/XAIProvider';
+import type { AIProvider } from './interfaces/AIProvider';
 
 /**
  * Initialize provider registry with all providers
@@ -24,11 +25,19 @@ import { XAIProvider } from './implementations/XAIProvider';
 export function initializeProviders(): void {
   const registry = ProviderRegistry.getInstance();
 
-  // Register all providers for mock mode (Phase 2)
-  registry.register('openai', 'mock', new OpenAIProvider());
-  registry.register('anthropic', 'mock', new AnthropicProvider());
-  registry.register('google', 'mock', new GoogleProvider());
-  registry.register('xai', 'mock', new XAIProvider());
+  const registerIfMissing = (
+    providerName: 'openai' | 'anthropic' | 'google' | 'xai',
+    factory: () => AIProvider,
+  ) => {
+    if (!registry.hasProvider(providerName, 'mock')) {
+      registry.register(providerName, 'mock', factory());
+    }
+  };
+
+  registerIfMissing('openai', () => new OpenAIProvider());
+  registerIfMissing('anthropic', () => new AnthropicProvider());
+  registerIfMissing('google', () => new GoogleProvider());
+  registerIfMissing('xai', () => new XAIProvider());
 }
 
 // Export registry and providers for convenience

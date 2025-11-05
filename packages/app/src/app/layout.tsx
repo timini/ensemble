@@ -24,17 +24,26 @@ export default function RootLayout({
   const { theme, language, setTheme, setLanguage } = useStore();
   const { i18n } = useTranslation();
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [hasHydrated, setHasHydrated] = useState(false);
+
+  const fallbackTheme: Theme = 'light';
+  const fallbackLanguage: Language = 'en';
+  const resolvedTheme = hasHydrated ? theme : fallbackTheme;
+  const resolvedLanguage = hasHydrated ? language : fallbackLanguage;
 
   // Initialize providers once on mount
   useEffect(() => {
     initializeProviders();
   }, []);
+  useEffect(() => {
+    setHasHydrated(true);
+  }, []);
 
   // Apply theme to document on mount and when theme changes
   useEffect(() => {
     document.documentElement.classList.remove('light', 'dark');
-    document.documentElement.classList.add(theme);
-  }, [theme]);
+    document.documentElement.classList.add(resolvedTheme);
+  }, [resolvedTheme]);
 
   // Sync language with i18next
   useEffect(() => {
@@ -45,11 +54,11 @@ export default function RootLayout({
 
   // Ensure html lang attribute always reflects current language (hydration-safe)
   useEffect(() => {
-    document.documentElement.setAttribute('lang', language);
-  }, [language]);
+    document.documentElement.setAttribute('lang', resolvedLanguage);
+  }, [resolvedLanguage]);
 
   return (
-    <html lang={language} className={`${geist.variable} ${theme}`}>
+    <html lang={resolvedLanguage} className={`${geist.variable} ${resolvedTheme}`}>
       <head>
         <title>Ensemble AI</title>
         <meta
@@ -94,9 +103,9 @@ export default function RootLayout({
           <SettingsModal
             open={settingsOpen}
             onOpenChange={setSettingsOpen}
-            theme={theme as Theme}
+            theme={resolvedTheme as Theme}
             onThemeChange={(newTheme) => setTheme(newTheme)}
-            language={language as Language}
+            language={resolvedLanguage as Language}
             onLanguageChange={(newLang) => {
               // Only allow supported languages (en, fr)
               if (newLang === 'en' || newLang === 'fr') {
