@@ -8,9 +8,15 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { useEffect, useRef } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useStore } from '~/store';
+import { ProviderRegistry } from '~/providers';
+import {
+  buildPairwiseComparisons,
+  calculateAverageConfidence,
+  normalizeSimilarity,
+} from '~/lib/agreement';
 import { PageHero } from '@/components/organisms/PageHero';
 import { ResponseCard } from '@/components/molecules/ResponseCard';
 import { ConsensusCard } from '@/components/organisms/ConsensusCard';
@@ -19,6 +25,7 @@ import { ProgressSteps } from '@/components/molecules/ProgressSteps';
 import { WorkflowNavigator } from '@/components/organisms/WorkflowNavigator';
 import { Card } from '@/components/atoms/Card';
 import type { Provider } from '@/components/molecules/ResponseCard';
+import type { ProviderType } from '~/store/slices/ensembleSlice';
 
 export default function ReviewPage() {
   const { t } = useTranslation();
@@ -30,16 +37,81 @@ export default function ReviewPage() {
   const agreementStats = useStore((state) => state.agreementStats);
   const metaAnalysis = useStore((state) => state.metaAnalysis);
   const manualResponses = useStore((state) => state.manualResponses);
+  const embeddings = useStore((state) => state.embeddings);
+  const similarityMatrix = useStore((state) => state.similarityMatrix);
+  const mode = useStore((state) => state.mode);
+  const hasHydrated = useHasHydrated();
+
+  const viewResponses = useMemo(
+    () => (hasHydrated ? responses : []),
+    [hasHydrated, responses],
+  );
+  const viewManualResponses = useMemo(
+    () => (hasHydrated ? manualResponses : []),
+    [hasHydrated, manualResponses],
+  );
+  const viewAgreementStats = useMemo(
+    () => (hasHydrated ? agreementStats : null),
+    [agreementStats, hasHydrated],
+  );
+  const viewMetaAnalysis = useMemo(
+    () => (hasHydrated ? metaAnalysis : null),
+    [hasHydrated, metaAnalysis],
+  );
+  const viewEmbeddings = useMemo(
+    () => (hasHydrated ? embeddings : []),
+    [embeddings, hasHydrated],
+  );
+  const viewSimilarityMatrix = useMemo(
+    () => (hasHydrated ? similarityMatrix : null),
+    [hasHydrated, similarityMatrix],
+  );
 
   const setCurrentStep = useStore((state) => state.setCurrentStep);
   const completeStep = useStore((state) => state.completeStep);
   const clearResponses = useStore((state) => state.clearResponses);
   const resetStreamingState = useStore((state) => state.resetStreamingState);
+  const setEmbeddings = useStore((state) => state.setEmbeddings);
+  const calculateAgreementState = useStore(
+    (state) => state.calculateAgreement,
+  );
 
   const skipRedirectRef = useRef(false);
+  const embeddingFetchRef = useRef(false);
+
+  const completedResponses = useMemo(
+    () =>
+      viewResponses.filter(
+        (response) =>
+          response.isComplete &&
+          !response.error &&
+          response.response.trim().length > 0,
+      ),
+    [viewResponses],
+  );
+
+  const pairwiseComparisons = useMemo(
+    () => buildPairwiseComparisons(completedResponses, viewSimilarityMatrix),
+    [completedResponses, viewSimilarityMatrix],
+  );
+
+  const overallAgreement = useMemo(
+    () =>
+      viewAgreementStats ? normalizeSimilarity(viewAgreementStats.mean) : 0,
+    [viewAgreementStats],
+  );
+
+  const averageConfidence = useMemo(
+    () => calculateAverageConfidence(pairwiseComparisons),
+    [pairwiseComparisons],
+  );
 
   // Mock responses for Phase 2 (will be replaced with real API calls in Phase 3/4)
   useEffect(() => {
+    if (!hasHydrated) {
+      return;
+    }
+
     // If no prompt, redirect back to prompt page unless a manual navigation already triggered a redirect.
     if (!prompt) {
       if (skipRedirectRef.current) {
@@ -56,7 +128,111 @@ export default function ReviewPage() {
 
     // TODO: In Phase 3/4, trigger actual API calls here
     // For now, we just display empty state or mock data
-  }, [completeStep, prompt, router, setCurrentStep]);
+  }, [completeStep, hasHydrated, prompt, router, setCurrentStep]);
+
+  useEffect(() => {
+    if (!hasHydrated) {
+      return;
+    }
+
+    if (completedResponses.length === 0) {
+      return;
+    }
+
+    const existingEmbeddings = new Set(viewEmbeddings.map((item) => item.modelId));
+    const pendingResponses = completedResponses.filter(
+      (response) => !existingEmbeddings.has(response.modelId),
+    );
+
+    if (pendingResponses.length === 0) {
+      if (viewEmbeddings.length >= 2 && !viewSimilarityMatrix) {
+        calculateAgreementState();
+      }
+      return;
+    }
+
+    if (embeddingFetchRef.current) {
+      return;
+    }
+
+    embeddingFetchRef.current = true;
+    let cancelled = false;
+
+    const registry = ProviderRegistry.getInstance();
+    const clientMode: 'mock' | 'free' | 'pro' =
+      process.env.NEXT_PUBLIC_MOCK_MODE === 'true'
+        ? 'mock'
+        : mode === 'pro'
+        ? 'pro'
+        : 'free';
+
+    (async () => {
+      const embeddingMap = new Map(
+        viewEmbeddings.map((entry) => [entry.modelId, entry.embedding]),
+      );
+
+      for (const response of pendingResponses) {
+        try {
+          const providerName = response.provider as ProviderType;
+          let provider;
+          try {
+            provider = registry.getProvider(providerName, clientMode);
+          } catch {
+            provider = registry.getProvider(providerName, 'mock');
+          }
+
+          const vector = await provider.generateEmbeddings(response.response);
+          if (cancelled) return;
+          embeddingMap.set(response.modelId, vector);
+        } catch (error) {
+          console.error(
+            `Failed to generate embeddings for ${response.modelId}`,
+            error,
+          );
+        }
+      }
+
+      if (cancelled) return;
+
+      const orderedEmbeddings = completedResponses
+        .map((response) => {
+          const vector = embeddingMap.get(response.modelId);
+          if (!vector) return null;
+          return { modelId: response.modelId, embedding: vector };
+        })
+        .filter(
+          (
+            value,
+          ): value is { modelId: string; embedding: number[] } =>
+            value !== null,
+        );
+
+      setEmbeddings(orderedEmbeddings);
+
+      if (orderedEmbeddings.length >= 2) {
+        calculateAgreementState();
+      }
+    })()
+      .catch((error) => {
+        console.error('Failed to process embeddings', error);
+      })
+      .finally(() => {
+        embeddingFetchRef.current = false;
+      });
+
+    return () => {
+      cancelled = true;
+      embeddingFetchRef.current = false;
+    };
+  }, [
+    calculateAgreementState,
+    completedResponses,
+    hasHydrated,
+    mode,
+    setEmbeddings,
+    viewEmbeddings,
+    viewSimilarityMatrix,
+  ]);
 
   const handleBack = () => {
     setCurrentStep('prompt');
@@ -76,6 +252,8 @@ export default function ReviewPage() {
     router.push('/config');
   };
 
+  const displayPrompt = hasHydrated ? prompt ?? '' : '';
+
   return (
     <div className="container mx-auto px-4 py-8 max-w-6xl">
       <ProgressSteps currentStep="review" fallbackStep="review" />
@@ -90,7 +268,7 @@ export default function ReviewPage() {
         <div className="p-6">
           <h3 className="text-lg font-semibold mb-4">{t('pages.review.promptLabel')}</h3>
           <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
-            <p className="text-gray-900 dark:text-gray-100">{prompt}</p>
+            <p className="text-gray-900 dark:text-gray-100">{displayPrompt}</p>
           </div>
         </div>
       </Card>
@@ -99,7 +277,7 @@ export default function ReviewPage() {
       <div className="mt-8 space-y-4">
         <h3 className="text-xl font-semibold">{t('pages.review.responsesHeading')}</h3>
 
-        {responses.length === 0 && manualResponses.length === 0 ? (
+        {viewResponses.length === 0 && viewManualResponses.length === 0 ? (
           <div className="p-8 text-center bg-gray-50 dark:bg-gray-800 rounded-lg">
             <p className="text-gray-600 dark:text-gray-400">
               {t('pages.review.noResponses')}
@@ -107,7 +285,7 @@ export default function ReviewPage() {
           </div>
         ) : (
           <div className="space-y-4">
-            {responses.map((response) => (
+            {viewResponses.map((response) => (
               <ResponseCard
                 key={response.modelId}
                 modelName={response.model}
@@ -130,7 +308,7 @@ export default function ReviewPage() {
                 testId={`response-card-${response.modelId}`}
               />
             ))}
-            {manualResponses.map((manual) => (
+            {viewManualResponses.map((manual) => (
               <ResponseCard
                 key={manual.id}
                 modelName={manual.label}
@@ -146,24 +324,24 @@ export default function ReviewPage() {
       </div>
 
       {/* Agreement Analysis Section */}
-      {agreementStats && responses.length >= 2 && (
+      {pairwiseComparisons.length > 0 && (
         <div className="mt-8">
           <AgreementAnalysis
-            overallAgreement={agreementStats.mean}
-            pairwiseComparisons={[]}
-            responseCount={responses.length}
-            comparisonCount={0}
-            averageConfidence={0}
+            overallAgreement={overallAgreement}
+            pairwiseComparisons={pairwiseComparisons}
+            responseCount={completedResponses.length}
+            comparisonCount={pairwiseComparisons.length}
+            averageConfidence={averageConfidence}
           />
         </div>
       )}
 
       {/* Consensus Section */}
-      {metaAnalysis && summarizerModel && (
+      {viewMetaAnalysis && summarizerModel && (
         <div className="mt-8">
           <ConsensusCard
             summarizerModel={summarizerModel}
-            consensusText={metaAnalysis}
+            consensusText={viewMetaAnalysis}
           />
         </div>
       )}
@@ -186,4 +364,14 @@ export default function ReviewPage() {
       </div>
     </div>
   );
+}
+
+function useHasHydrated() {
+  const [hydrated, setHydrated] = useState(false);
+
+  useEffect(() => {
+    setHydrated(true);
+  }, []);
+
+  return hydrated;
 }
