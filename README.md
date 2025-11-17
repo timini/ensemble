@@ -81,13 +81,20 @@ npm install
 # Start component library Storybook (port 6006)
 npm run dev:components
 
-# Start wireframes dev server (port 3001)
+# Start the main app in Free mode (real provider clients)
 npm run dev
+
+# Start the app in Mock mode (lorem ipsum streaming)
+npm run dev:mock
+
+# Start wireframes dev server (port 3001)
+npm run dev:wireframes
 
 # Run all tests
 npm test
 
-# Run E2E tests (Playwright list reporter, headless)
+# Run E2E tests (Playwright list reporter, headless).
+# Automatically boots the app in Mock mode via `npm run dev:mock`.
 npm run test:e2e
 
 # Run linter

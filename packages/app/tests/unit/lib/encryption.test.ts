@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { decrypt, encrypt, deriveKey } from '~/lib/encryption';
+import { decrypt, encrypt, deriveKey } from '@ensemble-ai/shared-utils/security';
 
 describe('encryption utilities', () => {
   const plaintext = 'sensitive-api-key';

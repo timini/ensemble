@@ -18,7 +18,7 @@ import { PromptTips } from '@/components/organisms/PromptTips';
 import { PromptInputWithHint } from '@/components/organisms/PromptInputWithHint';
 import { ProgressSteps } from '@/components/molecules/ProgressSteps';
 import { ResponseCard } from '@/components/molecules/ResponseCard';
-import { ProviderRegistry } from '~/providers';
+import { ProviderRegistry } from '@ensemble-ai/shared-utils/providers';
 import { AVAILABLE_MODELS } from '~/lib/models';
 
 export default function PromptPage() {

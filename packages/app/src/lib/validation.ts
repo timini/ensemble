@@ -4,7 +4,7 @@
 
 import type { Provider } from '@/components/molecules/ApiKeyInput';
 import type { ValidationStatus } from '@/components/molecules/ApiKeyInput';
-import { ProviderRegistry } from '~/providers/ProviderRegistry';
+import { ProviderRegistry } from '@ensemble-ai/shared-utils/providers';
 import { initializeProviders } from '~/providers';
 
 export interface ValidateApiKeyOptions {
@@ -57,11 +57,11 @@ export async function validateApiKey({
     const providerRegistry = ProviderRegistry.getInstance();
     // Determine which client to use
     const clientMode = getClientMode(userMode);
+
     if (!providerRegistry.hasProvider(provider, clientMode)) {
-      if (clientMode === 'mock') {
-        initializeProviders();
-      }
+      initializeProviders();
     }
+
     if (!providerRegistry.hasProvider(provider, clientMode)) {
       console.warn(
         `Skipping ${provider} validation. Provider not registered for mode '${clientMode}'.`,
