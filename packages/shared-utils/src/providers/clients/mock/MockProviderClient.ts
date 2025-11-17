@@ -81,9 +81,10 @@ export class MockProviderClient implements AIProvider {
     }
   }
 
-  async generateEmbeddings(text: string): Promise<number[]> {
+  generateEmbeddings(text: string): Promise<number[]> {
     const hash = this.simpleHash(text);
-    return Array.from({ length: 1536 }, (_, i) => (Math.sin(hash + i) + 1) / 2);
+    const embedding = Array.from({ length: 1536 }, (_, i) => (Math.sin(hash + i) + 1) / 2);
+    return Promise.resolve(embedding);
   }
 
   async validateApiKey(_apiKey: string): Promise<ValidationResult> {
@@ -173,8 +174,8 @@ export class MockProviderClient implements AIProvider {
     return allModels;
   }
 
-  async listAvailableTextModels(): Promise<string[]> {
-    return this.listAvailableModels().map((model) => model.name);
+  listAvailableTextModels(): Promise<string[]> {
+    return Promise.resolve(this.listAvailableModels().map((model) => model.name));
   }
 
   private getWordCountForModel(model: string): number {
@@ -199,7 +200,10 @@ export class MockProviderClient implements AIProvider {
     const words: string[] = [];
     for (let i = 0; i < wordCount; i += 1) {
       const index = this.randomInt(0, LOREM_IPSUM_WORDS.length - 1);
-      words.push(LOREM_IPSUM_WORDS[index]!);
+      const word = LOREM_IPSUM_WORDS[index];
+      if (word) {
+        words.push(word);
+      }
     }
     return words.join(' ');
   }
@@ -229,7 +233,7 @@ export class MockProviderClient implements AIProvider {
   private simpleHash(text: string): number {
     let hash = 0;
     for (let i = 0; i < text.length; i += 1) {
-      hash = (hash << 5) - hash + text.charCodeAt(i)!;
+      hash = (hash << 5) - hash + text.charCodeAt(i);
       hash |= 0;
     }
     return hash;
