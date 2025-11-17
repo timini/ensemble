@@ -40,12 +40,26 @@ jobs:
       - run: npm ci
       - run: npm run test --workspace=packages/shared-utils
 
+  wireframes:
+    name: Wireframes
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npm run lint --workspace=packages/wireframes
+      - run: npm run build --workspace=packages/wireframes
+
   app:
     name: App
     runs-on: ubuntu-latest
     needs:
       - component-library
       - shared-utils
+      - wireframes
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
