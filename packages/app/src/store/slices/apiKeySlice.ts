@@ -7,12 +7,14 @@
 
 import type { StateCreator } from 'zustand';
 import { decrypt, encrypt } from '@ensemble-ai/shared-utils/security';
+import type { ValidationStatus } from '@/components/molecules/ApiKeyInput';
 import type { ProviderType } from './ensembleSlice';
 
 export interface ApiKeyData {
   encrypted: string | null;
   key: string;
   visible: boolean;
+  status: ValidationStatus;
 }
 
 export interface ApiKeySlice {
@@ -29,6 +31,7 @@ export interface ApiKeySlice {
   getApiKey: (provider: ProviderType) => string | null;
   clearApiKeys: () => void;
   initializeEncryption: () => Promise<void>;
+  setApiKeyStatus: (provider: ProviderType, status: ValidationStatus) => void;
 }
 
 export const createApiKeySlice: StateCreator<ApiKeySlice> = (set, get) => ({
@@ -60,11 +63,16 @@ export const createApiKeySlice: StateCreator<ApiKeySlice> = (set, get) => ({
           set((state) => {
             const currentEntry = state.apiKeys[provider];
             const nextEntry = currentEntry
-              ? { ...currentEntry, key: decrypted }
+              ? {
+                  ...currentEntry,
+                  key: decrypted,
+                  status: currentEntry.status ?? 'idle',
+                }
               : {
                   key: decrypted,
                   encrypted: null,
                   visible: false,
+                  status: 'idle',
                 };
 
             return {
@@ -86,6 +94,7 @@ export const createApiKeySlice: StateCreator<ApiKeySlice> = (set, get) => ({
                       ...currentEntry,
                       key: '',
                       encrypted: null,
+                      status: 'idle',
                     }
                   : null,
               },
@@ -121,6 +130,7 @@ export const createApiKeySlice: StateCreator<ApiKeySlice> = (set, get) => ({
             key: trimmedKey,
             encrypted,
             visible: previousVisibility,
+            status: 'idle',
           },
         },
       }));
@@ -161,6 +171,25 @@ export const createApiKeySlice: StateCreator<ApiKeySlice> = (set, get) => ({
         xai: null,
       },
       encryptionInitialized: false,
+    });
+  },
+
+  setApiKeyStatus: (provider, status) => {
+    set((state) => {
+      const current = state.apiKeys[provider];
+      if (!current) {
+        return state;
+      }
+
+      return {
+        apiKeys: {
+          ...state.apiKeys,
+          [provider]: {
+            ...current,
+            status,
+          },
+        },
+      };
     });
   },
 });

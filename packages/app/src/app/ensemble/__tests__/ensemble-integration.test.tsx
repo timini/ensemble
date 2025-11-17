@@ -29,10 +29,10 @@ describe('Ensemble Page - Model Selection Integration', () => {
     useStore.setState({
       mode: 'free',
       apiKeys: {
-        openai: { key: 'sk-test-key', encrypted: null, visible: false },
-        anthropic: { key: '', encrypted: null, visible: false },
-        google: { key: '', encrypted: null, visible: false },
-        xai: { key: '', encrypted: null, visible: false },
+        openai: { key: 'sk-test-key', encrypted: null, visible: false, status: 'valid' },
+        anthropic: { key: '', encrypted: null, visible: false, status: 'idle' },
+        google: { key: '', encrypted: null, visible: false, status: 'idle' },
+        xai: { key: '', encrypted: null, visible: false, status: 'idle' },
       },
       encryptionInitialized: true,
       selectedModels: [],

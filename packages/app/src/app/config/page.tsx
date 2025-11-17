@@ -16,8 +16,7 @@ import { ModeSelector } from '@/components/organisms/ModeSelector';
 import { ApiKeyConfiguration } from '@/components/organisms/ApiKeyConfiguration';
 import { WorkflowNavigator } from '@/components/organisms/WorkflowNavigator';
 import { ProgressSteps } from '@/components/molecules/ProgressSteps';
-import type { Provider } from '@/components/molecules/ApiKeyInput';
-import type { ValidationStatus } from '@/components/molecules/ApiKeyInput';
+import type { Provider, ValidationStatus } from '@/components/molecules/ApiKeyInput';
 import { validateApiKey, createDebouncedValidator } from '~/lib/validation';
 import { InlineAlert } from '@/components/atoms/InlineAlert';
 import { isWebCryptoAvailable } from '@ensemble-ai/shared-utils/security';
@@ -40,13 +39,7 @@ export default function ConfigPage() {
   const setCurrentStep = useStore((state) => state.setCurrentStep);
   const completeStep = useStore((state) => state.completeStep);
 
-  // Validation state for each provider
-  const [validationStatus, setValidationStatus] = useState<Record<Provider, ValidationStatus>>({
-    openai: 'idle',
-    anthropic: 'idle',
-    google: 'idle',
-    xai: 'idle',
-  });
+  const setApiKeyStatus = useStore((state) => state.setApiKeyStatus);
 
   // Store timeout IDs for debouncing
   const timeoutRefs = useRef<Record<Provider, NodeJS.Timeout | null>>({
@@ -70,11 +63,21 @@ export default function ConfigPage() {
   };
 
   // Handler for validation status changes
+  const validationStatus = useMemo(
+    () => ({
+      openai: apiKeys.openai?.status ?? 'idle',
+      anthropic: apiKeys.anthropic?.status ?? 'idle',
+      google: apiKeys.google?.status ?? 'idle',
+      xai: apiKeys.xai?.status ?? 'idle',
+    }),
+    [apiKeys],
+  );
+
   const handleValidationStatusChange = useCallback(
     (provider: Provider, status: ValidationStatus) => {
-      setValidationStatus((prev) => ({ ...prev, [provider]: status }));
+      setApiKeyStatus(provider, status);
     },
-    [],
+    [setApiKeyStatus],
   );
 
   // Create debounced validator using the reusable utility
