@@ -38,9 +38,12 @@ export default defineConfig({
 
   // Run local dev server before starting tests
   webServer: {
-    command: 'npm run dev',
+    command: 'npm run dev:mock',
     url: 'http://localhost:3000',
     reuseExistingServer: !process.env.CI,
     timeout: 120 * 1000,
+    env: {
+      NEXT_PUBLIC_MOCK_MODE: 'true',
+    },
   },
 });

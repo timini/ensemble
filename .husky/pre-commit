@@ -13,3 +13,5 @@ cd ../app
 npm run lint
 npm run typecheck
 npm run build
+echo "🎭 Running app E2E tests..."
+npm run test:e2e

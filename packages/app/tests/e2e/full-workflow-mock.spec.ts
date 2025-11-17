@@ -15,6 +15,24 @@ import { test, expect, type Page } from '@playwright/test';
 const enabledModels = (page: Page) =>
   page.locator('[data-testid^="model-card-"][data-disabled="false"]');
 
+const expectConfiguredApiKeys = async (page: Page, count: number) => {
+  const label =
+    count === 1
+      ? /1 API key configured/i
+      : new RegExp(`${count} API keys configured`, 'i');
+  await expect(page.getByText(label)).toBeVisible();
+};
+
+const fillAndValidateKey = async (
+  page: Page,
+  provider: string,
+  value: string,
+  expectedCount: number,
+) => {
+  await page.locator(`[data-provider="${provider}"] input`).fill(value);
+  await expectConfiguredApiKeys(page, expectedCount);
+};
+
 test.describe('Full Workflow - Mock Mode', () => {
   test('completes full user journey from config to review', async ({ page }) => {
     // ==========================================
@@ -40,17 +58,24 @@ test.describe('Full Workflow - Mock Mode', () => {
     });
 
     await test.step('Configure API keys for multiple providers', async () => {
-      // Configure OpenAI API key
-      await page.locator('[data-provider="openai"] input').fill('sk-test-openai-key-full-workflow');
-
-      // Configure Anthropic API key
-      await page.locator('[data-provider="anthropic"] input').fill('sk-ant-test-anthropic-key');
-
-      // Configure Google API key
-      await page.locator('[data-provider="google"] input').fill('test-google-api-key-12345');
-
-      // Verify status message shows 3 keys configured
-      await expect(page.getByText(/3 API keys? configured/i)).toBeVisible();
+      await fillAndValidateKey(
+        page,
+        'openai',
+        'sk-test-openai-key-full-workflow',
+        1,
+      );
+      await fillAndValidateKey(
+        page,
+        'anthropic',
+        'sk-ant-test-anthropic-key',
+        2,
+      );
+      await fillAndValidateKey(
+        page,
+        'google',
+        'test-google-api-key-12345',
+        3,
+      );
 
       // Continue button should now be enabled
       await expect(page.getByRole('button', { name: /continue/i })).toBeEnabled();
@@ -213,7 +238,8 @@ test.describe('Full Workflow - Mock Mode', () => {
       // Free mode should still be selected
       await expect(page.locator('[data-mode="free"]')).toHaveAttribute('data-selected', 'true');
 
-      // Navigate to ensemble page
+      // Navigate to ensemble page (wait for keys to be revalidated)
+      await expectConfiguredApiKeys(page, 3);
       const continueButton = page.getByRole('button', { name: /continue/i });
       await expect(continueButton).toBeEnabled();
       await continueButton.click();
@@ -231,7 +257,7 @@ test.describe('Full Workflow - Mock Mode', () => {
 
       // Select Free mode with only 1 API key
       await page.locator('[data-mode="free"]').click();
-      await page.locator('[data-provider="openai"] input').fill('sk-test-minimal');
+      await fillAndValidateKey(page, 'openai', 'sk-test-minimal', 1);
       const continueButton = page.getByRole('button', { name: /continue/i });
       await expect(continueButton).toBeEnabled();
       await continueButton.click();
@@ -264,7 +290,7 @@ test.describe('Full Workflow - Mock Mode', () => {
       // Navigate properly through config first
       await page.goto('/config');
       await page.locator('[data-mode="free"]').click();
-      await page.locator('[data-provider="openai"] input').fill('sk-test-key');
+      await fillAndValidateKey(page, 'openai', 'sk-test-key', 1);
       const continueButtonConfig = page.getByRole('button', { name: /continue/i });
       await expect(continueButtonConfig).toBeEnabled();
       await continueButtonConfig.click();
