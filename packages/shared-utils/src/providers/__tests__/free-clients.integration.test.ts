@@ -1,10 +1,8 @@
 import { describe, it, expect } from 'vitest';
-import {
-  FreeGoogleClient,
-  FreeOpenAIClient,
-  FreeAnthropicClient,
-  FreeXAIClient,
-} from '../index.js';
+import { FreeGoogleClient } from '../clients/google/FreeGoogleClient.js';
+import { FreeOpenAIClient } from '../clients/openai/FreeOpenAIClient.js';
+import { FreeAnthropicClient } from '../clients/anthropic/FreeAnthropicClient.js';
+import { FreeXAIClient } from '../clients/xai/FreeXAIClient.js';
 
 const googleKey = process.env.NEXT_PUBLIC_GOOGLE_TEST_KEY ?? process.env.GOOGLE_API_KEY;
 const openAiKey = process.env.NEXT_PUBLIC_OPENAI_TEST_KEY ?? process.env.OPENAI_API_KEY;
