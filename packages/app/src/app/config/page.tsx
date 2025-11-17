@@ -22,6 +22,8 @@ import { validateApiKey, createDebouncedValidator } from '~/lib/validation';
 import { InlineAlert } from '@/components/atoms/InlineAlert';
 import { isWebCryptoAvailable } from '@ensemble-ai/shared-utils/security';
 
+const PROVIDERS: Provider[] = ['openai', 'anthropic', 'google', 'xai'];
+
 export default function ConfigPage() {
   const { t } = useTranslation('common');
   const router = useRouter();
@@ -91,7 +93,7 @@ export default function ConfigPage() {
       return;
     }
 
-    (['openai', 'anthropic', 'google', 'xai'] as Provider[]).forEach((provider) => {
+    PROVIDERS.forEach((provider) => {
       const existingKey = apiKeys[provider]?.key ?? '';
       if (existingKey.length === 0) {
         return;
@@ -167,20 +169,20 @@ export default function ConfigPage() {
     },
   ] : [];
 
-  // Count configured API keys (Free mode only)
+  // Count validated API keys (Free mode only)
   const configuredKeysCount = isFreeModeActive
-    ? [apiKeys.openai?.key, apiKeys.anthropic?.key, apiKeys.google?.key, apiKeys.xai?.key].filter(Boolean).length
+    ? PROVIDERS.filter((provider) => validationStatus[provider] === 'valid').length
     : 0;
 
-  // At least 1 API key configured enables Continue button in Free mode
-  const hasConfiguredKeys = configuredKeysCount > 0;
+  // At least 1 API key validated enables Continue button in Free mode
+  const hasValidKeys = configuredKeysCount > 0;
   const hasHydrated = useHasHydrated();
   const allowContinue = useMemo(() => {
     if (!hasHydrated) {
-      return isFreeModeActive ? false : isModeConfigured;
+      return false;
     }
-    return isFreeModeActive ? hasConfiguredKeys : isModeConfigured;
-  }, [hasHydrated, isFreeModeActive, hasConfiguredKeys, isModeConfigured]);
+    return isFreeModeActive ? hasValidKeys : isModeConfigured;
+  }, [hasHydrated, isFreeModeActive, hasValidKeys, isModeConfigured]);
 
   // Set current step to 'config' on mount
   useEffect(() => {
@@ -189,10 +191,10 @@ export default function ConfigPage() {
 
   // Call configureModeComplete when at least 1 key is configured
   useEffect(() => {
-    if (isFreeModeActive && hasConfiguredKeys && !isModeConfigured) {
+    if (isFreeModeActive && hasValidKeys && !isModeConfigured) {
       configureModeComplete();
     }
-  }, [isFreeModeActive, hasConfiguredKeys, isModeConfigured, configureModeComplete]);
+  }, [isFreeModeActive, hasValidKeys, isModeConfigured, configureModeComplete]);
 
   // Cleanup timeouts on unmount
   useEffect(() => {

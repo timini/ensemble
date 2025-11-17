@@ -8,7 +8,15 @@
  * - Navigation to /ensemble after selection
  */
 
-import { test, expect } from '@playwright/test';
+import { test, expect, type Page } from '@playwright/test';
+
+const expectConfiguredKeysCount = async (page: Page, count: number) => {
+  const label =
+    count === 1
+      ? /1 API key configured/i
+      : new RegExp(`${count} API keys configured`, 'i');
+  await expect(page.getByText(label)).toBeVisible();
+};
 
 test.describe('Config Page', () => {
   test.beforeEach(async ({ page }) => {
@@ -61,6 +69,7 @@ test.describe('Config Page', () => {
 
     // Configure just 1 API key (should be enough to enable Continue)
     await page.locator('[data-provider="openai"] input').fill('sk-test-openai-key');
+    await expectConfiguredKeysCount(page, 1);
 
     // Now enabled
     await expect(continueButton).toBeEnabled();
@@ -77,14 +86,14 @@ test.describe('Config Page', () => {
     await page.locator('[data-provider="openai"] input').fill('sk-test-openai-key');
 
     // Should show "1 API key configured"
-    await expect(page.getByText(/1 API key configured/i)).toBeVisible();
+    await expectConfiguredKeysCount(page, 1);
     await expect(page.getByText(/configure more or continue selecting models/i)).toBeVisible();
 
     // Configure another API key
     await page.locator('[data-provider="anthropic"] input').fill('sk-ant-test-anthropic-key');
 
     // Should show "2 API keys configured"
-    await expect(page.getByText(/2 API keys configured/i)).toBeVisible();
+    await expectConfiguredKeysCount(page, 2);
   });
 
   test('Pro mode is disabled with Coming Soon text', async ({ page }) => {
@@ -104,6 +113,7 @@ test.describe('Config Page', () => {
 
     // Configure at least 1 API key
     await page.locator('[data-provider="openai"] input').fill('sk-test-openai-key');
+    await expectConfiguredKeysCount(page, 1);
 
     // Click Continue button
     await page.getByRole('button', { name: /continue/i }).click();
