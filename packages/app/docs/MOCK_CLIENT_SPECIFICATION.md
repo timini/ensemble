@@ -218,12 +218,12 @@ interface MockClientConfig {
 
 ## Implementation
 
-### MockAPIClient (`src/providers/clients/MockAPIClient.ts`)
+### MockProviderClient (`packages/shared-utils/src/providers/clients/mock/MockProviderClient.ts`)
 
 ```typescript
-import { AIProvider } from '../interfaces/AIProvider';
+import { AIProvider } from '../../types.js';
 
-export class MockAPIClient implements AIProvider {
+export class MockProviderClient implements AIProvider {
   private config: MockClientConfig;
 
   constructor(config: MockClientConfig = {}) {
@@ -427,11 +427,11 @@ function hashToVector(text: string, dimension: number): number[] {
 ### Unit Tests
 
 ```typescript
-import { MockAPIClient } from '@/providers/clients/MockAPIClient';
+import { MockProviderClient } from '@ensemble-ai/shared-utils/providers';
 
-describe('MockAPIClient', () => {
+describe('MockProviderClient', () => {
   it('streams lorem ipsum with correct timing', async () => {
-    const client = new MockAPIClient();
+    const client = new MockProviderClient();
     const chunks: string[] = [];
     const startTime = Date.now();
 
@@ -457,7 +457,7 @@ describe('MockAPIClient', () => {
   });
 
   it('generates deterministic embeddings', async () => {
-    const client = new MockAPIClient();
+    const client = new MockProviderClient();
     const text = 'Lorem ipsum dolor sit amet';
 
     const embedding1 = await client.generateEmbeddings(text);
@@ -469,7 +469,7 @@ describe('MockAPIClient', () => {
   });
 
   it('simulates errors when configured', async () => {
-    const client = new MockAPIClient({
+    const client = new MockProviderClient({
       enableErrors: true,
       errorProbability: 1.0, // Always error
     });

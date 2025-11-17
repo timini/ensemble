@@ -78,12 +78,12 @@ Each provider (OpenAI, Anthropic, Google, XAI) has its own implementation:
 
 ## AIProvider Interface
 
-### Core Interface (`src/providers/interfaces/AIProvider.ts`)
+### Core Interface (`packages/shared-utils/src/providers/types.ts`)
 
 ```typescript
 /**
  * Abstract interface for all AI provider implementations
- * Implemented by: MockAPIClient, FreeAPIClient, ProAPIClient
+ * Implemented by: MockProviderClient, Free<Provider>Client, Pro<Provider>Client
  */
 export interface AIProvider {
   /**
@@ -138,7 +138,7 @@ export interface AIProvider {
 
 **Purpose**: Lorem ipsum streaming for UI development and E2E testing
 
-**Location**: `src/providers/clients/MockAPIClient.ts`
+**Location**: `packages/shared-utils/src/providers/clients/mock/MockProviderClient.ts`
 
 **Behavior**:
 - Generates random lorem ipsum text (500-1000 words)
@@ -150,7 +150,7 @@ export interface AIProvider {
 
 **Implementation**:
 ```typescript
-export class MockAPIClient implements AIProvider {
+export class MockProviderClient implements AIProvider {
   async streamResponse(
     prompt: string,
     model: string,
@@ -194,7 +194,7 @@ export class MockAPIClient implements AIProvider {
 
 **Purpose**: Direct API calls to providers with user-supplied API keys.
 
-**Location**: `src/providers/clients/<provider>/Free<Provider>Client.ts`
+**Location**: `packages/shared-utils/src/providers/clients/<provider>/Free<Provider>Client.ts`
 
 **Behavior**:
 - Each provider owns its Free-mode implementation (e.g., `FreeOpenAIClient`, `FreeAnthropicClient`).
@@ -205,16 +205,20 @@ export class MockAPIClient implements AIProvider {
 
 **Factory Pattern**:
 ```typescript
-// factories/createProviderClient.ts
+// packages/shared-utils/src/providers/factories/createProviderClient.ts
 export function createProviderClient(
-  provider: ProviderName,
-  mode: 'mock' | 'free' | 'pro',
-  getApiKey: () => string | null,
+  { provider, mode, getApiKey }: CreateProviderClientOptions,
 ): AIProvider {
-  if (mode === 'mock') return new Mock<Provider>Client();
-  if (mode === 'free') return new Free<Provider>Client(getApiKey);
-  // Phase 4
-  return new Pro<Provider>Client();
+  if (mode === 'mock') {
+    return new MockProviderClient({ providerFilter: provider });
+  }
+
+  if (mode === 'free') {
+    if (!getApiKey) throw new Error('Free mode requires getApiKey');
+    return new Free<Provider>Client(provider, getApiKey);
+  }
+
+  throw new Error('Pro mode client not yet implemented.');
 }
 ```
 
@@ -312,243 +316,14 @@ export class ProAPIClient implements AIProvider {
 
 Each provider has its own implementation handling API-specific details:
 
-#### OpenAIProvider (`src/providers/implementations/OpenAIProvider.ts`)
+#### Free client mapping
 
-```typescript
-import OpenAI from 'openai';
+- OpenAI: `packages/shared-utils/src/providers/clients/openai/FreeOpenAIClient.ts`
+- Anthropic: `packages/shared-utils/src/providers/clients/anthropic/FreeAnthropicClient.ts`
+- Google: `packages/shared-utils/src/providers/clients/google/FreeGoogleClient.ts`
+- XAI: `packages/shared-utils/src/providers/clients/xai/FreeXAIClient.ts`
 
-export class OpenAIProvider {
-  private client: OpenAI;
-
-  constructor(apiKey: string) {
-    this.client = new OpenAI({ apiKey, dangerouslyAllowBrowser: true });
-  }
-
-  async streamResponse(
-    prompt: string,
-    model: string,
-    onChunk: (chunk: string) => void,
-    onComplete: (fullResponse: string, responseTime: number) => void,
-    onError: (error: Error) => void
-  ): Promise<void> {
-    const startTime = Date.now();
-    let fullResponse = '';
-
-    try {
-      const stream = await this.client.chat.completions.create({
-        model,
-        messages: [{ role: 'user', content: prompt }],
-        stream: true,
-      });
-
-      for await (const chunk of stream) {
-        const content = chunk.choices[0]?.delta?.content || '';
-        fullResponse += content;
-        onChunk(content);
-      }
-
-      const responseTime = Date.now() - startTime;
-      onComplete(fullResponse, responseTime);
-    } catch (error) {
-      onError(error as Error);
-    }
-  }
-
-  async generateEmbeddings(text: string): Promise<number[]> {
-    const response = await this.client.embeddings.create({
-      model: 'text-embedding-3-small',
-      input: text,
-    });
-    return response.data[0].embedding;
-  }
-}
-```
-
-#### AnthropicProvider (`src/providers/implementations/AnthropicProvider.ts`)
-
-```typescript
-import Anthropic from '@anthropic-ai/sdk';
-
-export class AnthropicProvider {
-  private client: Anthropic;
-
-  constructor(apiKey: string) {
-    this.client = new Anthropic({ apiKey });
-  }
-
-  async streamResponse(
-    prompt: string,
-    model: string,
-    onChunk: (chunk: string) => void,
-    onComplete: (fullResponse: string, responseTime: number) => void,
-    onError: (error: Error) => void
-  ): Promise<void> {
-    const startTime = Date.now();
-    let fullResponse = '';
-
-    try {
-      const stream = await this.client.messages.create({
-        model,
-        messages: [{ role: 'user', content: prompt }],
-        max_tokens: 4096,
-        stream: true,
-      });
-
-      for await (const chunk of stream) {
-        if (chunk.type === 'content_block_delta') {
-          const content = chunk.delta.text || '';
-          fullResponse += content;
-          onChunk(content);
-        }
-      }
-
-      const responseTime = Date.now() - startTime;
-      onComplete(fullResponse, responseTime);
-    } catch (error) {
-      onError(error as Error);
-    }
-  }
-
-  async generateEmbeddings(text: string): Promise<number[]> {
-    // Anthropic uses Voyage AI for embeddings
-    const response = await fetch('https://api.voyageai.com/v1/embeddings', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${this.voyageApiKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ input: text, model: 'voyage-2' }),
-    });
-    const data = await response.json();
-    return data.data[0].embedding;
-  }
-}
-```
-
-#### GoogleProvider (`src/providers/implementations/GoogleProvider.ts`)
-
-```typescript
-import { GoogleGenerativeAI } from '@google/generative-ai';
-
-export class GoogleProvider {
-  private client: GoogleGenerativeAI;
-
-  constructor(apiKey: string) {
-    this.client = new GoogleGenerativeAI(apiKey);
-  }
-
-  async streamResponse(
-    prompt: string,
-    model: string,
-    onChunk: (chunk: string) => void,
-    onComplete: (fullResponse: string, responseTime: number) => void,
-    onError: (error: Error) => void
-  ): Promise<void> {
-    const startTime = Date.now();
-    let fullResponse = '';
-
-    try {
-      const geminiModel = this.client.getGenerativeModel({ model });
-      const result = await geminiModel.generateContentStream(prompt);
-
-      for await (const chunk of result.stream) {
-        const content = chunk.text();
-        fullResponse += content;
-        onChunk(content);
-      }
-
-      const responseTime = Date.now() - startTime;
-      onComplete(fullResponse, responseTime);
-    } catch (error) {
-      onError(error as Error);
-    }
-  }
-
-  async generateEmbeddings(text: string): Promise<number[]> {
-    const model = this.client.getGenerativeModel({ model: 'embedding-001' });
-    const result = await model.embedContent(text);
-    return result.embedding.values;
-  }
-}
-```
-
-#### XAIProvider (`src/providers/implementations/XAIProvider.ts`)
-
-```typescript
-import axios from 'axios';
-
-export class XAIProvider {
-  private apiKey: string;
-
-  constructor(apiKey: string) {
-    this.apiKey = apiKey;
-  }
-
-  async streamResponse(
-    prompt: string,
-    model: string,
-    onChunk: (chunk: string) => void,
-    onComplete: (fullResponse: string, responseTime: number) => void,
-    onError: (error: Error) => void
-  ): Promise<void> {
-    const startTime = Date.now();
-    let fullResponse = '';
-
-    try {
-      const response = await axios.post(
-        'https://api.x.ai/v1/chat/completions',
-        {
-          model,
-          messages: [{ role: 'user', content: prompt }],
-          stream: true,
-        },
-        {
-          headers: {
-            'Authorization': `Bearer ${this.apiKey}`,
-            'Content-Type': 'application/json',
-          },
-          responseType: 'stream',
-        }
-      );
-
-      response.data.on('data', (chunk: Buffer) => {
-        const content = chunk.toString();
-        fullResponse += content;
-        onChunk(content);
-      });
-
-      response.data.on('end', () => {
-        const responseTime = Date.now() - startTime;
-        onComplete(fullResponse, responseTime);
-      });
-
-      response.data.on('error', (error: Error) => {
-        onError(error);
-      });
-    } catch (error) {
-      onError(error as Error);
-    }
-  }
-
-  async generateEmbeddings(text: string): Promise<number[]> {
-    // XAI uses OpenAI-compatible embeddings
-    const response = await axios.post(
-      'https://api.x.ai/v1/embeddings',
-      {
-        model: 'text-embedding-ada-002',
-        input: text,
-      },
-      {
-        headers: {
-          'Authorization': `Bearer ${this.apiKey}`,
-          'Content-Type': 'application/json',
-        },
-      }
-    );
-    return response.data.data[0].embedding;
-  }
-}
-```
+Each class extends `BaseFreeClient` (`packages/shared-utils/src/providers/clients/base/BaseFreeClient.ts`), which currently falls back to mock streaming/embeddings while real integrations are implemented.
 
 ---
 
@@ -557,7 +332,7 @@ export class XAIProvider {
 ### Singleton Registry (`src/providers/ProviderRegistry.ts`)
 
 ```typescript
-import { MockAPIClient } from './clients/MockAPIClient';
+import { MockProviderClient } from '@ensemble-ai/shared-utils/providers';
 import { FreeAPIClient } from './clients/FreeAPIClient';
 import { ProAPIClient } from './clients/ProAPIClient';
 import { useStore } from '@/store';
@@ -586,7 +361,7 @@ export class ProviderRegistry {
 
     switch (mode) {
       case 'mock':
-        client = new MockAPIClient();
+        client = new MockProviderClient();
         break;
       case 'free':
         const apiKeys = useStore.getState().apiKeys;
@@ -684,11 +459,11 @@ async function calculateAgreement(responses: Array<{ modelId: string; response: 
 ### Unit Testing Providers
 
 ```typescript
-import { MockAPIClient } from '@/providers/clients/MockAPIClient';
+import { MockProviderClient } from '@ensemble-ai/shared-utils/providers';
 
-describe('MockAPIClient', () => {
+describe('MockProviderClient', () => {
   it('streams lorem ipsum response', async () => {
-    const client = new MockAPIClient();
+    const client = new MockProviderClient();
     const chunks: string[] = [];
 
     await client.streamResponse(
@@ -736,7 +511,7 @@ test('complete workflow with mock responses', async ({ page }) => {
 ## Migration Path
 
 ### Phase 2: Mock Mode Only
-- Implement MockAPIClient
+- Implement MockProviderClient
 - UI development with fake streaming
 - E2E tests without API costs
 

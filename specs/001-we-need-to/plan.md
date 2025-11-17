@@ -277,19 +277,8 @@ src/
 │       ├── ManualResponseModal.tsx
 │       ├── AgreementAnalysis.tsx
 │       └── PageHero.tsx
-├── providers/               # Provider architecture (Phase 2-3)
-│   ├── interfaces/
-│   │   └── AIProvider.ts   # Abstract interface
-│   ├── clients/
-│   │   ├── MockAPIClient.ts    # Phase 2
-│   │   ├── FreeAPIClient.ts    # Phase 3
-│   │   └── ProAPIClient.ts     # Phase 4
-│   ├── implementations/
-│   │   ├── XAIProvider.ts      # Grok models
-│   │   ├── OpenAIProvider.ts   # GPT models
-│   │   ├── GoogleProvider.ts   # Gemini models
-│   │   └── AnthropicProvider.ts # Claude models
-│   └── ProviderRegistry.ts  # Singleton provider manager
+├── providers/
+│   └── index.ts             # App-level initialization (delegates to shared utils)
 ├── store/                   # Zustand state management (Phase 1)
 │   ├── index.ts            # Root store with persistence
 │   ├── slices/
@@ -304,7 +293,6 @@ src/
 │   └── middleware/
 │       └── persistenceMiddleware.ts
 ├── lib/                     # Utility libraries
-│   ├── encryption.ts       # AES-256 encryption utilities (Phase 3)
 │   ├── embeddings.ts       # Embeddings generation utilities
 │   ├── similarity.ts       # Cosine similarity calculations
 │   └── streaming.ts        # AsyncIterator streaming utilities
@@ -723,9 +711,9 @@ Rationale: The agent context file (e.g., CLAUDE.md) is incrementally updated wit
    - T###: Define AIProvider interface
    - T###: Create ProviderRegistry singleton
    - Each provider (4) → 2 tasks:
-     - T###: Implement MockAPIClient [P]
-     - T###: Implement FreeAPIClient [P] (Phase 3)
-     - T###: Implement ProAPIClient [P] (Phase 4)
+     - T###: Implement shared MockProviderClient filtering support [P]
+     - T###: Implement provider-specific Free clients + factory wiring [P] (Phase 3)
+     - T###: Implement Pro clients (Phase 4)
 
    **From Backend Architecture** (Phase 4):
    - T###: Set up authentication (NextAuth.js)
@@ -744,7 +732,7 @@ Rationale: The agent context file (e.g., CLAUDE.md) is incrementally updated wit
 5. **Estimated Task Count**:
    - **Phase 1**: ~80 tasks (25 components × 3 tasks + setup + docs)
    - **Phase 2**: ~40 tasks (4 pages × 4 tasks + provider architecture + integration)
-   - **Phase 3**: ~30 tasks (4 FreeAPIClients + security + testing + docs)
+   - **Phase 3**: ~30 tasks (provider-specific Free clients + security + testing + docs)
    - **Phase 4**: ~50 tasks (backend + tRPC + credit system + deployment)
    - **Total**: ~200 tasks across 12-16 weeks
 
@@ -763,9 +751,9 @@ Rationale: The agent context file (e.g., CLAUDE.md) is incrementally updated wit
 ### Phase 3 Implementation Notes
 
 **Free Mode Architecture**:
-- FreeAPIClient implements AIProvider interface
-- Direct API calls from frontend to provider APIs
-- API keys encrypted with AES-256 via Web Crypto API
+- ProviderRegistry + createProviderClient factory resolve provider + mode to shared clients
+- Shared utils package houses provider clients (mock + free) and encryption utilities
+- Frontend delegates to shared clients; API keys encrypted with AES-256 via Web Crypto API
 - No backend dependency
 - Provider SDKs: openai, @anthropic-ai/sdk, @google/generative-ai, axios (XAI)
 

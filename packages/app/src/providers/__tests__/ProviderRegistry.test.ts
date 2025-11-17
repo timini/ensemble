@@ -5,8 +5,10 @@
  */
 
 import { describe, it, expect, beforeEach } from 'vitest';
-import { ProviderRegistry } from '../ProviderRegistry';
-import { MockAPIClient } from '../clients/MockAPIClient';
+import {
+  ProviderRegistry,
+  MockProviderClient,
+} from '@ensemble-ai/shared-utils/providers';
 
 describe('ProviderRegistry', () => {
   beforeEach(() => {
@@ -26,7 +28,7 @@ describe('ProviderRegistry', () => {
   describe('register', () => {
     it('registers a provider', () => {
       const registry = ProviderRegistry.getInstance();
-      const client = new MockAPIClient();
+      const client = new MockProviderClient();
 
       registry.register('openai', 'mock', client);
 
@@ -35,7 +37,7 @@ describe('ProviderRegistry', () => {
 
     it('allows registering multiple providers', () => {
       const registry = ProviderRegistry.getInstance();
-      const client = new MockAPIClient();
+      const client = new MockProviderClient();
 
       registry.register('openai', 'mock', client);
       registry.register('anthropic', 'mock', client);
@@ -50,7 +52,7 @@ describe('ProviderRegistry', () => {
 
     it('allows registering same provider for different modes', () => {
       const registry = ProviderRegistry.getInstance();
-      const mockClient = new MockAPIClient();
+      const mockClient = new MockProviderClient();
 
       registry.register('openai', 'mock', mockClient);
       registry.register('openai', 'free', mockClient);
@@ -65,7 +67,7 @@ describe('ProviderRegistry', () => {
   describe('getProvider', () => {
     it('retrieves registered provider', () => {
       const registry = ProviderRegistry.getInstance();
-      const client = new MockAPIClient();
+      const client = new MockProviderClient();
 
       registry.register('openai', 'mock', client);
 
@@ -100,7 +102,7 @@ describe('ProviderRegistry', () => {
 
     it('lists all registered providers for specific mode', () => {
       const registry = ProviderRegistry.getInstance();
-      const client = new MockAPIClient();
+      const client = new MockProviderClient();
 
       registry.register('openai', 'mock', client);
       registry.register('anthropic', 'mock', client);
@@ -121,7 +123,7 @@ describe('ProviderRegistry', () => {
   describe('hasProvider', () => {
     it('returns true for registered provider', () => {
       const registry = ProviderRegistry.getInstance();
-      const client = new MockAPIClient();
+      const client = new MockProviderClient();
 
       registry.register('openai', 'mock', client);
 
@@ -136,7 +138,7 @@ describe('ProviderRegistry', () => {
 
     it('returns false for different mode', () => {
       const registry = ProviderRegistry.getInstance();
-      const client = new MockAPIClient();
+      const client = new MockProviderClient();
 
       registry.register('openai', 'mock', client);
 
@@ -147,7 +149,7 @@ describe('ProviderRegistry', () => {
   describe('clearAll', () => {
     it('clears all registered providers', () => {
       const registry = ProviderRegistry.getInstance();
-      const client = new MockAPIClient();
+      const client = new MockProviderClient();
 
       registry.register('openai', 'mock', client);
       registry.register('anthropic', 'mock', client);
