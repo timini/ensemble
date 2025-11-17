@@ -3,6 +3,14 @@ import { BaseFreeClient } from '../base/BaseFreeClient.js';
 import type { ValidationResult } from '../../types.js';
 import { extractAxiosErrorMessage } from '../../utils/extractAxiosError.js';
 
+interface GoogleModelEntry {
+  name?: string;
+}
+
+interface GoogleModelsResponse {
+  models?: GoogleModelEntry[];
+}
+
 export class FreeGoogleClient extends BaseFreeClient {
   async validateApiKey(apiKey: string): Promise<ValidationResult> {
     if (!apiKey || apiKey.trim().length === 0) {
@@ -22,15 +30,18 @@ export class FreeGoogleClient extends BaseFreeClient {
   }
 
   protected async fetchTextModels(apiKey: string): Promise<string[]> {
-    const response = await axios.get('https://generativelanguage.googleapis.com/v1beta/models', {
-      params: {
-        key: apiKey,
+    const response = await axios.get<GoogleModelsResponse>(
+      'https://generativelanguage.googleapis.com/v1beta/models',
+      {
+        params: {
+          key: apiKey,
+        },
       },
-    });
+    );
 
-    const models = Array.isArray(response.data?.models) ? response.data.models : [];
+    const models = response.data?.models ?? [];
     return models
-      .map((model: { name?: string }) => {
+      .map((model) => {
         if (!model.name) return '';
         const segments = model.name.split('/');
         return segments[segments.length - 1] ?? model.name;

@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { MockProviderClient } from '../clients/mock/MockProviderClient.js';
 
 describe('MockProviderClient', () => {
@@ -6,14 +6,19 @@ describe('MockProviderClient', () => {
     const client = new MockProviderClient();
     const chunks: string[] = [];
 
+    const handleComplete = vi.fn();
+    const handleError = vi.fn();
+
     await client.streamResponse(
       'hello world',
       'gpt-4o',
       (chunk) => chunks.push(chunk),
-      () => {},
-      () => {},
+      handleComplete,
+      handleError,
     );
 
+    expect(handleComplete).toHaveBeenCalled();
+    expect(handleError).not.toHaveBeenCalled();
     expect(chunks.length).toBeGreaterThan(0);
     expect(chunks.join('').length).toBeGreaterThan(100);
   }, 15000);

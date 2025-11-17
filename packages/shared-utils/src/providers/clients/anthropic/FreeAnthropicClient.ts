@@ -3,6 +3,15 @@ import { BaseFreeClient } from '../base/BaseFreeClient.js';
 import type { ValidationResult } from '../../types.js';
 import { extractAxiosErrorMessage } from '../../utils/extractAxiosError.js';
 
+interface AnthropicModelEntry {
+  id?: string;
+  model?: string;
+}
+
+interface AnthropicModelsResponse {
+  data?: AnthropicModelEntry[];
+}
+
 export class FreeAnthropicClient extends BaseFreeClient {
   async validateApiKey(apiKey: string): Promise<ValidationResult> {
     if (!apiKey || apiKey.trim().length === 0) {
@@ -23,16 +32,16 @@ export class FreeAnthropicClient extends BaseFreeClient {
   }
 
   protected async fetchTextModels(apiKey: string): Promise<string[]> {
-    const response = await axios.get('https://api.anthropic.com/v1/models', {
+    const response = await axios.get<AnthropicModelsResponse>('https://api.anthropic.com/v1/models', {
       headers: {
         'x-api-key': apiKey,
         'anthropic-version': '2023-06-01',
       },
     });
 
-    const data = Array.isArray(response.data?.data) ? response.data.data : [];
+    const data = response.data?.data ?? [];
     return data
-      .map((entry: { id?: string; model?: string }) => entry.id ?? entry.model ?? '')
+      .map((entry) => entry.id ?? entry.model ?? '')
       .filter((value): value is string => value.length > 0);
   }
 }
