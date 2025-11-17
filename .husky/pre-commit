@@ -15,3 +15,8 @@ npm run typecheck
 npm run build
 echo "🎭 Running app E2E tests..."
 npm run test:e2e
+
+# Run Fast TypeScript Analyzer from repo root
+cd ../..
+echo "📊 Running FTA analysis..."
+npm run analyze:fta

@@ -7,8 +7,10 @@
   ],
   "scripts": {
     "dev": "npm run dev --workspace=packages/app",
+    "dev:mock": "npm run dev:mock --workspace=packages/app",
     "dev:wireframes": "npm run dev --workspace=packages/wireframes",
     "dev:components": "npm run storybook --workspace=packages/component-library",
+    "analyze:fta": "fta packages/app",
     "build": "npm run build --workspaces --if-present",
     "lint": "npm run lint --workspaces --if-present",
     "lint:fix": "npm run lint:fix --workspaces --if-present",
@@ -18,6 +20,7 @@
     "prepare": "husky"
   },
   "devDependencies": {
+    "fta-cli": "^3.0.0",
     "prettier": "^3.6.2",
     "prettier-plugin-tailwindcss": "^0.6.14"
   }
