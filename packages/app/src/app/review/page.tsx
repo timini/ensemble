@@ -11,12 +11,12 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useStore } from '~/store';
-import { ProviderRegistry } from '~/providers';
 import {
   buildPairwiseComparisons,
   calculateAverageConfidence,
   normalizeSimilarity,
 } from '~/lib/agreement';
+import { generateEmbeddingsForResponses } from '~/lib/embeddings';
 import { PageHero } from '@/components/organisms/PageHero';
 import { ResponseCard } from '@/components/molecules/ResponseCard';
 import { ConsensusCard } from '@/components/organisms/ConsensusCard';
@@ -40,6 +40,7 @@ export default function ReviewPage() {
   const embeddings = useStore((state) => state.embeddings);
   const similarityMatrix = useStore((state) => state.similarityMatrix);
   const mode = useStore((state) => state.mode);
+  const embeddingsProvider = useStore((state) => state.embeddingsProvider);
   const hasHydrated = useHasHydrated();
 
   const viewResponses = useMemo(
@@ -78,6 +79,7 @@ export default function ReviewPage() {
 
   const skipRedirectRef = useRef(false);
   const embeddingFetchRef = useRef(false);
+  const lastEmbeddingsProviderRef = useRef<ProviderType | null>(null);
 
   const completedResponses = useMemo(
     () =>
@@ -139,12 +141,17 @@ export default function ReviewPage() {
       return;
     }
 
-    const existingEmbeddings = new Set(viewEmbeddings.map((item) => item.modelId));
+    const providerChanged =
+      lastEmbeddingsProviderRef.current !== embeddingsProvider;
+    const existingEmbeddings = providerChanged ? [] : viewEmbeddings;
     const pendingResponses = completedResponses.filter(
-      (response) => !existingEmbeddings.has(response.modelId),
+      (response) =>
+        !existingEmbeddings.some(
+          (embedding) => embedding.modelId === response.modelId,
+        ),
     );
 
-    if (pendingResponses.length === 0) {
+    if (!providerChanged && pendingResponses.length === 0) {
       if (viewEmbeddings.length >= 2 && !viewSimilarityMatrix) {
         calculateAgreementState();
       }
@@ -158,55 +165,23 @@ export default function ReviewPage() {
     embeddingFetchRef.current = true;
     let cancelled = false;
 
-    const registry = ProviderRegistry.getInstance();
-    const clientMode: 'mock' | 'free' | 'pro' =
-      process.env.NEXT_PUBLIC_MOCK_MODE === 'true'
-        ? 'mock'
-        : mode === 'pro'
-        ? 'pro'
-        : 'free';
-
     (async () => {
-      const embeddingMap = new Map(
-        viewEmbeddings.map((entry) => [entry.modelId, entry.embedding]),
-      );
-
-      for (const response of pendingResponses) {
-        try {
-          const providerName = response.provider as ProviderType;
-          let provider;
-          try {
-            provider = registry.getProvider(providerName, clientMode);
-          } catch {
-            provider = registry.getProvider(providerName, 'mock');
-          }
-
-          const vector = await provider.generateEmbeddings(response.response);
-          if (cancelled) return;
-          embeddingMap.set(response.modelId, vector);
-        } catch (error) {
+      const orderedEmbeddings = await generateEmbeddingsForResponses({
+        responses: completedResponses,
+        existingEmbeddings,
+        provider: embeddingsProvider,
+        mode: mode === 'pro' ? 'pro' : 'free',
+        onError: (modelId, error) => {
           console.error(
-            `Failed to generate embeddings for ${response.modelId}`,
+            `Failed to generate embeddings for ${modelId} via ${embeddingsProvider}`,
             error,
           );
-        }
-      }
+        },
+      });
 
       if (cancelled) return;
 
-      const orderedEmbeddings = completedResponses
-        .map((response) => {
-          const vector = embeddingMap.get(response.modelId);
-          if (!vector) return null;
-          return { modelId: response.modelId, embedding: vector };
-        })
-        .filter(
-          (
-            value,
-          ): value is { modelId: string; embedding: number[] } =>
-            value !== null,
-        );
-
+      lastEmbeddingsProviderRef.current = embeddingsProvider;
       setEmbeddings(orderedEmbeddings);
 
       if (orderedEmbeddings.length >= 2) {
@@ -227,6 +202,7 @@ export default function ReviewPage() {
   }, [
     calculateAgreementState,
     completedResponses,
+    embeddingsProvider,
     hasHydrated,
     mode,
     setEmbeddings,

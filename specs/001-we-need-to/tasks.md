@@ -341,30 +341,25 @@ Ready to proceed to **Phase 2: UI Integration with Mock API Clients**
 ### Phase 2.1: Provider Architecture (Week 5, Days 26-30)
 
 #### T118-T120: AIProvider Interface
-- [X] T118 Create src/providers/interfaces/AIProvider.ts with abstract interface: `streamResponse`, `generateEmbeddings`, `validateApiKey`, `listAvailableModels`
-- [X] T119 Write unit tests tests/unit/providers/AIProvider.test.ts testing interface contract compliance
+- [X] T118 Create packages/shared-utils/src/providers/types.ts with abstract interface: `streamResponse`, `generateEmbeddings`, `validateApiKey`, `listAvailableModels`
+- [X] T119 Write unit tests packages/shared-utils/src/providers/__tests__/ai-provider.test.ts testing interface contract compliance
 - [X] T120 Create docs/STREAMING_ARCHITECTURE.md documenting AsyncIterator pattern for streaming responses
 
 #### T121-T123: ProviderRegistry Singleton
-- [X] T121 Create src/providers/ProviderRegistry.ts with singleton pattern: register, getProvider, listProviders methods
-- [X] T122 Write unit tests tests/unit/providers/ProviderRegistry.test.ts testing: singleton instance, provider registration, retrieval by name
+- [X] T121 Create packages/shared-utils/src/providers/registry/ProviderRegistry.ts with singleton pattern: register, getProvider, listProviders methods
+- [X] T122 Write unit tests packages/shared-utils/src/providers/__tests__/provider-registry.test.ts testing: singleton instance, provider registration, retrieval by name
 - [X] T123 Update docs/PROVIDER_ARCHITECTURE.md with ProviderRegistry usage examples
 
-#### T124-T126: MockAPIClient
-- [X] T124 Create src/providers/clients/MockAPIClient.ts implementing AIProvider interface with lorem ipsum streaming (50 chars/chunk, 100ms delay)
-- [X] T125 Write unit tests tests/unit/providers/MockAPIClient.test.ts testing: streamResponse yields chunks, generateEmbeddings returns mock vectors, validateApiKey always true
+#### T124-T126: Mock Provider Client
+- [X] T124 Create packages/shared-utils/src/providers/clients/mock/MockProviderClient.ts implementing AIProvider interface with lorem ipsum streaming (50 chars/chunk, 100ms delay)
+- [X] T125 Write unit tests packages/shared-utils/src/providers/__tests__/mock-client.test.ts testing: streamResponse yields chunks, generateEmbeddings returns mock vectors, validateApiKey always true
 - [X] T126 Update docs/MOCK_CLIENT_SPECIFICATION.md with implementation details
 
-#### T127-T135: Provider Implementations (4 providers with MockAPIClient)
-- [X] T127 [P] Create src/providers/implementations/XAIProvider.ts with MockAPIClient for Grok models (grok-2, grok-2-mini)
-- [X] T128 [P] Create src/providers/implementations/OpenAIProvider.ts with MockAPIClient for GPT models (gpt-4o, gpt-4o-mini)
-- [X] T129 [P] Create src/providers/implementations/GoogleProvider.ts with MockAPIClient for Gemini models (gemini-1.5-pro, gemini-1.5-flash)
-- [X] T130 [P] Create src/providers/implementations/AnthropicProvider.ts with MockAPIClient for Claude models (claude-3.5-sonnet, claude-3-opus)
-- [X] T131 [P] Write integration tests tests/integration/providers/XAIProvider.test.ts testing mock streaming
-- [X] T132 [P] Write integration tests tests/integration/providers/OpenAIProvider.test.ts testing mock streaming
-- [X] T133 [P] Write integration tests tests/integration/providers/GoogleProvider.test.ts testing mock streaming
-- [X] T134 [P] Write integration tests tests/integration/providers/AnthropicProvider.test.ts testing mock streaming
-- [X] T135 Update src/providers/ProviderRegistry.ts to register all 4 providers at initialization
+- [X] T127 [P] Ensure shared mock client supports provider filtering (MockProviderClient providerFilter option)
+- [X] T128 [P] Create packages/shared-utils/src/providers/factories/createProviderClient.ts handling provider + mode resolution
+- [X] T129 [P] Update docs/PROVIDER_ARCHITECTURE.md with per-provider client matrix (mock/free/pro)
+- [X] T131 [P] (deprecated) -- replaced by new shared-utils provider tests
+- [X] T135 Update app/src/providers/index.ts to register clients via shared createProviderClient
 
 - [X] T136 Run integration tests: `npm run test` and verify all provider tests pass (44 provider tests passing)
 - [X] T137 Commit Phase 2.1 provider architecture: "feat: implement AIProvider interface and 4 providers with MockAPIClient" (commit b017cf1)
@@ -449,31 +444,29 @@ Ready to proceed to **Phase 2: UI Integration with Mock API Clients**
 
 ### Phase 3.1: Security & Encryption (Week 8, Days 51-53)
 
-- [X] T191 Implement src/lib/encryption.ts with AES-256-GCM encryption using Web Crypto API: `encrypt(plaintext)`, `decrypt(ciphertext)`, `deriveKey()` (device entropy hashing + IV/payload base64 format)
-- [X] T192 Write unit tests tests/unit/lib/encryption.test.ts testing: encryption/decryption round-trip, key derivation consistency, error handling (unsupported browser) (Vitest targeted run 2024-09-30)
-- [X] T193 Update src/store/slices/apiKeysSlice.ts to use encryption utilities before localStorage storage (async AES-GCM, sanitized persist, initializeEncryption)
+- [X] T191 Implement packages/shared-utils/src/security/encryption.ts with AES-256-GCM encryption using Web Crypto API: `encrypt`, `decrypt`, `deriveKey` (device entropy hashing + IV/payload base64 format)
+- [X] T192 Write unit tests tests/unit/lib/encryption.test.ts (app) pointing to shared utils; validate round-trip, key derivation consistency, missing Web Crypto behaviour
+- [X] T193 Update src/store/slices/apiKeysSlice.ts to use shared security utilities before localStorage storage (async AES-GCM, sanitized persist, initializeEncryption)
 - [X] T194 Write integration tests tests/integration/store/apiKeysSlice.test.ts testing: API keys stored encrypted in localStorage, keys decrypted on retrieval (new memory storage harness)
-- [X] T195 Create src/lib/webCryptoDetection.ts with feature detection for Web Crypto API support (boolean helper)
+- [X] T195 Create packages/shared-utils/src/security/webCryptoDetection.ts with feature detection helper reused by Config UI
 - [X] T196 Update src/app/config/page.tsx to disable Free mode with InlineAlert if Web Crypto API not supported (FR-059) (ModeSelector gating + translations)
 - [ ] T197 Commit Phase 3.1 security: "feat: implement AES-256-GCM encryption for API keys with Web Crypto API"
 
-### Phase 3.2: FreeAPIClient Implementation (Week 8-9, Days 54-60)
+### Phase 3.2: Free Mode Provider Clients (Week 8-9, Days 54-60)
 
 - [X] T198 Install provider SDKs: `npm install openai @anthropic-ai/sdk @google/generative-ai axios` (installed via workspace root)
-- [X] T199 Create src/providers/clients/FreeAPIClient.ts implementing AIProvider interface with real API calls, retry logic, error handling (key validation wired to live SDKs; streaming/emeddings temporarily fall back to mock client)
-- [X] T200 Write unit tests tests/unit/providers/FreeAPIClient.test.ts testing: streamResponse with mocked SDK, validateApiKey success/failure (added module hoisted mocks for all providers)
-- [ ] T201 Update src/providers/implementations/XAIProvider.ts to use FreeAPIClient (axios for Grok API)
-- [ ] T202 Update src/providers/implementations/OpenAIProvider.ts to use FreeAPIClient (openai SDK)
-- [ ] T203 Update src/providers/implementations/GoogleProvider.ts to use FreeAPIClient (@google/generative-ai SDK)
-- [ ] T204 Update src/providers/implementations/AnthropicProvider.ts to use FreeAPIClient (@anthropic-ai/sdk)
-- [ ] T205 [P] Write integration tests tests/integration/providers/XAIProvider.free.test.ts with test API key (skipped in CI if no key)
-- [ ] T206 [P] Write integration tests tests/integration/providers/OpenAIProvider.free.test.ts with test API key
-- [ ] T207 [P] Write integration tests tests/integration/providers/GoogleProvider.free.test.ts with test API key
-- [ ] T208 [P] Write integration tests tests/integration/providers/AnthropicProvider.free.test.ts with test API key
-- [ ] T209 Implement src/lib/embeddings.ts with real embeddings generation using selected provider's API
-- [ ] T210 Write unit tests tests/unit/lib/embeddings.test.ts testing embeddings generation with mocked provider
-- [ ] T211 Update src/components/organisms/AgreementAnalysis.tsx to use real embeddings instead of mock data
-- [ ] T212 Commit Phase 3.2 Free mode clients: "feat: implement FreeAPIClient with real provider SDK integrations"
+- [X] T199 Create packages/shared-utils/src/providers/clients/base/BaseFreeClient.ts and provider-specific Free clients (OpenAI, Anthropic, Google, XAI)
+- [X] T200 Write unit tests packages/shared-utils/src/providers/__tests__/free-clients.test.ts covering validation success/failure paths and mock fallbacks
+- [X] T201 Update packages/shared-utils/src/providers/factories/createProviderClient.ts to return provider + mode specific clients with `getApiKey` callbacks
+- [X] T202 Update app/src/providers/index.ts to register shared clients for mock + free modes via ProviderRegistry
+- [X] T205 [P] Write integration tests tests/integration/providers/XAIProvider.free.test.ts with test API key (skipped in CI if no key)
+- [X] T206 [P] Write integration tests tests/integration/providers/OpenAIProvider.free.test.ts with test API key
+- [X] T207 [P] Write integration tests tests/integration/providers/GoogleProvider.free.test.ts with test API key
+- [X] T208 [P] Write integration tests tests/integration/providers/AnthropicProvider.free.test.ts with test API key
+- [X] T209 Implement src/lib/embeddings.ts with real embeddings generation using selected provider's API
+- [X] T210 Write unit tests tests/unit/lib/embeddings.test.ts testing embeddings generation with mocked provider
+- [X] T211 Update src/components/organisms/AgreementAnalysis.tsx to use real embeddings instead of mock data
+- [ ] T212 Commit Phase 3.2 Free mode clients: "feat: implement provider-specific Free clients with real SDK integrations"
 
 ### Phase 3.3: Free Mode UI Integration (Week 9-10, Days 61-67)
 
