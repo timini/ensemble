@@ -28,7 +28,9 @@
     "baseUrl": ".",
     "paths": {
       "~/*": ["./src/*"],
-      "@/*": ["../component-library/src/*"]
+      "@/*": ["../component-library/src/*"],
+      "@ensemble-ai/shared-utils": ["../shared-utils/dist/index.js"],
+      "@ensemble-ai/shared-utils/*": ["../shared-utils/dist/*"]
     }
   },
   "include": [
