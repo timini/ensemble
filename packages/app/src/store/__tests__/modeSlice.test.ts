@@ -2,9 +2,6 @@
  * Mode Slice Tests
  */
 
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
-/* eslint-disable @typescript-eslint/no-unsafe-call */
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import { describe, it, expect, beforeEach } from 'vitest';
 import { createStore } from 'zustand/vanilla';
 import { createModeSlice, type ModeSlice } from '../slices/modeSlice';
