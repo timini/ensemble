@@ -11,6 +11,7 @@ import { useRouter } from 'next/navigation';
 import { useState, useRef, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useStore } from '~/store';
+import type { ProviderType } from '~/store/slices/ensembleSlice';
 import { PageHero } from '@/components/organisms/PageHero';
 import { ModelSelectionList } from '@/components/organisms/ModelSelectionList';
 import { EnsembleSidebar, type Preset } from '@/components/organisms/EnsembleSidebar';
@@ -30,6 +31,7 @@ export default function EnsemblePage() {
   const apiKeys = useStore((state) => state.apiKeys);
   const setApiKey = useStore((state) => state.setApiKey);
   const toggleApiKeyVisibility = useStore((state) => state.toggleApiKeyVisibility);
+  const setApiKeyStatus = useStore((state) => state.setApiKeyStatus);
   const selectedModels = useStore((state) => state.selectedModels);
   const addModel = useStore((state) => state.addModel);
   const removeModel = useStore((state) => state.removeModel);
@@ -46,24 +48,7 @@ export default function EnsemblePage() {
   // NOTE: We use the 'model' field (e.g., 'gpt-4o'), not the dynamic 'id' field
   const selectedModelIds = useMemo(() => selectedModels.map((m) => m.model), [selectedModels]);
 
-  // Build provider status map based on mode
   const isMockMode = process.env.NEXT_PUBLIC_MOCK_MODE === 'true';
-
-  const providerStatus = mode === 'pro'
-    ? {
-        // Pro mode: all providers included in subscription
-        openai: 'Ready',
-        anthropic: 'Ready',
-        google: 'Ready',
-        xai: 'Ready',
-      }
-    : {
-        // Free mode (and mock mode): check for configured API keys
-        openai: apiKeys.openai?.key ? 'Ready' : 'API key required',
-        anthropic: apiKeys.anthropic?.key ? 'Ready' : 'API key required',
-        google: apiKeys.google?.key ? 'Ready' : 'API key required',
-        xai: apiKeys.xai?.key ? 'Ready' : 'API key required',
-      };
 
   // Presets matching wireframe design
   const [presets] = useState<Preset[]>([
@@ -102,13 +87,44 @@ export default function EnsemblePage() {
   const [manualModelName, setManualModelName] = useState('');
   const [manualModelProvider, setManualModelProvider] = useState('');
 
-  // Validation status for the modal
-  const [validationStatus, setValidationStatus] = useState<Record<Provider, ValidationStatus>>({
-    openai: 'idle',
-    anthropic: 'idle',
-    google: 'idle',
-    xai: 'idle',
-  });
+  // Validation status derived from store
+  const validationStatus = useMemo(
+    () => ({
+      openai: apiKeys.openai?.status ?? 'idle',
+      anthropic: apiKeys.anthropic?.status ?? 'idle',
+      google: apiKeys.google?.status ?? 'idle',
+      xai: apiKeys.xai?.status ?? 'idle',
+    }),
+    [apiKeys],
+  );
+
+  const mapStatusToLabel = (status: ValidationStatus) => {
+    switch (status) {
+      case 'valid':
+        return 'Ready';
+      case 'validating':
+        return 'Validating...';
+      case 'invalid':
+        return 'Invalid API key';
+      default:
+        return 'API key required';
+    }
+  };
+
+  const providerStatus =
+    mode === 'pro'
+      ? {
+          openai: 'Ready',
+          anthropic: 'Ready',
+          google: 'Ready',
+          xai: 'Ready',
+        }
+      : {
+          openai: mapStatusToLabel(validationStatus.openai),
+          anthropic: mapStatusToLabel(validationStatus.anthropic),
+          google: mapStatusToLabel(validationStatus.google),
+          xai: mapStatusToLabel(validationStatus.xai),
+        };
 
   // Store timeout IDs for debouncing
   const timeoutRefs = useRef<Record<Provider, NodeJS.Timeout | null>>({
@@ -120,7 +136,7 @@ export default function EnsemblePage() {
 
   // Handler for validation status changes
   const handleValidationStatusChange = (provider: Provider, status: ValidationStatus) => {
-    setValidationStatus(prev => ({ ...prev, [provider]: status }));
+    setApiKeyStatus(provider as ProviderType, status);
   };
 
   // Create debounced validator using the reusable utility
