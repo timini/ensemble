@@ -26,6 +26,9 @@ jobs:
       - run: npm ci
       - run: npm run lint --workspace=packages/component-library
       - run: npm run test:unit --workspace=packages/component-library
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+        working-directory: packages/component-library
       - run: npm run test:storybook:ci --workspace=packages/component-library
 
   shared-utils:
