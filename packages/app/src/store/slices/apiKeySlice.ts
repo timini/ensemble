@@ -6,7 +6,7 @@
  */
 
 import type { StateCreator } from 'zustand';
-import { decrypt, encrypt } from '~/lib/encryption';
+import { decrypt, encrypt } from '@ensemble-ai/shared-utils/security';
 import type { ProviderType } from './ensembleSlice';
 
 export interface ApiKeyData {
@@ -57,29 +57,40 @@ export const createApiKeySlice: StateCreator<ApiKeySlice> = (set, get) => ({
 
         try {
           const decrypted = await decrypt(entry.encrypted);
-          set((state) => ({
-            apiKeys: {
-              ...state.apiKeys,
-              [provider]: {
-                ...state.apiKeys[provider]!,
-                key: decrypted,
+          set((state) => {
+            const currentEntry = state.apiKeys[provider];
+            const nextEntry = currentEntry
+              ? { ...currentEntry, key: decrypted }
+              : {
+                  key: decrypted,
+                  encrypted: null,
+                  visible: false,
+                };
+
+            return {
+              apiKeys: {
+                ...state.apiKeys,
+                [provider]: nextEntry,
               },
-            },
-          }));
+            };
+          });
         } catch (error) {
           console.error(`Failed to decrypt ${provider} API key`, error);
-          set((state) => ({
-            apiKeys: {
-              ...state.apiKeys,
-              [provider]: state.apiKeys[provider]
-                ? {
-                    ...state.apiKeys[provider]!,
-                    key: '',
-                    encrypted: null,
-                  }
-                : null,
-            },
-          }));
+          set((state) => {
+            const currentEntry = state.apiKeys[provider];
+            return {
+              apiKeys: {
+                ...state.apiKeys,
+                [provider]: currentEntry
+                  ? {
+                      ...currentEntry,
+                      key: '',
+                      encrypted: null,
+                    }
+                  : null,
+              },
+            };
+          });
         }
       }),
     );

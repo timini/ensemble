@@ -63,7 +63,7 @@ export const persist = <
     api.subscribe((state) => {
       try {
         const stateToPersist = serialize
-          ? serialize(state as T)
+          ? serialize(state)
           : state;
         storage.setItem(name, JSON.stringify(stateToPersist));
       } catch (error) {

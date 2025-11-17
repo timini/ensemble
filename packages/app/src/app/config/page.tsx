@@ -20,7 +20,7 @@ import type { Provider } from '@/components/molecules/ApiKeyInput';
 import type { ValidationStatus } from '@/components/molecules/ApiKeyInput';
 import { validateApiKey, createDebouncedValidator } from '~/lib/validation';
 import { InlineAlert } from '@/components/atoms/InlineAlert';
-import { isWebCryptoAvailable } from '~/lib/webCryptoDetection';
+import { isWebCryptoAvailable } from '@ensemble-ai/shared-utils/security';
 
 export default function ConfigPage() {
   const { t } = useTranslation('common');
@@ -106,7 +106,7 @@ export default function ConfigPage() {
         });
       }
     });
-  }, [apiKeys, handleValidationStatusChange, mode, validationStatus]);
+  }, [apiKeys, handleValidationStatusChange, mode, validationStatus, webCryptoSupported]);
 
   const handleKeyChange = (provider: Provider, value: string) => {
     void setApiKey(provider, value).catch((error) => {
