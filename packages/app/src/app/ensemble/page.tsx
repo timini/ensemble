@@ -8,32 +8,31 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { useState, useRef, useEffect, useMemo } from 'react';
+import { useRef, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useStore } from '~/store';
 import type { ProviderType } from '~/store/slices/ensembleSlice';
+import type { OperatingMode } from '~/store/slices/modeSlice';
 import { PageHero } from '@/components/organisms/PageHero';
-import {
-  ModelSelectionList,
-  type Model,
-} from '@/components/organisms/ModelSelectionList';
-import { EnsembleSidebar, type Preset } from '@/components/organisms/EnsembleSidebar';
+import { ModelSelectionList } from '@/components/organisms/ModelSelectionList';
+import { EnsembleSidebar } from '@/components/organisms/EnsembleSidebar';
 import { WorkflowNavigator } from '@/components/organisms/WorkflowNavigator';
 import { ApiKeyConfigurationModal } from '@/components/organisms/ApiKeyConfigurationModal';
 import { ProgressSteps } from '@/components/molecules/ProgressSteps';
 import { ManualResponseModal } from '@/components/organisms/ManualResponseModal';
 import type { Provider, ValidationStatus } from '@/components/molecules/ApiKeyInput';
-import { ProviderRegistry } from '@ensemble-ai/shared-utils/providers';
-import { AVAILABLE_MODELS } from '~/lib/models';
 import { validateApiKey, createDebouncedValidator } from '~/lib/validation';
+import { getHydratedStatus, createProviderStatusLabels } from '~/lib/providerStatus';
+import { useHasHydrated } from '~/hooks/useHasHydrated';
+import { useManualResponseModal } from './hooks/useManualResponseModal';
+import { useApiKeyModal } from './hooks/useApiKeyModal';
+import { useAvailableModels } from './hooks/useAvailableModels';
 import {
-  fetchProviderModels,
-  mergeDynamicModels,
-} from '~/lib/providerModels';
-import { toError } from '~/lib/errors';
-import { getHydratedStatus, mapStatusToLabel } from '~/lib/providerStatus';
+  EMPTY_API_KEYS,
+  PRESETS,
+  DEFAULT_ENSEMBLE_NAME,
+} from './page.constants';
 
-const PROVIDERS: Provider[] = ['openai', 'anthropic', 'google', 'xai'];
 
 export default function EnsemblePage() {
   const { t } = useTranslation('common');
@@ -51,8 +50,10 @@ export default function EnsemblePage() {
   const setSummarizer = useStore((state) => state.setSummarizer);
   const addManualResponse = useStore((state) => state.addManualResponse);
   const manualResponses = useStore((state) => state.manualResponses);
-  const [hasDynamicModelsHydrated, setHasDynamicModelsHydrated] = useState(false);
-  const storeHydrated = useHasHydrated();
+  const hasHydrated = useHasHydrated();
+  const displayMode: OperatingMode = hasHydrated ? mode : 'free';
+  const safeApiKeys = hasHydrated ? apiKeys : EMPTY_API_KEYS;
+  const viewManualResponses = hasHydrated ? manualResponses : [];
 
   const currentStep = useStore((state) => state.currentStep);
   const setCurrentStep = useStore((state) => state.setCurrentStep);
@@ -61,87 +62,50 @@ export default function EnsemblePage() {
   // Track selected model IDs for ModelSelectionList
   // NOTE: We use the 'model' field (e.g., 'gpt-4o'), not the dynamic 'id' field
   const selectedModelIds = useMemo(() => selectedModels.map((m) => m.model), [selectedModels]);
-  const displayedSelectedModelIds = storeHydrated ? selectedModelIds : [];
-  const displayedSummarizer = storeHydrated ? summarizerModel ?? undefined : undefined;
+  const displayedSelectedModelIds = hasHydrated ? selectedModelIds : [];
+  const displayedSummarizer = hasHydrated ? summarizerModel ?? undefined : undefined;
+  const viewSelectedModels = hasHydrated ? selectedModels : [];
 
-  useEffect(() => {
-    setHasDynamicModelsHydrated(true);
-  }, []);
 
   const isMockMode = process.env.NEXT_PUBLIC_MOCK_MODE === 'true';
 
   // Presets matching wireframe design
-  const [presets] = useState<Preset[]>([
-    {
-      id: 'research-synthesis',
-      name: 'Research Synthesis',
-      description: 'Deep reasoning stack mixing GPT-4, Claude, and Gemini for comprehensive analysis.',
-      modelIds: ['gpt-4o', 'claude-3-5-sonnet', 'gemini-1-5-pro'],
-      summarizerId: 'claude-3-5-sonnet',
-      summarizerName: 'Claude 3.5 Sonnet',
-    },
-    {
-      id: 'rapid-drafting',
-      name: 'Rapid Drafting',
-      description: 'Fast, budget-friendly models tuned for quick ideation and iteration.',
-      modelIds: ['gpt-4o-mini', 'claude-3-haiku', 'gemini-1-5-flash'],
-      summarizerId: 'gpt-4o-mini',
-      summarizerName: 'GPT-4o Mini',
-    },
-    {
-      id: 'balanced-perspective',
-      name: 'Balanced Perspective',
-      description: 'Balanced trio for contrasting opinions and concise summaries.',
-      modelIds: ['gpt-4o', 'claude-3-5-sonnet', 'gemini-1-5-pro'],
-      summarizerId: 'gpt-4o',
-      summarizerName: 'GPT-4o',
-    },
-  ]);
-  const [currentEnsembleName] = useState('');
+  const currentEnsembleName = DEFAULT_ENSEMBLE_NAME;
 
   // Modal state for API key configuration
-  const [configModalOpen, setConfigModalOpen] = useState(false);
-  const [selectedProvider, setSelectedProvider] = useState<Provider | null>(null);
-  const [manualModalOpen, setManualModalOpen] = useState(false);
-  const [manualResponse, setManualResponse] = useState('');
-  const [manualModelName, setManualModelName] = useState('');
-  const [manualModelProvider, setManualModelProvider] = useState('');
+  const manualModal = useManualResponseModal(t, addManualResponse);
 
   // Validation status derived from store
   const validationStatus = useMemo(
     () => ({
-      openai: apiKeys.openai?.status ?? 'idle',
-      anthropic: apiKeys.anthropic?.status ?? 'idle',
-      google: apiKeys.google?.status ?? 'idle',
-      xai: apiKeys.xai?.status ?? 'idle',
+      openai: safeApiKeys.openai?.status ?? 'idle',
+      anthropic: safeApiKeys.anthropic?.status ?? 'idle',
+      google: safeApiKeys.google?.status ?? 'idle',
+      xai: safeApiKeys.xai?.status ?? 'idle',
     }),
-    [apiKeys],
+    [safeApiKeys],
   );
 
   const hydratedStatuses = useMemo(
-    () => getHydratedStatus(hasDynamicModelsHydrated, validationStatus),
-    [hasDynamicModelsHydrated, validationStatus],
+    () => getHydratedStatus(hasHydrated, validationStatus),
+    [hasHydrated, validationStatus],
   );
 
-  const [availableModels, setAvailableModels] =
-    useState<Model[]>(AVAILABLE_MODELS);
+  const availableModels = useAvailableModels({
+    hasHydrated,
+    mode: displayMode,
+    hydratedStatuses,
+  });
 
-  const providerStatus = useMemo(() => {
-    if (mode === 'pro') {
-      return {
-        openai: 'Ready',
-        anthropic: 'Ready',
-        google: 'Ready',
-        xai: 'Ready',
-      };
-    }
-    return {
-      openai: mapStatusToLabel(hydratedStatuses.openai),
-      anthropic: mapStatusToLabel(hydratedStatuses.anthropic),
-      google: mapStatusToLabel(hydratedStatuses.google),
-      xai: mapStatusToLabel(hydratedStatuses.xai),
-    };
-  }, [mode, hydratedStatuses]);
+  const providerStatus = useMemo(
+    () =>
+      createProviderStatusLabels({
+        mode: displayMode,
+        statuses: validationStatus,
+        hasHydrated,
+      }),
+    [displayMode, validationStatus, hasHydrated],
+  );
 
   // Store timeout IDs for debouncing
   const timeoutRefs = useRef<Record<Provider, NodeJS.Timeout | null>>({
@@ -163,7 +127,7 @@ export default function EnsemblePage() {
   );
 
   const handleModelToggle = (modelId: string) => {
-    if (!storeHydrated) {
+    if (!hasHydrated) {
       return;
     }
     // Check if selected by comparing the 'model' field (not the dynamic 'id' field)
@@ -185,7 +149,7 @@ export default function EnsemblePage() {
   };
 
   const handleSummarizerChange = (modelId: string) => {
-    if (!storeHydrated) {
+    if (!hasHydrated) {
       return;
     }
     setSummarizer(modelId);
@@ -215,74 +179,17 @@ export default function EnsemblePage() {
     console.log('Delete preset:', presetId);
   };
 
-  const handleConfigureApiKey = (provider: Provider) => {
-    setSelectedProvider(provider);
-    setConfigModalOpen(true);
-  };
+  const apiKeyModal = useApiKeyModal({
+    safeApiKeys,
+    hydratedStatuses,
+    mode,
+    setApiKey,
+    debouncedValidate,
+    toggleApiKeyVisibility,
+    onValidationStatusChange: handleValidationStatusChange,
+  });
 
-  const handleKeyChange = (provider: Provider, value: string) => {
-    void setApiKey(provider, value).catch((error: unknown) => {
-      console.error(
-        `Failed to store ${provider} API key`,
-        toError(error, `Unable to store ${provider} API key`),
-      );
-    });
-    debouncedValidate(provider, value, mode, handleValidationStatusChange);
-  };
-
-  const handleToggleShow = (provider: Provider) => {
-    toggleApiKeyVisibility(provider);
-  };
-
-  useEffect(() => {
-    if (!hasDynamicModelsHydrated || mode !== 'free') {
-      setAvailableModels(AVAILABLE_MODELS);
-      return;
-    }
-
-    let active = true;
-    const registry = ProviderRegistry.getInstance();
-    const loadModels = async () => {
-      const overrides: Partial<Record<Provider, Model[]>> = {};
-
-      await Promise.all(
-        PROVIDERS.map(async (provider) => {
-          if (hydratedStatuses[provider] !== 'valid') {
-            return;
-          }
-          if (!registry.hasProvider(provider, 'free')) {
-            return;
-          }
-          try {
-            const models = await fetchProviderModels({
-              provider,
-              mode: 'free',
-            });
-            if (models.length > 0) {
-              overrides[provider] = models;
-            }
-          } catch (error: unknown) {
-            console.warn(
-              `Failed to load ${provider} models`,
-              toError(error, `Failed to load ${provider} models`),
-            );
-          }
-        }),
-      );
-
-      if (!active) return;
-      if (Object.keys(overrides).length === 0) {
-        setAvailableModels(AVAILABLE_MODELS);
-        return;
-      }
-      setAvailableModels(mergeDynamicModels(overrides));
-    };
-
-    void loadModels();
-    return () => {
-      active = false;
-    };
-  }, [hasDynamicModelsHydrated, mode, hydratedStatuses]);
+  // Dynamic models handled by useAvailableModels hook
 
   // Set current step to 'ensemble' on mount
   useEffect(() => {
@@ -300,26 +207,8 @@ export default function EnsemblePage() {
   }, []);
 
   // Filter API key items to show only the selected provider
-  const apiKeyItems = selectedProvider
-    ? [
-        {
-          provider: selectedProvider,
-          label: `${selectedProvider.charAt(0).toUpperCase() + selectedProvider.slice(1)} API Key`,
-          value: apiKeys[selectedProvider]?.key ?? '',
-          placeholder: selectedProvider === 'openai' ? 'sk-...' : selectedProvider === 'anthropic' ? 'sk-ant-...' : selectedProvider === 'google' ? 'AIza...' : 'xai-...',
-          helperText: hydratedStatuses[selectedProvider] === 'valid'
-            ? 'API key configured'
-            : hydratedStatuses[selectedProvider] === 'validating'
-            ? 'Validating...'
-            : `Enter your ${selectedProvider} API key`,
-          validationStatus: hydratedStatuses[selectedProvider],
-          showKey: apiKeys[selectedProvider]?.visible ?? false,
-        },
-      ]
-    : [];
-
   // Map selected model metadata for the sidebar display
-  const sidebarModels = selectedModels.map((selection) => {
+  const sidebarModels = viewSelectedModels.map((selection) => {
     const model = availableModels.find((m) => m.id === selection.model);
     return {
       id: selection.model,
@@ -328,37 +217,8 @@ export default function EnsemblePage() {
   });
 
   // Continue button enabled if 2-6 models selected
-  const isValid = selectedModels.length >= 2 && selectedModels.length <= 6;
-
-  const handleAddManualResponse = () => {
-    setManualModalOpen(true);
-  };
-
-  const resetManualForm = () => {
-    setManualResponse('');
-    setManualModelName('');
-    setManualModelProvider('');
-  };
-
-  const handleManualSubmit = (data: {
-    response: string;
-    modelName: string;
-    modelProvider: string;
-  }) => {
-    const labelBase = data.modelName.trim() || t('organisms.manualResponseModal.title', { defaultValue: 'Manual Response' });
-    const providerSuffix = data.modelProvider.trim()
-      ? ` (${data.modelProvider.trim()})`
-      : '';
-
-    addManualResponse(`${labelBase}${providerSuffix}`, data.response.trim());
-    resetManualForm();
-    setManualModalOpen(false);
-  };
-
-  const handleManualCancel = () => {
-    resetManualForm();
-    setManualModalOpen(false);
-  };
+  const isValid =
+    hasHydrated && selectedModels.length >= 2 && selectedModels.length <= 6;
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-6xl">
@@ -381,7 +241,7 @@ export default function EnsemblePage() {
             isMockMode={isMockMode}
             onModelToggle={handleModelToggle}
             onSummarizerChange={handleSummarizerChange}
-            onConfigureApiKey={handleConfigureApiKey}
+            onConfigureApiKey={apiKeyModal.handleConfigureApiKey}
           />
         </div>
 
@@ -389,14 +249,14 @@ export default function EnsemblePage() {
         <div className="lg:col-span-1">
           <EnsembleSidebar
             selectedModels={sidebarModels}
-            summarizerId={summarizerModel ?? undefined}
-            presets={presets}
+            summarizerId={displayedSummarizer}
+            presets={PRESETS}
             currentEnsembleName={currentEnsembleName}
             onLoadPreset={handleLoadPreset}
             onSavePreset={handleSavePreset}
             onDeletePreset={handleDeletePreset}
-            onAddManualResponse={handleAddManualResponse}
-            manualResponses={manualResponses}
+            onAddManualResponse={manualModal.openModal}
+            manualResponses={viewManualResponses}
           />
         </div>
       </div>
@@ -412,39 +272,26 @@ export default function EnsemblePage() {
 
       {/* API Key Configuration Modal */}
       <ApiKeyConfigurationModal
-        open={configModalOpen}
-        onOpenChange={setConfigModalOpen}
-        provider={selectedProvider}
-        items={apiKeyItems}
-        onKeyChange={handleKeyChange}
-        onToggleShow={handleToggleShow}
+        open={apiKeyModal.configModalOpen}
+        onOpenChange={apiKeyModal.setConfigModalOpen}
+        provider={apiKeyModal.selectedProvider}
+        items={apiKeyModal.apiKeyItems}
+        onKeyChange={apiKeyModal.handleKeyChange}
+        onToggleShow={apiKeyModal.handleToggleShow}
       />
 
       <ManualResponseModal
-        open={manualModalOpen}
-        onOpenChange={(open) => {
-          setManualModalOpen(open);
-          if (!open) {
-            resetManualForm();
-          }
-        }}
-        value={manualResponse}
-        onChange={setManualResponse}
-        modelName={manualModelName}
-        onModelNameChange={setManualModelName}
-        modelProvider={manualModelProvider}
-        onModelProviderChange={setManualModelProvider}
-        onSubmit={handleManualSubmit}
-        onCancel={handleManualCancel}
+        open={manualModal.isOpen}
+        onOpenChange={manualModal.handleOpenChange}
+        value={manualModal.response}
+        onChange={manualModal.setResponse}
+        modelName={manualModal.modelName}
+        onModelNameChange={manualModal.setModelName}
+        modelProvider={manualModal.modelProvider}
+        onModelProviderChange={manualModal.setModelProvider}
+        onSubmit={manualModal.handleSubmit}
+        onCancel={manualModal.handleCancel}
       />
     </div>
   );
-}
-
-function useHasHydrated(): boolean {
-  const [hydrated, setHydrated] = useState(false);
-  useEffect(() => {
-    setHydrated(true);
-  }, []);
-  return hydrated;
 }

@@ -39,7 +39,7 @@ Ensemble AI is a web application that allows users to query multiple Large Langu
 
 **Development Approach**: UI-first with strict Test-Driven Development (TDD). All UI components are built and tested in isolation before any backend integration.
 
-**Delivery Strategy**: 4 progressive phases from component library (Phase 1) to full production with managed backend services (Phase 4).
+**Delivery Strategy**: 4 progressive phases from component library (Phase 1) to full production with managed backend services (Phase 4). **Mock mode exists solely for designers/engineers** to iterate without external API calls; it is never exposed as a selectable mode in the Config step of the user-facing product.
 
 ---
 
@@ -74,6 +74,12 @@ Ensemble AI is a web application that allows users to query multiple Large Langu
 - FR-056, FR-057: Noted copy and rating features already in wireframes
 - FR-060, FR-061: Added response time tracking and prompt tips card (NEW)
 
+### Mode Definitions (Summary)
+
+- **Mock**: Developer-only mode, toggled via `NEXT_PUBLIC_MOCK_MODE=true`, used for Storybook, CI, and E2E determinism. It never renders as a selectable option within the user-facing Config page.
+- **Free**: User-configurable mode that requires personal API keys. This is the lowest-cost production mode exposed to end users.
+- **Pro**: Managed backend mode with authentication, credits, and server-to-server streaming (Phase 4).
+
 ---
 
 ## User Scenarios & Testing *(mandatory)*
@@ -83,7 +89,7 @@ Ensemble AI is a web application that allows users to query multiple Large Langu
 **As a researcher/analyst**, I want to query multiple AI models with the same prompt and compare their responses so that I can identify consensus, outliers, and make more informed decisions based on diverse AI perspectives.
 
 **User Journey (4-Step Workflow)**:
-1. **Config**: User selects operating mode (Mock for testing, Free with own API keys, or Pro with managed service) and provides necessary credentials
+1. **Config**: User selects operating mode (Free with own API keys, or Pro with managed service). Mock mode is only available in developer builds via environment flag and must never appear to end users.
 2. **Ensemble**: User selects which AI models to include in the ensemble and designates one as the "summarizer"
 3. **Prompt**: User enters their question or prompt and submits it to the ensemble
 4. **Review**: User views individual model responses streaming in real-time, sees an agreement analysis showing similarity between responses, and reads a meta-analysis from the summarizer model
@@ -118,7 +124,7 @@ Ensemble AI is a web application that allows users to query multiple Large Langu
 - What happens when API key validation fails in Free mode?
   → Error indicator appears, Next button disabled, user must correct key
 - What happens when browser doesn't support Web Crypto API (Free mode)?
-  → Warning displayed that Free mode requires modern browser with Web Crypto API support; user must upgrade browser or use Mock mode
+  → Warning displayed that Free mode requires modern browser with Web Crypto API support; user must upgrade browser (Mock mode remains an internal developer tool only)
 
 **Ensemble Management**:
 - What happens when user selects no models?

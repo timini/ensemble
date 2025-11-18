@@ -4,6 +4,7 @@ import { FreeXAIClient } from '../clients/xai/FreeXAIClient.js';
 import { MockProviderClient } from '../clients/mock/MockProviderClient.js';
 import { FreeAnthropicClient } from '../clients/anthropic/FreeAnthropicClient.js';
 import { FreeGoogleClient } from '../clients/google/FreeGoogleClient.js';
+import { BaseFreeClient } from '../clients/base/BaseFreeClient.js';
 
 const mocks = vi.hoisted(() => ({
   openAiRetrieve: vi.fn(),
@@ -30,6 +31,26 @@ vi.mock('axios', () => {
     isAxiosError,
   };
 });
+
+class TestFreeClient extends BaseFreeClient {
+  constructor(
+    getApiKey: () => string | null,
+    private readonly shouldThrow = false,
+  ) {
+    super('openai', getApiKey);
+  }
+
+  async validateApiKey() {
+    return { valid: true };
+  }
+
+  protected override async fetchTextModels(): Promise<string[]> {
+    if (this.shouldThrow) {
+      throw new Error('boom');
+    }
+    return ['custom-model'];
+  }
+}
 
 describe('Free mode provider clients', () => {
   beforeEach(() => {
@@ -69,6 +90,41 @@ describe('Free mode provider clients', () => {
         },
       });
     });
+
+    it('rejects empty API keys', async () => {
+      const client = new FreeAnthropicClient('anthropic', () => '');
+      const result = await client.validateApiKey('');
+      expect(result.valid).toBe(false);
+      expect(result.error).toContain('required');
+    });
+
+    it('returns descriptive errors when validation fails', async () => {
+      mocks.axiosGet.mockRejectedValueOnce({
+        isAxiosError: true,
+        response: { data: { error: { message: 'bad anthro key' } } },
+      });
+      const client = new FreeAnthropicClient('anthropic', () => 'sk-ant');
+      const result = await client.validateApiKey('sk-ant');
+      expect(result.valid).toBe(false);
+      expect(result.error).toContain('bad anthro key');
+    });
+
+    it('fetches text models via Anthropic API', async () => {
+      mocks.axiosGet.mockResolvedValueOnce({
+        data: {
+          data: [
+            { id: 'claude-3', model: 'unused' },
+            { model: 'legacy-haiku' },
+            {},
+          ],
+        },
+      });
+      const client = new FreeAnthropicClient('anthropic', () => 'sk-ant');
+      await expect(client.listAvailableTextModels()).resolves.toEqual([
+        'claude-3',
+        'legacy-haiku',
+      ]);
+    });
   });
 
   describe('FreeGoogleClient', () => {
@@ -83,6 +139,34 @@ describe('Free mode provider clients', () => {
         },
       });
     });
+
+    it('reports invalid API keys', async () => {
+      mocks.axiosGet.mockRejectedValueOnce({
+        isAxiosError: true,
+        response: { data: { error: { message: 'denied' } } },
+      });
+      const client = new FreeGoogleClient('google', () => 'bad-key');
+      const result = await client.validateApiKey('bad-key');
+      expect(result.valid).toBe(false);
+      expect(result.error).toContain('denied');
+    });
+
+    it('parses model identifiers from API paths', async () => {
+      mocks.axiosGet.mockResolvedValueOnce({
+        data: {
+          models: [
+            { name: 'models/gemini-1.5-pro' },
+            { name: 'models/gemini-1.5-flash' },
+            { name: '' },
+          ],
+        },
+      });
+      const client = new FreeGoogleClient('google', () => 'AIza-test');
+      await expect(client.listAvailableTextModels()).resolves.toEqual([
+        'gemini-1.5-pro',
+        'gemini-1.5-flash',
+      ]);
+    });
   });
 
   describe('FreeXAIClient', () => {
@@ -95,6 +179,29 @@ describe('Free mode provider clients', () => {
       const result = await client.validateApiKey('xai-test');
       expect(result.valid).toBe(false);
       expect(result.error).toContain('Unauthorized');
+    });
+
+    it('accepts valid API keys', async () => {
+      mocks.axiosGet.mockResolvedValueOnce({ data: { data: [] } });
+      const client = new FreeXAIClient('xai', () => 'xai-test');
+      await expect(client.validateApiKey('xai-test')).resolves.toEqual({ valid: true });
+    });
+
+    it('lists models returned by the API', async () => {
+      mocks.axiosGet.mockResolvedValueOnce({
+        data: {
+          data: [
+            { id: 'grok-2' },
+            { name: 'grok-2-mini' },
+            {},
+          ],
+        },
+      });
+      const client = new FreeXAIClient('xai', () => 'xai-test');
+      await expect(client.listAvailableTextModels()).resolves.toEqual([
+        'grok-2',
+        'grok-2-mini',
+      ]);
     });
   });
 
@@ -129,5 +236,31 @@ describe('Free mode provider clients', () => {
     const client = new FreeOpenAIClient('openai', () => 'sk-test');
     const models = await client.listAvailableTextModels();
     expect(models).toEqual(['gpt-4o', 'o1-preview']);
+  });
+
+  it('requires API keys for stream and embedding operations in the base client', async () => {
+    const onError = vi.fn();
+    const client = new TestFreeClient(() => null);
+    await client.streamResponse('prompt', 'model', vi.fn(), vi.fn(), onError);
+    expect(onError).toHaveBeenCalledWith(
+      expect.objectContaining({
+        message: expect.stringContaining('Missing API key'),
+      }),
+    );
+
+    await expect(client.generateEmbeddings('text')).rejects.toThrow('Missing API key');
+  });
+
+  it('falls back to mock text models when fetchTextModels fails', async () => {
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+    const mockDefault = vi
+      .spyOn(MockProviderClient.prototype, 'listAvailableTextModels')
+      .mockResolvedValueOnce(['mock-entry']);
+    const client = new TestFreeClient(() => 'sk-test', true);
+
+    await expect(client.listAvailableTextModels()).resolves.toEqual(['mock-entry']);
+    expect(warnSpy).toHaveBeenCalled();
+    mockDefault.mockRestore();
+    warnSpy.mockRestore();
   });
 });

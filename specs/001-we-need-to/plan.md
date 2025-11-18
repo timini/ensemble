@@ -597,19 +597,21 @@ npm run lint
 npm run lint:fix
 ```
 
-**Phase 2 Quickstart** (UI Integration with Mock):
+**Phase 2 Quickstart** (UI Integration with Mock – developer sandbox only):
 ```bash
-# Start development server
-npm run dev
-# Opens http://localhost:3000
+# Enable mock sandbox (never expose in production)
+export NEXT_PUBLIC_MOCK_MODE=true
 
-# Navigate through workflow:
-# 1. /config - Select Mock mode
+# Start development server (UI + Mock providers)
+npm run dev   # http://localhost:3000
+
+# Navigate through workflow (UI-only validation):
+# 1. /config   - Free/Pro cards remain; mock is controlled via env flag only
 # 2. /ensemble - Select 3 models + summarizer + embeddings provider
-# 3. /prompt - Enter prompt (min 10 characters)
-# 4. /review - View streaming mock responses + agreement analysis
+# 3. /prompt   - Enter prompt (min 10 characters)
+# 4. /review   - View deterministic mock responses + agreement analysis
 
-# Run E2E tests
+# Run E2E tests (always execute in Mock mode for speed)
 npm run test:e2e
 
 # Build for production

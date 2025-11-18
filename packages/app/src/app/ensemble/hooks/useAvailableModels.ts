@@ -1,0 +1,72 @@
+import { useEffect, useState } from 'react';
+import type { Provider, ValidationStatus } from '@/components/molecules/ApiKeyInput';
+import type { Model } from '@/components/organisms/ModelSelectionList';
+import { AVAILABLE_MODELS } from '~/lib/models';
+import { fetchProviderModels, mergeDynamicModels } from '~/lib/providerModels';
+import { toError } from '~/lib/errors';
+import type { OperatingMode } from '~/store/slices/modeSlice';
+import { PROVIDERS } from '../page.constants';
+
+interface UseAvailableModelsOptions {
+  hasHydrated: boolean;
+  mode: OperatingMode;
+  hydratedStatuses: Record<Provider, ValidationStatus>;
+}
+
+export function useAvailableModels({
+  hasHydrated,
+  mode,
+  hydratedStatuses,
+}: UseAvailableModelsOptions): Model[] {
+  const [availableModels, setAvailableModels] =
+    useState<Model[]>(AVAILABLE_MODELS);
+
+  useEffect(() => {
+    if (!hasHydrated || mode !== 'free') {
+      setAvailableModels(AVAILABLE_MODELS);
+      return;
+    }
+
+    let active = true;
+    const loadModels = async () => {
+      const overrides: Partial<Record<Provider, Model[]>> = {};
+
+      await Promise.all(
+        PROVIDERS.map(async (provider) => {
+          if (hydratedStatuses[provider] !== 'valid') {
+            return;
+          }
+
+          try {
+            const models = await fetchProviderModels({
+              provider,
+              mode: 'free',
+            });
+            if (models.length > 0) {
+              overrides[provider] = models;
+            }
+          } catch (error: unknown) {
+            console.warn(
+              `Failed to load ${provider} models`,
+              toError(error, `Failed to load ${provider} models`),
+            );
+          }
+        }),
+      );
+
+      if (!active) return;
+      if (Object.keys(overrides).length === 0) {
+        setAvailableModels(AVAILABLE_MODELS);
+        return;
+      }
+      setAvailableModels(mergeDynamicModels(overrides));
+    };
+
+    void loadModels();
+    return () => {
+      active = false;
+    };
+  }, [hasHydrated, mode, hydratedStatuses]);
+
+  return availableModels;
+}

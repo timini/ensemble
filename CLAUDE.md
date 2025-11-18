@@ -348,7 +348,7 @@ All colors, spacing, and typography are defined in `tailwind.config.js`. Use sem
 ## Important Notes
 
 - Component files MUST NOT exceed 200 lines
-- Mock mode is development/testing only (NOT user-facing)
+- Mock mode is development/testing only (NOT user-facing). Enable it via `NEXT_PUBLIC_MOCK_MODE=true` when running local Storybook/E2E; never expose a “Mock” card/button in `/config`.
 - API keys in Free Mode are encrypted with AES-256 (Web Crypto API)
 - Streaming latency target: <100ms p95
 - All text uses i18n keys (no hardcoded strings)
