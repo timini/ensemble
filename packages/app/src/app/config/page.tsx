@@ -21,6 +21,7 @@ import { validateApiKey, createDebouncedValidator } from '~/lib/validation';
 import { InlineAlert } from '@/components/atoms/InlineAlert';
 import { isWebCryptoAvailable } from '@ensemble-ai/shared-utils/security';
 import { toError } from '~/lib/errors';
+import { getHydratedStatus } from '~/lib/providerStatus';
 
 const PROVIDERS: Provider[] = ['openai', 'anthropic', 'google', 'xai'];
 
@@ -72,6 +73,11 @@ export default function ConfigPage() {
       xai: apiKeys.xai?.status ?? 'idle',
     }),
     [apiKeys],
+  );
+  const hasHydrated = useHasHydrated();
+  const hydratedStatuses = useMemo(
+    () => getHydratedStatus(hasHydrated, validationStatus),
+    [hasHydrated, validationStatus],
   );
 
   const handleValidationStatusChange = useCallback(
@@ -137,53 +143,72 @@ export default function ConfigPage() {
   // Prepare API key configuration items for Free mode
   const isFreeModeActive = mode === 'free' && webCryptoSupported;
 
-  const apiKeyItems = isFreeModeActive ? [
-    {
-      provider: 'openai' as Provider,
-      label: 'OpenAI API Key',
-      value: apiKeys.openai?.key ?? '',
-      placeholder: 'sk-...',
-      helperText: validationStatus.openai === 'valid' ? 'API key configured' : validationStatus.openai === 'validating' ? 'Validating...' : 'Enter your OpenAI API key',
-      validationStatus: validationStatus.openai,
-      showKey: apiKeys.openai?.visible ?? false,
-    },
-    {
-      provider: 'anthropic' as Provider,
-      label: 'Anthropic API Key',
-      value: apiKeys.anthropic?.key ?? '',
-      placeholder: 'sk-ant-...',
-      helperText: validationStatus.anthropic === 'valid' ? 'API key configured' : validationStatus.anthropic === 'validating' ? 'Validating...' : 'Enter your Anthropic API key',
-      validationStatus: validationStatus.anthropic,
-      showKey: apiKeys.anthropic?.visible ?? false,
-    },
-    {
-      provider: 'google' as Provider,
-      label: 'Google (Gemini) API Key',
-      value: apiKeys.google?.key ?? '',
-      placeholder: 'AIza...',
-      helperText: validationStatus.google === 'valid' ? 'API key configured' : validationStatus.google === 'validating' ? 'Validating...' : 'Enter your Google AI API key',
-      validationStatus: validationStatus.google,
-      showKey: apiKeys.google?.visible ?? false,
-    },
-    {
-      provider: 'xai' as Provider,
-      label: 'xAI (Grok) API Key',
-      value: apiKeys.xai?.key ?? '',
-      placeholder: 'xai-...',
-      helperText: validationStatus.xai === 'valid' ? 'API key configured' : validationStatus.xai === 'validating' ? 'Validating...' : 'Enter your xAI API key',
-      validationStatus: validationStatus.xai,
-      showKey: apiKeys.xai?.visible ?? false,
-    },
-  ] : [];
+  const apiKeyItems = useMemo(() => {
+    if (!isFreeModeActive) {
+      return [];
+    }
+
+    return [
+      {
+        provider: 'openai' as Provider,
+        label: 'OpenAI API Key',
+        value: apiKeys.openai?.key ?? '',
+        placeholder: 'sk-...',
+        helperText: hydratedStatuses.openai === 'valid' ? 'API key configured' : hydratedStatuses.openai === 'validating' ? 'Validating...' : 'Enter your OpenAI API key',
+        validationStatus: hydratedStatuses.openai,
+        showKey: apiKeys.openai?.visible ?? false,
+      },
+      {
+        provider: 'anthropic' as Provider,
+        label: 'Anthropic API Key',
+        value: apiKeys.anthropic?.key ?? '',
+        placeholder: 'sk-ant-...',
+        helperText: hydratedStatuses.anthropic === 'valid' ? 'API key configured' : hydratedStatuses.anthropic === 'validating' ? 'Validating...' : 'Enter your Anthropic API key',
+        validationStatus: hydratedStatuses.anthropic,
+        showKey: apiKeys.anthropic?.visible ?? false,
+      },
+      {
+        provider: 'google' as Provider,
+        label: 'Google (Gemini) API Key',
+        value: apiKeys.google?.key ?? '',
+        placeholder: 'AIza...',
+        helperText: hydratedStatuses.google === 'valid' ? 'API key configured' : hydratedStatuses.google === 'validating' ? 'Validating...' : 'Enter your Google AI API key',
+        validationStatus: hydratedStatuses.google,
+        showKey: apiKeys.google?.visible ?? false,
+      },
+      {
+        provider: 'xai' as Provider,
+        label: 'xAI (Grok) API Key',
+        value: apiKeys.xai?.key ?? '',
+        placeholder: 'xai-...',
+        helperText: hydratedStatuses.xai === 'valid' ? 'API key configured' : hydratedStatuses.xai === 'validating' ? 'Validating...' : 'Enter your xAI API key',
+        validationStatus: hydratedStatuses.xai,
+        showKey: apiKeys.xai?.visible ?? false,
+      },
+    ];
+  }, [apiKeys, hydratedStatuses, isFreeModeActive]);
+
+  const displayApiKeyItems = useMemo(() => {
+    if (hasHydrated) {
+      return apiKeyItems;
+    }
+    return apiKeyItems.map((item) => ({
+      ...item,
+      value: '',
+      helperText: t('organisms.apiKeyConfiguration.apiKeyInfoNormal'),
+      validationStatus: 'idle' as ValidationStatus,
+      showKey: false,
+    }));
+  }, [apiKeyItems, hasHydrated, t]);
 
   // Count validated API keys (Free mode only)
   const configuredKeysCount = isFreeModeActive
-    ? PROVIDERS.filter((provider) => validationStatus[provider] === 'valid').length
+    ? PROVIDERS.filter((provider) => hydratedStatuses[provider] === 'valid').length
     : 0;
+  const configuredCountOverride = hasHydrated ? configuredKeysCount : 0;
 
   // At least 1 API key validated enables Continue button in Free mode
   const hasValidKeys = configuredKeysCount > 0;
-  const hasHydrated = useHasHydrated();
   const allowContinue = useMemo(() => {
     if (!hasHydrated) {
       return false;
@@ -248,7 +273,8 @@ export default function ConfigPage() {
       {mode === 'free' && (
         <div className="mt-8">
           <ApiKeyConfiguration
-            items={apiKeyItems}
+            items={displayApiKeyItems}
+            configuredCountOverride={configuredCountOverride}
             onKeyChange={handleKeyChange}
             onToggleShow={handleToggleShow}
           />

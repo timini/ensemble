@@ -182,6 +182,38 @@ describe('ApiKeyConfiguration', () => {
     });
   });
 
+  describe('configured count banner', () => {
+    it('reflects configured items by default', () => {
+      render(
+        <ApiKeyConfiguration
+          items={[
+            { provider: 'openai', label: 'OpenAI', validationStatus: 'valid' },
+            { provider: 'anthropic', label: 'Anthropic', validationStatus: 'idle' },
+          ]}
+          onKeyChange={vi.fn()}
+          onToggleShow={vi.fn()}
+        />,
+      );
+
+      expect(screen.getByText(/1 API key configured/i)).toBeInTheDocument();
+    });
+
+    it('allows overriding configured count', () => {
+      render(
+        <ApiKeyConfiguration
+          items={[
+            { provider: 'openai', label: 'OpenAI', validationStatus: 'idle' },
+          ]}
+          configuredCountOverride={2}
+          onKeyChange={vi.fn()}
+          onToggleShow={vi.fn()}
+        />,
+      );
+
+      expect(screen.getByText(/2 API keys configured/i)).toBeInTheDocument();
+    });
+  });
+
   describe('interactions', () => {
     it('calls onKeyChange when input value changes', async () => {
       const onKeyChange = vi.fn();
