@@ -9,12 +9,26 @@ import { BaseFreeClient } from '../clients/base/BaseFreeClient.js';
 const mocks = vi.hoisted(() => ({
   openAiRetrieve: vi.fn(),
   openAiList: vi.fn(),
+  openAiChatCreate: vi.fn(),
   axiosGet: vi.fn(),
 }));
+
+const createAsyncStream = (events: unknown[]) => ({
+  async *[Symbol.asyncIterator]() {
+    for (const event of events) {
+      yield event;
+    }
+  },
+});
 
 vi.mock('openai', () => ({
   default: class {
     models = { retrieve: mocks.openAiRetrieve, list: mocks.openAiList };
+    chat = {
+      completions: {
+        create: mocks.openAiChatCreate,
+      },
+    };
   },
 }));
 
@@ -56,6 +70,7 @@ describe('Free mode provider clients', () => {
   beforeEach(() => {
     mocks.openAiRetrieve.mockReset();
     mocks.openAiList.mockReset();
+    mocks.openAiChatCreate.mockReset();
     mocks.axiosGet.mockReset();
   });
 
@@ -205,14 +220,77 @@ describe('Free mode provider clients', () => {
     });
   });
 
-  it('free clients fall back to mock streaming until implementations are ready', async () => {
-    const streamSpy = vi
-      .spyOn(MockProviderClient.prototype, 'streamResponse')
-      .mockResolvedValue();
-    const client = new FreeOpenAIClient('openai', () => 'sk-test');
+  describe('FreeOpenAIClient streaming', () => {
+    it('streams chunks via OpenAI chat completions', async () => {
+      mocks.openAiChatCreate.mockResolvedValueOnce(
+        createAsyncStream([
+          { choices: [{ delta: { content: 'Hello' } }] },
+          { choices: [{ delta: { content: ' world' }, finish_reason: 'stop' }] },
+        ]),
+      );
 
-    await client.streamResponse('prompt', 'gpt-4o', vi.fn(), vi.fn(), vi.fn());
-    expect(streamSpy).toHaveBeenCalled();
+      const client = new FreeOpenAIClient('openai', () => 'sk-test');
+      const onChunk = vi.fn();
+      const onComplete = vi.fn();
+      const onError = vi.fn();
+
+      await client.streamResponse('prompt', 'gpt-4o', onChunk, onComplete, onError);
+
+      expect(mocks.openAiChatCreate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          model: 'gpt-4o',
+          stream: true,
+          messages: [{ role: 'user', content: 'prompt' }],
+        }),
+      );
+      expect(onChunk).toHaveBeenNthCalledWith(1, 'Hello');
+      expect(onChunk).toHaveBeenNthCalledWith(2, ' world');
+      expect(onComplete).toHaveBeenCalledWith('Hello world', expect.any(Number));
+      expect(onError).not.toHaveBeenCalled();
+    });
+
+    it('surfaces provider errors when streaming fails', async () => {
+      mocks.openAiChatCreate.mockRejectedValueOnce(new Error('stream failed'));
+
+      const client = new FreeOpenAIClient('openai', () => 'sk-test');
+      const onError = vi.fn();
+
+      await client.streamResponse('prompt', 'gpt-4o', vi.fn(), vi.fn(), onError);
+
+      expect(onError).toHaveBeenCalledWith(
+        expect.objectContaining({ message: 'stream failed' }),
+      );
+    });
+
+    it('handles array-based delta payloads', async () => {
+      mocks.openAiChatCreate.mockResolvedValueOnce(
+        createAsyncStream([
+          {
+            choices: [
+              {
+                delta: {
+                  content: [
+                    { text: 'Segment ' },
+                    { text: 'two' },
+                  ],
+                },
+              },
+            ],
+          },
+          { choices: [{ finish_reason: 'stop' }] },
+        ]),
+      );
+
+      const client = new FreeOpenAIClient('openai', () => 'sk-test');
+      const onChunk = vi.fn();
+      const onComplete = vi.fn();
+
+      await client.streamResponse('prompt', 'gpt-4o', onChunk, onComplete, vi.fn());
+
+      expect(onChunk).toHaveBeenNthCalledWith(1, 'Segment ');
+      expect(onChunk).toHaveBeenNthCalledWith(2, 'two');
+      expect(onComplete).toHaveBeenCalledWith('Segment two', expect.any(Number));
+    });
   });
 
   it('falls back to default text models when API key missing', async () => {

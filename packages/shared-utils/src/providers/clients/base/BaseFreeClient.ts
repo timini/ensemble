@@ -1,6 +1,18 @@
 import type { AIProvider, ProviderName, ValidationResult } from '../../types.js';
 import { MockProviderClient } from '../mock/MockProviderClient.js';
 
+export type StreamHandlers = {
+  onChunk: (chunk: string) => void;
+  onComplete: (fullResponse: string, responseTime: number) => void;
+  onError: (error: Error) => void;
+};
+
+export interface StreamOptions extends StreamHandlers {
+  apiKey: string;
+  prompt: string;
+  model: string;
+}
+
 /**
  * Base class for Free mode provider clients.
  *
@@ -17,6 +29,10 @@ export abstract class BaseFreeClient implements AIProvider {
     this.mockClient = new MockProviderClient({ providerFilter: provider });
   }
 
+  protected resolveApiKey(): string | null {
+    return this.getApiKey();
+  }
+
   async streamResponse(
     prompt: string,
     model: string,
@@ -24,7 +40,7 @@ export abstract class BaseFreeClient implements AIProvider {
     onComplete: (fullResponse: string, responseTime: number) => void,
     onError: (error: Error) => void,
   ): Promise<void> {
-    const apiKey = this.getApiKey();
+    const apiKey = this.resolveApiKey();
 
     if (!apiKey) {
       onError(
@@ -35,12 +51,22 @@ export abstract class BaseFreeClient implements AIProvider {
       return;
     }
 
-    // TODO: Replace fallback with real streaming implementation.
-    await this.mockClient.streamResponse(prompt, model, onChunk, onComplete, onError);
+    try {
+      await this.streamWithProvider({
+        apiKey,
+        prompt,
+        model,
+        onChunk,
+        onComplete,
+        onError,
+      });
+    } catch (error) {
+      onError(error instanceof Error ? error : new Error(String(error)));
+    }
   }
 
   async generateEmbeddings(text: string): Promise<number[]> {
-    const apiKey = this.getApiKey();
+    const apiKey = this.resolveApiKey();
 
     if (!apiKey) {
       throw new Error(
@@ -72,6 +98,12 @@ export abstract class BaseFreeClient implements AIProvider {
 
   protected async fetchTextModels(_apiKey: string): Promise<string[]> {
     return this.mockClient.listAvailableTextModels();
+  }
+
+  protected async streamWithProvider(_options: StreamOptions): Promise<void> {
+    throw new Error(
+      `${this.provider} streaming is not yet implemented for Free mode.`,
+    );
   }
 
   abstract validateApiKey(apiKey: string): Promise<ValidationResult>;
