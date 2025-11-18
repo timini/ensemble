@@ -22,6 +22,7 @@ import { ManualResponseModal } from '@/components/organisms/ManualResponseModal'
 import type { Provider, ValidationStatus } from '@/components/molecules/ApiKeyInput';
 import { AVAILABLE_MODELS } from '~/lib/models';
 import { validateApiKey, createDebouncedValidator } from '~/lib/validation';
+import { toError } from '~/lib/errors';
 
 export default function EnsemblePage() {
   const { t } = useTranslation('common');
@@ -198,8 +199,11 @@ export default function EnsemblePage() {
   };
 
   const handleKeyChange = (provider: Provider, value: string) => {
-    void setApiKey(provider, value).catch((error) => {
-      console.error(`Failed to store ${provider} API key`, error);
+    void setApiKey(provider, value).catch((error: unknown) => {
+      console.error(
+        `Failed to store ${provider} API key`,
+        toError(error, `Unable to store ${provider} API key`),
+      );
     });
     debouncedValidate(provider, value, mode, handleValidationStatusChange);
   };

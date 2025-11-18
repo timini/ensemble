@@ -8,6 +8,7 @@ import frAppTranslations from '../../public/locales/fr/common.json';
 // Import translation files from component library
 import enComponentTranslations from '@/lib/i18n/locales/en.json';
 import frComponentTranslations from '@/lib/i18n/locales/fr.json';
+import { toError } from './errors';
 
 /**
  * i18next configuration for Ensemble AI
@@ -42,8 +43,11 @@ i18n
       useSuspense: false,
     },
   })
-  .catch((error) => {
-    console.error('i18n initialization failed:', error);
+  .catch((error: unknown) => {
+    console.error(
+      'i18n initialization failed:',
+      toError(error, 'i18n initialization failed'),
+    );
   });
 
 export default i18n;

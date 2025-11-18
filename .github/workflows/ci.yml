@@ -73,6 +73,23 @@ jobs:
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium
         working-directory: packages/app
+  app-e2e:
+    name: App E2E
+    runs-on: ubuntu-latest
+    needs:
+      - app
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npm run build --workspace=packages/shared-utils
+      - run: npm run build --workspace=packages/app
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+        working-directory: packages/app
       - run: npm run test:e2e --workspace=packages/app
 
   analysis:

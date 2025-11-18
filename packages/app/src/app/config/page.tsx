@@ -20,6 +20,7 @@ import type { Provider, ValidationStatus } from '@/components/molecules/ApiKeyIn
 import { validateApiKey, createDebouncedValidator } from '~/lib/validation';
 import { InlineAlert } from '@/components/atoms/InlineAlert';
 import { isWebCryptoAvailable } from '@ensemble-ai/shared-utils/security';
+import { toError } from '~/lib/errors';
 
 const PROVIDERS: Provider[] = ['openai', 'anthropic', 'google', 'xai'];
 
@@ -114,8 +115,11 @@ export default function ConfigPage() {
   }, [apiKeys, handleValidationStatusChange, mode, validationStatus, webCryptoSupported]);
 
   const handleKeyChange = (provider: Provider, value: string) => {
-    void setApiKey(provider, value).catch((error) => {
-      console.error(`Failed to store ${provider} API key`, error);
+    void setApiKey(provider, value).catch((error: unknown) => {
+      console.error(
+        `Failed to store ${provider} API key`,
+        toError(error, `Unable to store ${provider} API key`),
+      );
     });
     debouncedValidate(provider, value, mode, handleValidationStatusChange);
   };

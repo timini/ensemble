@@ -1,9 +1,11 @@
 import {
   ProviderRegistry,
   type ProviderMode,
+  type AIProvider,
 } from '@ensemble-ai/shared-utils/providers';
 import type { ModelResponse } from '~/store';
 import type { ProviderType } from '~/store/slices/ensembleSlice';
+import { toError } from '~/lib/errors';
 
 export type EmbeddingVector = {
   modelId: string;
@@ -56,15 +58,18 @@ export async function generateEmbeddingsForResponses({
 
   const registry = ProviderRegistry.getInstance();
   const resolvedMode = resolveEmbeddingsMode(mode);
-  let client;
+  let client: AIProvider;
 
   try {
     client = registry.getProvider(provider, resolvedMode);
-  } catch (error) {
+  } catch (error: unknown) {
     if (resolvedMode !== 'mock' && registry.hasProvider(provider, 'mock')) {
       client = registry.getProvider(provider, 'mock');
     } else {
-      throw error;
+      throw toError(
+        error,
+        `Provider '${provider}' not registered for mode '${resolvedMode}'`,
+      );
     }
   }
 
@@ -89,8 +94,8 @@ export async function generateEmbeddingsForResponses({
     try {
       const embedding = await client.generateEmbeddings(response.response);
       embeddingMap.set(response.modelId, embedding);
-    } catch (error) {
-      handleError(response.modelId, error as Error);
+    } catch (error: unknown) {
+      handleError(response.modelId, toError(error));
     }
   }
 

@@ -3,12 +3,11 @@
  */
 
 import { describe, it, expect, beforeEach } from 'vitest';
-import { createStore } from 'zustand/vanilla';
+import { createStore, type StoreApi } from 'zustand/vanilla';
 import { createWorkflowSlice, type WorkflowSlice } from '../slices/workflowSlice';
 
 describe('workflowSlice', () => {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let store: any;
+  let store: StoreApi<WorkflowSlice>;
 
   beforeEach(() => {
     store = createStore<WorkflowSlice>()(createWorkflowSlice);
