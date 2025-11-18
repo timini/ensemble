@@ -19,12 +19,16 @@ This is a monorepo with npm workspaces:
 ```
 ai-ensemble/
 ├── packages/
-│   ├── component-library/    # Reusable UI components with Storybook
-│   ├── shared-utils/         # Domain utilities (similarity, crypto, embeddings, streaming)
-│   └── wireframes/           # Reference wireframe implementation (design source of truth)
-├── specs/                    # Feature specifications and planning documents
-├── package.json             # Root workspace configuration
-└── README.md                # This file
+│   ├── app/                # Production Next.js 15 App Router experience
+│   ├── component-library/  # Reusable UI system + Storybook
+│   ├── shared-utils/       # Provider clients, similarity math, crypto helpers
+│   └── wireframes/         # UX source of truth (static reference flows)
+├── docs/                   # Architecture primers, provider specs, decision records
+├── specs/                  # Active feature specs, task lists, planning artifacts
+├── scripts/                # Repo automation (FTA enforcement, etc.)
+├── run/                    # Husky-managed Git hooks (Codex CLI harness)
+├── package.json            # Root npm workspaces + shared scripts
+└── README.md               # This file
 ```
 
 ### Component Library (`packages/component-library/`)
@@ -87,8 +91,8 @@ npm run dev:components
 # Start the main app in Free mode (real provider clients)
 npm run dev
 
-# Start the app in Mock mode (lorem ipsum streaming)
-npm run dev:mock
+# Start the app in Mock mode (UI/dev-only sandbox; never shipped to users)
+NEXT_PUBLIC_MOCK_MODE=true npm run dev:mock
 
 # Start wireframes dev server (port 3001)
 npm run dev:wireframes
@@ -97,7 +101,7 @@ npm run dev:wireframes
 npm test
 
 # Run E2E tests (Playwright list reporter, headless).
-# Automatically boots the app in Mock mode via `npm run dev:mock`.
+# Uses Mock mode to keep tests deterministic and infrastructure-free.
 npm run test:e2e
 
 # Run linter
@@ -106,6 +110,8 @@ npm run lint
 # Type checking
 npm run typecheck
 ```
+
+> **Mock mode is developer-only.** `npm run dev:mock` (or setting `NEXT_PUBLIC_MOCK_MODE=true`) is strictly for UI iteration, Storybook snapshots, and deterministic CI runs. The user-facing product exposes only **Free** and **Pro** modes on the Config page; shipping builds must never surface Mock mode as an option.
 
 ### Individual Workspace Commands
 
@@ -153,7 +159,7 @@ Testing is wired into CI with parallel jobs:
 - **Location**: `packages/component-library/src/components/`
 - **Coverage**: 80%+ required per Constitution Principle VIII
 - **Execution**: Every commit via pre-commit hook
-- **Run**: `npm test` (all workspaces) or `npm run test:unit` (component library)
+- **Run**: `npm test` (all workspaces) or `npm run test` within a workspace (collects coverage & enforces thresholds). Use the `test:watch` scripts (e.g., `npm run test:watch --workspace=packages/app`) for faster local loops without coverage overhead.
 
 ### Storybook Interaction Tests
 - **Framework**: Storybook Test Runner

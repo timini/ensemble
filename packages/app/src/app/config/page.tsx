@@ -11,6 +11,8 @@ import { useEffect, useState, useRef, useCallback, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslation } from 'react-i18next';
 import { useStore } from '~/store';
+import { useHasHydrated } from '~/hooks/useHasHydrated';
+import type { OperatingMode } from '~/store/slices/modeSlice';
 import { PageHero } from '@/components/organisms/PageHero';
 import { ModeSelector } from '@/components/organisms/ModeSelector';
 import { ApiKeyConfiguration } from '@/components/organisms/ApiKeyConfiguration';
@@ -75,6 +77,7 @@ export default function ConfigPage() {
     [apiKeys],
   );
   const hasHydrated = useHasHydrated();
+  const displayMode: OperatingMode = hasHydrated ? mode : 'free';
   const hydratedStatuses = useMemo(
     () => getHydratedStatus(hasHydrated, validationStatus),
     [hasHydrated, validationStatus],
@@ -141,7 +144,7 @@ export default function ConfigPage() {
   };
 
   // Prepare API key configuration items for Free mode
-  const isFreeModeActive = mode === 'free' && webCryptoSupported;
+  const isFreeModeActive = displayMode === 'free' && webCryptoSupported;
 
   const apiKeyItems = useMemo(() => {
     if (!isFreeModeActive) {
@@ -249,7 +252,7 @@ export default function ConfigPage() {
 
       <div className="mt-8">
       <ModeSelector
-        selectedMode={mode}
+        selectedMode={displayMode}
         onSelectFreeMode={handleSelectFreeMode}
         onSelectProMode={handleSelectProMode}
         freeModeDisabled={!webCryptoSupported}
@@ -270,7 +273,7 @@ export default function ConfigPage() {
       )}
       </div>
 
-      {mode === 'free' && (
+      {displayMode === 'free' && (
         <div className="mt-8">
           <ApiKeyConfiguration
             items={displayApiKeyItems}
@@ -290,14 +293,4 @@ export default function ConfigPage() {
       </div>
     </div>
   );
-}
-
-function useHasHydrated() {
-  const [hydrated, setHydrated] = useState(false);
-
-  useEffect(() => {
-    setHydrated(true);
-  }, []);
-
-  return hydrated;
 }

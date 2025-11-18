@@ -58,7 +58,7 @@
 
 ### Testing Strategy
 - **Unit Tests**: Vitest + React Testing Library, 80%+ coverage, run on every commit via pre-commit hook
-- **E2E Tests**: Playwright, chromium ONLY (for speed), Mock mode by default, minimal critical path coverage
+- **E2E Tests**: Playwright, chromium ONLY (for speed). Tests run with `NEXT_PUBLIC_MOCK_MODE=true` to avoid external API calls; production builds expose only Free/Pro modes.
 - **TDD Required**: Write tests BEFORE implementation (Constitution Principle VIII)
 - **E2E Execution**: Before phase completion only (not every commit due to execution time)
 - **Visual Regression**: Screenshot testing (npx tsx scripts/screenshot-stories.ts) on phase completion and PR merge
@@ -430,7 +430,7 @@ Ready to proceed to **Phase 2: UI Integration with Mock API Clients**
 - [ ] T181 Run accessibility audit on all 4 pages: `npm run test:e2e -- --project=accessibility`
 - [ ] T182 Fix any accessibility violations (WCAG 2.1 AA compliance required per plan.md)
 - [ ] T183 Run screenshot testing: `npx tsx scripts/screenshot-stories.ts` and review visual diffs from Phase 1 baseline (git diff screenshots/)
-- [ ] T184 Update README.md with Phase 2 quickstart instructions (how to run Mock mode workflow)
+- [ ] T184 Update README.md with Phase 2 quickstart instructions (how to run Mock mode workflow via env flag; emphasize it is dev/testing only)
 - [ ] T185 Update spec.md to Version 2.0: mark Phase 2 functional requirements (FR-016 to FR-024) as COMPLETED
 - [ ] T186 Create docs/FREE_MODE_GUIDE.md as placeholder for Phase 3 (not yet implemented)
 - [X] T187 Run full test suite: `npm run test && npm run test:e2e` and verify all passing (2024-09-30: vitest + Playwright chromium suite clean)
@@ -478,13 +478,13 @@ Ready to proceed to **Phase 2: UI Integration with Mock API Clients**
 - [ ] T218 Implement retry mechanism for failed responses in src/app/review/page.tsx (Constitution Principle X: performance)
 - [ ] T219 Update src/components/molecules/ResponseCard.tsx to display token counts from real API responses
 - [ ] T220 Add translations for Free mode (API key labels, validation messages, error messages)
-- [ ] T221 Write E2E test tests/e2e/free-mode.spec.ts (chromium only, Mock mode) testing: Free mode selection, API key entry, validation success, streaming responses, error handling (mocked 429 error)
+- [ ] T221 Write E2E test tests/e2e/free-mode.spec.ts (chromium only, runs with `NEXT_PUBLIC_MOCK_MODE=true` to avoid real API traffic) testing: Free mode selection, API key entry, validation success, streaming responses, error handling (mocked 429 error)
 - [ ] T222 Update docs/FREE_MODE_GUIDE.md with setup instructions, API key acquisition, supported providers
 - [ ] T223 Commit Phase 3.3 Free mode UI: "feat: integrate Free mode with real API key validation and streaming"
 
 ### Phase 3.4: Testing & Documentation (Week 10, Days 68-73)
 
-- [ ] T224 Write E2E test tests/e2e/full-workflow-free.spec.ts (chromium only, Mock mode for CI; optional real API test with test keys in .env.local) testing complete Free mode workflow
+- [ ] T224 Write E2E test tests/e2e/full-workflow-free.spec.ts (chromium only, Mock providers for CI; optional manual run with real API keys in .env.local) testing complete Free mode workflow
 - [ ] T225 Run security audit: Verify API keys encrypted in localStorage, not exposed in network traces, not exposed in error logs
 - [ ] T226 Test error scenarios: 401 (invalid key), 429 (rate limit), 503 (service unavailable), network timeout
 - [ ] T227 Test streaming latency: Verify <100ms p95 latency from API chunk receipt to UI display (FR-058)

@@ -1,4 +1,5 @@
 import { defineConfig } from 'vitest/config';
+import '@vitest/coverage-v8';
 import react from '@vitejs/plugin-react';
 import path from 'path';
 

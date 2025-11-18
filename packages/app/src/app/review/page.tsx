@@ -8,16 +8,15 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useStore } from '~/store';
+import { useHasHydrated } from '~/hooks/useHasHydrated';
 import {
   buildPairwiseComparisons,
   calculateAverageConfidence,
   normalizeSimilarity,
 } from '~/lib/agreement';
-import { generateEmbeddingsForResponses } from '~/lib/embeddings';
-import { toError } from '~/lib/errors';
 import { PageHero } from '@/components/organisms/PageHero';
 import { ResponseCard } from '@/components/molecules/ResponseCard';
 import { ConsensusCard } from '@/components/organisms/ConsensusCard';
@@ -26,7 +25,7 @@ import { ProgressSteps } from '@/components/molecules/ProgressSteps';
 import { WorkflowNavigator } from '@/components/organisms/WorkflowNavigator';
 import { Card } from '@/components/atoms/Card';
 import type { Provider } from '@/components/molecules/ResponseCard';
-import type { ProviderType } from '~/store/slices/ensembleSlice';
+import { useResponseEmbeddings } from './hooks/useResponseEmbeddings';
 
 export default function ReviewPage() {
   const { t } = useTranslation();
@@ -79,8 +78,6 @@ export default function ReviewPage() {
   );
 
   const skipRedirectRef = useRef(false);
-  const embeddingFetchRef = useRef(false);
-  const lastEmbeddingsProviderRef = useRef<ProviderType | null>(null);
 
   const completedResponses = useMemo(
     () =>
@@ -133,85 +130,16 @@ export default function ReviewPage() {
     // For now, we just display empty state or mock data
   }, [completeStep, hasHydrated, prompt, router, setCurrentStep]);
 
-  useEffect(() => {
-    if (!hasHydrated) {
-      return;
-    }
-
-    if (completedResponses.length === 0) {
-      return;
-    }
-
-    const providerChanged =
-      lastEmbeddingsProviderRef.current !== embeddingsProvider;
-    const existingEmbeddings = providerChanged ? [] : viewEmbeddings;
-    const pendingResponses = completedResponses.filter(
-      (response) =>
-        !existingEmbeddings.some(
-          (embedding) => embedding.modelId === response.modelId,
-        ),
-    );
-
-    if (!providerChanged && pendingResponses.length === 0) {
-      if (viewEmbeddings.length >= 2 && !viewSimilarityMatrix) {
-        calculateAgreementState();
-      }
-      return;
-    }
-
-    if (embeddingFetchRef.current) {
-      return;
-    }
-
-    embeddingFetchRef.current = true;
-    let cancelled = false;
-
-    (async () => {
-      const orderedEmbeddings = await generateEmbeddingsForResponses({
-        responses: completedResponses,
-        existingEmbeddings,
-        provider: embeddingsProvider,
-        mode: mode === 'pro' ? 'pro' : 'free',
-        onError: (modelId, error: Error) => {
-          console.error(
-            `Failed to generate embeddings for ${modelId} via ${embeddingsProvider}`,
-            error,
-          );
-        },
-      });
-
-      if (cancelled) return;
-
-      lastEmbeddingsProviderRef.current = embeddingsProvider;
-      setEmbeddings(orderedEmbeddings);
-
-      if (orderedEmbeddings.length >= 2) {
-        calculateAgreementState();
-      }
-    })().catch((error: unknown) => {
-      console.error(
-        'Failed to process embeddings',
-        toError(error, 'Unable to process embeddings'),
-      );
-    })
-      .finally(() => {
-        embeddingFetchRef.current = false;
-      });
-
-    return () => {
-      cancelled = true;
-      embeddingFetchRef.current = false;
-    };
-  }, [
-    calculateAgreementState,
+  useResponseEmbeddings({
+    hasHydrated,
     completedResponses,
     embeddingsProvider,
-    hasHydrated,
-    mode,
-    setEmbeddings,
     viewEmbeddings,
     viewSimilarityMatrix,
-  ]);
+    mode,
+    setEmbeddings,
+    calculateAgreementState,
+  });
 
   const handleBack = () => {
     setCurrentStep('prompt');
@@ -343,14 +271,4 @@ export default function ReviewPage() {
       </div>
     </div>
   );
-}
-
-function useHasHydrated() {
-  const [hydrated, setHydrated] = useState(false);
-
-  useEffect(() => {
-    setHydrated(true);
-  }, []);
-
-  return hydrated;
 }

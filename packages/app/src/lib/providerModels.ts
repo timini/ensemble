@@ -8,6 +8,7 @@ import type {
 import { ProviderRegistry } from '@ensemble-ai/shared-utils/providers';
 import { AVAILABLE_MODELS } from './models';
 import { toError } from './errors';
+import { initializeProviders } from '~/providers';
 
 export function mapModelMetadataToModels(
   provider: ProviderName,
@@ -43,10 +44,16 @@ export function replaceProviderModels(
   return [...head, ...replacements, ...tail];
 }
 
+type TextModelCapableProvider = AIProvider & {
+  listAvailableTextModels: () => Promise<string[]>;
+};
+
 export async function fetchProviderModels(options: {
   provider: ProviderName;
   mode: ProviderMode;
 }): Promise<Model[]> {
+  initializeProviders();
+
   const registry = ProviderRegistry.getInstance();
   let client: AIProvider;
   try {
@@ -58,8 +65,34 @@ export async function fetchProviderModels(options: {
     );
   }
 
-  const metadata = await Promise.resolve(client.listAvailableModels());
-  return mapModelMetadataToModels(options.provider, metadata);
+  const metadata = mapModelMetadataToModels(
+    options.provider,
+    await Promise.resolve(client.listAvailableModels()),
+  );
+  const metadataMap = new Map(metadata.map((model) => [model.id, model]));
+
+  if (!('listAvailableTextModels' in client)) {
+    return metadata;
+  }
+
+  try {
+    const textModels = await (client as TextModelCapableProvider).listAvailableTextModels();
+    const resolved = textModels
+      .map((raw) => sanitizeModelIdentifier(raw))
+      .filter((value): value is string => value.length > 0)
+      .map((id) => metadataMap.get(id) ?? createModelFromId(options.provider, id));
+
+    if (resolved.length > 0) {
+      return resolved;
+    }
+  } catch (error: unknown) {
+    console.warn(
+      `Failed to load dynamic models for ${options.provider}`,
+      toError(error, 'Unable to load dynamic provider models'),
+    );
+  }
+
+  return metadata;
 }
 
 export function mergeDynamicModels(
@@ -72,4 +105,29 @@ export function mergeDynamicModels(
     merged = replaceProviderModels(merged, provider, models);
   }
   return merged;
+}
+
+function createModelFromId(provider: ProviderName, identifier: string): Model {
+  return {
+    id: identifier,
+    name: formatModelLabelFromId(identifier),
+    provider,
+  };
+}
+
+export function sanitizeModelIdentifier(value: string): string {
+  return value.replace(/^models\//i, '').trim();
+}
+
+export function formatModelLabelFromId(rawId: string): string {
+  const identifier = sanitizeModelIdentifier(rawId);
+  if (identifier.length === 0) {
+    return rawId;
+  }
+
+  return identifier
+    .split(/[-_]/g)
+    .filter((segment) => segment.length > 0)
+    .map((segment) => segment.charAt(0).toUpperCase() + segment.slice(1))
+    .join(' ');
 }
