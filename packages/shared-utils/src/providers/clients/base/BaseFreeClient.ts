@@ -1,5 +1,5 @@
-import type { AIProvider, ProviderName, ValidationResult } from '../../types.js';
-import { MockProviderClient } from '../mock/MockProviderClient.js';
+import type { AIProvider, ProviderName, ValidationResult } from '../../types';
+import { MockProviderClient } from '../mock/MockProviderClient';
 
 export type StreamHandlers = {
   onChunk: (chunk: string) => void;

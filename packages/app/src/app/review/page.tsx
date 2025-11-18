@@ -8,7 +8,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { useEffect, useMemo, useRef } from 'react';
+import { useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useStore } from '~/store';
 import { useHasHydrated } from '~/hooks/useHasHydrated';
@@ -26,6 +26,7 @@ import { WorkflowNavigator } from '@/components/organisms/WorkflowNavigator';
 import { Card } from '@/components/atoms/Card';
 import type { Provider } from '@/components/molecules/ResponseCard';
 import { useResponseEmbeddings } from './hooks/useResponseEmbeddings';
+import { useStreamingResponses } from './hooks/useStreamingResponses';
 
 export default function ReviewPage() {
   const { t } = useTranslation();
@@ -69,10 +70,10 @@ export default function ReviewPage() {
   );
 
   const setCurrentStep = useStore((state) => state.setCurrentStep);
-  const completeStep = useStore((state) => state.completeStep);
   const clearResponses = useStore((state) => state.clearResponses);
   const resetStreamingState = useStore((state) => state.resetStreamingState);
   const setEmbeddings = useStore((state) => state.setEmbeddings);
+
   const calculateAgreementState = useStore(
     (state) => state.calculateAgreement,
   );
@@ -106,29 +107,12 @@ export default function ReviewPage() {
     [pairwiseComparisons],
   );
 
-  // Mock responses for Phase 2 (will be replaced with real API calls in Phase 3/4)
-  useEffect(() => {
-    if (!hasHydrated) {
-      return;
-    }
-
-    // If no prompt, redirect back to prompt page unless a manual navigation already triggered a redirect.
-    if (!prompt) {
-      if (skipRedirectRef.current) {
-        skipRedirectRef.current = false;
-        return;
-      }
-
-      router.push('/prompt');
-      return;
-    }
-
-    setCurrentStep('review');
-    completeStep('review');
-
-    // TODO: In Phase 3/4, trigger actual API calls here
-    // For now, we just display empty state or mock data
-  }, [completeStep, hasHydrated, prompt, router, setCurrentStep]);
+  useStreamingResponses({
+    hasHydrated,
+    prompt,
+    mode,
+    skipRedirectRef,
+  });
 
   useResponseEmbeddings({
     hasHydrated,
@@ -201,8 +185,8 @@ export default function ReviewPage() {
                   response.error
                     ? 'error'
                     : response.isStreaming
-                    ? 'streaming'
-                    : 'complete'
+                      ? 'streaming'
+                      : 'complete'
                 }
                 responseType="ai"
                 content={response.response}
@@ -213,6 +197,7 @@ export default function ReviewPage() {
                     : undefined
                 }
                 testId={`response-card-${response.modelId}`}
+                tokenCount={response.tokenCount ?? undefined}
               />
             ))}
             {viewManualResponses.map((manual) => (

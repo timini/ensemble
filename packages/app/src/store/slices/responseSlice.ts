@@ -15,6 +15,7 @@ export interface ModelResponse {
   isStreaming: boolean;
   isComplete: boolean;
   responseTime: number | null;
+  tokenCount: number | null;
   error: string | null;
 }
 
@@ -44,7 +45,7 @@ export interface ResponseSlice {
   setPrompt: (prompt: string) => void;
   startStreaming: (modelId: string, provider: string, model: string) => void;
   appendStreamChunk: (modelId: string, chunk: string) => void;
-  completeResponse: (modelId: string, responseTime: number) => void;
+  completeResponse: (modelId: string, responseTime: number, tokenCount?: number) => void;
   setError: (modelId: string, error: string) => void;
   addManualResponse: (label: string, response: string) => void;
   removeManualResponse: (id: string) => void;
@@ -95,6 +96,7 @@ export const createResponseSlice: StateCreator<ResponseSlice> = (set, get) => ({
         isStreaming: true,
         isComplete: false,
         responseTime: null,
+        tokenCount: null,
         error: null,
       };
 
@@ -111,11 +113,11 @@ export const createResponseSlice: StateCreator<ResponseSlice> = (set, get) => ({
     });
   },
 
-  completeResponse: (modelId, responseTime) => {
+  completeResponse: (modelId, responseTime, tokenCount) => {
     set((state) => {
       const responses = state.responses.map((r) =>
         r.modelId === modelId
-          ? { ...r, isStreaming: false, isComplete: true, responseTime }
+          ? { ...r, isStreaming: false, isComplete: true, responseTime, tokenCount: tokenCount ?? null }
           : r,
       );
       return { responses };

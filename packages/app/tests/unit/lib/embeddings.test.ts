@@ -21,6 +21,7 @@ const createResponse = (modelId: string, response: string): ModelResponse => ({
   isComplete: true,
   responseTime: 1200,
   error: null,
+  tokenCount: null,
 });
 
 class TrackingClient extends MockProviderClient {

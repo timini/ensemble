@@ -30,6 +30,8 @@ export interface ResponseCardProps {
   rating?: number;
   /** Response time (e.g., "1568ms") */
   responseTime?: string;
+  /** Token count (e.g., 150) */
+  tokenCount?: number;
   /** Callback when rating changes */
   onRatingChange?: (rating: number) => void;
   /** Callback when copy button is clicked */
@@ -75,6 +77,7 @@ export const ResponseCard = React.forwardRef<HTMLDivElement, ResponseCardProps>(
       error,
       rating = 0,
       responseTime,
+      tokenCount,
       onRatingChange,
       onCopy,
       defaultExpanded = true,
@@ -201,6 +204,11 @@ export const ResponseCard = React.forwardRef<HTMLDivElement, ResponseCardProps>(
                     {responseTime && (
                       <span className="text-sm text-muted-foreground">
                         {t('molecules.responseCard.responseTime', { time: responseTime })}
+                      </span>
+                    )}
+                    {tokenCount !== undefined && (
+                      <span className="text-sm text-muted-foreground">
+                        {tokenCount} tokens
                       </span>
                     )}
                   </div>

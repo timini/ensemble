@@ -1,2 +1,2 @@
-export * from './encryption.js';
-export * from './webCryptoDetection.js';
+export * from './encryption';
+export * from './webCryptoDetection';
