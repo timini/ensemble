@@ -13,16 +13,27 @@ import { useTranslation } from 'react-i18next';
 import { useStore } from '~/store';
 import type { ProviderType } from '~/store/slices/ensembleSlice';
 import { PageHero } from '@/components/organisms/PageHero';
-import { ModelSelectionList } from '@/components/organisms/ModelSelectionList';
+import {
+  ModelSelectionList,
+  type Model,
+} from '@/components/organisms/ModelSelectionList';
 import { EnsembleSidebar, type Preset } from '@/components/organisms/EnsembleSidebar';
 import { WorkflowNavigator } from '@/components/organisms/WorkflowNavigator';
 import { ApiKeyConfigurationModal } from '@/components/organisms/ApiKeyConfigurationModal';
 import { ProgressSteps } from '@/components/molecules/ProgressSteps';
 import { ManualResponseModal } from '@/components/organisms/ManualResponseModal';
 import type { Provider, ValidationStatus } from '@/components/molecules/ApiKeyInput';
+import { ProviderRegistry } from '@ensemble-ai/shared-utils/providers';
 import { AVAILABLE_MODELS } from '~/lib/models';
 import { validateApiKey, createDebouncedValidator } from '~/lib/validation';
+import {
+  fetchProviderModels,
+  mergeDynamicModels,
+} from '~/lib/providerModels';
 import { toError } from '~/lib/errors';
+import { getHydratedStatus, mapStatusToLabel } from '~/lib/providerStatus';
+
+const PROVIDERS: Provider[] = ['openai', 'anthropic', 'google', 'xai'];
 
 export default function EnsemblePage() {
   const { t } = useTranslation('common');
@@ -40,6 +51,8 @@ export default function EnsemblePage() {
   const setSummarizer = useStore((state) => state.setSummarizer);
   const addManualResponse = useStore((state) => state.addManualResponse);
   const manualResponses = useStore((state) => state.manualResponses);
+  const [hasDynamicModelsHydrated, setHasDynamicModelsHydrated] = useState(false);
+  const storeHydrated = useHasHydrated();
 
   const currentStep = useStore((state) => state.currentStep);
   const setCurrentStep = useStore((state) => state.setCurrentStep);
@@ -48,6 +61,12 @@ export default function EnsemblePage() {
   // Track selected model IDs for ModelSelectionList
   // NOTE: We use the 'model' field (e.g., 'gpt-4o'), not the dynamic 'id' field
   const selectedModelIds = useMemo(() => selectedModels.map((m) => m.model), [selectedModels]);
+  const displayedSelectedModelIds = storeHydrated ? selectedModelIds : [];
+  const displayedSummarizer = storeHydrated ? summarizerModel ?? undefined : undefined;
+
+  useEffect(() => {
+    setHasDynamicModelsHydrated(true);
+  }, []);
 
   const isMockMode = process.env.NEXT_PUBLIC_MOCK_MODE === 'true';
 
@@ -99,33 +118,30 @@ export default function EnsemblePage() {
     [apiKeys],
   );
 
-  const mapStatusToLabel = (status: ValidationStatus) => {
-    switch (status) {
-      case 'valid':
-        return 'Ready';
-      case 'validating':
-        return 'Validating...';
-      case 'invalid':
-        return 'Invalid API key';
-      default:
-        return 'API key required';
-    }
-  };
+  const hydratedStatuses = useMemo(
+    () => getHydratedStatus(hasDynamicModelsHydrated, validationStatus),
+    [hasDynamicModelsHydrated, validationStatus],
+  );
 
-  const providerStatus =
-    mode === 'pro'
-      ? {
-          openai: 'Ready',
-          anthropic: 'Ready',
-          google: 'Ready',
-          xai: 'Ready',
-        }
-      : {
-          openai: mapStatusToLabel(validationStatus.openai),
-          anthropic: mapStatusToLabel(validationStatus.anthropic),
-          google: mapStatusToLabel(validationStatus.google),
-          xai: mapStatusToLabel(validationStatus.xai),
-        };
+  const [availableModels, setAvailableModels] =
+    useState<Model[]>(AVAILABLE_MODELS);
+
+  const providerStatus = useMemo(() => {
+    if (mode === 'pro') {
+      return {
+        openai: 'Ready',
+        anthropic: 'Ready',
+        google: 'Ready',
+        xai: 'Ready',
+      };
+    }
+    return {
+      openai: mapStatusToLabel(hydratedStatuses.openai),
+      anthropic: mapStatusToLabel(hydratedStatuses.anthropic),
+      google: mapStatusToLabel(hydratedStatuses.google),
+      xai: mapStatusToLabel(hydratedStatuses.xai),
+    };
+  }, [mode, hydratedStatuses]);
 
   // Store timeout IDs for debouncing
   const timeoutRefs = useRef<Record<Provider, NodeJS.Timeout | null>>({
@@ -147,6 +163,9 @@ export default function EnsemblePage() {
   );
 
   const handleModelToggle = (modelId: string) => {
+    if (!storeHydrated) {
+      return;
+    }
     // Check if selected by comparing the 'model' field (not the dynamic 'id' field)
     const selectedModel = selectedModels.find((m) => m.model === modelId);
     const isSelected = !!selectedModel;
@@ -157,7 +176,7 @@ export default function EnsemblePage() {
     } else {
       // Add model if under limit
       if (selectedModels.length < 6) {
-        const model = AVAILABLE_MODELS.find((m) => m.id === modelId);
+        const model = availableModels.find((m) => m.id === modelId);
         if (model) {
           addModel(model.provider, model.id);
         }
@@ -166,6 +185,9 @@ export default function EnsemblePage() {
   };
 
   const handleSummarizerChange = (modelId: string) => {
+    if (!storeHydrated) {
+      return;
+    }
     setSummarizer(modelId);
   };
 
@@ -212,6 +234,56 @@ export default function EnsemblePage() {
     toggleApiKeyVisibility(provider);
   };
 
+  useEffect(() => {
+    if (!hasDynamicModelsHydrated || mode !== 'free') {
+      setAvailableModels(AVAILABLE_MODELS);
+      return;
+    }
+
+    let active = true;
+    const registry = ProviderRegistry.getInstance();
+    const loadModels = async () => {
+      const overrides: Partial<Record<Provider, Model[]>> = {};
+
+      await Promise.all(
+        PROVIDERS.map(async (provider) => {
+          if (hydratedStatuses[provider] !== 'valid') {
+            return;
+          }
+          if (!registry.hasProvider(provider, 'free')) {
+            return;
+          }
+          try {
+            const models = await fetchProviderModels({
+              provider,
+              mode: 'free',
+            });
+            if (models.length > 0) {
+              overrides[provider] = models;
+            }
+          } catch (error: unknown) {
+            console.warn(
+              `Failed to load ${provider} models`,
+              toError(error, `Failed to load ${provider} models`),
+            );
+          }
+        }),
+      );
+
+      if (!active) return;
+      if (Object.keys(overrides).length === 0) {
+        setAvailableModels(AVAILABLE_MODELS);
+        return;
+      }
+      setAvailableModels(mergeDynamicModels(overrides));
+    };
+
+    void loadModels();
+    return () => {
+      active = false;
+    };
+  }, [hasDynamicModelsHydrated, mode, hydratedStatuses]);
+
   // Set current step to 'ensemble' on mount
   useEffect(() => {
     setCurrentStep('ensemble');
@@ -235,12 +307,12 @@ export default function EnsemblePage() {
           label: `${selectedProvider.charAt(0).toUpperCase() + selectedProvider.slice(1)} API Key`,
           value: apiKeys[selectedProvider]?.key ?? '',
           placeholder: selectedProvider === 'openai' ? 'sk-...' : selectedProvider === 'anthropic' ? 'sk-ant-...' : selectedProvider === 'google' ? 'AIza...' : 'xai-...',
-          helperText: validationStatus[selectedProvider] === 'valid'
+          helperText: hydratedStatuses[selectedProvider] === 'valid'
             ? 'API key configured'
-            : validationStatus[selectedProvider] === 'validating'
+            : hydratedStatuses[selectedProvider] === 'validating'
             ? 'Validating...'
             : `Enter your ${selectedProvider} API key`,
-          validationStatus: validationStatus[selectedProvider],
+          validationStatus: hydratedStatuses[selectedProvider],
           showKey: apiKeys[selectedProvider]?.visible ?? false,
         },
       ]
@@ -248,7 +320,7 @@ export default function EnsemblePage() {
 
   // Map selected model metadata for the sidebar display
   const sidebarModels = selectedModels.map((selection) => {
-    const model = AVAILABLE_MODELS.find((m) => m.id === selection.model);
+    const model = availableModels.find((m) => m.id === selection.model);
     return {
       id: selection.model,
       name: model?.name ?? selection.model,
@@ -301,9 +373,9 @@ export default function EnsemblePage() {
         {/* Model Selection List - Takes 2/3 width on large screens */}
         <div className="lg:col-span-2">
           <ModelSelectionList
-            models={AVAILABLE_MODELS}
-            selectedModelIds={selectedModelIds}
-            summarizerModelId={summarizerModel ?? undefined}
+            models={availableModels}
+            selectedModelIds={displayedSelectedModelIds}
+            summarizerModelId={displayedSummarizer}
             maxSelection={6}
             providerStatus={providerStatus}
             isMockMode={isMockMode}
@@ -367,4 +439,12 @@ export default function EnsemblePage() {
       />
     </div>
   );
+}
+
+function useHasHydrated(): boolean {
+  const [hydrated, setHydrated] = useState(false);
+  useEffect(() => {
+    setHydrated(true);
+  }, []);
+  return hydrated;
 }

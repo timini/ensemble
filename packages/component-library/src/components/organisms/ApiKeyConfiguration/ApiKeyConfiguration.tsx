@@ -35,6 +35,8 @@ export interface ApiKeyConfigurationProps {
   heading?: string;
   /** Whether the entire section is disabled */
   disabled?: boolean;
+  /** Override for pre-calculating configured count */
+  configuredCountOverride?: number;
 }
 
 /**
@@ -68,12 +70,15 @@ export interface ApiKeyConfigurationProps {
  * ```
  */
 export const ApiKeyConfiguration = React.forwardRef<HTMLDivElement, ApiKeyConfigurationProps>(
-  ({ items, onKeyChange, onToggleShow, heading, disabled = false }, ref) => {
+  ({ items, onKeyChange, onToggleShow, heading, disabled = false, configuredCountOverride }, ref) => {
     const { t } = useTranslation();
     const displayHeading = heading || t('organisms.apiKeyConfiguration.heading');
 
     // Calculate configured keys count from items with valid status
-    const configuredCount = items.filter(item => item.validationStatus === 'valid').length;
+    const configuredCount =
+      typeof configuredCountOverride === 'number'
+        ? configuredCountOverride
+        : items.filter(item => item.validationStatus === 'valid').length;
 
     return (
       <div ref={ref} data-testid="api-key-configuration">
