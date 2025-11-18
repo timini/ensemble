@@ -17,6 +17,7 @@ import {
   normalizeSimilarity,
 } from '~/lib/agreement';
 import { generateEmbeddingsForResponses } from '~/lib/embeddings';
+import { toError } from '~/lib/errors';
 import { PageHero } from '@/components/organisms/PageHero';
 import { ResponseCard } from '@/components/molecules/ResponseCard';
 import { ConsensusCard } from '@/components/organisms/ConsensusCard';
@@ -171,7 +172,7 @@ export default function ReviewPage() {
         existingEmbeddings,
         provider: embeddingsProvider,
         mode: mode === 'pro' ? 'pro' : 'free',
-        onError: (modelId, error) => {
+        onError: (modelId, error: Error) => {
           console.error(
             `Failed to generate embeddings for ${modelId} via ${embeddingsProvider}`,
             error,
@@ -187,10 +188,12 @@ export default function ReviewPage() {
       if (orderedEmbeddings.length >= 2) {
         calculateAgreementState();
       }
-    })()
-      .catch((error) => {
-        console.error('Failed to process embeddings', error);
-      })
+    })().catch((error: unknown) => {
+      console.error(
+        'Failed to process embeddings',
+        toError(error, 'Unable to process embeddings'),
+      );
+    })
       .finally(() => {
         embeddingFetchRef.current = false;
       });

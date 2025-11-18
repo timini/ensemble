@@ -12,6 +12,7 @@ import { EnsembleHeader } from '@/components/molecules/EnsembleHeader';
 import { SettingsModal } from '@/components/organisms/SettingsModal';
 import type { Theme, Language } from '@/components/organisms/SettingsModal';
 import { initializeProviders } from '~/providers';
+import { toError } from '~/lib/errors';
 
 const geist = Geist({
   subsets: ['latin'],
@@ -51,8 +52,11 @@ export default function RootLayout({
 
   // Sync language with i18next
   useEffect(() => {
-    i18n.changeLanguage(language).catch((error) => {
-      console.error('Failed to change language:', error);
+    i18n.changeLanguage(language).catch((error: unknown) => {
+      console.error(
+        'Failed to change language:',
+        toError(error, 'Unable to change language'),
+      );
     });
   }, [language, i18n]);
 
@@ -94,7 +98,10 @@ export default function RootLayout({
                   }
                 }
               } catch (error) {
-                console.error('Failed to clear stale review state', error);
+                console.error(
+                  'Failed to clear stale review state',
+                  toError(error, 'Failed to clear stale review state'),
+                );
               }
             })();`,
           }}

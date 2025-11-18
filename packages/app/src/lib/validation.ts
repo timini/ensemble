@@ -6,6 +6,7 @@ import type { Provider } from '@/components/molecules/ApiKeyInput';
 import type { ValidationStatus } from '@/components/molecules/ApiKeyInput';
 import { ProviderRegistry } from '@ensemble-ai/shared-utils/providers';
 import { initializeProviders } from '~/providers';
+import { toError } from '~/lib/errors';
 
 export interface ValidateApiKeyOptions {
   provider: Provider;
@@ -72,8 +73,12 @@ export async function validateApiKey({
     const providerInstance = providerRegistry.getProvider(provider, clientMode);
     const result = await providerInstance.validateApiKey(apiKey);
     onStatusChange(provider, result.valid ? 'valid' : 'invalid');
-  } catch (error) {
-    console.error(`Error validating ${provider} API key:`, error);
+  } catch (error: unknown) {
+    const normalizedError = toError(
+      error,
+      `Error validating ${provider} API key`,
+    );
+    console.error(`Error validating ${provider} API key:`, normalizedError);
     onStatusChange(provider, 'invalid');
   }
 }

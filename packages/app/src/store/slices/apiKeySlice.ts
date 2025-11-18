@@ -9,6 +9,7 @@ import type { StateCreator } from 'zustand';
 import { decrypt, encrypt } from '@ensemble-ai/shared-utils/security';
 import type { ValidationStatus } from '@/components/molecules/ApiKeyInput';
 import type { ProviderType } from './ensembleSlice';
+import { toError } from '~/lib/errors';
 
 export interface ApiKeyData {
   encrypted: string | null;
@@ -82,8 +83,12 @@ export const createApiKeySlice: StateCreator<ApiKeySlice> = (set, get) => ({
               },
             };
           });
-        } catch (error) {
-          console.error(`Failed to decrypt ${provider} API key`, error);
+        } catch (error: unknown) {
+          const normalizedError = toError(
+            error,
+            `Failed to decrypt ${provider} API key`,
+          );
+          console.error(`Failed to decrypt ${provider} API key`, normalizedError);
           set((state) => {
             const currentEntry = state.apiKeys[provider];
             return {
@@ -134,9 +139,13 @@ export const createApiKeySlice: StateCreator<ApiKeySlice> = (set, get) => ({
           },
         },
       }));
-    } catch (error) {
-      console.error(`Failed to encrypt ${provider} API key`, error);
-      throw error;
+    } catch (error: unknown) {
+      const normalizedError = toError(
+        error,
+        `Failed to encrypt ${provider} API key`,
+      );
+      console.error(`Failed to encrypt ${provider} API key`, normalizedError);
+      throw normalizedError;
     }
   },
 

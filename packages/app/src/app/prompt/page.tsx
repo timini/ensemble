@@ -18,8 +18,12 @@ import { PromptTips } from '@/components/organisms/PromptTips';
 import { PromptInputWithHint } from '@/components/organisms/PromptInputWithHint';
 import { ProgressSteps } from '@/components/molecules/ProgressSteps';
 import { ResponseCard } from '@/components/molecules/ResponseCard';
-import { ProviderRegistry } from '@ensemble-ai/shared-utils/providers';
+import {
+  ProviderRegistry,
+  type AIProvider,
+} from '@ensemble-ai/shared-utils/providers';
 import { AVAILABLE_MODELS } from '~/lib/models';
+import { toError } from '~/lib/errors';
 
 export default function PromptPage() {
   const { t } = useTranslation();
@@ -88,26 +92,35 @@ export default function PromptPage() {
 
       startStreaming(selection.id, selection.provider, displayName);
 
-    let provider;
-    try {
-      provider = registry.getProvider(selection.provider, clientMode);
-    } catch {
-      provider = registry.getProvider(selection.provider, 'mock');
-    }
+      let providerClient: AIProvider;
+      try {
+        providerClient = registry.getProvider(selection.provider, clientMode);
+      } catch (error: unknown) {
+        if (registry.hasProvider(selection.provider, 'mock')) {
+          providerClient = registry.getProvider(selection.provider, 'mock');
+        } else {
+          throw toError(
+            error,
+            `No provider configured for ${selection.provider}`,
+          );
+        }
+      }
 
-      void provider
+      void providerClient
         .streamResponse(
           currentPrompt,
           selection.model,
-          (chunk) => appendStreamChunk(selection.id, chunk),
-          (_fullResponse, responseTime) => {
+          (chunk: string) => appendStreamChunk(selection.id, chunk),
+          (_fullResponse: string, responseTime: number) => {
             completeResponse(selection.id, responseTime);
           },
-          (error) => {
+          (error: Error) => {
             setError(selection.id, error.message);
           },
         )
-        .catch((error) => setError(selection.id, (error as Error).message));
+        .catch((error: unknown) =>
+          setError(selection.id, toError(error).message),
+        );
     });
 
     completeStep('prompt');
