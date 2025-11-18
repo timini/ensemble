@@ -1,6 +1,6 @@
 import OpenAI from 'openai';
-import { BaseFreeClient, type StreamOptions } from '../base/BaseFreeClient.js';
-import type { ValidationResult } from '../../types.js';
+import { BaseFreeClient, type StreamOptions } from '../base/BaseFreeClient';
+import type { ValidationResult } from '../../types';
 
 export class FreeOpenAIClient extends BaseFreeClient {
   private createClient(apiKey: string) {

@@ -25,6 +25,7 @@ describe('agreement utilities', () => {
         isComplete: true,
         responseTime: 100,
         error: null,
+        tokenCount: null,
       },
       {
         modelId: 'model-2',
@@ -35,6 +36,7 @@ describe('agreement utilities', () => {
         isComplete: true,
         responseTime: 120,
         error: null,
+        tokenCount: null,
       },
       {
         modelId: 'model-3',
@@ -45,6 +47,7 @@ describe('agreement utilities', () => {
         isComplete: true,
         responseTime: 90,
         error: null,
+        tokenCount: null,
       },
     ];
 
@@ -88,6 +91,7 @@ describe('agreement utilities', () => {
         isComplete: true,
         responseTime: 100,
         error: null,
+        tokenCount: null,
       },
       {
         modelId: 'model-2',
@@ -98,6 +102,7 @@ describe('agreement utilities', () => {
         isComplete: true,
         responseTime: 120,
         error: null,
+        tokenCount: null,
       },
     ];
 
@@ -105,6 +110,7 @@ describe('agreement utilities', () => {
 
     const malformed = [
       [1, 0.5],
+      [0.5],
       [0.5],
     ];
 

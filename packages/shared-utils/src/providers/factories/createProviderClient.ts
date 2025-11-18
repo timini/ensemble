@@ -1,9 +1,9 @@
-import type { AIProvider, ProviderMode, ProviderName } from '../types.js';
-import { MockProviderClient } from '../clients/mock/MockProviderClient.js';
-import { FreeOpenAIClient } from '../clients/openai/FreeOpenAIClient.js';
-import { FreeAnthropicClient } from '../clients/anthropic/FreeAnthropicClient.js';
-import { FreeGoogleClient } from '../clients/google/FreeGoogleClient.js';
-import { FreeXAIClient } from '../clients/xai/FreeXAIClient.js';
+import type { AIProvider, ProviderMode, ProviderName } from '../types';
+import { MockProviderClient } from '../clients/mock/MockProviderClient';
+import { FreeOpenAIClient } from '../clients/openai/FreeOpenAIClient';
+import { FreeAnthropicClient } from '../clients/anthropic/FreeAnthropicClient';
+import { FreeGoogleClient } from '../clients/google/FreeGoogleClient';
+import { FreeXAIClient } from '../clients/xai/FreeXAIClient';
 
 interface CreateProviderClientOptions {
   provider: ProviderName;

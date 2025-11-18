@@ -1,7 +1,7 @@
 import axios from 'axios';
-import { BaseFreeClient } from '../base/BaseFreeClient.js';
-import type { ValidationResult } from '../../types.js';
-import { extractAxiosErrorMessage } from '../../utils/extractAxiosError.js';
+import { BaseFreeClient } from '../base/BaseFreeClient';
+import type { ValidationResult } from '../../types';
+import { extractAxiosErrorMessage } from '../../utils/extractAxiosError';
 
 interface GoogleModelEntry {
   name?: string;

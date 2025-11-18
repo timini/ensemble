@@ -157,7 +157,7 @@ export default function ConfigPage() {
         label: 'OpenAI API Key',
         value: apiKeys.openai?.key ?? '',
         placeholder: 'sk-...',
-        helperText: hydratedStatuses.openai === 'valid' ? 'API key configured' : hydratedStatuses.openai === 'validating' ? 'Validating...' : 'Enter your OpenAI API key',
+        helperText: hydratedStatuses.openai === 'valid' ? 'API key configured' : hydratedStatuses.openai === 'validating' ? 'Validating...' : hydratedStatuses.openai === 'invalid' ? 'Invalid API key' : 'Enter your OpenAI API key',
         validationStatus: hydratedStatuses.openai,
         showKey: apiKeys.openai?.visible ?? false,
       },
@@ -166,7 +166,7 @@ export default function ConfigPage() {
         label: 'Anthropic API Key',
         value: apiKeys.anthropic?.key ?? '',
         placeholder: 'sk-ant-...',
-        helperText: hydratedStatuses.anthropic === 'valid' ? 'API key configured' : hydratedStatuses.anthropic === 'validating' ? 'Validating...' : 'Enter your Anthropic API key',
+        helperText: hydratedStatuses.anthropic === 'valid' ? 'API key configured' : hydratedStatuses.anthropic === 'validating' ? 'Validating...' : hydratedStatuses.anthropic === 'invalid' ? 'Invalid API key' : 'Enter your Anthropic API key',
         validationStatus: hydratedStatuses.anthropic,
         showKey: apiKeys.anthropic?.visible ?? false,
       },
@@ -175,7 +175,7 @@ export default function ConfigPage() {
         label: 'Google (Gemini) API Key',
         value: apiKeys.google?.key ?? '',
         placeholder: 'AIza...',
-        helperText: hydratedStatuses.google === 'valid' ? 'API key configured' : hydratedStatuses.google === 'validating' ? 'Validating...' : 'Enter your Google AI API key',
+        helperText: hydratedStatuses.google === 'valid' ? 'API key configured' : hydratedStatuses.google === 'validating' ? 'Validating...' : hydratedStatuses.google === 'invalid' ? 'Invalid API key' : 'Enter your Google AI API key',
         validationStatus: hydratedStatuses.google,
         showKey: apiKeys.google?.visible ?? false,
       },
@@ -184,7 +184,7 @@ export default function ConfigPage() {
         label: 'xAI (Grok) API Key',
         value: apiKeys.xai?.key ?? '',
         placeholder: 'xai-...',
-        helperText: hydratedStatuses.xai === 'valid' ? 'API key configured' : hydratedStatuses.xai === 'validating' ? 'Validating...' : 'Enter your xAI API key',
+        helperText: hydratedStatuses.xai === 'valid' ? 'API key configured' : hydratedStatuses.xai === 'validating' ? 'Validating...' : hydratedStatuses.xai === 'invalid' ? 'Invalid API key' : 'Enter your xAI API key',
         validationStatus: hydratedStatuses.xai,
         showKey: apiKeys.xai?.visible ?? false,
       },
@@ -251,26 +251,26 @@ export default function ConfigPage() {
       />
 
       <div className="mt-8">
-      <ModeSelector
-        selectedMode={displayMode}
-        onSelectFreeMode={handleSelectFreeMode}
-        onSelectProMode={handleSelectProMode}
-        freeModeDisabled={!webCryptoSupported}
-        proModeDisabled
-      />
+        <ModeSelector
+          selectedMode={displayMode}
+          onSelectFreeMode={handleSelectFreeMode}
+          onSelectProMode={handleSelectProMode}
+          freeModeDisabled={!webCryptoSupported}
+          proModeDisabled
+        />
 
-      {!webCryptoSupported && (
-        <div className="mt-6">
-          <InlineAlert variant="error">
-            <p className="font-semibold">
-              {t('pages.config.webCryptoUnsupportedTitle')}
-            </p>
-            <p className="mt-1">
-              {t('pages.config.webCryptoUnsupportedDescription')}
-            </p>
-          </InlineAlert>
-        </div>
-      )}
+        {!webCryptoSupported && (
+          <div className="mt-6">
+            <InlineAlert variant="error">
+              <p className="font-semibold">
+                {t('pages.config.webCryptoUnsupportedTitle')}
+              </p>
+              <p className="mt-1">
+                {t('pages.config.webCryptoUnsupportedDescription')}
+              </p>
+            </InlineAlert>
+          </div>
+        )}
       </div>
 
       {displayMode === 'free' && (
