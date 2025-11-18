@@ -78,6 +78,9 @@ npm install
 ### Development
 
 ```bash
+# Whenever you change packages/shared-utils, rebuild it so the dist bundle and published types stay in sync
+npm run build --workspace=packages/shared-utils
+
 # Start component library Storybook (port 6006)
 npm run dev:components
 
@@ -138,6 +141,14 @@ For detailed design system documentation, see: [`packages/component-library/docs
 
 ## 🧪 Testing Strategy
 
+Testing is wired into CI with parallel jobs:
+- **Component Library**: lint, unit tests, Storybook interaction tests
+- **Shared Utils**: lint + unit tests
+- **Wireframes**: lint + build verification
+- **App**: lint, typecheck, production build
+- **App E2E**: runs Playwright against the built app in parallel once the App job passes
+- **Static Analysis**: `npm run analyze:fta`
+
 ### Unit Tests (Vitest + Testing Library)
 - **Location**: `packages/component-library/src/components/`
 - **Coverage**: 80%+ required per Constitution Principle VIII
@@ -158,6 +169,16 @@ Per Constitution Principle VIII, all components follow the TDD workflow:
 1. Write Storybook story with all variants FIRST
 2. Write unit tests BEFORE implementation
 3. Implement until tests pass
+
+## 🧱 Working with Shared Utilities
+
+`packages/shared-utils` ships compiled JavaScript and type definitions under `dist/`. The app workspace imports from that bundle, so whenever you change the shared-utils source run:
+
+```bash
+npm run build --workspace=packages/shared-utils
+```
+
+before running `next lint`, `tsc`, or the app’s Playwright tests. The CI pipeline builds the package automatically in both the App and App E2E jobs, so keeping the dist folder fresh locally ensures you see the same behavior as CI.
 4. Visual validation in Storybook
 
 ## 🔧 Component Development
