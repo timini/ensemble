@@ -48,9 +48,9 @@ test.describe('Full Workflow - Mock Mode', () => {
       // Progress indicator should show step 1
       await expect(page.getByTestId('progress-step-config')).toBeVisible();
 
-      // Continue button should be disabled initially
-      const continueButton = page.getByRole('button', { name: /continue/i });
-      await expect(continueButton).toBeDisabled();
+      // Next button should be disabled initially
+      const nextButton = page.getByRole('button', { name: 'Next', exact: true });
+      await expect(nextButton).toBeDisabled();
 
       // Select Free mode
       await page.locator('[data-mode="free"]').click();
@@ -77,12 +77,12 @@ test.describe('Full Workflow - Mock Mode', () => {
         3,
       );
 
-      // Continue button should now be enabled
-      await expect(page.getByRole('button', { name: /continue/i })).toBeEnabled();
+      // Next button should now be enabled
+      await expect(page.getByRole('button', { name: 'Next', exact: true })).toBeEnabled();
     });
 
     await test.step('Navigate to ensemble page', async () => {
-      await page.getByRole('button', { name: /continue/i }).click();
+      await page.getByRole('button', { name: 'Next', exact: true }).click();
       await expect(page).toHaveURL('/ensemble');
     });
 
@@ -96,9 +96,9 @@ test.describe('Full Workflow - Mock Mode', () => {
       // Progress indicator should show step 2
       await expect(page.getByTestId('progress-step-ensemble')).toBeVisible();
 
-      // Continue button disabled initially (need min 2 models)
-      const continueButton = page.getByRole('button', { name: /continue/i });
-      await expect(continueButton).toBeDisabled();
+      // Next button disabled initially (need min 2 models)
+      const nextButton = page.getByRole('button', { name: 'Next', exact: true });
+      await expect(nextButton).toBeDisabled();
 
       // Select 3 models
       await enabledModels(page).first().click();
@@ -109,8 +109,8 @@ test.describe('Full Workflow - Mock Mode', () => {
       const selectedCards = page.locator('[data-testid^="model-card-"][data-selected="true"]');
       await expect(selectedCards).toHaveCount(3);
 
-      // Continue button should now be enabled
-      await expect(continueButton).toBeEnabled();
+      // Next button should now be enabled
+      await expect(nextButton).toBeEnabled();
     });
 
     await test.step('Designate summarizer model', async () => {
@@ -124,7 +124,7 @@ test.describe('Full Workflow - Mock Mode', () => {
     });
 
     await test.step('Navigate to prompt page', async () => {
-      await page.getByRole('button', { name: /continue/i }).click();
+      await page.getByRole('button', { name: 'Next', exact: true }).click();
       await expect(page).toHaveURL('/prompt');
     });
 
@@ -240,9 +240,9 @@ test.describe('Full Workflow - Mock Mode', () => {
 
       // Navigate to ensemble page (wait for keys to be revalidated)
       await expectConfiguredApiKeys(page, 3);
-      const continueButton = page.getByRole('button', { name: /continue/i });
-      await expect(continueButton).toBeEnabled();
-      await continueButton.click();
+      const nextButton = page.getByRole('button', { name: 'Next', exact: true });
+      await expect(nextButton).toBeEnabled();
+      await nextButton.click();
 
       // Models should still be selected
       const selectedCards = page.locator('[data-testid^="model-card-"][data-selected="true"]');
@@ -258,14 +258,14 @@ test.describe('Full Workflow - Mock Mode', () => {
       // Select Free mode with only 1 API key
       await page.locator('[data-mode="free"]').click();
       await fillAndValidateKey(page, 'openai', 'sk-test-minimal', 1);
-      const continueButton = page.getByRole('button', { name: /continue/i });
-      await expect(continueButton).toBeEnabled();
-      await continueButton.click();
+      const nextButton = page.getByRole('button', { name: 'Next', exact: true });
+      await expect(nextButton).toBeEnabled();
+      await nextButton.click();
 
       // Select exactly 2 models (minimum)
       await page.locator('[data-testid^="model-card-"]').first().click();
       await page.locator('[data-testid^="model-card-"]').nth(1).click();
-      await page.getByRole('button', { name: /continue/i }).click();
+      await page.getByRole('button', { name: 'Next', exact: true }).click();
 
       // Enter minimal prompt
       await page.getByTestId('prompt-textarea').fill('Test prompt');
@@ -282,23 +282,23 @@ test.describe('Full Workflow - Mock Mode', () => {
       // Try to navigate directly to ensemble without completing config
       await page.goto('/ensemble');
 
-      // Should work (no forced redirect), but Continue will be disabled
+      // Should work (no forced redirect), but Next will be disabled
       // until proper configuration is done
-      const continueButton = page.getByRole('button', { name: /continue/i });
-      await expect(continueButton).toBeDisabled();
+      const nextButton = page.getByRole('button', { name: 'Next', exact: true });
+      await expect(nextButton).toBeDisabled();
 
       // Navigate properly through config first
       await page.goto('/config');
       await page.locator('[data-mode="free"]').click();
       await fillAndValidateKey(page, 'openai', 'sk-test-key', 1);
-      const continueButtonConfig = page.getByRole('button', { name: /continue/i });
-      await expect(continueButtonConfig).toBeEnabled();
-      await continueButtonConfig.click();
+      const nextButtonConfig = page.getByRole('button', { name: 'Next', exact: true });
+      await expect(nextButtonConfig).toBeEnabled();
+      await nextButtonConfig.click();
 
-      // Now ensemble Continue should work after selecting models
+      // Now ensemble Next should work after selecting models
       await page.locator('[data-testid^="model-card-"]').first().click();
       await page.locator('[data-testid^="model-card-"]').nth(1).click();
-      await expect(page.getByRole('button', { name: /continue/i })).toBeEnabled();
+      await expect(page.getByRole('button', { name: 'Next', exact: true })).toBeEnabled();
     });
   });
 });

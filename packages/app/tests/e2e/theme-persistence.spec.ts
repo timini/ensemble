@@ -64,7 +64,7 @@ test.describe('Theme Persistence', () => {
     // Navigate to ensemble page
     await page.locator('[data-mode="free"]').click();
     await page.locator('[data-provider="openai"] input').fill('sk-test-key');
-    await page.getByRole('button', { name: /continue/i }).click();
+    await page.getByRole('button', { name: 'Next', exact: true }).click();
 
     // Dark theme should persist
     await expect(page.locator('html')).toHaveClass(/dark/);
@@ -72,7 +72,7 @@ test.describe('Theme Persistence', () => {
     // Navigate to prompt page
     await page.locator('[data-testid^="model-card-"]').first().click();
     await page.locator('[data-testid^="model-card-"]').nth(1).click();
-    await page.getByRole('button', { name: /continue/i }).click();
+    await page.getByRole('button', { name: 'Next', exact: true }).click();
 
     // Dark theme should still persist
     await expect(page.locator('html')).toHaveClass(/dark/);

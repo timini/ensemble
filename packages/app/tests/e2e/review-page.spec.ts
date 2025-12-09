@@ -33,12 +33,12 @@ test.describe('Review Page', () => {
     // Configure at least 1 API key to enable Continue button
     await page.locator('[data-provider="openai"] input').fill('sk-test-openai-key');
 
-    await page.getByRole('button', { name: /continue/i }).click();
+    await page.getByRole('button', { name: 'Next', exact: true }).click();
 
     // Select 2 models on ensemble page
     await enabledModels(page).first().click();
     await enabledModels(page).nth(1).click();
-    await page.getByRole('button', { name: /continue/i }).click();
+    await page.getByRole('button', { name: 'Next', exact: true }).click();
 
     // Enter prompt on prompt page
     await page.getByTestId('prompt-textarea').fill('What is the meaning of life?');
@@ -139,7 +139,7 @@ test.describe('Review Page', () => {
   test('renders manual responses alongside AI responses', async ({ page }) => {
     await page.goto('/ensemble');
     await addManualResponse(page);
-    await page.getByRole('button', { name: /continue/i }).click();
+    await page.getByRole('button', { name: 'Next', exact: true }).click();
     await page.getByTestId('prompt-textarea').fill('Manual response check');
     await page.getByRole('button', { name: /generate responses/i }).click();
 

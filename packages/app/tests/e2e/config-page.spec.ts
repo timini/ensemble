@@ -20,8 +20,9 @@ const expectConfiguredKeysCount = async (page: Page, count: number) => {
 
 test.describe('Config Page', () => {
   test.beforeEach(async ({ page }) => {
-    // Navigate to config page
     await page.goto('/config');
+    await page.evaluate(() => localStorage.clear());
+    await page.reload();
   });
 
   test('loads config page successfully', async ({ page }) => {
@@ -43,9 +44,9 @@ test.describe('Config Page', () => {
     await expect(page.locator('[data-mode="pro"]')).toBeVisible();
   });
 
-  test('Continue button is disabled initially', async ({ page }) => {
-    const continueButton = page.getByRole('button', { name: /continue/i });
-    await expect(continueButton).toBeDisabled();
+  test('Next button is disabled initially', async ({ page }) => {
+    const nextButton = page.getByRole('button', { name: 'Next', exact: true });
+    await expect(nextButton).toBeDisabled();
   });
 
   test('can select Free mode', async ({ page }) => {
@@ -59,20 +60,20 @@ test.describe('Config Page', () => {
     );
   });
 
-  test('Continue button enables after Free mode selection and at least 1 API key configured', async ({ page }) => {
+  test('Next button enables after Free mode selection and at least 1 API key configured', async ({ page }) => {
     // Initially disabled
-    const continueButton = page.getByRole('button', { name: /continue/i });
-    await expect(continueButton).toBeDisabled();
+    const nextButton = page.getByRole('button', { name: 'Next', exact: true });
+    await expect(nextButton).toBeDisabled();
 
     // Select Free mode
     await page.locator('[data-mode="free"]').click();
 
-    // Configure just 1 API key (should be enough to enable Continue)
+    // Configure just 1 API key (should be enough to enable Next)
     await page.locator('[data-provider="openai"] input').fill('sk-test-openai-key');
     await expectConfiguredKeysCount(page, 1);
 
     // Now enabled
-    await expect(continueButton).toBeEnabled();
+    await expect(nextButton).toBeEnabled();
   });
 
   test('shows dynamic message based on configured API keys count', async ({ page }) => {
@@ -107,7 +108,7 @@ test.describe('Config Page', () => {
     await expect(proModeCard.getByRole('button')).toBeDisabled();
   });
 
-  test('navigates to /ensemble after clicking Continue', async ({ page }) => {
+  test('navigates to /ensemble after clicking Next', async ({ page }) => {
     // Select Free mode
     await page.locator('[data-mode="free"]').click();
 
@@ -115,8 +116,8 @@ test.describe('Config Page', () => {
     await page.locator('[data-provider="openai"] input').fill('sk-test-openai-key');
     await expectConfiguredKeysCount(page, 1);
 
-    // Click Continue button
-    await page.getByRole('button', { name: /continue/i }).click();
+    // Click Next button
+    await page.getByRole('button', { name: 'Next', exact: true }).click();
 
     // Should navigate to ensemble page
     await expect(page).toHaveURL('/ensemble');
