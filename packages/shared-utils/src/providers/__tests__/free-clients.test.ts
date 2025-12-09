@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { FreeOpenAIClient } from '../clients/openai/FreeOpenAIClient.js';
 import { FreeXAIClient } from '../clients/xai/FreeXAIClient.js';
 import { MockProviderClient } from '../clients/mock/MockProviderClient.js';
@@ -11,6 +11,7 @@ const mocks = vi.hoisted(() => ({
   openAiList: vi.fn(),
   openAiChatCreate: vi.fn(),
   axiosGet: vi.fn(),
+  anthropicModelsList: vi.fn(),
 }));
 
 const createAsyncStream = (events: unknown[]) => ({
@@ -46,6 +47,15 @@ vi.mock('axios', () => {
   };
 });
 
+vi.mock('@anthropic-ai/sdk', () => ({
+  default: class {
+    models = { list: mocks.anthropicModelsList };
+    messages = {
+      create: vi.fn(),
+    };
+  },
+}));
+
 class TestFreeClient extends BaseFreeClient {
   constructor(
     getApiKey: () => string | null,
@@ -72,6 +82,7 @@ describe('Free mode provider clients', () => {
     mocks.openAiList.mockReset();
     mocks.openAiChatCreate.mockReset();
     mocks.axiosGet.mockReset();
+    mocks.anthropicModelsList.mockReset();
   });
 
   describe('FreeOpenAIClient', () => {
@@ -124,20 +135,18 @@ describe('Free mode provider clients', () => {
       expect(result.error).toContain('bad anthro key');
     });
 
-    it('fetches text models via Anthropic API', async () => {
-      mocks.axiosGet.mockResolvedValueOnce({
-        data: {
-          data: [
-            { id: 'claude-3', model: 'unused' },
-            { model: 'legacy-haiku' },
-            {},
-          ],
-        },
+    it('fetches text models via Anthropic SDK', async () => {
+      mocks.anthropicModelsList.mockResolvedValueOnce({
+        data: [
+          { id: 'claude-3-5-sonnet-20241022' },
+          { id: 'claude-3-opus-20240229' },
+          { id: 'text-embedding-ada-002' }, // Should be filtered out
+        ],
       });
       const client = new FreeAnthropicClient('anthropic', () => 'sk-ant');
       await expect(client.listAvailableTextModels()).resolves.toEqual([
-        'claude-3',
-        'legacy-haiku',
+        'claude-3-5-sonnet-20241022',
+        'claude-3-opus-20240229',
       ]);
     });
   });
@@ -245,7 +254,10 @@ describe('Free mode provider clients', () => {
       );
       expect(onChunk).toHaveBeenNthCalledWith(1, 'Hello');
       expect(onChunk).toHaveBeenNthCalledWith(2, ' world');
-      expect(onComplete).toHaveBeenCalledWith('Hello world', expect.any(Number));
+      // onComplete receives (fullResponse, responseTime, tokenCount?) - tokenCount may be 0 or undefined
+      expect(onComplete).toHaveBeenCalled();
+      expect(onComplete.mock.calls[0][0]).toBe('Hello world');
+      expect(typeof onComplete.mock.calls[0][1]).toBe('number');
       expect(onError).not.toHaveBeenCalled();
     });
 
@@ -289,7 +301,10 @@ describe('Free mode provider clients', () => {
 
       expect(onChunk).toHaveBeenNthCalledWith(1, 'Segment ');
       expect(onChunk).toHaveBeenNthCalledWith(2, 'two');
-      expect(onComplete).toHaveBeenCalledWith('Segment two', expect.any(Number));
+      // onComplete receives (fullResponse, responseTime, tokenCount?) - tokenCount may be 0 or undefined
+      expect(onComplete).toHaveBeenCalled();
+      expect(onComplete.mock.calls[0][0]).toBe('Segment two');
+      expect(typeof onComplete.mock.calls[0][1]).toBe('number');
     });
   });
 
@@ -340,5 +355,77 @@ describe('Free mode provider clients', () => {
     expect(warnSpy).toHaveBeenCalled();
     mockDefault.mockRestore();
     warnSpy.mockRestore();
+  });
+
+  describe('BaseFreeClient streaming timeout', () => {
+    afterEach(() => {
+      // Ensure real timers are always restored after each test
+      vi.useRealTimers();
+    });
+
+    it('should timeout and call onError when stream hangs indefinitely', async () => {
+      // Create a client with a streaming implementation that never resolves
+      class HangingClient extends BaseFreeClient {
+        async validateApiKey() {
+          return { valid: true };
+        }
+
+        protected override async streamWithProvider(): Promise<void> {
+          // This promise never resolves - simulating a hanging stream
+          await new Promise(() => {
+            // Never resolves
+          });
+        }
+      }
+
+      const client = new HangingClient('openai', () => 'test-key');
+      const onChunk = vi.fn();
+      const onComplete = vi.fn();
+      const onError = vi.fn();
+
+      // Set a short timeout for testing (the actual implementation should use a longer timeout)
+      // We'll use vi.useFakeTimers to speed this up
+      vi.useFakeTimers();
+
+      const streamPromise = client.streamResponse('test prompt', 'test-model', onChunk, onComplete, onError);
+
+      // Advance time past the timeout (default should be 2 minutes = 120000ms)
+      await vi.advanceTimersByTimeAsync(130000);
+
+      await streamPromise;
+
+      vi.useRealTimers();
+
+      expect(onError).toHaveBeenCalledWith(
+        expect.objectContaining({
+          message: expect.stringContaining('timeout'),
+        }),
+      );
+      expect(onComplete).not.toHaveBeenCalled();
+    });
+
+    it('should complete normally when stream finishes before timeout', async () => {
+      class FastClient extends BaseFreeClient {
+        async validateApiKey() {
+          return { valid: true };
+        }
+
+        protected override async streamWithProvider(options: { onChunk: (chunk: string) => void; onComplete: (response: string, time: number, tokenCount?: number) => void }): Promise<void> {
+          options.onChunk('Hello');
+          options.onComplete('Hello', 100, 5);
+        }
+      }
+
+      const client = new FastClient('openai', () => 'test-key');
+      const onChunk = vi.fn();
+      const onComplete = vi.fn();
+      const onError = vi.fn();
+
+      await client.streamResponse('test prompt', 'test-model', onChunk, onComplete, onError);
+
+      expect(onChunk).toHaveBeenCalledWith('Hello');
+      expect(onComplete).toHaveBeenCalledWith('Hello', 100, 5);
+      expect(onError).not.toHaveBeenCalled();
+    });
   });
 });

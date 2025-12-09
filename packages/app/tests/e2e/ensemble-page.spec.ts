@@ -12,18 +12,21 @@
 import { test, expect, type Page } from '@playwright/test';
 
 test.describe('Ensemble Page', () => {
-const enabledModels = (page: Page) =>
-  page.locator('[data-testid^="model-card-"][data-disabled="false"]');
+  const enabledModels = (page: Page) =>
+    page.locator('[data-testid^="model-card-"][data-disabled="false"]');
 
-test.beforeEach(async ({ page }) => {
-  // Navigate through config first
-  await page.goto('/config');
-  await page.locator('[data-mode="free"]').click();
+  test.beforeEach(async ({ page }) => {
+    // Navigate through config first
+    await page.goto('/config');
+    await page.evaluate(() => localStorage.clear());
+    await page.reload();
 
-  // Configure at least 1 API key to enable Continue button
-  await page.locator('[data-provider="openai"] input').fill('sk-test-openai-key');
+    await page.locator('[data-mode="free"]').click();
 
-  await page.getByRole('button', { name: /continue/i }).click();
+    // Configure at least 1 API key to enable Continue button
+    await page.locator('[data-provider="openai"] input').fill('sk-test-openai-key');
+
+    await page.getByRole('button', { name: 'Next', exact: true }).click();
 
     // Should now be on ensemble page
     await expect(page).toHaveURL('/ensemble');
@@ -49,9 +52,9 @@ test.beforeEach(async ({ page }) => {
     await expect(modelCards.first()).toBeVisible();
   });
 
-  test('Continue button is disabled initially', async ({ page }) => {
-    const continueButton = page.getByRole('button', { name: /continue/i });
-    await expect(continueButton).toBeDisabled();
+  test('Next button is disabled initially', async ({ page }) => {
+    const nextButton = page.getByRole('button', { name: 'Next', exact: true });
+    await expect(nextButton).toBeDisabled();
   });
 
   test('can select models', async ({ page }) => {
@@ -63,15 +66,15 @@ test.beforeEach(async ({ page }) => {
   });
 
   test('requires minimum 2 models', async ({ page }) => {
-    const continueButton = page.getByRole('button', { name: /continue/i });
+    const nextButton = page.getByRole('button', { name: 'Next', exact: true });
 
     // Select 1 model - button still disabled
     await enabledModels(page).first().click();
-    await expect(continueButton).toBeDisabled();
+    await expect(nextButton).toBeDisabled();
 
     // Select 2nd model - button now enabled
     await enabledModels(page).nth(1).click();
-    await expect(continueButton).toBeEnabled();
+    await expect(nextButton).toBeEnabled();
   });
 
   test('enforces maximum 6 models', async ({ page }) => {
@@ -81,7 +84,7 @@ test.beforeEach(async ({ page }) => {
     await page.locator('[data-provider="openai"] input').fill('sk-openai');
     await page.locator('[data-provider="anthropic"] input').fill('sk-anthropic');
     await page.locator('[data-provider="google"] input').fill('sk-google');
-    await page.getByRole('button', { name: /continue/i }).click();
+    await page.getByRole('button', { name: 'Next', exact: true }).click();
 
     const enabledCards = enabledModels(page);
     const count = await enabledCards.count();
@@ -118,7 +121,7 @@ test.beforeEach(async ({ page }) => {
     await enabledModels(page).nth(1).click();
 
     // Click Continue button
-    await page.getByRole('button', { name: /continue/i }).click();
+    await page.getByRole('button', { name: 'Next', exact: true }).click();
 
     // Should navigate to prompt page
     await expect(page).toHaveURL('/prompt');
@@ -164,7 +167,7 @@ test.beforeEach(async ({ page }) => {
     await page.goto('/config');
     await page.locator('[data-mode="free"]').click();
     await page.locator('[data-provider="openai"] input').fill('sk-test-openai-key');
-    await page.getByRole('button', { name: /continue/i }).click();
+    await page.getByRole('button', { name: 'Next', exact: true }).click();
 
     const selector = '[data-testid="model-card-gemini-1.5-pro"]';
     const googleCard = page.locator(selector);

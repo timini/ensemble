@@ -19,9 +19,8 @@ describe('FreeGoogleClient', () => {
                 models: [
                     { name: 'models/gemini-1.0-pro', displayName: 'Gemini 1.0 Pro' },
                     { name: 'models/gemini-1.5-flash', displayName: 'Gemini 1.5 Flash' },
-                    { name: 'models/embedding-001', displayName: 'Embedding 001' }, // Should be filtered out if we only want text models? 
-                    // Actually the current implementation doesn't filter by capability, just returns all.
-                    // But let's verify what it returns.
+                    { name: 'models/embedding-001', displayName: 'Embedding 001' }, // Should be filtered out (embedding models are not text models)
+                    { name: 'models/other-model', displayName: 'Other Model' }, // Should be filtered out (doesn't start with 'gemini-')
                 ],
             },
         };
@@ -39,11 +38,12 @@ describe('FreeGoogleClient', () => {
             }
         );
 
-        // The current implementation splits by '/' and takes the last segment
+        // The implementation filters to only gemini-* models that are not embeddings
         expect(models).toContain('gemini-1.0-pro');
         expect(models).toContain('gemini-1.5-flash');
-        expect(models).toContain('embedding-001');
-        expect(models).toHaveLength(3);
+        expect(models).not.toContain('embedding-001'); // Filtered out as embedding model
+        expect(models).not.toContain('other-model'); // Filtered out as non-gemini model
+        expect(models).toHaveLength(2);
     });
 
     it('should handle empty response gracefully', async () => {

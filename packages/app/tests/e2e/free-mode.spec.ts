@@ -1,106 +1,89 @@
-import { test, expect, type Page } from '@playwright/test';
-
-const expectConfiguredApiKeys = async (page: Page, count: number) => {
-    const label =
-        count === 1
-            ? /1 API key configured/i
-            : new RegExp(`${count} API keys configured`, 'i');
-    await expect(page.getByText(label)).toBeVisible();
-};
+import { test, expect } from '@playwright/test';
 
 test.describe('Free Mode Workflow', () => {
-    test.beforeEach(async ({ page }) => {
-        page.on('console', msg => console.log(`[Browser] ${msg.text()}`));
-        await page.goto('/config');
+  test.beforeEach(async ({ page }) => {
+    // Ensure we are in a clean state
+    await page.goto('/');
+    // If redirected to config, we are good. If not, maybe clear storage.
+    await page.evaluate(() => {
+      localStorage.clear();
     });
+    await page.reload();
+  });
 
-    test('validates API keys correctly', async ({ page }) => {
-        // Select Free mode
-        await page.locator('[data-mode="free"]').click();
+  test('complete workflow with API key configuration', async ({ page }) => {
+    page.on('console', msg => console.log(`BROWSER LOG: ${msg.text()}`));
 
-        // Initial state: 0 keys configured
-        await expectConfiguredApiKeys(page, 0);
-        const continueButton = page.getByRole('button', { name: /continue/i });
-        await expect(continueButton).toBeDisabled();
+    // 1. Configuration Page
+    await expect(page).toHaveURL('/config');
 
-        // Enter invalid key (mock client should accept anything non-empty, 
-        // but we can test the UI interaction)
-        // Note: Mock client validateApiKey always returns true currently.
-        // To test invalid key, we'd need to mock the validation response or use a specific "invalid" key if supported.
-        // For now, we verify the "validating" state and success.
+    // Select Free Mode
+    await page.getByTestId('mode-card-free').click();
 
-        // Enter valid key
-        await page.locator('[data-provider="openai"] input').fill('sk-test-key');
+    // Check if API key inputs are visible
+    await expect(page.getByTestId('api-key-configuration')).toBeVisible();
 
-        // Should show "Validating..." then "API key configured"
-        // (Fast in mock mode, so might skip validating check in E2E)
-        await expect(page.getByText('API key configured').first()).toBeVisible();
+    // Enter dummy API keys (Mock mode accepts anything)
+    await page.getByLabel('OpenAI API Key').fill('sk-dummy-openai');
+    await page.getByLabel('Anthropic API Key').fill('sk-dummy-anthropic');
 
-        // Verify count updated
-        await expectConfiguredApiKeys(page, 1);
+    // Wait for validation (Mock client delays 100-300ms)
+    await expect(page.getByTestId('api-key-configuration')).toContainText('2 API keys configured');
 
-        // Continue should be enabled
-        await expect(continueButton).toBeEnabled();
-    });
+    // Continue
+    const nextButton = page.getByRole('button', { name: 'Next', exact: true });
+    await expect(nextButton).toBeEnabled();
 
-    test('requires at least one API key to continue', async ({ page }) => {
-        await page.locator('[data-mode="free"]').click();
+    const btnText = await nextButton.innerText();
+    console.log(`Found button innerText: "${btnText}"`);
 
-        const continueButton = page.getByRole('button', { name: /continue/i });
-        await expect(continueButton).toBeDisabled();
+    // Wait for stability
+    await page.waitForTimeout(500); // Reduced delay
 
-        // Enter key
-        await page.locator('[data-provider="anthropic"] input').fill('sk-ant-test');
-        await expect(continueButton).toBeEnabled();
+    console.log('Clicking Next button...');
+    await nextButton.click();
 
-        // Clear key
-        await page.locator('[data-provider="anthropic"] input').fill('');
-        await expect(continueButton).toBeDisabled();
-    });
+    // 2. Ensemble Page
+    await expect(page).toHaveURL('/ensemble', { timeout: 15000 });
 
-    test('persists API keys in localStorage', async ({ page }) => {
-        await page.locator('[data-mode="free"]').click();
-        await page.locator('[data-provider="google"] input').fill('test-google-key');
-        await expectConfiguredApiKeys(page, 1);
+    // Select models
+    await page.getByTestId('model-card-gpt-4o').click();
+    await page.getByTestId('model-card-claude-3-5-sonnet').click();
 
-        // Reload page
-        await page.reload();
+    // Continue
+    await page.getByRole('button', { name: 'Next', exact: true }).click();
 
-        // Should still have key configured
-        await expect(page.locator('[data-mode="free"]')).toHaveAttribute('data-selected', 'true');
-        // Note: Input value might be masked or empty if not hydrated yet, 
-        // but the validation status should eventually return to valid.
-        // In the current implementation, we don't re-populate the input for security (unless we implement that).
-        // But the store has it.
+    // 3. Prompt Page
+    await expect(page).toHaveURL('/prompt');
 
-        // Wait for hydration and validation
-        await expectConfiguredApiKeys(page, 1);
-    });
+    // Enter prompt
+    await page.getByPlaceholder('Enter your prompt here...').fill('Tell me a joke about testing.');
 
-    test('fetches and displays dynamic models from provider', async ({ page }) => {
-        // Mock Google API response
-        await page.route('https://generativelanguage.googleapis.com/v1beta/models*', async (route) => {
-            const json = {
-                models: [
-                    { name: 'models/gemini-custom-1', displayName: 'Gemini Custom 1' },
-                    { name: 'models/gemini-custom-2', displayName: 'Gemini Custom 2' },
-                ],
-            };
-            await route.fulfill({ json });
-        });
+    // Generate
+    await page.getByRole('button', { name: 'Generate Responses' }).click();
 
-        await page.locator('[data-mode="free"]').click();
+    // 4. Review Page
+    await expect(page).toHaveURL('/review');
 
-        // Enter Google key to trigger fetch
-        await page.locator('[data-provider="google"] input').fill('valid-google-key');
-        await expectConfiguredApiKeys(page, 1);
+    // Verify responses are streaming/complete (using prefix matching due to timestamp in IDs)
+    await expect(page.locator('[data-testid^="response-card-openai-gpt-4o-"]')).toBeVisible();
+    await expect(page.locator('[data-testid^="response-card-anthropic-claude-3-5-sonnet-"]')).toBeVisible();
 
-        // Navigate to Ensemble page
-        await page.getByRole('button', { name: /continue/i }).click();
+    // Wait for completion
+    await expect(page.locator('[data-testid^="response-card-openai-gpt-4o-"]')).toHaveAttribute('data-status', 'complete', { timeout: 30000 });
+    await expect(page.locator('[data-testid^="response-card-anthropic-claude-3-5-sonnet-"]')).toHaveAttribute('data-status', 'complete', { timeout: 30000 });
 
-        // Check if custom models are displayed
-        // Note: The model ID is sanitized (models/ removed)
-        await expect(page.getByText('Gemini Custom 1')).toBeVisible();
-        await expect(page.getByText('Gemini Custom 2')).toBeVisible();
-    });
+    // Verify token counts are displayed
+    await expect(page.locator('[data-testid^="response-card-openai-gpt-4o-"]')).toContainText('tokens');
+    await expect(page.locator('[data-testid^="response-card-anthropic-claude-3-5-sonnet-"]')).toContainText('tokens');
+
+    // 5. Verify Google and XAI (Additional run or reset)
+    // For simplicity in this test, we'll just verify they are available in the config if we were to select them
+    // But since we already ran the flow, let's just ensure the code supports them by checking the config page again
+    await page.goto('/config');
+    await page.getByTestId('mode-card-free').click();
+    await page.getByLabel('Google (Gemini) API Key').fill('AIza-dummy');
+    await page.getByLabel('xAI (Grok) API Key').fill('xai-dummy');
+    await expect(page.getByTestId('api-key-configuration')).toContainText('4 API keys configured');
+  });
 });

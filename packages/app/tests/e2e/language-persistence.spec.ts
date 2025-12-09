@@ -70,10 +70,12 @@ test.describe('Language Persistence', () => {
     await page.getByRole('option', { name: /français/i }).click();
     await page.getByRole('button', { name: /terminé|done/i }).click();
 
-    // Navigate to ensemble page
+    // Navigate to ensemble page (French: "Suivant" = Next)
     await page.locator('[data-mode="free"]').click();
     await page.locator('[data-provider="openai"] input').fill('sk-test-key');
-    await page.getByRole('button', { name: /continuer|continue/i }).click();
+    // Wait for validation to complete and button to be enabled
+    await expect(page.getByRole('button', { name: 'Suivant' })).toBeEnabled({ timeout: 10000 });
+    await page.getByRole('button', { name: 'Suivant' }).click();
 
     // French should persist
     await expect(page.locator('html')).toHaveAttribute('lang', 'fr');
@@ -81,7 +83,7 @@ test.describe('Language Persistence', () => {
     // Navigate to prompt page
     await page.locator('[data-testid^="model-card-"]').first().click();
     await page.locator('[data-testid^="model-card-"]').nth(1).click();
-    await page.getByRole('button', { name: /continuer|continue/i }).click();
+    await page.getByRole('button', { name: 'Suivant' }).click();
 
     // French should still persist
     await expect(page.locator('html')).toHaveAttribute('lang', 'fr');
@@ -160,10 +162,12 @@ test.describe('Language Persistence', () => {
     // Config page in French
     await expect(page.locator('html')).toHaveAttribute('lang', 'fr');
 
-    // Navigate to ensemble
+    // Navigate to ensemble (French: "Suivant" = Next)
     await page.locator('[data-mode="free"]').click();
     await page.locator('[data-provider="openai"] input').fill('sk-test-key');
-    await page.getByRole('button', { name: /continuer/i }).click();
+    // Wait for validation to complete and button to be enabled
+    await expect(page.getByRole('button', { name: 'Suivant' })).toBeEnabled({ timeout: 10000 });
+    await page.getByRole('button', { name: 'Suivant' }).click();
 
     // Ensemble page in French
     await expect(page.locator('html')).toHaveAttribute('lang', 'fr');
@@ -171,7 +175,7 @@ test.describe('Language Persistence', () => {
     // Navigate to prompt
     await page.locator('[data-testid^="model-card-"]').first().click();
     await page.locator('[data-testid^="model-card-"]').nth(1).click();
-    await page.getByRole('button', { name: /continuer/i }).click();
+    await page.getByRole('button', { name: 'Suivant' }).click();
 
     // Prompt page in French
     await expect(page.locator('html')).toHaveAttribute('lang', 'fr');
