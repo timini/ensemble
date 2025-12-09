@@ -4,6 +4,7 @@ import type { Model } from '@/components/organisms/ModelSelectionList';
 import { AVAILABLE_MODELS } from '~/lib/models';
 import { fetchProviderModels, mergeDynamicModels } from '~/lib/providerModels';
 import { toError } from '~/lib/errors';
+import { logger } from '~/lib/logger';
 import type { OperatingMode } from '~/store/slices/modeSlice';
 import { PROVIDERS } from '../page.constants';
 
@@ -30,6 +31,7 @@ export function useAvailableModels({
     let active = true;
     const loadModels = async () => {
       const activeProviders = PROVIDERS.filter(provider => hydratedStatuses[provider] === 'valid');
+      logger.debug('[useAvailableModels] Fetching models for:', activeProviders);
 
       const overrides: Partial<Record<Provider, Model[]>> = {};
 

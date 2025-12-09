@@ -73,8 +73,11 @@ jobs:
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium
         working-directory: packages/app
-  app-e2e:
-    name: App E2E
+
+  # Mock Mode E2E Tests - Always run in CI
+  # Uses mock API clients, no real API keys needed
+  app-e2e-mock:
+    name: App E2E (Mock Mode)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -88,7 +91,47 @@ jobs:
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium
         working-directory: packages/app
-      - run: npm run test:e2e --workspace=packages/app
+      - name: Run Mock Mode E2E Tests
+        run: npm run test:e2e --workspace=packages/app
+        env:
+          NEXT_PUBLIC_MOCK_MODE: 'true'
+
+  # Free Mode E2E Tests - Only run when API key secrets are configured
+  # Tests real API integrations with actual provider keys
+  app-e2e-free:
+    name: App E2E (Free Mode)
+    runs-on: ubuntu-latest
+    # Only run if secrets are available (will be skipped in forks)
+    if: ${{ github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npm run build --workspace=packages/shared-utils
+      - run: npm run build --workspace=packages/app
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+        working-directory: packages/app
+      - name: Run Free Mode E2E Tests
+        run: npm run test:e2e:free --workspace=packages/app
+        env:
+          NEXT_PUBLIC_MOCK_MODE: 'false'
+          TEST_OPENAI_API_KEY: ${{ secrets.TEST_OPENAI_API_KEY }}
+          TEST_ANTHROPIC_API_KEY: ${{ secrets.TEST_ANTHROPIC_API_KEY }}
+          TEST_GOOGLE_API_KEY: ${{ secrets.TEST_GOOGLE_API_KEY }}
+          TEST_XAI_API_KEY: ${{ secrets.TEST_XAI_API_KEY }}
+
+  # Pro Mode E2E Tests - Placeholder for Phase 4
+  # Will test backend services, authentication, and credits
+  # app-e2e-pro:
+  #   name: App E2E (Pro Mode)
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - run: echo "Pro mode tests will be added in Phase 4"
 
   analysis:
     name: Static Analysis
