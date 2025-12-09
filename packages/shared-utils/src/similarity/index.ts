@@ -130,3 +130,14 @@ export function agreementStatistics(similarities: number[]): {
     stddev,
   };
 }
+
+/**
+ * Normalize a cosine similarity value (-1 to 1) into a 0-1 range.
+ */
+export function normalizeSimilarity(value: number): number {
+  const normalized = (value + 1) / 2;
+  if (Number.isNaN(normalized)) return 0;
+  if (normalized < 0) return 0;
+  if (normalized > 1) return 1;
+  return normalized;
+}

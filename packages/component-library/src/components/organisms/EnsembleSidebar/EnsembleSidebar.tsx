@@ -43,6 +43,8 @@ export interface EnsembleSidebarProps {
   onAddManualResponse: () => void;
   /** Manual responses to display */
   manualResponses?: Array<{ id: string; label: string; response?: string }>;
+  /** Callback when clear all models is clicked */
+  onClearAll?: () => void;
 }
 
 /**
@@ -85,6 +87,7 @@ export const EnsembleSidebar = React.forwardRef<HTMLDivElement, EnsembleSidebarP
       onDeletePreset,
       onAddManualResponse,
       manualResponses = [],
+      onClearAll,
     },
     ref
   ) => {
@@ -117,7 +120,20 @@ export const EnsembleSidebar = React.forwardRef<HTMLDivElement, EnsembleSidebarP
               <Heading level={4} size="sm" className="mb-0">
                 {t('organisms.ensembleSidebar.selectedModels', { count: selectedModels.length })}
               </Heading>
-              {summarizerId && <Text as="span" variant="small" color="primary">{t('organisms.ensembleSidebar.summarizerLabel')}</Text>}
+              <div className="flex items-center gap-2">
+                {summarizerId && <Text as="span" variant="small" color="primary">{t('organisms.ensembleSidebar.summarizerLabel')}</Text>}
+                {selectedModels.length > 0 && onClearAll && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-6 px-2 text-xs text-muted-foreground hover:text-destructive"
+                    onClick={onClearAll}
+                    data-testid="clear-all-models"
+                  >
+                    {t('common.clearAll', 'Clear All')}
+                  </Button>
+                )}
+              </div>
             </div>
             <div className="space-y-2">
               {selectedModels.length === 0 ? (
@@ -224,36 +240,36 @@ export const EnsembleSidebar = React.forwardRef<HTMLDivElement, EnsembleSidebarP
 
           {/* Manual Responses */}
           <div>
-          <Heading level={4} size="sm" className="mb-2">{t('organisms.ensembleSidebar.manualResponses')}</Heading>
-          <Text variant="caption" color="muted" className="mb-3">
-            {t('organisms.ensembleSidebar.manualResponsesDescription')}
-          </Text>
-          <Text variant="caption" className="text-gray-600 mb-3">
-            {t('organisms.ensembleSidebar.manualResponsesInfo')}
-          </Text>
-          {manualResponses.length > 0 && (
-            <div className="mb-3 space-y-2" data-testid="manual-responses-list">
-              {manualResponses.map((manual) => (
-                <div
-                  key={manual.id}
-                  className="rounded-lg border border-gray-200 bg-white p-3 text-sm shadow-sm"
-                >
-                  <div className="font-medium text-gray-900">{manual.label}</div>
-                  {manual.response && (
-                    <p className="mt-1 text-gray-600 line-clamp-3">{manual.response}</p>
-                  )}
-                </div>
-              ))}
-            </div>
-          )}
-          <Button
-            variant="outline"
-            className="w-full text-sm bg-transparent"
-            onClick={onAddManualResponse}
-            data-testid="add-manual-response"
-          >
-            {t('organisms.ensembleSidebar.addManualResponse')}
-          </Button>
+            <Heading level={4} size="sm" className="mb-2">{t('organisms.ensembleSidebar.manualResponses')}</Heading>
+            <Text variant="caption" color="muted" className="mb-3">
+              {t('organisms.ensembleSidebar.manualResponsesDescription')}
+            </Text>
+            <Text variant="caption" className="text-gray-600 mb-3">
+              {t('organisms.ensembleSidebar.manualResponsesInfo')}
+            </Text>
+            {manualResponses.length > 0 && (
+              <div className="mb-3 space-y-2" data-testid="manual-responses-list">
+                {manualResponses.map((manual) => (
+                  <div
+                    key={manual.id}
+                    className="rounded-lg border border-gray-200 bg-white p-3 text-sm shadow-sm"
+                  >
+                    <div className="font-medium text-gray-900">{manual.label}</div>
+                    {manual.response && (
+                      <p className="mt-1 text-gray-600 line-clamp-3">{manual.response}</p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+            <Button
+              variant="outline"
+              className="w-full text-sm bg-transparent"
+              onClick={onAddManualResponse}
+              data-testid="add-manual-response"
+            >
+              {t('organisms.ensembleSidebar.addManualResponse')}
+            </Button>
 
             <div className="mt-4 p-3 bg-blue-50 rounded-lg">
               <div className="flex items-start space-x-2">

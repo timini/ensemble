@@ -49,15 +49,16 @@ describe('responseSlice', () => {
     expect(response?.response).toBe('Hello World');
   });
 
-  it('completes response', () => {
+  it('completes response with token count', () => {
     store.getState().startStreaming('model-1', 'openai', 'gpt-4o');
     store.getState().appendStreamChunk('model-1', 'Test response');
-    store.getState().completeResponse('model-1', 5000);
+    store.getState().completeResponse('model-1', 5000, 150);
 
     const response = store.getState().responses[0];
     expect(response?.isStreaming).toBe(false);
     expect(response?.isComplete).toBe(true);
     expect(response?.responseTime).toBe(5000);
+    expect(response?.tokenCount).toBe(150);
   });
 
   it('sets error for a model', () => {

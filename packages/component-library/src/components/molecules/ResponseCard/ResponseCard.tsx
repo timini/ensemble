@@ -34,7 +34,9 @@ export interface ResponseCardProps {
   tokenCount?: number;
   /** Callback when rating changes */
   onRatingChange?: (rating: number) => void;
-  /** Callback when copy button is clicked */
+  /** Callback when retry is clicked (only for error state) */
+  onRetry?: () => void;
+  /** Callback when copy is clicked */
   onCopy?: () => void;
   /** Initial expanded state (default: true) */
   defaultExpanded?: boolean;
@@ -79,6 +81,7 @@ export const ResponseCard = React.forwardRef<HTMLDivElement, ResponseCardProps>(
       responseTime,
       tokenCount,
       onRatingChange,
+      onRetry,
       onCopy,
       defaultExpanded = true,
       testId,
@@ -98,6 +101,8 @@ export const ResponseCard = React.forwardRef<HTMLDivElement, ResponseCardProps>(
       }
       onCopy?.();
     };
+
+    console.log(`[ResponseCard] Render ${modelName} (${testId}), status=${status}, tokenCount=${tokenCount}`);
 
     return (
       <Card
@@ -167,9 +172,21 @@ export const ResponseCard = React.forwardRef<HTMLDivElement, ResponseCardProps>(
 
         <CardContent className="pt-0 space-y-4">
           {isError ? (
-            <InlineAlert variant="error">
-              {error}
-            </InlineAlert>
+            <div className="flex flex-col gap-2">
+              <InlineAlert variant="error">
+                {error}
+              </InlineAlert>
+              {onRetry && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={onRetry}
+                  className="self-start"
+                >
+                  {t('common.retry', 'Retry')}
+                </Button>
+              )}
+            </div>
           ) : (
             <>
               {isExpanded && (

@@ -111,8 +111,8 @@ export default function PromptPage() {
           currentPrompt,
           selection.model,
           (chunk: string) => appendStreamChunk(selection.id, chunk),
-          (_fullResponse: string, responseTime: number) => {
-            completeResponse(selection.id, responseTime);
+          (_fullResponse: string, responseTime: number, tokenCount?: number) => {
+            completeResponse(selection.id, responseTime, tokenCount);
           },
           (error: Error) => {
             setError(selection.id, error.message);

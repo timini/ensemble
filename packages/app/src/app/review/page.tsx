@@ -31,10 +31,13 @@ import { useStreamingResponses } from './hooks/useStreamingResponses';
 export default function ReviewPage() {
   const { t } = useTranslation();
   const router = useRouter();
+  const hasHydrated = useHasHydrated();
 
   const prompt = useStore((state) => state.prompt);
   const summarizerModel = useStore((state) => state.summarizerModel);
+  const selectedModels = useStore((state) => state.selectedModels);
   const responses = useStore((state) => state.responses);
+
   const agreementStats = useStore((state) => state.agreementStats);
   const metaAnalysis = useStore((state) => state.metaAnalysis);
   const manualResponses = useStore((state) => state.manualResponses);
@@ -42,20 +45,22 @@ export default function ReviewPage() {
   const similarityMatrix = useStore((state) => state.similarityMatrix);
   const mode = useStore((state) => state.mode);
   const embeddingsProvider = useStore((state) => state.embeddingsProvider);
-  const hasHydrated = useHasHydrated();
 
   const viewResponses = useMemo(
     () => (hasHydrated ? responses : []),
     [hasHydrated, responses],
   );
+
   const viewManualResponses = useMemo(
     () => (hasHydrated ? manualResponses : []),
     [hasHydrated, manualResponses],
   );
+
   const viewAgreementStats = useMemo(
     () => (hasHydrated ? agreementStats : null),
     [agreementStats, hasHydrated],
   );
+
   const viewMetaAnalysis = useMemo(
     () => (hasHydrated ? metaAnalysis : null),
     [hasHydrated, metaAnalysis],
@@ -107,7 +112,7 @@ export default function ReviewPage() {
     [pairwiseComparisons],
   );
 
-  useStreamingResponses({
+  const { retryModel } = useStreamingResponses({
     hasHydrated,
     prompt,
     mode,
@@ -198,6 +203,7 @@ export default function ReviewPage() {
                 }
                 testId={`response-card-${response.modelId}`}
                 tokenCount={response.tokenCount ?? undefined}
+                onRetry={() => retryModel(response.modelId)}
               />
             ))}
             {viewManualResponses.map((manual) => (

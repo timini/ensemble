@@ -9,10 +9,11 @@ const meta = {
   },
   tags: ['autodocs'],
   args: {
-    onLoadPreset: () => {},
-    onSavePreset: () => {},
-    onDeletePreset: () => {},
-    onAddManualResponse: () => {},
+    onLoadPreset: () => { },
+    onSavePreset: () => { },
+    onDeletePreset: () => { },
+    onAddManualResponse: () => { },
+    onClearAll: () => { },
   },
 } satisfies Meta<typeof EnsembleSidebar>;
 

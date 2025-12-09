@@ -599,6 +599,29 @@ describe('EnsembleSidebar', () => {
 
       expect(onAddManualResponse).toHaveBeenCalled();
     });
+
+    it('calls onClearAll when clear button clicked', async () => {
+      const user = userEvent.setup();
+      const onClearAll = vi.fn();
+
+      render(
+        <EnsembleSidebar
+          selectedModels={mockSelectedModels}
+          presets={[]}
+          currentEnsembleName=""
+          onLoadPreset={vi.fn()}
+          onSavePreset={vi.fn()}
+          onDeletePreset={vi.fn()}
+          onAddManualResponse={vi.fn()}
+          onClearAll={onClearAll}
+        />
+      );
+
+      const clearButton = screen.getByTestId('clear-all-models');
+      await user.click(clearButton);
+
+      expect(onClearAll).toHaveBeenCalled();
+    });
   });
 
   describe('layout', () => {

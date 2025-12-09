@@ -29,6 +29,8 @@ export function useAvailableModels({
 
     let active = true;
     const loadModels = async () => {
+      const activeProviders = PROVIDERS.filter(provider => hydratedStatuses[provider] === 'valid');
+
       const overrides: Partial<Record<Provider, Model[]>> = {};
 
       await Promise.all(

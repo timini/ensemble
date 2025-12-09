@@ -16,6 +16,7 @@ export interface ApiKeyData {
   key: string;
   visible: boolean;
   status: ValidationStatus;
+  error?: string;
 }
 
 export interface ApiKeySlice {
@@ -32,7 +33,11 @@ export interface ApiKeySlice {
   getApiKey: (provider: ProviderType) => string | null;
   clearApiKeys: () => void;
   initializeEncryption: () => Promise<void>;
-  setApiKeyStatus: (provider: ProviderType, status: ValidationStatus) => void;
+  setApiKeyStatus: (
+    provider: ProviderType,
+    status: ValidationStatus,
+    error?: string,
+  ) => void;
 }
 
 export const createApiKeySlice: StateCreator<ApiKeySlice> = (set, get) => ({
@@ -183,7 +188,7 @@ export const createApiKeySlice: StateCreator<ApiKeySlice> = (set, get) => ({
     });
   },
 
-  setApiKeyStatus: (provider, status) => {
+  setApiKeyStatus: (provider, status, error) => {
     set((state) => {
       const current = state.apiKeys[provider];
       if (!current) {
@@ -196,6 +201,7 @@ export const createApiKeySlice: StateCreator<ApiKeySlice> = (set, get) => ({
           [provider]: {
             ...current,
             status,
+            error,
           },
         },
       };

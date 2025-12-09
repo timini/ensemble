@@ -57,6 +57,7 @@ export async function fetchProviderModels(options: {
   const registry = ProviderRegistry.getInstance();
   let client: AIProvider;
   try {
+
     client = registry.getProvider(options.provider, options.mode);
   } catch (error: unknown) {
     throw toError(

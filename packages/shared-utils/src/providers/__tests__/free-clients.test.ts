@@ -364,6 +364,9 @@ describe('Free mode provider clients', () => {
     });
 
     it('should timeout and call onError when stream hangs indefinitely', async () => {
+      // Use fake timers BEFORE creating any promises
+      vi.useFakeTimers();
+
       // Create a client with a streaming implementation that never resolves
       class HangingClient extends BaseFreeClient {
         async validateApiKey() {
@@ -383,18 +386,14 @@ describe('Free mode provider clients', () => {
       const onComplete = vi.fn();
       const onError = vi.fn();
 
-      // Set a short timeout for testing (the actual implementation should use a longer timeout)
-      // We'll use vi.useFakeTimers to speed this up
-      vi.useFakeTimers();
-
+      // Start the stream (don't await yet)
       const streamPromise = client.streamResponse('test prompt', 'test-model', onChunk, onComplete, onError);
 
       // Advance time past the timeout (default should be 2 minutes = 120000ms)
       await vi.advanceTimersByTimeAsync(130000);
 
+      // Now await the promise - it should have resolved due to timeout
       await streamPromise;
-
-      vi.useRealTimers();
 
       expect(onError).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -402,7 +401,7 @@ describe('Free mode provider clients', () => {
         }),
       );
       expect(onComplete).not.toHaveBeenCalled();
-    });
+    }, 10000);
 
     it('should complete normally when stream finishes before timeout', async () => {
       class FastClient extends BaseFreeClient {

@@ -3,7 +3,7 @@ import { MockProviderClient } from '../mock/MockProviderClient';
 
 export type StreamHandlers = {
   onChunk: (chunk: string) => void;
-  onComplete: (fullResponse: string, responseTime: number) => void;
+  onComplete: (fullResponse: string, responseTime: number, tokenCount?: number) => void;
   onError: (error: Error) => void;
 };
 
@@ -33,11 +33,14 @@ export abstract class BaseFreeClient implements AIProvider {
     return this.getApiKey();
   }
 
+  /** Default timeout for streaming operations (2 minutes) */
+  protected static readonly STREAM_TIMEOUT_MS = 120000;
+
   async streamResponse(
     prompt: string,
     model: string,
     onChunk: (chunk: string) => void,
-    onComplete: (fullResponse: string, responseTime: number) => void,
+    onComplete: (fullResponse: string, responseTime: number, tokenCount?: number) => void,
     onError: (error: Error) => void,
   ): Promise<void> {
     const apiKey = this.resolveApiKey();
@@ -51,17 +54,38 @@ export abstract class BaseFreeClient implements AIProvider {
       return;
     }
 
+    // Create a timeout promise to prevent hanging streams
+    let timeoutId: ReturnType<typeof setTimeout> | null = null;
+    const timeoutPromise = new Promise<never>((_, reject) => {
+      timeoutId = setTimeout(() => {
+        reject(
+          new Error(
+            `Streaming timeout for ${this.provider} after ${BaseFreeClient.STREAM_TIMEOUT_MS / 1000}s. The API may be unresponsive.`,
+          ),
+        );
+      }, BaseFreeClient.STREAM_TIMEOUT_MS);
+    });
+
     try {
-      await this.streamWithProvider({
-        apiKey,
-        prompt,
-        model,
-        onChunk,
-        onComplete,
-        onError,
-      });
+      // Race the stream against the timeout
+      await Promise.race([
+        this.streamWithProvider({
+          apiKey,
+          prompt,
+          model,
+          onChunk,
+          onComplete,
+          onError,
+        }),
+        timeoutPromise,
+      ]);
     } catch (error) {
       onError(error instanceof Error ? error : new Error(String(error)));
+    } finally {
+      // Clean up the timeout
+      if (timeoutId !== null) {
+        clearTimeout(timeoutId);
+      }
     }
   }
 

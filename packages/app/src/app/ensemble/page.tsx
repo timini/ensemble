@@ -50,6 +50,7 @@ export default function EnsemblePage() {
   const setSummarizer = useStore((state) => state.setSummarizer);
   const addManualResponse = useStore((state) => state.addManualResponse);
   const manualResponses = useStore((state) => state.manualResponses);
+  const clearSelection = useStore((state) => state.clearSelection);
   const hasHydrated = useHasHydrated();
   const displayMode: OperatingMode = hasHydrated ? mode : 'free';
   const safeApiKeys = hasHydrated ? apiKeys : EMPTY_API_KEYS;
@@ -65,6 +66,7 @@ export default function EnsemblePage() {
   const displayedSelectedModelIds = hasHydrated ? selectedModelIds : [];
   const displayedSummarizer = hasHydrated ? summarizerModel ?? undefined : undefined;
   const viewSelectedModels = hasHydrated ? selectedModels : [];
+
 
 
   const isMockMode = process.env.NEXT_PUBLIC_MOCK_MODE === 'true';
@@ -166,17 +168,17 @@ export default function EnsemblePage() {
     router.push('/config');
   };
 
-  // Placeholder handlers for EnsembleManagementPanel
-  const handleLoadPreset = (presetId: string) => {
-    console.log('Load preset:', presetId);
+  // Placeholder handlers for EnsembleManagementPanel (to be implemented)
+  const handleLoadPreset = (_presetId: string) => {
+    // TODO: Implement preset loading
   };
 
-  const handleSavePreset = (name: string) => {
-    console.log('Save preset:', name);
+  const handleSavePreset = (_name: string) => {
+    // TODO: Implement preset saving
   };
 
-  const handleDeletePreset = (presetId: string) => {
-    console.log('Delete preset:', presetId);
+  const handleDeletePreset = (_presetId: string) => {
+    // TODO: Implement preset deletion
   };
 
   const apiKeyModal = useApiKeyModal({
@@ -257,6 +259,7 @@ export default function EnsemblePage() {
             onDeletePreset={handleDeletePreset}
             onAddManualResponse={manualModal.openModal}
             manualResponses={viewManualResponses}
+            onClearAll={clearSelection}
           />
         </div>
       </div>
@@ -267,6 +270,7 @@ export default function EnsemblePage() {
           onContinue={handleContinue}
           onBack={handleBack}
           continueDisabled={!isValid}
+          continueLabel={t('common.next')}
         />
       </div>
 

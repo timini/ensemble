@@ -117,7 +117,13 @@ export const createResponseSlice: StateCreator<ResponseSlice> = (set, get) => ({
     set((state) => {
       const responses = state.responses.map((r) =>
         r.modelId === modelId
-          ? { ...r, isStreaming: false, isComplete: true, responseTime, tokenCount: tokenCount ?? null }
+          ? {
+              ...r,
+              isStreaming: false,
+              isComplete: true,
+              responseTime,
+              tokenCount: tokenCount ?? null,
+            }
           : r,
       );
       return { responses };
