@@ -300,6 +300,43 @@ Tasks marked `[P]` can run in parallel (different files, no dependencies):
 6. **Never batch tasks without commits** (commit frequently, aim for 30-60 min cycles)
 7. **Follow task order** (respect dependencies, execute sequentially unless marked `[P]`)
 
+## Mandatory Development Practices
+
+### Feature Development Agents (REQUIRED)
+**ALWAYS use feature-dev agents** when doing any development work:
+- `feature-dev:code-explorer` - Use to deeply analyze existing codebase features, trace execution paths, and understand patterns before making changes
+- `feature-dev:code-architect` - Use to design feature architectures and create implementation blueprints
+- `feature-dev:code-reviewer` - Use after writing significant code to review for bugs, security issues, and code quality
+
+Launch these agents via the Task tool with the appropriate `subagent_type`. Never skip the exploration phase - always understand the codebase before making changes.
+
+### Test-Driven Development (MANDATORY)
+**TDD is non-negotiable.** For every change:
+1. **Write a failing test first** that demonstrates the bug or specifies the new behavior
+2. **Run the test** to confirm it fails (red phase)
+3. **Implement the fix/feature** until the test passes (green phase)
+4. **Refactor** if needed while keeping tests green
+5. **Verify all existing tests still pass** before committing
+
+### Git Commit Rules (STRICT)
+**NEVER use `--no-verify` flag** when committing. Pre-commit hooks exist to enforce quality:
+- Linting must pass
+- Type checking must pass
+- Tests must pass
+- Formatting must be correct
+
+If hooks fail, **fix the issues** rather than bypassing them.
+
+### Commit Requirements
+Before **every commit**, ensure:
+```bash
+npm run check        # Linting + typecheck must pass
+npm run build        # Production build must succeed
+npm test             # ALL tests must pass (not just new ones)
+```
+
+**Only commit when ALL tests pass.** A commit with failing tests breaks the build for everyone.
+
 ## Component Development Workflow (Detailed)
 
 For component development specifically (Phase 1), tasks are structured as 3-step cycles:

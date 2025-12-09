@@ -12,7 +12,11 @@ export interface ValidateApiKeyOptions {
   provider: Provider;
   apiKey: string;
   userMode: 'free' | 'pro';
-  onStatusChange: (provider: Provider, status: ValidationStatus) => void;
+  onStatusChange: (
+    provider: Provider,
+    status: ValidationStatus,
+    error?: string,
+  ) => void;
 }
 
 /**
@@ -64,22 +68,38 @@ export async function validateApiKey({
     }
 
     if (!providerRegistry.hasProvider(provider, clientMode)) {
-      console.warn(
-        `Skipping ${provider} validation. Provider not registered for mode '${clientMode}'.`,
-      );
-      onStatusChange(provider, 'invalid');
+      const msg = `Provider '${provider}' not registered for mode '${clientMode}'`;
+      console.warn(`Skipping validation: ${msg}`);
+      onStatusChange(provider, 'invalid', msg);
       return;
     }
     const providerInstance = providerRegistry.getProvider(provider, clientMode);
     const result = await providerInstance.validateApiKey(apiKey);
-    onStatusChange(provider, result.valid ? 'valid' : 'invalid');
+
+    if (result.valid) {
+      onStatusChange(provider, 'valid');
+    } else {
+      // Pass specific error message from provider if available, or generic message
+      onStatusChange(provider, 'invalid', result.error ?? 'Invalid API key');
+    }
   } catch (error: unknown) {
     const normalizedError = toError(
       error,
       `Error validating ${provider} API key`,
     );
     console.error(`Error validating ${provider} API key:`, normalizedError);
-    onStatusChange(provider, 'invalid');
+
+    // Try to extract a user-friendly message
+    let userMessage = normalizedError.message;
+    if (userMessage.includes('401')) {
+      userMessage = 'Invalid API key (401 Unauthorized)';
+    } else if (userMessage.includes('429')) {
+      userMessage = 'Rate limit exceeded (429)';
+    } else if (userMessage.includes('fetch failed') || userMessage.includes('Network error')) {
+      userMessage = 'Network error - check connection';
+    }
+
+    onStatusChange(provider, 'invalid', userMessage);
   }
 }
 
@@ -91,9 +111,18 @@ export async function validateApiKey({
 export function createDebouncedValidator(
   timeoutRefs: React.MutableRefObject<Record<Provider, NodeJS.Timeout | null>>,
   validateFn: (options: ValidateApiKeyOptions) => Promise<void>,
-  debounceMs = 500
+  debounceMs = 500,
 ) {
-  return (provider: Provider, apiKey: string, userMode: 'free' | 'pro', onStatusChange: (provider: Provider, status: ValidationStatus) => void) => {
+  return (
+    provider: Provider,
+    apiKey: string,
+    userMode: 'free' | 'pro',
+    onStatusChange: (
+      provider: Provider,
+      status: ValidationStatus,
+      error?: string,
+    ) => void,
+  ) => {
     // Clear existing timeout for this provider
     const timeout = timeoutRefs.current[provider];
     if (timeout) {

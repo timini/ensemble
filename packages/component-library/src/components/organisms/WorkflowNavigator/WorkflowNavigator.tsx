@@ -75,7 +75,10 @@ export const WorkflowNavigator = React.forwardRef<HTMLElement, WorkflowNavigator
         {onContinue && (
           <Button
             variant="default"
-            onClick={onContinue}
+            onClick={() => {
+              console.log('WorkflowNavigator: Continue clicked');
+              onContinue();
+            }}
             disabled={continueDisabled}
           >
             {displayContinueLabel}

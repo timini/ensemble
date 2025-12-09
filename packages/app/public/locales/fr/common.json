@@ -22,7 +22,8 @@
     "next": "Suivant",
     "previous": "Précédent",
     "close": "Fermer",
-    "confirm": "Confirmer"
+    "confirm": "Confirmer",
+    "retry": "Réessayer"
   },
   "theme": {
     "light": "Clair",
@@ -41,6 +42,22 @@
     "step4": "Étape 4 : Examiner les résultats"
   },
   "molecules": {
+    "apiKeyInput": {
+      "validKey": "Clé API valide",
+      "invalidKey": "Clé API invalide",
+      "hideKey": "Masquer la clé API",
+      "showKey": "Afficher la clé API"
+    },
+    "responseCard": {
+      "manual": "Manuel",
+      "streaming": "En cours",
+      "expand": "Développer",
+      "collapse": "Réduire",
+      "copy": "Copier",
+      "rateResponse": "Évaluer la réponse",
+      "responseTime": "{{time}}",
+      "tokens": "{{count}} jetons"
+    },
     "modeSelectionCard": {
       "free": {
         "title": "Mode Gratuit",
@@ -57,6 +74,10 @@
   "organisms": {
     "modeSelector": {
       "heading": "Choisissez votre mode"
+    },
+    "workflowNavigator": {
+      "back": "Retour",
+      "continue": "Suivant"
     },
     "ensembleSidebar": {
       "heading": "Résumé de l'ensemble",
@@ -98,6 +119,24 @@
     "ensemble": {
       "title": "Construire votre ensemble",
       "description": "Sélectionnez 2 à 6 modèles d'IA pour comparer leurs réponses"
+    },
+    "prompt": {
+      "title": "Entrez votre invite",
+      "description": "Décrivez ce que vous voulez que les modèles d'IA fassent",
+      "inputLabel": "Votre invite",
+      "placeholder": "Entrez votre invite ici...",
+      "keyboardHint": "Appuyez sur Cmd+Entrée pour soumettre",
+      "generateButton": "Générer les réponses"
+    },
+    "review": {
+      "title": "Examiner les résultats",
+      "description": "Comparez les réponses et analysez l'accord",
+      "promptLabel": "Votre invite",
+      "responsesHeading": "Réponses de l'IA",
+      "noResponses": "Aucune réponse générée pour le moment.",
+      "backButton": "Retour à l'invite",
+      "startOverButton": "Recommencer",
+      "newComparisonButton": "Nouvelle comparaison"
     }
   }
 }

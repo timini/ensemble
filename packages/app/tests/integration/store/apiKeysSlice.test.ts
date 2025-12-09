@@ -128,4 +128,17 @@ describe('API key slice persistence', () => {
       encryptedValue,
     );
   });
+
+  it('updates status and error message', async () => {
+    const store = createTestStore(storage);
+    await store.getState().setApiKey('openai', 'sk-test');
+
+    store
+      .getState()
+      .setApiKeyStatus('openai', 'invalid', 'Rate limit exceeded');
+
+    const entry = store.getState().apiKeys.openai;
+    expect(entry?.status).toBe('invalid');
+    expect(entry?.error).toBe('Rate limit exceeded');
+  });
 });

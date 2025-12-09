@@ -22,7 +22,8 @@
     "next": "Next",
     "previous": "Previous",
     "close": "Close",
-    "confirm": "Confirm"
+    "confirm": "Confirm",
+    "retry": "Retry"
   },
   "theme": {
     "light": "Light",
@@ -41,6 +42,22 @@
     "step4": "Step 4: Review Results"
   },
   "molecules": {
+    "apiKeyInput": {
+      "validKey": "Valid API key",
+      "invalidKey": "Invalid API key",
+      "hideKey": "Hide API key",
+      "showKey": "Show API key"
+    },
+    "responseCard": {
+      "manual": "Manual",
+      "streaming": "Streaming",
+      "expand": "Expand",
+      "collapse": "Collapse",
+      "copy": "Copy",
+      "rateResponse": "Rate response",
+      "responseTime": "{{time}}",
+      "tokens": "{{count}} tokens"
+    },
     "modeSelectionCard": {
       "free": {
         "title": "Free Mode",
@@ -57,6 +74,10 @@
   "organisms": {
     "modeSelector": {
       "heading": "Choose Your Mode"
+    },
+    "workflowNavigator": {
+      "back": "Back",
+      "continue": "Next"
     },
     "ensembleSidebar": {
       "heading": "Ensemble Summary",
@@ -81,6 +102,14 @@
       "manualResponsesInfo": "Include custom responses to compare against live model outputs.",
       "addManualResponse": "Add Manual Response",
       "manualResponsesNote": "Add reference answers or benchmark outputs to compare against live model responses."
+    },
+    "apiKeyConfiguration": {
+      "heading": "Configure API Keys",
+      "apiKeyInfoBold": "Configure an API key to continue.",
+      "apiKeyInfoNormal": "Your keys are stored locally and never sent to our servers.",
+      "apiKeysConfigured": "{{count}} API key configured.",
+      "apiKeysConfigured_other": "{{count}} API keys configured.",
+      "configureMoreOrContinue": "Configure more or continue selecting models."
     }
   },
   "pages": {
@@ -98,6 +127,24 @@
     "ensemble": {
       "title": "Build Your Ensemble",
       "description": "Select 2-6 AI models to compare their responses"
+    },
+    "prompt": {
+      "title": "Enter Your Prompt",
+      "description": "Describe what you want the AI models to do",
+      "inputLabel": "Your Prompt",
+      "placeholder": "Enter your prompt here...",
+      "keyboardHint": "Press Cmd+Enter to submit",
+      "generateButton": "Generate Responses"
+    },
+    "review": {
+      "title": "Review Results",
+      "description": "Compare responses and analyze agreement",
+      "promptLabel": "Your Prompt",
+      "responsesHeading": "AI Responses",
+      "noResponses": "No responses generated yet.",
+      "backButton": "Back to Prompt",
+      "startOverButton": "Start Over",
+      "newComparisonButton": "New Comparison"
     }
   }
 }

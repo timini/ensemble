@@ -470,15 +470,15 @@ Ready to proceed to **Phase 2: UI Integration with Mock API Clients**
 
 ### Phase 3.3: Free Mode UI Integration (Week 9-10, Days 61-67)
 
-- [ ] T213 Update src/app/config/page.tsx to add API key inputs (ApiKeyInput molecules) when Free mode selected
-- [ ] T214 Implement real-time API key validation in src/app/config/page.tsx using provider `validateApiKey` method
-- [ ] T215 Add loading states (LoadingSpinner) during API key validation
-- [ ] T216 Add error handling (InlineAlert) for invalid API keys, network errors, rate limits (429)
-- [ ] T217 Update src/app/review/page.tsx to handle streaming errors from real APIs (display error in ResponseCard)
-- [ ] T218 Implement retry mechanism for failed responses in src/app/review/page.tsx (Constitution Principle X: performance)
-- [ ] T219 Update src/components/molecules/ResponseCard.tsx to display token counts from real API responses
-- [ ] T220 Add translations for Free mode (API key labels, validation messages, error messages)
-- [ ] T221 Write E2E test tests/e2e/free-mode.spec.ts (chromium only, runs with `NEXT_PUBLIC_MOCK_MODE=true` to avoid real API traffic) testing: Free mode selection, API key entry, validation success, streaming responses, error handling (mocked 429 error)
+- [X] T213 Update src/app/config/page.tsx to add API key inputs (ApiKeyInput molecules) when Free mode selected
+- [X] T214 Implement real-time API key validation in src/app/config/page.tsx using provider `validateApiKey` method
+- [X] T215 Add loading states (LoadingSpinner) during API key validation
+- [X] T216 Add error handling (InlineAlert) for invalid API keys, network errors, rate limits (429)
+- [X] T217 Update src/app/review/page.tsx to handle streaming errors from real APIs (display error in ResponseCard)
+- [X] T218 Implement retry mechanism for failed responses in src/app/review/page.tsx (Constitution Principle X: performance)
+- [X] T219 Update src/components/molecules/ResponseCard.tsx to display token counts from real API responses
+- [X] T220 Add translations for Free mode (API key labels, validation messages, error messages)
+- [X] T221 Write E2E test tests/e2e/free-mode.spec.ts (chromium only, runs with `NEXT_PUBLIC_MOCK_MODE=true` to avoid real API traffic) testing: Free mode selection, API key entry, validation success, streaming responses, error handling (mocked 429 error)
 - [ ] T222 Update docs/FREE_MODE_GUIDE.md with setup instructions, API key acquisition, supported providers
 - [ ] T223 Commit Phase 3.3 Free mode UI: "feat: integrate Free mode with real API key validation and streaming"
 

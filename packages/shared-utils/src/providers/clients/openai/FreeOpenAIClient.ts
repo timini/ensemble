@@ -26,26 +26,50 @@ export class FreeOpenAIClient extends BaseFreeClient {
   }
 
   protected async fetchTextModels(apiKey: string): Promise<string[]> {
+    if (process.env.NEXT_PUBLIC_MOCK_MODE === 'true') {
+      return ['gpt-4o', 'gpt-4o-mini'];
+    }
     const client = this.createClient(apiKey);
 
     const response = await client.models.list();
     return response.data
       .map((model) => model.id)
-      .filter((id): id is string => Boolean(id));
+      .filter((id): id is string => {
+        if (!id) return false;
+        // Filter for known text generation model prefixes
+        const isTextModel = id.startsWith('gpt-') || id.startsWith('o1-') || id.startsWith('o3-');
+        // Explicitly exclude non-text capabilities
+        const isExcluded =
+          id.includes('audio') ||
+          id.includes('tts') ||
+          id.includes('dall-e') ||
+          id.includes('whisper') ||
+          id.includes('embedding');
+        return isTextModel && !isExcluded;
+      });
   }
 
   protected override async streamWithProvider(options: StreamOptions): Promise<void> {
     const client = this.createClient(options.apiKey);
     const startTime = Date.now();
     let fullResponse = '';
+    let tokenCount = 0;
 
     const stream = await client.chat.completions.create({
       model: options.model,
       stream: true,
       messages: [{ role: 'user', content: options.prompt }],
+      stream_options: { include_usage: true },
     });
 
-    for await (const chunk of stream as AsyncIterable<{ choices?: Array<{ delta?: { content?: unknown }; finish_reason?: string | null }> }>) {
+    for await (const chunk of stream as AsyncIterable<{
+      choices?: Array<{ delta?: { content?: unknown }; finish_reason?: string | null }>;
+      usage?: { total_tokens?: number };
+    }>) {
+      if (chunk.usage?.total_tokens) {
+        tokenCount = chunk.usage.total_tokens;
+      }
+
       const choice = chunk.choices?.[0];
       const deltaContent = choice?.delta?.content;
 
@@ -66,10 +90,10 @@ export class FreeOpenAIClient extends BaseFreeClient {
       }
 
       if (choice?.finish_reason) {
-        break;
+        // Don't break immediately if usage is coming in the last chunk
       }
     }
 
-    options.onComplete(fullResponse, Date.now() - startTime);
+    options.onComplete(fullResponse, Date.now() - startTime, tokenCount > 0 ? tokenCount : undefined);
   }
 }

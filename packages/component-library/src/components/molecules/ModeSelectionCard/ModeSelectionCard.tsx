@@ -51,6 +51,7 @@ export const ModeSelectionCard = React.forwardRef<HTMLDivElement, ModeSelectionC
     return (
       <Card
         ref={ref}
+        data-testid={`mode-card-${mode}`}
         data-mode={mode}
         data-selected={selected}
         data-disabled={disabled}

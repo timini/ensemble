@@ -53,7 +53,7 @@ export class MockProviderClient implements AIProvider {
     _prompt: string,
     model: string,
     onChunk: (chunk: string) => void,
-    onComplete: (fullResponse: string, responseTime: number) => void,
+    onComplete: (fullResponse: string, responseTime: number, tokenCount?: number) => void,
     onError: (error: Error) => void,
   ): Promise<void> {
     if (this.config.enableErrors && Math.random() < this.config.errorProbability) {
@@ -75,7 +75,10 @@ export class MockProviderClient implements AIProvider {
       }
 
       const responseTime = Date.now() - startTime;
-      onComplete(fullText, responseTime);
+      // Mock token count as approximately word count * 1.3
+      const tokenCount = Math.round(wordCount * 1.3);
+      console.log(`[MockProviderClient] Completing stream. words=${wordCount}, tokens=${tokenCount}`);
+      onComplete(fullText, responseTime, tokenCount);
     } catch (error) {
       onError(error as Error);
     }

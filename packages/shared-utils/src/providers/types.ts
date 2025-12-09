@@ -19,7 +19,11 @@ export interface AIProvider {
     prompt: string,
     model: string,
     onChunk: (chunk: string) => void,
-    onComplete: (fullResponse: string, responseTime: number) => void,
+    onComplete: (
+      fullResponse: string,
+      responseTime: number,
+      tokenCount?: number,
+    ) => void,
     onError: (error: Error) => void,
   ): Promise<void>;
 

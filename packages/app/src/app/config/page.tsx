@@ -84,8 +84,8 @@ export default function ConfigPage() {
   );
 
   const handleValidationStatusChange = useCallback(
-    (provider: Provider, status: ValidationStatus) => {
-      setApiKeyStatus(provider, status);
+    (provider: Provider, status: ValidationStatus, error?: string) => {
+      setApiKeyStatus(provider, status, error);
     },
     [setApiKeyStatus],
   );
@@ -138,6 +138,7 @@ export default function ConfigPage() {
   };
 
   const handleContinue = () => {
+
     completeStep('config');
     setCurrentStep('ensemble');
     router.push('/ensemble');
@@ -158,6 +159,7 @@ export default function ConfigPage() {
         value: apiKeys.openai?.key ?? '',
         placeholder: 'sk-...',
         helperText: hydratedStatuses.openai === 'valid' ? 'API key configured' : hydratedStatuses.openai === 'validating' ? 'Validating...' : hydratedStatuses.openai === 'invalid' ? 'Invalid API key' : 'Enter your OpenAI API key',
+        error: apiKeys.openai?.error,
         validationStatus: hydratedStatuses.openai,
         showKey: apiKeys.openai?.visible ?? false,
       },
@@ -167,6 +169,7 @@ export default function ConfigPage() {
         value: apiKeys.anthropic?.key ?? '',
         placeholder: 'sk-ant-...',
         helperText: hydratedStatuses.anthropic === 'valid' ? 'API key configured' : hydratedStatuses.anthropic === 'validating' ? 'Validating...' : hydratedStatuses.anthropic === 'invalid' ? 'Invalid API key' : 'Enter your Anthropic API key',
+        error: apiKeys.anthropic?.error,
         validationStatus: hydratedStatuses.anthropic,
         showKey: apiKeys.anthropic?.visible ?? false,
       },
@@ -176,6 +179,7 @@ export default function ConfigPage() {
         value: apiKeys.google?.key ?? '',
         placeholder: 'AIza...',
         helperText: hydratedStatuses.google === 'valid' ? 'API key configured' : hydratedStatuses.google === 'validating' ? 'Validating...' : hydratedStatuses.google === 'invalid' ? 'Invalid API key' : 'Enter your Google AI API key',
+        error: apiKeys.google?.error,
         validationStatus: hydratedStatuses.google,
         showKey: apiKeys.google?.visible ?? false,
       },
@@ -185,6 +189,7 @@ export default function ConfigPage() {
         value: apiKeys.xai?.key ?? '',
         placeholder: 'xai-...',
         helperText: hydratedStatuses.xai === 'valid' ? 'API key configured' : hydratedStatuses.xai === 'validating' ? 'Validating...' : hydratedStatuses.xai === 'invalid' ? 'Invalid API key' : 'Enter your xAI API key',
+        error: apiKeys.xai?.error,
         validationStatus: hydratedStatuses.xai,
         showKey: apiKeys.xai?.visible ?? false,
       },
@@ -210,13 +215,16 @@ export default function ConfigPage() {
     : 0;
   const configuredCountOverride = hasHydrated ? configuredKeysCount : 0;
 
+
   // At least 1 API key validated enables Continue button in Free mode
   const hasValidKeys = configuredKeysCount > 0;
   const allowContinue = useMemo(() => {
     if (!hasHydrated) {
       return false;
     }
-    return isFreeModeActive ? hasValidKeys : isModeConfigured;
+    const allowed = isFreeModeActive ? hasValidKeys : isModeConfigured;
+
+    return allowed;
   }, [hasHydrated, isFreeModeActive, hasValidKeys, isModeConfigured]);
 
   // Set current step to 'config' on mount
@@ -289,6 +297,7 @@ export default function ConfigPage() {
           currentStep={currentStep}
           onContinue={handleContinue}
           continueDisabled={!allowContinue}
+          continueLabel={t('common.next')}
         />
       </div>
     </div>
