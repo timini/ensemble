@@ -29,6 +29,7 @@ export function useResponseEmbeddings({
 }: UseResponseEmbeddingsOptions): void {
   const embeddingFetchRef = useRef(false);
   const lastEmbeddingsProviderRef = useRef<ProviderType | null>(null);
+  const failedEmbeddingsRef = useRef<Set<string>>(new Set());
 
   useEffect(() => {
     if (!hasHydrated || completedResponses.length === 0) {
@@ -37,12 +38,17 @@ export function useResponseEmbeddings({
 
     const providerChanged =
       lastEmbeddingsProviderRef.current !== embeddingsProvider;
+
+    if (providerChanged) {
+      failedEmbeddingsRef.current.clear();
+    }
+
     const existingEmbeddings = providerChanged ? [] : viewEmbeddings;
     const pendingResponses = completedResponses.filter(
       (response) =>
         !existingEmbeddings.some(
           (embedding) => embedding.modelId === response.modelId,
-        ),
+        ) && !failedEmbeddingsRef.current.has(response.modelId),
     );
 
     if (!providerChanged && pendingResponses.length === 0) {
@@ -70,6 +76,7 @@ export function useResponseEmbeddings({
             `Failed to generate embeddings for ${modelId} via ${embeddingsProvider}`,
             error,
           );
+          failedEmbeddingsRef.current.add(modelId);
         },
       });
 
