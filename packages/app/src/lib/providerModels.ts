@@ -9,6 +9,7 @@ import { ProviderRegistry } from '@ensemble-ai/shared-utils/providers';
 import { AVAILABLE_MODELS } from './models';
 import { toError } from './errors';
 import { initializeProviders } from '~/providers';
+import { logger } from '~/lib/logger';
 
 export function mapModelMetadataToModels(
   provider: ProviderName,
@@ -53,6 +54,7 @@ export async function fetchProviderModels(options: {
   mode: ProviderMode;
 }): Promise<Model[]> {
   initializeProviders();
+  logger.debug(`[fetchProviderModels] Fetching for ${options.provider}`);
 
   const registry = ProviderRegistry.getInstance();
   let client: AIProvider;

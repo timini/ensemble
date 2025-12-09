@@ -18,7 +18,10 @@
     "test": "vitest run --coverage",
     "test:watch": "vitest",
     "test:ui": "vitest --ui",
-    "test:e2e": "playwright test --reporter=list",
+    "test:e2e": "playwright test --project=mock-mode --reporter=list",
+    "test:e2e:free": "playwright test --project=free-mode --reporter=list",
+    "test:e2e:pro": "playwright test --project=pro-mode --reporter=list",
+    "test:e2e:all": "playwright test --reporter=list",
     "test:e2e:ui": "playwright test --ui",
     "typecheck": "tsc --noEmit",
     "prepare": "husky"
