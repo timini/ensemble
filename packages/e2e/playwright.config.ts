@@ -15,10 +15,19 @@ dotenv.config({ path: path.resolve(process.cwd(), '../../.env') });
  * - pro-mode: Placeholder for Phase 4 backend tests
  *
  * Usage:
- *   npm run test:e2e                    # Run mock-mode tests (default)
- *   npm run test:e2e:free               # Run free-mode tests (requires API keys)
+ *   npm run test:mock                   # Run mock-mode tests (default)
+ *   npm run test:free                   # Run free-mode tests (requires API keys)
  *   npx playwright test --project=all   # Run all available tests
+ *
+ * The webServer mode is determined by the E2E_MODE environment variable:
+ * - E2E_MODE=mock (default): Starts server with NEXT_PUBLIC_MOCK_MODE=true
+ * - E2E_MODE=free: Starts server with NEXT_PUBLIC_MOCK_MODE=false
  */
+
+// Determine which mode to run based on E2E_MODE env var
+const e2eMode = process.env.E2E_MODE || 'mock';
+const isMockMode = e2eMode === 'mock';
+
 export default defineConfig({
   testDir: './tests',
   fullyParallel: true,
@@ -61,14 +70,16 @@ export default defineConfig({
   ],
 
   // Web server configuration
-  // Mock mode server for mock-mode tests
+  // Mode is determined by E2E_MODE environment variable
   webServer: {
-    command: 'cd ../app && npm run dev:mock',
+    command: isMockMode
+      ? 'cd ../app && npm run dev:mock'
+      : 'cd ../app && npm run dev:free',
     url: 'http://localhost:3000',
     reuseExistingServer: !process.env.CI,
     timeout: 120 * 1000,
     env: {
-      NEXT_PUBLIC_MOCK_MODE: 'true',
+      NEXT_PUBLIC_MOCK_MODE: isMockMode ? 'true' : 'false',
     },
   },
 });
