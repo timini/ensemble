@@ -238,7 +238,8 @@ Wait for all CI jobs to complete:
 - Shared Utils (tests)
 - Wireframes (lint + build)
 - App (lint + typecheck + build)
-- App E2E Mock Mode (Playwright tests)
+- App E2E Mock Mode (Playwright tests with mock API clients)
+- App E2E Free Mode (Playwright tests with real API keys, when secrets configured)
 - Static Analysis
 
 If any job fails, fix the issues and push again.
@@ -431,10 +432,27 @@ All colors, spacing, and typography are defined in `tailwind.config.js`. Use sem
 ## Testing
 
 - **Unit/Integration**: Vitest + React Testing Library
-- **E2E**: Playwright (uses Mock mode)
+- **E2E**: Playwright with three test suites:
+  - `mock-mode`: Uses mock API clients (CI default, always runs)
+  - `free-mode`: Uses real API keys (runs when `TEST_*_API_KEY` secrets configured)
+  - `pro-mode`: Phase 4 placeholder for backend tests
 - **Visual Regression**: Chromatic + Storybook
 - **Selectors**: Use `data-testid` exclusively (NEVER CSS classes)
 - **Coverage Goal**: 80% minimum per component
+
+### E2E Test Commands
+```bash
+# Run mock mode tests (no API keys needed)
+npm run test:mock --workspace=packages/e2e
+
+# Run free mode tests (requires API keys)
+npm run test:free --workspace=packages/e2e
+
+# Interactive debugging
+npm run test:ui --workspace=packages/e2e
+```
+
+The `E2E_MODE` environment variable controls which server mode Playwright starts.
 
 ## Important Notes
 

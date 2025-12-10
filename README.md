@@ -100,9 +100,9 @@ npm run dev:wireframes
 # Run all tests
 npm test
 
-# Run E2E tests (Playwright list reporter, headless).
-# Uses Mock mode to keep tests deterministic and infrastructure-free.
-npm run test:e2e
+# Run E2E tests (see E2E Testing section below for details)
+npm run test:mock --workspace=packages/e2e    # Mock mode (CI default)
+npm run test:free --workspace=packages/e2e    # Free mode (requires API keys)
 
 # Run linter
 npm run lint
@@ -152,8 +152,55 @@ Testing is wired into CI with parallel jobs:
 - **Shared Utils**: lint + unit tests
 - **Wireframes**: lint + build verification
 - **App**: lint, typecheck, production build
-- **App E2E**: runs Playwright against the built app in parallel once the App job passes
+- **App E2E (Mock Mode)**: Playwright tests with mock API clients (always runs)
+- **App E2E (Free Mode)**: Playwright tests with real API keys (runs when secrets configured)
 - **Static Analysis**: `npm run analyze:fta`
+
+### E2E Testing
+
+E2E tests are organized into three test suites in `packages/e2e/`:
+
+| Suite | Environment | When to Use | CI Behavior |
+|-------|-------------|-------------|-------------|
+| **mock-mode** | `NEXT_PUBLIC_MOCK_MODE=true` | UI testing, CI default | Always runs |
+| **free-mode** | Real API calls | Integration testing | Runs when `TEST_*_API_KEY` secrets configured |
+| **pro-mode** | Backend services | Phase 4 (placeholder) | Not yet implemented |
+
+**Running E2E Tests:**
+```bash
+# Mock mode (default, no API keys needed)
+npm run test:mock --workspace=packages/e2e
+
+# Free mode (requires API keys in .env.local or environment)
+npm run test:free --workspace=packages/e2e
+
+# Interactive UI mode for debugging
+npm run test:ui --workspace=packages/e2e
+```
+
+**Environment Variables:**
+- `E2E_MODE`: Controls which server mode to start (`mock` or `free`)
+- `TEST_OPENAI_API_KEY`: OpenAI API key for free-mode tests
+- `TEST_ANTHROPIC_API_KEY`: Anthropic API key for free-mode tests
+- `TEST_GOOGLE_API_KEY`: Google API key for free-mode tests
+- `TEST_XAI_API_KEY`: XAI API key for free-mode tests
+
+**Test Structure:**
+```
+packages/e2e/
+├── tests/
+│   ├── mock-mode/           # 68 tests with mock clients
+│   │   ├── config-page.spec.ts
+│   │   ├── ensemble-page.spec.ts
+│   │   ├── prompt-page.spec.ts
+│   │   ├── review-page.spec.ts
+│   │   ├── full-workflow-mock.spec.ts
+│   │   ├── theme-persistence.spec.ts
+│   │   └── language-persistence.spec.ts
+│   ├── free-mode/           # Tests with real API calls
+│   └── pro-mode/            # Phase 4 placeholder
+└── playwright.config.ts     # Dynamic server configuration
+```
 
 ### Unit Tests (Vitest + Testing Library)
 - **Location**: `packages/component-library/src/components/`
