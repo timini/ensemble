@@ -1,0 +1,38 @@
+[dotenv@17.2.3] injecting env (0) from ../../.env.local -- tip: 🔑 add access controls to secrets: https://dotenvx.com/ops
+[dotenv@17.2.3] injecting env (0) from ../../.env -- tip: 🔐 encrypt with Dotenvx: https://dotenvx.com
+[2m[WebServer] [22m[baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
+
+Running 1 test using 1 worker
+
+[dotenv@17.2.3] injecting env (0) from ../../.env.local -- tip: ⚙️  write to custom object with { processEnv: myObject }
+[dotenv@17.2.3] injecting env (0) from ../../.env -- tip: ✅ audit secrets and track compliance: https://dotenvx.com/ops
+  ✘  1 [mock-mode] › tests/mock-mode/consensus-presets-mock.spec.ts:21:5 › Consensus Presets (Mock Mode) › should verify ELO and Standard consensus generation (1.7s)
+
+
+  1) [mock-mode] › tests/mock-mode/consensus-presets-mock.spec.ts:21:5 › Consensus Presets (Mock Mode) › should verify ELO and Standard consensus generation 
+
+    Error: locator.click: Error: strict mode violation: getByRole('button', { name: /Next/i }) resolved to 2 elements:
+        1) <button class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 bg-primary text-primary-foreground shadow hover:bg-primary/90 h-9 px-4 py-2">Next</button> aka getByTestId('workflow-navigator').getByRole('button', { name: 'Next' })
+        2) <button id="next-logo" aria-haspopup="menu" data-next-mark="true" aria-expanded="false" data-next-mark-loading="false" aria-label="Open Next.js Dev Tools" data-nextjs-dev-tools-button="true" aria-controls="nextjs-dev-tools-menu">…</button> aka getByRole('button', { name: 'Open Next.js Dev Tools' })
+
+    Call log:
+    [2m  - waiting for getByRole('button', { name: /Next/i })[22m
+
+
+      42 |         }
+      43 |
+    > 44 |         await page.getByRole('button', { name: /Next/i }).click();
+         |                                                           ^
+      45 |
+      46 |         // 2. Ensemble Page -> Model Selection
+      47 |         await expect(page).toHaveURL(/\/ensemble/);
+        at /Users/timrichardson/Documents/projects/personal/ensemble/ai-ensemble-8/packages/e2e/tests/mock-mode/consensus-presets-mock.spec.ts:44:59
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/consensus-presets-mock-Con-0faf8-andard-consensus-generation-mock-mode/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/consensus-presets-mock-Con-0faf8-andard-consensus-generation-mock-mode/error-context.md
+
+  1 failed
+    [mock-mode] › tests/mock-mode/consensus-presets-mock.spec.ts:21:5 › Consensus Presets (Mock Mode) › should verify ELO and Standard consensus generation 

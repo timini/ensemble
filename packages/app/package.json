@@ -18,11 +18,6 @@
     "test": "vitest run --coverage",
     "test:watch": "vitest",
     "test:ui": "vitest --ui",
-    "test:e2e": "playwright test --project=mock-mode --reporter=list",
-    "test:e2e:free": "playwright test --project=free-mode --reporter=list",
-    "test:e2e:pro": "playwright test --project=pro-mode --reporter=list",
-    "test:e2e:all": "playwright test --reporter=list",
-    "test:e2e:ui": "playwright test --ui",
     "typecheck": "tsc --noEmit",
     "prepare": "husky"
   },
@@ -49,7 +44,6 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.3.1",
-    "@playwright/test": "^1.55.1",
     "@storybook/addon-a11y": "^9.1.9",
     "@storybook/nextjs": "^9.1.9",
     "@testing-library/jest-dom": "^6.9.0",

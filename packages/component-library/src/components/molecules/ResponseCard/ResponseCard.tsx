@@ -8,6 +8,7 @@ import { Rating } from '../../atoms/Rating';
 import { Button } from '../../atoms/Button';
 import { cn } from '@/lib/utils';
 import { ChevronDown, ChevronUp, Copy } from 'lucide-react';
+import { Markdown } from '../../atoms/Markdown';
 
 export type Provider = 'openai' | 'anthropic' | 'google' | 'xai';
 export type ResponseStatus = 'streaming' | 'complete' | 'error';
@@ -190,9 +191,9 @@ export const ResponseCard = React.forwardRef<HTMLDivElement, ResponseCardProps>(
           ) : (
             <>
               {isExpanded && (
-                <div className="text-sm text-foreground whitespace-pre-wrap">
-                  {content}
-                </div>
+                <Markdown className="text-sm text-foreground">
+                  {content || ''}
+                </Markdown>
               )}
 
               {isComplete && !isError && (

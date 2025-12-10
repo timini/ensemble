@@ -70,9 +70,6 @@ jobs:
       - run: npm run lint --workspace=packages/app
       - run: npm run typecheck --workspace=packages/app
       - run: npm run build --workspace=packages/app
-      - name: Install Playwright browsers
-        run: npx playwright install --with-deps chromium
-        working-directory: packages/app
 
   # Mock Mode E2E Tests - Always run in CI
   # Uses mock API clients, no real API keys needed
@@ -90,9 +87,9 @@ jobs:
       - run: npm run build --workspace=packages/app
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium
-        working-directory: packages/app
+        working-directory: packages/e2e
       - name: Run Mock Mode E2E Tests
-        run: npm run test:e2e --workspace=packages/app
+        run: npm run test:mock --workspace=packages/e2e
         env:
           NEXT_PUBLIC_MOCK_MODE: 'true'
 
@@ -114,9 +111,9 @@ jobs:
       - run: npm run build --workspace=packages/app
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium
-        working-directory: packages/app
+        working-directory: packages/e2e
       - name: Run Free Mode E2E Tests
-        run: npm run test:e2e:free --workspace=packages/app
+        run: npm run test:free --workspace=packages/e2e
         env:
           NEXT_PUBLIC_MOCK_MODE: 'false'
           TEST_OPENAI_API_KEY: ${{ secrets.TEST_OPENAI_API_KEY }}

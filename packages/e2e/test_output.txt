@@ -1,0 +1,41 @@
+[dotenv@17.2.3] injecting env (0) from ../../.env.local -- tip: ⚙️  specify custom .env file path with { path: '/custom/path/.env' }
+[dotenv@17.2.3] injecting env (0) from ../../.env -- tip: ✅ audit secrets and track compliance: https://dotenvx.com/ops
+
+Running 1 test using 1 worker
+
+[dotenv@17.2.3] injecting env (0) from ../../.env.local -- tip: 🔐 encrypt with Dotenvx: https://dotenvx.com
+[dotenv@17.2.3] injecting env (0) from ../../.env -- tip: ✅ audit secrets and track compliance: https://dotenvx.com/ops
+  ✘  1 [free-mode] › tests/free-mode/consensus-presets.spec.ts:14:5 › Consensus Presets (Free Mode) › should allow selecting consensus presets and generating consensus (5.5s)
+
+
+  1) [free-mode] › tests/free-mode/consensus-presets.spec.ts:14:5 › Consensus Presets (Free Mode) › should allow selecting consensus presets and generating consensus 
+
+    Error: [2mexpect([22m[31mlocator[39m[2m).[22mtoBeVisible[2m()[22m failed
+
+    Locator:  getByRole('heading', { name: /Choose Your AI Ensemble/i })
+    Expected: visible
+    Received: <element(s) not found>
+    Timeout:  5000ms
+
+    Call log:
+    [2m  - Expect "toBeVisible" with timeout 5000ms[22m
+    [2m  - waiting for getByRole('heading', { name: /Choose Your AI Ensemble/i })[22m
+
+
+       9 |         await page.goto('/');
+      10 |         // Wait for hydration/initial load
+    > 11 |         await expect(page.getByRole('heading', { name: /Choose Your AI Ensemble/i })).toBeVisible();
+         |                                                                                       ^
+      12 |     });
+      13 |
+      14 |     test('should allow selecting consensus presets and generating consensus', async ({ page }) => {
+        at /Users/timrichardson/Documents/projects/personal/ensemble/ai-ensemble-8/packages/e2e/tests/free-mode/consensus-presets.spec.ts:11:87
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/consensus-presets-Consensu-488f7-ts-and-generating-consensus-free-mode/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/consensus-presets-Consensu-488f7-ts-and-generating-consensus-free-mode/error-context.md
+
+  1 failed
+    [free-mode] › tests/free-mode/consensus-presets.spec.ts:14:5 › Consensus Presets (Free Mode) › should allow selecting consensus presets and generating consensus 

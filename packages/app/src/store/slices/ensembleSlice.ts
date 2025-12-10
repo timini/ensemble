@@ -20,6 +20,8 @@ export interface SavedEnsemble {
   description: string;
   models: ModelSelection[];
   summarizer: string;
+  consensusMethod: 'standard' | 'elo';
+  eloTopN: number;
 }
 
 export interface EnsembleSlice {
@@ -28,11 +30,15 @@ export interface EnsembleSlice {
   embeddingsProvider: ProviderType;
   savedEnsembles: SavedEnsemble[];
   currentEnsembleId: string | null;
+  consensusMethod: 'standard' | 'elo';
+  eloTopN: number;
 
   addModel: (provider: ProviderType, model: string) => void;
   removeModel: (modelId: string) => void;
   setSummarizer: (modelId: string) => void;
   setEmbeddingsProvider: (provider: ProviderType) => void;
+  setConsensusMethod: (method: 'standard' | 'elo') => void;
+  setEloTopN: (n: number) => void;
   saveEnsemble: (name: string, description: string) => void;
   loadEnsemble: (ensembleId: string) => void;
   deleteEnsemble: (ensembleId: string) => void;
@@ -45,6 +51,8 @@ export const createEnsembleSlice: StateCreator<EnsembleSlice> = (set) => ({
   embeddingsProvider: 'openai',
   savedEnsembles: [],
   currentEnsembleId: null,
+  consensusMethod: 'standard',
+  eloTopN: 3,
 
   addModel: (provider, model) => {
     set((state) => {
@@ -72,6 +80,14 @@ export const createEnsembleSlice: StateCreator<EnsembleSlice> = (set) => ({
     set({ embeddingsProvider: provider });
   },
 
+  setConsensusMethod: (method) => {
+    set({ consensusMethod: method });
+  },
+
+  setEloTopN: (n) => {
+    set({ eloTopN: n });
+  },
+
   saveEnsemble: (name, description) => {
     set((state) => {
       const id = `ensemble-${Date.now()}`;
@@ -81,6 +97,8 @@ export const createEnsembleSlice: StateCreator<EnsembleSlice> = (set) => ({
         description,
         models: state.selectedModels,
         summarizer: state.summarizerModel ?? '',
+        consensusMethod: state.consensusMethod,
+        eloTopN: state.eloTopN,
       };
       return {
         savedEnsembles: [...state.savedEnsembles, newEnsemble],
@@ -98,6 +116,8 @@ export const createEnsembleSlice: StateCreator<EnsembleSlice> = (set) => ({
         selectedModels: ensemble.models,
         summarizerModel: ensemble.summarizer,
         currentEnsembleId: ensembleId,
+        consensusMethod: (ensemble as any).consensusMethod ?? 'standard', // Backwards compatibility
+        eloTopN: (ensemble as any).eloTopN ?? 3,
       };
     });
   },
@@ -117,6 +137,8 @@ export const createEnsembleSlice: StateCreator<EnsembleSlice> = (set) => ({
       selectedModels: [],
       summarizerModel: null,
       currentEnsembleId: null,
+      consensusMethod: 'standard',
+      eloTopN: 3,
     });
   },
 });

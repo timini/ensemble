@@ -109,26 +109,37 @@ export function useEnsemblePage() {
         validateApiKey
     );
 
+    const removeManualResponse = useStore((state) => state.removeManualResponse);
+    const setConsensusMethod = useStore((state) => state.setConsensusMethod);
+    const setEloTopN = useStore((state) => state.setEloTopN);
+    const consensusMethod = useStore((state) => state.consensusMethod);
+    const eloTopN = useStore((state) => state.eloTopN);
+
     const handleModelToggle = (modelId: string) => {
         if (!hasHydrated) {
             return;
         }
         // Check if selected by comparing the 'model' field (not the dynamic 'id' field)
-        const selectedModel = selectedModels.find((m) => m.model === modelId);
-        const isSelected = !!selectedModel;
-
+        const isSelected = selectedModels.some((m) => m.id === modelId);
         if (isSelected) {
-            // Remove using the dynamic ID from the store
-            removeModel(selectedModel.id);
+            removeModel(modelId);
         } else {
             // Add model if under limit
             if (selectedModels.length < 6) {
                 const model = availableModels.find((m) => m.id === modelId);
                 if (model) {
-                    addModel(model.provider, model.id);
+                    addModel(model.provider, model.name);
                 }
             }
         }
+    };
+
+    const handleConsensusMethodChange = (method: 'standard' | 'elo') => {
+        setConsensusMethod(method);
+    };
+
+    const handleTopNChange = (n: number) => {
+        setEloTopN(n);
     };
 
     const handleSummarizerChange = (modelId: string) => {
@@ -241,5 +252,9 @@ export function useEnsemblePage() {
         handleContinue,
         handleBack,
         isValid,
+        handleConsensusMethodChange,
+        handleTopNChange,
+        consensusMethod,
+        eloTopN,
     };
 }

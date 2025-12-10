@@ -84,6 +84,7 @@
     "consensusCard": {
       "heading": "Consensus",
       "description": "Résumé combiné fourni par {{model}}.",
+      "generatedBy": "Généré par {{model}}",
       "shareText": "Partager cette réponse consensuelle",
       "shareButton": "Partager"
     },

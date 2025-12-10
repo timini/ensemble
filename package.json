@@ -16,6 +16,7 @@
     "lint": "npm run lint --workspaces --if-present",
     "lint:fix": "npm run lint:fix --workspaces --if-present",
     "test": "npm run test --workspaces --if-present",
+    "test:e2e": "npm run test --workspace=packages/e2e",
     "test:unit": "npm run test:unit --workspaces --if-present",
     "typecheck": "npm run typecheck --workspaces --if-present",
     "prepare": "husky"

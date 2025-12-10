@@ -222,7 +222,7 @@ describe('EnsembleConfigurationSummary', () => {
         />
       );
 
-      const flexContainer = container.querySelector('.flex.items-center.justify-between');
+      const flexContainer = container.querySelector('.flex.items-start.justify-between');
       expect(flexContainer).toBeInTheDocument();
     });
 
