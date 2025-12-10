@@ -137,101 +137,120 @@ When working on features, ALWAYS:
 
 ## Development Workflow
 
-**CRITICAL**: Treat **EACH TASK** in `specs/{feature-id}/tasks.md` as a separate, complete unit of work. Follow this workflow for every single task (T001, T002, T003, etc.) to maintain quality and consistency.
+All changes to `main` must go through a Pull Request with passing CI checks and at least one approval.
 
-### Task-by-Task Execution
+### Branch Protection Rules
 
-Each task goes through the complete 7-step workflow before moving to the next task:
+The `main` branch is protected with:
+- **Required status checks**: All CI jobs must pass (Component Library, Shared Utils, Wireframes, App, App E2E Mock Mode, Static Analysis)
+- **Required reviews**: At least 1 approving review before merge
+- **Stale review dismissal**: Reviews are dismissed when new commits are pushed
+- **No force pushes**: History cannot be rewritten on main
+- **No deletions**: The main branch cannot be deleted
 
-### 1. Plan Work (Per Task)
-- **Read the specific task** from `specs/{feature-id}/tasks.md` (e.g., T001, T033, T152)
-- **Understand task context**:
-  - Review task description and file paths
-  - Check for dependencies (tasks without `[P]` may depend on previous tasks)
-  - Review related requirements in `specs/{feature-id}/spec.md`
-  - Check technical decisions in `specs/{feature-id}/plan.md`
-- **Identify deliverables**: What files/artifacts will this task create or modify?
+### Standard Development Workflow
 
-### 2. Write Tests (TDD - MANDATORY)
-**For component tasks** (e.g., T033-T035, T036-T038):
+Follow this workflow for all changes:
+
+#### 1. Create a Feature Branch
+```bash
+git checkout main
+git pull origin main
+git checkout -b feature/<descriptive-name>
+# or: git checkout -b fix/<bug-description>
+```
+
+#### 2. Write/Update Specs
+- Review or create specs in `specs/{feature-id}/spec.md`
+- Check implementation plan in `specs/{feature-id}/plan.md`
+- Update task list in `specs/{feature-id}/tasks.md`
+
+#### 3. Write Tests (TDD - MANDATORY)
+**For component tasks**:
 - **Story First**: Create Storybook story (`.stories.tsx`) with all variants
 - **Tests Before Code**: Write unit tests (`.test.tsx`) testing all behaviors
-  - Test rendering, props, interactions, accessibility, states
-  - Use `data-testid` selectors exclusively
-  - Mock all external dependencies (Zustand, APIs)
 - Run tests (they should fail initially - this is correct TDD)
 
-**For setup/config tasks** (e.g., T001-T032):
-- Write configuration first, then verify it works
-- For tasks like T006a-T006c (pre-commit hooks), test the hook after setup
+**For page tasks**:
+- Write E2E test FIRST, then implement until tests pass
 
-**For page tasks** (e.g., T152-T156):
-- Write E2E test FIRST (e.g., T152), then implement page (T153-T156)
-
-### 3. Implement Code (Per Task)
-- Implement the specific task deliverable until tests pass
-- **Follow task specification exactly** (file paths, naming, structure)
-- Keep files under 200 lines (break down if needed)
-- Use Tailwind utility classes only (no hardcoded colors/strings)
+#### 4. Write Code
+- Implement the feature/fix until tests pass
+- Keep files under 200 lines
+- Use Tailwind utility classes only
 - Add JSDoc documentation
-- For component tasks: Visually validate in Storybook (themes, languages, states)
 
-### 4. Quality Gates (MUST PASS - Every Task)
-Before committing **each task**, ensure all checks pass:
-
+#### 5. Iterate Until Tests Pass
+Run all quality checks locally:
 ```bash
-cd packages/app
-
-# Run all quality checks
+# From packages/app
 npm run check            # Linting + typecheck
 npm run format:write     # Auto-format code
 npm run build            # Ensure production build succeeds
+npm test                 # All unit tests pass
 
-# Run tests (when test suite is set up)
-npm test                 # All unit tests pass with 80%+ coverage
+# From packages/component-library (if applicable)
+npm run lint
+npm run test:unit
+npm run test:storybook:ci
+
+# From packages/e2e (if applicable)
+npm run test:mock
 ```
 
-**DO NOT** proceed to commit if any check fails. Fix issues before committing.
+**DO NOT** proceed if any check fails. Fix issues before committing.
 
-### 5. Commit Changes (One Commit Per Task)
-Once quality gates pass for the current task:
-
+#### 6. Commit Changes
 ```bash
 git add .
-git commit -m "feat: <task description> (T###)
+git commit -m "feat: <description>
 
-<detailed changes from this specific task>
+<detailed changes>
 
 🤖 Generated with [Claude Code](https://claude.com/claude-code)
 
 Co-Authored-By: Claude <noreply@anthropic.com>"
 ```
 
-**Examples**:
-- `feat: initialize Next.js project with TypeScript and Tailwind (T001)`
-- `feat: add Button component with stories and tests (T036-T038)`
-- `test: add E2E test for config page (T152)`
+Use conventional commit format: `feat:`, `fix:`, `test:`, `refactor:`, `docs:`, `chore:`
 
-**Important**:
-- Reference the task ID (e.g., `T001`, `T036-T038`) in commit message
-- One commit per task or logical task group (e.g., T036-T038 for Button component's 3 sub-tasks)
-- Use conventional commit format: `feat:`, `test:`, `refactor:`, `docs:`, `chore:`
+#### 7. Update Documentation
+- Mark completed tasks as `[X]` in `specs/{feature-id}/tasks.md`
+- Update README.md if setup changes
+- Update spec.md with completion notes if applicable
 
-### 6. Update Documentation (Every Task)
-After **each task** is committed:
+#### 8. Push and Create Pull Request
+```bash
+git push -u origin feature/<descriptive-name>
+gh pr create --title "feat: <description>" --body "## Summary
+- <changes>
 
-- **REQUIRED**: Mark task as `[X]` in `specs/{feature-id}/tasks.md`
-  ```markdown
-  - [X] T001 Create Next.js 14 project with TypeScript
-  ```
-- **If phase/component complete**: Update `specs/{feature-id}/spec.md` with completion date
-- **If setup changes**: Update README.md with new dependencies or instructions
-- **At phase milestones**: Increment version number in spec.md
+## Test plan
+- [ ] All CI checks pass
+- [ ] Tested locally
 
-### 7. Move to Next Task
-**ONLY** after completing steps 1-6 for the current task, move to the next task in the task list.
+🤖 Generated with [Claude Code](https://claude.com/claude-code)"
+```
 
-**Important**: Do not batch multiple tasks. Each task is a complete cycle through steps 1-7.
+#### 9. Verify CI Passes
+Wait for all CI jobs to complete:
+- Component Library (lint + unit tests + Storybook tests)
+- Shared Utils (tests)
+- Wireframes (lint + build)
+- App (lint + typecheck + build)
+- App E2E Mock Mode (Playwright tests)
+- Static Analysis
+
+If any job fails, fix the issues and push again.
+
+#### 10. Request Review and Merge
+Once CI passes, request a review. After approval, merge the PR.
+
+---
+
+### Task-by-Task Execution
+
+**CRITICAL**: Treat **EACH TASK** in `specs/{feature-id}/tasks.md` as a separate, complete unit of work.
 
 ---
 

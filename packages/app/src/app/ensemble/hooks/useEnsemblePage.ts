@@ -109,7 +109,6 @@ export function useEnsemblePage() {
         validateApiKey
     );
 
-    const removeManualResponse = useStore((state) => state.removeManualResponse);
     const setConsensusMethod = useStore((state) => state.setConsensusMethod);
     const setEloTopN = useStore((state) => state.setEloTopN);
     const consensusMethod = useStore((state) => state.consensusMethod);

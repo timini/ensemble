@@ -139,7 +139,7 @@ export default function ReviewPage() {
     if (!hasHydrated || metaAnalysis || isGeneratingConsensus) return;
 
     // Use summarizer from state, or fallback to first selected model
-    const effectiveSummarizer = summarizerModel || selectedModels[0];
+    const effectiveSummarizer = summarizerModel ?? selectedModels[0];
     if (!effectiveSummarizer) return;
 
     const allResponsesComplete = viewResponses.every(r => r.isComplete && !r.isStreaming);
@@ -164,6 +164,7 @@ export default function ReviewPage() {
     viewManualResponses,
     metaAnalysis,
     summarizerModel,
+    selectedModels,
     prompt,
     generateConsensus,
     isGeneratingConsensus
@@ -204,10 +205,10 @@ export default function ReviewPage() {
       </div>
 
       {/* 2. Consensus Section (matches wireframe order) */}
-      {(viewMetaAnalysis || isGeneratingConsensus) && (
+      {(viewMetaAnalysis !== null || isGeneratingConsensus) && (
         <div className="mt-8">
           <ConsensusCard
-            summarizerModel={summarizerModel || selectedModels[0]?.id || 'AI Model'}
+            summarizerModel={summarizerModel ?? selectedModels[0]?.id ?? 'AI Model'}
             consensusText={viewMetaAnalysis ?? undefined}
             isLoading={isGeneratingConsensus}
           />

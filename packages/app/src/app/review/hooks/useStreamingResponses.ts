@@ -116,8 +116,9 @@ export function useStreamingResponses({
 
     // Cleanup intervals on unmount
     useEffect(() => {
+        const intervals = flushIntervals.current;
         return () => {
-            Object.values(flushIntervals.current).forEach((interval) => {
+            Object.values(intervals).forEach((interval) => {
                 if (interval) clearInterval(interval);
             });
         };
@@ -159,6 +160,7 @@ export function useStreamingResponses({
         };
 
         void triggerApiCalls();
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- streamModel is intentionally excluded to prevent re-triggering
     }, [
         completeStep,
         hasHydrated,
@@ -166,9 +168,7 @@ export function useStreamingResponses({
         router,
         setCurrentStep,
         selectedModels,
-        // responses, // Removed to prevent infinite loop
         skipRedirectRef,
-        // other dependencies implicitly used by streamModel but we don't want to re-trigger on them changing
     ]);
 
     return { retryModel: streamModel };

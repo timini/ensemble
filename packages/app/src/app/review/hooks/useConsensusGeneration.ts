@@ -23,7 +23,7 @@ export function useConsensusGeneration() {
         summarizerOverride?: string
     ) => {
         // Use override if provided, otherwise fall back to store value
-        const effectiveSummarizerModelId = summarizerOverride || summarizerModelId;
+        const effectiveSummarizerModelId = summarizerOverride ?? summarizerModelId;
 
         if (!effectiveSummarizerModelId) {
             setError('No summarizer model selected');
@@ -114,9 +114,10 @@ export function useConsensusGeneration() {
 
             setMetaAnalysis(resultText);
 
-        } catch (err: any) {
+        } catch (err: unknown) {
             console.error('Consensus Generation Error:', err);
-            setError(err.message || 'Failed to generate consensus');
+            const message = err instanceof Error ? err.message : 'Failed to generate consensus';
+            setError(message);
         } finally {
             setIsGenerating(false);
         }
