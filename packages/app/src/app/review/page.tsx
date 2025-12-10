@@ -138,9 +138,19 @@ export default function ReviewPage() {
   useEffect(() => {
     if (!hasHydrated || metaAnalysis || isGeneratingConsensus) return;
 
-    // Use summarizer from state, or fallback to first selected model
-    const effectiveSummarizer = summarizerModel ?? selectedModels[0];
-    if (!effectiveSummarizer) return;
+    // Use summarizer from state (which is an available model ID like "gpt-4o")
+    // If no summarizer set, find the first selected model's corresponding available model ID
+    let effectiveSummarizerId = summarizerModel;
+
+    if (!effectiveSummarizerId && selectedModels[0]) {
+      // selectedModels[0].model contains the model name (e.g., "GPT-4o")
+      // We need to find the corresponding available model ID
+      // For now, use a lowercase, hyphenated version as a fallback
+      // The actual ID format in FALLBACK_MODELS uses lowercase with hyphens
+      effectiveSummarizerId = selectedModels[0].model.toLowerCase().replace(/\s+/g, '-');
+    }
+
+    if (!effectiveSummarizerId) return;
 
     const allResponsesComplete = viewResponses.every(r => r.isComplete && !r.isStreaming);
     if (!allResponsesComplete && viewResponses.length > 0) return;
@@ -152,11 +162,7 @@ export default function ReviewPage() {
     ].filter(r => r.content.trim().length > 0);
 
     if (allCompletedResponses.length >= 2) {
-      // Get the summarizer ID as a string (from object if needed)
-      const summarizerId = typeof effectiveSummarizer === 'string'
-        ? effectiveSummarizer
-        : effectiveSummarizer.id;
-      void generateConsensus(allCompletedResponses, prompt ?? '', summarizerId);
+      void generateConsensus(allCompletedResponses, prompt ?? '', effectiveSummarizerId);
     }
   }, [
     hasHydrated,

@@ -44,9 +44,6 @@ export function useEnsemblePage() {
     const setCurrentStep = useStore((state) => state.setCurrentStep);
     const completeStep = useStore((state) => state.completeStep);
 
-    // Track selected model IDs for ModelSelectionList
-    const selectedModelIds = useMemo(() => selectedModels.map((m) => m.model), [selectedModels]);
-    const displayedSelectedModelIds = hasHydrated ? selectedModelIds : [];
     const displayedSummarizer = hasHydrated ? summarizerModel ?? undefined : undefined;
     const viewSelectedModels = hasHydrated ? selectedModels : [];
 
@@ -79,6 +76,20 @@ export function useEnsemblePage() {
         mode: displayMode,
         hydratedStatuses,
     });
+
+    // Track selected model IDs for ModelSelectionList
+    // Map from selected model names to available model IDs
+    const selectedModelIds = useMemo(() => {
+        return selectedModels.map((selectedModel) => {
+            // Find the available model that matches this selected model's name
+            const availableModel = availableModels.find(
+                (m) => m.name === selectedModel.model && m.provider === selectedModel.provider
+            );
+            // Return the available model's ID if found, otherwise fall back to model name
+            return availableModel?.id ?? selectedModel.model;
+        });
+    }, [selectedModels, availableModels]);
+    const displayedSelectedModelIds = hasHydrated ? selectedModelIds : [];
 
     const providerStatus = useMemo(
         () =>
@@ -118,17 +129,23 @@ export function useEnsemblePage() {
         if (!hasHydrated) {
             return;
         }
-        // Check if selected by comparing the 'model' field (not the dynamic 'id' field)
-        const isSelected = selectedModels.some((m) => m.id === modelId);
-        if (isSelected) {
-            removeModel(modelId);
+        // Find the available model first to get its name
+        const availableModel = availableModels.find((m) => m.id === modelId);
+        if (!availableModel) {
+            return;
+        }
+
+        // Check if selected by comparing the 'model' field (model name), not the dynamic 'id' field
+        // selectedModels stores model name in .model field, available models use .name
+        const selectedModel = selectedModels.find((m) => m.model === availableModel.name);
+
+        if (selectedModel) {
+            // Remove using the selected model's unique ID
+            removeModel(selectedModel.id);
         } else {
             // Add model if under limit
             if (selectedModels.length < 6) {
-                const model = availableModels.find((m) => m.id === modelId);
-                if (model) {
-                    addModel(model.provider, model.name);
-                }
+                addModel(availableModel.provider, availableModel.name);
             }
         }
     };
