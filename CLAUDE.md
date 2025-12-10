@@ -321,13 +321,25 @@ Tasks marked `[P]` can run in parallel (different files, no dependencies):
 
 ## Mandatory Development Practices
 
-### Feature Development Agents (REQUIRED)
-**ALWAYS use feature-dev agents** when doing any development work:
-- `feature-dev:code-explorer` - Use to deeply analyze existing codebase features, trace execution paths, and understand patterns before making changes
-- `feature-dev:code-architect` - Use to design feature architectures and create implementation blueprints
-- `feature-dev:code-reviewer` - Use after writing significant code to review for bugs, security issues, and code quality
+### Feature Development Agents (CRITICAL - ALWAYS USE)
 
-Launch these agents via the Task tool with the appropriate `subagent_type`. Never skip the exploration phase - always understand the codebase before making changes.
+**YOU MUST ALWAYS USE feature-dev agents** for ANY development work. This is not optional. Before writing ANY code, you MUST:
+
+1. **FIRST**: Use `feature-dev:code-explorer` to deeply analyze existing codebase features, trace execution paths, and understand patterns
+2. **SECOND**: Use `feature-dev:code-architect` to design feature architectures and create implementation blueprints
+3. **AFTER CODING**: Use `feature-dev:code-reviewer` to review for bugs, security issues, and code quality
+
+**Launch these agents via the Task tool with the appropriate `subagent_type`.** Example:
+
+```
+Task(subagent_type="feature-dev:code-explorer", prompt="Analyze how model selection works...")
+```
+
+**NEVER skip the exploration phase.** You MUST understand the codebase before making ANY changes. Failing to use these agents leads to:
+- Introducing bugs from misunderstanding existing code
+- Breaking existing functionality
+- Creating inconsistent patterns
+- Wasting time on incorrect approaches
 
 ### Test-Driven Development (MANDATORY)
 **TDD is non-negotiable.** For every change:
@@ -337,8 +349,31 @@ Launch these agents via the Task tool with the appropriate `subagent_type`. Neve
 4. **Refactor** if needed while keeping tests green
 5. **Verify all existing tests still pass** before committing
 
+### NEVER Bypass Git Hooks (ABSOLUTE RULE)
+
+**This is an ABSOLUTE rule with NO exceptions:**
+
+1. **NEVER use `--no-verify`** on any git command (commit, push, etc.)
+2. **NEVER use `--force` or `--force-with-lease`** to push changes
+3. **NEVER modify hook files** (`.husky/pre-commit`, `.husky/pre-push`) to skip checks
+4. **NEVER disable hooks temporarily** "just this once"
+5. **NEVER amend commits** that have already been pushed to remote
+
+**If hooks fail, you MUST:**
+- Fix the underlying issues (lint errors, test failures, etc.)
+- Run the checks again until they pass
+- Only then proceed with the commit/push
+
+**Why this matters:**
+- Hooks ensure code quality before it reaches the repository
+- Bypassing hooks defeats the entire purpose of having quality gates
+- It introduces bugs, breaks builds, and wastes everyone's time
+- Force pushing rewrites history and can cause data loss and merge conflicts
+
+**There are NO valid reasons to bypass hooks.** If tests are flaky, fix the tests. If linting is wrong, fix the code. If hooks are too slow, optimize the hooks themselves through proper channels - never bypass them.
+
 ### Git Commit Rules (STRICT)
-**NEVER use `--no-verify` flag** when committing. Pre-commit hooks exist to enforce quality:
+Pre-commit hooks exist to enforce quality:
 - Linting must pass
 - Type checking must pass
 - Tests must pass

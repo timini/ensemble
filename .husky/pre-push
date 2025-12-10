@@ -11,6 +11,7 @@ else
   npm run test:storybook
 fi
 
-# E2E tests are run by CI - skipping in pre-push to avoid flaky failures
-# The CI pipeline runs E2E tests in a more stable environment
-echo "✅ E2E tests will be run by CI"
+# Run e2e tests (mock mode only for pre-push)
+echo "🧪 Running E2E tests (mock mode)..."
+cd ../e2e
+npm run test:mock
