@@ -34,6 +34,7 @@ export { Rating, ratingVariants, type RatingProps } from './components/atoms/Rat
 export { Heading, headingVariants, type HeadingProps } from './components/atoms/Heading';
 export { Text, textVariants, type TextProps } from './components/atoms/Text';
 export { Link, linkVariants, type LinkProps } from './components/atoms/Link';
+export { Markdown, type MarkdownProps } from './components/atoms/Markdown';
 export {
   Dialog,
   DialogPortal,
@@ -82,3 +83,4 @@ export { SettingsModal, type SettingsModalProps, type Theme, type Language } fro
 export { ManualResponseModal, type ManualResponseModalProps, type ManualResponseData } from './components/organisms/ManualResponseModal';
 export { PromptTips, type PromptTipsProps } from './components/organisms/PromptTips';
 export { PromptInputWithHint, type PromptInputWithHintProps } from './components/organisms/PromptInputWithHint';
+export { PromptCard, type PromptCardProps } from './components/organisms/PromptCard';

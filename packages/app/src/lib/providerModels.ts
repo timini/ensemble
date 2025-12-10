@@ -6,7 +6,7 @@ import type {
   AIProvider,
 } from '@ensemble-ai/shared-utils/providers';
 import { ProviderRegistry } from '@ensemble-ai/shared-utils/providers';
-import { AVAILABLE_MODELS } from './models';
+import { FALLBACK_MODELS } from './models';
 import { toError } from './errors';
 import { initializeProviders } from '~/providers';
 import { logger } from '~/lib/logger';
@@ -101,7 +101,7 @@ export async function fetchProviderModels(options: {
 export function mergeDynamicModels(
   overrides: Partial<Record<ProviderName, Model[]>>,
 ): Model[] {
-  let merged = AVAILABLE_MODELS;
+  let merged = FALLBACK_MODELS;
   for (const provider of Object.keys(overrides) as ProviderName[]) {
     const models = overrides[provider];
     if (!models || models.length === 0) continue;

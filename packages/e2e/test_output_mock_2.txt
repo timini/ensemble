@@ -1,0 +1,37 @@
+[dotenv@17.2.3] injecting env (0) from ../../.env.local -- tip: 🔐 encrypt with Dotenvx: https://dotenvx.com
+[dotenv@17.2.3] injecting env (0) from ../../.env -- tip: ⚙️  override existing env vars with { override: true }
+[2m[WebServer] [22m[baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
+
+Running 1 test using 1 worker
+
+[dotenv@17.2.3] injecting env (0) from ../../.env.local -- tip: 🔐 prevent committing .env to code: https://dotenvx.com/precommit
+[dotenv@17.2.3] injecting env (0) from ../../.env -- tip: 🗂️ backup and recover secrets: https://dotenvx.com/ops
+  ✘  1 [mock-mode] › tests/mock-mode/consensus-presets-mock.spec.ts:21:5 › Consensus Presets (Mock Mode) › should verify ELO and Standard consensus generation (1.0m)
+
+
+  1) [mock-mode] › tests/mock-mode/consensus-presets-mock.spec.ts:21:5 › Consensus Presets (Mock Mode) › should verify ELO and Standard consensus generation 
+
+    [31mTest timeout of 60000ms exceeded.[39m
+
+    Error: locator.click: Test timeout of 60000ms exceeded.
+    Call log:
+    [2m  - waiting for getByTestId('model-card-claude-3-opus')[22m
+
+
+      54 |             // IDs might be model-card-gpt-4o, etc.
+      55 |             // Assuming IDs match mock client.
+    > 56 |             await page.getByTestId(`model-card-${modelId}`).click();
+         |                                                             ^
+      57 |         }
+      58 |
+      59 |         // Check selection count or presence in sidebar
+        at /Users/timrichardson/Documents/projects/personal/ensemble/ai-ensemble-8/packages/e2e/tests/mock-mode/consensus-presets-mock.spec.ts:56:61
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/consensus-presets-mock-Con-0faf8-andard-consensus-generation-mock-mode/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/consensus-presets-mock-Con-0faf8-andard-consensus-generation-mock-mode/error-context.md
+
+  1 failed
+    [mock-mode] › tests/mock-mode/consensus-presets-mock.spec.ts:21:5 › Consensus Presets (Mock Mode) › should verify ELO and Standard consensus generation 

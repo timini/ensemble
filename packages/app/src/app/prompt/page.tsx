@@ -22,7 +22,7 @@ import {
   ProviderRegistry,
   type AIProvider,
 } from '@ensemble-ai/shared-utils/providers';
-import { AVAILABLE_MODELS } from '~/lib/models';
+import { FALLBACK_MODELS } from '~/lib/models';
 import { toError } from '~/lib/errors';
 
 export default function PromptPage() {
@@ -40,6 +40,10 @@ export default function PromptPage() {
   const completeResponse = useStore((state) => state.completeResponse);
   const setError = useStore((state) => state.setError);
   const mode = useStore((state) => state.mode);
+  const consensusMethod = useStore((state) => state.consensusMethod);
+  const eloTopN = useStore((state) => state.eloTopN);
+  const setConsensusMethod = useStore((state) => state.setConsensusMethod);
+  const setEloTopN = useStore((state) => state.setEloTopN);
 
   const currentStep = useStore((state) => state.currentStep);
   const setCurrentStep = useStore((state) => state.setCurrentStep);
@@ -80,14 +84,14 @@ export default function PromptPage() {
       process.env.NEXT_PUBLIC_MOCK_MODE === 'true'
         ? 'mock'
         : mode === 'pro'
-        ? 'pro'
-        : 'free';
+          ? 'pro'
+          : 'free';
 
     const currentPrompt = localPrompt.trim();
 
     selectedModels.forEach((selection) => {
       const displayName =
-        AVAILABLE_MODELS.find((model) => model.id === selection.model)?.name ??
+        FALLBACK_MODELS.find((model) => model.id === selection.model)?.name ??
         selection.model;
 
       startStreaming(selection.id, selection.provider, displayName);
@@ -154,6 +158,10 @@ export default function PromptPage() {
           <EnsembleConfigurationSummary
             selectedModels={modelNames}
             summarizerModel={summarizerForSummary}
+            consensusMethod={consensusMethod}
+            topN={eloTopN}
+            onConsensusMethodChange={setConsensusMethod}
+            onTopNChange={setEloTopN}
           />
         )}
 

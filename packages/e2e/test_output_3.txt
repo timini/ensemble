@@ -1,0 +1,42 @@
+[dotenv@17.2.3] injecting env (0) from ../../.env.local -- tip: 🗂️ backup and recover secrets: https://dotenvx.com/ops
+[dotenv@17.2.3] injecting env (0) from ../../.env -- tip: 🔐 prevent building .env in docker: https://dotenvx.com/prebuild
+[2m[WebServer] [22m[baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
+
+Running 1 test using 1 worker
+
+[dotenv@17.2.3] injecting env (0) from ../../.env.local -- tip: ⚙️  suppress all logs with { quiet: true }
+[dotenv@17.2.3] injecting env (0) from ../../.env -- tip: ⚙️  write to custom object with { processEnv: myObject }
+  ✘  1 [free-mode] › tests/free-mode/consensus-presets.spec.ts:9:5 › Consensus Presets (Free Mode) › should allow selecting consensus presets and generating consensus (7.0s)
+
+
+  1) [free-mode] › tests/free-mode/consensus-presets.spec.ts:9:5 › Consensus Presets (Free Mode) › should allow selecting consensus presets and generating consensus 
+
+    Error: [2mexpect([22m[31mlocator[39m[2m).[22mtoBeVisible[2m()[22m failed
+
+    Locator:  getByText('2 Models Selected')
+    Expected: visible
+    Received: <element(s) not found>
+    Timeout:  5000ms
+
+    Call log:
+    [2m  - Expect "toBeVisible" with timeout 5000ms[22m
+    [2m  - waiting for getByText('2 Models Selected')[22m
+
+
+      43 |
+      44 |         // Ensure we have 2 selected
+    > 45 |         await expect(page.getByText('2 Models Selected')).toBeVisible();
+         |                                                           ^
+      46 |
+      47 |         // Click Next
+      48 |         await page.getByRole('button', { name: /Next/i }).click();
+        at /Users/timrichardson/Documents/projects/personal/ensemble/ai-ensemble-8/packages/e2e/tests/free-mode/consensus-presets.spec.ts:45:59
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/consensus-presets-Consensu-488f7-ts-and-generating-consensus-free-mode/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/consensus-presets-Consensu-488f7-ts-and-generating-consensus-free-mode/error-context.md
+
+  1 failed
+    [free-mode] › tests/free-mode/consensus-presets.spec.ts:9:5 › Consensus Presets (Free Mode) › should allow selecting consensus presets and generating consensus 

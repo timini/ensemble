@@ -80,6 +80,8 @@ export default function EnsemblePage() {
             onAddManualResponse={manualModal.openModal}
             manualResponses={viewManualResponses}
             onClearAll={clearSelection}
+            showQuickPresets={false}
+            showSaveEnsemble={false}
           />
         </div>
       </div>

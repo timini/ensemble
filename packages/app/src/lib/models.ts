@@ -1,13 +1,13 @@
 /**
- * Available AI Models Configuration
+ * Fallback AI Models Configuration
  *
- * Defines all available models across providers for the Ensemble page.
- * Models are grouped by provider with display names and IDs.
+ * Static list of models used as fallback when dynamic loading from
+ * provider APIs fails or is unavailable. Prefer dynamically loaded models.
  */
 
 import type { Model } from '@/components/organisms/ModelSelectionList';
 
-export const AVAILABLE_MODELS: Model[] = [
+export const FALLBACK_MODELS: Model[] = [
   // XAI (Grok)
   {
     id: 'grok-1',
@@ -52,6 +52,11 @@ export const AVAILABLE_MODELS: Model[] = [
     id: 'gemini-1.5-flash',
     provider: 'google',
     name: 'Gemini 1.5 Flash',
+  },
+  {
+    id: 'gemini-2.5-flash',
+    provider: 'google',
+    name: 'Gemini 2.5 Flash',
   },
 
   // Anthropic (Claude)

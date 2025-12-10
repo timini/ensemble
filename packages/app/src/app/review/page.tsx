@@ -23,10 +23,12 @@ import { ConsensusCard } from '@/components/organisms/ConsensusCard';
 import { AgreementAnalysis } from '@/components/organisms/AgreementAnalysis';
 import { ProgressSteps } from '@/components/molecules/ProgressSteps';
 import { WorkflowNavigator } from '@/components/organisms/WorkflowNavigator';
-import { Card } from '@/components/atoms/Card';
+import { PromptCard } from '@/components/organisms/PromptCard';
 import type { Provider } from '@/components/molecules/ResponseCard';
 import { useResponseEmbeddings } from './hooks/useResponseEmbeddings';
 import { useStreamingResponses } from './hooks/useStreamingResponses';
+import { useConsensusGeneration } from './hooks/useConsensusGeneration';
+import { useEffect } from 'react';
 
 export default function ReviewPage() {
   const { t } = useTranslation();
@@ -130,6 +132,43 @@ export default function ReviewPage() {
     calculateAgreementState,
   });
 
+  const { generateConsensus, isGenerating: isGeneratingConsensus } = useConsensusGeneration();
+
+  // Effect: Trigger consensus generation when all responses are complete
+  useEffect(() => {
+    if (!hasHydrated || metaAnalysis || isGeneratingConsensus) return;
+
+    // Use summarizer from state, or fallback to first selected model
+    const effectiveSummarizer = summarizerModel || selectedModels[0];
+    if (!effectiveSummarizer) return;
+
+    const allResponsesComplete = viewResponses.every(r => r.isComplete && !r.isStreaming);
+    if (!allResponsesComplete && viewResponses.length > 0) return;
+
+    // Combine responses
+    const allCompletedResponses = [
+      ...viewResponses.filter(r => r.isComplete && !r.error).map(r => ({ modelId: r.modelId, modelName: r.model, content: r.response })),
+      ...viewManualResponses.map(r => ({ modelId: r.id, modelName: r.label, content: r.response ?? '' }))
+    ].filter(r => r.content.trim().length > 0);
+
+    if (allCompletedResponses.length >= 2) {
+      // Get the summarizer ID as a string (from object if needed)
+      const summarizerId = typeof effectiveSummarizer === 'string'
+        ? effectiveSummarizer
+        : effectiveSummarizer.id;
+      void generateConsensus(allCompletedResponses, prompt ?? '', summarizerId);
+    }
+  }, [
+    hasHydrated,
+    viewResponses,
+    viewManualResponses,
+    metaAnalysis,
+    summarizerModel,
+    prompt,
+    generateConsensus,
+    isGeneratingConsensus
+  ]);
+
   const handleBack = () => {
     setCurrentStep('prompt');
     router.push('/prompt');
@@ -159,17 +198,36 @@ export default function ReviewPage() {
         description={t('pages.review.description')}
       />
 
-      {/* Display the prompt */}
-      <Card className="mt-8">
-        <div className="p-6">
-          <h3 className="text-lg font-semibold mb-4">{t('pages.review.promptLabel')}</h3>
-          <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
-            <p className="text-gray-900 dark:text-gray-100">{displayPrompt}</p>
-          </div>
-        </div>
-      </Card>
+      {/* 1. Prompt Card (matches wireframe order) */}
+      <div className="mt-8">
+        <PromptCard prompt={displayPrompt} />
+      </div>
 
-      {/* Responses Section */}
+      {/* 2. Consensus Section (matches wireframe order) */}
+      {(viewMetaAnalysis || isGeneratingConsensus) && (
+        <div className="mt-8">
+          <ConsensusCard
+            summarizerModel={summarizerModel || selectedModels[0]?.id || 'AI Model'}
+            consensusText={viewMetaAnalysis ?? undefined}
+            isLoading={isGeneratingConsensus}
+          />
+        </div>
+      )}
+
+      {/* 3. Agreement Analysis Section (matches wireframe order) */}
+      {pairwiseComparisons.length > 0 && (
+        <div className="mt-8">
+          <AgreementAnalysis
+            overallAgreement={overallAgreement}
+            pairwiseComparisons={pairwiseComparisons}
+            responseCount={completedResponses.length}
+            comparisonCount={pairwiseComparisons.length}
+            averageConfidence={averageConfidence}
+          />
+        </div>
+      )}
+
+      {/* 4. Individual Responses Section (matches wireframe order - at bottom) */}
       <div className="mt-8 space-y-4">
         <h3 className="text-xl font-semibold">{t('pages.review.responsesHeading')}</h3>
 
@@ -221,30 +279,7 @@ export default function ReviewPage() {
         )}
       </div>
 
-      {/* Agreement Analysis Section */}
-      {pairwiseComparisons.length > 0 && (
-        <div className="mt-8">
-          <AgreementAnalysis
-            overallAgreement={overallAgreement}
-            pairwiseComparisons={pairwiseComparisons}
-            responseCount={completedResponses.length}
-            comparisonCount={pairwiseComparisons.length}
-            averageConfidence={averageConfidence}
-          />
-        </div>
-      )}
-
-      {/* Consensus Section */}
-      {viewMetaAnalysis && summarizerModel && (
-        <div className="mt-8">
-          <ConsensusCard
-            summarizerModel={summarizerModel}
-            consensusText={viewMetaAnalysis}
-          />
-        </div>
-      )}
-
-      {/* Action Buttons */}
+      {/* 5. Action Buttons */}
       <div className="mt-12 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <WorkflowNavigator
           currentStep="review"

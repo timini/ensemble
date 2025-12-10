@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import type { Provider, ValidationStatus } from '@/components/molecules/ApiKeyInput';
 import type { Model } from '@/components/organisms/ModelSelectionList';
-import { AVAILABLE_MODELS } from '~/lib/models';
+import { FALLBACK_MODELS } from '~/lib/models';
 import { fetchProviderModels, mergeDynamicModels } from '~/lib/providerModels';
 import { toError } from '~/lib/errors';
 import { logger } from '~/lib/logger';
@@ -20,11 +20,11 @@ export function useAvailableModels({
   hydratedStatuses,
 }: UseAvailableModelsOptions): Model[] {
   const [availableModels, setAvailableModels] =
-    useState<Model[]>(AVAILABLE_MODELS);
+    useState<Model[]>(FALLBACK_MODELS);
 
   useEffect(() => {
     if (!hasHydrated || mode !== 'free') {
-      setAvailableModels(AVAILABLE_MODELS);
+      setAvailableModels(FALLBACK_MODELS);
       return;
     }
 
@@ -60,7 +60,7 @@ export function useAvailableModels({
 
       if (!active) return;
       if (Object.keys(overrides).length === 0) {
-        setAvailableModels(AVAILABLE_MODELS);
+        setAvailableModels(FALLBACK_MODELS);
         return;
       }
       setAvailableModels(mergeDynamicModels(overrides));

@@ -3,8 +3,8 @@ import dotenv from 'dotenv';
 import path from 'path';
 
 // Load environment variables from .env.local and .env
-dotenv.config({ path: path.resolve(process.cwd(), '.env.local') });
-dotenv.config({ path: path.resolve(process.cwd(), '.env') });
+dotenv.config({ path: path.resolve(process.cwd(), '../../.env.local') });
+dotenv.config({ path: path.resolve(process.cwd(), '../../.env') });
 
 /**
  * Playwright configuration for E2E testing
@@ -20,7 +20,7 @@ dotenv.config({ path: path.resolve(process.cwd(), '.env') });
  *   npx playwright test --project=all   # Run all available tests
  */
 export default defineConfig({
-  testDir: './tests/e2e',
+  testDir: './tests',
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
@@ -38,7 +38,7 @@ export default defineConfig({
     // Always runs in CI, uses NEXT_PUBLIC_MOCK_MODE=true
     {
       name: 'mock-mode',
-      testDir: './tests/e2e/mock-mode',
+      testDir: './tests/mock-mode',
       use: { ...devices['Desktop Chrome'] },
     },
 
@@ -47,7 +47,7 @@ export default defineConfig({
     // Skips automatically if keys are not available
     {
       name: 'free-mode',
-      testDir: './tests/e2e/free-mode',
+      testDir: './tests/free-mode',
       use: { ...devices['Desktop Chrome'] },
     },
 
@@ -55,7 +55,7 @@ export default defineConfig({
     // Will test authentication, credits, and backend-proxied API calls
     {
       name: 'pro-mode',
-      testDir: './tests/e2e/pro-mode',
+      testDir: './tests/pro-mode',
       use: { ...devices['Desktop Chrome'] },
     },
   ],
@@ -63,7 +63,7 @@ export default defineConfig({
   // Web server configuration
   // Mock mode server for mock-mode tests
   webServer: {
-    command: 'npm run dev:mock',
+    command: 'cd ../app && npm run dev:mock',
     url: 'http://localhost:3000',
     reuseExistingServer: !process.env.CI,
     timeout: 120 * 1000,

@@ -45,6 +45,10 @@ export interface EnsembleSidebarProps {
   manualResponses?: Array<{ id: string; label: string; response?: string }>;
   /** Callback when clear all models is clicked */
   onClearAll?: () => void;
+  /** Feature flag to show Quick Presets section (default: true) */
+  showQuickPresets?: boolean;
+  /** Feature flag to show Save Ensemble section (default: true) */
+  showSaveEnsemble?: boolean;
 }
 
 /**
@@ -88,6 +92,8 @@ export const EnsembleSidebar = React.forwardRef<HTMLDivElement, EnsembleSidebarP
       onAddManualResponse,
       manualResponses = [],
       onClearAll,
+      showQuickPresets = true,
+      showSaveEnsemble = true,
     },
     ref
   ) => {
@@ -157,86 +163,90 @@ export const EnsembleSidebar = React.forwardRef<HTMLDivElement, EnsembleSidebarP
           </div>
 
           {/* Quick Presets */}
-          <div className="mb-6">
-            <Heading level={4} size="sm" className="mb-3">{t('organisms.ensembleSidebar.quickPresets')}</Heading>
-            <Text variant="caption" color="muted" className="mb-4">
-              {t('organisms.ensembleSidebar.quickPresetsDescription')}
-            </Text>
+          {showQuickPresets && (
+            <div className="mb-6">
+              <Heading level={4} size="sm" className="mb-3">{t('organisms.ensembleSidebar.quickPresets')}</Heading>
+              <Text variant="caption" color="muted" className="mb-4">
+                {t('organisms.ensembleSidebar.quickPresetsDescription')}
+              </Text>
 
-            {presets.length === 0 ? (
-              <div className="text-center py-6 text-sm text-gray-500">
-                {t('organisms.ensembleSidebar.noPresets')}
-              </div>
-            ) : (
-              <div className="space-y-3">
-                {presets.map((preset) => (
-                  <div key={preset.id} className="border rounded-lg p-3 relative">
-                    <div className="flex items-center justify-between mb-2">
-                      <Heading level={5} size="sm">{preset.name}</Heading>
-                      <div className="flex items-center gap-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="text-xs bg-transparent"
-                          onClick={() => onLoadPreset(preset.id)}
-                        >
-                          {t('organisms.ensembleSidebar.usePreset')}
-                        </Button>
-                        {showDeleteButtons && (
+              {presets.length === 0 ? (
+                <div className="text-center py-6 text-sm text-gray-500">
+                  {t('organisms.ensembleSidebar.noPresets')}
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {presets.map((preset) => (
+                    <div key={preset.id} className="border rounded-lg p-3 relative">
+                      <div className="flex items-center justify-between mb-2">
+                        <Heading level={5} size="sm">{preset.name}</Heading>
+                        <div className="flex items-center gap-2">
                           <Button
-                            variant="ghost"
+                            variant="outline"
                             size="sm"
-                            className="text-xs text-red-600 hover:text-red-700 hover:bg-red-50"
-                            onClick={() => onDeletePreset(preset.id)}
-                            aria-label={t('organisms.ensembleSidebar.deletePreset', { name: preset.name })}
+                            className="text-xs bg-transparent"
+                            onClick={() => onLoadPreset(preset.id)}
                           >
-                            <Trash2 className="w-3 h-3" />
+                            {t('organisms.ensembleSidebar.usePreset')}
                           </Button>
-                        )}
+                          {showDeleteButtons && (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="text-xs text-red-600 hover:text-red-700 hover:bg-red-50"
+                              onClick={() => onDeletePreset(preset.id)}
+                              aria-label={t('organisms.ensembleSidebar.deletePreset', { name: preset.name })}
+                            >
+                              <Trash2 className="w-3 h-3" />
+                            </Button>
+                          )}
+                        </div>
                       </div>
+                      <Text variant="caption" className="text-gray-600 mb-2">{preset.description}</Text>
+                      <Text variant="caption" color="muted">{t('organisms.ensembleSidebar.summarizerInfo', { name: preset.summarizerName })}</Text>
                     </div>
-                    <Text variant="caption" className="text-gray-600 mb-2">{preset.description}</Text>
-                    <Text variant="caption" color="muted">{t('organisms.ensembleSidebar.summarizerInfo', { name: preset.summarizerName })}</Text>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Save Current Ensemble */}
-          <div className="mb-6">
-            <Heading level={4} size="sm" className="mb-3">{t('organisms.ensembleSidebar.saveCurrentEnsemble')}</Heading>
-            <Text variant="caption" color="muted" className="mb-3">{t('organisms.ensembleSidebar.saveDescription')}</Text>
+          {showSaveEnsemble && (
+            <div className="mb-6">
+              <Heading level={4} size="sm" className="mb-3">{t('organisms.ensembleSidebar.saveCurrentEnsemble')}</Heading>
+              <Text variant="caption" color="muted" className="mb-3">{t('organisms.ensembleSidebar.saveDescription')}</Text>
 
-            <div className="space-y-3">
-              <div>
-                <label className="text-xs font-medium text-gray-700">{t('organisms.ensembleSidebar.ensembleNameLabel')}</label>
-                <Input
-                  placeholder={t('organisms.ensembleSidebar.ensembleNamePlaceholder')}
-                  value={ensembleName}
-                  onChange={(e) => setEnsembleName(e.target.value)}
-                  className="mt-1"
-                />
+              <div className="space-y-3">
+                <div>
+                  <label className="text-xs font-medium text-gray-700">{t('organisms.ensembleSidebar.ensembleNameLabel')}</label>
+                  <Input
+                    placeholder={t('organisms.ensembleSidebar.ensembleNamePlaceholder')}
+                    value={ensembleName}
+                    onChange={(e) => setEnsembleName(e.target.value)}
+                    className="mt-1"
+                  />
+                </div>
+                <Button
+                  variant="outline"
+                  className="w-full text-sm bg-transparent"
+                  onClick={handleSave}
+                  disabled={!ensembleName.trim()}
+                >
+                  {t('organisms.ensembleSidebar.saveButton')}
+                </Button>
               </div>
-              <Button
-                variant="outline"
-                className="w-full text-sm bg-transparent"
-                onClick={handleSave}
-                disabled={!ensembleName.trim()}
-              >
-                {t('organisms.ensembleSidebar.saveButton')}
-              </Button>
-            </div>
 
-            <div className="mt-4 p-3 bg-blue-50 rounded-lg">
-              <div className="flex items-start space-x-2">
-                <Info className="w-4 h-4 text-blue-500 mt-0.5 flex-shrink-0" />
-                <Text variant="caption" className="text-blue-700">
-                  {t('organisms.ensembleSidebar.saveInfoText')}
-                </Text>
+              <div className="mt-4 p-3 bg-blue-50 rounded-lg">
+                <div className="flex items-start space-x-2">
+                  <Info className="w-4 h-4 text-blue-500 mt-0.5 flex-shrink-0" />
+                  <Text variant="caption" className="text-blue-700">
+                    {t('organisms.ensembleSidebar.saveInfoText')}
+                  </Text>
+                </div>
               </div>
             </div>
-          </div>
+          )}
 
           {/* Manual Responses */}
           <div>
