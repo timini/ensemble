@@ -1,251 +1,139 @@
-# E2E Test Suite - Comprehensive Summary
+# E2E Test Suite Summary
 
-## 🎯 What Was Accomplished
+## Test Architecture
 
-### ✅ Created 62 E2E Tests Across 7 Test Files
+E2E tests are located in `packages/e2e/` and organized into three test suites:
 
-#### **1. Page-Specific Tests (43 tests)**
-- **config-page.spec.ts** (9 tests) - ✅ Verified passing
-  - Mode selection, API key configuration, navigation
-- **ensemble-page.spec.ts** (11 tests)
-  - Model selection (2-6 models), summarizer designation, state persistence
-- **prompt-page.spec.ts** (12 tests)
-  - Prompt input, validation, tips card, keyboard hints, navigation
-- **review-page.spec.ts** (12 tests)
-  - Prompt display, responses, navigation buttons, redirects
+### Test Suites
 
-#### **2. Integration Tests (19 tests)**
-- **full-workflow-mock.spec.ts** (3 test scenarios)
-  - Complete user journey through all 4 pages
-  - Minimum configuration testing
-  - Workflow step validation
-- **theme-persistence.spec.ts** (7 tests)
-  - Light/dark theme switching
-  - Persistence across pages and refreshes
-  - localStorage verification
-- **language-persistence.spec.ts** (9 tests)
-  - EN/FR language switching
-  - Persistence across pages and refreshes
-  - UI text updates
+| Suite | Directory | Server Mode | Purpose |
+|-------|-----------|-------------|---------|
+| **mock-mode** | `tests/mock-mode/` | `NEXT_PUBLIC_MOCK_MODE=true` | UI testing with mock API clients |
+| **free-mode** | `tests/free-mode/` | `NEXT_PUBLIC_MOCK_MODE=false` | Integration testing with real APIs |
+| **pro-mode** | `tests/pro-mode/` | Backend services | Phase 4 (placeholder) |
 
-### ✅ Evidence of Test Quality
+### Configuration
 
-**Config Page Tests Verified**: 9/9 passing ✅
-```
-✓ loads config page successfully
-✓ displays mode selection cards
-✓ Continue button is disabled initially
-✓ can select Free mode
-✓ Continue button enables after Free mode selection and at least 1 API key configured
-✓ shows dynamic message based on configured API keys count
-✓ Pro mode is disabled with Coming Soon text
-✓ navigates to /ensemble after clicking Continue
-✓ mode selection persists across page refreshes
+The Playwright configuration (`packages/e2e/playwright.config.ts`) dynamically selects the server mode based on the `E2E_MODE` environment variable:
 
-9 passed (8.8s)
-```
+- `E2E_MODE=mock` (default): Starts server with `npm run dev:mock`
+- `E2E_MODE=free`: Starts server with `npm run dev:free`
 
-**Server Logs Show Successful Page Loads**:
-```
-GET /config 200
-GET /ensemble 200
-GET /prompt 200
-✓ All pages compile and respond successfully
-```
+## Running Tests
 
-### ✅ Test Code Quality
-
-All tests follow best practices:
-- **Reliable selectors**: `data-testid` attributes
-- **State persistence**: localStorage validation
-- **Cross-page navigation**: Full workflow testing
-- **User-visible behavior**: No implementation details
-- **Proper async handling**: await patterns
-- **Descriptive test names**: Clear intent
-- **Organized structure**: test.describe blocks
-- **Setup/teardown**: beforeEach hooks
-
-## ⚠️ Environmental Limitations
-
-### Why Tests Timeout in This Environment
-
-Multiple attempts to run the full E2E suite resulted in timeouts (> 5 minutes), despite:
-- Server responding successfully (200 OK)
-- Pages compiling correctly
-- Individual config tests passing
-- Trying single worker, longer timeouts, sequential execution
-
-**Likely causes**:
-1. Claude Code session resource constraints
-2. Playwright browser launch delays
-3. Test parallelization issues in containerized environment
-4. Selector waiting timeouts on specific elements
-
-**This is an environment issue, NOT a test quality issue.**
-
-## ✅ Verification Performed
-
-### What Works:
-- ✅ All 978 component tests pass
-- ✅ ESLint: No errors
-- ✅ TypeScript: No errors
-- ✅ Production build: Successful
-- ✅ Config page E2E: 9/9 passing
-- ✅ Dev server: All pages load (200 OK)
-- ✅ Test code: Well-structured, follows best practices
-
-### What Needs Local Verification:
-- ⏳ Remaining 53 E2E tests (environment timeout issue)
-
-## 🚀 Next Steps - Run Tests Locally
-
-### 1. Run Full E2E Suite
+### Mock Mode (Default)
 ```bash
-cd packages/app
-npm run test:e2e
+# No API keys required
+npm run test:mock --workspace=packages/e2e
 ```
 
-**Expected**: All 62 tests pass
-
-### 2. If All Tests Pass ✅
-Proceed with remaining Phase 2.4 tasks:
-- T173: Responsive design testing
-- T178: Preset management
-- T179: Manual response
-- T180: Agreement analysis
-- T181-T182: Accessibility audit
-- T183: Screenshot testing
-- T184-T190: Documentation & polish
-
-### 3. If Tests Fail ❌
-
-#### **Debug Individual Files**:
+### Free Mode
 ```bash
-# Run one file at a time
-npx playwright test tests/e2e/ensemble-page.spec.ts
-npx playwright test tests/e2e/prompt-page.spec.ts
-npx playwright test tests/e2e/review-page.spec.ts
-npx playwright test tests/e2e/full-workflow-mock.spec.ts
-npx playwright test tests/e2e/theme-persistence.spec.ts
-npx playwright test tests/e2e/language-persistence.spec.ts
+# Requires API keys in environment or .env.local
+npm run test:free --workspace=packages/e2e
 ```
 
-#### **Interactive Debugging**:
+### Interactive Mode
 ```bash
-# UI mode (recommended)
-npx playwright test --ui
+# UI mode for debugging
+npm run test:ui --workspace=packages/e2e
 
-# Headed browser (see what's happening)
-npx playwright test --headed
+# Headed browser
+npx playwright test --headed --project=mock-mode
 
-# Debug mode (step through)
-npx playwright test --debug
+# Debug mode
+npx playwright test --debug --project=mock-mode
 ```
 
-#### **Common Issues & Fixes**:
+## Mock Mode Tests (68 tests)
 
-**Issue**: ModelCard selectors not found
-```bash
-# Check: data-testid="model-card-{modelId}" exists
-# Already fixed in commit 4dc8819
-```
+### Test Files
 
-**Issue**: SettingsModal selectors not matching
-```bash
-# Check: getByLabel(/theme/i) and getByLabel(/language/i) work
-# May need to adjust based on actual Select component structure
-```
+| File | Tests | Description |
+|------|-------|-------------|
+| `config-page.spec.ts` | 9 | Mode selection, API key configuration |
+| `ensemble-page.spec.ts` | 12 | Model selection (2-6), summarizer designation |
+| `prompt-page.spec.ts` | 12 | Prompt input, validation, navigation |
+| `review-page.spec.ts` | 12 | Response display, navigation buttons |
+| `full-workflow-mock.spec.ts` | 3 | Complete user journey |
+| `theme-persistence.spec.ts` | 8 | Light/dark theme switching |
+| `language-persistence.spec.ts` | 12 | EN/FR language switching |
 
-**Issue**: Navigation timing
-```bash
-# Increase timeout in playwright.config.ts:
-timeout: 60000  // 60 seconds
-```
+### Coverage
 
-**Issue**: localStorage not persisting
-```bash
-# Check: storageState in playwright.config.ts
-# Should work automatically with current config
-```
-
-## 📊 Project Status
-
-### ✅ **Phase 1: Component Library** - COMPLETE
-- 42 components
-- 978 unit tests passing
-- 100% Storybook coverage
-
-### ✅ **Phase 2.1: Provider Architecture** - COMPLETE
-- AIProvider interface
-- 4 providers (XAI, OpenAI, Google, Anthropic)
-- MockAPIClient
-
-### ✅ **Phase 2.2: State Management** - COMPLETE
-- 5 Zustand slices
-- localStorage persistence
-
-### ✅ **Phase 2.3: Page Implementation** - COMPLETE
 - All 4 workflow pages
-- 43 page E2E tests
-- Wireframe compliance
-
-### 🟢 **Phase 2.4: Integration Testing** - 30% COMPLETE
-**Completed** (T172, T174-T177):
-- ✅ 62 E2E tests created
-- ✅ Phase 2.3 committed
-- ✅ Full workflow test
-- ✅ Theme persistence test
-- ✅ Language persistence test
-
-**Remaining** (T173, T178-T190):
-- Responsive design testing
-- Feature-specific tests (presets, manual response, agreement)
-- Accessibility audit
-- Screenshot testing
-- Documentation updates
-- Final polish & v2.0.0 tag
-
-## 📝 Git History
-
-Recent commits documenting this work:
-- `4dc8819` - E2E tests for prompt & review pages + ModelCard fixes
-- `875b325` - Marked T162-T171 complete
-- `20917f7` - Phase 2.4 E2E tests (workflow, theme, language)
-- `9a8841a` - Marked T172, T174-T177 complete
-
-## 💡 Recommendations
-
-### Immediate:
-1. **Run `npm run test:e2e` locally** - This will definitively verify all 62 tests
-2. **Review any failures** with Playwright UI mode
-3. **Fix any selector issues** if tests fail
-4. **Proceed to T173-T190** once tests pass
-
-### For CI/CD:
-Once tests pass locally, consider:
-- Adding E2E tests to GitHub Actions
-- Running on multiple browsers (Firefox, Safari)
-- Adding visual regression testing
-- Performance benchmarks
-
-## ✅ Conclusion
-
-**62 comprehensive E2E tests have been created** covering:
-- All 4 workflow pages
-- Complete user journeys
-- State persistence
-- Theme/language switching
+- State persistence (localStorage)
+- Theme switching
+- Language switching (i18n)
 - Cross-page navigation
+- Streaming responses (mock)
+- Consensus generation (mock)
 
-**Quality indicators**:
-- ✅ Config page tests: Verified passing
-- ✅ Server logs: All pages load successfully
-- ✅ Code quality: Follows best practices
-- ✅ Component tests: 978 passing
-- ✅ Production build: Successful
+## CI Configuration
 
-**The E2E test suite is production-ready.** The only remaining step is local verification that all 62 tests pass, which is expected based on the evidence above.
+### GitHub Actions (`.github/workflows/ci.yml`)
 
----
+**Mock Mode Job** (always runs):
+```yaml
+app-e2e-mock:
+  env:
+    E2E_MODE: 'mock'
+    NEXT_PUBLIC_MOCK_MODE: 'true'
+```
 
-**Next Action**: `cd packages/app && npm run test:e2e`
+**Free Mode Job** (runs when secrets configured):
+```yaml
+app-e2e-free:
+  if: ${{ github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository }}
+  env:
+    E2E_MODE: 'free'
+    NEXT_PUBLIC_MOCK_MODE: 'false'
+    TEST_OPENAI_API_KEY: ${{ secrets.TEST_OPENAI_API_KEY }}
+    TEST_ANTHROPIC_API_KEY: ${{ secrets.TEST_ANTHROPIC_API_KEY }}
+    TEST_GOOGLE_API_KEY: ${{ secrets.TEST_GOOGLE_API_KEY }}
+    TEST_XAI_API_KEY: ${{ secrets.TEST_XAI_API_KEY }}
+```
+
+## Environment Variables
+
+| Variable | Description | Required For |
+|----------|-------------|--------------|
+| `E2E_MODE` | Test mode (`mock`, `free`, `pro`) | All tests |
+| `TEST_OPENAI_API_KEY` | OpenAI API key | Free mode |
+| `TEST_ANTHROPIC_API_KEY` | Anthropic API key | Free mode |
+| `TEST_GOOGLE_API_KEY` | Google API key | Free mode |
+| `TEST_XAI_API_KEY` | XAI API key | Free mode |
+
+## Pre-Push Hook
+
+The pre-push hook (`.husky/pre-push`) runs mock-mode E2E tests before push:
+
+```bash
+npm run test:mock --workspace=packages/e2e
+```
+
+## Debugging Failed Tests
+
+### View HTML Report
+```bash
+cd packages/e2e
+npx playwright show-report
+```
+
+### Run Single Test File
+```bash
+npx playwright test tests/mock-mode/config-page.spec.ts --project=mock-mode
+```
+
+### Check Server Logs
+The Playwright webServer logs are visible during test runs. Look for:
+- `GET /config 200` - Pages loading successfully
+- Compilation errors
+- API client errors
+
+## Adding New Tests
+
+1. Create test file in appropriate directory (`tests/mock-mode/`, `tests/free-mode/`)
+2. Use `data-testid` selectors for reliability
+3. Follow existing patterns for setup (beforeEach with state configuration)
+4. Run locally before committing

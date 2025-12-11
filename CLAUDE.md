@@ -137,101 +137,121 @@ When working on features, ALWAYS:
 
 ## Development Workflow
 
-**CRITICAL**: Treat **EACH TASK** in `specs/{feature-id}/tasks.md` as a separate, complete unit of work. Follow this workflow for every single task (T001, T002, T003, etc.) to maintain quality and consistency.
+All changes to `main` must go through a Pull Request with passing CI checks and at least one approval.
 
-### Task-by-Task Execution
+### Branch Protection Rules
 
-Each task goes through the complete 7-step workflow before moving to the next task:
+The `main` branch is protected with:
+- **Required status checks**: All CI jobs must pass (Component Library, Shared Utils, Wireframes, App, App E2E Mock Mode, Static Analysis)
+- **Required reviews**: At least 1 approving review before merge
+- **Stale review dismissal**: Reviews are dismissed when new commits are pushed
+- **No force pushes**: History cannot be rewritten on main
+- **No deletions**: The main branch cannot be deleted
 
-### 1. Plan Work (Per Task)
-- **Read the specific task** from `specs/{feature-id}/tasks.md` (e.g., T001, T033, T152)
-- **Understand task context**:
-  - Review task description and file paths
-  - Check for dependencies (tasks without `[P]` may depend on previous tasks)
-  - Review related requirements in `specs/{feature-id}/spec.md`
-  - Check technical decisions in `specs/{feature-id}/plan.md`
-- **Identify deliverables**: What files/artifacts will this task create or modify?
+### Standard Development Workflow
 
-### 2. Write Tests (TDD - MANDATORY)
-**For component tasks** (e.g., T033-T035, T036-T038):
+Follow this workflow for all changes:
+
+#### 1. Create a Feature Branch
+```bash
+git checkout main
+git pull origin main
+git checkout -b feature/<descriptive-name>
+# or: git checkout -b fix/<bug-description>
+```
+
+#### 2. Write/Update Specs
+- Review or create specs in `specs/{feature-id}/spec.md`
+- Check implementation plan in `specs/{feature-id}/plan.md`
+- Update task list in `specs/{feature-id}/tasks.md`
+
+#### 3. Write Tests (TDD - MANDATORY)
+**For component tasks**:
 - **Story First**: Create Storybook story (`.stories.tsx`) with all variants
 - **Tests Before Code**: Write unit tests (`.test.tsx`) testing all behaviors
-  - Test rendering, props, interactions, accessibility, states
-  - Use `data-testid` selectors exclusively
-  - Mock all external dependencies (Zustand, APIs)
 - Run tests (they should fail initially - this is correct TDD)
 
-**For setup/config tasks** (e.g., T001-T032):
-- Write configuration first, then verify it works
-- For tasks like T006a-T006c (pre-commit hooks), test the hook after setup
+**For page tasks**:
+- Write E2E test FIRST, then implement until tests pass
 
-**For page tasks** (e.g., T152-T156):
-- Write E2E test FIRST (e.g., T152), then implement page (T153-T156)
-
-### 3. Implement Code (Per Task)
-- Implement the specific task deliverable until tests pass
-- **Follow task specification exactly** (file paths, naming, structure)
-- Keep files under 200 lines (break down if needed)
-- Use Tailwind utility classes only (no hardcoded colors/strings)
+#### 4. Write Code
+- Implement the feature/fix until tests pass
+- Keep files under 200 lines
+- Use Tailwind utility classes only
 - Add JSDoc documentation
-- For component tasks: Visually validate in Storybook (themes, languages, states)
 
-### 4. Quality Gates (MUST PASS - Every Task)
-Before committing **each task**, ensure all checks pass:
-
+#### 5. Iterate Until Tests Pass
+Run all quality checks locally:
 ```bash
-cd packages/app
-
-# Run all quality checks
+# From packages/app
 npm run check            # Linting + typecheck
 npm run format:write     # Auto-format code
 npm run build            # Ensure production build succeeds
+npm test                 # All unit tests pass
 
-# Run tests (when test suite is set up)
-npm test                 # All unit tests pass with 80%+ coverage
+# From packages/component-library (if applicable)
+npm run lint
+npm run test:unit
+npm run test:storybook:ci
+
+# From packages/e2e (if applicable)
+npm run test:mock
 ```
 
-**DO NOT** proceed to commit if any check fails. Fix issues before committing.
+**DO NOT** proceed if any check fails. Fix issues before committing.
 
-### 5. Commit Changes (One Commit Per Task)
-Once quality gates pass for the current task:
-
+#### 6. Commit Changes
 ```bash
 git add .
-git commit -m "feat: <task description> (T###)
+git commit -m "feat: <description>
 
-<detailed changes from this specific task>
+<detailed changes>
 
 🤖 Generated with [Claude Code](https://claude.com/claude-code)
 
 Co-Authored-By: Claude <noreply@anthropic.com>"
 ```
 
-**Examples**:
-- `feat: initialize Next.js project with TypeScript and Tailwind (T001)`
-- `feat: add Button component with stories and tests (T036-T038)`
-- `test: add E2E test for config page (T152)`
+Use conventional commit format: `feat:`, `fix:`, `test:`, `refactor:`, `docs:`, `chore:`
 
-**Important**:
-- Reference the task ID (e.g., `T001`, `T036-T038`) in commit message
-- One commit per task or logical task group (e.g., T036-T038 for Button component's 3 sub-tasks)
-- Use conventional commit format: `feat:`, `test:`, `refactor:`, `docs:`, `chore:`
+#### 7. Update Documentation
+- Mark completed tasks as `[X]` in `specs/{feature-id}/tasks.md`
+- Update README.md if setup changes
+- Update spec.md with completion notes if applicable
 
-### 6. Update Documentation (Every Task)
-After **each task** is committed:
+#### 8. Push and Create Pull Request
+```bash
+git push -u origin feature/<descriptive-name>
+gh pr create --title "feat: <description>" --body "## Summary
+- <changes>
 
-- **REQUIRED**: Mark task as `[X]` in `specs/{feature-id}/tasks.md`
-  ```markdown
-  - [X] T001 Create Next.js 14 project with TypeScript
-  ```
-- **If phase/component complete**: Update `specs/{feature-id}/spec.md` with completion date
-- **If setup changes**: Update README.md with new dependencies or instructions
-- **At phase milestones**: Increment version number in spec.md
+## Test plan
+- [ ] All CI checks pass
+- [ ] Tested locally
 
-### 7. Move to Next Task
-**ONLY** after completing steps 1-6 for the current task, move to the next task in the task list.
+🤖 Generated with [Claude Code](https://claude.com/claude-code)"
+```
 
-**Important**: Do not batch multiple tasks. Each task is a complete cycle through steps 1-7.
+#### 9. Verify CI Passes
+Wait for all CI jobs to complete:
+- Component Library (lint + unit tests + Storybook tests)
+- Shared Utils (tests)
+- Wireframes (lint + build)
+- App (lint + typecheck + build)
+- App E2E Mock Mode (Playwright tests with mock API clients)
+- App E2E Free Mode (Playwright tests with real API keys, when secrets configured)
+- Static Analysis
+
+If any job fails, fix the issues and push again.
+
+#### 10. Request Review and Merge
+Once CI passes, request a review. After approval, merge the PR.
+
+---
+
+### Task-by-Task Execution
+
+**CRITICAL**: Treat **EACH TASK** in `specs/{feature-id}/tasks.md` as a separate, complete unit of work.
 
 ---
 
@@ -302,13 +322,25 @@ Tasks marked `[P]` can run in parallel (different files, no dependencies):
 
 ## Mandatory Development Practices
 
-### Feature Development Agents (REQUIRED)
-**ALWAYS use feature-dev agents** when doing any development work:
-- `feature-dev:code-explorer` - Use to deeply analyze existing codebase features, trace execution paths, and understand patterns before making changes
-- `feature-dev:code-architect` - Use to design feature architectures and create implementation blueprints
-- `feature-dev:code-reviewer` - Use after writing significant code to review for bugs, security issues, and code quality
+### Feature Development Agents (CRITICAL - ALWAYS USE)
 
-Launch these agents via the Task tool with the appropriate `subagent_type`. Never skip the exploration phase - always understand the codebase before making changes.
+**YOU MUST ALWAYS USE feature-dev agents** for ANY development work. This is not optional. Before writing ANY code, you MUST:
+
+1. **FIRST**: Use `feature-dev:code-explorer` to deeply analyze existing codebase features, trace execution paths, and understand patterns
+2. **SECOND**: Use `feature-dev:code-architect` to design feature architectures and create implementation blueprints
+3. **AFTER CODING**: Use `feature-dev:code-reviewer` to review for bugs, security issues, and code quality
+
+**Launch these agents via the Task tool with the appropriate `subagent_type`.** Example:
+
+```
+Task(subagent_type="feature-dev:code-explorer", prompt="Analyze how model selection works...")
+```
+
+**NEVER skip the exploration phase.** You MUST understand the codebase before making ANY changes. Failing to use these agents leads to:
+- Introducing bugs from misunderstanding existing code
+- Breaking existing functionality
+- Creating inconsistent patterns
+- Wasting time on incorrect approaches
 
 ### Test-Driven Development (MANDATORY)
 **TDD is non-negotiable.** For every change:
@@ -318,8 +350,31 @@ Launch these agents via the Task tool with the appropriate `subagent_type`. Neve
 4. **Refactor** if needed while keeping tests green
 5. **Verify all existing tests still pass** before committing
 
+### NEVER Bypass Git Hooks (ABSOLUTE RULE)
+
+**This is an ABSOLUTE rule with NO exceptions:**
+
+1. **NEVER use `--no-verify`** on any git command (commit, push, etc.)
+2. **NEVER use `--force` or `--force-with-lease`** to push changes
+3. **NEVER modify hook files** (`.husky/pre-commit`, `.husky/pre-push`) to skip checks
+4. **NEVER disable hooks temporarily** "just this once"
+5. **NEVER amend commits** that have already been pushed to remote
+
+**If hooks fail, you MUST:**
+- Fix the underlying issues (lint errors, test failures, etc.)
+- Run the checks again until they pass
+- Only then proceed with the commit/push
+
+**Why this matters:**
+- Hooks ensure code quality before it reaches the repository
+- Bypassing hooks defeats the entire purpose of having quality gates
+- It introduces bugs, breaks builds, and wastes everyone's time
+- Force pushing rewrites history and can cause data loss and merge conflicts
+
+**There are NO valid reasons to bypass hooks.** If tests are flaky, fix the tests. If linting is wrong, fix the code. If hooks are too slow, optimize the hooks themselves through proper channels - never bypass them.
+
 ### Git Commit Rules (STRICT)
-**NEVER use `--no-verify` flag** when committing. Pre-commit hooks exist to enforce quality:
+Pre-commit hooks exist to enforce quality:
 - Linting must pass
 - Type checking must pass
 - Tests must pass
@@ -377,10 +432,27 @@ All colors, spacing, and typography are defined in `tailwind.config.js`. Use sem
 ## Testing
 
 - **Unit/Integration**: Vitest + React Testing Library
-- **E2E**: Playwright (uses Mock mode)
+- **E2E**: Playwright with three test suites:
+  - `mock-mode`: Uses mock API clients (CI default, always runs)
+  - `free-mode`: Uses real API keys (runs when `TEST_*_API_KEY` secrets configured)
+  - `pro-mode`: Phase 4 placeholder for backend tests
 - **Visual Regression**: Chromatic + Storybook
 - **Selectors**: Use `data-testid` exclusively (NEVER CSS classes)
 - **Coverage Goal**: 80% minimum per component
+
+### E2E Test Commands
+```bash
+# Run mock mode tests (no API keys needed)
+npm run test:mock --workspace=packages/e2e
+
+# Run free mode tests (requires API keys)
+npm run test:free --workspace=packages/e2e
+
+# Interactive debugging
+npm run test:ui --workspace=packages/e2e
+```
+
+The `E2E_MODE` environment variable controls which server mode Playwright starts.
 
 ## Important Notes
 

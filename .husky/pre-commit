@@ -1,5 +1,3 @@
-#!/usr/bin/env sh
-. "$(dirname -- "$0")/_/husky.sh"
 set -euo pipefail
 
 echo "🧪 Component library quick checks..."

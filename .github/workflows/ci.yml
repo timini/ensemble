@@ -91,6 +91,7 @@ jobs:
       - name: Run Mock Mode E2E Tests
         run: npm run test:mock --workspace=packages/e2e
         env:
+          E2E_MODE: 'mock'
           NEXT_PUBLIC_MOCK_MODE: 'true'
 
   # Free Mode E2E Tests - Only run when API key secrets are configured
@@ -115,6 +116,7 @@ jobs:
       - name: Run Free Mode E2E Tests
         run: npm run test:free --workspace=packages/e2e
         env:
+          E2E_MODE: 'free'
           NEXT_PUBLIC_MOCK_MODE: 'false'
           TEST_OPENAI_API_KEY: ${{ secrets.TEST_OPENAI_API_KEY }}
           TEST_ANTHROPIC_API_KEY: ${{ secrets.TEST_ANTHROPIC_API_KEY }}

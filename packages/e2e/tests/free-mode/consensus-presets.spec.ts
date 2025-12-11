@@ -1,6 +1,21 @@
 import { test, expect } from '@playwright/test';
 
+/**
+ * Free Mode Consensus Presets E2E Tests
+ *
+ * These tests require REAL API keys to run against actual provider APIs.
+ * They are skipped in CI unless API key secrets are configured.
+ */
+
+const OPENAI_API_KEY = process.env.TEST_OPENAI_API_KEY;
+const ANTHROPIC_API_KEY = process.env.TEST_ANTHROPIC_API_KEY;
+
+const hasRequiredKeys = OPENAI_API_KEY && ANTHROPIC_API_KEY;
+
 test.describe('Consensus Presets (Free Mode)', () => {
+    // Skip entire suite if required API keys are not available
+    test.skip(!hasRequiredKeys, 'Skipping free mode tests - API keys not configured');
+
     test.beforeEach(async ({ page }) => {
         await page.goto('/');
         await expect(page).toHaveURL(/\/config/);
@@ -18,20 +33,9 @@ test.describe('Consensus Presets (Free Mode)', () => {
         // Check if API key inputs are visible
         await expect(page.getByTestId('api-key-configuration')).toBeVisible();
 
-        // Enter Mock API Keys (if environment variables are not set in the test runner context, 
-        // but typically e2e tests run with some env vars. 
-        // Free mode tests in free-mode folder usually expect real keys or skip.
-        // BUT if we want to test UI logic with mocks, we should ensure we are in Mock Mode or provide dummy keys that pass client-side validation if possible.
-        // However, the `free-mode` tests typically run against real APIs. 
-        // If we want to test Presets logic specifically without spending money, we should strictly run in Mock Mode.
-        // But the user asked for "Free Mode" E2E tests.
-        // Let's use the provided keys from env for the test, same as free-mode.spec.ts.
-
-        const OPENAI_API_KEY = process.env.TEST_OPENAI_API_KEY || 'sk-mock-openai-key';
-        const ANTHROPIC_API_KEY = process.env.TEST_ANTHROPIC_API_KEY || 'sk-ant-mock-key';
-
-        await page.getByLabel('OpenAI API Key').fill(OPENAI_API_KEY);
-        await page.getByLabel('Anthropic API Key').fill(ANTHROPIC_API_KEY);
+        // Enter real API keys (guaranteed to exist due to test.skip above)
+        await page.getByLabel('OpenAI API Key').fill(OPENAI_API_KEY!);
+        await page.getByLabel('Anthropic API Key').fill(ANTHROPIC_API_KEY!);
 
         // Next
         const nextButton = page.getByRole('button', { name: 'Next', exact: true });

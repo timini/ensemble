@@ -1,5 +1,5 @@
 
-import type { AIProvider } from '../../providers/types';
+import type { AIProvider } from '../providers/types';
 import type { ConsensusModelResponse, ConsensusStrategy, RankingResult } from './types';
 
 export class EloRankingConsensus implements ConsensusStrategy {
