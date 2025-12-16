@@ -160,7 +160,7 @@ export function useStreamingResponses({
         };
 
         void triggerApiCalls();
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- streamModel is intentionally excluded to prevent re-triggering
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- streamModel uses refs and store.getState() to avoid stale closures
     }, [
         completeStep,
         hasHydrated,

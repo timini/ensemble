@@ -116,7 +116,7 @@ export const createEnsembleSlice: StateCreator<EnsembleSlice> = (set) => ({
         selectedModels: ensemble.models,
         summarizerModel: ensemble.summarizer,
         currentEnsembleId: ensembleId,
-        consensusMethod: ensemble.consensusMethod ?? 'standard', // Backwards compatibility
+        consensusMethod: ensemble.consensusMethod ?? 'standard',
         eloTopN: ensemble.eloTopN ?? 3,
       };
     });

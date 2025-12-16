@@ -120,6 +120,8 @@ export function useEnsemblePage() {
         validateApiKey
     );
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const _removeManualResponse = useStore((state) => state.removeManualResponse);
     const setConsensusMethod = useStore((state) => state.setConsensusMethod);
     const setEloTopN = useStore((state) => state.setEloTopN);
     const consensusMethod = useStore((state) => state.consensusMethod);
