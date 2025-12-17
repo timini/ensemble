@@ -10,23 +10,35 @@ dotenv.config({ path: path.resolve(process.cwd(), '../../.env') });
  * Playwright configuration for E2E testing
  *
  * Three test suites:
- * - mock-mode: Tests with mock API clients (default, always runs in CI)
- * - free-mode: Tests with real API keys (runs when TEST_*_API_KEY env vars are set)
+ * - mock-mode: Tests with mock API clients (runs in CI before deployment)
+ * - free-mode: Tests with real API keys (runs post-deployment against deployed infra)
  * - pro-mode: Placeholder for Phase 4 backend tests
  *
  * Usage:
- *   npm run test:mock                   # Run mock-mode tests (default)
+ *   npm run test:mock                   # Run mock-mode tests (default, local server)
  *   npm run test:free                   # Run free-mode tests (requires API keys)
  *   npx playwright test --project=all   # Run all available tests
  *
- * The webServer mode is determined by the E2E_MODE environment variable:
- * - E2E_MODE=mock (default): Starts server with NEXT_PUBLIC_MOCK_MODE=true
- * - E2E_MODE=free: Starts server with NEXT_PUBLIC_MOCK_MODE=false
+ * Environment variables:
+ * - E2E_MODE: 'mock' (default) or 'free' - determines which API mode to use
+ * - E2E_BASE_URL: Optional URL of deployed app (e.g., https://example.com)
+ *   When set, tests run against this URL instead of starting a local server.
+ *   Used for post-deployment testing in CI.
+ *
+ * CI/CD Flow:
+ * 1. Mock mode E2E tests run locally (webServer starts) as part of CI checks
+ * 2. If CI passes, app deploys to Firebase App Hosting
+ * 3. Free/Pro mode E2E tests run against deployed URL (E2E_BASE_URL is set)
  */
 
 // Determine which mode to run based on E2E_MODE env var
 const e2eMode = process.env.E2E_MODE || 'mock';
 const isMockMode = e2eMode === 'mock';
+
+// Support testing against deployed infrastructure via E2E_BASE_URL
+// When set, tests run against the deployed URL instead of starting a local server
+const baseURL = process.env.E2E_BASE_URL || 'http://localhost:3000';
+const isDeployedTest = !!process.env.E2E_BASE_URL;
 
 export default defineConfig({
   testDir: './tests',
@@ -37,7 +49,7 @@ export default defineConfig({
   reporter: process.env.CI ? 'dot' : 'list',
 
   use: {
-    baseURL: 'http://localhost:3000',
+    baseURL,
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
   },
@@ -70,16 +82,21 @@ export default defineConfig({
   ],
 
   // Web server configuration
+  // Only start a local server if E2E_BASE_URL is not set (i.e., not testing deployed infra)
   // Mode is determined by E2E_MODE environment variable
-  webServer: {
-    command: isMockMode
-      ? 'cd ../app && npm run dev:mock'
-      : 'cd ../app && npm run dev:free',
-    url: 'http://localhost:3000',
-    reuseExistingServer: !process.env.CI,
-    timeout: 120 * 1000,
-    env: {
-      NEXT_PUBLIC_MOCK_MODE: isMockMode ? 'true' : 'false',
-    },
-  },
+  ...(isDeployedTest
+    ? {}
+    : {
+        webServer: {
+          command: isMockMode
+            ? 'cd ../app && npm run dev:mock'
+            : 'cd ../app && npm run dev:free',
+          url: 'http://localhost:3000',
+          reuseExistingServer: !process.env.CI,
+          timeout: 120 * 1000,
+          env: {
+            NEXT_PUBLIC_MOCK_MODE: isMockMode ? 'true' : 'false',
+          },
+        },
+      }),
 });

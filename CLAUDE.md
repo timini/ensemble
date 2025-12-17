@@ -433,26 +433,66 @@ All colors, spacing, and typography are defined in `tailwind.config.js`. Use sem
 
 - **Unit/Integration**: Vitest + React Testing Library
 - **E2E**: Playwright with three test suites:
-  - `mock-mode`: Uses mock API clients (CI default, always runs)
-  - `free-mode`: Uses real API keys (runs when `TEST_*_API_KEY` secrets configured)
+  - `mock-mode`: Uses mock API clients (runs in CI before deployment)
+  - `free-mode`: Uses real API keys (runs post-deployment against deployed infrastructure)
   - `pro-mode`: Phase 4 placeholder for backend tests
 - **Visual Regression**: Chromatic + Storybook
 - **Selectors**: Use `data-testid` exclusively (NEVER CSS classes)
 - **Coverage Goal**: 80% minimum per component
 
+### CI/CD Pipeline Flow
+
+The E2E test strategy follows a deploy-then-test pattern:
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│ CI Checks (PRs & main)                                          │
+│  - Component Library (lint, unit tests, Storybook tests)        │
+│  - Shared Utils (unit tests)                                    │
+│  - App (lint, typecheck, build)                                 │
+│  - Mock Mode E2E (tests with mock API clients)                  │
+│  - Static Analysis                                              │
+└─────────────────────────────────────────────────────────────────┘
+                              │
+                              ▼ (only if CI passes AND on main branch)
+┌─────────────────────────────────────────────────────────────────┐
+│ Deploy to Firebase App Hosting                                  │
+│  - Build app                                                    │
+│  - Deploy to production                                         │
+│  - Verify deployment is accessible                              │
+└─────────────────────────────────────────────────────────────────┘
+                              │
+                              ▼ (only if deploy succeeds)
+┌─────────────────────────────────────────────────────────────────┐
+│ Post-Deploy E2E Tests                                           │
+│  - Free Mode E2E (tests against deployed URL with real APIs)    │
+│  - Pro Mode E2E (Phase 4 - backend service tests)               │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+**Why this pattern?**
+- Mock mode tests verify the UI works correctly without external dependencies
+- Free/Pro mode tests verify the deployed app works with real infrastructure
+- Testing against deployed infrastructure catches deployment-specific issues
+
 ### E2E Test Commands
 ```bash
-# Run mock mode tests (no API keys needed)
+# Run mock mode tests locally (starts local server)
 npm run test:mock --workspace=packages/e2e
 
-# Run free mode tests (requires API keys)
+# Run free mode tests locally (starts local server, requires API keys)
 npm run test:free --workspace=packages/e2e
+
+# Run tests against deployed infrastructure (no local server)
+E2E_BASE_URL=https://your-app.hosted.app npm run test:free --workspace=packages/e2e
 
 # Interactive debugging
 npm run test:ui --workspace=packages/e2e
 ```
 
-The `E2E_MODE` environment variable controls which server mode Playwright starts.
+**E2E Environment Variables:**
+- `E2E_MODE`: 'mock' or 'free' - determines which API mode to use
+- `E2E_BASE_URL`: When set, tests run against this URL instead of starting a local server
 
 ## Important Notes
 
