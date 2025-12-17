@@ -5,12 +5,6 @@ on:
     branches:
       - main
   workflow_dispatch:
-    inputs:
-      skip_ci:
-        description: 'Skip CI checks (use with caution)'
-        required: false
-        default: 'false'
-        type: boolean
 
 concurrency:
   group: deploy-${{ github.ref }}
@@ -23,17 +17,16 @@ jobs:
   # Run existing CI checks first
   ci:
     name: CI Checks
-    if: ${{ github.event.inputs.skip_ci != 'true' }}
     uses: ./.github/workflows/ci.yml
 
   deploy:
     name: Deploy to Production
     runs-on: ubuntu-latest
     needs: [ci]
-    # Run if CI passed, or if CI was skipped via workflow_dispatch
+    # Only deploy if CI passed - never deploy if CI was skipped or failed
     if: |
       always() &&
-      (needs.ci.result == 'success' || needs.ci.result == 'skipped') &&
+      needs.ci.result == 'success' &&
       github.ref == 'refs/heads/main'
 
     permissions:
@@ -77,6 +70,23 @@ jobs:
             --git-branch main \
             --project ${{ vars.FIREBASE_PROJECT_ID }} \
             --non-interactive
+
+      - name: Verify deployment
+        run: |
+          DEPLOY_URL="https://ensemble-ai-prod--${{ vars.FIREBASE_PROJECT_ID }}.us-central1.hosted.app"
+          echo "Waiting for deployment to be ready..."
+          # Wait up to 5 minutes for deployment, checking every 30 seconds
+          for i in {1..10}; do
+            if curl -sf --max-time 10 "$DEPLOY_URL" > /dev/null 2>&1; then
+              echo "Deployment verified successfully!"
+              exit 0
+            fi
+            echo "Attempt $i/10: Deployment not ready yet, waiting 30s..."
+            sleep 30
+          done
+          echo "Warning: Could not verify deployment within timeout"
+          # Don't fail the workflow - App Hosting may take longer to propagate
+          exit 0
 
       - name: Output deployment URL
         run: |

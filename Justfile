@@ -120,9 +120,33 @@ deploy-list:
 
 # ==================== Infrastructure ====================
 
-# Initialize Terraform
+# Create Terraform state bucket (run once before tf-init)
+tf-state-bucket:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    if [ -z "{{project_id}}" ]; then
+        echo "Error: FIREBASE_PROJECT_ID environment variable is required"
+        exit 1
+    fi
+    bucket_name="{{project_id}}-terraform-state"
+    echo "Creating Terraform state bucket: gs://${bucket_name}"
+    if gsutil ls -b "gs://${bucket_name}" &>/dev/null; then
+        echo "   Bucket already exists"
+    else
+        gsutil mb -p {{project_id}} -l {{region}} "gs://${bucket_name}"
+        gsutil versioning set on "gs://${bucket_name}"
+        echo "   Created bucket with versioning enabled"
+    fi
+
+# Initialize Terraform (requires FIREBASE_PROJECT_ID)
 tf-init:
-    cd infra/terraform && terraform init
+    #!/usr/bin/env bash
+    set -euo pipefail
+    if [ -z "{{project_id}}" ]; then
+        echo "Error: FIREBASE_PROJECT_ID environment variable is required"
+        exit 1
+    fi
+    cd infra/terraform && terraform init -backend-config="bucket={{project_id}}-terraform-state"
 
 # Plan Terraform changes
 tf-plan:
@@ -183,6 +207,7 @@ bootstrap: _check-bootstrap-vars
     just bootstrap-firebase
     just bootstrap-service-accounts
     just bootstrap-wif
+    just tf-state-bucket
     just bootstrap-app-hosting
     echo ""
     echo "✅ Bootstrap complete!"

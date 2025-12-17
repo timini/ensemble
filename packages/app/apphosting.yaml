@@ -3,8 +3,8 @@
 
 runConfig:
   cpu: 1
-  memoryMiB: 512
-  minInstances: 0
+  memoryMiB: 1024
+  minInstances: 1
   maxInstances: 10
   concurrency: 80
 
