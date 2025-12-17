@@ -64,12 +64,18 @@ jobs:
       - name: Setup Firebase CLI
         run: npm install -g firebase-tools
 
-      - name: Deploy to Firebase App Hosting
+      # NOTE: Firebase App Hosting auto-deploys when we push to main.
+      # Manual rollout via CLI requires complex Developer Connect permissions.
+      # If you need manual rollouts, grant the deploy service account access to
+      # the Developer Connect connection resource (not just project-level IAM).
+      #
+      # For now, we wait for Firebase's automatic deployment to complete.
+      - name: Wait for Firebase Auto-Deployment
         run: |
-          firebase apphosting:rollouts:create ensemble-app \
-            --git-branch main \
-            --project ${{ vars.FIREBASE_PROJECT_ID }} \
-            --non-interactive
+          echo "Waiting for Firebase App Hosting to auto-deploy from main branch..."
+          echo "Firebase automatically deploys when it detects push to main."
+          # Give Firebase time to detect the push and start building
+          sleep 60
 
       - name: Verify deployment
         run: |
