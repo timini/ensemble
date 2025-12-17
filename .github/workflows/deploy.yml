@@ -93,3 +93,60 @@ jobs:
           echo "## Deployment Complete" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "Deployed to: https://ensemble-ai-prod--${{ vars.FIREBASE_PROJECT_ID }}.us-central1.hosted.app" >> $GITHUB_STEP_SUMMARY
+
+    outputs:
+      deploy_url: https://ensemble-ai-prod--${{ vars.FIREBASE_PROJECT_ID }}.us-central1.hosted.app
+
+  # Post-deployment E2E tests run against the actual deployed infrastructure
+  # These tests verify the real deployment works correctly
+  e2e-free-mode:
+    name: E2E Tests (Free Mode) - Post Deploy
+    runs-on: ubuntu-latest
+    needs: [deploy]
+    if: ${{ needs.deploy.result == 'success' }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+        working-directory: packages/e2e
+
+      - name: Run Free Mode E2E Tests against deployed app
+        run: npm run test:free --workspace=packages/e2e
+        env:
+          E2E_MODE: 'free'
+          E2E_BASE_URL: ${{ needs.deploy.outputs.deploy_url }}
+          NEXT_PUBLIC_MOCK_MODE: 'false'
+          TEST_OPENAI_API_KEY: ${{ secrets.TEST_OPENAI_API_KEY }}
+          TEST_ANTHROPIC_API_KEY: ${{ secrets.TEST_ANTHROPIC_API_KEY }}
+          TEST_GOOGLE_API_KEY: ${{ secrets.TEST_GOOGLE_API_KEY }}
+          TEST_XAI_API_KEY: ${{ secrets.TEST_XAI_API_KEY }}
+
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: e2e-free-mode-results
+          path: packages/e2e/test-results/
+          retention-days: 7
+
+  # Pro Mode E2E Tests - Placeholder for Phase 4
+  # Will test backend services, authentication, and credits
+  # e2e-pro-mode:
+  #   name: E2E Tests (Pro Mode) - Post Deploy
+  #   runs-on: ubuntu-latest
+  #   needs: [deploy]
+  #   if: ${{ needs.deploy.result == 'success' }}
+  #   steps:
+  #     - run: echo "Pro mode tests will be added in Phase 4"
