@@ -278,6 +278,7 @@ bootstrap-apis:
         "cloudresourcemanager.googleapis.com"
         "iamcredentials.googleapis.com"
         "serviceusage.googleapis.com"
+        "developerconnect.googleapis.com"
     )
     for api in "${apis[@]}"; do
         echo "   Enabling $api..."
