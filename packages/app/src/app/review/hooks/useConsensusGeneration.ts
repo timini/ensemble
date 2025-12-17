@@ -116,8 +116,7 @@ export function useConsensusGeneration() {
 
         } catch (err: unknown) {
             console.error('Consensus Generation Error:', err);
-            const message = err instanceof Error ? err.message : 'Failed to generate consensus';
-            setError(message);
+            setError(err instanceof Error ? err.message : 'Failed to generate consensus');
         } finally {
             setIsGenerating(false);
         }

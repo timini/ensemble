@@ -77,3 +77,17 @@ Thumbs.db
 # Specify temp files
 .specify/temp/
 *storybook.log
+
+# Terraform
+infra/terraform/.terraform/
+infra/terraform/*.tfstate
+infra/terraform/*.tfstate.*
+infra/terraform/*.tfvars
+!infra/terraform/terraform.tfvars.example
+infra/terraform/.terraform.lock.hcl
+infra/terraform/crash.log
+infra/terraform/crash.*.log
+
+# Firebase (project-specific, created by bootstrap)
+.firebaserc
+!.firebaserc.example

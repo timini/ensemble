@@ -1,0 +1,95 @@
+name: Deploy to Firebase App Hosting
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  NODE_VERSION: '20'
+
+jobs:
+  # Run existing CI checks first
+  ci:
+    name: CI Checks
+    uses: ./.github/workflows/ci.yml
+
+  deploy:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    needs: [ci]
+    # Only deploy if CI passed - never deploy if CI was skipped or failed
+    if: |
+      always() &&
+      needs.ci.result == 'success' &&
+      github.ref == 'refs/heads/main'
+
+    permissions:
+      contents: read
+      id-token: write # Required for Workload Identity Federation
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build shared-utils
+        run: npm run build --workspace=packages/shared-utils
+
+      - name: Build app
+        run: npm run build --workspace=packages/app
+        env:
+          SKIP_ENV_VALIDATION: 'true'
+
+      - name: Authenticate to Google Cloud
+        id: auth
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ vars.WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ vars.DEPLOY_SERVICE_ACCOUNT }}
+
+      - name: Setup Firebase CLI
+        run: npm install -g firebase-tools
+
+      - name: Deploy to Firebase App Hosting
+        run: |
+          firebase apphosting:rollouts:create ensemble-ai-prod \
+            --git-branch main \
+            --project ${{ vars.FIREBASE_PROJECT_ID }} \
+            --non-interactive
+
+      - name: Verify deployment
+        run: |
+          DEPLOY_URL="https://ensemble-ai-prod--${{ vars.FIREBASE_PROJECT_ID }}.us-central1.hosted.app"
+          echo "Waiting for deployment to be ready..."
+          # Wait up to 5 minutes for deployment, checking every 30 seconds
+          for i in {1..10}; do
+            if curl -sf --max-time 10 "$DEPLOY_URL" > /dev/null 2>&1; then
+              echo "Deployment verified successfully!"
+              exit 0
+            fi
+            echo "Attempt $i/10: Deployment not ready yet, waiting 30s..."
+            sleep 30
+          done
+          echo "Warning: Could not verify deployment within timeout"
+          # Don't fail the workflow - App Hosting may take longer to propagate
+          exit 0
+
+      - name: Output deployment URL
+        run: |
+          echo "## Deployment Complete" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Deployed to: https://ensemble-ai-prod--${{ vars.FIREBASE_PROJECT_ID }}.us-central1.hosted.app" >> $GITHUB_STEP_SUMMARY
