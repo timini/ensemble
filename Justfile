@@ -342,7 +342,7 @@ bootstrap-service-accounts:
 
     # Grant roles to GitHub Actions SA
     echo "   Granting roles to GitHub Actions SA..."
-    for role in "roles/firebaseapphosting.admin" "roles/firebase.admin" "roles/iam.serviceAccountUser" "roles/cloudbuild.builds.editor"; do
+    for role in "roles/firebaseapphosting.admin" "roles/firebase.admin" "roles/iam.serviceAccountUser" "roles/cloudbuild.builds.editor" "roles/developerconnect.admin"; do
         gcloud projects add-iam-policy-binding {{project_id}} \
             --member="serviceAccount:{{deploy_sa_id}}@{{project_id}}.iam.gserviceaccount.com" \
             --role="$role" \
