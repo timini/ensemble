@@ -107,6 +107,9 @@ export const Interactive: Story = {
     open: true,
     provider: 'openai',
     items: mockItems,
+    onOpenChange: () => {},
+    onKeyChange: () => {},
+    onToggleShow: () => {},
   },
   render: function Render(args) {
     const [open, setOpen] = React.useState(args.open);

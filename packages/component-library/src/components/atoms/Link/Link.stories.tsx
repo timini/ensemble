@@ -92,6 +92,7 @@ export const ExternalLargeIcon: Story = {
 
 // All variants showcase
 export const AllVariants: Story = {
+  args: { children: '' },
   render: () => (
     <div className="space-y-4">
       <div>
@@ -109,6 +110,7 @@ export const AllVariants: Story = {
 
 // External links showcase
 export const ExternalLinks: Story = {
+  args: { children: '' },
   render: () => (
     <div className="space-y-4">
       <div>
@@ -132,6 +134,7 @@ export const ExternalLinks: Story = {
 
 // Inline text example
 export const InlineText: Story = {
+  args: { children: '' },
   render: () => (
     <p className="max-w-md text-gray-700">
       This is a paragraph with an{' '}
@@ -145,6 +148,7 @@ export const InlineText: Story = {
 
 // Breadcrumb example
 export const Breadcrumb: Story = {
+  args: { children: '' },
   render: () => (
     <nav aria-label="Breadcrumb" className="flex items-center space-x-2 text-sm">
       <Link variant="subtle" href="/">Home</Link>
@@ -158,6 +162,7 @@ export const Breadcrumb: Story = {
 
 // Navigation menu example
 export const NavigationMenu: Story = {
+  args: { children: '' },
   render: () => (
     <nav className="flex flex-col space-y-2">
       <Link variant="subtle" href="/dashboard">Dashboard</Link>
@@ -170,6 +175,7 @@ export const NavigationMenu: Story = {
 
 // Footer links example
 export const FooterLinks: Story = {
+  args: { children: '' },
   render: () => (
     <footer className="bg-gray-50 p-6 rounded">
       <div className="grid grid-cols-3 gap-4 text-sm">

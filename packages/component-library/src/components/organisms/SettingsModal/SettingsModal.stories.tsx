@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import { SettingsModal } from './SettingsModal';
+import { SettingsModal, type Language } from './SettingsModal';
 import { useState } from 'react';
 import { Button } from '../../atoms/Button';
 
@@ -17,7 +17,7 @@ type Story = StoryObj<typeof meta>;
 
 interface SettingsModalWithStateProps {
   theme: 'light' | 'dark';
-  language: 'en' | 'es' | 'fr' | 'de' | 'ja' | 'zh';
+  language: Language;
 }
 
 // Wrapper component to handle state
@@ -44,62 +44,58 @@ const SettingsModalWithState = (args: SettingsModalWithStateProps) => {
 };
 
 // Default story
-export const Default: Story = {
-  render: (args) => <SettingsModalWithState {...args} />,
+export const LightTheme: Story = {
   args: {
     theme: 'light',
     language: 'en',
-    onExportSettings: () => console.log('Export settings'),
-    onImportSettings: () => console.log('Import settings'),
-    onClearData: () => console.log('Clear all data'),
+    onThemeChange: () => {},
+    onLanguageChange: () => {},
+    onExportSettings: () => {},
+    onImportSettings: () => {},
+    onClearData: () => {},
   },
 };
 
 // Dark theme
 export const DarkTheme: Story = {
-  render: (args) => <SettingsModalWithState {...args} />,
   args: {
     theme: 'dark',
     language: 'en',
-    onExportSettings: () => console.log('Export settings'),
-    onImportSettings: () => console.log('Import settings'),
-    onClearData: () => console.log('Clear all data'),
+    onThemeChange: () => {},
+    onLanguageChange: () => {},
+    onExportSettings: () => {},
+    onImportSettings: () => {},
+    onClearData: () => {},
   },
 };
 
 // Different language
-export const SpanishLanguage: Story = {
+export const FrenchLanguage: Story = {
   render: (args) => <SettingsModalWithState {...args} />,
   args: {
     theme: 'light',
-    language: 'es',
+    language: 'fr',
+    onThemeChange: () => {},
+    onLanguageChange: () => {},
     onExportSettings: () => console.log('Export settings'),
     onImportSettings: () => console.log('Import settings'),
     onClearData: () => console.log('Clear all data'),
   },
 };
 
-// Japanese language
-export const JapaneseLanguage: Story = {
-  render: (args) => <SettingsModalWithState {...args} />,
-  args: {
-    theme: 'light',
-    language: 'ja',
-    onExportSettings: () => console.log('Export settings'),
-    onImportSettings: () => console.log('Import settings'),
-    onClearData: () => console.log('Clear all data'),
-  },
-};
+
 
 // Open by default
-export const OpenByDefault: Story = {
+export const OpenModal: Story = {
   args: {
     open: true,
     theme: 'light',
     language: 'en',
-    onExportSettings: () => console.log('Export settings'),
-    onImportSettings: () => console.log('Import settings'),
-    onClearData: () => console.log('Clear all data'),
-    onDone: () => console.log('Done clicked'),
+    onThemeChange: () => {},
+    onLanguageChange: () => {},
+    onExportSettings: () => {},
+    onImportSettings: () => {},
+    onClearData: () => {},
+    onDone: () => {},
   },
 };

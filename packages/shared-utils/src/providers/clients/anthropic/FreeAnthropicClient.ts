@@ -53,7 +53,7 @@ export class FreeAnthropicClient extends BaseFreeClient {
       return response.data
         .map((m) => m.id)
         .filter((id) => id.startsWith('claude-'));
-    } catch (error) {
+    } catch {
       // Fallback to axios if SDK fails or manual list
       return ['claude-3-5-sonnet-20241022', 'claude-3-opus-20240229', 'claude-3-sonnet-20240229', 'claude-3-haiku-20240307'];
     }

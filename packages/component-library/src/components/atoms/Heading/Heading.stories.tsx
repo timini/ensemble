@@ -27,6 +27,7 @@ type Story = StoryObj<typeof meta>;
 
 // All heading levels with default sizes
 export const AllLevels: Story = {
+  args: { level: 1, children: '' },
   render: () => (
     <div className="space-y-4">
       <Heading level={1}>Heading 1 (default size: lg)</Heading>
@@ -41,6 +42,7 @@ export const AllLevels: Story = {
 
 // All size variants with h2
 export const AllSizes: Story = {
+  args: { level: 2, children: '' },
   render: () => (
     <div className="space-y-4">
       <Heading level={2} size="xs">Extra Small (xs)</Heading>
@@ -92,6 +94,7 @@ export const SmallHeading: Story = {
 
 // Semantic vs Visual demonstration
 export const SemanticVsVisual: Story = {
+  args: { level: 1, children: '' },
   render: () => (
     <div className="space-y-6">
       <div>
@@ -138,6 +141,7 @@ export const LongText: Story = {
 
 // Hierarchy example
 export const HierarchyExample: Story = {
+  args: { level: 1, children: '' },
   render: () => (
     <div className="space-y-4">
       <Heading level={1} size="3xl">

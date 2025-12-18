@@ -124,6 +124,10 @@ export const WithCurrentEnsemble: Story = {
 export const Interactive: Story = {
   args: {
     presets: mockPresets,
+    currentEnsembleName: '',
+    onLoadPreset: () => {},
+    onSavePreset: () => {},
+    onDeletePreset: () => {},
   },
   render: function Render(args) {
     const [presets, setPresets] = React.useState(args.presets);

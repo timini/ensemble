@@ -22,6 +22,7 @@ type Story = StoryObj<typeof meta>;
  * Default PromptInputWithHint with empty value
  */
 export const Default: Story = {
+  args: { value: '', onChange: () => {} },
   render: function DefaultStory() {
     const [value, setValue] = useState('');
     return (
@@ -37,6 +38,7 @@ export const Default: Story = {
  * PromptInputWithHint with pre-filled value
  */
 export const WithValue: Story = {
+  args: { value: '', onChange: () => {} },
   render: function WithValueStory() {
     const [value, setValue] = useState('What are the key differences between React and Vue?');
     return (
@@ -52,6 +54,7 @@ export const WithValue: Story = {
  * PromptInputWithHint with custom placeholder
  */
 export const CustomPlaceholder: Story = {
+  args: { value: '', onChange: () => {} },
   render: function CustomPlaceholderStory() {
     const [value, setValue] = useState('');
     return (
@@ -68,6 +71,7 @@ export const CustomPlaceholder: Story = {
  * PromptInputWithHint in dark mode
  */
 export const DarkMode: Story = {
+  args: { value: '', onChange: () => {} },
   render: function DarkModeStory() {
     const [value, setValue] = useState('');
     return (

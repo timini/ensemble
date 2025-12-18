@@ -1,5 +1,5 @@
 
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, type Mock } from 'vitest';
 import { EloRankingConsensus } from '../EloRankingConsensus';
 import type { ConsensusModelResponse } from '../types';
 import type { AIProvider } from '../../../providers/types';
@@ -37,11 +37,11 @@ describe('EloRankingConsensus', () => {
         // For this test, let's assume we want Model A > Model B > Model C.
 
         // We can inspect the prompt to decide who wins.
-        (mockJudgeProvider.streamResponse as any).mockImplementation(async (
+        (mockJudgeProvider.streamResponse as Mock).mockImplementation(async (
             prompt: string,
-            model: string,
-            onChunk: any,
-            onComplete: any
+            _model: string,
+            _onChunk: (chunk: string) => void,
+            onComplete: (full: string, time: number, tokens?: number) => void
         ) => {
             // Determine winner based on which models are being compared
             // Model A always wins, Model B beats Model C
@@ -83,11 +83,11 @@ describe('EloRankingConsensus', () => {
             { modelId: 'model-c', eloScore: 1168, rank: 3 },
         ]);
 
-        (mockJudgeProvider.streamResponse as any).mockImplementation(async (
+        (mockJudgeProvider.streamResponse as Mock).mockImplementation(async (
             prompt: string,
-            model: string,
-            onChunk: any,
-            onComplete: any
+            _model: string,
+            _onChunk: (chunk: string) => void,
+            onComplete: (full: string, time: number, tokens?: number) => void
         ) => {
             // Mock summarizer behavior
             onComplete('Consensus Summary', 100, 10);
@@ -104,7 +104,7 @@ describe('EloRankingConsensus', () => {
         // but passing the same mock object.
         // We can check the last call or inspect calls.
 
-        const calls = (mockJudgeProvider.streamResponse as any).mock.calls;
+        const calls = (mockJudgeProvider.streamResponse as Mock).mock.calls;
         const summarizerCall = calls[calls.length - 1];
         const promptArg = summarizerCall[0];
 

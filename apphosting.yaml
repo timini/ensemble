@@ -1,8 +1,8 @@
 # Firebase App Hosting configuration for Ensemble AI
 # https://firebase.google.com/docs/app-hosting/configure
 
-# Monorepo configuration: build from root but deploy the app package
-# The Next.js app is in packages/app
+# Monorepo: Build from repo root using npm workspaces
+# The Next.js app is at packages/app
 
 runConfig:
   cpu: 1

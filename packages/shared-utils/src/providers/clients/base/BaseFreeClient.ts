@@ -1,11 +1,11 @@
 import type { AIProvider, ProviderName, ValidationResult } from '../../types';
 import { MockProviderClient } from '../mock/MockProviderClient';
 
-export type StreamHandlers = {
+export interface StreamHandlers {
   onChunk: (chunk: string) => void;
   onComplete: (fullResponse: string, responseTime: number, tokenCount?: number) => void;
   onError: (error: Error) => void;
-};
+}
 
 export interface StreamOptions extends StreamHandlers {
   apiKey: string;

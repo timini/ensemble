@@ -1,5 +1,5 @@
 
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, type Mock } from 'vitest';
 import { StandardConsensus } from '../StandardConsensus';
 import type { ConsensusModelResponse } from '../types';
 import type { AIProvider } from '../../../providers/types';
@@ -26,11 +26,11 @@ describe('StandardConsensus', () => {
     });
 
     it('should generate summary using all responses', async () => {
-        (mockSummarizerProvider.streamResponse as any).mockImplementation(async (
+        (mockSummarizerProvider.streamResponse as Mock).mockImplementation(async (
             prompt: string,
-            model: string,
-            onChunk: any,
-            onComplete: any
+            _model: string,
+            _onChunk: (chunk: string) => void,
+            onComplete: (full: string, time: number, tokens?: number) => void
         ) => {
             onComplete('Standard Summary', 100, 10);
             return Promise.resolve();
@@ -40,7 +40,7 @@ describe('StandardConsensus', () => {
 
         expect(summary).toBe('Standard Summary');
 
-        const calls = (mockSummarizerProvider.streamResponse as any).mock.calls;
+        const calls = (mockSummarizerProvider.streamResponse as Mock).mock.calls;
         const promptArg = calls[0][0];
 
         expect(promptArg).toContain('Model A');

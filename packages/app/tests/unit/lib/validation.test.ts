@@ -44,7 +44,7 @@ describe('validateApiKey', () => {
     });
 
     expect(initializeProviders).toHaveBeenCalledTimes(1);
-    expect(onStatusChange).toHaveBeenLastCalledWith('openai', 'invalid');
+    expect(onStatusChange).toHaveBeenLastCalledWith('openai', 'invalid', expect.any(String));
   });
 
   it('validates API keys with the resolved provider client', async () => {
@@ -76,7 +76,7 @@ describe('validateApiKey', () => {
       onStatusChange,
     });
 
-    expect(onStatusChange).toHaveBeenLastCalledWith('openai', 'invalid');
+    expect(onStatusChange).toHaveBeenLastCalledWith('openai', 'invalid', expect.any(String));
   });
 });
 

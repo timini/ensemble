@@ -249,7 +249,7 @@ describe('Heading', () => {
 
   describe('edge cases', () => {
     it('handles empty children', () => {
-      render(<Heading level={2}></Heading>);
+      render(<Heading level={2}>{null}</Heading>);
 
       const heading = screen.getByRole('heading', { level: 2 });
       expect(heading).toBeInTheDocument();
