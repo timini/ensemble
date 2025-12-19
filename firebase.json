@@ -1,6 +1,6 @@
 {
   "apphosting": {
-    "backendId": "ensemble-ai-prod",
+    "backendId": "ensemble-app",
     "rootDir": "packages/app"
   }
 }
