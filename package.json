@@ -12,7 +12,7 @@
     "dev:wireframes": "npm run dev --workspace=packages/wireframes",
     "dev:components": "npm run storybook --workspace=packages/component-library",
     "analyze:fta": "node ./scripts/check-fta.mjs",
-    "build": "npm run build --workspaces --if-present",
+    "build": "npm run build --workspace=@ensemble-ai/shared-utils --workspace=@ai-ensemble/component-library --workspace=@ai-ensemble/app",
     "lint": "npm run lint --workspaces --if-present",
     "lint:fix": "npm run lint:fix --workspaces --if-present",
     "test": "npm run test --workspaces --if-present",
