@@ -1,5 +1,5 @@
 {
-  "name": "ai-ensemble",
+  "name": "ai-ensemble-monorepo",
   "version": "0.1.0",
   "private": true,
   "workspaces": [
@@ -19,7 +19,8 @@
     "test:e2e": "npm run test --workspace=packages/e2e",
     "test:unit": "npm run test:unit --workspaces --if-present",
     "typecheck": "npm run typecheck --workspaces --if-present",
-    "prepare": "husky"
+    "prepare": "husky",
+    "start": "npm run start --workspace=@ai-ensemble/app"
   },
   "devDependencies": {
     "fta-cli": "^3.0.0",
