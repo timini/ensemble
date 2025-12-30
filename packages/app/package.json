@@ -14,7 +14,7 @@
     "lint": "next lint",
     "lint:fix": "next lint --fix",
     "preview": "next build && next start",
-    "start": "cp -R public .next/standalone/packages/app/ && cp -R .next/static .next/standalone/packages/app/.next/ && node .next/standalone/packages/app/server.js",
+    "start": "cp -R public .next/standalone/packages/app/ && cp -R .next/static .next/standalone/packages/app/.next/ && cd .next/standalone && node packages/app/server.js",
     "test": "vitest run --coverage",
     "test:watch": "vitest",
     "test:ui": "vitest --ui",
