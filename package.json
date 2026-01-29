@@ -3,7 +3,10 @@
   "version": "0.1.0",
   "private": true,
   "workspaces": [
-    "packages/*"
+    "packages/app",
+    "packages/component-library",
+    "packages/shared-utils",
+    "packages/e2e"
   ],
   "scripts": {
     "dev": "npm run dev:free",
