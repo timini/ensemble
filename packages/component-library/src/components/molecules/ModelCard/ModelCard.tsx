@@ -122,9 +122,9 @@ export const ModelCard = React.forwardRef<HTMLDivElement, ModelCardProps>(
           'relative cursor-pointer transition-all hover:shadow-md',
           selected
             ? isSummarizer
-              ? 'border-orange-500 bg-orange-50'
-              : 'border-blue-500 bg-blue-50'
-            : 'border-gray-200',
+              ? 'border-orange-500 bg-orange-50 dark:border-orange-500 dark:bg-orange-950/30'
+              : 'border-blue-500 bg-blue-50 dark:border-blue-500 dark:bg-blue-950/30'
+            : 'border-gray-200 dark:border-gray-800',
           disabled && 'opacity-50 cursor-not-allowed'
         )}
       >
