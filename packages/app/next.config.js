@@ -7,7 +7,7 @@ import "./src/env.js";
 /** @type {import("next").NextConfig} */
 const config = {
     output: "standalone",
-    transpilePackages: ["@ensemble-ai/shared-utils"],
+    transpilePackages: ["@ensemble-ai/shared-utils", "@ai-ensemble/component-library"],
     webpack: (config) => {
         config.resolve.alias = {
             ...config.resolve.alias,
