@@ -12,7 +12,6 @@
     "dev": "npm run dev:free",
     "dev:free": "npm run dev:free --workspace=packages/app",
     "dev:mock": "npm run dev:mock --workspace=packages/app",
-    "dev:wireframes": "npm run dev --workspace=packages/wireframes",
     "dev:components": "npm run storybook --workspace=packages/component-library",
     "analyze:fta": "node ./scripts/check-fta.mjs",
     "build": "npm run build --workspace=@ensemble-ai/shared-utils --workspace=@ai-ensemble/component-library --workspace=@ai-ensemble/app",

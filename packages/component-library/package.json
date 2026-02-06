@@ -21,8 +21,11 @@
   },
   "dependencies": {
     "@ensemble-ai/shared-utils": "*",
+    "@floating-ui/react-dom": "^2.0.0",
     "@radix-ui/react-dialog": "^1.1.15",
     "@radix-ui/react-select": "^2.2.6",
+    "aria-hidden": "^1.2.4",
+    "react-remove-scroll": "^2.6.3",
     "@radix-ui/react-slot": "^1.2.3",
     "@radix-ui/react-use-effect-event": "^0.0.2",
     "class-variance-authority": "^0.7.1",
