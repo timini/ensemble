@@ -1,8 +1,13 @@
 # Firebase App Hosting configuration for Ensemble AI
 # https://firebase.google.com/docs/app-hosting/configure
 
-# Monorepo: Build from repo root using npm workspaces
-# The Next.js app is at packages/app
+# Monorepo: Backend rootDirectory is set to "/" (repo root) via Firebase API
+# so the buildpack finds package-lock.json at the workspace root.
+# The Next.js app is at packages/app.
+
+scripts:
+  buildCommand: npm run build --workspace=@ensemble-ai/shared-utils && npm run build --workspace=@ai-ensemble/app
+  runCommand: node packages/app/.next/standalone/packages/app/server.js
 
 runConfig:
   cpu: 1
@@ -26,3 +31,13 @@ env:
     value: "true"
     availability:
       - BUILD
+
+  - variable: HOSTNAME
+    value: "0.0.0.0"
+    availability:
+      - RUNTIME
+
+  - variable: PORT
+    value: "8080"
+    availability:
+      - RUNTIME
