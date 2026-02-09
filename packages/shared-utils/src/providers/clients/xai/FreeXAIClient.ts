@@ -71,7 +71,7 @@ export class FreeXAIClient extends BaseFreeClient {
       });
 
       for await (const chunk of stream as AsyncIterable<{
-        choices?: Array<{ delta?: { content?: unknown }; finish_reason?: string | null }>;
+        choices?: { delta?: { content?: unknown }; finish_reason?: string | null }[];
         usage?: { total_tokens?: number };
       }>) {
         if (chunk.usage?.total_tokens) {

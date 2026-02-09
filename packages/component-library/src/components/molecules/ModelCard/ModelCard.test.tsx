@@ -261,4 +261,48 @@ describe('ModelCard', () => {
       expect(screen.queryByText('Synthétiseur')).not.toBeInTheDocument();
     });
   });
+
+  describe('regression - styling and dark mode', () => {
+    it('applies explicit selection highlighting classes including dark mode', () => {
+      const { container } = render(
+        <ModelCard
+          provider="openai"
+          modelName="GPT-4"
+          selected={true}
+          isSummarizer={false}
+        />
+      );
+      const card = container.querySelector('[data-testid="model-card"]');
+
+      // Explicitly check for the highlighting classes
+      expect(card).toHaveClass('border-blue-500');
+      expect(card).toHaveClass('bg-blue-50');
+      expect(card).toHaveClass('dark:bg-blue-950/30');
+
+      // Ensure defaults are overridden
+      expect(card).not.toHaveClass('border-gray-200');
+      // Ensure bg-card is removed by merge to prevent conflicts
+      expect(card).not.toHaveClass('bg-card');
+    });
+
+    it('applies explicit summarizer highlighting classes including dark mode', () => {
+      const { container } = render(
+        <ModelCard
+          provider="anthropic"
+          modelName="Claude 3"
+          selected={true}
+          isSummarizer={true}
+        />
+      );
+      const card = container.querySelector('[data-testid="model-card"]');
+
+      expect(card).toHaveClass('border-orange-500');
+      expect(card).toHaveClass('bg-orange-50');
+      expect(card).toHaveClass('dark:bg-orange-950/30');
+
+      expect(card).not.toHaveClass('border-gray-200');
+      expect(card).not.toHaveClass('border-blue-500');
+      expect(card).not.toHaveClass('bg-card');
+    });
+  });
 });

@@ -72,6 +72,7 @@ export const WithMargin: Story = {
 
 // In Context
 export const InFormLayout: Story = {
+  args: { modelName: '' },
   render: () => (
     <div className="max-w-2xl space-y-4">
       <div className="space-y-2">
@@ -96,6 +97,7 @@ export const InFormLayout: Story = {
 };
 
 export const MultipleIndicators: Story = {
+  args: { modelName: '' },
   render: () => (
     <div className="max-w-2xl space-y-4">
       <SummarizerIndicator modelName="Claude 3 Opus" />
@@ -107,6 +109,7 @@ export const MultipleIndicators: Story = {
 
 // Responsive Example
 export const ResponsiveWidth: Story = {
+  args: { modelName: '' },
   render: () => (
     <div className="space-y-4">
       <div className="w-full">

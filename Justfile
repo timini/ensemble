@@ -10,7 +10,7 @@ project_id := env_var_or_default("FIREBASE_PROJECT_ID", "")
 billing_account := env_var_or_default("GCP_BILLING_ACCOUNT", "")
 github_repo := env_var_or_default("GITHUB_REPO", "")
 region := env_var_or_default("GCP_REGION", "us-central1")
-backend_id := "ensemble-ai-prod"
+backend_id := "ai-ensemble"
 wif_pool_id := "github-actions-pool"
 wif_provider_id := "github-provider"
 deploy_sa_id := "github-actions-deploy"
@@ -278,6 +278,7 @@ bootstrap-apis:
         "cloudresourcemanager.googleapis.com"
         "iamcredentials.googleapis.com"
         "serviceusage.googleapis.com"
+        "developerconnect.googleapis.com"
     )
     for api in "${apis[@]}"; do
         echo "   Enabling $api..."
@@ -341,7 +342,7 @@ bootstrap-service-accounts:
 
     # Grant roles to GitHub Actions SA
     echo "   Granting roles to GitHub Actions SA..."
-    for role in "roles/firebaseapphosting.admin" "roles/firebase.admin" "roles/iam.serviceAccountUser" "roles/cloudbuild.builds.editor"; do
+    for role in "roles/firebaseapphosting.admin" "roles/firebase.admin" "roles/iam.serviceAccountUser" "roles/cloudbuild.builds.editor" "roles/developerconnect.admin" "roles/developerconnect.gitProxyUser"; do
         gcloud projects add-iam-policy-binding {{project_id}} \
             --member="serviceAccount:{{deploy_sa_id}}@{{project_id}}.iam.gserviceaccount.com" \
             --role="$role" \

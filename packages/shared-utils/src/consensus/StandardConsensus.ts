@@ -46,10 +46,9 @@ Write as if you are directly answering the original question yourself, enhanced 
         `.trim();
 
         return new Promise((resolve) => {
-            let fullResponse = '';
-            // eslint-disable-next-line @typescript-eslint/no-floating-promises
+             
             this.summarizerProvider.streamResponse(prompt, this.summarizerModelId,
-                (chunk: string) => { fullResponse += chunk; },
+                () => { void 0; },
                 (finalText: string) => resolve(finalText),
                 (err: Error) => {
                     console.error('Summarizer error:', err);

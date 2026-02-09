@@ -175,6 +175,9 @@ export const Interactive: Story = {
   args: {
     models: mockModels,
     maxSelection: 6,
+    selectedModelIds: [],
+    onModelToggle: () => {},
+    onSummarizerChange: () => {},
   },
   render: function Render(args) {
     const [selectedModelIds, setSelectedModelIds] = React.useState<string[]>([]);

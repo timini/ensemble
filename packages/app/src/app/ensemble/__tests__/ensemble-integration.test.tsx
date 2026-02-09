@@ -108,7 +108,7 @@ describe('Ensemble Page - Model Selection Integration', () => {
       expect(screen.getByTestId('model-selection-list')).toBeInTheDocument();
     });
 
-    const continueButton = screen.getByRole('button', { name: /continue/i });
+    const continueButton = screen.getByRole('button', { name: /common.next/i });
     expect(continueButton).toBeDisabled();
 
     // Select 2 models
@@ -118,7 +118,8 @@ describe('Ensemble Page - Model Selection Integration', () => {
 
     // Continue button should be enabled
     await waitFor(() => {
-      expect(continueButton).toBeEnabled();
+      const btn = screen.getByRole('button', { name: /common.next/i });
+      expect(btn).toBeEnabled();
     });
   });
 });

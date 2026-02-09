@@ -10,7 +10,7 @@ resource "google_firebase_app_hosting_backend" "production" {
   provider         = google-beta
   project          = var.project_id
   location         = var.region
-  backend_id       = "ensemble-ai-prod"
+  backend_id       = "ai-ensemble"
   app_id           = google_firebase_web_app.ensemble_ai.app_id
   serving_locality = "GLOBAL_ACCESS"
   service_account  = google_service_account.app_hosting.email

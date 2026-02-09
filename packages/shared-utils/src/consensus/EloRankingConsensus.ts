@@ -91,10 +91,9 @@ Write as if you are directly answering the original question yourself, enhanced 
         `.trim();
 
         return new Promise((resolve) => {
-            let fullResponse = '';
-            // eslint-disable-next-line @typescript-eslint/no-floating-promises
+             
             this.summarizerProvider.streamResponse(prompt, this.summarizerModelId,
-                (chunk: string) => { fullResponse += chunk; },
+                () => { void 0; },
                 (finalText: string) => resolve(finalText),
                 (err: Error) => {
                     console.error('Summarizer error:', err);
@@ -129,12 +128,9 @@ Which response is better? Reply EXACTLY with "Winner: ${modelA.modelName}" or "W
         `.trim();
 
         return new Promise((resolve) => {
-            // eslint-disable-next-line @typescript-eslint/no-unused-vars
-            let fullResponse = '';
-
-            // eslint-disable-next-line @typescript-eslint/no-floating-promises
+             
             this.judgeProvider.streamResponse(prompt, this.judgeModelId,
-                (chunk: string) => { fullResponse += chunk; },
+                () => { void 0; },
                 (finalText: string) => {
                     if (finalText.includes(`Winner: ${modelA.modelName}`)) {
                         resolve(modelA.modelId);

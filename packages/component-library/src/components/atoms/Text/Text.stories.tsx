@@ -130,6 +130,7 @@ export const AsSpan: Story = {
 
 // All variants showcase
 export const AllVariants: Story = {
+  args: { children: '' },
   render: () => (
     <div className="space-y-4 max-w-lg">
       <div>
@@ -150,6 +151,7 @@ export const AllVariants: Story = {
 
 // All colors showcase
 export const AllColors: Story = {
+  args: { children: '' },
   render: () => (
     <div className="space-y-2 max-w-lg">
       <Text color="default">Default: Standard text color</Text>
@@ -164,6 +166,7 @@ export const AllColors: Story = {
 
 // Form helper text example
 export const FormHelperText: Story = {
+  args: { children: '' },
   render: () => (
     <div className="space-y-2 max-w-md">
       <label htmlFor="email" className="block text-sm font-medium text-gray-700">
@@ -184,6 +187,7 @@ export const FormHelperText: Story = {
 
 // Error message example
 export const ErrorMessage: Story = {
+  args: { children: '' },
   render: () => (
     <div className="space-y-2 max-w-md">
       <label htmlFor="password" className="block text-sm font-medium text-gray-700">

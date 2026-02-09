@@ -1,7 +1,7 @@
 import { ReactElement } from 'react';
 import { render, RenderOptions } from '@testing-library/react';
 import { I18nextProvider } from 'react-i18next';
-import i18n from 'i18next';
+import i18n, { type i18n as I18nInstance } from 'i18next';
 import { initReactI18next } from 'react-i18next';
 import en from '../i18n/locales/en.json';
 import fr from '../i18n/locales/fr.json';
@@ -11,7 +11,7 @@ import fr from '../i18n/locales/fr.json';
  * @param language - The language to use for the test ('en' or 'fr')
  * @returns A configured i18n instance
  */
-export const createTestI18n = (language: 'en' | 'fr' = 'en') => {
+export const createTestI18n = (language: 'en' | 'fr' = 'en'): I18nInstance => {
   const testI18n = i18n.createInstance();
 
   testI18n.use(initReactI18next).init({

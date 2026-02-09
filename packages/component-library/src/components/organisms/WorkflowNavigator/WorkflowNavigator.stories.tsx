@@ -105,8 +105,8 @@ export const Interactive: Story = {
       }
     };
 
-    const getLabels = () => {
-      const labels = {
+    const getLabels = (): { back?: string; continue: string } => {
+      const labels: Record<string, { back?: string; continue: string }> = {
         config: { continue: 'Choose Your AI Models' },
         ensemble: { back: 'Back to Configuration', continue: 'Continue to Prompt' },
         prompt: { back: 'Back to Models', continue: 'Generate Responses' },
@@ -137,6 +137,7 @@ export const Interactive: Story = {
 
 // All steps showcase
 export const AllSteps: Story = {
+  args: { currentStep: 'config' },
   render: () => (
     <div className="space-y-8">
       <div>

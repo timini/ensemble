@@ -1,9 +1,13 @@
 # Firebase App Hosting configuration for Ensemble AI
 # https://firebase.google.com/docs/app-hosting/configure
 
+# Monorepo setup: backend rootDirectory is "packages/app" (set via Firebase API).
+# A symlink packages/app/package-lock.json -> ../../package-lock.json ensures
+# the buildpack finds the workspace root lockfile.
+
 runConfig:
   cpu: 1
-  memoryMiB: 1024
+  memoryMiB: 2048
   minInstances: 1
   maxInstances: 10
   concurrency: 80

@@ -10,11 +10,11 @@ export interface Pairing {
     modelB: ConsensusModelResponse;
 }
 
-export type RankingResult = {
+export interface RankingResult {
     modelId: string;
     eloScore: number;
     rank: number;
-};
+}
 
 export interface ConsensusStrategy {
     rankResponses(responses: ConsensusModelResponse[], prompt: string): Promise<RankingResult[]>;
