@@ -82,8 +82,8 @@ export const ApiKeyConfiguration = React.forwardRef<HTMLDivElement, ApiKeyConfig
 
     return (
       <div ref={ref} data-testid="api-key-configuration">
-        <div className="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-md">
-          <p className="text-sm text-gray-700">
+        <div className="mb-4 p-4 bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-md">
+          <p className="text-sm text-gray-700 dark:text-gray-300">
             💡 <strong>
               {configuredCount > 0
                 ? t('organisms.apiKeyConfiguration.apiKeysConfigured', { count: configuredCount })
