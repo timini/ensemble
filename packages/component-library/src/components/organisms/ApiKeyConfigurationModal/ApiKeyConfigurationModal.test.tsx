@@ -210,6 +210,53 @@ describe('ApiKeyConfigurationModal', () => {
     });
   });
 
+  describe('dark mode', () => {
+    it('applies dark mode modal background class', () => {
+      const { container } = render(
+        <ApiKeyConfigurationModal
+          open={true}
+          onOpenChange={vi.fn()}
+          provider="openai"
+          items={mockItems}
+          onKeyChange={vi.fn()}
+          onToggleShow={vi.fn()}
+        />
+      );
+      const modalContent = container.querySelector('.bg-white');
+      expect(modalContent).toHaveClass('dark:bg-gray-900');
+    });
+
+    it('applies dark mode title text class', () => {
+      render(
+        <ApiKeyConfigurationModal
+          open={true}
+          onOpenChange={vi.fn()}
+          provider="openai"
+          items={mockItems}
+          onKeyChange={vi.fn()}
+          onToggleShow={vi.fn()}
+        />
+      );
+      const title = screen.getByText('Configure API Key');
+      expect(title).toHaveClass('dark:text-gray-100');
+    });
+
+    it('applies dark mode close button hover class', () => {
+      const { container } = render(
+        <ApiKeyConfigurationModal
+          open={true}
+          onOpenChange={vi.fn()}
+          provider="openai"
+          items={mockItems}
+          onKeyChange={vi.fn()}
+          onToggleShow={vi.fn()}
+        />
+      );
+      const closeButton = container.querySelector('[data-testid="close-modal-button"]');
+      expect(closeButton).toHaveClass('dark:hover:bg-gray-800');
+    });
+  });
+
   describe('accessibility', () => {
     it('has close button with aria-label', () => {
       render(

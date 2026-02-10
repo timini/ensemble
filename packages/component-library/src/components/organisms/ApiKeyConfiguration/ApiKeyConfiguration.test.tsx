@@ -566,6 +566,44 @@ describe('ApiKeyConfiguration', () => {
     });
   });
 
+  describe('dark mode', () => {
+    it('applies dark mode info box background class', () => {
+      const { container } = render(
+        <ApiKeyConfiguration
+          items={[{ provider: 'openai', label: 'OpenAI', validationStatus: 'valid' }]}
+          onKeyChange={vi.fn()}
+          onToggleShow={vi.fn()}
+        />
+      );
+      const infoBox = container.querySelector('.bg-blue-50');
+      expect(infoBox).toHaveClass('dark:bg-blue-950');
+    });
+
+    it('applies dark mode info box border class', () => {
+      const { container } = render(
+        <ApiKeyConfiguration
+          items={[{ provider: 'openai', label: 'OpenAI', validationStatus: 'valid' }]}
+          onKeyChange={vi.fn()}
+          onToggleShow={vi.fn()}
+        />
+      );
+      const infoBox = container.querySelector('.border-blue-200');
+      expect(infoBox).toHaveClass('dark:border-blue-800');
+    });
+
+    it('applies dark mode info box text class', () => {
+      const { container } = render(
+        <ApiKeyConfiguration
+          items={[{ provider: 'openai', label: 'OpenAI', validationStatus: 'valid' }]}
+          onKeyChange={vi.fn()}
+          onToggleShow={vi.fn()}
+        />
+      );
+      const infoText = container.querySelector('.text-gray-700');
+      expect(infoText).toHaveClass('dark:text-gray-300');
+    });
+  });
+
   describe('internationalization', () => {
     it('renders English heading by default', () => {
       renderWithI18n(
