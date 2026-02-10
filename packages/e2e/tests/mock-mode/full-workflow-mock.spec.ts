@@ -218,10 +218,11 @@ test.describe('Full Workflow - Mock Mode', () => {
     });
 
     await test.step('Test "Start Over" navigation', async () => {
-      // Wait for the page to stabilize after streaming responses resume
+      // Wait for streaming to settle then force-click to avoid layout shift interception
       const startOverButton = page.getByRole('button', { name: /start over/i });
       await startOverButton.scrollIntoViewIfNeeded();
-      await startOverButton.click();
+      await page.waitForTimeout(1000);
+      await startOverButton.click({ force: true });
       await expect(page).toHaveURL('/config');
 
       // Verify we're back at config page

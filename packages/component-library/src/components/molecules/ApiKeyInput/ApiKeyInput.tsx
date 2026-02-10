@@ -98,7 +98,7 @@ export const ApiKeyInput = React.forwardRef<HTMLInputElement, ApiKeyInputProps>(
         return (
           <CheckCircle
             data-validation="valid"
-            className="h-4 w-4 text-green-500 dark:text-green-400"
+            className="h-4 w-4 text-success"
             aria-label={t('molecules.apiKeyInput.validKey')}
           />
         );
@@ -108,7 +108,7 @@ export const ApiKeyInput = React.forwardRef<HTMLInputElement, ApiKeyInputProps>(
         return (
           <XCircle
             data-validation="invalid"
-            className="h-4 w-4 text-red-500 dark:text-red-400"
+            className="h-4 w-4 text-destructive"
             aria-label={t('molecules.apiKeyInput.invalidKey')}
           />
         );
@@ -140,8 +140,8 @@ export const ApiKeyInput = React.forwardRef<HTMLInputElement, ApiKeyInputProps>(
             }
             className={cn(
               'pr-20',
-              validationStatus === 'valid' && 'border-green-300 dark:border-green-700 bg-green-50 dark:bg-green-950',
-              validationStatus === 'invalid' && 'border-red-500 dark:border-red-400',
+              validationStatus === 'valid' && 'border-success/50 bg-success/10',
+              validationStatus === 'invalid' && 'border-destructive',
               disabled && 'disabled:opacity-50'
             )}
           />
