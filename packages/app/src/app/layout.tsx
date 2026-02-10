@@ -123,6 +123,10 @@ export default function RootLayout({
                 setLanguage(newLang);
               }
             }}
+            onClearData={() => {
+              localStorage.removeItem('ensemble-ai-store');
+              window.location.reload();
+            }}
             onDone={() => setSettingsOpen(false)}
           />
         </TRPCReactProvider>

@@ -78,9 +78,7 @@ export function useEnsemblePage() {
     });
 
     // Track selected model IDs for ModelSelectionList
-    const selectedModelIds = useMemo(() => {
-        return selectedModels.map((selectedModel) => selectedModel.model);
-    }, [selectedModels]);
+    const selectedModelIds = selectedModels.map((m) => m.model);
     const displayedSelectedModelIds = hasHydrated ? selectedModelIds : [];
 
     const providerStatus = useMemo(
@@ -129,8 +127,7 @@ export function useEnsemblePage() {
             return;
         }
 
-        // Check if selected by comparing the 'model' field (model name), not the dynamic 'id' field
-        // selectedModels stores model name in .model field, available models use .name
+        // Check if already selected by matching on the stored model API ID
         const selectedModel = selectedModels.find((m) => m.model === availableModel.id);
 
         if (selectedModel) {

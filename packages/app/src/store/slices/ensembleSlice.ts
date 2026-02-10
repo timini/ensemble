@@ -11,6 +11,7 @@ export type ProviderType = 'openai' | 'anthropic' | 'google' | 'xai';
 export interface ModelSelection {
   id: string;
   provider: ProviderType;
+  /** The model's API identifier (e.g., 'gpt-4o', 'gemini-2.5-flash'), not a display name */
   model: string;
 }
 
