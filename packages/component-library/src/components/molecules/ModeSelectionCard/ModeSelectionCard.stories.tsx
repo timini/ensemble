@@ -208,5 +208,31 @@ export const KeyboardNavigation: Story = {
   },
 };
 
+/**
+ * Dark mode - both modes with one selected.
+ */
+export const DarkMode: Story = {
+  args: {
+    mode: 'free',
+    selected: true,
+  },
+  render: () => (
+    <div className="flex flex-col gap-4 w-[400px]">
+      <ModeSelectionCard mode="free" selected={true} />
+      <ModeSelectionCard mode="pro" selected={false} />
+    </div>
+  ),
+  parameters: {
+    backgrounds: { default: 'dark' },
+  },
+  decorators: [
+    (Story) => (
+      <div className="dark bg-gray-900 p-8">
+        <Story />
+      </div>
+    ),
+  ],
+};
+
 // Add React import for interactive stories
 import * as React from 'react';
