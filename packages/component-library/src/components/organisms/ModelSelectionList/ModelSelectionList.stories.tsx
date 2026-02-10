@@ -170,6 +170,27 @@ export const MaxSelectionReached: Story = {
   },
 };
 
+// Dark mode
+export const DarkMode: Story = {
+  args: {
+    models: mockModels,
+    selectedModelIds: ['gpt-4', 'claude-3-opus'],
+    summarizerModelId: 'claude-3-opus',
+    onModelToggle: () => {},
+    onSummarizerChange: () => {},
+  },
+  parameters: {
+    backgrounds: { default: 'dark' },
+  },
+  decorators: [
+    (Story) => (
+      <div className="dark bg-gray-900 p-8">
+        <Story />
+      </div>
+    ),
+  ],
+};
+
 // Interactive example
 export const Interactive: Story = {
   args: {

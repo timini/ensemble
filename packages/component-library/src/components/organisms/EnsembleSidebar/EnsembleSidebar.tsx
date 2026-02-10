@@ -116,7 +116,7 @@ export const EnsembleSidebar = React.forwardRef<HTMLDivElement, EnsembleSidebarP
         <CardContent className="p-6">
           {/* Ensemble Summary */}
           <Heading level={3} size="lg" className="mb-4">{t('organisms.ensembleSidebar.heading')}</Heading>
-          <Text variant="helper" className="text-gray-600 mb-6">
+          <Text variant="helper" className="text-gray-600 dark:text-gray-400 mb-6">
             {t('organisms.ensembleSidebar.description')}
           </Text>
 
@@ -151,7 +151,7 @@ export const EnsembleSidebar = React.forwardRef<HTMLDivElement, EnsembleSidebarP
                     {model.id === summarizerId && (
                       <Badge
                         variant="outline"
-                        className="text-xs bg-blue-50 text-blue-600 border-blue-200"
+                        className="text-xs bg-blue-50 dark:bg-blue-950 text-blue-600 dark:text-blue-400 border-blue-200 dark:border-blue-800"
                       >
                         {model.name}
                       </Badge>
@@ -171,13 +171,13 @@ export const EnsembleSidebar = React.forwardRef<HTMLDivElement, EnsembleSidebarP
               </Text>
 
               {presets.length === 0 ? (
-                <div className="text-center py-6 text-sm text-gray-500">
+                <div className="text-center py-6 text-sm text-gray-500 dark:text-gray-400">
                   {t('organisms.ensembleSidebar.noPresets')}
                 </div>
               ) : (
                 <div className="space-y-3">
                   {presets.map((preset) => (
-                    <div key={preset.id} className="border rounded-lg p-3 relative">
+                    <div key={preset.id} className="border border-gray-200 dark:border-gray-700 rounded-lg p-3 relative">
                       <div className="flex items-center justify-between mb-2">
                         <Heading level={5} size="sm">{preset.name}</Heading>
                         <div className="flex items-center gap-2">
@@ -193,7 +193,7 @@ export const EnsembleSidebar = React.forwardRef<HTMLDivElement, EnsembleSidebarP
                             <Button
                               variant="ghost"
                               size="sm"
-                              className="text-xs text-red-600 hover:text-red-700 hover:bg-red-50"
+                              className="text-xs text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-950"
                               onClick={() => onDeletePreset(preset.id)}
                               aria-label={t('organisms.ensembleSidebar.deletePreset', { name: preset.name })}
                             >
@@ -202,7 +202,7 @@ export const EnsembleSidebar = React.forwardRef<HTMLDivElement, EnsembleSidebarP
                           )}
                         </div>
                       </div>
-                      <Text variant="caption" className="text-gray-600 mb-2">{preset.description}</Text>
+                      <Text variant="caption" className="text-gray-600 dark:text-gray-400 mb-2">{preset.description}</Text>
                       <Text variant="caption" color="muted">{t('organisms.ensembleSidebar.summarizerInfo', { name: preset.summarizerName })}</Text>
                     </div>
                   ))}
@@ -219,7 +219,7 @@ export const EnsembleSidebar = React.forwardRef<HTMLDivElement, EnsembleSidebarP
 
               <div className="space-y-3">
                 <div>
-                  <label className="text-xs font-medium text-gray-700">{t('organisms.ensembleSidebar.ensembleNameLabel')}</label>
+                  <label className="text-xs font-medium text-gray-700 dark:text-gray-300">{t('organisms.ensembleSidebar.ensembleNameLabel')}</label>
                   <Input
                     placeholder={t('organisms.ensembleSidebar.ensembleNamePlaceholder')}
                     value={ensembleName}
@@ -237,10 +237,10 @@ export const EnsembleSidebar = React.forwardRef<HTMLDivElement, EnsembleSidebarP
                 </Button>
               </div>
 
-              <div className="mt-4 p-3 bg-blue-50 rounded-lg">
+              <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-950 rounded-lg">
                 <div className="flex items-start space-x-2">
                   <Info className="w-4 h-4 text-blue-500 mt-0.5 flex-shrink-0" />
-                  <Text variant="caption" className="text-blue-700">
+                  <Text variant="caption" className="text-blue-700 dark:text-blue-300">
                     {t('organisms.ensembleSidebar.saveInfoText')}
                   </Text>
                 </div>
@@ -254,7 +254,7 @@ export const EnsembleSidebar = React.forwardRef<HTMLDivElement, EnsembleSidebarP
             <Text variant="caption" color="muted" className="mb-3">
               {t('organisms.ensembleSidebar.manualResponsesDescription')}
             </Text>
-            <Text variant="caption" className="text-gray-600 mb-3">
+            <Text variant="caption" className="text-gray-600 dark:text-gray-400 mb-3">
               {t('organisms.ensembleSidebar.manualResponsesInfo')}
             </Text>
             {manualResponses.length > 0 && (
@@ -262,11 +262,11 @@ export const EnsembleSidebar = React.forwardRef<HTMLDivElement, EnsembleSidebarP
                 {manualResponses.map((manual) => (
                   <div
                     key={manual.id}
-                    className="rounded-lg border border-gray-200 bg-white p-3 text-sm shadow-sm"
+                    className="rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-3 text-sm shadow-sm"
                   >
-                    <div className="font-medium text-gray-900">{manual.label}</div>
+                    <div className="font-medium text-gray-900 dark:text-gray-100">{manual.label}</div>
                     {manual.response && (
-                      <p className="mt-1 text-gray-600 line-clamp-3">{manual.response}</p>
+                      <p className="mt-1 text-gray-600 dark:text-gray-400 line-clamp-3">{manual.response}</p>
                     )}
                   </div>
                 ))}
@@ -281,10 +281,10 @@ export const EnsembleSidebar = React.forwardRef<HTMLDivElement, EnsembleSidebarP
               {t('organisms.ensembleSidebar.addManualResponse')}
             </Button>
 
-            <div className="mt-4 p-3 bg-blue-50 rounded-lg">
+            <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-950 rounded-lg">
               <div className="flex items-start space-x-2">
                 <Info className="w-4 h-4 text-blue-500 mt-0.5 flex-shrink-0" />
-                <Text variant="caption" className="text-blue-700">
+                <Text variant="caption" className="text-blue-700 dark:text-blue-300">
                   {t('organisms.ensembleSidebar.manualResponsesNote')}
                 </Text>
               </div>

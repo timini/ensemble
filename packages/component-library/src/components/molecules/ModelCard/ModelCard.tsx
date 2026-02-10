@@ -144,7 +144,7 @@ export const ModelCard = React.forwardRef<HTMLDivElement, ModelCardProps>(
                 'mt-2 w-full px-2 py-1 text-xs font-medium rounded transition-colors',
                 isSummarizer
                   ? 'bg-orange-500 text-white hover:bg-orange-600'
-                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                  : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600'
               )}
               aria-label={isSummarizer ? 'Remove as summarizer' : 'Set as summarizer'}
             >
