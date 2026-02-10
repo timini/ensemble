@@ -156,7 +156,7 @@ export const ApiKeyInput = React.forwardRef<HTMLInputElement, ApiKeyInputProps>(
               disabled={disabled}
               aria-label={showKey ? t('molecules.apiKeyInput.hideKey') : t('molecules.apiKeyInput.showKey')}
               className={cn(
-                'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors',
+                'text-muted-foreground hover:text-foreground transition-colors',
                 disabled && 'opacity-50 cursor-not-allowed'
               )}
             >

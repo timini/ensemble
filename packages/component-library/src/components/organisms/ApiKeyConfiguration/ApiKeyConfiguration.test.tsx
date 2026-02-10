@@ -566,8 +566,8 @@ describe('ApiKeyConfiguration', () => {
     });
   });
 
-  describe('dark mode', () => {
-    it('applies dark mode info box background class', () => {
+  describe('semantic tokens', () => {
+    it('uses semantic muted token for info box background', () => {
       const { container } = render(
         <ApiKeyConfiguration
           items={[{ provider: 'openai', label: 'OpenAI', validationStatus: 'valid' }]}
@@ -575,11 +575,11 @@ describe('ApiKeyConfiguration', () => {
           onToggleShow={vi.fn()}
         />
       );
-      const infoBox = container.querySelector('.bg-blue-50');
-      expect(infoBox).toHaveClass('dark:bg-blue-950');
+      const infoBox = container.querySelector('.bg-muted');
+      expect(infoBox).toBeInTheDocument();
     });
 
-    it('applies dark mode info box border class', () => {
+    it('uses semantic border token for info box border', () => {
       const { container } = render(
         <ApiKeyConfiguration
           items={[{ provider: 'openai', label: 'OpenAI', validationStatus: 'valid' }]}
@@ -587,11 +587,11 @@ describe('ApiKeyConfiguration', () => {
           onToggleShow={vi.fn()}
         />
       );
-      const infoBox = container.querySelector('.border-blue-200');
-      expect(infoBox).toHaveClass('dark:border-blue-800');
+      const infoBox = container.querySelector('.border-border');
+      expect(infoBox).toBeInTheDocument();
     });
 
-    it('applies dark mode info box text class', () => {
+    it('uses semantic muted-foreground token for info box text', () => {
       const { container } = render(
         <ApiKeyConfiguration
           items={[{ provider: 'openai', label: 'OpenAI', validationStatus: 'valid' }]}
@@ -599,8 +599,8 @@ describe('ApiKeyConfiguration', () => {
           onToggleShow={vi.fn()}
         />
       );
-      const infoText = container.querySelector('.text-gray-700');
-      expect(infoText).toHaveClass('dark:text-gray-300');
+      const infoText = container.querySelector('.text-muted-foreground');
+      expect(infoText).toBeInTheDocument();
     });
   });
 

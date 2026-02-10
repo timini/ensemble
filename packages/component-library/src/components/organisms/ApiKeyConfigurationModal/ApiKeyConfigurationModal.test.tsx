@@ -210,8 +210,8 @@ describe('ApiKeyConfigurationModal', () => {
     });
   });
 
-  describe('dark mode', () => {
-    it('applies dark mode modal background class', () => {
+  describe('semantic tokens', () => {
+    it('uses semantic card token for modal background', () => {
       const { container } = render(
         <ApiKeyConfigurationModal
           open={true}
@@ -222,11 +222,11 @@ describe('ApiKeyConfigurationModal', () => {
           onToggleShow={vi.fn()}
         />
       );
-      const modalContent = container.querySelector('.bg-white');
-      expect(modalContent).toHaveClass('dark:bg-gray-900');
+      const modalContent = container.querySelector('.bg-card');
+      expect(modalContent).toBeInTheDocument();
     });
 
-    it('applies dark mode title text class', () => {
+    it('uses semantic card-foreground token for title text', () => {
       render(
         <ApiKeyConfigurationModal
           open={true}
@@ -238,10 +238,10 @@ describe('ApiKeyConfigurationModal', () => {
         />
       );
       const title = screen.getByText('Configure API Key');
-      expect(title).toHaveClass('dark:text-gray-100');
+      expect(title).toHaveClass('text-card-foreground');
     });
 
-    it('applies dark mode close button hover class', () => {
+    it('uses semantic accent token for close button hover', () => {
       const { container } = render(
         <ApiKeyConfigurationModal
           open={true}
@@ -253,10 +253,10 @@ describe('ApiKeyConfigurationModal', () => {
         />
       );
       const closeButton = container.querySelector('[data-testid="close-modal-button"]');
-      expect(closeButton).toHaveClass('dark:hover:bg-gray-800');
+      expect(closeButton).toHaveClass('hover:bg-accent');
     });
 
-    it('applies dark mode close button icon color class', () => {
+    it('uses semantic muted-foreground token for close icon', () => {
       const { container } = render(
         <ApiKeyConfigurationModal
           open={true}
@@ -268,7 +268,7 @@ describe('ApiKeyConfigurationModal', () => {
         />
       );
       const icon = container.querySelector('[data-testid="close-modal-button"] svg');
-      expect(icon).toHaveClass('dark:text-gray-400');
+      expect(icon).toHaveClass('text-muted-foreground');
     });
   });
 
