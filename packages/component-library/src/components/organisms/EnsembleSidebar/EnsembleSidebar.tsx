@@ -177,7 +177,7 @@ export const EnsembleSidebar = React.forwardRef<HTMLDivElement, EnsembleSidebarP
               ) : (
                 <div className="space-y-3">
                   {presets.map((preset) => (
-                    <div key={preset.id} className="border rounded-lg p-3 relative">
+                    <div key={preset.id} className="border border-gray-200 dark:border-gray-700 rounded-lg p-3 relative">
                       <div className="flex items-center justify-between mb-2">
                         <Heading level={5} size="sm">{preset.name}</Heading>
                         <div className="flex items-center gap-2">
@@ -193,7 +193,7 @@ export const EnsembleSidebar = React.forwardRef<HTMLDivElement, EnsembleSidebarP
                             <Button
                               variant="ghost"
                               size="sm"
-                              className="text-xs text-red-600 hover:text-red-700 hover:bg-red-50"
+                              className="text-xs text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-950"
                               onClick={() => onDeletePreset(preset.id)}
                               aria-label={t('organisms.ensembleSidebar.deletePreset', { name: preset.name })}
                             >
