@@ -65,7 +65,7 @@ export const ApiKeyConfigurationModal = React.forwardRef<
               data-testid="close-modal-button"
             >
               <svg
-                className="w-6 h-6"
+                className="w-6 h-6 text-gray-500 dark:text-gray-400"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"

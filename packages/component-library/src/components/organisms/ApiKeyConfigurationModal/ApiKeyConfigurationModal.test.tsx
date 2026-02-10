@@ -255,6 +255,21 @@ describe('ApiKeyConfigurationModal', () => {
       const closeButton = container.querySelector('[data-testid="close-modal-button"]');
       expect(closeButton).toHaveClass('dark:hover:bg-gray-800');
     });
+
+    it('applies dark mode close button icon color class', () => {
+      const { container } = render(
+        <ApiKeyConfigurationModal
+          open={true}
+          onOpenChange={vi.fn()}
+          provider="openai"
+          items={mockItems}
+          onKeyChange={vi.fn()}
+          onToggleShow={vi.fn()}
+        />
+      );
+      const icon = container.querySelector('[data-testid="close-modal-button"] svg');
+      expect(icon).toHaveClass('dark:text-gray-400');
+    });
   });
 
   describe('accessibility', () => {

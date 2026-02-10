@@ -56,7 +56,7 @@ export const ModeSelectionCard = React.forwardRef<HTMLDivElement, ModeSelectionC
         data-selected={selected}
         data-disabled={disabled}
         className={cn(
-          'border-2 hover:border-blue-200 dark:hover:border-blue-800 transition-colors flex flex-col',
+          'border-2 border-gray-200 dark:border-gray-700 hover:border-blue-200 dark:hover:border-blue-800 transition-colors flex flex-col',
           selected && 'border-blue-500 bg-blue-50 dark:bg-blue-950',
           disabled && 'opacity-60'
         )}
@@ -66,7 +66,7 @@ export const ModeSelectionCard = React.forwardRef<HTMLDivElement, ModeSelectionC
             <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center">
               <span className="text-blue-600 dark:text-blue-400 text-lg">{config.icon}</span>
             </div>
-            <h4 className="text-xl font-semibold">{t(`molecules.modeSelectionCard.${mode}.title`)}</h4>
+            <h4 className="text-xl font-semibold dark:text-gray-100">{t(`molecules.modeSelectionCard.${mode}.title`)}</h4>
           </div>
           <p className="text-gray-600 dark:text-gray-400 mb-6 flex-1">{t(`molecules.modeSelectionCard.${mode}.description`)}</p>
           <Button
