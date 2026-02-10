@@ -261,6 +261,42 @@ export const Disabled: Story = {
   },
 };
 
+// Dark mode
+export const DarkMode: Story = {
+  args: {
+    items: [
+      {
+        provider: 'openai',
+        label: 'OpenAI',
+        value: 'sk-proj-...',
+        placeholder: 'Enter your OpenAI API key',
+        validationStatus: 'valid',
+        showKey: false,
+      },
+      {
+        provider: 'anthropic',
+        label: 'Anthropic',
+        value: '',
+        placeholder: 'Enter your Anthropic API key',
+        validationStatus: 'idle',
+        showKey: false,
+      },
+    ],
+    onKeyChange: (provider, value) => console.log('Key changed:', provider, value),
+    onToggleShow: (provider) => console.log('Toggle show:', provider),
+  },
+  parameters: {
+    backgrounds: { default: 'dark' },
+  },
+  decorators: [
+    (Story) => (
+      <div className="dark bg-gray-900 p-8">
+        <Story />
+      </div>
+    ),
+  ],
+};
+
 // Partially disabled
 export const PartiallyDisabled: Story = {
   args: {

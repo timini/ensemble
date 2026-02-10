@@ -64,7 +64,7 @@ export const ModeSelectionCard = React.forwardRef<HTMLDivElement, ModeSelectionC
         <CardContent className="p-6 flex flex-col flex-1">
           <div className="flex items-center space-x-3 mb-4">
             <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center">
-              <span className="text-blue-600 text-lg">{config.icon}</span>
+              <span className="text-blue-600 dark:text-blue-400 text-lg">{config.icon}</span>
             </div>
             <h4 className="text-xl font-semibold">{t(`molecules.modeSelectionCard.${mode}.title`)}</h4>
           </div>
