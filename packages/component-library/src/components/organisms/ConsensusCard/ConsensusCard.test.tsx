@@ -95,13 +95,13 @@ describe('ConsensusCard', () => {
       expect(card).toHaveClass('bg-gradient-to-br');
     });
 
-    it('applies blue text color to heading', () => {
+    it('applies primary text color to heading', () => {
       render(
         <ConsensusCard consensusText={mockConsensusText} summarizerModel={mockSummarizerModel} />
       );
 
       const heading = screen.getByText('Consensus');
-      expect(heading).toHaveClass('text-blue-900');
+      expect(heading).toHaveClass('text-primary');
     });
 
     it('applies correct heading styles', () => {
@@ -113,7 +113,7 @@ describe('ConsensusCard', () => {
       expect(heading).toHaveClass('font-semibold');
     });
 
-    it('applies white background to share button when provided', () => {
+    it('applies card background to share button when provided', () => {
       render(
         <ConsensusCard
           consensusText={mockConsensusText}
@@ -123,7 +123,7 @@ describe('ConsensusCard', () => {
       );
 
       const shareButton = screen.getByTestId('share-button');
-      expect(shareButton).toHaveClass('bg-white');
+      expect(shareButton).toHaveClass('bg-card');
     });
   });
 

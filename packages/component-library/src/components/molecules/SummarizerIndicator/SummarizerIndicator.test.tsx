@@ -36,7 +36,7 @@ describe('SummarizerIndicator', () => {
     it('applies default styling classes', () => {
       render(<SummarizerIndicator modelName="Claude 3 Opus" />);
       const indicator = screen.getByTestId('summarizer-indicator');
-      expect(indicator).toHaveClass('bg-orange-50', 'border-orange-200', 'rounded-lg');
+      expect(indicator).toHaveClass('bg-warning/10', 'border-warning/30', 'rounded-lg');
     });
   });
 
@@ -92,15 +92,15 @@ describe('SummarizerIndicator', () => {
   });
 
   describe('styling', () => {
-    it('has orange color scheme', () => {
+    it('has warning color scheme', () => {
       const { container } = render(<SummarizerIndicator modelName="Claude 3 Opus" />);
       const indicator = screen.getByTestId('summarizer-indicator');
 
       // Background and border
-      expect(indicator).toHaveClass('bg-orange-50', 'border-orange-200');
+      expect(indicator).toHaveClass('bg-warning/10', 'border-warning/30');
 
       // Icon color
-      const iconWrapper = container.querySelector('[class*="text-orange-600"]');
+      const iconWrapper = container.querySelector('[class*="text-warning"]');
       expect(iconWrapper).toBeInTheDocument();
     });
 
@@ -112,7 +112,7 @@ describe('SummarizerIndicator', () => {
         />
       );
       const indicator = screen.getByTestId('summarizer-indicator');
-      expect(indicator).toHaveClass('bg-orange-50', 'border-orange-200', 'mt-4', 'shadow-lg');
+      expect(indicator).toHaveClass('bg-warning/10', 'border-warning/30', 'mt-4', 'shadow-lg');
     });
   });
 

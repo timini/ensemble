@@ -95,8 +95,8 @@ describe('SettingsModal', () => {
       const lightCard = screen.getByTestId('theme-light');
       const darkCard = screen.getByTestId('theme-dark');
 
-      expect(lightCard).toHaveClass('border-blue-500');
-      expect(darkCard).not.toHaveClass('border-blue-500');
+      expect(lightCard).toHaveClass('border-primary');
+      expect(darkCard).not.toHaveClass('border-primary');
     });
 
     it('highlights dark theme when selected', () => {
@@ -105,8 +105,8 @@ describe('SettingsModal', () => {
       const lightCard = screen.getByTestId('theme-light');
       const darkCard = screen.getByTestId('theme-dark');
 
-      expect(darkCard).toHaveClass('border-blue-500');
-      expect(lightCard).not.toHaveClass('border-blue-500');
+      expect(darkCard).toHaveClass('border-primary');
+      expect(lightCard).not.toHaveClass('border-primary');
     });
 
     it('calls onThemeChange when light theme is clicked', async () => {
@@ -263,14 +263,14 @@ describe('SettingsModal', () => {
       render(<SettingsModal {...mockProps} theme="light" open={true} />);
 
       const lightCard = screen.getByTestId('theme-light');
-      expect(lightCard).toHaveClass('border-blue-500', 'bg-blue-50');
+      expect(lightCard).toHaveClass('border-primary', 'bg-primary/10');
     });
 
     it('applies correct styles to danger zone button', () => {
       render(<SettingsModal {...mockProps} open={true} />);
 
       const clearButton = screen.getByTestId('clear-data-button');
-      expect(clearButton).toHaveClass('text-red-600');
+      expect(clearButton).toHaveClass('text-destructive');
     });
   });
 

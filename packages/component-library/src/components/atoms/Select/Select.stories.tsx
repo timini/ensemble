@@ -136,7 +136,7 @@ export const Controlled: Story = {
             <SelectItem value="grape">Grape</SelectItem>
           </SelectContent>
         </Select>
-        <div className="text-sm text-gray-600">
+        <div className="text-sm text-muted-foreground">
           Selected value: <span className="font-semibold">{value}</span>
         </div>
       </div>

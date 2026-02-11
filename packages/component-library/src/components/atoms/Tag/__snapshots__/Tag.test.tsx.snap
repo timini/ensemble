@@ -44,7 +44,7 @@ exports[`Tag > snapshots > matches snapshot for removable state 1`] = `
 
 exports[`Tag > snapshots > matches snapshot for selected state 1`] = `
 <span
-  class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-medium transition-colors border bg-secondary text-secondary-foreground border-blue-500 dark:border-blue-400"
+  class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-medium transition-colors border bg-secondary text-secondary-foreground border-primary"
 >
   Tag
 </span>

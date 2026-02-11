@@ -126,7 +126,7 @@ describe('Heading', () => {
       render(<Heading level={2}>Heading</Heading>);
 
       const heading = screen.getByRole('heading', { level: 2 });
-      expect(heading).toHaveClass('font-semibold', 'text-gray-900');
+      expect(heading).toHaveClass('font-semibold', 'text-foreground');
     });
 
     it('applies custom className', () => {

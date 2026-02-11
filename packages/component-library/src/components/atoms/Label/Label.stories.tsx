@@ -51,8 +51,8 @@ export const Disabled: Story = {
 export const CustomStyling: Story = {
   render: () => (
     <div className="space-y-2">
-      <Label className="text-lg text-blue-600">Large Blue Label</Label>
-      <Label className="text-xs text-gray-500">Small Gray Label</Label>
+      <Label className="text-lg text-primary">Large Primary Label</Label>
+      <Label className="text-xs text-muted-foreground">Small Muted Label</Label>
       <Label className="font-bold text-destructive">Bold Red Label</Label>
     </div>
   ),

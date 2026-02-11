@@ -14,49 +14,49 @@ describe('InlineAlert', () => {
     it('renders with info variant by default', () => {
       const { container } = render(<InlineAlert>Message</InlineAlert>);
       const alert = container.firstChild;
-      expect(alert).toHaveClass('bg-blue-50');
+      expect(alert).toHaveClass('bg-primary/10');
     });
 
     it('renders with success variant', () => {
       const { container } = render(<InlineAlert variant="success">Message</InlineAlert>);
       const alert = container.firstChild;
-      expect(alert).toHaveClass('bg-green-50');
+      expect(alert).toHaveClass('bg-success/10');
     });
 
     it('renders with warning variant', () => {
       const { container } = render(<InlineAlert variant="warning">Message</InlineAlert>);
       const alert = container.firstChild;
-      expect(alert).toHaveClass('bg-yellow-50');
+      expect(alert).toHaveClass('bg-warning/10');
     });
 
     it('renders with error variant', () => {
       const { container } = render(<InlineAlert variant="error">Message</InlineAlert>);
       const alert = container.firstChild;
-      expect(alert).toHaveClass('bg-red-50');
+      expect(alert).toHaveClass('bg-destructive/10');
     });
 
     it('renders info icon for info variant', () => {
       const { container } = render(<InlineAlert variant="info">Message</InlineAlert>);
       const icon = container.querySelector('svg');
-      expect(icon).toHaveClass('text-blue-600');
+      expect(icon).toHaveClass('text-primary');
     });
 
     it('renders check icon for success variant', () => {
       const { container} = render(<InlineAlert variant="success">Message</InlineAlert>);
       const icon = container.querySelector('svg');
-      expect(icon).toHaveClass('text-green-600');
+      expect(icon).toHaveClass('text-success');
     });
 
     it('renders alert triangle for warning variant', () => {
       const { container } = render(<InlineAlert variant="warning">Message</InlineAlert>);
       const icon = container.querySelector('svg');
-      expect(icon).toHaveClass('text-yellow-600');
+      expect(icon).toHaveClass('text-warning');
     });
 
     it('renders alert circle for error variant', () => {
       const { container } = render(<InlineAlert variant="error">Message</InlineAlert>);
       const icon = container.querySelector('svg');
-      expect(icon).toHaveClass('text-red-600');
+      expect(icon).toHaveClass('text-destructive');
     });
 
     it('does not show dismiss button by default', () => {

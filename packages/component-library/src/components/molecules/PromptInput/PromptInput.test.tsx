@@ -71,13 +71,13 @@ describe('PromptInput', () => {
     it('shows warning color when near max length', () => {
       const { container } = render(<PromptInput label="Enter prompt" value={'A'.repeat(85)} maxLength={100} />);
       const counter = container.querySelector('[data-testid="character-counter"]');
-      expect(counter).toHaveClass('text-orange-500');
+      expect(counter).toHaveClass('text-warning');
     });
 
     it('shows error color when at max length', () => {
       const { container } = render(<PromptInput label="Enter prompt" value={'A'.repeat(100)} maxLength={100} />);
       const counter = container.querySelector('[data-testid="character-counter"]');
-      expect(counter).toHaveClass('text-red-500');
+      expect(counter).toHaveClass('text-destructive');
     });
   });
 
@@ -109,7 +109,7 @@ describe('PromptInput', () => {
     it('applies error styling when validation fails', () => {
       render(<PromptInput label="Enter prompt" value="Short" minLength={10} error="Too short" />);
       const textarea = screen.getByLabelText('Enter prompt');
-      expect(textarea).toHaveClass('border-red-500');
+      expect(textarea).toHaveClass('border-destructive');
     });
   });
 

@@ -2,12 +2,12 @@
 
 exports[`InlineAlert > snapshots > matches snapshot for dismissible alert 1`] = `
 <div
-  class="flex items-start gap-3 p-4 rounded-md border bg-blue-50 border-blue-200 text-blue-900 dark:bg-blue-950 dark:border-blue-800 dark:text-blue-100"
+  class="flex items-start gap-3 p-4 rounded-md border bg-primary/10 border-primary/20 text-foreground"
   role="alert"
 >
   <svg
     aria-hidden="true"
-    class="lucide lucide-info h-4 w-4 shrink-0 mt-0.5 text-blue-600 dark:text-blue-400"
+    class="lucide lucide-info h-4 w-4 shrink-0 mt-0.5 text-primary"
     fill="none"
     height="24"
     stroke="currentColor"
@@ -66,12 +66,12 @@ exports[`InlineAlert > snapshots > matches snapshot for dismissible alert 1`] = 
 
 exports[`InlineAlert > snapshots > matches snapshot for info variant 1`] = `
 <div
-  class="flex items-start gap-3 p-4 rounded-md border bg-blue-50 border-blue-200 text-blue-900 dark:bg-blue-950 dark:border-blue-800 dark:text-blue-100"
+  class="flex items-start gap-3 p-4 rounded-md border bg-primary/10 border-primary/20 text-foreground"
   role="alert"
 >
   <svg
     aria-hidden="true"
-    class="lucide lucide-info h-4 w-4 shrink-0 mt-0.5 text-blue-600 dark:text-blue-400"
+    class="lucide lucide-info h-4 w-4 shrink-0 mt-0.5 text-primary"
     fill="none"
     height="24"
     stroke="currentColor"
@@ -104,12 +104,12 @@ exports[`InlineAlert > snapshots > matches snapshot for info variant 1`] = `
 
 exports[`InlineAlert > snapshots > matches snapshot for success variant 1`] = `
 <div
-  class="flex items-start gap-3 p-4 rounded-md border bg-green-50 border-green-200 text-green-900 dark:bg-green-950 dark:border-green-800 dark:text-green-100"
+  class="flex items-start gap-3 p-4 rounded-md border bg-success/10 border-success/20 text-foreground"
   role="alert"
 >
   <svg
     aria-hidden="true"
-    class="lucide lucide-circle-check-big h-4 w-4 shrink-0 mt-0.5 text-green-600 dark:text-green-400"
+    class="lucide lucide-circle-check-big h-4 w-4 shrink-0 mt-0.5 text-success"
     fill="none"
     height="24"
     stroke="currentColor"

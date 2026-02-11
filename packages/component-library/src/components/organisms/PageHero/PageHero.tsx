@@ -47,18 +47,18 @@ export const PageHero = React.forwardRef<HTMLDivElement, PageHeroProps>(
         {/* Breadcrumb Navigation */}
         {breadcrumbs && breadcrumbs.length > 0 && (
           <nav aria-label={t('organisms.pageHero.breadcrumb')} className="mb-4">
-            <ol className="flex items-center space-x-2 text-sm text-gray-600">
+            <ol className="flex items-center space-x-2 text-sm text-muted-foreground">
               {breadcrumbs.map((breadcrumb, index) => (
                 <li key={index} className="flex items-center">
                   {index > 0 && (
-                    <ChevronRight className="w-4 h-4 mx-2 text-gray-400" aria-hidden="true" />
+                    <ChevronRight className="w-4 h-4 mx-2 text-muted-foreground" aria-hidden="true" />
                   )}
                   <Link
                     href={breadcrumb.href}
                     variant="subtle"
                     className={cn(
                       index === breadcrumbs.length - 1
-                        ? 'text-gray-900 font-medium no-underline'
+                        ? 'text-foreground font-medium no-underline'
                         : ''
                     )}
                   >
@@ -72,7 +72,7 @@ export const PageHero = React.forwardRef<HTMLDivElement, PageHeroProps>(
 
         {/* Hero Section */}
         <div className="text-center mb-8">
-          <Heading level={2} size="3xl" className="text-gray-900 mb-4">{title}</Heading>
+          <Heading level={2} size="3xl" className="text-foreground mb-4">{title}</Heading>
           <Text color="muted">{description}</Text>
         </div>
       </div>

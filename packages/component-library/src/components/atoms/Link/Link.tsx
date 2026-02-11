@@ -4,13 +4,13 @@ import { cn } from '../../../lib/utils';
 import { ExternalLink } from 'lucide-react';
 
 const linkVariants = cva(
-  'inline-flex items-center gap-1 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded',
+  'inline-flex items-center gap-1 transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 rounded',
   {
     variants: {
       variant: {
-        default: 'text-blue-600 hover:text-blue-700 underline',
-        subtle: 'text-gray-600 hover:text-gray-900 hover:underline',
-        bold: 'text-blue-600 hover:text-blue-700 font-semibold underline',
+        default: 'text-primary hover:text-primary/80 underline',
+        subtle: 'text-muted-foreground hover:text-foreground hover:underline',
+        bold: 'text-primary hover:text-primary/80 font-semibold underline',
       },
     },
     defaultVariants: {

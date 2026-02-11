@@ -19,19 +19,19 @@ describe('Tag', () => {
     it('renders with primary variant', () => {
       const { container } = render(<Tag variant="primary">Tag</Tag>);
       const tag = container.firstChild;
-      expect(tag).toHaveClass('bg-blue-100');
+      expect(tag).toHaveClass('bg-primary/10');
     });
 
     it('renders with success variant', () => {
       const { container } = render(<Tag variant="success">Tag</Tag>);
       const tag = container.firstChild;
-      expect(tag).toHaveClass('bg-green-100');
+      expect(tag).toHaveClass('bg-success/10');
     });
 
     it('renders as selected', () => {
       const { container } = render(<Tag selected>Tag</Tag>);
       const tag = container.firstChild;
-      expect(tag).toHaveClass('border-blue-500');
+      expect(tag).toHaveClass('border-primary');
     });
 
     it('renders as unselected', () => {

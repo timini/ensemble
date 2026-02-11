@@ -55,7 +55,7 @@ export const PromptCard = React.forwardRef<HTMLDivElement, PromptCardProps>(
                                 variant="ghost"
                                 size="sm"
                                 onClick={handleCopy}
-                                className="text-gray-500 hover:text-gray-700"
+                                className="text-muted-foreground hover:text-foreground"
                                 data-testid="copy-prompt-button"
                             >
                                 {copied ? (
@@ -72,8 +72,8 @@ export const PromptCard = React.forwardRef<HTMLDivElement, PromptCardProps>(
                             </Button>
                         )}
                     </div>
-                    <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
-                        <p className="text-gray-900 dark:text-gray-100 whitespace-pre-wrap">
+                    <div className="bg-muted rounded-lg p-4">
+                        <p className="text-foreground whitespace-pre-wrap">
                             {prompt}
                         </p>
                     </div>

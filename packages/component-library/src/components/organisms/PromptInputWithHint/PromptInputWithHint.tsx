@@ -67,7 +67,7 @@ export function PromptInputWithHint({
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder || t('pages.prompt.placeholder')}
-        className="w-full min-h-[200px] p-4 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-y bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
+        className="w-full min-h-[200px] p-4 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent resize-y bg-background text-foreground"
         data-testid={dataTestId}
       />
     </div>

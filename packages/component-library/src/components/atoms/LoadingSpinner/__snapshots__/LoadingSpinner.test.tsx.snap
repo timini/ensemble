@@ -57,7 +57,7 @@ exports[`LoadingSpinner > snapshots > matches snapshot for primary variant 1`] =
 >
   <svg
     aria-hidden="true"
-    class="lucide lucide-loader-circle animate-spin h-4 w-4 text-blue-600 dark:text-blue-400"
+    class="lucide lucide-loader-circle animate-spin h-4 w-4 text-primary"
     fill="none"
     height="24"
     stroke="currentColor"

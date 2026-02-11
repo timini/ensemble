@@ -105,7 +105,7 @@ export const SettingsModal = React.forwardRef<HTMLDivElement, SettingsModalProps
           <div className="space-y-6">
             <section data-testid="appearance-section">
               <div className="flex items-center gap-2 mb-4">
-                <Icon className="text-blue-600" size="sm">
+                <Icon className="text-primary" size="sm">
                   <BookOpen />
                 </Icon>
                 <Heading level={3} size="lg">
@@ -119,30 +119,30 @@ export const SettingsModal = React.forwardRef<HTMLDivElement, SettingsModalProps
                 <div className="grid grid-cols-2 gap-4">
                   <Card
                     className={cn(
-                      'cursor-pointer border-2 transition-colors hover:border-blue-200',
-                      theme === 'light' ? 'border-blue-500 bg-blue-50' : 'border-gray-200'
+                      'cursor-pointer border-2 transition-colors hover:border-primary/20',
+                      theme === 'light' ? 'border-primary bg-primary/10' : 'border-border'
                     )}
                     onClick={() => onThemeChange('light')}
                     data-testid="theme-light"
                   >
                     <div className="p-6 flex flex-col items-center">
-                      <div className="w-16 h-16 bg-white border border-gray-300 rounded mb-3" />
-                      <span className={cn('font-medium', theme === 'light' && 'text-blue-600')}>
+                      <div className="w-16 h-16 bg-card border border-border rounded mb-3" />
+                      <span className={cn('font-medium', theme === 'light' && 'text-primary')}>
                         {t('organisms.settingsModal.themeLight')}
                       </span>
                     </div>
                   </Card>
                   <Card
                     className={cn(
-                      'cursor-pointer border-2 transition-colors hover:border-blue-200',
-                      theme === 'dark' ? 'border-blue-500 bg-blue-50' : 'border-gray-200'
+                      'cursor-pointer border-2 transition-colors hover:border-primary/20',
+                      theme === 'dark' ? 'border-primary bg-primary/10' : 'border-border'
                     )}
                     onClick={() => onThemeChange('dark')}
                     data-testid="theme-dark"
                   >
                     <div className="p-6 flex flex-col items-center">
-                      <div className="w-16 h-16 bg-gray-800 border border-gray-600 rounded mb-3" />
-                      <span className={cn('font-medium', theme === 'dark' && 'text-blue-600')}>
+                      <div className="w-16 h-16 bg-foreground border border-muted-foreground rounded mb-3" />
+                      <span className={cn('font-medium', theme === 'dark' && 'text-primary')}>
                         {t('organisms.settingsModal.themeDark')}
                       </span>
                     </div>
@@ -177,7 +177,7 @@ export const SettingsModal = React.forwardRef<HTMLDivElement, SettingsModalProps
             {/* Data Management Section */}
             <section data-testid="data-management-section">
               <div className="flex items-center gap-2 mb-4">
-                <Icon className="text-blue-600" size="sm">
+                <Icon className="text-primary" size="sm">
                   <Database />
                 </Icon>
                 <Heading level={3} size="lg">
@@ -210,7 +210,7 @@ export const SettingsModal = React.forwardRef<HTMLDivElement, SettingsModalProps
             {/* Danger Zone Section */}
             <section data-testid="danger-zone-section">
               <div className="flex items-center gap-2 mb-4">
-                <Icon className="text-red-600" size="sm">
+                <Icon className="text-destructive" size="sm">
                   <TriangleAlert />
                 </Icon>
                 <Heading level={3} size="lg">
@@ -218,11 +218,11 @@ export const SettingsModal = React.forwardRef<HTMLDivElement, SettingsModalProps
                 </Heading>
               </div>
 
-              <p className="text-sm text-gray-600 mb-4">{t('organisms.settingsModal.dangerZoneWarning')}</p>
+              <p className="text-sm text-muted-foreground mb-4">{t('organisms.settingsModal.dangerZoneWarning')}</p>
 
               <Button
                 variant="outline"
-                className="w-full justify-start border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700"
+                className="w-full justify-start border-destructive/20 text-destructive hover:bg-destructive/10 hover:text-destructive"
                 onClick={onClearData}
                 data-testid="clear-data-button"
               >
@@ -234,7 +234,7 @@ export const SettingsModal = React.forwardRef<HTMLDivElement, SettingsModalProps
 
           <DialogFooter className="mt-6">
             <Button
-              className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700"
+              className="w-full sm:w-auto bg-primary hover:bg-primary/90 text-primary-foreground"
               onClick={onDone}
               data-testid="done-button"
             >

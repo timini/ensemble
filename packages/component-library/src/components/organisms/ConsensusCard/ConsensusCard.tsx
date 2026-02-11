@@ -53,20 +53,20 @@ export const ConsensusCard = React.forwardRef<HTMLDivElement, ConsensusCardProps
     return (
       <Card
         ref={ref}
-        className="bg-gradient-to-br from-blue-50 to-indigo-50 border-blue-100 dark:from-blue-900/20 dark:to-indigo-900/20 dark:border-blue-800"
+        className="bg-gradient-to-br from-primary/10 to-primary/5 border-primary/20"
         data-testid="consensus-card"
       >
         <CardContent className="p-6">
           <div className="flex items-start justify-between mb-4">
             <div className="flex items-center gap-2">
-              <Heading level={3} size="lg" className="text-blue-900 dark:text-blue-100 mb-0">
+              <Heading level={3} size="lg" className="text-primary mb-0">
                 {heading || t('organisms.consensusCard.heading')}
               </Heading>
               {isLoading && (
-                <span className="text-sm text-blue-600 animate-pulse">Generating...</span>
+                <span className="text-sm text-primary animate-pulse">Generating...</span>
               )}
             </div>
-            <Badge className="bg-white/80 dark:bg-black/20 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-700">
+            <Badge className="bg-card/80 text-primary border-primary/20">
               {t('organisms.consensusCard.generatedBy', { model: summarizerModel })}
             </Badge>
           </div>
@@ -74,24 +74,24 @@ export const ConsensusCard = React.forwardRef<HTMLDivElement, ConsensusCardProps
           <div className="prose-blue">
             {isLoading && !consensusText ? (
               <div className="animate-pulse space-y-2">
-                <div className="h-4 bg-blue-200 rounded w-3/4"></div>
-                <div className="h-4 bg-blue-200 rounded w-full"></div>
-                <div className="h-4 bg-blue-200 rounded w-5/6"></div>
+                <div className="h-4 bg-primary/20 rounded w-3/4"></div>
+                <div className="h-4 bg-primary/20 rounded w-full"></div>
+                <div className="h-4 bg-primary/20 rounded w-5/6"></div>
               </div>
             ) : (
-              <Markdown className="text-gray-800 dark:text-gray-200">
+              <Markdown className="text-foreground">
                 {consensusText || ''}
               </Markdown>
             )}
           </div>
 
           {/* Footer with Copy and Share buttons */}
-          <div className="flex items-center justify-between mt-4 pt-4 border-t border-blue-200 dark:border-blue-700">
+          <div className="flex items-center justify-between mt-4 pt-4 border-t border-primary/20">
             <Button
               variant="ghost"
               size="sm"
               onClick={handleCopy}
-              className="gap-1 text-blue-700 hover:text-blue-900 hover:bg-blue-100"
+              className="gap-1 text-primary hover:text-primary hover:bg-primary/10"
               data-testid="copy-button"
             >
               {copied ? (
@@ -109,12 +109,12 @@ export const ConsensusCard = React.forwardRef<HTMLDivElement, ConsensusCardProps
 
             {onShare && (
               <div className="flex items-center gap-2">
-                <Share className="w-4 h-4 text-blue-600" />
-                <span className="text-sm text-blue-700">{t('organisms.consensusCard.shareText')}</span>
+                <Share className="w-4 h-4 text-primary" />
+                <span className="text-sm text-primary">{t('organisms.consensusCard.shareText')}</span>
                 <Button
                   variant="outline"
                   size="sm"
-                  className="bg-white"
+                  className="bg-card"
                   onClick={onShare}
                   data-testid="share-button"
                 >

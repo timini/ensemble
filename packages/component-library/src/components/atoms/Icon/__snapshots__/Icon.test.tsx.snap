@@ -52,7 +52,7 @@ exports[`Icon > snapshots > matches snapshot for large size 1`] = `
 
 exports[`Icon > snapshots > matches snapshot for primary variant 1`] = `
 <span
-  class="inline-flex shrink-0 h-4 w-4 text-blue-600 dark:text-blue-400"
+  class="inline-flex shrink-0 h-4 w-4 text-primary"
   role="img"
 >
   <svg

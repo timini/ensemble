@@ -52,20 +52,20 @@ export const ApiKeyConfigurationModal = React.forwardRef<
       className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
       data-testid="api-key-configuration-modal"
     >
-      <div className="bg-white dark:bg-gray-900 rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+      <div className="bg-card rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
         <div className="p-6">
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+            <h2 className="text-2xl font-bold text-card-foreground">
               {t('organisms.apiKeyConfigurationModal.title')}
             </h2>
             <button
               onClick={() => onOpenChange(false)}
-              className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-colors"
+              className="p-2 hover:bg-accent rounded-full transition-colors"
               aria-label="Close modal"
               data-testid="close-modal-button"
             >
               <svg
-                className="w-6 h-6 text-gray-500 dark:text-gray-400"
+                className="w-6 h-6 text-muted-foreground"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"

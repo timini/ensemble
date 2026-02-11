@@ -169,13 +169,13 @@ export const FormHelperText: Story = {
   args: { children: '' },
   render: () => (
     <div className="space-y-2 max-w-md">
-      <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+      <label htmlFor="email" className="block text-sm font-medium text-muted-foreground">
         Email
       </label>
       <input
         type="email"
         id="email"
-        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm px-3 py-2 border"
+        className="mt-1 block w-full rounded-md border-border shadow-sm px-3 py-2 border"
         placeholder="you@example.com"
       />
       <Text variant="helper" color="muted">
@@ -190,13 +190,13 @@ export const ErrorMessage: Story = {
   args: { children: '' },
   render: () => (
     <div className="space-y-2 max-w-md">
-      <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+      <label htmlFor="password" className="block text-sm font-medium text-muted-foreground">
         Password
       </label>
       <input
         type="password"
         id="password"
-        className="mt-1 block w-full rounded-md border-red-300 shadow-sm px-3 py-2 border"
+        className="mt-1 block w-full rounded-md border-destructive shadow-sm px-3 py-2 border"
       />
       <Text variant="helper" color="error">
         Password must be at least 8 characters long.
