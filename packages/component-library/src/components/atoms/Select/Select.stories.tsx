@@ -242,6 +242,32 @@ export const DisabledOptions: Story = {
   ),
 };
 
+// Dark mode
+export const DarkMode: Story = {
+  render: () => (
+    <Select defaultValue="apple">
+      <SelectTrigger className="w-[250px]">
+        <SelectValue placeholder="Select a fruit" />
+      </SelectTrigger>
+      <SelectContent>
+        <SelectItem value="apple">Apple</SelectItem>
+        <SelectItem value="banana">Banana</SelectItem>
+        <SelectItem value="orange">Orange</SelectItem>
+      </SelectContent>
+    </Select>
+  ),
+  parameters: {
+    backgrounds: { default: 'dark' },
+  },
+  decorators: [
+    (Story) => (
+      <div className="dark bg-gray-900 p-8">
+        <Story />
+      </div>
+    ),
+  ],
+};
+
 // Interactive playground
 export const Playground: Story = {
   render: () => (
