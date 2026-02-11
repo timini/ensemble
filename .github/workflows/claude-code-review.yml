@@ -2,28 +2,17 @@ name: Claude Code Review
 
 on:
   pull_request:
-    types: [opened, synchronize, reopened]
-    # Optional: Only run on specific file changes
-    # paths:
-    #   - "src/**/*.ts"
-    #   - "src/**/*.tsx"
-    #   - "src/**/*.js"
-    #   - "src/**/*.jsx"
+    types: [opened, synchronize, reopened, ready_for_review]
 
 jobs:
-  claude-review:
-    # Optional: Filter by PR author
-    # if: |
-    #   github.event.pull_request.user.login == 'external-contributor' ||
-    #   github.event.pull_request.user.login == 'new-developer' ||
-    #   github.event.pull_request.author_association == 'FIRST_TIME_CONTRIBUTOR'
-
+  review:
     runs-on: ubuntu-latest
     permissions:
       contents: read
       pull-requests: write
       issues: write
       id-token: write
+      actions: read
 
     steps:
       - name: Checkout repository
@@ -36,22 +25,79 @@ jobs:
         uses: anthropics/claude-code-action@v1
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          use_sticky_comment: "true"
+          additional_permissions: |
+            actions: read
           prompt: |
-            REPO: ${{ github.repository }}
-            PR NUMBER: ${{ github.event.pull_request.number }}
+            You are reviewing PR #${{ github.event.pull_request.number }} in ${{ github.repository }}.
 
-            Please review this pull request and provide feedback on:
-            - Code quality and best practices
-            - Potential bugs or issues
-            - Performance considerations
-            - Security concerns
-            - Test coverage
+            ## Pre-Review Setup (Required)
 
-            Use the repository's CLAUDE.md for guidance on style and conventions. Be constructive and helpful in your feedback.
+            1. Read CLAUDE.md at the repo root for project conventions
+            2. Run `gh pr diff ${{ github.event.pull_request.number }}` to get the full diff
 
-            Use `gh pr comment` with your Bash tool to leave your review as a comment on the PR.
+            ## Review Criteria (Priority Order)
 
-          # See https://github.com/anthropics/claude-code-action/blob/main/docs/usage.md
-          # or https://code.claude.com/docs/en/cli-reference for available options
-          claude_args: '--allowed-tools "Bash(gh issue view:*),Bash(gh search:*),Bash(gh issue list:*),Bash(gh pr comment:*),Bash(gh pr diff:*),Bash(gh pr view:*),Bash(gh pr list:*)"'
+            ### Project-Specific Rules (from CLAUDE.md)
+            - Component files must not exceed 200 lines
+            - All colours must use semantic design tokens — FORBIDDEN: `text-gray-*`, `bg-blue-*`, `border-red-*`, or any Tailwind color with a numeric suffix. ALLOWED: `text-foreground`, `text-muted-foreground`, `bg-primary`, `border-border`, `text-destructive`, `bg-card`, etc.
+            - All user-facing text must use i18n keys via `useTranslation()` (no hardcoded English strings)
+            - Tests must use `data-testid` selectors, never CSS class selectors
+            - New components require `.tsx` + `.stories.tsx` + `.test.tsx`
+            - No `eslint-disable` comments without justification
+            - Atomic design: atoms → molecules → organisms (components in correct layer)
+            - Mock mode is dev/test only — never expose Mock selection UI in `/config`
 
+            ### General Code Quality
+            1. **Correctness**: Logic errors, unhandled edge cases, race conditions
+            2. **Security**: XSS, injection, exposed secrets, unsafe data handling
+            3. **Performance**: Unnecessary computations, memory leaks, N+1 patterns
+            4. **Error handling**: Missing try/catch, unhandled promise rejections
+
+            ## Severity Levels (Mandatory — assign one per issue)
+
+            - 🔴 **Critical** — Production failure, security breach, data corruption. MUST fix before merge.
+            - 🟠 **High** — Significant bugs, performance degradation. Should fix before merge.
+            - 🟡 **Medium** — Best practice deviation, technical debt. Consider improvement.
+            - 🟢 **Low** — Typos, docs, formatting. Author's discretion.
+
+            Severity rules:
+            - Constitutional violations (200-line, design tokens, i18n, missing tests): 🟠 or 🔴
+            - Security issues: 🔴
+            - Typos, comments, docs: 🟢
+            - Test files: 🟢 or 🟡
+
+            ## Review Rules (Strict)
+
+            1. **Fact-based only** — DO NOT add comments that ask to "check", "verify", or "confirm". Only report verifiable issues.
+            2. **No padding** — Do not praise code or repeat what it does correctly.
+            3. **Concise** — One issue per comment, with file:line reference.
+            4. **Actionable** — Provide a code suggestion when possible.
+            5. **Confident only** — Only report issues you are certain about.
+
+            ## Output Format
+
+            Post your review using `gh pr comment` with this format:
+
+            ## PR Review
+
+            ### Summary
+            (1-2 sentences: what the PR does and overall quality assessment)
+
+            ### Issues Found
+
+            🔴 **file.tsx:42** — [200-line violation] Component is 247 lines, exceeds limit
+            🟠 **page.tsx:15** — [Design token violation] Uses hardcoded `text-gray-600`, should be `text-muted-foreground`
+            🟡 **component.tsx:8** — [Missing tests] New component lacks `.test.tsx`
+            🟢 **readme.md:3** — Typo: "configuraton" → "configuration"
+
+            (If no issues found, just write "No issues found.")
+
+            ### Verdict
+            - 🚫 **Changes requested** (if any 🔴 or 🟠 issues)
+            - 💡 **LGTM with suggestions** (if only 🟡 or 🟢 issues)
+            - ✅ **LGTM** (if no issues)
+          claude_args: |
+            --model claude-opus-4-6
+            --max-turns 10
+            --allowedTools "Read,Grep,Glob,Bash(gh pr diff:*),Bash(gh pr view:*),Bash(gh pr comment:*)"
