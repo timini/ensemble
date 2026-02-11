@@ -85,11 +85,6 @@ export default function ReviewPage() {
     (state) => state.calculateAgreement,
   );
 
-  // Set current step to 'review' on mount
-  useEffect(() => {
-    setCurrentStep('review');
-  }, [setCurrentStep]);
-
   const skipRedirectRef = useRef(false);
 
   const completedResponses = useMemo(

@@ -212,11 +212,6 @@ export function useConfigPage() {
         return allowed;
     }, [hasHydrated, isFreeModeActive, hasValidKeys, isModeConfigured]);
 
-    // Set current step to 'config' on mount
-    useEffect(() => {
-        setCurrentStep('config');
-    }, [setCurrentStep]);
-
     // Call configureModeComplete when at least 1 key is configured
     useEffect(() => {
         if (isFreeModeActive && hasValidKeys && !isModeConfigured) {
