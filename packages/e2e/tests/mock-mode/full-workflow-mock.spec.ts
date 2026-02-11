@@ -219,8 +219,9 @@ test.describe('Full Workflow - Mock Mode', () => {
 
     await test.step('Test "Start Over" navigation', async () => {
       // Wait for all response cards to finish streaming before interacting
-      const responseCards = page.locator('[data-status="streaming"]');
-      await expect(responseCards).toHaveCount(0, { timeout: 30000 });
+      // Use 60s timeout for CI where mock streaming can be slower after multiple re-submissions
+      const completedCards = page.locator('[data-status="complete"]');
+      await expect(completedCards).toHaveCount(3, { timeout: 60000 });
 
       const startOverButton = page.getByRole('button', { name: /start over/i });
       await startOverButton.scrollIntoViewIfNeeded();

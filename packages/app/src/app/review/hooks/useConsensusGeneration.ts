@@ -45,22 +45,20 @@ export function useConsensusGeneration() {
             const clientMode = process.env.NEXT_PUBLIC_MOCK_MODE === 'true' ? 'mock' : (mode === 'pro' ? 'pro' : 'free');
 
             // Resolve the provider for the summarizer model.
-            // Try: FALLBACK_MODELS → selected models in store → ID pattern inference
+            // Try: FALLBACK_MODELS → selected models in store
             const { FALLBACK_MODELS } = await import('~/lib/models');
             const summarizerModelDef = FALLBACK_MODELS.find(m => m.id === effectiveSummarizerModelId);
 
             let providerName: ProviderName;
             if (summarizerModelDef) {
-                providerName = summarizerModelDef.provider as ProviderName;
+                providerName = validateProviderName(summarizerModelDef.provider);
             } else {
-                // Try to find provider from selected models in the store
                 const selectedModels = useStore.getState().selectedModels;
                 const fromStore = selectedModels.find(m => m.model === effectiveSummarizerModelId);
                 if (fromStore) {
-                    providerName = fromStore.provider as ProviderName;
+                    providerName = validateProviderName(fromStore.provider);
                 } else {
-                    // Infer provider from model ID naming conventions
-                    providerName = inferProviderFromModelId(effectiveSummarizerModelId);
+                    throw new Error(`Cannot determine provider for summarizer model: ${effectiveSummarizerModelId}`);
                 }
             }
             const providerClient = registry.getProvider(providerName, clientMode);
@@ -110,12 +108,12 @@ export function useConsensusGeneration() {
     };
 }
 
-/** Infer the provider from common model ID naming conventions. */
-function inferProviderFromModelId(modelId: string): ProviderName {
-    const id = modelId.toLowerCase();
-    if (id.startsWith('gpt-') || id.startsWith('o1') || id.startsWith('o3')) return 'openai';
-    if (id.startsWith('claude')) return 'anthropic';
-    if (id.startsWith('gemini')) return 'google';
-    if (id.startsWith('grok')) return 'xai';
-    throw new Error(`Cannot determine provider for model: ${modelId}`);
+const VALID_PROVIDERS: ProviderName[] = ['openai', 'anthropic', 'google', 'xai'];
+
+function validateProviderName(provider: string): ProviderName {
+    if (VALID_PROVIDERS.includes(provider as ProviderName)) {
+        return provider as ProviderName;
+    }
+    throw new Error(`Invalid provider: ${provider}`);
 }
+
