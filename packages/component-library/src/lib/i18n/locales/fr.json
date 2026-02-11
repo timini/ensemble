@@ -168,6 +168,9 @@
       "dangerZone": "Zone de Danger",
       "dangerZoneWarning": "Ces actions sont irréversibles.",
       "clearAllData": "Effacer Toutes les Données",
+      "clearConfirmMessage": "Êtes-vous sûr ? Cela supprimera définitivement tous vos paramètres, clés API et ensembles enregistrés.",
+      "clearConfirmYes": "Oui, tout effacer",
+      "clearConfirmCancel": "Annuler",
       "doneButton": "Terminé"
     },
     "workflowNavigator": {

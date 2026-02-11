@@ -22,29 +22,28 @@ import {
 import { FileDown, Upload, Trash2, BookOpen, Database, TriangleAlert } from 'lucide-react';
 import { cn } from '../../../lib/utils';
 
+function SectionHeader({ icon, className, children }: { icon: React.ReactNode; className: string; children: React.ReactNode }) {
+  return (
+    <div className="flex items-center gap-2 mb-4">
+      <Icon className={className} size="sm">{icon}</Icon>
+      <Heading level={3} size="lg">{children}</Heading>
+    </div>
+  );
+}
+
 export type Theme = 'light' | 'dark';
 export type Language = 'en' | 'fr';
 
 export interface SettingsModalProps {
-  /** Whether the modal is open */
   open?: boolean;
-  /** Callback when modal open state changes */
   onOpenChange?: (open: boolean) => void;
-  /** Current theme */
   theme: Theme;
-  /** Callback when theme changes */
   onThemeChange: (theme: Theme) => void;
-  /** Current language */
   language: Language;
-  /** Callback when language changes */
   onLanguageChange: (language: Language) => void;
-  /** Callback when export settings is clicked */
   onExportSettings?: () => void;
-  /** Callback when import settings is clicked */
   onImportSettings?: () => void;
-  /** Callback when clear all data is clicked */
   onClearData?: () => void;
-  /** Callback when done button is clicked */
   onDone?: () => void;
 }
 
@@ -53,28 +52,7 @@ const LANGUAGE_LABELS: Record<Language, string> = {
   fr: 'Français',
 };
 
-/**
- * SettingsModal organism for managing application settings.
- *
- * Provides interface for changing theme, language, managing data, and clearing settings.
- * Uses Dialog component with organized sections for different settings categories.
- *
- * @example
- * ```tsx
- * <SettingsModal
- *   open={isOpen}
- *   onOpenChange={setIsOpen}
- *   theme="light"
- *   onThemeChange={setTheme}
- *   language="en"
- *   onLanguageChange={setLanguage}
- *   onExportSettings={() => console.log('Export')}
- *   onImportSettings={() => console.log('Import')}
- *   onClearData={() => console.log('Clear')}
- *   onDone={() => setIsOpen(false)}
- * />
- * ```
- */
+/** SettingsModal organism for managing application settings (theme, language, data). */
 export const SettingsModal = React.forwardRef<HTMLDivElement, SettingsModalProps>(
   (
     {
@@ -92,6 +70,12 @@ export const SettingsModal = React.forwardRef<HTMLDivElement, SettingsModalProps
     ref
   ) => {
     const { t } = useTranslation();
+    const [showClearConfirm, setShowClearConfirm] = React.useState(false);
+
+    // Reset confirmation state when modal closes
+    React.useEffect(() => {
+      if (!open) setShowClearConfirm(false);
+    }, [open]);
 
     return (
       <Dialog open={open} onOpenChange={onOpenChange}>
@@ -104,49 +88,34 @@ export const SettingsModal = React.forwardRef<HTMLDivElement, SettingsModalProps
           {/* Appearance Section */}
           <div className="space-y-6">
             <section data-testid="appearance-section">
-              <div className="flex items-center gap-2 mb-4">
-                <Icon className="text-primary" size="sm">
-                  <BookOpen />
-                </Icon>
-                <Heading level={3} size="lg">
-                  {t('organisms.settingsModal.appearance')}
-                </Heading>
-              </div>
+              <SectionHeader icon={<BookOpen />} className="text-primary">
+                {t('organisms.settingsModal.appearance')}
+              </SectionHeader>
 
-              {/* Theme */}
               <div className="mb-6">
                 <Label className="mb-3 block">{t('organisms.settingsModal.themeLabel')}</Label>
                 <div className="grid grid-cols-2 gap-4">
-                  <Card
-                    className={cn(
-                      'cursor-pointer border-2 transition-colors hover:border-primary/20',
-                      theme === 'light' ? 'border-primary bg-primary/10' : 'border-border'
-                    )}
-                    onClick={() => onThemeChange('light')}
-                    data-testid="theme-light"
-                  >
-                    <div className="p-6 flex flex-col items-center">
-                      <div className="w-16 h-16 bg-card border border-border rounded mb-3" />
-                      <span className={cn('font-medium', theme === 'light' && 'text-primary')}>
-                        {t('organisms.settingsModal.themeLight')}
-                      </span>
-                    </div>
-                  </Card>
-                  <Card
-                    className={cn(
-                      'cursor-pointer border-2 transition-colors hover:border-primary/20',
-                      theme === 'dark' ? 'border-primary bg-primary/10' : 'border-border'
-                    )}
-                    onClick={() => onThemeChange('dark')}
-                    data-testid="theme-dark"
-                  >
-                    <div className="p-6 flex flex-col items-center">
-                      <div className="w-16 h-16 bg-foreground border border-muted-foreground rounded mb-3" />
-                      <span className={cn('font-medium', theme === 'dark' && 'text-primary')}>
-                        {t('organisms.settingsModal.themeDark')}
-                      </span>
-                    </div>
-                  </Card>
+                  {(['light', 'dark'] as const).map((t_) => (
+                    <Card
+                      key={t_}
+                      className={cn(
+                        'cursor-pointer border-2 transition-colors hover:border-primary/20',
+                        theme === t_ ? 'border-primary bg-primary/10' : 'border-border'
+                      )}
+                      onClick={() => onThemeChange(t_)}
+                      data-testid={`theme-${t_}`}
+                    >
+                      <div className="p-6 flex flex-col items-center">
+                        <div className={cn(
+                          'w-16 h-16 rounded mb-3 border',
+                          t_ === 'light' ? 'bg-card border-border' : 'bg-foreground border-muted-foreground'
+                        )} />
+                        <span className={cn('font-medium', theme === t_ && 'text-primary')}>
+                          {t(`organisms.settingsModal.theme${t_ === 'light' ? 'Light' : 'Dark'}`)}
+                        </span>
+                      </div>
+                    </Card>
+                  ))}
                 </div>
               </div>
 
@@ -174,61 +143,47 @@ export const SettingsModal = React.forwardRef<HTMLDivElement, SettingsModalProps
               </div>
             </section>
 
-            {/* Data Management Section */}
             <section data-testid="data-management-section">
-              <div className="flex items-center gap-2 mb-4">
-                <Icon className="text-primary" size="sm">
-                  <Database />
-                </Icon>
-                <Heading level={3} size="lg">
-                  {t('organisms.settingsModal.dataManagement')}
-                </Heading>
-              </div>
-
+              <SectionHeader icon={<Database />} className="text-primary">
+                {t('organisms.settingsModal.dataManagement')}
+              </SectionHeader>
               <div className="grid grid-cols-2 gap-4">
-                <Button
-                  variant="outline"
-                  className="justify-start"
-                  onClick={onExportSettings}
-                  data-testid="export-button"
-                >
-                  <FileDown className="w-4 h-4 mr-2" />
-                  {t('organisms.settingsModal.exportSettings')}
+                <Button variant="outline" className="justify-start" onClick={onExportSettings} data-testid="export-button">
+                  <FileDown className="w-4 h-4 mr-2" />{t('organisms.settingsModal.exportSettings')}
                 </Button>
-                <Button
-                  variant="outline"
-                  className="justify-start"
-                  onClick={onImportSettings}
-                  data-testid="import-button"
-                >
-                  <Upload className="w-4 h-4 mr-2" />
-                  {t('organisms.settingsModal.importSettings')}
+                <Button variant="outline" className="justify-start" onClick={onImportSettings} data-testid="import-button">
+                  <Upload className="w-4 h-4 mr-2" />{t('organisms.settingsModal.importSettings')}
                 </Button>
               </div>
             </section>
 
-            {/* Danger Zone Section */}
             <section data-testid="danger-zone-section">
-              <div className="flex items-center gap-2 mb-4">
-                <Icon className="text-destructive" size="sm">
-                  <TriangleAlert />
-                </Icon>
-                <Heading level={3} size="lg">
-                  {t('organisms.settingsModal.dangerZone')}
-                </Heading>
-              </div>
-
+              <SectionHeader icon={<TriangleAlert />} className="text-destructive">
+                {t('organisms.settingsModal.dangerZone')}
+              </SectionHeader>
               <p className="text-sm text-muted-foreground mb-4">{t('organisms.settingsModal.dangerZoneWarning')}</p>
-
-              <Button
-                variant="outline"
-                className="w-full justify-start border-destructive/20 text-destructive hover:bg-destructive/10 hover:text-destructive"
-                onClick={onClearData}
-                data-testid="clear-data-button"
-              >
-                <Trash2 className="w-4 h-4 mr-2" />
-                {t('organisms.settingsModal.clearAllData')}
-              </Button>
+              {!showClearConfirm ? (
+                <Button
+                  variant="outline"
+                  className="w-full justify-start border-destructive/20 text-destructive hover:bg-destructive/10 hover:text-destructive"
+                  onClick={() => setShowClearConfirm(true)}
+                  data-testid="clear-data-button"
+                >
+                  <Trash2 className="w-4 h-4 mr-2" />{t('organisms.settingsModal.clearAllData')}
+                </Button>
+              ) : (
+                <div className="rounded-md border border-destructive/30 bg-destructive/5 p-4" data-testid="clear-data-confirm">
+                  <p className="text-sm font-medium text-destructive mb-3">{t('organisms.settingsModal.clearConfirmMessage')}</p>
+                  <div className="flex gap-2">
+                    <Button variant="destructive" size="sm" onClick={() => { onClearData?.(); setShowClearConfirm(false); }} data-testid="clear-data-confirm-button">
+                      {t('organisms.settingsModal.clearConfirmYes')}
+                    </Button>
+                    <Button variant="outline" size="sm" onClick={() => setShowClearConfirm(false)} data-testid="clear-data-cancel-button">
+                      {t('organisms.settingsModal.clearConfirmCancel')}
+                    </Button>
+                  </div>
+                </div>
+              )}
             </section>
           </div>
 
