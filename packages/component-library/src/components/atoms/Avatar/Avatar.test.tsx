@@ -56,7 +56,7 @@ describe('Avatar', () => {
       </Avatar>
     );
     const avatar = screen.getByTestId('avatar');
-    expect(avatar).toHaveClass('bg-orange-100', 'text-orange-600');
+    expect(avatar).toHaveClass('bg-warning/10', 'text-warning');
   });
 
   it('applies openai variant classes', () => {
@@ -66,7 +66,7 @@ describe('Avatar', () => {
       </Avatar>
     );
     const avatar = screen.getByTestId('avatar');
-    expect(avatar).toHaveClass('bg-blue-100', 'text-blue-600');
+    expect(avatar).toHaveClass('bg-primary/10', 'text-primary');
   });
 
   it('applies google variant classes', () => {
@@ -76,7 +76,7 @@ describe('Avatar', () => {
       </Avatar>
     );
     const avatar = screen.getByTestId('avatar');
-    expect(avatar).toHaveClass('bg-green-100', 'text-green-600');
+    expect(avatar).toHaveClass('bg-success/10', 'text-success');
   });
 
   it('applies warning variant classes', () => {
@@ -86,7 +86,7 @@ describe('Avatar', () => {
       </Avatar>
     );
     const avatar = screen.getByTestId('avatar');
-    expect(avatar).toHaveClass('bg-yellow-100', 'text-yellow-600');
+    expect(avatar).toHaveClass('bg-warning/10', 'text-warning');
   });
 
   it('applies custom className', () => {

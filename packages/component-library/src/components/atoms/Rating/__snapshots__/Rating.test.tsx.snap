@@ -6,7 +6,7 @@ exports[`Rating > snapshots > matches snapshot for disabled 1`] = `
 >
   <button
     aria-label="1 star"
-    class="transition-colors disabled:cursor-not-allowed disabled:opacity-50 text-base text-yellow-400 cursor-default hover:text-current"
+    class="transition-colors disabled:cursor-not-allowed disabled:opacity-50 text-base text-warning cursor-default hover:text-current"
     disabled=""
     type="button"
   >
@@ -14,7 +14,7 @@ exports[`Rating > snapshots > matches snapshot for disabled 1`] = `
   </button>
   <button
     aria-label="2 stars"
-    class="transition-colors disabled:cursor-not-allowed disabled:opacity-50 text-base text-yellow-400 cursor-default hover:text-current"
+    class="transition-colors disabled:cursor-not-allowed disabled:opacity-50 text-base text-warning cursor-default hover:text-current"
     disabled=""
     type="button"
   >
@@ -22,7 +22,7 @@ exports[`Rating > snapshots > matches snapshot for disabled 1`] = `
   </button>
   <button
     aria-label="3 stars"
-    class="transition-colors disabled:cursor-not-allowed disabled:opacity-50 text-base text-gray-300 cursor-default hover:text-current"
+    class="transition-colors disabled:cursor-not-allowed disabled:opacity-50 text-base text-muted cursor-default hover:text-current"
     disabled=""
     type="button"
   >
@@ -30,7 +30,7 @@ exports[`Rating > snapshots > matches snapshot for disabled 1`] = `
   </button>
   <button
     aria-label="4 stars"
-    class="transition-colors disabled:cursor-not-allowed disabled:opacity-50 text-base text-gray-300 cursor-default hover:text-current"
+    class="transition-colors disabled:cursor-not-allowed disabled:opacity-50 text-base text-muted cursor-default hover:text-current"
     disabled=""
     type="button"
   >
@@ -38,7 +38,7 @@ exports[`Rating > snapshots > matches snapshot for disabled 1`] = `
   </button>
   <button
     aria-label="5 stars"
-    class="transition-colors disabled:cursor-not-allowed disabled:opacity-50 text-base text-gray-300 cursor-default hover:text-current"
+    class="transition-colors disabled:cursor-not-allowed disabled:opacity-50 text-base text-muted cursor-default hover:text-current"
     disabled=""
     type="button"
   >
@@ -53,35 +53,35 @@ exports[`Rating > snapshots > matches snapshot for five stars 1`] = `
 >
   <button
     aria-label="1 star"
-    class="cursor-pointer transition-colors disabled:cursor-not-allowed disabled:opacity-50 text-base text-yellow-400 hover:text-yellow-500"
+    class="cursor-pointer transition-colors disabled:cursor-not-allowed disabled:opacity-50 text-base text-warning hover:text-warning/80"
     type="button"
   >
     ⭐
   </button>
   <button
     aria-label="2 stars"
-    class="cursor-pointer transition-colors disabled:cursor-not-allowed disabled:opacity-50 text-base text-yellow-400 hover:text-yellow-500"
+    class="cursor-pointer transition-colors disabled:cursor-not-allowed disabled:opacity-50 text-base text-warning hover:text-warning/80"
     type="button"
   >
     ⭐
   </button>
   <button
     aria-label="3 stars"
-    class="cursor-pointer transition-colors disabled:cursor-not-allowed disabled:opacity-50 text-base text-yellow-400 hover:text-yellow-500"
+    class="cursor-pointer transition-colors disabled:cursor-not-allowed disabled:opacity-50 text-base text-warning hover:text-warning/80"
     type="button"
   >
     ⭐
   </button>
   <button
     aria-label="4 stars"
-    class="cursor-pointer transition-colors disabled:cursor-not-allowed disabled:opacity-50 text-base text-yellow-400 hover:text-yellow-500"
+    class="cursor-pointer transition-colors disabled:cursor-not-allowed disabled:opacity-50 text-base text-warning hover:text-warning/80"
     type="button"
   >
     ⭐
   </button>
   <button
     aria-label="5 stars"
-    class="cursor-pointer transition-colors disabled:cursor-not-allowed disabled:opacity-50 text-base text-yellow-400 hover:text-yellow-500"
+    class="cursor-pointer transition-colors disabled:cursor-not-allowed disabled:opacity-50 text-base text-warning hover:text-warning/80"
     type="button"
   >
     ⭐
@@ -95,35 +95,35 @@ exports[`Rating > snapshots > matches snapshot for large size 1`] = `
 >
   <button
     aria-label="1 star"
-    class="cursor-pointer transition-colors disabled:cursor-not-allowed disabled:opacity-50 text-xl text-yellow-400 hover:text-yellow-500"
+    class="cursor-pointer transition-colors disabled:cursor-not-allowed disabled:opacity-50 text-xl text-warning hover:text-warning/80"
     type="button"
   >
     ⭐
   </button>
   <button
     aria-label="2 stars"
-    class="cursor-pointer transition-colors disabled:cursor-not-allowed disabled:opacity-50 text-xl text-yellow-400 hover:text-yellow-500"
+    class="cursor-pointer transition-colors disabled:cursor-not-allowed disabled:opacity-50 text-xl text-warning hover:text-warning/80"
     type="button"
   >
     ⭐
   </button>
   <button
     aria-label="3 stars"
-    class="cursor-pointer transition-colors disabled:cursor-not-allowed disabled:opacity-50 text-xl text-yellow-400 hover:text-yellow-500"
+    class="cursor-pointer transition-colors disabled:cursor-not-allowed disabled:opacity-50 text-xl text-warning hover:text-warning/80"
     type="button"
   >
     ⭐
   </button>
   <button
     aria-label="4 stars"
-    class="cursor-pointer transition-colors disabled:cursor-not-allowed disabled:opacity-50 text-xl text-yellow-400 hover:text-yellow-500"
+    class="cursor-pointer transition-colors disabled:cursor-not-allowed disabled:opacity-50 text-xl text-warning hover:text-warning/80"
     type="button"
   >
     ⭐
   </button>
   <button
     aria-label="5 stars"
-    class="cursor-pointer transition-colors disabled:cursor-not-allowed disabled:opacity-50 text-xl text-gray-300 hover:text-yellow-400"
+    class="cursor-pointer transition-colors disabled:cursor-not-allowed disabled:opacity-50 text-xl text-muted hover:text-warning"
     type="button"
   >
     ☆
@@ -137,7 +137,7 @@ exports[`Rating > snapshots > matches snapshot for read only 1`] = `
 >
   <button
     aria-label="1 star"
-    class="transition-colors disabled:cursor-not-allowed disabled:opacity-50 text-base text-yellow-400 cursor-default hover:text-current"
+    class="transition-colors disabled:cursor-not-allowed disabled:opacity-50 text-base text-warning cursor-default hover:text-current"
     disabled=""
     type="button"
   >
@@ -145,7 +145,7 @@ exports[`Rating > snapshots > matches snapshot for read only 1`] = `
   </button>
   <button
     aria-label="2 stars"
-    class="transition-colors disabled:cursor-not-allowed disabled:opacity-50 text-base text-yellow-400 cursor-default hover:text-current"
+    class="transition-colors disabled:cursor-not-allowed disabled:opacity-50 text-base text-warning cursor-default hover:text-current"
     disabled=""
     type="button"
   >
@@ -153,7 +153,7 @@ exports[`Rating > snapshots > matches snapshot for read only 1`] = `
   </button>
   <button
     aria-label="3 stars"
-    class="transition-colors disabled:cursor-not-allowed disabled:opacity-50 text-base text-yellow-400 cursor-default hover:text-current"
+    class="transition-colors disabled:cursor-not-allowed disabled:opacity-50 text-base text-warning cursor-default hover:text-current"
     disabled=""
     type="button"
   >
@@ -161,7 +161,7 @@ exports[`Rating > snapshots > matches snapshot for read only 1`] = `
   </button>
   <button
     aria-label="4 stars"
-    class="transition-colors disabled:cursor-not-allowed disabled:opacity-50 text-base text-yellow-400 cursor-default hover:text-current"
+    class="transition-colors disabled:cursor-not-allowed disabled:opacity-50 text-base text-warning cursor-default hover:text-current"
     disabled=""
     type="button"
   >
@@ -169,7 +169,7 @@ exports[`Rating > snapshots > matches snapshot for read only 1`] = `
   </button>
   <button
     aria-label="5 stars"
-    class="transition-colors disabled:cursor-not-allowed disabled:opacity-50 text-base text-gray-300 cursor-default hover:text-current"
+    class="transition-colors disabled:cursor-not-allowed disabled:opacity-50 text-base text-muted cursor-default hover:text-current"
     disabled=""
     type="button"
   >
@@ -184,35 +184,35 @@ exports[`Rating > snapshots > matches snapshot for small size 1`] = `
 >
   <button
     aria-label="1 star"
-    class="cursor-pointer transition-colors disabled:cursor-not-allowed disabled:opacity-50 text-sm text-yellow-400 hover:text-yellow-500"
+    class="cursor-pointer transition-colors disabled:cursor-not-allowed disabled:opacity-50 text-sm text-warning hover:text-warning/80"
     type="button"
   >
     ⭐
   </button>
   <button
     aria-label="2 stars"
-    class="cursor-pointer transition-colors disabled:cursor-not-allowed disabled:opacity-50 text-sm text-yellow-400 hover:text-yellow-500"
+    class="cursor-pointer transition-colors disabled:cursor-not-allowed disabled:opacity-50 text-sm text-warning hover:text-warning/80"
     type="button"
   >
     ⭐
   </button>
   <button
     aria-label="3 stars"
-    class="cursor-pointer transition-colors disabled:cursor-not-allowed disabled:opacity-50 text-sm text-yellow-400 hover:text-yellow-500"
+    class="cursor-pointer transition-colors disabled:cursor-not-allowed disabled:opacity-50 text-sm text-warning hover:text-warning/80"
     type="button"
   >
     ⭐
   </button>
   <button
     aria-label="4 stars"
-    class="cursor-pointer transition-colors disabled:cursor-not-allowed disabled:opacity-50 text-sm text-gray-300 hover:text-yellow-400"
+    class="cursor-pointer transition-colors disabled:cursor-not-allowed disabled:opacity-50 text-sm text-muted hover:text-warning"
     type="button"
   >
     ☆
   </button>
   <button
     aria-label="5 stars"
-    class="cursor-pointer transition-colors disabled:cursor-not-allowed disabled:opacity-50 text-sm text-gray-300 hover:text-yellow-400"
+    class="cursor-pointer transition-colors disabled:cursor-not-allowed disabled:opacity-50 text-sm text-muted hover:text-warning"
     type="button"
   >
     ☆
@@ -226,35 +226,35 @@ exports[`Rating > snapshots > matches snapshot for three stars 1`] = `
 >
   <button
     aria-label="1 star"
-    class="cursor-pointer transition-colors disabled:cursor-not-allowed disabled:opacity-50 text-base text-yellow-400 hover:text-yellow-500"
+    class="cursor-pointer transition-colors disabled:cursor-not-allowed disabled:opacity-50 text-base text-warning hover:text-warning/80"
     type="button"
   >
     ⭐
   </button>
   <button
     aria-label="2 stars"
-    class="cursor-pointer transition-colors disabled:cursor-not-allowed disabled:opacity-50 text-base text-yellow-400 hover:text-yellow-500"
+    class="cursor-pointer transition-colors disabled:cursor-not-allowed disabled:opacity-50 text-base text-warning hover:text-warning/80"
     type="button"
   >
     ⭐
   </button>
   <button
     aria-label="3 stars"
-    class="cursor-pointer transition-colors disabled:cursor-not-allowed disabled:opacity-50 text-base text-yellow-400 hover:text-yellow-500"
+    class="cursor-pointer transition-colors disabled:cursor-not-allowed disabled:opacity-50 text-base text-warning hover:text-warning/80"
     type="button"
   >
     ⭐
   </button>
   <button
     aria-label="4 stars"
-    class="cursor-pointer transition-colors disabled:cursor-not-allowed disabled:opacity-50 text-base text-gray-300 hover:text-yellow-400"
+    class="cursor-pointer transition-colors disabled:cursor-not-allowed disabled:opacity-50 text-base text-muted hover:text-warning"
     type="button"
   >
     ☆
   </button>
   <button
     aria-label="5 stars"
-    class="cursor-pointer transition-colors disabled:cursor-not-allowed disabled:opacity-50 text-base text-gray-300 hover:text-yellow-400"
+    class="cursor-pointer transition-colors disabled:cursor-not-allowed disabled:opacity-50 text-base text-muted hover:text-warning"
     type="button"
   >
     ☆
@@ -268,35 +268,35 @@ exports[`Rating > snapshots > matches snapshot for zero stars 1`] = `
 >
   <button
     aria-label="1 star"
-    class="cursor-pointer transition-colors disabled:cursor-not-allowed disabled:opacity-50 text-base text-gray-300 hover:text-yellow-400"
+    class="cursor-pointer transition-colors disabled:cursor-not-allowed disabled:opacity-50 text-base text-muted hover:text-warning"
     type="button"
   >
     ☆
   </button>
   <button
     aria-label="2 stars"
-    class="cursor-pointer transition-colors disabled:cursor-not-allowed disabled:opacity-50 text-base text-gray-300 hover:text-yellow-400"
+    class="cursor-pointer transition-colors disabled:cursor-not-allowed disabled:opacity-50 text-base text-muted hover:text-warning"
     type="button"
   >
     ☆
   </button>
   <button
     aria-label="3 stars"
-    class="cursor-pointer transition-colors disabled:cursor-not-allowed disabled:opacity-50 text-base text-gray-300 hover:text-yellow-400"
+    class="cursor-pointer transition-colors disabled:cursor-not-allowed disabled:opacity-50 text-base text-muted hover:text-warning"
     type="button"
   >
     ☆
   </button>
   <button
     aria-label="4 stars"
-    class="cursor-pointer transition-colors disabled:cursor-not-allowed disabled:opacity-50 text-base text-gray-300 hover:text-yellow-400"
+    class="cursor-pointer transition-colors disabled:cursor-not-allowed disabled:opacity-50 text-base text-muted hover:text-warning"
     type="button"
   >
     ☆
   </button>
   <button
     aria-label="5 stars"
-    class="cursor-pointer transition-colors disabled:cursor-not-allowed disabled:opacity-50 text-base text-gray-300 hover:text-yellow-400"
+    class="cursor-pointer transition-colors disabled:cursor-not-allowed disabled:opacity-50 text-base text-muted hover:text-warning"
     type="button"
   >
     ☆

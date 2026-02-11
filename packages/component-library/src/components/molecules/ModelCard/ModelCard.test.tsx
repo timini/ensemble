@@ -46,21 +46,21 @@ describe('ModelCard', () => {
     it('applies selected styling', () => {
       const { container } = render(<ModelCard provider="openai" modelName="GPT-4" selected={true} isSummarizer={false} />);
       const card = container.querySelector('[data-testid="model-card"]');
-      expect(card).toHaveClass('border-blue-500');
-      expect(card).toHaveClass('bg-blue-50');
+      expect(card).toHaveClass('border-primary');
+      expect(card).toHaveClass('bg-primary/10');
     });
 
     it('applies unselected styling', () => {
       const { container } = render(<ModelCard provider="openai" modelName="GPT-4" selected={false} isSummarizer={false} />);
       const card = container.querySelector('[data-testid="model-card"]');
-      expect(card).toHaveClass('border-gray-200');
+      expect(card).toHaveClass('border-border');
     });
 
     it('applies summarizer styling when selected and summarizer', () => {
       const { container } = render(<ModelCard provider="openai" modelName="GPT-4" selected={true} isSummarizer={true} />);
       const card = container.querySelector('[data-testid="model-card"]');
-      expect(card).toHaveClass('border-orange-500');
-      expect(card).toHaveClass('bg-orange-50');
+      expect(card).toHaveClass('border-warning');
+      expect(card).toHaveClass('bg-warning/10');
     });
   });
 
@@ -263,7 +263,7 @@ describe('ModelCard', () => {
   });
 
   describe('regression - styling and dark mode', () => {
-    it('applies explicit selection highlighting classes including dark mode', () => {
+    it('applies explicit selection highlighting classes', () => {
       const { container } = render(
         <ModelCard
           provider="openai"
@@ -274,18 +274,17 @@ describe('ModelCard', () => {
       );
       const card = container.querySelector('[data-testid="model-card"]');
 
-      // Explicitly check for the highlighting classes
-      expect(card).toHaveClass('border-blue-500');
-      expect(card).toHaveClass('bg-blue-50');
-      expect(card).toHaveClass('dark:bg-blue-950/30');
+      // Explicitly check for the highlighting classes (semantic tokens handle dark mode)
+      expect(card).toHaveClass('border-primary');
+      expect(card).toHaveClass('bg-primary/10');
 
       // Ensure defaults are overridden
-      expect(card).not.toHaveClass('border-gray-200');
+      expect(card).not.toHaveClass('border-border');
       // Ensure bg-card is removed by merge to prevent conflicts
       expect(card).not.toHaveClass('bg-card');
     });
 
-    it('applies explicit summarizer highlighting classes including dark mode', () => {
+    it('applies explicit summarizer highlighting classes', () => {
       const { container } = render(
         <ModelCard
           provider="anthropic"
@@ -296,12 +295,12 @@ describe('ModelCard', () => {
       );
       const card = container.querySelector('[data-testid="model-card"]');
 
-      expect(card).toHaveClass('border-orange-500');
-      expect(card).toHaveClass('bg-orange-50');
-      expect(card).toHaveClass('dark:bg-orange-950/30');
+      // Semantic tokens handle dark mode automatically
+      expect(card).toHaveClass('border-warning');
+      expect(card).toHaveClass('bg-warning/10');
 
-      expect(card).not.toHaveClass('border-gray-200');
-      expect(card).not.toHaveClass('border-blue-500');
+      expect(card).not.toHaveClass('border-border');
+      expect(card).not.toHaveClass('border-primary');
       expect(card).not.toHaveClass('bg-card');
     });
   });

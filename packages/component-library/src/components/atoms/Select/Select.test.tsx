@@ -233,7 +233,7 @@ describe('Select', () => {
       const trigger = screen.getByTestId('trigger');
       expect(trigger).toHaveClass('rounded-lg');
       expect(trigger).toHaveClass('border');
-      expect(trigger).toHaveClass('bg-white');
+      expect(trigger).toHaveClass('bg-background');
     });
 
     it('merges custom className with default classes', () => {

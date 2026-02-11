@@ -2,7 +2,7 @@ import * as React from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '../../../lib/utils';
 
-const headingVariants = cva('font-semibold text-gray-900', {
+const headingVariants = cva('font-semibold text-foreground', {
   variants: {
     size: {
       xs: 'text-xs',

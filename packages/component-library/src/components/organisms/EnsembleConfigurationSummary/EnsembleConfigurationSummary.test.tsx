@@ -110,7 +110,7 @@ describe('EnsembleConfigurationSummary', () => {
       expect(badges).toHaveLength(3);
 
       badges.forEach((badge) => {
-        expect(badge).toHaveClass('bg-gray-50');
+        expect(badge).toHaveClass('bg-muted');
       });
     });
 
@@ -197,7 +197,7 @@ describe('EnsembleConfigurationSummary', () => {
       );
 
       const summarizerBadge = screen.getByTestId('summarizer-model');
-      expect(summarizerBadge).toHaveClass('bg-blue-100', 'text-blue-800', 'border-blue-200');
+      expect(summarizerBadge).toHaveClass('bg-primary/10', 'text-primary', 'border-primary/30');
     });
 
     it('handles different summarizer model', () => {
@@ -288,7 +288,7 @@ describe('EnsembleConfigurationSummary', () => {
       );
 
       const description = screen.getByText(/These models will receive the prompt/i);
-      expect(description).toHaveClass('text-sm', 'text-gray-600');
+      expect(description).toHaveClass('text-sm', 'text-muted-foreground');
     });
   });
 
@@ -314,7 +314,7 @@ describe('EnsembleConfigurationSummary', () => {
       );
 
       const description = screen.getByText(/These models will receive the prompt/i);
-      expect(description).toHaveClass('text-sm', 'text-gray-600', 'mb-4');
+      expect(description).toHaveClass('text-sm', 'text-muted-foreground', 'mb-4');
     });
 
     it('applies correct subheading styling', () => {

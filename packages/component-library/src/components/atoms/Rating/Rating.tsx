@@ -26,8 +26,8 @@ const starVariants = cva(
         lg: 'text-xl',
       },
       filled: {
-        true: 'text-yellow-400 hover:text-yellow-500',
-        false: 'text-gray-300 hover:text-yellow-400',
+        true: 'text-warning hover:text-warning/80',
+        false: 'text-muted hover:text-warning',
       },
     },
     defaultVariants: {

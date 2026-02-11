@@ -5,18 +5,18 @@ import { cn } from '../../../lib/utils';
 const textVariants = cva('', {
   variants: {
     variant: {
-      body: 'text-base text-gray-900',
-      helper: 'text-sm text-gray-600',
-      caption: 'text-xs text-gray-500',
-      small: 'text-sm text-gray-900',
+      body: 'text-base text-foreground',
+      helper: 'text-sm text-muted-foreground',
+      caption: 'text-xs text-muted-foreground',
+      small: 'text-sm text-foreground',
     },
     color: {
       default: '',
-      muted: 'text-gray-500',
-      error: 'text-red-600',
-      success: 'text-green-600',
-      warning: 'text-yellow-600',
-      primary: 'text-blue-600',
+      muted: 'text-muted-foreground',
+      error: 'text-destructive',
+      success: 'text-success',
+      warning: 'text-warning',
+      primary: 'text-primary',
     },
   },
   defaultVariants: {

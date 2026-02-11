@@ -9,11 +9,11 @@ const tagVariants = cva(
     variants: {
       variant: {
         default: 'bg-secondary text-secondary-foreground',
-        primary: 'bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-300',
-        success: 'bg-green-100 text-green-700 dark:bg-green-950 dark:text-green-300',
+        primary: 'bg-primary/10 text-primary',
+        success: 'bg-success/10 text-success',
       },
       selected: {
-        true: 'border-blue-500 dark:border-blue-400',
+        true: 'border-primary',
         false: 'border-border',
       },
       clickable: {

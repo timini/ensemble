@@ -46,19 +46,19 @@ describe('Link', () => {
     it('renders default variant', () => {
       render(<Link href="/test">Default Link</Link>);
       const link = screen.getByRole('link');
-      expect(link).toHaveClass('text-blue-600', 'hover:text-blue-700', 'underline');
+      expect(link).toHaveClass('text-primary', 'hover:text-primary/80', 'underline');
     });
 
     it('renders subtle variant', () => {
       render(<Link variant="subtle" href="/test">Subtle Link</Link>);
       const link = screen.getByRole('link');
-      expect(link).toHaveClass('text-gray-600', 'hover:text-gray-900', 'hover:underline');
+      expect(link).toHaveClass('text-muted-foreground', 'hover:text-foreground', 'hover:underline');
     });
 
     it('renders bold variant', () => {
       render(<Link variant="bold" href="/test">Bold Link</Link>);
       const link = screen.getByRole('link');
-      expect(link).toHaveClass('text-blue-600', 'hover:text-blue-700', 'font-semibold', 'underline');
+      expect(link).toHaveClass('text-primary', 'hover:text-primary/80', 'font-semibold', 'underline');
     });
   });
 
@@ -126,7 +126,7 @@ describe('Link', () => {
     it('has focus ring styles', () => {
       render(<Link href="/test">Focusable Link</Link>);
       const link = screen.getByRole('link');
-      expect(link).toHaveClass('focus:outline-none', 'focus:ring-2', 'focus:ring-blue-500');
+      expect(link).toHaveClass('focus:outline-none', 'focus:ring-2', 'focus:ring-ring');
     });
 
     it('includes accessible label for external icon', () => {
@@ -139,7 +139,7 @@ describe('Link', () => {
     it('merges custom className with variant classes', () => {
       render(<Link variant="default" className="font-bold" href="/test">Custom Link</Link>);
       const link = screen.getByRole('link');
-      expect(link).toHaveClass('text-blue-600', 'font-bold');
+      expect(link).toHaveClass('text-primary', 'font-bold');
     });
 
     it('merges custom className with external link classes', () => {

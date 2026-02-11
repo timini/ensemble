@@ -53,7 +53,7 @@ describe('Icon', () => {
         </Icon>
       );
       const icon = container.firstChild;
-      expect(icon).toHaveClass('text-blue-600');
+      expect(icon).toHaveClass('text-primary');
     });
 
     it('renders with success variant', () => {
@@ -63,7 +63,7 @@ describe('Icon', () => {
         </Icon>
       );
       const icon = container.firstChild;
-      expect(icon).toHaveClass('text-green-500');
+      expect(icon).toHaveClass('text-success');
     });
 
     it('renders with warning variant', () => {
@@ -73,7 +73,7 @@ describe('Icon', () => {
         </Icon>
       );
       const icon = container.firstChild;
-      expect(icon).toHaveClass('text-yellow-500');
+      expect(icon).toHaveClass('text-warning');
     });
 
     it('renders with destructive variant', () => {
