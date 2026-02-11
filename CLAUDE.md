@@ -135,6 +135,44 @@ When working on features, ALWAYS:
 3. Review the implementation plan for technical decisions
 4. Follow the task list for implementation order
 
+## Task Management
+
+Tasks are managed using the **GitHub Project Board** ("Ensemble AI", project #5). Always check the project board for available work before starting new tasks.
+
+### Useful Commands
+
+```bash
+# List all open issues
+gh issue list --state open
+
+# List project board items with status
+gh project item-list 5 --owner timini --format json | jq -r '.items[] | "\(.content.number // "draft") | \(.status) | \(.title)"'
+
+# View a specific issue
+gh issue view <number>
+
+# Assign an issue to yourself
+gh issue edit <number> --add-assignee @me
+
+# Create a new issue
+gh issue create --title "type: description" --body "Details here" --label bug
+
+# Move a project item to a different status (e.g. In Progress, Done)
+# Use the GitHub web UI or gh project item-edit for status changes
+
+# Close an issue when done
+gh issue close <number>
+```
+
+### Workflow
+
+1. **Pick an issue**: Run `gh issue list --state open` and choose an unassigned issue
+2. **Assign yourself**: `gh issue edit <number> --add-assignee @me`
+3. **Create a branch**: `git checkout -b fix/<issue-description>` or `feature/<issue-description>`
+4. **Do the work**: Follow the development workflow below
+5. **Create a PR**: Reference the issue with `Fixes #<number>` in the PR body
+6. **Close the issue**: Happens automatically when the PR merges (via `Fixes #`)
+
 ## Development Workflow
 
 All changes to `main` must go through a Pull Request with passing CI checks and at least one approval.
