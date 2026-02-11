@@ -188,10 +188,14 @@ export default function ReviewPage() {
   };
 
   const handleStartOver = () => {
+    // Navigate first, then clear state. Clearing prompt triggers the
+    // useStreamingResponses redirect guard (!prompt → push /prompt).
+    // By navigating before clearing, the route change is already in
+    // flight and the component unmounts before the guard can fire.
     skipRedirectRef.current = true;
-    clearResponses();
     setCurrentStep('config');
     router.push('/config');
+    clearResponses();
   };
 
   const displayPrompt = hasHydrated ? prompt ?? '' : '';

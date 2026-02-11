@@ -144,6 +144,7 @@ test.describe('Prompt Page', () => {
     // Check that prompt step is active in progress steps
     const promptStep = page.getByTestId('progress-step-prompt');
     await expect(promptStep).toBeVisible();
+    await expect(promptStep).toHaveAttribute('data-active', 'true');
   });
 
   test('displays manual responses preview when manual responses exist', async ({ page }) => {

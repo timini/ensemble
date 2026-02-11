@@ -207,11 +207,6 @@ export function useEnsemblePage() {
         onValidationStatusChange: handleValidationStatusChange,
     });
 
-    // Set current step to 'ensemble' on mount
-    useEffect(() => {
-        setCurrentStep('ensemble');
-    }, [setCurrentStep]);
-
     // Cleanup timeouts on unmount
     useEffect(() => {
         const timeouts = timeoutRefs.current;

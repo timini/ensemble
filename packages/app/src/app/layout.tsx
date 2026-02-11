@@ -8,6 +8,7 @@ import { Geist } from 'next/font/google';
 import { useTranslation } from 'react-i18next';
 import { TRPCReactProvider } from '~/trpc/react';
 import { useStore } from '~/store';
+import { useSyncStepWithRoute } from '~/hooks/useSyncStepWithRoute';
 import { EnsembleHeader } from '@/components/molecules/EnsembleHeader';
 import { SettingsModal } from '@/components/organisms/SettingsModal';
 import type { Theme, Language } from '@/components/organisms/SettingsModal';
@@ -32,6 +33,8 @@ export default function RootLayout({
   const fallbackLanguage: Language = 'en';
   const resolvedTheme = hasHydrated ? theme : fallbackTheme;
   const resolvedLanguage = hasHydrated ? language : fallbackLanguage;
+
+  useSyncStepWithRoute();
 
   // Initialize providers once on mount
   useEffect(() => {
