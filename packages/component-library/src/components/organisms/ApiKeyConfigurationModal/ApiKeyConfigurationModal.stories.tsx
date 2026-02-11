@@ -102,6 +102,28 @@ export const Anthropic: Story = {
   },
 };
 
+export const DarkMode: Story = {
+  args: {
+    open: true,
+    provider: 'openai',
+    items: mockItems,
+    onOpenChange: (open: boolean) => console.log('Open changed:', open),
+    onKeyChange: (provider: string, value: string) =>
+      console.log('Key changed:', provider, value),
+    onToggleShow: (provider: string) => console.log('Toggle show:', provider),
+  },
+  parameters: {
+    backgrounds: { default: 'dark' },
+  },
+  decorators: [
+    (Story) => (
+      <div className="dark bg-gray-900 p-8">
+        <Story />
+      </div>
+    ),
+  ],
+};
+
 export const Interactive: Story = {
   args: {
     open: true,

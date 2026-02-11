@@ -217,6 +217,50 @@ describe('ModeSelectionCard', () => {
     });
   });
 
+  describe('dark mode', () => {
+    it('applies dark mode selected background class', () => {
+      const { container } = render(<ModeSelectionCard mode="free" selected={true} />);
+      const card = container.querySelector('[data-selected="true"]');
+      expect(card).toHaveClass('dark:bg-blue-950');
+    });
+
+    it('applies dark mode hover border class', () => {
+      const { container } = render(<ModeSelectionCard mode="free" />);
+      const card = container.querySelector('[data-testid="mode-card-free"]');
+      expect(card).toHaveClass('dark:hover:border-blue-800');
+    });
+
+    it('applies dark mode icon background class', () => {
+      const { container } = render(<ModeSelectionCard mode="free" />);
+      const iconCircle = container.querySelector('.bg-blue-100');
+      expect(iconCircle).toHaveClass('dark:bg-blue-900');
+    });
+
+    it('applies dark mode icon text color class', () => {
+      const { container } = render(<ModeSelectionCard mode="free" />);
+      const icon = container.querySelector('.text-blue-600');
+      expect(icon).toHaveClass('dark:text-blue-400');
+    });
+
+    it('applies dark mode description text class', () => {
+      const { container } = render(<ModeSelectionCard mode="free" />);
+      const description = container.querySelector('.text-gray-600');
+      expect(description).toHaveClass('dark:text-gray-400');
+    });
+
+    it('applies dark mode title text class', () => {
+      render(<ModeSelectionCard mode="free" />);
+      const title = screen.getByRole('heading', { name: /Free Mode/i });
+      expect(title).toHaveClass('dark:text-gray-100');
+    });
+
+    it('applies dark mode default border class', () => {
+      const { container } = render(<ModeSelectionCard mode="free" />);
+      const card = container.querySelector('[data-testid="mode-card-free"]');
+      expect(card).toHaveClass('dark:border-gray-700');
+    });
+  });
+
   describe('data attributes', () => {
     it('sets data-mode attribute for free mode', () => {
       const { container } = render(<ModeSelectionCard mode="free" />);

@@ -140,6 +140,26 @@ export const Interactive: Story = {
   },
 };
 
+// Dark mode
+export const DarkMode: Story = {
+  args: {
+    provider: 'openai',
+    label: 'OpenAI API Key',
+    value: 'sk-proj-1234567890abcdef',
+    validationStatus: 'valid',
+  },
+  parameters: {
+    backgrounds: { default: 'dark' },
+  },
+  decorators: [
+    (Story) => (
+      <div className="dark bg-gray-900 p-8 w-[400px]">
+        <Story />
+      </div>
+    ),
+  ],
+};
+
 // All providers showcase
 export const AllProviders: Story = {
   args: { provider: 'openai', label: 'Provider', validationStatus: 'idle' },

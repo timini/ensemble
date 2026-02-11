@@ -210,6 +210,24 @@ describe('ApiKeyInput', () => {
     });
   });
 
+  describe('dark mode', () => {
+    it('applies dark mode valid border class', () => {
+      const { container } = render(
+        <ApiKeyInput provider="openai" label="API Key" validationStatus="valid" value="sk-valid" />
+      );
+      const wrapper = container.querySelector('.border-green-300');
+      expect(wrapper).toHaveClass('dark:border-green-700');
+    });
+
+    it('applies dark mode valid background class', () => {
+      const { container } = render(
+        <ApiKeyInput provider="openai" label="API Key" validationStatus="valid" value="sk-valid" />
+      );
+      const wrapper = container.querySelector('.bg-green-50');
+      expect(wrapper).toHaveClass('dark:bg-green-950');
+    });
+  });
+
   describe('internationalization', () => {
     it('renders show key button label in English', () => {
       renderWithI18n(<ApiKeyInput provider="openai" label="API Key" validationStatus="idle" />, { language: 'en' });
