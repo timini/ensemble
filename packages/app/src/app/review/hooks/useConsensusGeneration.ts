@@ -5,6 +5,7 @@ import { EloRankingConsensus } from '@ensemble-ai/shared-utils/consensus/EloRank
 import { StandardConsensus } from '@ensemble-ai/shared-utils/consensus/StandardConsensus';
 import { ProviderRegistry, type ProviderName } from '@ensemble-ai/shared-utils/providers';
 import type { ConsensusModelResponse } from '@ensemble-ai/shared-utils/consensus/types';
+import { FALLBACK_MODELS } from '~/lib/models';
 import { logger } from '~/lib/logger';
 
 export function useConsensusGeneration() {
@@ -46,7 +47,6 @@ export function useConsensusGeneration() {
 
             // Resolve the provider for the summarizer model.
             // Try: FALLBACK_MODELS → selected models in store
-            const { FALLBACK_MODELS } = await import('~/lib/models');
             const summarizerModelDef = FALLBACK_MODELS.find(m => m.id === effectiveSummarizerModelId);
 
             let providerName: ProviderName;
