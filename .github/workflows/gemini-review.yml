@@ -44,22 +44,6 @@ jobs:
       - name: 'Pre-pull GitHub MCP server image'
         run: docker pull ghcr.io/github/github-mcp-server:v0.27.0
 
-      - name: 'Verify MCP server starts'
-        env:
-          GITHUB_TOKEN: '${{ steps.mint_identity_token.outputs.token || secrets.GITHUB_TOKEN || github.token }}'
-        run: |
-          # Smoke-test: start the container, wait for it to be ready, then stop it
-          CONTAINER_ID=$(docker run -d --rm \
-            -e GITHUB_PERSONAL_ACCESS_TOKEN="$GITHUB_TOKEN" \
-            ghcr.io/github/github-mcp-server:v0.27.0)
-          sleep 3
-          if docker ps -q --filter "id=$CONTAINER_ID" | grep -q .; then
-            echo "MCP server container is running"
-            docker stop "$CONTAINER_ID" || true
-          else
-            echo "::warning::MCP server container exited early — review may fail"
-          fi
-
       - name: 'Run Gemini pull request review'
         uses: 'google-github-actions/run-gemini-cli@v0' # ratchet:exclude
         id: 'gemini_pr_review'
@@ -78,12 +62,12 @@ jobs:
           gcp_workload_identity_provider: '${{ vars.GCP_WIF_PROVIDER }}'
           gemini_api_key: '${{ secrets.GEMINI_API_KEY }}'
           gemini_cli_version: '${{ vars.GEMINI_CLI_VERSION }}'
-          gemini_debug: '${{ fromJSON(vars.GEMINI_DEBUG || vars.ACTIONS_STEP_DEBUG || false) }}'
+          gemini_debug: '${{ fromJSON(vars.GEMINI_DEBUG || vars.ACTIONS_STEP_DEBUG || true) }}'
           gemini_model: '${{ vars.GEMINI_MODEL }}'
           google_api_key: '${{ secrets.GOOGLE_API_KEY }}'
           use_gemini_code_assist: '${{ vars.GOOGLE_GENAI_USE_GCA }}'
           use_vertex_ai: '${{ vars.GOOGLE_GENAI_USE_VERTEXAI }}'
-          upload_artifacts: '${{ vars.UPLOAD_ARTIFACTS }}'
+          upload_artifacts: 'true'
           workflow_name: 'gemini-review'
           settings: |-
             {
@@ -108,10 +92,8 @@ jobs:
                   ],
                   "includeTools": [
                     "add_comment_to_pending_review",
-                    "create_pending_pull_request_review",
                     "pull_request_read",
-                    "pull_request_review_write",
-                    "submit_pending_pull_request_review"
+                    "pull_request_review_write"
                   ],
                   "env": {
                     "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_TOKEN}"
@@ -137,10 +119,20 @@ jobs:
           PR_NUMBER: '${{ github.event.pull_request.number || github.event.issue.number }}'
           GEMINI_OUTCOME: '${{ steps.gemini_pr_review.outcome }}'
         run: |
-          # Check if the Gemini step failed
           if [ "$GEMINI_OUTCOME" != "success" ]; then
             echo "::warning::Gemini review step failed (outcome: $GEMINI_OUTCOME)"
             gh pr comment "$PR_NUMBER" \
-              --body "🤖 Gemini review was unable to complete. See [workflow logs](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) for details." \
+              --body "🤖 Gemini review failed (outcome: $GEMINI_OUTCOME). See [workflow logs](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) for details." \
               --repo "${{ github.repository }}" || true
+          else
+            # Verify a review was actually posted (CLI can exit 0 without posting)
+            REVIEW_COUNT=$(gh api "repos/${{ github.repository }}/pulls/$PR_NUMBER/reviews" \
+              --jq '[.[] | select(.user.login == "github-actions[bot]" or .user.login == "github-actions")] | length' 2>/dev/null || echo "0")
+            echo "Reviews found from github-actions: $REVIEW_COUNT"
+            if [ "$REVIEW_COUNT" = "0" ]; then
+              echo "::warning::Gemini CLI exited successfully but no review was posted"
+              gh pr comment "$PR_NUMBER" \
+                --body "🤖 Gemini review completed but no review was posted. This may indicate an MCP tool issue. See [workflow logs](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) for details." \
+                --repo "${{ github.repository }}" || true
+            fi
           fi
