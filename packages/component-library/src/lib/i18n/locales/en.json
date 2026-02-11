@@ -173,6 +173,9 @@
       "dangerZone": "Danger Zone",
       "dangerZoneWarning": "These actions cannot be undone.",
       "clearAllData": "Clear All Data",
+      "clearConfirmMessage": "Are you sure? This will permanently delete all your settings, API keys, and saved ensembles.",
+      "clearConfirmYes": "Yes, clear all data",
+      "clearConfirmCancel": "Cancel",
       "doneButton": "Done"
     },
     "workflowNavigator": {
