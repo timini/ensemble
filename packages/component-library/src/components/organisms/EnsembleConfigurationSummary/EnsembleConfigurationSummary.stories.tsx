@@ -120,6 +120,53 @@ export const EmptyModels: Story = {
   },
 };
 
+// Dark mode
+export const DarkMode: Story = {
+  args: {
+    selectedModels: [
+      'claude-3-haiku-20240307',
+      'claude-3-opus-20240229',
+      'gpt-4-turbo',
+    ],
+    summarizerModel: 'claude-3-opus-20240229',
+  },
+  parameters: {
+    backgrounds: { default: 'dark' },
+  },
+  decorators: [
+    (Story) => (
+      <div className="dark bg-gray-900 p-8">
+        <Story />
+      </div>
+    ),
+  ],
+};
+
+// Dark mode with consensus controls
+export const DarkModeWithConsensus: Story = {
+  args: {
+    selectedModels: [
+      'claude-3-haiku-20240307',
+      'claude-3-opus-20240229',
+      'gpt-4-turbo',
+    ],
+    summarizerModel: 'claude-3-opus-20240229',
+    consensusMethod: 'standard',
+    onConsensusMethodChange: () => {},
+    onTopNChange: () => {},
+  },
+  parameters: {
+    backgrounds: { default: 'dark' },
+  },
+  decorators: [
+    (Story) => (
+      <div className="dark bg-gray-900 p-8">
+        <Story />
+      </div>
+    ),
+  ],
+};
+
 // Long model names
 export const LongModelNames: Story = {
   args: {

@@ -135,7 +135,7 @@ export const EnsembleConfigurationSummary = React.forwardRef<
                           max={selectedModels.length}
                           value={topN}
                           onChange={(e) => onTopNChange(parseInt(e.target.value) || 3)}
-                          className="w-16 p-1 border rounded text-sm"
+                          className="w-16 p-1 border border-input bg-background text-foreground rounded text-sm focus:outline-none focus:ring-2 focus:ring-ring"
                           data-testid="input-top-n"
                         />
                       </div>

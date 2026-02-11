@@ -371,6 +371,74 @@ describe('EnsembleConfigurationSummary', () => {
     });
   });
 
+  describe('dark mode (semantic tokens)', () => {
+    it('uses semantic token for description text', () => {
+      render(
+        <EnsembleConfigurationSummary
+          selectedModels={mockSelectedModels}
+          summarizerModel={mockSummarizerModel}
+        />
+      );
+
+      const description = screen.getByText(/These models will receive/i);
+      expect(description).toHaveClass('text-muted-foreground');
+    });
+
+    it('uses semantic token for model badges', () => {
+      const { container } = render(
+        <EnsembleConfigurationSummary
+          selectedModels={mockSelectedModels}
+          summarizerModel={mockSummarizerModel}
+        />
+      );
+
+      const badges = container.querySelectorAll('[data-testid^="selected-model-"]');
+      badges.forEach((badge) => {
+        expect(badge).toHaveClass('bg-muted');
+      });
+    });
+
+    it('uses semantic tokens for summarizer badge', () => {
+      render(
+        <EnsembleConfigurationSummary
+          selectedModels={mockSelectedModels}
+          summarizerModel={mockSummarizerModel}
+        />
+      );
+
+      const badge = screen.getByTestId('summarizer-model');
+      expect(badge).toHaveClass('bg-primary/10', 'text-primary', 'border-primary/30');
+    });
+
+    it('uses semantic token for warning text', () => {
+      render(
+        <EnsembleConfigurationSummary
+          selectedModels={['model-1', 'model-2']}
+          summarizerModel={mockSummarizerModel}
+          onConsensusMethodChange={() => {}}
+        />
+      );
+
+      const warning = screen.getByText(/ELO Ranked Summarisation requires/i);
+      expect(warning).toHaveClass('text-warning');
+    });
+
+    it('uses semantic tokens for number input', () => {
+      render(
+        <EnsembleConfigurationSummary
+          selectedModels={mockSelectedModels}
+          summarizerModel={mockSummarizerModel}
+          consensusMethod="elo"
+          onConsensusMethodChange={() => {}}
+          onTopNChange={() => {}}
+        />
+      );
+
+      const input = screen.getByTestId('input-top-n');
+      expect(input).toHaveClass('border-input', 'bg-background', 'text-foreground');
+    });
+  });
+
   describe('internationalization', () => {
     it('renders English text', () => {
       renderWithI18n(
