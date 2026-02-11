@@ -8,7 +8,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { useMemo, useRef } from 'react';
+import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useStore } from '~/store';
 import { useHasHydrated } from '~/hooks/useHasHydrated';
@@ -77,15 +77,12 @@ export default function ReviewPage() {
   );
 
   const setCurrentStep = useStore((state) => state.setCurrentStep);
-  const clearResponses = useStore((state) => state.clearResponses);
   const resetStreamingState = useStore((state) => state.resetStreamingState);
   const setEmbeddings = useStore((state) => state.setEmbeddings);
 
   const calculateAgreementState = useStore(
     (state) => state.calculateAgreement,
   );
-
-  const skipRedirectRef = useRef(false);
 
   const completedResponses = useMemo(
     () =>
@@ -118,7 +115,6 @@ export default function ReviewPage() {
     hasHydrated,
     prompt,
     mode,
-    skipRedirectRef,
   });
 
   useResponseEmbeddings({
@@ -188,14 +184,9 @@ export default function ReviewPage() {
   };
 
   const handleStartOver = () => {
-    // Navigate first, then clear state. Clearing prompt triggers the
-    // useStreamingResponses redirect guard (!prompt → push /prompt).
-    // By navigating before clearing, the route change is already in
-    // flight and the component unmounts before the guard can fire.
-    skipRedirectRef.current = true;
     setCurrentStep('config');
+    resetStreamingState();
     router.push('/config');
-    clearResponses();
   };
 
   const displayPrompt = hasHydrated ? prompt ?? '' : '';
