@@ -64,6 +64,11 @@ export default function PromptPage() {
     return t('organisms.ensembleConfigurationSummary.noSummarizer');
   }, [selectedModelIds, summarizerModel, t]);
 
+  // Set current step to 'prompt' on mount
+  useEffect(() => {
+    setCurrentStep('prompt');
+  }, [setCurrentStep]);
+
   // Sync local state with Zustand when component mounts or prompt changes
   useEffect(() => {
     setLocalPrompt(prompt ?? '');
