@@ -2,6 +2,7 @@ import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { ApiKeyInput, type Provider, type ValidationStatus } from '../../molecules/ApiKeyInput';
 import { Heading } from '../../atoms/Heading';
+import { InlineAlert } from '../../atoms/InlineAlert';
 
 export interface ApiKeyConfigurationItem {
   /** AI provider */
@@ -82,17 +83,19 @@ export const ApiKeyConfiguration = React.forwardRef<HTMLDivElement, ApiKeyConfig
 
     return (
       <div ref={ref} data-testid="api-key-configuration">
-        <div className="mb-4 p-4 bg-muted border border-border rounded-md">
-          <p className="text-sm text-muted-foreground">
-            💡 <strong>
+        <div className="mb-4">
+          <InlineAlert variant="info">
+            <p>
+              <strong>
+                {configuredCount > 0
+                  ? t('organisms.apiKeyConfiguration.apiKeysConfigured', { count: configuredCount })
+                  : t('organisms.apiKeyConfiguration.apiKeyInfoBold')}
+              </strong>{' '}
               {configuredCount > 0
-                ? t('organisms.apiKeyConfiguration.apiKeysConfigured', { count: configuredCount })
-                : t('organisms.apiKeyConfiguration.apiKeyInfoBold')}
-            </strong>{' '}
-            {configuredCount > 0
-              ? t('organisms.apiKeyConfiguration.configureMoreOrContinue')
-              : t('organisms.apiKeyConfiguration.apiKeyInfoNormal')}
-          </p>
+                ? t('organisms.apiKeyConfiguration.configureMoreOrContinue')
+                : t('organisms.apiKeyConfiguration.apiKeyInfoNormal')}
+            </p>
+          </InlineAlert>
         </div>
 
         <Heading level={3} size="lg" className="mb-6">{displayHeading}</Heading>
