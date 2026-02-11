@@ -91,3 +91,7 @@ infra/terraform/crash.*.log
 # Firebase (project-specific, created by bootstrap)
 .firebaserc
 !.firebaserc.example
+
+# Gemini CLI
+.gemini/
+gha-creds-*.json
