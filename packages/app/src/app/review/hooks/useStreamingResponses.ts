@@ -3,6 +3,8 @@ import { useRouter } from 'next/navigation';
 import { useStore } from '~/store';
 import { ProviderRegistry, type ProviderName } from '@ensemble-ai/shared-utils/providers';
 import { initializeProviders } from '~/providers';
+import { FALLBACK_MODELS } from '~/lib/models';
+import { formatModelLabelFromId } from '~/lib/providerModels';
 
 interface UseStreamingResponsesProps {
     hasHydrated: boolean;
@@ -49,7 +51,11 @@ export function useStreamingResponses({
         initializeProviders();
         const registry = ProviderRegistry.getInstance();
 
-        startStreaming(model.id, model.provider, model.model);
+        const displayName = model.model
+            ? (FALLBACK_MODELS.find((m) => m.id === model.model)?.name ??
+              formatModelLabelFromId(model.model))
+            : 'Unknown Model';
+        startStreaming(model.id, model.provider, displayName);
 
         // Initialize buffer
         streamBuffers.current[modelId] = '';
