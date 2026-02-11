@@ -128,6 +128,7 @@ test.describe('Review Page', () => {
     // Check that review step is shown in progress steps
     const reviewStep = page.getByTestId('progress-step-review');
     await expect(reviewStep).toBeVisible();
+    await expect(reviewStep).toHaveAttribute('data-active', 'true');
   });
 
   test('displays progress steps component', async ({ page }) => {
