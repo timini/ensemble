@@ -78,17 +78,7 @@ export function useEnsemblePage() {
     });
 
     // Track selected model IDs for ModelSelectionList
-    // Map from selected model names to available model IDs
-    const selectedModelIds = useMemo(() => {
-        return selectedModels.map((selectedModel) => {
-            // Find the available model that matches this selected model's name
-            const availableModel = availableModels.find(
-                (m) => m.name === selectedModel.model && m.provider === selectedModel.provider
-            );
-            // Return the available model's ID if found, otherwise fall back to model name
-            return availableModel?.id ?? selectedModel.model;
-        });
-    }, [selectedModels, availableModels]);
+    const selectedModelIds = selectedModels.map((m) => m.model);
     const displayedSelectedModelIds = hasHydrated ? selectedModelIds : [];
 
     const providerStatus = useMemo(
@@ -137,9 +127,8 @@ export function useEnsemblePage() {
             return;
         }
 
-        // Check if selected by comparing the 'model' field (model name), not the dynamic 'id' field
-        // selectedModels stores model name in .model field, available models use .name
-        const selectedModel = selectedModels.find((m) => m.model === availableModel.name);
+        // Check if already selected by matching on the stored model API ID
+        const selectedModel = selectedModels.find((m) => m.model === availableModel.id);
 
         if (selectedModel) {
             // Remove using the selected model's unique ID
@@ -147,7 +136,7 @@ export function useEnsemblePage() {
         } else {
             // Add model if under limit
             if (selectedModels.length < 6) {
-                addModel(availableModel.provider, availableModel.name);
+                addModel(availableModel.provider, availableModel.id);
             }
         }
     };
