@@ -566,41 +566,17 @@ describe('ApiKeyConfiguration', () => {
     });
   });
 
-  describe('semantic tokens', () => {
-    it('uses semantic muted token for info box background', () => {
-      const { container } = render(
+  describe('info alert styling', () => {
+    it('renders an InlineAlert with info variant for the info box', () => {
+      render(
         <ApiKeyConfiguration
           items={[{ provider: 'openai', label: 'OpenAI', validationStatus: 'valid' }]}
           onKeyChange={vi.fn()}
           onToggleShow={vi.fn()}
         />
       );
-      const infoBox = container.querySelector('.bg-muted');
-      expect(infoBox).toBeInTheDocument();
-    });
-
-    it('uses semantic border token for info box border', () => {
-      const { container } = render(
-        <ApiKeyConfiguration
-          items={[{ provider: 'openai', label: 'OpenAI', validationStatus: 'valid' }]}
-          onKeyChange={vi.fn()}
-          onToggleShow={vi.fn()}
-        />
-      );
-      const infoBox = container.querySelector('.border-border');
-      expect(infoBox).toBeInTheDocument();
-    });
-
-    it('uses semantic muted-foreground token for info box text', () => {
-      const { container } = render(
-        <ApiKeyConfiguration
-          items={[{ provider: 'openai', label: 'OpenAI', validationStatus: 'valid' }]}
-          onKeyChange={vi.fn()}
-          onToggleShow={vi.fn()}
-        />
-      );
-      const infoText = container.querySelector('.text-muted-foreground');
-      expect(infoText).toBeInTheDocument();
+      const alert = screen.getByRole('alert');
+      expect(alert).toBeInTheDocument();
     });
   });
 
