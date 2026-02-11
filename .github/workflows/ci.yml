@@ -25,8 +25,23 @@ jobs:
       - run: npm ci
       - run: npm run lint --workspace=packages/component-library
       - run: npm run test:unit --workspace=packages/component-library
+      - name: Get Playwright version
+        id: playwright-version
+        run: echo "version=$(npx playwright --version | awk '{print $2}')" >> $GITHUB_OUTPUT
+        working-directory: packages/component-library
+      - name: Cache Playwright browsers
+        id: playwright-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ steps.playwright-version.outputs.version }}
       - name: Install Playwright browsers
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
         run: npx playwright install --with-deps chromium
+        working-directory: packages/component-library
+      - name: Install Playwright system deps
+        if: steps.playwright-cache.outputs.cache-hit == 'true'
+        run: npx playwright install-deps chromium
         working-directory: packages/component-library
       - run: npm run test:storybook:ci --workspace=packages/component-library
 
@@ -71,8 +86,23 @@ jobs:
       - run: npm ci
       - run: npm run build --workspace=packages/shared-utils
       - run: npm run build --workspace=packages/app
+      - name: Get Playwright version
+        id: playwright-version
+        run: echo "version=$(npx playwright --version | awk '{print $2}')" >> $GITHUB_OUTPUT
+        working-directory: packages/e2e
+      - name: Cache Playwright browsers
+        id: playwright-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ steps.playwright-version.outputs.version }}
       - name: Install Playwright browsers
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
         run: npx playwright install --with-deps chromium
+        working-directory: packages/e2e
+      - name: Install Playwright system deps
+        if: steps.playwright-cache.outputs.cache-hit == 'true'
+        run: npx playwright install-deps chromium
         working-directory: packages/e2e
       - name: Run Mock Mode E2E Tests
         run: npm run test:mock --workspace=packages/e2e
