@@ -32,7 +32,7 @@ describe('LoadingSpinner', () => {
     it('renders with primary variant', () => {
       const { container } = render(<LoadingSpinner variant="primary" />);
       const spinner = container.querySelector('svg');
-      expect(spinner).toHaveClass('text-blue-600');
+      expect(spinner).toHaveClass('text-primary');
     });
 
     it('renders with muted variant', () => {

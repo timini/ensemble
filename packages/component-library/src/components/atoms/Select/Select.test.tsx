@@ -233,7 +233,24 @@ describe('Select', () => {
       const trigger = screen.getByTestId('trigger');
       expect(trigger).toHaveClass('rounded-lg');
       expect(trigger).toHaveClass('border');
-      expect(trigger).toHaveClass('bg-white');
+      expect(trigger).toHaveClass('bg-background');
+    });
+
+    it('uses semantic color tokens for dark mode support', () => {
+      render(
+        <Select>
+          <SelectTrigger data-testid="trigger">
+            <SelectValue placeholder="Select" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="option1">Option 1</SelectItem>
+          </SelectContent>
+        </Select>
+      );
+
+      const trigger = screen.getByTestId('trigger');
+      expect(trigger).toHaveClass('bg-background');
+      expect(trigger).toHaveClass('border-input');
     });
 
     it('merges custom className with default classes', () => {

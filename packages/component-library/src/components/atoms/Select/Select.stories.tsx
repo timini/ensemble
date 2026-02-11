@@ -136,7 +136,7 @@ export const Controlled: Story = {
             <SelectItem value="grape">Grape</SelectItem>
           </SelectContent>
         </Select>
-        <div className="text-sm text-gray-600">
+        <div className="text-sm text-muted-foreground">
           Selected value: <span className="font-semibold">{value}</span>
         </div>
       </div>
@@ -240,6 +240,32 @@ export const DisabledOptions: Story = {
       </SelectContent>
     </Select>
   ),
+};
+
+// Dark mode
+export const DarkMode: Story = {
+  render: () => (
+    <Select defaultValue="apple">
+      <SelectTrigger className="w-[250px]">
+        <SelectValue placeholder="Select a fruit" />
+      </SelectTrigger>
+      <SelectContent>
+        <SelectItem value="apple">Apple</SelectItem>
+        <SelectItem value="banana">Banana</SelectItem>
+        <SelectItem value="orange">Orange</SelectItem>
+      </SelectContent>
+    </Select>
+  ),
+  parameters: {
+    backgrounds: { default: 'dark' },
+  },
+  decorators: [
+    (Story) => (
+      <div className="dark bg-gray-900 p-8">
+        <Story />
+      </div>
+    ),
+  ],
 };
 
 // Interactive playground

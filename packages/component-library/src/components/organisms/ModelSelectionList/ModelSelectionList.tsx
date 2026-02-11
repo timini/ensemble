@@ -98,7 +98,7 @@ export const ModelSelectionList = React.forwardRef<HTMLDivElement, ModelSelectio
     // Render empty state
     if (models.length === 0) {
       return (
-        <div ref={ref} className="text-center py-8 text-gray-500">
+        <div ref={ref} className="text-center py-8 text-muted-foreground">
           {t('organisms.modelSelectionList.noModels')}
         </div>
       );
@@ -118,20 +118,20 @@ export const ModelSelectionList = React.forwardRef<HTMLDivElement, ModelSelectio
             <div key={provider} data-testid="provider-section" className="mb-8">
               {/* Provider Header */}
               <div className="flex items-center justify-between mb-4">
-                <Heading level={4} size="lg" className="text-gray-900">{PROVIDER_LABELS[provider]}</Heading>
+                <Heading level={4} size="lg" className="text-foreground">{PROVIDER_LABELS[provider]}</Heading>
                 {providerStatus?.[provider] && (
                   <div className="flex items-center gap-2">
                     {providerStatus[provider] === 'Ready' ? (
-                      <span className="text-sm text-green-600 font-medium">
+                      <span className="text-sm text-success font-medium">
                         ✓ {providerStatus[provider]}
                       </span>
                     ) : (
                       <>
-                        <span className="text-sm text-gray-600">{providerStatus[provider]}</span>
+                        <span className="text-sm text-muted-foreground">{providerStatus[provider]}</span>
                         {onConfigureApiKey && (
                           <button
                             onClick={() => onConfigureApiKey(provider)}
-                            className="px-3 py-1 text-xs font-medium text-blue-600 bg-blue-50 hover:bg-blue-100 rounded border border-blue-200 transition-colors"
+                            className="px-3 py-1 text-xs font-medium text-primary bg-primary/10 hover:bg-primary/20 rounded border border-primary/30 transition-colors"
                           >
                             Configure
                           </button>

@@ -108,8 +108,8 @@ export const PromptInput = React.forwardRef<HTMLTextAreaElement, PromptInputProp
 
       const percentage = (charCount / maxLength) * 100;
 
-      if (percentage >= 100) return 'text-red-500 dark:text-red-400';
-      if (percentage >= 80) return 'text-orange-500 dark:text-orange-400';
+      if (percentage >= 100) return 'text-destructive';
+      if (percentage >= 80) return 'text-warning';
 
       return 'text-muted-foreground';
     };
@@ -137,7 +137,7 @@ export const PromptInput = React.forwardRef<HTMLTextAreaElement, PromptInputProp
             }
             className={cn(
               'min-h-[120px] resize-y',
-              isInvalid && 'border-red-500 dark:border-red-400',
+              isInvalid && 'border-destructive',
               disabled && 'disabled:opacity-50'
             )}
           />

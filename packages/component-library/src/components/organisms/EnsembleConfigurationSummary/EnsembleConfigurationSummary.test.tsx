@@ -110,7 +110,7 @@ describe('EnsembleConfigurationSummary', () => {
       expect(badges).toHaveLength(3);
 
       badges.forEach((badge) => {
-        expect(badge).toHaveClass('bg-gray-50');
+        expect(badge).toHaveClass('bg-muted');
       });
     });
 
@@ -197,7 +197,7 @@ describe('EnsembleConfigurationSummary', () => {
       );
 
       const summarizerBadge = screen.getByTestId('summarizer-model');
-      expect(summarizerBadge).toHaveClass('bg-blue-100', 'text-blue-800', 'border-blue-200');
+      expect(summarizerBadge).toHaveClass('bg-primary/10', 'text-primary', 'border-primary/30');
     });
 
     it('handles different summarizer model', () => {
@@ -288,7 +288,7 @@ describe('EnsembleConfigurationSummary', () => {
       );
 
       const description = screen.getByText(/These models will receive the prompt/i);
-      expect(description).toHaveClass('text-sm', 'text-gray-600');
+      expect(description).toHaveClass('text-sm', 'text-muted-foreground');
     });
   });
 
@@ -314,7 +314,7 @@ describe('EnsembleConfigurationSummary', () => {
       );
 
       const description = screen.getByText(/These models will receive the prompt/i);
-      expect(description).toHaveClass('text-sm', 'text-gray-600', 'mb-4');
+      expect(description).toHaveClass('text-sm', 'text-muted-foreground', 'mb-4');
     });
 
     it('applies correct subheading styling', () => {
@@ -368,6 +368,74 @@ describe('EnsembleConfigurationSummary', () => {
       );
 
       expect(screen.getByText(specialModel)).toBeInTheDocument();
+    });
+  });
+
+  describe('dark mode (semantic tokens)', () => {
+    it('uses semantic token for description text', () => {
+      render(
+        <EnsembleConfigurationSummary
+          selectedModels={mockSelectedModels}
+          summarizerModel={mockSummarizerModel}
+        />
+      );
+
+      const description = screen.getByText(/These models will receive/i);
+      expect(description).toHaveClass('text-muted-foreground');
+    });
+
+    it('uses semantic token for model badges', () => {
+      const { container } = render(
+        <EnsembleConfigurationSummary
+          selectedModels={mockSelectedModels}
+          summarizerModel={mockSummarizerModel}
+        />
+      );
+
+      const badges = container.querySelectorAll('[data-testid^="selected-model-"]');
+      badges.forEach((badge) => {
+        expect(badge).toHaveClass('bg-muted');
+      });
+    });
+
+    it('uses semantic tokens for summarizer badge', () => {
+      render(
+        <EnsembleConfigurationSummary
+          selectedModels={mockSelectedModels}
+          summarizerModel={mockSummarizerModel}
+        />
+      );
+
+      const badge = screen.getByTestId('summarizer-model');
+      expect(badge).toHaveClass('bg-primary/10', 'text-primary', 'border-primary/30');
+    });
+
+    it('uses semantic token for warning text', () => {
+      render(
+        <EnsembleConfigurationSummary
+          selectedModels={['model-1', 'model-2']}
+          summarizerModel={mockSummarizerModel}
+          onConsensusMethodChange={() => {}}
+        />
+      );
+
+      const warning = screen.getByText(/ELO Ranked Summarisation requires/i);
+      expect(warning).toHaveClass('text-warning');
+    });
+
+    it('uses semantic tokens for number input', () => {
+      render(
+        <EnsembleConfigurationSummary
+          selectedModels={mockSelectedModels}
+          summarizerModel={mockSummarizerModel}
+          consensusMethod="elo"
+          onConsensusMethodChange={() => {}}
+          onTopNChange={() => {}}
+        />
+      );
+
+      const input = screen.getByTestId('input-top-n');
+      expect(input).toHaveClass('border-input', 'bg-background', 'text-foreground');
     });
   });
 

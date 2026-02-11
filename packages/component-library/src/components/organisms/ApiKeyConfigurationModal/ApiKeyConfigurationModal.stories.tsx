@@ -102,6 +102,28 @@ export const Anthropic: Story = {
   },
 };
 
+export const DarkMode: Story = {
+  args: {
+    open: true,
+    provider: 'openai',
+    items: mockItems,
+    onOpenChange: (open: boolean) => console.log('Open changed:', open),
+    onKeyChange: (provider: string, value: string) =>
+      console.log('Key changed:', provider, value),
+    onToggleShow: (provider: string) => console.log('Toggle show:', provider),
+  },
+  parameters: {
+    backgrounds: { default: 'dark' },
+  },
+  decorators: [
+    (Story) => (
+      <div className="dark bg-gray-900 p-8">
+        <Story />
+      </div>
+    ),
+  ],
+};
+
 export const Interactive: Story = {
   args: {
     open: true,
@@ -135,7 +157,7 @@ export const Interactive: Story = {
       <div>
         <button
           onClick={() => setOpen(true)}
-          className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+          className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90"
         >
           Open Modal
         </button>

@@ -210,6 +210,48 @@ describe('ApiKeyInput', () => {
     });
   });
 
+  describe('semantic tokens', () => {
+    it('uses success token for valid border', () => {
+      const { container } = render(
+        <ApiKeyInput provider="openai" label="API Key" validationStatus="valid" value="sk-valid" />
+      );
+      const input = container.querySelector('input');
+      expect(input).toHaveClass('border-success/50');
+    });
+
+    it('uses success token for valid background', () => {
+      const { container } = render(
+        <ApiKeyInput provider="openai" label="API Key" validationStatus="valid" value="sk-valid" />
+      );
+      const input = container.querySelector('input');
+      expect(input).toHaveClass('bg-success/10');
+    });
+
+    it('uses destructive token for invalid border', () => {
+      const { container } = render(
+        <ApiKeyInput provider="openai" label="API Key" validationStatus="invalid" value="bad" error="Invalid" />
+      );
+      const input = container.querySelector('input');
+      expect(input).toHaveClass('border-destructive');
+    });
+
+    it('uses success token for valid icon', () => {
+      const { container } = render(
+        <ApiKeyInput provider="openai" label="API Key" validationStatus="valid" value="sk-valid" />
+      );
+      const icon = container.querySelector('[data-validation="valid"]');
+      expect(icon).toHaveClass('text-success');
+    });
+
+    it('uses destructive token for invalid icon', () => {
+      const { container } = render(
+        <ApiKeyInput provider="openai" label="API Key" validationStatus="invalid" value="bad" error="Invalid" />
+      );
+      const icon = container.querySelector('[data-validation="invalid"]');
+      expect(icon).toHaveClass('text-destructive');
+    });
+  });
+
   describe('internationalization', () => {
     it('renders show key button label in English', () => {
       renderWithI18n(<ApiKeyInput provider="openai" label="API Key" validationStatus="idle" />, { language: 'en' });

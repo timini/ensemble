@@ -218,8 +218,14 @@ test.describe('Full Workflow - Mock Mode', () => {
     });
 
     await test.step('Test "Start Over" navigation', async () => {
-      await page.getByRole('button', { name: /start over/i }).click();
-      await expect(page).toHaveURL('/config');
+      // Wait for all response cards to finish streaming before interacting
+      const responseCards = page.locator('[data-status="streaming"]');
+      await expect(responseCards).toHaveCount(0, { timeout: 30000 });
+
+      const startOverButton = page.getByRole('button', { name: /start over/i });
+      await startOverButton.scrollIntoViewIfNeeded();
+      await startOverButton.click({ force: true });
+      await expect(page).toHaveURL('/config', { timeout: 10000 });
 
       // Verify we're back at config page
       await expect(page.locator('[data-mode="free"]')).toBeVisible();

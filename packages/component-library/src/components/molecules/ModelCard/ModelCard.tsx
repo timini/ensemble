@@ -122,9 +122,9 @@ export const ModelCard = React.forwardRef<HTMLDivElement, ModelCardProps>(
           'relative cursor-pointer transition-all hover:shadow-md',
           selected
             ? isSummarizer
-              ? 'border-orange-500 bg-orange-50 dark:border-orange-500 dark:bg-orange-950/30'
-              : 'border-blue-500 bg-blue-50 dark:border-blue-500 dark:bg-blue-950/30'
-            : 'border-gray-200 dark:border-gray-800',
+              ? 'border-warning bg-warning/10'
+              : 'border-primary bg-primary/10'
+            : 'border-border',
           disabled && 'opacity-50 cursor-not-allowed'
         )}
       >
@@ -132,7 +132,7 @@ export const ModelCard = React.forwardRef<HTMLDivElement, ModelCardProps>(
           <div className="text-2xl mb-2">{config.icon}</div>
           <div className="font-medium text-sm">{modelName}</div>
           {isSummarizer && (
-            <Badge className="absolute -top-2 -right-2 bg-orange-500 text-white text-xs">
+            <Badge className="absolute -top-2 -right-2 bg-warning text-warning-foreground text-xs">
               {t('molecules.modelCard.summarizer')}
             </Badge>
           )}
@@ -143,8 +143,8 @@ export const ModelCard = React.forwardRef<HTMLDivElement, ModelCardProps>(
               className={cn(
                 'mt-2 w-full px-2 py-1 text-xs font-medium rounded transition-colors',
                 isSummarizer
-                  ? 'bg-orange-500 text-white hover:bg-orange-600'
-                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                  ? 'bg-warning text-warning-foreground hover:bg-warning/80'
+                  : 'bg-secondary text-secondary-foreground hover:bg-accent'
               )}
               aria-label={isSummarizer ? 'Remove as summarizer' : 'Set as summarizer'}
             >

@@ -170,6 +170,27 @@ export const MaxSelectionReached: Story = {
   },
 };
 
+// Dark mode
+export const DarkMode: Story = {
+  args: {
+    models: mockModels,
+    selectedModelIds: ['gpt-4', 'claude-3-opus'],
+    summarizerModelId: 'claude-3-opus',
+    onModelToggle: () => {},
+    onSummarizerChange: () => {},
+  },
+  parameters: {
+    backgrounds: { default: 'dark' },
+  },
+  decorators: [
+    (Story) => (
+      <div className="dark bg-gray-900 p-8">
+        <Story />
+      </div>
+    ),
+  ],
+};
+
 // Interactive example
 export const Interactive: Story = {
   args: {
@@ -229,8 +250,8 @@ export const Interactive: Story = {
                 }
                 className={`px-3 py-1 text-sm rounded border ${
                   providerFilter === filter
-                    ? 'bg-blue-500 text-white border-blue-500'
-                    : 'bg-white text-gray-700 border-gray-300'
+                    ? 'bg-primary text-primary-foreground border-primary'
+                    : 'bg-background text-muted-foreground border-border'
                 }`}
               >
                 {filter.charAt(0).toUpperCase() + filter.slice(1)}
@@ -239,7 +260,7 @@ export const Interactive: Story = {
           </div>
         </div>
 
-        <div className="text-sm text-gray-600">
+        <div className="text-sm text-muted-foreground">
           Selected: {selectedModelIds.length} / {args.maxSelection || '∞'}
           {summarizerModelId && ` | Summarizer: ${summarizerModelId}`}
         </div>

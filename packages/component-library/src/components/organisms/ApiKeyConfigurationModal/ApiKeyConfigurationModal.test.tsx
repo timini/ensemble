@@ -210,6 +210,68 @@ describe('ApiKeyConfigurationModal', () => {
     });
   });
 
+  describe('semantic tokens', () => {
+    it('uses semantic card token for modal background', () => {
+      const { container } = render(
+        <ApiKeyConfigurationModal
+          open={true}
+          onOpenChange={vi.fn()}
+          provider="openai"
+          items={mockItems}
+          onKeyChange={vi.fn()}
+          onToggleShow={vi.fn()}
+        />
+      );
+      const modalContent = container.querySelector('.bg-card');
+      expect(modalContent).toBeInTheDocument();
+    });
+
+    it('uses semantic card-foreground token for title text', () => {
+      render(
+        <ApiKeyConfigurationModal
+          open={true}
+          onOpenChange={vi.fn()}
+          provider="openai"
+          items={mockItems}
+          onKeyChange={vi.fn()}
+          onToggleShow={vi.fn()}
+        />
+      );
+      const title = screen.getByText('Configure API Key');
+      expect(title).toHaveClass('text-card-foreground');
+    });
+
+    it('uses semantic accent token for close button hover', () => {
+      const { container } = render(
+        <ApiKeyConfigurationModal
+          open={true}
+          onOpenChange={vi.fn()}
+          provider="openai"
+          items={mockItems}
+          onKeyChange={vi.fn()}
+          onToggleShow={vi.fn()}
+        />
+      );
+      const closeButton = container.querySelector('[data-testid="close-modal-button"]');
+      expect(closeButton).toHaveClass('hover:bg-accent');
+    });
+
+    it('uses semantic muted-foreground token for close icon', () => {
+      const { container } = render(
+        <ApiKeyConfigurationModal
+          open={true}
+          onOpenChange={vi.fn()}
+          provider="openai"
+          items={mockItems}
+          onKeyChange={vi.fn()}
+          onToggleShow={vi.fn()}
+        />
+      );
+      const icon = container.querySelector('[data-testid="close-modal-button"] svg');
+      expect(icon).toHaveClass('text-muted-foreground');
+    });
+  });
+
   describe('accessibility', () => {
     it('has close button with aria-label', () => {
       render(

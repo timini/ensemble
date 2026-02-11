@@ -15,7 +15,7 @@ describe('ProgressSteps', () => {
   it('highlights the current step', () => {
     render(<ProgressSteps currentStep="prompt" />);
     const promptStep = screen.getByText('Prompt').parentElement;
-    expect(promptStep?.querySelector('.bg-blue-500')).toBeInTheDocument();
+    expect(promptStep?.querySelector('.bg-primary')).toBeInTheDocument();
   });
 
   it('shows check marks for completed steps', () => {
@@ -40,7 +40,7 @@ describe('ProgressSteps', () => {
 
   it('applies correct styling for completed steps', () => {
     const { container } = render(<ProgressSteps currentStep="prompt" />);
-    const completedSteps = container.querySelectorAll('.bg-green-500');
+    const completedSteps = container.querySelectorAll('.bg-success');
     expect(completedSteps.length).toBeGreaterThan(0);
   });
 
@@ -89,47 +89,47 @@ describe('ProgressSteps', () => {
       renderWithI18n(<ProgressSteps currentStep="config" />, { language: 'en' });
 
       const configLabel = screen.getByText('Config');
-      expect(configLabel).toHaveClass('text-blue-600');
+      expect(configLabel).toHaveClass('text-primary');
     });
 
     it('displays current step label in French when on config step', () => {
       renderWithI18n(<ProgressSteps currentStep="config" />, { language: 'fr' });
 
       const configLabel = screen.getByText('Config');
-      expect(configLabel).toHaveClass('text-blue-600');
+      expect(configLabel).toHaveClass('text-primary');
     });
 
     it('displays completed step labels in English when on review step', () => {
       renderWithI18n(<ProgressSteps currentStep="review" />, { language: 'en' });
 
-      expect(screen.getByText('Config')).toHaveClass('text-green-600');
-      expect(screen.getByText('Ensemble')).toHaveClass('text-green-600');
-      expect(screen.getByText('Prompt')).toHaveClass('text-green-600');
+      expect(screen.getByText('Config')).toHaveClass('text-success');
+      expect(screen.getByText('Ensemble')).toHaveClass('text-success');
+      expect(screen.getByText('Prompt')).toHaveClass('text-success');
     });
 
     it('displays completed step labels in French when on review step', () => {
       renderWithI18n(<ProgressSteps currentStep="review" />, { language: 'fr' });
 
-      expect(screen.getByText('Config')).toHaveClass('text-green-600');
-      expect(screen.getByText('Ensemble')).toHaveClass('text-green-600');
-      expect(screen.getByText('Invite')).toHaveClass('text-green-600');
+      expect(screen.getByText('Config')).toHaveClass('text-success');
+      expect(screen.getByText('Ensemble')).toHaveClass('text-success');
+      expect(screen.getByText('Invite')).toHaveClass('text-success');
     });
 
     it('displays English labels correctly for prompt step', () => {
       renderWithI18n(<ProgressSteps currentStep="prompt" />, { language: 'en' });
 
-      expect(screen.getByText('Config')).toHaveClass('text-green-600');
-      expect(screen.getByText('Ensemble')).toHaveClass('text-green-600');
-      expect(screen.getByText('Prompt')).toHaveClass('text-blue-600');
+      expect(screen.getByText('Config')).toHaveClass('text-success');
+      expect(screen.getByText('Ensemble')).toHaveClass('text-success');
+      expect(screen.getByText('Prompt')).toHaveClass('text-primary');
       expect(screen.getByText('Review')).toHaveClass('text-muted-foreground');
     });
 
     it('displays French labels correctly for prompt step', () => {
       renderWithI18n(<ProgressSteps currentStep="prompt" />, { language: 'fr' });
 
-      expect(screen.getByText('Config')).toHaveClass('text-green-600');
-      expect(screen.getByText('Ensemble')).toHaveClass('text-green-600');
-      expect(screen.getByText('Invite')).toHaveClass('text-blue-600');
+      expect(screen.getByText('Config')).toHaveClass('text-success');
+      expect(screen.getByText('Ensemble')).toHaveClass('text-success');
+      expect(screen.getByText('Invite')).toHaveClass('text-primary');
       expect(screen.getByText('Révision')).toHaveClass('text-muted-foreground');
     });
   });

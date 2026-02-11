@@ -115,7 +115,7 @@ export const ResponseCard = React.forwardRef<HTMLDivElement, ResponseCardProps>(
         aria-busy={isStreaming ? 'true' : undefined}
         className={cn(
           'w-full',
-          isError && 'border-red-500 dark:border-red-400'
+          isError && 'border-destructive'
         )}
         data-testid={testId}
       >

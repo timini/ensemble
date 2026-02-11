@@ -566,6 +566,44 @@ describe('ApiKeyConfiguration', () => {
     });
   });
 
+  describe('semantic tokens', () => {
+    it('uses semantic muted token for info box background', () => {
+      const { container } = render(
+        <ApiKeyConfiguration
+          items={[{ provider: 'openai', label: 'OpenAI', validationStatus: 'valid' }]}
+          onKeyChange={vi.fn()}
+          onToggleShow={vi.fn()}
+        />
+      );
+      const infoBox = container.querySelector('.bg-muted');
+      expect(infoBox).toBeInTheDocument();
+    });
+
+    it('uses semantic border token for info box border', () => {
+      const { container } = render(
+        <ApiKeyConfiguration
+          items={[{ provider: 'openai', label: 'OpenAI', validationStatus: 'valid' }]}
+          onKeyChange={vi.fn()}
+          onToggleShow={vi.fn()}
+        />
+      );
+      const infoBox = container.querySelector('.border-border');
+      expect(infoBox).toBeInTheDocument();
+    });
+
+    it('uses semantic muted-foreground token for info box text', () => {
+      const { container } = render(
+        <ApiKeyConfiguration
+          items={[{ provider: 'openai', label: 'OpenAI', validationStatus: 'valid' }]}
+          onKeyChange={vi.fn()}
+          onToggleShow={vi.fn()}
+        />
+      );
+      const infoText = container.querySelector('.text-muted-foreground');
+      expect(infoText).toBeInTheDocument();
+    });
+  });
+
   describe('internationalization', () => {
     it('renders English heading by default', () => {
       renderWithI18n(

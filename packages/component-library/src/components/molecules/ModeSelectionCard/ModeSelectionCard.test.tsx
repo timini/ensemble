@@ -56,16 +56,16 @@ describe('ModeSelectionCard', () => {
       const { container } = render(<ModeSelectionCard mode="free" selected={true} />);
       const card = container.querySelector('[data-selected="true"]');
       expect(card).toBeInTheDocument();
-      expect(card).toHaveClass('border-blue-500');
-      expect(card).toHaveClass('bg-blue-50');
+      expect(card).toHaveClass('border-primary');
+      expect(card).toHaveClass('bg-primary/10');
     });
 
     it('does not apply selected styling when unselected', () => {
       const { container } = render(<ModeSelectionCard mode="free" selected={false} />);
       const card = container.querySelector('[data-selected="false"]');
       expect(card).toBeInTheDocument();
-      expect(card).not.toHaveClass('border-blue-500');
-      expect(card).not.toHaveClass('bg-blue-50');
+      expect(card).not.toHaveClass('border-primary');
+      expect(card).not.toHaveClass('bg-primary/10');
     });
 
     it('has correct data attribute for selected state', () => {
@@ -174,8 +174,8 @@ describe('ModeSelectionCard', () => {
   describe('styling', () => {
     it('applies hover border style', () => {
       const { container } = render(<ModeSelectionCard mode="free" />);
-      const card = container.querySelector('.hover\\:border-blue-200');
-      expect(card).toBeInTheDocument();
+      const card = container.querySelector('[data-testid="mode-card-free"]');
+      expect(card).toHaveClass('hover:border-primary/30');
     });
 
     it('applies transition classes', () => {
@@ -186,8 +186,8 @@ describe('ModeSelectionCard', () => {
 
     it('applies correct icon circle styling', () => {
       const { container } = render(<ModeSelectionCard mode="free" />);
-      const iconCircle = container.querySelector('.bg-blue-100.rounded-full');
-      expect(iconCircle).toBeInTheDocument();
+      const iconCircle = container.querySelector('.rounded-full');
+      expect(iconCircle).toHaveClass('bg-primary/15');
     });
 
     it('applies full-width button styling', () => {
@@ -214,6 +214,38 @@ describe('ModeSelectionCard', () => {
       render(<ModeSelectionCard mode="free" />);
       const button = screen.getByRole('button', { name: /Start in Free Mode/i });
       expect(button).toBeInTheDocument();
+    });
+  });
+
+  describe('semantic tokens', () => {
+    it('uses semantic border token for default state', () => {
+      const { container } = render(<ModeSelectionCard mode="free" />);
+      const card = container.querySelector('[data-testid="mode-card-free"]');
+      expect(card).toHaveClass('border-border');
+    });
+
+    it('uses semantic primary token for selected border', () => {
+      const { container } = render(<ModeSelectionCard mode="free" selected={true} />);
+      const card = container.querySelector('[data-selected="true"]');
+      expect(card).toHaveClass('border-primary');
+    });
+
+    it('uses semantic foreground token for title', () => {
+      render(<ModeSelectionCard mode="free" />);
+      const title = screen.getByRole('heading', { name: /Free Mode/i });
+      expect(title).toHaveClass('text-foreground');
+    });
+
+    it('uses semantic muted-foreground token for description', () => {
+      const { container } = render(<ModeSelectionCard mode="free" />);
+      const description = container.querySelector('.text-muted-foreground');
+      expect(description).toBeInTheDocument();
+    });
+
+    it('uses semantic primary token for icon', () => {
+      const { container } = render(<ModeSelectionCard mode="free" />);
+      const icon = container.querySelector('.text-primary.text-lg');
+      expect(icon).toBeInTheDocument();
     });
   });
 

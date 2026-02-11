@@ -98,19 +98,19 @@ export const SemanticVsVisual: Story = {
   render: () => (
     <div className="space-y-6">
       <div>
-        <p className="text-sm text-gray-600 mb-2">H1 with small visual size:</p>
+        <p className="text-sm text-muted-foreground mb-2">H1 with small visual size:</p>
         <Heading level={1} size="sm">
           Small but semantically H1
         </Heading>
       </div>
       <div>
-        <p className="text-sm text-gray-600 mb-2">H6 with large visual size:</p>
+        <p className="text-sm text-muted-foreground mb-2">H6 with large visual size:</p>
         <Heading level={6} size="3xl">
           Large but semantically H6
         </Heading>
       </div>
       <div>
-        <p className="text-sm text-gray-600 mb-2">H2 with medium visual size:</p>
+        <p className="text-sm text-muted-foreground mb-2">H2 with medium visual size:</p>
         <Heading level={2} size="md">
           Medium H2
         </Heading>
@@ -124,7 +124,7 @@ export const CustomStyling: Story = {
   args: {
     level: 2,
     size: 'xl',
-    className: 'text-blue-600 mb-4',
+    className: 'text-primary mb-4',
     children: 'Heading with Custom Classes',
   },
 };

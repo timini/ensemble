@@ -9,10 +9,10 @@ const alertVariants = cva(
   {
     variants: {
       variant: {
-        info: 'bg-blue-50 border-blue-200 text-blue-900 dark:bg-blue-950 dark:border-blue-800 dark:text-blue-100',
-        success: 'bg-green-50 border-green-200 text-green-900 dark:bg-green-950 dark:border-green-800 dark:text-green-100',
-        warning: 'bg-yellow-50 border-yellow-200 text-yellow-900 dark:bg-yellow-950 dark:border-yellow-800 dark:text-yellow-100',
-        error: 'bg-red-50 border-red-200 text-red-900 dark:bg-red-950 dark:border-red-800 dark:text-red-100',
+        info: 'bg-primary/10 border-primary/20 text-foreground',
+        success: 'bg-success/10 border-success/20 text-foreground',
+        warning: 'bg-warning/10 border-warning/20 text-foreground',
+        error: 'bg-destructive/10 border-destructive/20 text-foreground',
       },
     },
     defaultVariants: {
@@ -24,10 +24,10 @@ const alertVariants = cva(
 const iconVariants = cva('h-4 w-4 shrink-0 mt-0.5', {
   variants: {
     variant: {
-      info: 'text-blue-600 dark:text-blue-400',
-      success: 'text-green-600 dark:text-green-400',
-      warning: 'text-yellow-600 dark:text-yellow-400',
-      error: 'text-red-600 dark:text-red-400',
+      info: 'text-primary',
+      success: 'text-success',
+      warning: 'text-warning',
+      error: 'text-destructive',
     },
   },
   defaultVariants: {

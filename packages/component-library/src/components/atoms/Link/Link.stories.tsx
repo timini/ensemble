@@ -136,7 +136,7 @@ export const ExternalLinks: Story = {
 export const InlineText: Story = {
   args: { children: '' },
   render: () => (
-    <p className="max-w-md text-gray-700">
+    <p className="max-w-md text-muted-foreground">
       This is a paragraph with an{' '}
       <Link href="/inline">inline link</Link>
       {' '}that demonstrates how the link component works within body text. You can also have{' '}
@@ -152,10 +152,10 @@ export const Breadcrumb: Story = {
   render: () => (
     <nav aria-label="Breadcrumb" className="flex items-center space-x-2 text-sm">
       <Link variant="subtle" href="/">Home</Link>
-      <span className="text-gray-400">/</span>
+      <span className="text-muted-foreground">/</span>
       <Link variant="subtle" href="/products">Products</Link>
-      <span className="text-gray-400">/</span>
-      <span className="text-gray-900">Current Page</span>
+      <span className="text-muted-foreground">/</span>
+      <span className="text-foreground">Current Page</span>
     </nav>
   ),
 };
@@ -177,10 +177,10 @@ export const NavigationMenu: Story = {
 export const FooterLinks: Story = {
   args: { children: '' },
   render: () => (
-    <footer className="bg-gray-50 p-6 rounded">
+    <footer className="bg-muted p-6 rounded">
       <div className="grid grid-cols-3 gap-4 text-sm">
         <div>
-          <h3 className="font-semibold text-gray-900 mb-2">Product</h3>
+          <h3 className="font-semibold text-foreground mb-2">Product</h3>
           <div className="space-y-1">
             <div><Link variant="subtle" href="/features">Features</Link></div>
             <div><Link variant="subtle" href="/pricing">Pricing</Link></div>
@@ -188,7 +188,7 @@ export const FooterLinks: Story = {
           </div>
         </div>
         <div>
-          <h3 className="font-semibold text-gray-900 mb-2">Company</h3>
+          <h3 className="font-semibold text-foreground mb-2">Company</h3>
           <div className="space-y-1">
             <div><Link variant="subtle" href="/about">About</Link></div>
             <div><Link variant="subtle" href="/blog">Blog</Link></div>
@@ -196,7 +196,7 @@ export const FooterLinks: Story = {
           </div>
         </div>
         <div>
-          <h3 className="font-semibold text-gray-900 mb-2">Resources</h3>
+          <h3 className="font-semibold text-foreground mb-2">Resources</h3>
           <div className="space-y-1">
             <div><Link variant="subtle" href="https://docs.example.com" external>Documentation</Link></div>
             <div><Link variant="subtle" href="https://github.com/example" external>GitHub</Link></div>

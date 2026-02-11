@@ -176,7 +176,7 @@ export const Interactive: Story = {
 
     return (
       <div className="space-y-6">
-        <div className="text-sm text-gray-600">
+        <div className="text-sm text-muted-foreground">
           Presets: {presets.length} | Selected: {selectedPresetId || 'None'}
         </div>
 

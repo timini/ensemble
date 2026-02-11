@@ -98,7 +98,7 @@ export const ApiKeyInput = React.forwardRef<HTMLInputElement, ApiKeyInputProps>(
         return (
           <CheckCircle
             data-validation="valid"
-            className="h-4 w-4 text-green-500 dark:text-green-400"
+            className="h-4 w-4 text-success"
             aria-label={t('molecules.apiKeyInput.validKey')}
           />
         );
@@ -108,7 +108,7 @@ export const ApiKeyInput = React.forwardRef<HTMLInputElement, ApiKeyInputProps>(
         return (
           <XCircle
             data-validation="invalid"
-            className="h-4 w-4 text-red-500 dark:text-red-400"
+            className="h-4 w-4 text-destructive"
             aria-label={t('molecules.apiKeyInput.invalidKey')}
           />
         );
@@ -140,8 +140,8 @@ export const ApiKeyInput = React.forwardRef<HTMLInputElement, ApiKeyInputProps>(
             }
             className={cn(
               'pr-20',
-              validationStatus === 'valid' && 'border-green-300 bg-green-50',
-              validationStatus === 'invalid' && 'border-red-500 dark:border-red-400',
+              validationStatus === 'valid' && 'border-success/50 bg-success/10',
+              validationStatus === 'invalid' && 'border-destructive',
               disabled && 'disabled:opacity-50'
             )}
           />
@@ -156,7 +156,7 @@ export const ApiKeyInput = React.forwardRef<HTMLInputElement, ApiKeyInputProps>(
               disabled={disabled}
               aria-label={showKey ? t('molecules.apiKeyInput.hideKey') : t('molecules.apiKeyInput.showKey')}
               className={cn(
-                'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors',
+                'text-muted-foreground hover:text-foreground transition-colors',
                 disabled && 'opacity-50 cursor-not-allowed'
               )}
             >

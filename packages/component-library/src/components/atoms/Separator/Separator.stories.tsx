@@ -53,21 +53,21 @@ export const InContent: Story = {
     <div className="w-96 space-y-4">
       <div>
         <h3 className="text-lg font-semibold">Introduction</h3>
-        <p className="text-sm text-gray-600 mt-2">
+        <p className="text-sm text-muted-foreground mt-2">
           This is an introduction paragraph that provides context.
         </p>
       </div>
       <Separator />
       <div>
         <h3 className="text-lg font-semibold">Main Content</h3>
-        <p className="text-sm text-gray-600 mt-2">
+        <p className="text-sm text-muted-foreground mt-2">
           This is the main content section with detailed information.
         </p>
       </div>
       <Separator />
       <div>
         <h3 className="text-lg font-semibold">Conclusion</h3>
-        <p className="text-sm text-gray-600 mt-2">
+        <p className="text-sm text-muted-foreground mt-2">
           This is the concluding section that wraps up the content.
         </p>
       </div>
@@ -110,7 +110,7 @@ export const CustomStyling: Story = {
       </div>
       <div>
         <p>Colored separator</p>
-        <Separator className="my-2 bg-blue-500" />
+        <Separator className="my-2 bg-primary" />
       </div>
       <div>
         <p>Dashed separator</p>

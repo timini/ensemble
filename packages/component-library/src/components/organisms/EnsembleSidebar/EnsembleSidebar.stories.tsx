@@ -128,6 +128,27 @@ export const SinglePreset: Story = {
   },
 };
 
+// Dark mode
+export const DarkMode: Story = {
+  args: {
+    selectedModels: mockSelectedModels,
+    summarizerId: 'claude-3-opus',
+    presets: mockPresets,
+    currentEnsembleName: 'My Research Ensemble',
+    showDeleteButtons: true,
+  },
+  parameters: {
+    backgrounds: { default: 'dark' },
+  },
+  decorators: [
+    (Story) => (
+      <div className="dark bg-gray-900 p-8">
+        <Story />
+      </div>
+    ),
+  ],
+};
+
 // Sidebar with no summarizer selected
 export const NoSummarizer: Story = {
   args: {

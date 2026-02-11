@@ -57,9 +57,9 @@ export function ProgressSteps({ currentStep, fallbackStep }: ProgressStepsProps)
               <div
                 className={`w-12 h-12 rounded-full flex items-center justify-center font-semibold text-sm transition-colors ${
                   index < currentIndex
-                    ? 'bg-green-500 text-white dark:bg-green-600'
+                    ? 'bg-success text-success-foreground'
                     : index === currentIndex
-                      ? 'bg-blue-500 text-white dark:bg-blue-600'
+                      ? 'bg-primary text-primary-foreground'
                       : 'bg-muted text-muted-foreground'
                 }`}
               >
@@ -72,9 +72,9 @@ export function ProgressSteps({ currentStep, fallbackStep }: ProgressStepsProps)
               <span
                 className={`mt-2 text-sm font-medium transition-colors ${
                   index < currentIndex
-                    ? 'text-green-600 dark:text-green-400'
+                    ? 'text-success'
                     : index === currentIndex
-                      ? 'text-blue-600 dark:text-blue-400'
+                      ? 'text-primary'
                       : 'text-muted-foreground'
                 }`}
               >
@@ -87,7 +87,7 @@ export function ProgressSteps({ currentStep, fallbackStep }: ProgressStepsProps)
             <div
               className={`w-16 h-0.5 mx-4 transition-colors ${
                 index < currentIndex
-                  ? 'bg-green-500 dark:bg-green-600'
+                  ? 'bg-success'
                   : 'bg-muted'
               }`}
             />

@@ -59,7 +59,7 @@ export const EnsembleConfigurationSummary = React.forwardRef<
           <Heading level={3} size="lg" className="mb-4">
             {heading || t('organisms.ensembleConfigurationSummary.heading')}
           </Heading>
-          <p className="text-sm text-gray-600 mb-4">
+          <p className="text-sm text-muted-foreground mb-4">
             {description || t('organisms.ensembleConfigurationSummary.description')}
           </p>
 
@@ -75,7 +75,7 @@ export const EnsembleConfigurationSummary = React.forwardRef<
                     <Badge
                       key={index}
                       variant="outline"
-                      className="bg-gray-50"
+                      className="bg-muted"
                       data-testid={`selected-model-${index}`}
                     >
                       {model}
@@ -87,7 +87,7 @@ export const EnsembleConfigurationSummary = React.forwardRef<
               <div>
                 <Heading level={4} size="sm" className="mb-2">{t('organisms.ensembleConfigurationSummary.summarizer')}</Heading>
                 <Badge
-                  className="bg-blue-100 text-blue-800 border-blue-200"
+                  className="bg-primary/10 text-primary border-primary/30"
                   data-testid="summarizer-model"
                 >
                   {summarizerModel}
@@ -107,7 +107,7 @@ export const EnsembleConfigurationSummary = React.forwardRef<
                         name="consensusMethod"
                         checked={consensusMethod === 'standard'}
                         onChange={() => onConsensusMethodChange('standard')}
-                        className="w-4 h-4 text-blue-600"
+                        className="w-4 h-4 text-primary accent-primary"
                         data-testid="preset-standard"
                       />
                       <span className="text-sm font-medium">Standard Summarisation</span>
@@ -120,7 +120,7 @@ export const EnsembleConfigurationSummary = React.forwardRef<
                         checked={consensusMethod === 'elo'}
                         onChange={() => onConsensusMethodChange('elo')}
                         disabled={selectedModels.length < 3}
-                        className="w-4 h-4 text-blue-600 disabled:opacity-50"
+                        className="w-4 h-4 text-primary accent-primary disabled:opacity-50"
                         data-testid="preset-elo"
                       />
                       <span className="text-sm font-medium">ELO Ranked Summarisation</span>
@@ -128,14 +128,14 @@ export const EnsembleConfigurationSummary = React.forwardRef<
 
                     {consensusMethod === 'elo' && onTopNChange && (
                       <div className="flex items-center gap-2 ml-4">
-                        <span className="text-sm text-gray-600">Top N:</span>
+                        <span className="text-sm text-muted-foreground">Top N:</span>
                         <input
                           type="number"
                           min={3}
                           max={selectedModels.length}
                           value={topN}
                           onChange={(e) => onTopNChange(parseInt(e.target.value) || 3)}
-                          className="w-16 p-1 border rounded text-sm"
+                          className="w-16 p-1 border border-input bg-background text-foreground rounded text-sm focus:outline-none focus:ring-2 focus:ring-ring"
                           data-testid="input-top-n"
                         />
                       </div>
@@ -143,7 +143,7 @@ export const EnsembleConfigurationSummary = React.forwardRef<
                   </div>
 
                   {selectedModels.length < 3 && (
-                    <p className="text-xs text-amber-600 flex items-center gap-1">
+                    <p className="text-xs text-warning flex items-center gap-1">
                       <span>ℹ️</span>
                       ELO Ranked Summarisation requires at least 3 models selected ({selectedModels.length} selected)
                     </p>

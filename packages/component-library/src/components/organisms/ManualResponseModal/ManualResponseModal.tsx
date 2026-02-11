@@ -171,7 +171,7 @@ export const ManualResponseModal = React.forwardRef<HTMLDivElement, ManualRespon
               {t('organisms.manualResponseModal.cancelButton')}
             </Button>
             <Button
-              className="bg-blue-600 hover:bg-blue-700"
+              className="bg-primary hover:bg-primary/90 text-primary-foreground"
               onClick={handleSubmit}
               disabled={disabled || !value.trim() || !modelName.trim() || !modelProvider.trim()}
               data-testid="submit-button"
