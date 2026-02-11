@@ -108,7 +108,7 @@ export const SettingsModal = React.forwardRef<HTMLDivElement, SettingsModalProps
                       <div className="p-6 flex flex-col items-center">
                         <div className={cn(
                           'w-16 h-16 rounded mb-3 border',
-                          t_ === 'light' ? 'bg-card border-border' : 'bg-foreground border-muted-foreground'
+                          t_ === 'light' ? 'bg-white border-slate-200' : 'bg-foreground border-muted-foreground'
                         )} />
                         <span className={cn('font-medium', theme === t_ && 'text-primary')}>
                           {t(`organisms.settingsModal.theme${t_ === 'light' ? 'Light' : 'Dark'}`)}

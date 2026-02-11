@@ -11,7 +11,7 @@ const meta = {
   argTypes: {
     variant: {
       control: 'select',
-      options: ['default', 'destructive', 'outline', 'secondary', 'ghost', 'link'],
+      options: ['default', 'destructive', 'warning', 'success', 'outline', 'secondary', 'ghost', 'link'],
       description: 'The visual style variant of the button',
     },
     size: {
@@ -44,6 +44,20 @@ export const Destructive: Story = {
   args: {
     children: 'Delete',
     variant: 'destructive',
+  },
+};
+
+export const Warning: Story = {
+  args: {
+    children: 'Warning',
+    variant: 'warning',
+  },
+};
+
+export const Success: Story = {
+  args: {
+    children: 'Success',
+    variant: 'success',
   },
 };
 
@@ -109,9 +123,11 @@ export const AllVariants: Story = {
       <div className="flex gap-4">
         <Button variant="default">Default</Button>
         <Button variant="destructive">Destructive</Button>
-        <Button variant="outline">Outline</Button>
+        <Button variant="warning">Warning</Button>
+        <Button variant="success">Success</Button>
       </div>
       <div className="flex gap-4">
+        <Button variant="outline">Outline</Button>
         <Button variant="secondary">Secondary</Button>
         <Button variant="ghost">Ghost</Button>
         <Button variant="link">Link</Button>
