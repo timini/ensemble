@@ -99,5 +99,5 @@ jobs:
             - ✅ **LGTM** (if no issues)
           claude_args: |
             --model claude-opus-4-6
-            --max-turns 10
+            --max-turns 50
             --allowedTools "Read,Grep,Glob,Bash(gh pr diff:*),Bash(gh pr view:*),Bash(gh pr comment:*)"
