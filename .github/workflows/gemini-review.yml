@@ -19,7 +19,7 @@ defaults:
 jobs:
   review:
     runs-on: 'ubuntu-latest'
-    timeout-minutes: 7
+    timeout-minutes: 10
     permissions:
       contents: 'read'
       id-token: 'write'
@@ -41,9 +41,29 @@ jobs:
       - name: 'Checkout repository'
         uses: 'actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8' # ratchet:actions/checkout@v6
 
+      - name: 'Pre-pull GitHub MCP server image'
+        run: docker pull ghcr.io/github/github-mcp-server:v0.27.0
+
+      - name: 'Verify MCP server starts'
+        env:
+          GITHUB_TOKEN: '${{ steps.mint_identity_token.outputs.token || secrets.GITHUB_TOKEN || github.token }}'
+        run: |
+          # Smoke-test: start the container, wait for it to be ready, then stop it
+          CONTAINER_ID=$(docker run -d --rm \
+            -e GITHUB_PERSONAL_ACCESS_TOKEN="$GITHUB_TOKEN" \
+            ghcr.io/github/github-mcp-server:v0.27.0)
+          sleep 3
+          if docker ps -q --filter "id=$CONTAINER_ID" | grep -q .; then
+            echo "MCP server container is running"
+            docker stop "$CONTAINER_ID" || true
+          else
+            echo "::warning::MCP server container exited early — review may fail"
+          fi
+
       - name: 'Run Gemini pull request review'
         uses: 'google-github-actions/run-gemini-cli@v0' # ratchet:exclude
         id: 'gemini_pr_review'
+        continue-on-error: true
         env:
           GITHUB_TOKEN: '${{ steps.mint_identity_token.outputs.token || secrets.GITHUB_TOKEN || github.token }}'
           ISSUE_TITLE: '${{ github.event.pull_request.title || github.event.issue.title }}'
@@ -68,7 +88,7 @@ jobs:
           settings: |-
             {
               "model": {
-                "maxSessionTurns": 25
+                "maxSessionTurns": 50
               },
               "telemetry": {
                 "enabled": true,
@@ -88,8 +108,10 @@ jobs:
                   ],
                   "includeTools": [
                     "add_comment_to_pending_review",
+                    "create_pending_pull_request_review",
                     "pull_request_read",
-                    "pull_request_review_write"
+                    "pull_request_review_write",
+                    "submit_pending_pull_request_review"
                   ],
                   "env": {
                     "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_TOKEN}"
@@ -107,3 +129,18 @@ jobs:
               }
             }
           prompt: '/gemini-review'
+
+      - name: 'Check if review was posted'
+        if: always()
+        env:
+          GITHUB_TOKEN: '${{ steps.mint_identity_token.outputs.token || secrets.GITHUB_TOKEN || github.token }}'
+          PR_NUMBER: '${{ github.event.pull_request.number || github.event.issue.number }}'
+          GEMINI_OUTCOME: '${{ steps.gemini_pr_review.outcome }}'
+        run: |
+          # Check if the Gemini step failed
+          if [ "$GEMINI_OUTCOME" != "success" ]; then
+            echo "::warning::Gemini review step failed (outcome: $GEMINI_OUTCOME)"
+            gh pr comment "$PR_NUMBER" \
+              --body "🤖 Gemini review was unable to complete. See [workflow logs](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) for details." \
+              --repo "${{ github.repository }}" || true
+          fi
