@@ -88,6 +88,13 @@
       "shareText": "Partager cette réponse consensuelle",
       "shareButton": "Partager"
     },
+    "shareDialog": {
+      "title": "Partager les Résultats",
+      "description": "Partagez votre analyse ensemble avec d'autres via ce lien.",
+      "generating": "Génération du lien de partage...",
+      "copied": "Lien copié dans le presse-papiers !",
+      "openLink": "Ouvrir dans un nouvel onglet"
+    },
     "ensembleConfigurationSummary": {
       "heading": "Configuration de Votre Ensemble",
       "description": "Ces modèles recevront l'invite et contribueront à la comparaison.",

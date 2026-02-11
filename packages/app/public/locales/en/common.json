@@ -145,6 +145,13 @@
       "backButton": "Back to Prompt",
       "startOverButton": "Start Over",
       "newComparisonButton": "New Comparison"
+    },
+    "share": {
+      "title": "Shared Review",
+      "description": "Ensemble AI review shared on {{date}}",
+      "notFoundTitle": "Review Not Found",
+      "notFoundDescription": "This shared review may have been removed or the link is invalid.",
+      "poweredBy": "Powered by Ensemble AI — The smartest AI is an ensemble."
     }
   }
 }

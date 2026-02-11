@@ -93,6 +93,13 @@
       "copy": "Copy",
       "copied": "Copied!"
     },
+    "shareDialog": {
+      "title": "Share Results",
+      "description": "Share your ensemble review with others using this link.",
+      "generating": "Generating share link...",
+      "copied": "Link copied to clipboard!",
+      "openLink": "Open in new tab"
+    },
     "ensembleConfigurationSummary": {
       "heading": "Your Ensemble Configuration",
       "description": "These models will receive the prompt and contribute to the comparison.",

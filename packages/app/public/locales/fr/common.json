@@ -137,6 +137,13 @@
       "backButton": "Retour à l'invite",
       "startOverButton": "Recommencer",
       "newComparisonButton": "Nouvelle comparaison"
+    },
+    "share": {
+      "title": "Analyse Partagée",
+      "description": "Analyse Ensemble IA partagée le {{date}}",
+      "notFoundTitle": "Analyse Non Trouvée",
+      "notFoundDescription": "Cette analyse partagée a peut-être été supprimée ou le lien est invalide.",
+      "poweredBy": "Propulsé par Ensemble IA — L'IA la plus intelligente est un ensemble."
     }
   }
 }

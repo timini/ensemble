@@ -84,3 +84,4 @@ export { ManualResponseModal, type ManualResponseModalProps, type ManualResponse
 export { PromptTips, type PromptTipsProps } from './components/organisms/PromptTips';
 export { PromptInputWithHint, type PromptInputWithHintProps } from './components/organisms/PromptInputWithHint';
 export { PromptCard, type PromptCardProps } from './components/organisms/PromptCard';
+export { ShareDialog, type ShareDialogProps } from './components/organisms/ShareDialog';
