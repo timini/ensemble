@@ -1,1 +1,1 @@
-export { EnsembleHeader } from './EnsembleHeader';
+export { EnsembleHeader, type EnsembleHeaderProps, type EnsembleHeaderAuthUser } from './EnsembleHeader';

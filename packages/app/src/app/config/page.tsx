@@ -13,7 +13,9 @@ import { ApiKeyConfiguration } from '@/components/organisms/ApiKeyConfiguration'
 import { WorkflowNavigator } from '@/components/organisms/WorkflowNavigator';
 import { ProgressSteps } from '@/components/molecules/ProgressSteps';
 import { InlineAlert } from '@/components/atoms/InlineAlert';
+import { ProModeAuthGate } from '@/components/organisms/ProModeAuthGate';
 import { useConfigPage } from './hooks/useConfigPage';
+import { signInWithGoogle, signInWithGitHub, signOut } from '~/lib/auth';
 
 export default function ConfigPage() {
   const {
@@ -29,7 +31,16 @@ export default function ConfigPage() {
     handleToggleShow,
     handleContinue,
     allowContinue,
+    authStatus,
+    authUser,
   } = useConfigPage();
+
+  const proModeAuthStatus =
+    authStatus === 'authenticated'
+      ? 'authenticated'
+      : authStatus === 'loading'
+        ? 'loading'
+        : 'unauthenticated';
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-6xl">
@@ -46,7 +57,6 @@ export default function ConfigPage() {
           onSelectFreeMode={handleSelectFreeMode}
           onSelectProMode={handleSelectProMode}
           freeModeDisabled={!webCryptoSupported}
-          proModeDisabled
         />
 
         {!webCryptoSupported && (
@@ -70,6 +80,18 @@ export default function ConfigPage() {
             configuredCountOverride={configuredCountOverride}
             onKeyChange={handleKeyChange}
             onToggleShow={handleToggleShow}
+          />
+        </div>
+      )}
+
+      {displayMode === 'pro' && (
+        <div className="mt-8">
+          <ProModeAuthGate
+            authStatus={proModeAuthStatus}
+            user={authUser}
+            onSignInWithGoogle={() => void signInWithGoogle()}
+            onSignInWithGitHub={() => void signInWithGitHub()}
+            onSignOut={() => void signOut()}
           />
         </div>
       )}

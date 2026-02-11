@@ -7,9 +7,10 @@
  * need to use are documented accordingly near the end.
  */
 import { logger } from '~/lib/logger';
-import { initTRPC } from "@trpc/server";
+import { initTRPC, TRPCError } from "@trpc/server";
 import superjson from "superjson";
 import { ZodError } from "zod";
+import { getAdminAuth } from '~/server/firebase-admin';
 
 /**
  * 1. CONTEXT
@@ -24,8 +25,26 @@ import { ZodError } from "zod";
  * @see https://trpc.io/docs/server/context
  */
 export const createTRPCContext = async (opts: { headers: Headers }) => {
+  let userId: string | null = null;
+
+  const authHeader = opts.headers.get('authorization');
+  if (authHeader?.startsWith('Bearer ')) {
+    const token = authHeader.slice(7);
+    const adminAuth = getAdminAuth();
+    if (adminAuth) {
+      try {
+        const decoded = await adminAuth.verifyIdToken(token);
+        userId = decoded.uid;
+      } catch {
+        // Invalid token — leave userId null (public access)
+        logger.debug('[TRPC] Failed to verify Firebase ID token');
+      }
+    }
+  }
+
   return {
     ...opts,
+    userId,
   };
 };
 
@@ -102,3 +121,23 @@ const timingMiddleware = t.middleware(async ({ next, path }) => {
  * are logged in.
  */
 export const publicProcedure = t.procedure.use(timingMiddleware);
+
+/**
+ * Auth middleware — enforces that the request has a verified userId in context.
+ */
+const authMiddleware = t.middleware(({ ctx, next }) => {
+  if (!ctx.userId) {
+    throw new TRPCError({ code: 'UNAUTHORIZED' });
+  }
+  return next({ ctx: { ...ctx, userId: ctx.userId } });
+});
+
+/**
+ * Protected (authenticated) procedure
+ *
+ * Requires a valid Firebase ID token in the Authorization header.
+ * The userId is guaranteed to be non-null in the context.
+ */
+export const protectedProcedure = t.procedure
+  .use(timingMiddleware)
+  .use(authMiddleware);

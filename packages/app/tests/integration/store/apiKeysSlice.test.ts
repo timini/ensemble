@@ -29,6 +29,10 @@ import {
   createResponseSlice,
   type ResponseSlice,
 } from '~/store/slices/responseSlice';
+import {
+  createAuthSlice,
+  type AuthSlice,
+} from '~/store/slices/authSlice';
 import type { StoreState } from '~/store';
 import { serializeStoreState } from '~/store';
 
@@ -38,7 +42,8 @@ type TestStore = ThemeSlice &
   ModeSlice &
   ApiKeySlice &
   EnsembleSlice &
-  ResponseSlice;
+  ResponseSlice &
+  AuthSlice;
 
 const STORE_NAME = 'test-ensemble-store';
 
@@ -78,6 +83,7 @@ function createTestStore(storage: Storage) {
         ...createApiKeySlice(...a),
         ...createEnsembleSlice(...a),
         ...createResponseSlice(...a),
+        ...createAuthSlice(...a),
       }),
       {
         name: STORE_NAME,

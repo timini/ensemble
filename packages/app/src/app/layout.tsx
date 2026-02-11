@@ -9,6 +9,8 @@ import { useTranslation } from 'react-i18next';
 import { TRPCReactProvider } from '~/trpc/react';
 import { useStore } from '~/store';
 import { useSyncStepWithRoute } from '~/hooks/useSyncStepWithRoute';
+import { useFirebaseAuthSync } from '~/hooks/useFirebaseAuthSync';
+import { signOut } from '~/lib/auth';
 import { EnsembleHeader } from '@/components/molecules/EnsembleHeader';
 import { SettingsModal } from '@/components/organisms/SettingsModal';
 import type { Theme, Language } from '@/components/organisms/SettingsModal';
@@ -24,6 +26,7 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   const { theme, language, setTheme, setLanguage } = useStore();
+  const authUser = useStore((state) => state.authUser);
   const initializeEncryption = useStore((state) => state.initializeEncryption);
   const { i18n } = useTranslation();
   const [settingsOpen, setSettingsOpen] = useState(false);
@@ -35,6 +38,7 @@ export default function RootLayout({
   const resolvedLanguage = hasHydrated ? language : fallbackLanguage;
 
   useSyncStepWithRoute();
+  useFirebaseAuthSync();
 
   // Initialize providers once on mount
   useEffect(() => {
@@ -112,7 +116,11 @@ export default function RootLayout({
       </head>
       <body>
         <TRPCReactProvider>
-          <EnsembleHeader onSettingsClick={() => setSettingsOpen(true)} />
+          <EnsembleHeader
+            onSettingsClick={() => setSettingsOpen(true)}
+            authUser={authUser ?? undefined}
+            onSignOut={() => void signOut()}
+          />
           {children}
           <SettingsModal
             open={settingsOpen}

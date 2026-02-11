@@ -2,7 +2,8 @@
   "ensemble": {
     "header": {
       "title": "IA Ensemble",
-      "tagline": "L'IA la plus intelligente est un ensemble."
+      "tagline": "L'IA la plus intelligente est un ensemble.",
+      "signOut": "Se déconnecter"
     },
     "steps": {
       "config": "Config",
@@ -172,6 +173,14 @@
       "clearConfirmYes": "Oui, tout effacer",
       "clearConfirmCancel": "Annuler",
       "doneButton": "Terminé"
+    },
+    "proModeAuthGate": {
+      "heading": "Connectez-vous pour continuer",
+      "description": "Connectez-vous avec votre compte pour utiliser le mode Pro avec des clés API gérées et des crédits.",
+      "signInWithGoogle": "Continuer avec Google",
+      "signInWithGitHub": "Continuer avec GitHub",
+      "signOut": "Se déconnecter",
+      "signedInMessage": "Vous êtes connecté et prêt à utiliser le mode Pro."
     },
     "workflowNavigator": {
       "back": "Retour",

@@ -31,6 +31,9 @@ export function useConfigPage() {
 
     const setApiKeyStatus = useStore((state) => state.setApiKeyStatus);
 
+    const authStatus = useStore((state) => state.authStatus);
+    const authUser = useStore((state) => state.authUser);
+
     // Store timeout IDs for debouncing
     const timeoutRefs = useRef<Record<Provider, NodeJS.Timeout | null>>({
         openai: null,
@@ -49,7 +52,6 @@ export function useConfigPage() {
 
     const handleSelectProMode = () => {
         setMode('pro');
-        configureModeComplete();
     };
 
     // Handler for validation status changes
@@ -203,21 +205,26 @@ export function useConfigPage() {
 
     // At least 1 API key validated enables Continue button in Free mode
     const hasValidKeys = configuredKeysCount > 0;
+    const isProAuthenticated = displayMode === 'pro' && authStatus === 'authenticated';
     const allowContinue = useMemo(() => {
         if (!hasHydrated) {
             return false;
         }
-        const allowed = isFreeModeActive ? hasValidKeys : isModeConfigured;
-        logger.debug(`ConfigPage: allowContinue=${allowed} (hasValidKeys=${hasValidKeys}, isModeConfigured=${isModeConfigured})`);
+        const allowed = isFreeModeActive ? hasValidKeys : isProAuthenticated;
+        logger.debug(`ConfigPage: allowContinue=${allowed} (hasValidKeys=${hasValidKeys}, isProAuthenticated=${isProAuthenticated})`);
         return allowed;
-    }, [hasHydrated, isFreeModeActive, hasValidKeys, isModeConfigured]);
+    }, [hasHydrated, isFreeModeActive, hasValidKeys, isProAuthenticated]);
 
-    // Call configureModeComplete when at least 1 key is configured
+    // Call configureModeComplete when at least 1 key is configured (Free mode)
+    // or when authenticated (Pro mode)
     useEffect(() => {
         if (isFreeModeActive && hasValidKeys && !isModeConfigured) {
             configureModeComplete();
         }
-    }, [isFreeModeActive, hasValidKeys, isModeConfigured, configureModeComplete]);
+        if (isProAuthenticated && !isModeConfigured) {
+            configureModeComplete();
+        }
+    }, [isFreeModeActive, hasValidKeys, isProAuthenticated, isModeConfigured, configureModeComplete]);
 
     // Cleanup timeouts on unmount
     useEffect(() => {
@@ -242,5 +249,7 @@ export function useConfigPage() {
         handleToggleShow,
         handleContinue,
         allowContinue,
+        authStatus,
+        authUser,
     };
 }

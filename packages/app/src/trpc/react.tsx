@@ -8,6 +8,7 @@ import { useState } from "react";
 import SuperJSON from "superjson";
 
 import { type AppRouter } from "~/server/api/root";
+import { useStore } from "~/store";
 import { createQueryClient } from "./query-client";
 
 let clientQueryClientSingleton: QueryClient | undefined = undefined;
@@ -55,6 +56,10 @@ export function TRPCReactProvider(props: { children: React.ReactNode }) {
           headers: () => {
             const headers = new Headers();
             headers.set("x-trpc-source", "nextjs-react");
+            const idToken = useStore.getState().idToken;
+            if (idToken) {
+              headers.set("authorization", `Bearer ${idToken}`);
+            }
             return headers;
           },
         }),

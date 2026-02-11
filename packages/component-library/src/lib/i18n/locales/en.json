@@ -2,7 +2,8 @@
   "ensemble": {
     "header": {
       "title": "Ensemble AI",
-      "tagline": "The smartest AI is an ensemble."
+      "tagline": "The smartest AI is an ensemble.",
+      "signOut": "Sign out"
     },
     "steps": {
       "config": "Config",
@@ -177,6 +178,14 @@
       "clearConfirmYes": "Yes, clear all data",
       "clearConfirmCancel": "Cancel",
       "doneButton": "Done"
+    },
+    "proModeAuthGate": {
+      "heading": "Sign in to continue",
+      "description": "Sign in with your account to use Pro mode with managed API keys and credits.",
+      "signInWithGoogle": "Continue with Google",
+      "signInWithGitHub": "Continue with GitHub",
+      "signOut": "Sign out",
+      "signedInMessage": "You're signed in and ready to use Pro mode."
     },
     "workflowNavigator": {
       "back": "Back",

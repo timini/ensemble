@@ -103,6 +103,14 @@
       "addManualResponse": "Add Manual Response",
       "manualResponsesNote": "Add reference answers or benchmark outputs to compare against live model responses."
     },
+    "proModeAuthGate": {
+      "heading": "Sign in to continue",
+      "description": "Sign in with your account to use Pro mode with managed API keys and credits.",
+      "signInWithGoogle": "Continue with Google",
+      "signInWithGitHub": "Continue with GitHub",
+      "signOut": "Sign out",
+      "signedInMessage": "You're signed in and ready to use Pro mode."
+    },
     "apiKeyConfiguration": {
       "heading": "Configure API Keys",
       "apiKeyInfoBold": "Configure an API key to continue.",

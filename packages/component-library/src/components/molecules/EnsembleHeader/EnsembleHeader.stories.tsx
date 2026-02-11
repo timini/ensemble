@@ -28,3 +28,25 @@ export const WithPage: Story = {
     </div>
   ),
 };
+
+export const Authenticated: Story = {
+  args: {
+    authUser: {
+      displayName: 'Jane Doe',
+      email: 'jane@example.com',
+      photoURL: 'https://i.pravatar.cc/150?u=jane',
+    },
+    onSignOut: () => console.log('Sign out'),
+  },
+};
+
+export const AuthenticatedNoPhoto: Story = {
+  args: {
+    authUser: {
+      displayName: 'John Smith',
+      email: 'john@example.com',
+      photoURL: null,
+    },
+    onSignOut: () => console.log('Sign out'),
+  },
+};

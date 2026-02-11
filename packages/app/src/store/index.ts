@@ -28,6 +28,10 @@ import {
   createResponseSlice,
   type ResponseSlice,
 } from './slices/responseSlice';
+import {
+  createAuthSlice,
+  type AuthSlice,
+} from './slices/authSlice';
 
 /**
  * Root Zustand store combining all slices
@@ -43,7 +47,8 @@ export type StoreState = ThemeSlice &
   ModeSlice &
   ApiKeySlice &
   EnsembleSlice &
-  ResponseSlice;
+  ResponseSlice &
+  AuthSlice;
 
 const sanitizeStateForPersist = (state: StoreState): StoreState => {
   const sanitized = { ...state };
@@ -78,6 +83,11 @@ const sanitizeStateForPersist = (state: StoreState): StoreState => {
 
   sanitized.encryptionInitialized = false;
 
+  // Never persist auth state — Firebase manages its own persistence
+  sanitized.authUser = null;
+  sanitized.authStatus = 'idle';
+  sanitized.idToken = null;
+
   return sanitized;
 };
 
@@ -93,6 +103,7 @@ export const useStore = create<StoreState>()(
       ...createApiKeySlice(...a),
       ...createEnsembleSlice(...a),
       ...createResponseSlice(...a),
+      ...createAuthSlice(...a),
     }),
     {
       name: 'ensemble-ai-store',
@@ -108,3 +119,4 @@ export type { WorkflowStep } from './slices/workflowSlice';
 export type { OperatingMode } from './slices/modeSlice';
 export type { ProviderType, ModelSelection, SavedEnsemble } from './slices/ensembleSlice';
 export type { ModelResponse, ManualResponse, AgreementStats } from './slices/responseSlice';
+export type { AuthUser, AuthStatus } from './slices/authSlice';
