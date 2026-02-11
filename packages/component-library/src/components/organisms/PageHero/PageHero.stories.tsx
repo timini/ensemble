@@ -93,6 +93,30 @@ export const LongDescription: Story = {
   },
 };
 
+// Dark mode with breadcrumbs
+export const DarkMode: Story = {
+  args: {
+    title: 'Configure Your AI Ensemble',
+    description:
+      'Choose your preferred mode and configure provider access before selecting models.',
+    breadcrumbs: [
+      { label: 'Home', href: '/' },
+      { label: 'Config', href: '/config' },
+      { label: 'Ensemble', href: '#' },
+    ],
+  },
+  parameters: {
+    backgrounds: { default: 'dark' },
+  },
+  decorators: [
+    (Story) => (
+      <div className="dark bg-gray-900 p-8">
+        <Story />
+      </div>
+    ),
+  ],
+};
+
 // Minimal
 export const Minimal: Story = {
   args: {

@@ -85,6 +85,31 @@ export const FrenchLanguage: Story = {
 
 
 
+// Dark mode rendering context (open by default)
+export const DarkModeOpen: Story = {
+  args: {
+    open: true,
+    theme: 'dark',
+    language: 'en',
+    onThemeChange: () => {},
+    onLanguageChange: () => {},
+    onExportSettings: () => {},
+    onImportSettings: () => {},
+    onClearData: () => {},
+    onDone: () => {},
+  },
+  parameters: {
+    backgrounds: { default: 'dark' },
+  },
+  decorators: [
+    (Story) => (
+      <div className="dark bg-gray-900 p-8">
+        <Story />
+      </div>
+    ),
+  ],
+};
+
 // Open by default
 export const OpenModal: Story = {
   args: {
