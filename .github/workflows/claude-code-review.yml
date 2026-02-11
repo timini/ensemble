@@ -3,21 +3,9 @@ name: Claude Code Review
 on:
   pull_request:
     types: [opened, synchronize, reopened]
-    # Optional: Only run on specific file changes
-    # paths:
-    #   - "src/**/*.ts"
-    #   - "src/**/*.tsx"
-    #   - "src/**/*.js"
-    #   - "src/**/*.jsx"
 
 jobs:
-  claude-review:
-    # Optional: Filter by PR author
-    # if: |
-    #   github.event.pull_request.user.login == 'external-contributor' ||
-    #   github.event.pull_request.user.login == 'new-developer' ||
-    #   github.event.pull_request.author_association == 'FIRST_TIME_CONTRIBUTOR'
-
+  review:
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -36,22 +24,34 @@ jobs:
         uses: anthropics/claude-code-action@v1
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          use_sticky_comment: "true"
           prompt: |
-            REPO: ${{ github.repository }}
-            PR NUMBER: ${{ github.event.pull_request.number }}
+            You are reviewing PR #${{ github.event.pull_request.number }} in ${{ github.repository }}.
 
-            Please review this pull request and provide feedback on:
-            - Code quality and best practices
-            - Potential bugs or issues
-            - Performance considerations
-            - Security concerns
-            - Test coverage
+            Read the repository's CLAUDE.md first for project conventions, then review the PR diff.
 
-            Use the repository's CLAUDE.md for guidance on style and conventions. Be constructive and helpful in your feedback.
+            Focus your review on these project-specific rules:
+            - Component files must not exceed 200 lines
+            - All colours must use semantic design tokens (no hardcoded text-gray-600, bg-blue-50, etc.)
+            - All user-facing text must use i18n keys via useTranslation (no hardcoded strings)
+            - Tests must use data-testid selectors, never CSS class selectors
+            - New components require .tsx + .stories.tsx + .test.tsx
+            - No eslint-disable comments without justification
 
-            Use `gh pr comment` with your Bash tool to leave your review as a comment on the PR.
+            Also check for:
+            - Bugs, logic errors, and race conditions
+            - Security concerns (XSS, injection, exposed secrets)
+            - Missing error handling
+            - Performance issues
 
-          # See https://github.com/anthropics/claude-code-action/blob/main/docs/usage.md
-          # or https://code.claude.com/docs/en/cli-reference for available options
-          claude_args: '--allowed-tools "Bash(gh issue view:*),Bash(gh search:*),Bash(gh issue list:*),Bash(gh pr comment:*),Bash(gh pr diff:*),Bash(gh pr view:*),Bash(gh pr list:*)"'
+            Be concise. Only report issues you are confident about. Do not pad reviews with praise or repeat what the code already does correctly.
 
+            Format your review as:
+            ## PR Review
+            ### Summary (1-2 sentences)
+            ### Issues Found (if any, with file:line references)
+            ### Verdict: LGTM | LGTM with suggestions | Changes requested
+
+            Use `gh pr comment` with your Bash tool to post the review on the PR.
+
+          claude_args: '--model claude-sonnet-4-5-20250929 --allowed-tools "Bash(gh issue view:*),Bash(gh search:*),Bash(gh issue list:*),Bash(gh pr comment:*),Bash(gh pr diff:*),Bash(gh pr view:*),Bash(gh pr list:*)"'
