@@ -291,7 +291,7 @@ describe('ManualResponseModal', () => {
       render(<ManualResponseModal {...mockProps} open={true} value="Test" />);
 
       const submitButton = screen.getByTestId('submit-button');
-      expect(submitButton).toHaveClass('bg-blue-600');
+      expect(submitButton).toHaveClass('bg-primary');
     });
   });
 

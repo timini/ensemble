@@ -53,12 +53,10 @@ describe('PromptTips', () => {
     expect(component.className).toContain('custom-class');
   });
 
-  it('applies blue theme styling', () => {
+  it('applies primary theme styling', () => {
     render(<PromptTips />);
     const component = screen.getByTestId('prompt-tips');
-    expect(component.className).toContain('bg-blue-50');
-    expect(component.className).toContain('dark:bg-blue-900/20');
-    expect(component.className).toContain('border-blue-200');
-    expect(component.className).toContain('dark:border-blue-800');
+    expect(component.className).toContain('bg-primary/10');
+    expect(component.className).toContain('border-primary/20');
   });
 });

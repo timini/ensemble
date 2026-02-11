@@ -112,14 +112,14 @@ export const MultipleProgress: Story = {
       <div>
         <div className="flex justify-between mb-2 text-sm">
           <span>Medium Agreement (56%)</span>
-          <span className="text-yellow-600">Fair</span>
+          <span className="text-warning">Fair</span>
         </div>
         <Progress value={56} variant="warning" />
       </div>
       <div>
         <div className="flex justify-between mb-2 text-sm">
           <span>High Agreement (92%)</span>
-          <span className="text-green-600">Excellent</span>
+          <span className="text-success">Excellent</span>
         </div>
         <Progress value={92} variant="success" />
       </div>
@@ -135,7 +135,7 @@ export const AgreementAnalysis: Story = {
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3 flex-1">
             <span className="text-sm">Claude 3 Haiku</span>
-            <span className="text-gray-400">vs</span>
+            <span className="text-muted-foreground">vs</span>
             <span className="text-sm">Claude 3 Opus</span>
           </div>
           <div className="flex items-center space-x-3">
@@ -146,7 +146,7 @@ export const AgreementAnalysis: Story = {
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3 flex-1">
             <span className="text-sm">GPT-4</span>
-            <span className="text-gray-400">vs</span>
+            <span className="text-muted-foreground">vs</span>
             <span className="text-sm">Gemini Pro</span>
           </div>
           <div className="flex items-center space-x-3">
@@ -157,7 +157,7 @@ export const AgreementAnalysis: Story = {
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3 flex-1">
             <span className="text-sm">GPT-4</span>
-            <span className="text-gray-400">vs</span>
+            <span className="text-muted-foreground">vs</span>
             <span className="text-sm">Claude 3 Opus</span>
           </div>
           <div className="flex items-center space-x-3">

@@ -30,25 +30,25 @@ export function PromptTips({ className = '' }: PromptTipsProps) {
 
   return (
     <Card
-      className={`bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800 ${className}`}
+      className={`bg-primary/10 border-primary/20 ${className}`}
       data-testid="prompt-tips"
     >
       <div className="p-6">
         <Heading
           level={3}
           size="lg"
-          className="mb-4 text-blue-900 dark:text-blue-100"
+          className="mb-4 text-primary"
         >
           {t('pages.prompt.tipsHeading')}
         </Heading>
         <Text
           variant="body"
           color="muted"
-          className="mb-4 text-blue-800 dark:text-blue-200"
+          className="mb-4 text-primary/80"
         >
           {t('pages.prompt.tipsDescription')}
         </Text>
-        <ul className="space-y-2 text-sm text-blue-800 dark:text-blue-200">
+        <ul className="space-y-2 text-sm text-primary/80">
           <li>
             <strong>{t('pages.prompt.tip1')}</strong>
           </li>

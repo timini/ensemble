@@ -130,7 +130,7 @@ describe('AgreementAnalysis', () => {
       );
 
       const percentage = screen.getByText('35%');
-      expect(percentage).toHaveClass('text-red-500');
+      expect(percentage).toHaveClass('text-destructive');
     });
 
     it('applies yellow color for medium agreement', () => {
@@ -145,7 +145,7 @@ describe('AgreementAnalysis', () => {
       );
 
       const percentage = screen.getByText('68%');
-      expect(percentage).toHaveClass('text-yellow-500');
+      expect(percentage).toHaveClass('text-warning');
     });
 
     it('applies green color for high agreement', () => {
@@ -160,7 +160,7 @@ describe('AgreementAnalysis', () => {
       );
 
       const percentage = screen.getByText('89%');
-      expect(percentage).toHaveClass('text-green-500');
+      expect(percentage).toHaveClass('text-success');
     });
   });
 
@@ -311,7 +311,7 @@ describe('AgreementAnalysis', () => {
         />
       );
 
-      const progressBars = container.querySelectorAll('.bg-gray-200.rounded-full');
+      const progressBars = container.querySelectorAll('.bg-muted.rounded-full');
       expect(progressBars.length).toBeGreaterThan(0);
     });
 

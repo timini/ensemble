@@ -10,7 +10,7 @@ export default function TestComponentsPage() {
       <section className="mb-12">
         <h2 className="text-2xl font-semibold mb-6">Button Component</h2>
 
-        <div className="space-y-8 bg-white p-8 rounded-lg shadow">
+        <div className="space-y-8 bg-card p-8 rounded-lg shadow">
           <div>
             <h3 className="text-lg font-medium mb-4">Variants</h3>
             <div className="flex gap-4 flex-wrap">

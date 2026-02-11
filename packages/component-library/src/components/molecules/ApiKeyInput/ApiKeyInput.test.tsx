@@ -210,21 +210,45 @@ describe('ApiKeyInput', () => {
     });
   });
 
-  describe('dark mode', () => {
-    it('applies dark mode valid border class', () => {
+  describe('semantic tokens', () => {
+    it('uses success token for valid border', () => {
       const { container } = render(
         <ApiKeyInput provider="openai" label="API Key" validationStatus="valid" value="sk-valid" />
       );
-      const wrapper = container.querySelector('.border-green-300');
-      expect(wrapper).toHaveClass('dark:border-green-700');
+      const input = container.querySelector('input');
+      expect(input).toHaveClass('border-success/50');
     });
 
-    it('applies dark mode valid background class', () => {
+    it('uses success token for valid background', () => {
       const { container } = render(
         <ApiKeyInput provider="openai" label="API Key" validationStatus="valid" value="sk-valid" />
       );
-      const wrapper = container.querySelector('.bg-green-50');
-      expect(wrapper).toHaveClass('dark:bg-green-950');
+      const input = container.querySelector('input');
+      expect(input).toHaveClass('bg-success/10');
+    });
+
+    it('uses destructive token for invalid border', () => {
+      const { container } = render(
+        <ApiKeyInput provider="openai" label="API Key" validationStatus="invalid" value="bad" error="Invalid" />
+      );
+      const input = container.querySelector('input');
+      expect(input).toHaveClass('border-destructive');
+    });
+
+    it('uses success token for valid icon', () => {
+      const { container } = render(
+        <ApiKeyInput provider="openai" label="API Key" validationStatus="valid" value="sk-valid" />
+      );
+      const icon = container.querySelector('[data-validation="valid"]');
+      expect(icon).toHaveClass('text-success');
+    });
+
+    it('uses destructive token for invalid icon', () => {
+      const { container } = render(
+        <ApiKeyInput provider="openai" label="API Key" validationStatus="invalid" value="bad" error="Invalid" />
+      );
+      const icon = container.querySelector('[data-validation="invalid"]');
+      expect(icon).toHaveClass('text-destructive');
     });
   });
 

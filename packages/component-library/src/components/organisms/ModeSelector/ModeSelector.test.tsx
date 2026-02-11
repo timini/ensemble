@@ -151,8 +151,8 @@ describe('ModeSelector', () => {
       );
 
       const freeCard = container.querySelector('[data-mode="free"]');
-      expect(freeCard).toHaveClass('border-blue-500');
-      expect(freeCard).toHaveClass('bg-blue-50');
+      expect(freeCard).toHaveClass('border-primary');
+      expect(freeCard).toHaveClass('bg-primary/10');
     });
 
     it('highlights Pro Mode card when selected', () => {
@@ -165,8 +165,8 @@ describe('ModeSelector', () => {
       );
 
       const proCard = container.querySelector('[data-mode="pro"]');
-      expect(proCard).toHaveClass('border-blue-500');
-      expect(proCard).toHaveClass('bg-blue-50');
+      expect(proCard).toHaveClass('border-primary');
+      expect(proCard).toHaveClass('bg-primary/10');
     });
 
     it('does not highlight any card when no mode is selected', () => {
@@ -177,8 +177,8 @@ describe('ModeSelector', () => {
       const freeCard = container.querySelector('[data-mode="free"]');
       const proCard = container.querySelector('[data-mode="pro"]');
 
-      expect(freeCard).not.toHaveClass('border-blue-500');
-      expect(proCard).not.toHaveClass('border-blue-500');
+      expect(freeCard).not.toHaveClass('border-primary');
+      expect(proCard).not.toHaveClass('border-primary');
     });
   });
 
@@ -188,8 +188,8 @@ describe('ModeSelector', () => {
         <ModeSelector onSelectFreeMode={vi.fn()} onSelectProMode={vi.fn()} />
       );
 
-      const cards = container.querySelectorAll('.hover\\:border-blue-200');
-      expect(cards).toHaveLength(2);
+      const cards = container.querySelectorAll('[data-testid^="mode-card-"]');
+      cards.forEach(card => expect(card).toHaveClass('hover:border-primary/30'));
     });
 
     it('applies consistent spacing between cards', () => {
@@ -206,7 +206,7 @@ describe('ModeSelector', () => {
         <ModeSelector onSelectFreeMode={vi.fn()} onSelectProMode={vi.fn()} />
       );
 
-      const iconCircles = container.querySelectorAll('.bg-blue-100.rounded-full');
+      const iconCircles = container.querySelectorAll('.rounded-full');
       expect(iconCircles).toHaveLength(2);
     });
   });
@@ -322,7 +322,7 @@ describe('ModeSelector', () => {
       );
 
       // Initially Free Mode is selected
-      expect(container.querySelector('[data-mode="free"]')).toHaveClass('border-blue-500');
+      expect(container.querySelector('[data-mode="free"]')).toHaveClass('border-primary');
 
       // Switch to Pro Mode
       const proButton = screen.getByText('Go Pro');
@@ -338,7 +338,7 @@ describe('ModeSelector', () => {
         />
       );
 
-      expect(container.querySelector('[data-mode="pro"]')).toHaveClass('border-blue-500');
+      expect(container.querySelector('[data-mode="pro"]')).toHaveClass('border-primary');
     });
   });
 

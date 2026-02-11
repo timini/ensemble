@@ -34,19 +34,19 @@ export const SummarizerIndicator = React.forwardRef<
     <div
       ref={ref}
       className={cn(
-        'flex items-center gap-3 px-6 py-4 bg-orange-50 border border-orange-200 rounded-lg',
+        'flex items-center gap-3 px-6 py-4 bg-warning/10 border border-warning/30 rounded-lg',
         className
       )}
       data-testid="summarizer-indicator"
     >
-      <Icon className="text-orange-600" size="lg">
+      <Icon className="text-warning" size="lg">
         <Zap />
       </Icon>
-      <Text as="span" className="text-gray-700">
-        <Text as="span" className="font-medium text-orange-900">
+      <Text as="span" className="text-muted-foreground">
+        <Text as="span" className="font-medium text-warning">
           {t('molecules.summarizerIndicator.label')}
         </Text>{' '}
-        <Text as="span" className="text-gray-900 font-semibold">
+        <Text as="span" className="text-foreground font-semibold">
           {modelName}
         </Text>
       </Text>

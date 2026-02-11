@@ -76,19 +76,19 @@ export const InFormLayout: Story = {
   render: () => (
     <div className="max-w-2xl space-y-4">
       <div className="space-y-2">
-        <h3 className="text-lg font-semibold text-gray-900">
+        <h3 className="text-lg font-semibold text-foreground">
           Ensemble Configuration
         </h3>
-        <p className="text-sm text-gray-600">
+        <p className="text-sm text-muted-foreground">
           Configure your ensemble settings below
         </p>
       </div>
       <SummarizerIndicator modelName="Claude 3 Opus" />
       <div className="space-y-2">
-        <label className="text-sm font-medium text-gray-700">
+        <label className="text-sm font-medium text-muted-foreground">
           Additional Models
         </label>
-        <p className="text-sm text-gray-600">
+        <p className="text-sm text-muted-foreground">
           Select additional models to include in your ensemble
         </p>
       </div>
@@ -113,15 +113,15 @@ export const ResponsiveWidth: Story = {
   render: () => (
     <div className="space-y-4">
       <div className="w-full">
-        <p className="text-sm text-gray-600 mb-2">Full width:</p>
+        <p className="text-sm text-muted-foreground mb-2">Full width:</p>
         <SummarizerIndicator modelName="Claude 3 Opus" />
       </div>
       <div className="max-w-md">
-        <p className="text-sm text-gray-600 mb-2">Max width (md):</p>
+        <p className="text-sm text-muted-foreground mb-2">Max width (md):</p>
         <SummarizerIndicator modelName="Claude 3 Opus" />
       </div>
       <div className="max-w-sm">
-        <p className="text-sm text-gray-600 mb-2">Max width (sm):</p>
+        <p className="text-sm text-muted-foreground mb-2">Max width (sm):</p>
         <SummarizerIndicator modelName="Claude 3 Opus" />
       </div>
     </div>

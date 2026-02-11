@@ -12,7 +12,7 @@ const spinnerVariants = cva('animate-spin', {
     },
     variant: {
       default: 'text-foreground',
-      primary: 'text-blue-600 dark:text-blue-400',
+      primary: 'text-primary',
       muted: 'text-muted-foreground',
     },
   },

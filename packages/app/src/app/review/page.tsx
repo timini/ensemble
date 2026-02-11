@@ -239,8 +239,8 @@ export default function ReviewPage() {
         <h3 className="text-xl font-semibold">{t('pages.review.responsesHeading')}</h3>
 
         {viewResponses.length === 0 && viewManualResponses.length === 0 ? (
-          <div className="p-8 text-center bg-gray-50 dark:bg-gray-800 rounded-lg">
-            <p className="text-gray-600 dark:text-gray-400">
+          <div className="p-8 text-center bg-muted rounded-lg">
+            <p className="text-muted-foreground">
               {t('pages.review.noResponses')}
             </p>
           </div>
@@ -297,7 +297,7 @@ export default function ReviewPage() {
         />
         <button
           onClick={handleNewComparison}
-          className="px-6 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors self-end md:self-auto"
+          className="px-6 py-2 border border-border rounded-lg hover:bg-accent transition-colors self-end md:self-auto"
         >
           {t('pages.review.newComparisonButton')}
         </button>

@@ -53,9 +53,9 @@ export const AgreementAnalysis = React.forwardRef<HTMLDivElement, AgreementAnaly
 
     // Determine agreement level and color
     const getAgreementLevel = (agreement: number) => {
-      if (agreement > 0.8) return { label: t('organisms.agreementAnalysis.highAgreement'), color: 'text-green-500' };
-      if (agreement >= 0.5) return { label: t('organisms.agreementAnalysis.mediumAgreement'), color: 'text-yellow-500' };
-      return { label: t('organisms.agreementAnalysis.lowAgreement'), color: 'text-red-500' };
+      if (agreement > 0.8) return { label: t('organisms.agreementAnalysis.highAgreement'), color: 'text-success' };
+      if (agreement >= 0.5) return { label: t('organisms.agreementAnalysis.mediumAgreement'), color: 'text-warning' };
+      return { label: t('organisms.agreementAnalysis.lowAgreement'), color: 'text-destructive' };
     };
 
     const agreementLevel = getAgreementLevel(overallAgreement);
@@ -65,9 +65,9 @@ export const AgreementAnalysis = React.forwardRef<HTMLDivElement, AgreementAnaly
 
     // Get color for progress bar
     const getProgressColor = (similarity: number) => {
-      if (similarity > 0.8) return 'bg-green-500';
-      if (similarity >= 0.5) return 'bg-yellow-500';
-      return 'bg-red-500';
+      if (similarity > 0.8) return 'bg-success';
+      if (similarity >= 0.5) return 'bg-warning';
+      return 'bg-destructive';
     };
 
     return (
@@ -93,11 +93,11 @@ export const AgreementAnalysis = React.forwardRef<HTMLDivElement, AgreementAnaly
                 <div key={index} className="flex items-center justify-between">
                   <div className="flex items-center space-x-3">
                     <Text as="span" variant="small">{comparison.model1}</Text>
-                    <Text as="span" variant="small" className="text-gray-400">{t('organisms.agreementAnalysis.vs')}</Text>
+                    <Text as="span" variant="small" className="text-muted-foreground">{t('organisms.agreementAnalysis.vs')}</Text>
                     <Text as="span" variant="small">{comparison.model2}</Text>
                   </div>
                   <div className="flex items-center space-x-3">
-                    <div className="w-32 bg-gray-200 rounded-full h-2">
+                    <div className="w-32 bg-muted rounded-full h-2">
                       <div
                         className={cn('h-2 rounded-full', getProgressColor(comparison.similarity))}
                         style={{ width: `${formatPercentage(comparison.similarity)}%` }}
@@ -118,15 +118,15 @@ export const AgreementAnalysis = React.forwardRef<HTMLDivElement, AgreementAnaly
           {/* Statistics Grid */}
           <div className="grid grid-cols-3 gap-8 text-center">
             <div>
-              <div className="text-2xl font-bold text-blue-600">{responseCount}</div>
+              <div className="text-2xl font-bold text-primary">{responseCount}</div>
               <Text variant="small" color="muted">{t('organisms.agreementAnalysis.responsesAnalyzed')}</Text>
             </div>
             <div>
-              <div className="text-2xl font-bold text-blue-600">{comparisonCount}</div>
+              <div className="text-2xl font-bold text-primary">{comparisonCount}</div>
               <Text variant="small" color="muted">{t('organisms.agreementAnalysis.comparisons')}</Text>
             </div>
             <div>
-              <div className="text-2xl font-bold text-blue-600">
+              <div className="text-2xl font-bold text-primary">
                 {formatPercentage(averageConfidence)}%
               </div>
               <Text variant="small" color="muted">{t('organisms.agreementAnalysis.avgConfidence')}</Text>

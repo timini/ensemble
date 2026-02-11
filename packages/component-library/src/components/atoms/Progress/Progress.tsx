@@ -6,9 +6,9 @@ const progressVariants = cva('relative h-2 w-full overflow-hidden rounded-full',
   variants: {
     variant: {
       default: 'bg-secondary',
-      destructive: 'bg-red-100 dark:bg-red-950',
-      success: 'bg-green-100 dark:bg-green-950',
-      warning: 'bg-yellow-100 dark:bg-yellow-950',
+      destructive: 'bg-destructive/10',
+      success: 'bg-success/10',
+      warning: 'bg-warning/10',
     },
   },
   defaultVariants: {
@@ -23,8 +23,8 @@ const progressIndicatorVariants = cva(
       variant: {
         default: 'bg-primary',
         destructive: 'bg-destructive',
-        success: 'bg-green-500 dark:bg-green-400',
-        warning: 'bg-yellow-500 dark:bg-yellow-400',
+        success: 'bg-success',
+        warning: 'bg-warning',
       },
     },
     defaultVariants: {

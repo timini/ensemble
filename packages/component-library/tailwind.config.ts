@@ -23,6 +23,14 @@ export default {
           DEFAULT: 'rgb(var(--color-destructive) / <alpha-value>)',
           foreground: 'rgb(var(--color-destructive-foreground) / <alpha-value>)',
         },
+        success: {
+          DEFAULT: 'rgb(var(--color-success) / <alpha-value>)',
+          foreground: 'rgb(var(--color-success-foreground) / <alpha-value>)',
+        },
+        warning: {
+          DEFAULT: 'rgb(var(--color-warning) / <alpha-value>)',
+          foreground: 'rgb(var(--color-warning-foreground) / <alpha-value>)',
+        },
         muted: {
           DEFAULT: 'rgb(var(--color-muted) / <alpha-value>)',
           foreground: 'rgb(var(--color-muted-foreground) / <alpha-value>)',

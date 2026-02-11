@@ -11,9 +11,9 @@ const iconVariants = cva('inline-flex shrink-0', {
     },
     variant: {
       default: 'text-foreground',
-      primary: 'text-blue-600 dark:text-blue-400',
-      success: 'text-green-500 dark:text-green-400',
-      warning: 'text-yellow-500 dark:text-yellow-400',
+      primary: 'text-primary',
+      success: 'text-success',
+      warning: 'text-warning',
       destructive: 'text-destructive',
       muted: 'text-muted-foreground',
     },
