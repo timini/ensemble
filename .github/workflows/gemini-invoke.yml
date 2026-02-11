@@ -19,6 +19,7 @@ defaults:
 jobs:
   invoke:
     runs-on: 'ubuntu-latest'
+    timeout-minutes: 10
     permissions:
       contents: 'read'
       id-token: 'write'
@@ -37,14 +38,19 @@ jobs:
           permission-issues: 'write'
           permission-pull-requests: 'write'
 
+      - name: 'Pre-pull GitHub MCP server image'
+        run: docker pull ghcr.io/github/github-mcp-server:v0.27.0
+
       - name: 'Run Gemini CLI'
         id: 'run_gemini'
+        continue-on-error: true
         uses: 'google-github-actions/run-gemini-cli@v0' # ratchet:exclude
         env:
           TITLE: '${{ github.event.pull_request.title || github.event.issue.title }}'
           DESCRIPTION: '${{ github.event.pull_request.body || github.event.issue.body }}'
           EVENT_NAME: '${{ github.event_name }}'
           GITHUB_TOKEN: '${{ steps.mint_identity_token.outputs.token || secrets.GITHUB_TOKEN || github.token }}'
+          GITHUB_PERSONAL_ACCESS_TOKEN: '${{ steps.mint_identity_token.outputs.token || secrets.GITHUB_TOKEN || github.token }}'
           IS_PULL_REQUEST: '${{ !!github.event.pull_request }}'
           ISSUE_NUMBER: '${{ github.event.pull_request.number || github.event.issue.number }}'
           REPOSITORY: '${{ github.repository }}'
@@ -55,7 +61,7 @@ jobs:
           gcp_service_account: '${{ vars.SERVICE_ACCOUNT_EMAIL }}'
           gcp_workload_identity_provider: '${{ vars.GCP_WIF_PROVIDER }}'
           gemini_api_key: '${{ secrets.GEMINI_API_KEY }}'
-          gemini_cli_version: '${{ vars.GEMINI_CLI_VERSION }}'
+          gemini_cli_version: '0.19.0'
           gemini_debug: '${{ fromJSON(vars.GEMINI_DEBUG || vars.ACTIONS_STEP_DEBUG || false) }}'
           gemini_model: '${{ vars.GEMINI_MODEL }}'
           google_api_key: '${{ secrets.GOOGLE_API_KEY }}'
@@ -66,7 +72,7 @@ jobs:
           settings: |-
             {
               "model": {
-                "maxSessionTurns": 25
+                "maxSessionTurns": 50
               },
               "telemetry": {
                 "enabled": true,
@@ -119,3 +125,14 @@ jobs:
               }
             }
           prompt: '/gemini-invoke'
+
+      - name: 'Report failure'
+        if: steps.run_gemini.outcome != 'success'
+        env:
+          GITHUB_TOKEN: '${{ steps.mint_identity_token.outputs.token || secrets.GITHUB_TOKEN || github.token }}'
+          ISSUE_NUMBER: '${{ github.event.pull_request.number || github.event.issue.number }}'
+        run: |
+          echo "::warning::Gemini invoke step failed (outcome: ${{ steps.run_gemini.outcome }})"
+          gh issue comment "$ISSUE_NUMBER" \
+            --body "🤖 Gemini was unable to complete the request. See [workflow logs](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) for details." \
+            --repo "${{ github.repository }}" || true

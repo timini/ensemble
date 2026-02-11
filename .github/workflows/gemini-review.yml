@@ -19,7 +19,7 @@ defaults:
 jobs:
   review:
     runs-on: 'ubuntu-latest'
-    timeout-minutes: 7
+    timeout-minutes: 10
     permissions:
       contents: 'read'
       id-token: 'write'
@@ -41,11 +41,16 @@ jobs:
       - name: 'Checkout repository'
         uses: 'actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8' # ratchet:actions/checkout@v6
 
+      - name: 'Pre-pull GitHub MCP server image'
+        run: docker pull ghcr.io/github/github-mcp-server:v0.27.0
+
       - name: 'Run Gemini pull request review'
         uses: 'google-github-actions/run-gemini-cli@v0' # ratchet:exclude
         id: 'gemini_pr_review'
+        continue-on-error: true
         env:
           GITHUB_TOKEN: '${{ steps.mint_identity_token.outputs.token || secrets.GITHUB_TOKEN || github.token }}'
+          GITHUB_PERSONAL_ACCESS_TOKEN: '${{ steps.mint_identity_token.outputs.token || secrets.GITHUB_TOKEN || github.token }}'
           ISSUE_TITLE: '${{ github.event.pull_request.title || github.event.issue.title }}'
           ISSUE_BODY: '${{ github.event.pull_request.body || github.event.issue.body }}'
           PULL_REQUEST_NUMBER: '${{ github.event.pull_request.number || github.event.issue.number }}'
@@ -57,7 +62,7 @@ jobs:
           gcp_service_account: '${{ vars.SERVICE_ACCOUNT_EMAIL }}'
           gcp_workload_identity_provider: '${{ vars.GCP_WIF_PROVIDER }}'
           gemini_api_key: '${{ secrets.GEMINI_API_KEY }}'
-          gemini_cli_version: '${{ vars.GEMINI_CLI_VERSION }}'
+          gemini_cli_version: '0.19.0'
           gemini_debug: '${{ fromJSON(vars.GEMINI_DEBUG || vars.ACTIONS_STEP_DEBUG || false) }}'
           gemini_model: '${{ vars.GEMINI_MODEL }}'
           google_api_key: '${{ secrets.GOOGLE_API_KEY }}'
@@ -68,7 +73,7 @@ jobs:
           settings: |-
             {
               "model": {
-                "maxSessionTurns": 25
+                "maxSessionTurns": 50
               },
               "telemetry": {
                 "enabled": true,
@@ -107,3 +112,28 @@ jobs:
               }
             }
           prompt: '/gemini-review'
+
+      - name: 'Check if review was posted'
+        if: always()
+        env:
+          GITHUB_TOKEN: '${{ steps.mint_identity_token.outputs.token || secrets.GITHUB_TOKEN || github.token }}'
+          PR_NUMBER: '${{ github.event.pull_request.number || github.event.issue.number }}'
+          GEMINI_OUTCOME: '${{ steps.gemini_pr_review.outcome }}'
+        run: |
+          if [ "$GEMINI_OUTCOME" != "success" ]; then
+            echo "::warning::Gemini review step failed (outcome: $GEMINI_OUTCOME)"
+            gh pr comment "$PR_NUMBER" \
+              --body "🤖 Gemini review failed (outcome: $GEMINI_OUTCOME). See [workflow logs](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) for details." \
+              --repo "${{ github.repository }}" || true
+          else
+            # Verify a review was actually posted (CLI can exit 0 without posting)
+            REVIEW_COUNT=$(gh api "repos/${{ github.repository }}/pulls/$PR_NUMBER/reviews" \
+              --jq '[.[] | select(.user.login == "github-actions[bot]" or .user.login == "github-actions")] | length' 2>/dev/null || echo "0")
+            echo "Reviews found from github-actions: $REVIEW_COUNT"
+            if [ "$REVIEW_COUNT" = "0" ]; then
+              echo "::warning::Gemini CLI exited successfully but no review was posted"
+              gh pr comment "$PR_NUMBER" \
+                --body "🤖 Gemini review completed but no review was posted. This may indicate an MCP tool issue. See [workflow logs](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) for details." \
+                --repo "${{ github.repository }}" || true
+            fi
+          fi
