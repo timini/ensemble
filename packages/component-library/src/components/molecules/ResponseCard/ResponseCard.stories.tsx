@@ -245,7 +245,7 @@ export const Interactive: Story = {
           onCopy={handleCopy}
         />
         {copyFeedback && (
-          <p className="mt-2 text-sm text-green-600">Copied to clipboard!</p>
+          <p className="mt-2 text-sm text-success">Copied to clipboard!</p>
         )}
       </div>
     );
