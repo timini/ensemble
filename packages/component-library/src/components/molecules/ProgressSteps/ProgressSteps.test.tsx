@@ -14,8 +14,8 @@ describe('ProgressSteps', () => {
 
   it('highlights the current step', () => {
     render(<ProgressSteps currentStep="prompt" />);
-    const promptStep = screen.getByText('Prompt').parentElement;
-    expect(promptStep?.querySelector('.bg-primary')).toBeInTheDocument();
+    const promptStep = screen.getByTestId('workflow-step-prompt');
+    expect(promptStep).toHaveClass('bg-primary');
   });
 
   it('shows check marks for completed steps', () => {
