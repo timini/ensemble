@@ -35,6 +35,7 @@ export default function ReviewPage() {
   const router = useRouter();
   const hasHydrated = useHasHydrated();
 
+  const currentStep = useStore((state) => state.currentStep);
   const prompt = useStore((state) => state.prompt);
   const summarizerModel = useStore((state) => state.summarizerModel);
   const selectedModels = useStore((state) => state.selectedModels);
@@ -198,7 +199,7 @@ export default function ReviewPage() {
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-6xl">
-      <ProgressSteps currentStep="review" fallbackStep="review" />
+      <ProgressSteps currentStep={currentStep} fallbackStep="review" />
 
       <PageHero
         title={t('pages.review.title')}
@@ -289,7 +290,7 @@ export default function ReviewPage() {
       {/* 5. Action Buttons */}
       <div className="mt-12 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <WorkflowNavigator
-          currentStep="review"
+          currentStep={currentStep}
           backLabel={t('pages.review.backButton')}
           continueLabel={t('pages.review.startOverButton')}
           onBack={handleBack}
