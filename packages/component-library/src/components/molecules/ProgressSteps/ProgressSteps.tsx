@@ -39,22 +39,20 @@ export function ProgressSteps({ currentStep, fallbackStep }: ProgressStepsProps)
   const currentIndex = getCurrentStepIndex();
 
   return (
-    <div className="progress-steps flex items-center justify-center mb-12">
-      {steps.map((step, index) => (
-        <div key={step.id} className="flex items-center">
-          <div
-            className="flex flex-col items-center"
-            data-testid={`progress-step-${step.id}`}
-            data-active={index === currentIndex}
-            data-completed={index < currentIndex}
-          >
+    <div className="progress-steps flex flex-col items-center mb-12">
+      {/* Circles and connectors row */}
+      <div className="flex items-center">
+        {steps.map((step, index) => (
+          <div key={step.id} className="flex items-center">
             <div
-              className="flex flex-col items-center"
-              data-testid={`workflow-step-${step.id}`}
+              data-testid={`progress-step-${step.id}`}
               data-active={index === currentIndex}
               data-completed={index < currentIndex}
             >
               <div
+                data-testid={`workflow-step-${step.id}`}
+                data-active={index === currentIndex}
+                data-completed={index < currentIndex}
                 className={`w-12 h-12 rounded-full flex items-center justify-center font-semibold text-sm transition-colors ${
                   index < currentIndex
                     ? 'bg-success text-success-foreground'
@@ -69,31 +67,36 @@ export function ProgressSteps({ currentStep, fallbackStep }: ProgressStepsProps)
                   step.number
                 )}
               </div>
-              <span
-                className={`mt-2 text-sm font-medium transition-colors ${
-                  index < currentIndex
-                    ? 'text-success'
-                    : index === currentIndex
-                      ? 'text-primary'
-                      : 'text-muted-foreground'
-                }`}
-              >
-                {step.label}
-              </span>
             </div>
+            {index < steps.length - 1 && (
+              <div
+                className={`w-16 h-0.5 mx-4 transition-colors ${
+                  index < currentIndex ? 'bg-success' : 'bg-muted'
+                }`}
+              />
+            )}
           </div>
-
-          {index < steps.length - 1 && (
-            <div
-              className={`w-16 h-0.5 mx-4 transition-colors ${
+        ))}
+      </div>
+      {/* Labels row */}
+      <div className="flex items-start mt-2">
+        {steps.map((step, index) => (
+          <div key={step.id} className="flex items-center">
+            <span
+              className={`w-12 text-center text-sm font-medium transition-colors ${
                 index < currentIndex
-                  ? 'bg-success'
-                  : 'bg-muted'
+                  ? 'text-success'
+                  : index === currentIndex
+                    ? 'text-primary'
+                    : 'text-muted-foreground'
               }`}
-            />
-          )}
-        </div>
-      ))}
+            >
+              {step.label}
+            </span>
+            {index < steps.length - 1 && <div className="w-16 mx-4" />}
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
