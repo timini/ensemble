@@ -80,3 +80,19 @@ exports[`Button > snapshots > matches snapshot for small size 1`] = `
   Small
 </button>
 `;
+
+exports[`Button > snapshots > matches snapshot for success variant 1`] = `
+<button
+  class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 bg-success text-success-foreground shadow-sm hover:bg-success/90 h-9 px-4 py-2"
+>
+  Success
+</button>
+`;
+
+exports[`Button > snapshots > matches snapshot for warning variant 1`] = `
+<button
+  class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 bg-warning text-warning-foreground shadow-sm hover:bg-warning/90 h-9 px-4 py-2"
+>
+  Warning
+</button>
+`;

@@ -37,6 +37,12 @@ describe('Button', () => {
 
     rerender(<Button variant="link">Link</Button>);
     expect(screen.getByRole('button')).toHaveClass('underline-offset-4');
+
+    rerender(<Button variant="warning">Warning</Button>);
+    expect(screen.getByRole('button')).toHaveClass('bg-warning');
+
+    rerender(<Button variant="success">Success</Button>);
+    expect(screen.getByRole('button')).toHaveClass('bg-success');
   });
 
   it('applies size classes correctly', () => {
@@ -100,6 +106,16 @@ describe('Button', () => {
 
     it('matches snapshot for link variant', () => {
       const { container } = render(<Button variant="link">Link</Button>);
+      expect(container.firstChild).toMatchSnapshot();
+    });
+
+    it('matches snapshot for warning variant', () => {
+      const { container } = render(<Button variant="warning">Warning</Button>);
+      expect(container.firstChild).toMatchSnapshot();
+    });
+
+    it('matches snapshot for success variant', () => {
+      const { container } = render(<Button variant="success">Success</Button>);
       expect(container.firstChild).toMatchSnapshot();
     });
 
