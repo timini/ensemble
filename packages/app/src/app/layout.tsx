@@ -124,8 +124,13 @@ export default function RootLayout({
               }
             }}
             onClearData={() => {
-              localStorage.removeItem('ensemble-ai-store');
-              window.location.reload();
+              const confirmed = window.confirm(
+                'Are you sure? This will clear all saved data including API keys and ensembles.',
+              );
+              if (confirmed) {
+                localStorage.removeItem('ensemble-ai-store');
+                window.location.reload();
+              }
             }}
             onDone={() => setSettingsOpen(false)}
           />

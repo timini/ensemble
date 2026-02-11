@@ -28,6 +28,7 @@ import {
   createResponseSlice,
   type ResponseSlice,
 } from './slices/responseSlice';
+import { migrateModelDisplayNamesToIds } from './migrations/migrateModelIds';
 
 /**
  * Root Zustand store combining all slices
@@ -97,6 +98,7 @@ export const useStore = create<StoreState>()(
     {
       name: 'ensemble-ai-store',
       serialize: serializeStoreState,
+      deserialize: migrateModelDisplayNamesToIds,
     },
   ),
 );

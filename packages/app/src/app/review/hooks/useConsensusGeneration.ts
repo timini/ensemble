@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { useStore } from '~/store';
 import { EloRankingConsensus } from '@ensemble-ai/shared-utils/consensus/EloRankingConsensus';
 import { StandardConsensus } from '@ensemble-ai/shared-utils/consensus/StandardConsensus';
-import { ProviderRegistry } from '@ensemble-ai/shared-utils/providers';
+import { ProviderRegistry, type ProviderName } from '@ensemble-ai/shared-utils/providers';
 import type { ConsensusModelResponse } from '@ensemble-ai/shared-utils/consensus/types';
 import { logger } from '~/lib/logger';
 
@@ -44,38 +44,25 @@ export function useConsensusGeneration() {
             const registry = ProviderRegistry.getInstance();
             const clientMode = process.env.NEXT_PUBLIC_MOCK_MODE === 'true' ? 'mock' : (mode === 'pro' ? 'pro' : 'free');
 
-            // For now, we assume the summarizer provider is what we use for "judging" as well in ELO,
-            // OR we need to find the provider for the summarizer model.
-            // We can iterate available providers or assume a mapping.
-            // Since we don't store provider for summarizer explicitly in store (just ID), 
-            // we might need to find it.
-            // But wait, `summarizerModel` is just string ID.
-            // We need to find the provider for this ID.
-            // Let's assume we can look it up from available models or just iterate.
-            // For simplicity/safety, let's look up in the models list if we had it.
-            // But this hook doesn't have access to "all available models" easily unless we select from store.
-            // For now, let's use the registry's method if available, or hack it?
-            // Actually `useStore` has `selectedModels` which has provider info,
-            // but the summarizer MIGHT NOT be one of the selected generating models (though UI enforces it?).
-            // The UI `EnsembleConfigurationSummary` shows `summarizerModel`.
-            // The `ModelSelectionList` enforces summarizer is one of selected or just one available?
-            // Usually summarizer is one of the available models, not necessarily selected for generation.
-
-            // Let's blindly try to find provider or default to something safe.
-            // Ideally we pass full model info.
-
-            // HACK: For MVP/Prototype, we will try to find the provider from the ID.
-            // Common IDs: 'gpt-4o' -> openai, 'claude-3-opus' -> anthropic.
-            // Dynamic loading prefers API results, but we need model metadata for provider lookup
-            // Use FALLBACK_MODELS for provider resolution
+            // Resolve the provider for the summarizer model.
+            // Try: FALLBACK_MODELS → selected models in store → ID pattern inference
             const { FALLBACK_MODELS } = await import('~/lib/models');
             const summarizerModelDef = FALLBACK_MODELS.find(m => m.id === effectiveSummarizerModelId);
 
-            if (!summarizerModelDef) {
-                throw new Error(`Summarizer model definition not found for ID: ${effectiveSummarizerModelId}`);
+            let providerName: ProviderName;
+            if (summarizerModelDef) {
+                providerName = summarizerModelDef.provider as ProviderName;
+            } else {
+                // Try to find provider from selected models in the store
+                const selectedModels = useStore.getState().selectedModels;
+                const fromStore = selectedModels.find(m => m.model === effectiveSummarizerModelId);
+                if (fromStore) {
+                    providerName = fromStore.provider as ProviderName;
+                } else {
+                    // Infer provider from model ID naming conventions
+                    providerName = inferProviderFromModelId(effectiveSummarizerModelId);
+                }
             }
-
-            const providerName = summarizerModelDef.provider;
             const providerClient = registry.getProvider(providerName, clientMode);
 
             const consensusResponses: ConsensusModelResponse[] = responses.map(r => ({
@@ -87,12 +74,6 @@ export function useConsensusGeneration() {
             let resultText = '';
 
             if (consensusMethod === 'elo') {
-                // For ELO, we need a Judge and a Summarizer.
-                // We'll use the SAME provider/model for both for now as per "judgeProvider" argument.
-                // Or we could allow separate configuration.
-                // "User's main objective... using a summarizer model to rate responses... and then generating consensus".
-                // So same model.
-
                 const strategy = new EloRankingConsensus(
                     providerClient,
                     effectiveSummarizerModelId,
@@ -103,7 +84,6 @@ export function useConsensusGeneration() {
                 resultText = await strategy.generateConsensus(consensusResponses, eloTopN, originalPrompt);
 
             } else {
-                // Standard
                 const strategy = new StandardConsensus(
                     providerClient,
                     effectiveSummarizerModelId
@@ -128,4 +108,14 @@ export function useConsensusGeneration() {
         error,
         consensusMethod
     };
+}
+
+/** Infer the provider from common model ID naming conventions. */
+function inferProviderFromModelId(modelId: string): ProviderName {
+    const id = modelId.toLowerCase();
+    if (id.startsWith('gpt-') || id.startsWith('o1') || id.startsWith('o3')) return 'openai';
+    if (id.startsWith('claude')) return 'anthropic';
+    if (id.startsWith('gemini')) return 'google';
+    if (id.startsWith('grok')) return 'xai';
+    throw new Error(`Cannot determine provider for model: ${modelId}`);
 }

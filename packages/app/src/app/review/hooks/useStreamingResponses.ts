@@ -51,9 +51,10 @@ export function useStreamingResponses({
         initializeProviders();
         const registry = ProviderRegistry.getInstance();
 
-        const displayName =
-            FALLBACK_MODELS.find((m) => m.id === model.model)?.name ??
-            formatModelLabelFromId(model.model);
+        const displayName = model.model
+            ? (FALLBACK_MODELS.find((m) => m.id === model.model)?.name ??
+              formatModelLabelFromId(model.model))
+            : 'Unknown Model';
         startStreaming(model.id, model.provider, displayName);
 
         // Initialize buffer
