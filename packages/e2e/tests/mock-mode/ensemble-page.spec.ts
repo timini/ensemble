@@ -181,6 +181,38 @@ test.describe('Ensemble Page', () => {
     await expect(googleCard).not.toHaveAttribute('data-selected', 'true');
   });
 
+  test.describe('Sidebar Continue Button', () => {
+    test('sidebar continue button is visible on ensemble page', async ({ page }) => {
+      const sidebarButton = page.getByTestId('continue-to-prompt');
+      await expect(sidebarButton).toBeVisible();
+    });
+
+    test('sidebar continue button is disabled with less than 2 models', async ({ page }) => {
+      const sidebarButton = page.getByTestId('continue-to-prompt');
+      await expect(sidebarButton).toBeDisabled();
+
+      // Select 1 model - still disabled
+      await enabledModels(page).first().click();
+      await expect(sidebarButton).toBeDisabled();
+    });
+
+    test('sidebar continue button is enabled with 2 models selected', async ({ page }) => {
+      await enabledModels(page).first().click();
+      await enabledModels(page).nth(1).click();
+
+      const sidebarButton = page.getByTestId('continue-to-prompt');
+      await expect(sidebarButton).toBeEnabled();
+    });
+
+    test('sidebar continue button navigates to /prompt', async ({ page }) => {
+      await enabledModels(page).first().click();
+      await enabledModels(page).nth(1).click();
+
+      await page.getByTestId('continue-to-prompt').click();
+      await expect(page).toHaveURL('/prompt');
+    });
+  });
+
   test('shows manual responses in sidebar after creation', async ({ page }) => {
     await page.getByTestId('add-manual-response').click();
     await page.getByTestId('model-name-input').fill('Manual Test');

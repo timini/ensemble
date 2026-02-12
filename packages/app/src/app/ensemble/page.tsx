@@ -82,6 +82,8 @@ export default function EnsemblePage() {
             onClearAll={clearSelection}
             showQuickPresets={false}
             showSaveEnsemble={false}
+            onContinue={handleContinue}
+            continueDisabled={!isValid}
           />
         </div>
       </div>
