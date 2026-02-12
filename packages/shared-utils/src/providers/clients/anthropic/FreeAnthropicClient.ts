@@ -31,8 +31,6 @@ export class FreeAnthropicClient extends BaseFreeClient {
     if (process.env.NEXT_PUBLIC_MOCK_MODE === 'true') {
       return ['claude-3-5-sonnet', 'claude-3-haiku'];
     }
-    // Fallback to axios for models if SDK listing is heavy, or use SDK.
-    // SDK is cleaner.
     try {
       const client = this.createClient(apiKey);
       const response = await client.models.list();
@@ -40,7 +38,7 @@ export class FreeAnthropicClient extends BaseFreeClient {
         .map((m) => m.id)
         .filter((id) => id.startsWith('claude-'));
     } catch {
-      // Fallback to axios if SDK fails or manual list
+      // Fallback to known model list if SDK call fails
       return ['claude-3-5-sonnet-20241022', 'claude-3-opus-20240229', 'claude-3-sonnet-20240229', 'claude-3-haiku-20240307'];
     }
   }
