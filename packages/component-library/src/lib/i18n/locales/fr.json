@@ -86,7 +86,15 @@
       "description": "Résumé combiné fourni par {{model}}.",
       "generatedBy": "Généré par {{model}}",
       "shareText": "Partager cette réponse consensuelle",
-      "shareButton": "Partager"
+      "shareButton": "Partager",
+      "copy": "Copier",
+      "copied": "Copié !",
+      "awaitingText": "En attente des réponses des modèles…",
+      "awaitingDescription": "Le résumé consensuel sera généré une fois que les modèles auront terminé leurs réponses.",
+      "generatingText": "Génération du consensus…",
+      "failedText": "Échec de la génération du consensus",
+      "failedDescription": "Une erreur s'est produite lors de la génération du résumé consensuel.",
+      "errorLabel": "Erreur :"
     },
     "ensembleConfigurationSummary": {
       "heading": "Configuration de Votre Ensemble",

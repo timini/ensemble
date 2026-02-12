@@ -5,30 +5,31 @@
  * Displays streaming responses, agreement analysis, and consensus
  */
 
-'use client';
+"use client";
 
-import { useRouter } from 'next/navigation';
-import { useMemo } from 'react';
-import { useTranslation } from 'react-i18next';
-import { useStore } from '~/store';
-import { useHasHydrated } from '~/hooks/useHasHydrated';
+import { useRouter } from "next/navigation";
+import { useMemo } from "react";
+import { useTranslation } from "react-i18next";
+import { useStore } from "~/store";
+import { useHasHydrated } from "~/hooks/useHasHydrated";
 import {
   buildPairwiseComparisons,
   calculateAverageConfidence,
   normalizeSimilarity,
-} from '~/lib/agreement';
-import { PageHero } from '@/components/organisms/PageHero';
-import { ResponseCard } from '@/components/molecules/ResponseCard';
-import { ConsensusCard } from '@/components/organisms/ConsensusCard';
-import { AgreementAnalysis } from '@/components/organisms/AgreementAnalysis';
-import { ProgressSteps } from '@/components/molecules/ProgressSteps';
-import { WorkflowNavigator } from '@/components/organisms/WorkflowNavigator';
-import { PromptCard } from '@/components/organisms/PromptCard';
-import type { Provider } from '@/components/molecules/ResponseCard';
-import { useResponseEmbeddings } from './hooks/useResponseEmbeddings';
-import { useStreamingResponses } from './hooks/useStreamingResponses';
-import { useConsensusGeneration } from './hooks/useConsensusGeneration';
-import { useEffect } from 'react';
+} from "~/lib/agreement";
+import { PageHero } from "@/components/organisms/PageHero";
+import { ResponseCard } from "@/components/molecules/ResponseCard";
+import { ConsensusCard } from "@/components/organisms/ConsensusCard";
+import { AgreementAnalysis } from "@/components/organisms/AgreementAnalysis";
+import { ProgressSteps } from "@/components/molecules/ProgressSteps";
+import { WorkflowNavigator } from "@/components/organisms/WorkflowNavigator";
+import { PromptCard } from "@/components/organisms/PromptCard";
+import type { Provider } from "@/components/molecules/ResponseCard";
+import { useResponseEmbeddings } from "./hooks/useResponseEmbeddings";
+import { useStreamingResponses } from "./hooks/useStreamingResponses";
+import { useConsensusGeneration } from "./hooks/useConsensusGeneration";
+import { useConsensusStatus } from "./hooks/useConsensusStatus";
+import { useConsensusTrigger } from "./hooks/useConsensusTrigger";
 
 export default function ReviewPage() {
   const { t } = useTranslation();
@@ -80,9 +81,7 @@ export default function ReviewPage() {
   const resetStreamingState = useStore((state) => state.resetStreamingState);
   const setEmbeddings = useStore((state) => state.setEmbeddings);
 
-  const calculateAgreementState = useStore(
-    (state) => state.calculateAgreement,
-  );
+  const calculateAgreementState = useStore((state) => state.calculateAgreement);
 
   const completedResponses = useMemo(
     () =>
@@ -128,76 +127,58 @@ export default function ReviewPage() {
     calculateAgreementState,
   });
 
-  const { generateConsensus, isGenerating: isGeneratingConsensus } = useConsensusGeneration();
+  const {
+    generateConsensus,
+    isGenerating: isGeneratingConsensus,
+    error: consensusError,
+  } = useConsensusGeneration();
 
-  // Effect: Trigger consensus generation when all responses are complete
-  useEffect(() => {
-    if (!hasHydrated || metaAnalysis || isGeneratingConsensus) return;
-
-    // Use summarizer from state (which is an available model ID like "gpt-4o")
-    // If no summarizer set, find the first selected model's corresponding available model ID
-    let effectiveSummarizerId = summarizerModel;
-
-    if (!effectiveSummarizerId && selectedModels[0]) {
-      // selectedModels[0].model contains the model name (e.g., "GPT-4o")
-      // We need to find the corresponding available model ID
-      // For now, use a lowercase, hyphenated version as a fallback
-      // The actual ID format in FALLBACK_MODELS uses lowercase with hyphens
-      effectiveSummarizerId = selectedModels[0].model.toLowerCase().replace(/\s+/g, '-');
-    }
-
-    if (!effectiveSummarizerId) return;
-
-    const allResponsesComplete = viewResponses.every(r => r.isComplete && !r.isStreaming);
-    if (!allResponsesComplete && viewResponses.length > 0) return;
-
-    // Combine responses
-    const allCompletedResponses = [
-      ...viewResponses.filter(r => r.isComplete && !r.error).map(r => ({ modelId: r.modelId, modelName: r.model, content: r.response })),
-      ...viewManualResponses.map(r => ({ modelId: r.id, modelName: r.label, content: r.response ?? '' }))
-    ].filter(r => r.content.trim().length > 0);
-
-    if (allCompletedResponses.length >= 2) {
-      void generateConsensus(allCompletedResponses, prompt ?? '', effectiveSummarizerId);
-    }
-  }, [
+  useConsensusTrigger({
     hasHydrated,
-    viewResponses,
-    viewManualResponses,
+    responses: viewResponses,
+    manualResponses: viewManualResponses,
     metaAnalysis,
     summarizerModel,
     selectedModels,
     prompt,
     generateConsensus,
-    isGeneratingConsensus
-  ]);
+    isGenerating: isGeneratingConsensus,
+  });
+
+  const consensusStatus = useConsensusStatus({
+    hasHydrated,
+    responses: viewResponses,
+    metaAnalysis: viewMetaAnalysis,
+    isGenerating: isGeneratingConsensus,
+    error: consensusError,
+  });
 
   const handleBack = () => {
-    setCurrentStep('prompt');
-    router.push('/prompt');
+    setCurrentStep("prompt");
+    router.push("/prompt");
   };
 
   const handleNewComparison = () => {
     resetStreamingState();
-    setCurrentStep('prompt');
-    router.push('/prompt');
+    setCurrentStep("prompt");
+    router.push("/prompt");
   };
 
   const handleStartOver = () => {
-    setCurrentStep('config');
+    setCurrentStep("config");
     resetStreamingState();
-    router.push('/config');
+    router.push("/config");
   };
 
-  const displayPrompt = hasHydrated ? prompt ?? '' : '';
+  const displayPrompt = hasHydrated ? (prompt ?? "") : "";
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-6xl">
+    <div className="container mx-auto max-w-6xl px-4 py-8">
       <ProgressSteps currentStep="review" fallbackStep="review" />
 
       <PageHero
-        title={t('pages.review.title')}
-        description={t('pages.review.description')}
+        title={t("pages.review.title")}
+        description={t("pages.review.description")}
       />
 
       {/* 1. Prompt Card (matches wireframe order) */}
@@ -206,12 +187,15 @@ export default function ReviewPage() {
       </div>
 
       {/* 2. Consensus Section (matches wireframe order) */}
-      {(viewMetaAnalysis !== null || isGeneratingConsensus) && (
+      {consensusStatus !== null && (
         <div className="mt-8">
           <ConsensusCard
-            summarizerModel={summarizerModel ?? selectedModels[0]?.id ?? 'AI Model'}
+            summarizerModel={
+              summarizerModel ?? selectedModels[0]?.id ?? "AI Model"
+            }
             consensusText={viewMetaAnalysis ?? undefined}
-            isLoading={isGeneratingConsensus}
+            status={consensusStatus}
+            error={consensusError ?? undefined}
           />
         </div>
       )}
@@ -231,12 +215,14 @@ export default function ReviewPage() {
 
       {/* 4. Individual Responses Section (matches wireframe order - at bottom) */}
       <div className="mt-8 space-y-4">
-        <h3 className="text-xl font-semibold">{t('pages.review.responsesHeading')}</h3>
+        <h3 className="text-xl font-semibold">
+          {t("pages.review.responsesHeading")}
+        </h3>
 
         {viewResponses.length === 0 && viewManualResponses.length === 0 ? (
-          <div className="p-8 text-center bg-muted rounded-lg">
+          <div className="rounded-lg bg-muted p-8 text-center">
             <p className="text-muted-foreground">
-              {t('pages.review.noResponses')}
+              {t("pages.review.noResponses")}
             </p>
           </div>
         ) : (
@@ -248,10 +234,10 @@ export default function ReviewPage() {
                 provider={response.provider as Provider}
                 status={
                   response.error
-                    ? 'error'
+                    ? "error"
                     : response.isStreaming
-                      ? 'streaming'
-                      : 'complete'
+                      ? "streaming"
+                      : "complete"
                 }
                 responseType="ai"
                 content={response.response}
@@ -285,16 +271,16 @@ export default function ReviewPage() {
       <div className="mt-12 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <WorkflowNavigator
           currentStep="review"
-          backLabel={t('pages.review.backButton')}
-          continueLabel={t('pages.review.startOverButton')}
+          backLabel={t("pages.review.backButton")}
+          continueLabel={t("pages.review.startOverButton")}
           onBack={handleBack}
           onContinue={handleStartOver}
         />
         <button
           onClick={handleNewComparison}
-          className="px-6 py-2 border border-border rounded-lg hover:bg-accent transition-colors self-end md:self-auto"
+          className="self-end rounded-lg border border-border px-6 py-2 transition-colors hover:bg-accent md:self-auto"
         >
-          {t('pages.review.newComparisonButton')}
+          {t("pages.review.newComparisonButton")}
         </button>
       </div>
     </div>
