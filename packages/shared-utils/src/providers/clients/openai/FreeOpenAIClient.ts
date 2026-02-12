@@ -36,16 +36,25 @@ export class FreeOpenAIClient extends BaseFreeClient {
       .map((model) => model.id)
       .filter((id): id is string => {
         if (!id) return false;
-        // Filter for known text generation model prefixes
-        const isTextModel = id.startsWith('gpt-') || id.startsWith('o1-') || id.startsWith('o3-');
-        // Explicitly exclude non-text capabilities
-        const isExcluded =
+        const isChatCandidate =
+          id.startsWith('gpt-') || id.startsWith('o1-') || id.startsWith('o3-');
+        if (!isChatCandidate) return false;
+        // Exclude models that don't support the Chat Completions endpoint.
+        // Patterns derived from probing the OpenAI API (404 = not chat).
+        const isNonChat =
           id.includes('audio') ||
           id.includes('tts') ||
           id.includes('dall-e') ||
           id.includes('whisper') ||
-          id.includes('embedding');
-        return isTextModel && !isExcluded;
+          id.includes('embedding') ||
+          id.includes('realtime') ||
+          id.includes('transcribe') ||
+          id.includes('image') ||
+          id.includes('codex') ||
+          id.includes('instruct') ||
+          id.includes('deep-research') ||
+          /-pro($|-)/.test(id);
+        return !isNonChat;
       });
   }
 
