@@ -6,7 +6,7 @@ import { Input } from '../../atoms/Input';
 import { Badge } from '../../atoms/Badge';
 import { Heading } from '../../atoms/Heading';
 import { Text } from '../../atoms/Text';
-import { Info, Trash2 } from 'lucide-react';
+import { ArrowRight, Info, Trash2 } from 'lucide-react';
 
 export interface SelectedModel {
   id: string;
@@ -49,6 +49,10 @@ export interface EnsembleSidebarProps {
   showQuickPresets?: boolean;
   /** Feature flag to show Save Ensemble section (default: true) */
   showSaveEnsemble?: boolean;
+  /** Callback when continue button is clicked */
+  onContinue?: () => void;
+  /** Whether the continue button is disabled */
+  continueDisabled?: boolean;
 }
 
 /**
@@ -94,6 +98,8 @@ export const EnsembleSidebar = React.forwardRef<HTMLDivElement, EnsembleSidebarP
       onClearAll,
       showQuickPresets = true,
       showSaveEnsemble = true,
+      onContinue,
+      continueDisabled = false,
     },
     ref
   ) => {
@@ -161,6 +167,22 @@ export const EnsembleSidebar = React.forwardRef<HTMLDivElement, EnsembleSidebarP
               )}
             </div>
           </div>
+
+          {/* Continue to Prompt */}
+          {onContinue && (
+            <div className="mb-6">
+              <Button
+                variant="default"
+                className="w-full"
+                onClick={onContinue}
+                disabled={continueDisabled}
+                data-testid="continue-to-prompt"
+              >
+                {t('organisms.ensembleSidebar.continueToPrompt', 'Continue to Prompt')}
+                <ArrowRight className="w-4 h-4 ml-2" />
+              </Button>
+            </div>
+          )}
 
           {/* Quick Presets */}
           {showQuickPresets && (
