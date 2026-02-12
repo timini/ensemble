@@ -79,7 +79,6 @@ export const EnsembleConfigurationSummary = React.forwardRef<
                     const isSummarizer = model === summarizerModel;
                     const badge = (
                       <Badge
-                        key={index}
                         variant="outline"
                         className={cn(
                           'bg-muted',
@@ -106,7 +105,7 @@ export const EnsembleConfigurationSummary = React.forwardRef<
                       );
                     }
 
-                    return badge;
+                    return <React.Fragment key={index}>{badge}</React.Fragment>;
                   })}
                 </div>
               </div>

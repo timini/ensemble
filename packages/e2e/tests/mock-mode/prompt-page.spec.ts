@@ -151,9 +151,7 @@ test.describe('Prompt Page', () => {
     const summaryCard = page.getByTestId('ensemble-configuration-summary');
     await expect(summaryCard).toBeVisible();
 
-    // Get the summarizer model text before change
     const summarizerBadge = page.getByTestId('summarizer-model');
-    const initialSummarizer = await summarizerBadge.textContent();
 
     // Click on the first model badge (index 0) to set it as summarizer
     const firstModelBadge = page.getByTestId('selected-model-0');
