@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
+import { fn } from '@storybook/test';
 import { EnsembleSidebar } from './EnsembleSidebar';
 
 const meta = {
@@ -167,7 +168,7 @@ export const WithContinueButton: Story = {
     currentEnsembleName: '',
     showQuickPresets: false,
     showSaveEnsemble: false,
-    onContinue: () => {},
+    onContinue: fn(),
     continueDisabled: false,
   },
 };
@@ -180,7 +181,7 @@ export const WithContinueButtonDisabled: Story = {
     currentEnsembleName: '',
     showQuickPresets: false,
     showSaveEnsemble: false,
-    onContinue: () => {},
+    onContinue: fn(),
     continueDisabled: true,
   },
 };
