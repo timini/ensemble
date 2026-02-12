@@ -771,7 +771,168 @@ describe('EnsembleSidebar', () => {
     });
   });
 
+  describe('continue to prompt button', () => {
+    it('renders continue button when onContinue prop is provided', () => {
+      render(
+        <EnsembleSidebar
+          selectedModels={mockSelectedModels}
+          summarizerId="claude-3-opus"
+          presets={[]}
+          currentEnsembleName=""
+          onLoadPreset={vi.fn()}
+          onSavePreset={vi.fn()}
+          onDeletePreset={vi.fn()}
+          onAddManualResponse={vi.fn()}
+          onContinue={vi.fn()}
+        />
+      );
+
+      const button = screen.getByTestId('continue-to-prompt');
+      expect(button).toBeInTheDocument();
+      expect(button).toHaveTextContent('Continue to Prompt');
+    });
+
+    it('does not render continue button when onContinue prop is not provided', () => {
+      render(
+        <EnsembleSidebar
+          selectedModels={mockSelectedModels}
+          summarizerId="claude-3-opus"
+          presets={[]}
+          currentEnsembleName=""
+          onLoadPreset={vi.fn()}
+          onSavePreset={vi.fn()}
+          onDeletePreset={vi.fn()}
+          onAddManualResponse={vi.fn()}
+        />
+      );
+
+      expect(screen.queryByTestId('continue-to-prompt')).not.toBeInTheDocument();
+    });
+
+    it('disables continue button when continueDisabled is true', () => {
+      render(
+        <EnsembleSidebar
+          selectedModels={mockSelectedModels}
+          summarizerId="claude-3-opus"
+          presets={[]}
+          currentEnsembleName=""
+          onLoadPreset={vi.fn()}
+          onSavePreset={vi.fn()}
+          onDeletePreset={vi.fn()}
+          onAddManualResponse={vi.fn()}
+          onContinue={vi.fn()}
+          continueDisabled={true}
+        />
+      );
+
+      expect(screen.getByTestId('continue-to-prompt')).toBeDisabled();
+    });
+
+    it('enables continue button when continueDisabled is false', () => {
+      render(
+        <EnsembleSidebar
+          selectedModels={mockSelectedModels}
+          summarizerId="claude-3-opus"
+          presets={[]}
+          currentEnsembleName=""
+          onLoadPreset={vi.fn()}
+          onSavePreset={vi.fn()}
+          onDeletePreset={vi.fn()}
+          onAddManualResponse={vi.fn()}
+          onContinue={vi.fn()}
+          continueDisabled={false}
+        />
+      );
+
+      expect(screen.getByTestId('continue-to-prompt')).not.toBeDisabled();
+    });
+
+    it('calls onContinue when continue button is clicked', async () => {
+      const user = userEvent.setup();
+      const onContinue = vi.fn();
+
+      render(
+        <EnsembleSidebar
+          selectedModels={mockSelectedModels}
+          summarizerId="claude-3-opus"
+          presets={[]}
+          currentEnsembleName=""
+          onLoadPreset={vi.fn()}
+          onSavePreset={vi.fn()}
+          onDeletePreset={vi.fn()}
+          onAddManualResponse={vi.fn()}
+          onContinue={onContinue}
+          continueDisabled={false}
+        />
+      );
+
+      await user.click(screen.getByTestId('continue-to-prompt'));
+      expect(onContinue).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not call onContinue when button is disabled', async () => {
+      const user = userEvent.setup();
+      const onContinue = vi.fn();
+
+      render(
+        <EnsembleSidebar
+          selectedModels={mockSelectedModels}
+          summarizerId="claude-3-opus"
+          presets={[]}
+          currentEnsembleName=""
+          onLoadPreset={vi.fn()}
+          onSavePreset={vi.fn()}
+          onDeletePreset={vi.fn()}
+          onAddManualResponse={vi.fn()}
+          onContinue={onContinue}
+          continueDisabled={true}
+        />
+      );
+
+      await user.click(screen.getByTestId('continue-to-prompt'));
+      expect(onContinue).not.toHaveBeenCalled();
+    });
+  });
+
   describe('internationalization', () => {
+    it('renders continue button text in English', () => {
+      renderWithI18n(
+        <EnsembleSidebar
+          selectedModels={mockSelectedModels}
+          summarizerId="claude-3-opus"
+          presets={[]}
+          currentEnsembleName=""
+          onLoadPreset={vi.fn()}
+          onSavePreset={vi.fn()}
+          onDeletePreset={vi.fn()}
+          onAddManualResponse={vi.fn()}
+          onContinue={vi.fn()}
+        />,
+        { language: 'en' }
+      );
+
+      expect(screen.getByTestId('continue-to-prompt')).toHaveTextContent('Continue to Prompt');
+    });
+
+    it('renders continue button text in French', () => {
+      renderWithI18n(
+        <EnsembleSidebar
+          selectedModels={mockSelectedModels}
+          summarizerId="claude-3-opus"
+          presets={[]}
+          currentEnsembleName=""
+          onLoadPreset={vi.fn()}
+          onSavePreset={vi.fn()}
+          onDeletePreset={vi.fn()}
+          onAddManualResponse={vi.fn()}
+          onContinue={vi.fn()}
+        />,
+        { language: 'fr' }
+      );
+
+      expect(screen.getByTestId('continue-to-prompt')).toHaveTextContent("Continuer vers l'Invite");
+    });
+
     it('renders English text', () => {
       renderWithI18n(
         <EnsembleSidebar

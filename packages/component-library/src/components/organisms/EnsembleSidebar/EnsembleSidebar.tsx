@@ -49,7 +49,7 @@ export interface EnsembleSidebarProps {
   showQuickPresets?: boolean;
   /** Feature flag to show Save Ensemble section (default: true) */
   showSaveEnsemble?: boolean;
-  /** Callback when continue button is clicked */
+  /** Callback when continue to prompt is clicked */
   onContinue?: () => void;
   /** Whether the continue button is disabled */
   continueDisabled?: boolean;
@@ -327,22 +327,6 @@ export const EnsembleSidebar = React.forwardRef<HTMLDivElement, EnsembleSidebarP
             </div>
           </div>
 
-          {/* Continue to Prompt */}
-          {onContinue && (
-            <div className="mb-6">
-              <Button
-                variant="default"
-                className="w-full"
-                onClick={onContinue}
-                disabled={continueDisabled}
-                data-testid="continue-to-prompt"
-              >
-                {t('organisms.ensembleSidebar.continueToPrompt')}
-                <ArrowRight className="w-4 h-4 ml-2" />
-              </Button>
-            </div>
-          )}
-
           {showQuickPresets && (
             <QuickPresetsSection
               presets={presets}
@@ -363,6 +347,23 @@ export const EnsembleSidebar = React.forwardRef<HTMLDivElement, EnsembleSidebarP
             manualResponses={manualResponses}
             onAddManualResponse={onAddManualResponse}
           />
+
+          {/* Continue to Prompt Button */}
+          {onContinue && (
+            <div className="mt-6 pt-6 border-t border-border">
+              <Button
+                variant="default"
+                size="lg"
+                className="w-full"
+                onClick={onContinue}
+                disabled={continueDisabled}
+                data-testid="continue-to-prompt"
+              >
+                {t('organisms.ensembleSidebar.continueToPrompt')}
+                <ArrowRight className="w-4 h-4 ml-2" />
+              </Button>
+            </div>
+          )}
         </CardContent>
       </Card>
     );

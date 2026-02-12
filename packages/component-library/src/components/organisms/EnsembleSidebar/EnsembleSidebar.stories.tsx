@@ -173,8 +173,8 @@ export const WithContinueButton: Story = {
   },
 };
 
-// Sidebar with continue button disabled (no models selected)
-export const WithContinueButtonDisabled: Story = {
+// Sidebar with continue button disabled
+export const ContinueButtonDisabled: Story = {
   args: {
     selectedModels: [],
     presets: [],
