@@ -6,13 +6,25 @@ import { FreeAnthropicClient } from '../clients/anthropic/FreeAnthropicClient.js
 import { FreeGoogleClient } from '../clients/google/FreeGoogleClient.js';
 import { BaseFreeClient } from '../clients/base/BaseFreeClient.js';
 
-const mocks = vi.hoisted(() => ({
-  openAiRetrieve: vi.fn(),
-  openAiList: vi.fn(),
-  openAiChatCreate: vi.fn(),
-  axiosGet: vi.fn(),
-  anthropicModelsList: vi.fn(),
-}));
+const { mocks, MockAPIError } = vi.hoisted(() => {
+  class _MockAPIError extends Error {
+    status: number;
+    constructor(status: number, message: string) {
+      super(message);
+      this.status = status;
+    }
+  }
+  return {
+    mocks: {
+      openAiRetrieve: vi.fn(),
+      openAiList: vi.fn(),
+      openAiChatCreate: vi.fn(),
+      axiosGet: vi.fn(),
+      anthropicModelsList: vi.fn(),
+    },
+    MockAPIError: _MockAPIError,
+  };
+});
 
 const createAsyncStream = (events: unknown[]) => ({
   async *[Symbol.asyncIterator]() {
@@ -47,14 +59,16 @@ vi.mock('axios', () => {
   };
 });
 
-vi.mock('@anthropic-ai/sdk', () => ({
-  default: class {
+vi.mock('@anthropic-ai/sdk', () => {
+  const MockAnthropic = class {
     models = { list: mocks.anthropicModelsList };
     messages = {
       create: vi.fn(),
     };
-  },
-}));
+  };
+  (MockAnthropic as unknown as Record<string, unknown>).APIError = MockAPIError;
+  return { default: MockAnthropic };
+});
 
 class TestFreeClient extends BaseFreeClient {
   constructor(
@@ -125,6 +139,14 @@ describe('Free mode provider clients', () => {
       const result = await client.validateApiKey('sk-ant');
       expect(result.valid).toBe(false);
       expect(result.error).toContain('bad anthro key');
+    });
+
+    it('returns a clear message for 401 authentication errors', async () => {
+      mocks.anthropicModelsList.mockRejectedValueOnce(new MockAPIError(401, 'auth_error'));
+      const client = new FreeAnthropicClient('anthropic', () => 'sk-ant');
+      const result = await client.validateApiKey('sk-ant-invalid');
+      expect(result.valid).toBe(false);
+      expect(result.error).toBe('Invalid Anthropic API key.');
     });
 
     it('fetches text models via Anthropic SDK', async () => {

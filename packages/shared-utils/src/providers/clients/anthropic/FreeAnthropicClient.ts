@@ -22,7 +22,12 @@ export class FreeAnthropicClient extends BaseFreeClient {
     } catch (error) {
       return {
         valid: false,
-        error: error instanceof Error ? error.message : 'Invalid Anthropic API key.',
+        error:
+          error instanceof Anthropic.APIError && error.status === 401
+            ? 'Invalid Anthropic API key.'
+            : error instanceof Error && error.message
+              ? error.message
+              : 'An unknown error occurred.',
       };
     }
   }
