@@ -14,6 +14,27 @@ const describeIf = (condition: unknown) => (condition ? describe : describe.skip
 
 describeIf(Boolean(googleKey))('Google Free client integration', () => {
   it(
+    'validates a real API key',
+    async () => {
+      const client = new FreeGoogleClient('google', () => googleKey!);
+      const result = await client.validateApiKey(googleKey!);
+      expect(result.valid).toBe(true);
+    },
+    20_000,
+  );
+
+  it(
+    'rejects an invalid API key',
+    async () => {
+      const client = new FreeGoogleClient('google', () => 'invalid-key');
+      const result = await client.validateApiKey('invalid-key');
+      expect(result.valid).toBe(false);
+      expect(result.error).toBeDefined();
+    },
+    20_000,
+  );
+
+  it(
     'lists models from the live API',
     async () => {
       const client = new FreeGoogleClient('google', () => googleKey!);
@@ -27,6 +48,27 @@ describeIf(Boolean(googleKey))('Google Free client integration', () => {
 
 describeIf(Boolean(openAiKey))('OpenAI Free client integration', () => {
   it(
+    'validates a real API key',
+    async () => {
+      const client = new FreeOpenAIClient('openai', () => openAiKey!);
+      const result = await client.validateApiKey(openAiKey!);
+      expect(result.valid).toBe(true);
+    },
+    20_000,
+  );
+
+  it(
+    'rejects an invalid API key',
+    async () => {
+      const client = new FreeOpenAIClient('openai', () => 'sk-invalid');
+      const result = await client.validateApiKey('sk-invalid');
+      expect(result.valid).toBe(false);
+      expect(result.error).toBeDefined();
+    },
+    20_000,
+  );
+
+  it(
     'lists models from the live API',
     async () => {
       const client = new FreeOpenAIClient('openai', () => openAiKey!);
@@ -36,9 +78,48 @@ describeIf(Boolean(openAiKey))('OpenAI Free client integration', () => {
     },
     20_000,
   );
+
+  it(
+    'excludes non-chat-completions models',
+    async () => {
+      const client = new FreeOpenAIClient('openai', () => openAiKey!);
+      const models = await client.listAvailableTextModels();
+      for (const id of models) {
+        expect(id).not.toMatch(/codex/);
+        expect(id).not.toMatch(/-pro($|-)/);
+        expect(id).not.toMatch(/realtime/);
+        expect(id).not.toMatch(/transcribe/);
+        expect(id).not.toMatch(/image/);
+        expect(id).not.toMatch(/instruct/);
+        expect(id).not.toMatch(/deep-research/);
+      }
+    },
+    20_000,
+  );
 });
 
 describeIf(Boolean(anthropicKey))('Anthropic Free client integration', () => {
+  it(
+    'validates a real API key',
+    async () => {
+      const client = new FreeAnthropicClient('anthropic', () => anthropicKey!);
+      const result = await client.validateApiKey(anthropicKey!);
+      expect(result.valid).toBe(true);
+    },
+    20_000,
+  );
+
+  it(
+    'rejects an invalid API key',
+    async () => {
+      const client = new FreeAnthropicClient('anthropic', () => 'sk-ant-invalid');
+      const result = await client.validateApiKey('sk-ant-invalid');
+      expect(result.valid).toBe(false);
+      expect(result.error).toBeDefined();
+    },
+    20_000,
+  );
+
   it(
     'lists models from the live API',
     async () => {
@@ -52,6 +133,27 @@ describeIf(Boolean(anthropicKey))('Anthropic Free client integration', () => {
 });
 
 describeIf(Boolean(xaiKey))('xAI Free client integration', () => {
+  it(
+    'validates a real API key',
+    async () => {
+      const client = new FreeXAIClient('xai', () => xaiKey!);
+      const result = await client.validateApiKey(xaiKey!);
+      expect(result.valid).toBe(true);
+    },
+    20_000,
+  );
+
+  it(
+    'rejects an invalid API key',
+    async () => {
+      const client = new FreeXAIClient('xai', () => 'xai-invalid');
+      const result = await client.validateApiKey('xai-invalid');
+      expect(result.valid).toBe(false);
+      expect(result.error).toBeDefined();
+    },
+    20_000,
+  );
+
   it(
     'lists models from the live API',
     async () => {

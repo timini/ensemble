@@ -157,3 +157,30 @@ export const NoSummarizer: Story = {
     currentEnsembleName: '',
   },
 };
+
+// Sidebar with continue button enabled
+export const WithContinueButton: Story = {
+  args: {
+    selectedModels: mockSelectedModels,
+    summarizerId: 'claude-3-opus',
+    presets: [],
+    currentEnsembleName: '',
+    showQuickPresets: false,
+    showSaveEnsemble: false,
+    onContinue: () => console.log('Continue clicked'),
+    continueDisabled: false,
+  },
+};
+
+// Sidebar with continue button disabled
+export const ContinueButtonDisabled: Story = {
+  args: {
+    selectedModels: [],
+    presets: [],
+    currentEnsembleName: '',
+    showQuickPresets: false,
+    showSaveEnsemble: false,
+    onContinue: () => console.log('Continue clicked'),
+    continueDisabled: true,
+  },
+};

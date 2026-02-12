@@ -144,7 +144,8 @@
       "manualResponsesDescription": "Add reference answers or benchmark outputs to include in the review step.",
       "manualResponsesInfo": "Include custom responses to compare against live model outputs.",
       "addManualResponse": "Add Manual Response",
-      "manualResponsesNote": "Add reference answers or benchmark outputs to compare against live model responses."
+      "manualResponsesNote": "Add reference answers or benchmark outputs to compare against live model responses.",
+      "continueToPrompt": "Continue to Prompt"
     },
     "manualResponseModal": {
       "title": "Manual Response",

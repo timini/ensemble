@@ -49,6 +49,10 @@ export interface EnsembleSidebarProps {
   showQuickPresets?: boolean;
   /** Feature flag to show Save Ensemble section (default: true) */
   showSaveEnsemble?: boolean;
+  /** Callback when continue to prompt is clicked */
+  onContinue?: () => void;
+  /** Whether the continue button is disabled */
+  continueDisabled?: boolean;
 }
 
 /**
@@ -94,6 +98,8 @@ export const EnsembleSidebar = React.forwardRef<HTMLDivElement, EnsembleSidebarP
       onClearAll,
       showQuickPresets = true,
       showSaveEnsemble = true,
+      onContinue,
+      continueDisabled = false,
     },
     ref
   ) => {
@@ -290,6 +296,22 @@ export const EnsembleSidebar = React.forwardRef<HTMLDivElement, EnsembleSidebarP
               </div>
             </div>
           </div>
+
+          {/* Continue to Prompt Button */}
+          {onContinue && (
+            <div className="mt-6 pt-6 border-t border-border">
+              <Button
+                variant="default"
+                size="lg"
+                className="w-full"
+                onClick={onContinue}
+                disabled={continueDisabled}
+                data-testid="continue-to-prompt"
+              >
+                {t('organisms.ensembleSidebar.continueToPrompt')}
+              </Button>
+            </div>
+          )}
         </CardContent>
       </Card>
     );
