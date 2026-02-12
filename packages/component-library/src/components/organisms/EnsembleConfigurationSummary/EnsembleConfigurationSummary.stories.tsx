@@ -167,6 +167,44 @@ export const DarkModeWithConsensus: Story = {
   ],
 };
 
+// Interactive summarizer selection
+export const InteractiveSummarizer: Story = {
+  args: {
+    selectedModels: [
+      'claude-3-haiku-20240307',
+      'claude-3-opus-20240229',
+      'gpt-4-turbo',
+    ],
+    summarizerModel: 'claude-3-opus-20240229',
+    onSummarizerChange: (modelId: string) => {
+      console.log('New summarizer:', modelId);
+    },
+  },
+};
+
+// Interactive - Single model edge case
+export const InteractiveSingleModel: Story = {
+  args: {
+    selectedModels: ['claude-3-opus-20240229'],
+    summarizerModel: 'claude-3-opus-20240229',
+    onSummarizerChange: (modelId: string) => {
+      console.log('New summarizer:', modelId);
+    },
+  },
+};
+
+// Static (no callback) - existing behavior preserved
+export const StaticNonInteractive: Story = {
+  args: {
+    selectedModels: [
+      'claude-3-haiku-20240307',
+      'claude-3-opus-20240229',
+      'gpt-4-turbo',
+    ],
+    summarizerModel: 'claude-3-opus-20240229',
+  },
+};
+
 // Long model names
 export const LongModelNames: Story = {
   args: {
