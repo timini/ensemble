@@ -20,6 +20,34 @@ const XAI_API_KEY = process.env.TEST_XAI_API_KEY;
 
 const hasAllKeys = OPENAI_API_KEY && ANTHROPIC_API_KEY && GOOGLE_API_KEY && XAI_API_KEY;
 
+/** Timeouts for real API calls (validation, model loading, streaming). */
+const TIMEOUT = {
+  TEST: 180_000,
+  API_VALIDATION: 60_000,
+  MODEL_VISIBLE: 15_000,
+  RESPONSE_VISIBLE: 30_000,
+  RESPONSE_COMPLETE: 60_000,
+} as const;
+
+/** Provider API keys keyed by data-provider attribute value. */
+const API_KEYS: Record<string, string | undefined> = {
+  openai: OPENAI_API_KEY,
+  anthropic: ANTHROPIC_API_KEY,
+  google: GOOGLE_API_KEY,
+  xai: XAI_API_KEY,
+};
+
+/** Model card testid prefixes keyed by provider. */
+const MODEL_PREFIXES = ['gpt', 'claude', 'gemini', 'grok'];
+
+/** Response card testid prefixes with display labels. */
+const RESPONSE_PROVIDERS = [
+  { prefix: 'response-card-openai-', label: 'OpenAI' },
+  { prefix: 'response-card-anthropic-', label: 'Anthropic' },
+  { prefix: 'response-card-google-', label: 'Google' },
+  { prefix: 'response-card-xai-', label: 'XAI' },
+];
+
 /** Fill an API key input by provider data attribute and wait for the configured count. */
 const fillAndValidateKey = async (
   page: Page,
@@ -32,7 +60,7 @@ const fillAndValidateKey = async (
     expectedCount === 1
       ? /1 API key configured/i
       : new RegExp(`${expectedCount} API keys configured`, 'i');
-  await expect(page.getByText(label)).toBeVisible({ timeout: 60_000 });
+  await expect(page.getByText(label)).toBeVisible({ timeout: TIMEOUT.API_VALIDATION });
 };
 
 test.describe('Free Mode - Full MVP Journey (All 4 Providers)', () => {
@@ -48,7 +76,7 @@ test.describe('Free Mode - Full MVP Journey (All 4 Providers)', () => {
   test('completes Config → Ensemble → Prompt → Review with all 4 providers', async ({
     page,
   }) => {
-    test.setTimeout(180_000); // 3 minutes for real API calls
+    test.setTimeout(TIMEOUT.TEST);
 
     // ==========================================
     // STEP 1: Config Page — enter all 4 API keys
@@ -69,10 +97,12 @@ test.describe('Free Mode - Full MVP Journey (All 4 Providers)', () => {
       await expect(nextButton).toBeDisabled();
 
       // Enter all 4 provider API keys (validation hits real APIs)
-      await fillAndValidateKey(page, 'openai', OPENAI_API_KEY!, 1);
-      await fillAndValidateKey(page, 'anthropic', ANTHROPIC_API_KEY!, 2);
-      await fillAndValidateKey(page, 'google', GOOGLE_API_KEY!, 3);
-      await fillAndValidateKey(page, 'xai', XAI_API_KEY!, 4);
+      let count = 1;
+      for (const [provider, key] of Object.entries(API_KEYS)) {
+        if (key) {
+          await fillAndValidateKey(page, provider, key, count++);
+        }
+      }
 
       // Next button should now be enabled
       await expect(nextButton).toBeEnabled();
@@ -91,21 +121,11 @@ test.describe('Free Mode - Full MVP Journey (All 4 Providers)', () => {
       await expect(page.getByTestId('model-selection-list')).toBeVisible();
 
       // Select first available model from each provider
-      const openaiModel = page.locator('[data-testid^="model-card-gpt-"]').first();
-      await expect(openaiModel).toBeVisible({ timeout: 15_000 });
-      await openaiModel.click();
-
-      const claudeModel = page.locator('[data-testid^="model-card-claude-"]').first();
-      await expect(claudeModel).toBeVisible({ timeout: 15_000 });
-      await claudeModel.click();
-
-      const geminiModel = page.locator('[data-testid^="model-card-gemini-"]').first();
-      await expect(geminiModel).toBeVisible({ timeout: 15_000 });
-      await geminiModel.click();
-
-      const grokModel = page.locator('[data-testid^="model-card-grok-"]').first();
-      await expect(grokModel).toBeVisible({ timeout: 15_000 });
-      await grokModel.click();
+      for (const prefix of MODEL_PREFIXES) {
+        const model = page.locator(`[data-testid^="model-card-${prefix}-"]`).first();
+        await expect(model).toBeVisible({ timeout: TIMEOUT.MODEL_VISIBLE });
+        await model.click();
+      }
 
       // Verify 4 models selected
       const selectedCards = page.locator(
@@ -148,19 +168,11 @@ test.describe('Free Mode - Full MVP Journey (All 4 Providers)', () => {
     // STEP 4: Review Page — verify all 4 responses
     // ==========================================
     await test.step('Verify all 4 provider responses complete', async () => {
-      // Wait for each provider's response card to reach "complete"
-      const providers = [
-        { prefix: 'response-card-openai-', label: 'OpenAI' },
-        { prefix: 'response-card-anthropic-', label: 'Anthropic' },
-        { prefix: 'response-card-google-', label: 'Google' },
-        { prefix: 'response-card-xai-', label: 'XAI' },
-      ];
-
-      for (const { prefix, label } of providers) {
+      for (const { prefix, label } of RESPONSE_PROVIDERS) {
         const card = page.locator(`[data-testid^="${prefix}"]`).first();
-        await expect(card).toBeVisible({ timeout: 30_000 });
+        await expect(card).toBeVisible({ timeout: TIMEOUT.RESPONSE_VISIBLE });
         await expect(card).toHaveAttribute('data-status', 'complete', {
-          timeout: 60_000,
+          timeout: TIMEOUT.RESPONSE_COMPLETE,
         });
 
         // Verify card has real content (not empty / lorem ipsum)
