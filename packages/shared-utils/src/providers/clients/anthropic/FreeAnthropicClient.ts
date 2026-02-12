@@ -1,8 +1,6 @@
 import Anthropic from '@anthropic-ai/sdk';
-import axios from 'axios';
 import { BaseFreeClient, type StreamOptions } from '../base/BaseFreeClient';
 import type { ValidationResult } from '../../types';
-import { extractAxiosErrorMessage } from '../../utils/extractAxiosError';
 
 export class FreeAnthropicClient extends BaseFreeClient {
   private createClient(apiKey: string) {
@@ -18,26 +16,14 @@ export class FreeAnthropicClient extends BaseFreeClient {
     }
 
     try {
-      // Using axios for validation to avoid instantiating full client if not needed,
-      // and SDK might not have a simple "validate" method without making a call.
-      // Actually, listing models is a good check.
-      await axios.get('https://api.anthropic.com/v1/models', {
-        headers: {
-          'x-api-key': apiKey,
-          'anthropic-version': '2023-06-01',
-          // CORS might be an issue from browser directly to Anthropic API without proxy?
-          // Anthropic doesn't officially support browser-side calls due to CORS.
-          // If CORS is an issue, we might need a proxy or Mock mode only.
-          // Assuming for now it works or users will use a proxy/Mock mode.
-          // Wait, Free mode implies direct client-side calls.
-          // OpenAI allows it with `dangerouslyAllowBrowser: true`.
-          // Anthropic SDK also has `dangerouslyAllowBrowser: true`?
-          // Let's check SDK usage.
-        },
-      });
+      const client = this.createClient(apiKey);
+      await client.models.list();
       return { valid: true };
     } catch (error) {
-      return { valid: false, error: extractAxiosErrorMessage(error) };
+      return {
+        valid: false,
+        error: error instanceof Error ? error.message : 'Invalid Anthropic API key.',
+      };
     }
   }
 

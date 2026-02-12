@@ -105,16 +105,11 @@ describe('Free mode provider clients', () => {
 
   describe('FreeAnthropicClient', () => {
     it('validates API key successfully', async () => {
-      mocks.axiosGet.mockResolvedValueOnce({ data: { data: [] } });
+      mocks.anthropicModelsList.mockResolvedValueOnce({ data: [] });
       const client = new FreeAnthropicClient('anthropic', () => 'sk-ant');
       const result = await client.validateApiKey('sk-ant');
       expect(result.valid).toBe(true);
-      expect(mocks.axiosGet).toHaveBeenCalledWith('https://api.anthropic.com/v1/models', {
-        headers: {
-          'x-api-key': 'sk-ant',
-          'anthropic-version': '2023-06-01',
-        },
-      });
+      expect(mocks.anthropicModelsList).toHaveBeenCalled();
     });
 
     it('rejects empty API keys', async () => {
@@ -125,10 +120,7 @@ describe('Free mode provider clients', () => {
     });
 
     it('returns descriptive errors when validation fails', async () => {
-      mocks.axiosGet.mockRejectedValueOnce({
-        isAxiosError: true,
-        response: { data: { error: { message: 'bad anthro key' } } },
-      });
+      mocks.anthropicModelsList.mockRejectedValueOnce(new Error('bad anthro key'));
       const client = new FreeAnthropicClient('anthropic', () => 'sk-ant');
       const result = await client.validateApiKey('sk-ant');
       expect(result.valid).toBe(false);
