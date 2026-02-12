@@ -78,6 +78,24 @@ describeIf(Boolean(openAiKey))('OpenAI Free client integration', () => {
     },
     20_000,
   );
+
+  it(
+    'excludes non-chat-completions models',
+    async () => {
+      const client = new FreeOpenAIClient('openai', () => openAiKey!);
+      const models = await client.listAvailableTextModels();
+      for (const id of models) {
+        expect(id).not.toMatch(/codex/);
+        expect(id).not.toMatch(/-pro($|-)/);
+        expect(id).not.toMatch(/realtime/);
+        expect(id).not.toMatch(/transcribe/);
+        expect(id).not.toMatch(/image/);
+        expect(id).not.toMatch(/instruct/);
+        expect(id).not.toMatch(/deep-research/);
+      }
+    },
+    20_000,
+  );
 });
 
 describeIf(Boolean(anthropicKey))('Anthropic Free client integration', () => {
