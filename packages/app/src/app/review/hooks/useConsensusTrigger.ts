@@ -33,13 +33,8 @@ export function useConsensusTrigger({
   useEffect(() => {
     if (!hasHydrated || metaAnalysis || isGenerating) return;
 
-    let effectiveSummarizerId = summarizerModel;
-
-    if (!effectiveSummarizerId && selectedModels[0]) {
-      effectiveSummarizerId = selectedModels[0].model
-        .toLowerCase()
-        .replace(/\s+/g, "-");
-    }
+    const effectiveSummarizerId =
+      summarizerModel ?? selectedModels[0]?.model;
 
     if (!effectiveSummarizerId) return;
 

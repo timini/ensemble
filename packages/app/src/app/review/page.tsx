@@ -17,6 +17,8 @@ import {
   calculateAverageConfidence,
   normalizeSimilarity,
 } from "~/lib/agreement";
+import { FALLBACK_MODELS } from "~/lib/models";
+import { formatModelLabelFromId } from "~/lib/providerModels";
 import { PageHero } from "@/components/organisms/PageHero";
 import { ResponseCard } from "@/components/molecules/ResponseCard";
 import { ConsensusCard } from "@/components/organisms/ConsensusCard";
@@ -145,6 +147,13 @@ export default function ReviewPage() {
     isGenerating: isGeneratingConsensus,
   });
 
+  const summarizerDisplayName = useMemo(() => {
+    const modelId = summarizerModel ?? selectedModels[0]?.model;
+    if (!modelId) return "AI Model";
+    const modelDef = FALLBACK_MODELS.find((m) => m.id === modelId);
+    return modelDef ? modelDef.name : formatModelLabelFromId(modelId);
+  }, [summarizerModel, selectedModels]);
+
   const consensusStatus = useConsensusStatus({
     hasHydrated,
     responses: viewResponses,
@@ -190,9 +199,7 @@ export default function ReviewPage() {
       {consensusStatus !== null && (
         <div className="mt-8">
           <ConsensusCard
-            summarizerModel={
-              summarizerModel ?? selectedModels[0]?.model ?? "AI Model"
-            }
+            summarizerModel={summarizerDisplayName}
             consensusText={viewMetaAnalysis ?? undefined}
             status={consensusStatus}
             error={consensusError ?? undefined}
