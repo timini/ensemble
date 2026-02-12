@@ -458,9 +458,7 @@ describe('ConsensusCard', () => {
 
       expect(screen.getByTestId('consensus-card')).toBeInTheDocument();
       expect(screen.getByText(/generating consensus/i)).toBeInTheDocument();
-      const card = screen.getByTestId('consensus-card');
-      const skeleton = card.querySelector('.animate-pulse');
-      expect(skeleton).toBeInTheDocument();
+      expect(screen.getByTestId('consensus-skeleton')).toBeInTheDocument();
     });
 
     it('renders success state with consensus text', () => {

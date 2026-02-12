@@ -191,7 +191,7 @@ export default function ReviewPage() {
         <div className="mt-8">
           <ConsensusCard
             summarizerModel={
-              summarizerModel ?? selectedModels[0]?.id ?? "AI Model"
+              summarizerModel ?? selectedModels[0]?.model ?? "AI Model"
             }
             consensusText={viewMetaAnalysis ?? undefined}
             status={consensusStatus}

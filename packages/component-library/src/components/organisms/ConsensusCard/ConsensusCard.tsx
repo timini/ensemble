@@ -90,7 +90,7 @@ export const ConsensusCard = React.forwardRef<HTMLDivElement, ConsensusCardProps
             )}
 
             {status === 'generating' && (
-              <div className="animate-pulse space-y-2">
+              <div className="animate-pulse space-y-2" data-testid="consensus-skeleton">
                 <div className="h-4 bg-primary/20 rounded w-3/4"></div>
                 <div className="h-4 bg-primary/20 rounded w-full"></div>
                 <div className="h-4 bg-primary/20 rounded w-5/6"></div>
