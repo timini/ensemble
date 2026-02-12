@@ -1,6 +1,9 @@
 {
-  "apphosting": {
-    "backendId": "ensemble-app",
-    "rootDir": "."
-  }
+  "apphosting": [
+    { "backendId": "ensemble-app", "rootDir": "." },
+    { "backendId": "ai-ensemble-preview-1", "rootDir": "." },
+    { "backendId": "ai-ensemble-preview-2", "rootDir": "." },
+    { "backendId": "ai-ensemble-preview-3", "rootDir": "." },
+    { "backendId": "ai-ensemble-preview-4", "rootDir": "." }
+  ]
 }
