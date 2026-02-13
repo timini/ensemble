@@ -46,7 +46,6 @@ export class FreeOpenAIClient extends BaseFreeClient {
           hasNonTextModality(id) ||
           id.includes('realtime') ||
           id.includes('transcribe') ||
-          id.includes('image') ||
           id.includes('codex') ||
           id.includes('instruct') ||
           id.includes('deep-research') ||
