@@ -79,7 +79,7 @@ jobs:
 
       - name: Verify deployment
         run: |
-          DEPLOY_URL="https://ai-ensemble--${{ vars.FIREBASE_PROJECT_ID }}.us-central1.hosted.app"
+          DEPLOY_URL="https://ensemble-app--${{ vars.FIREBASE_PROJECT_ID }}.us-central1.hosted.app"
           echo "Waiting for deployment to be ready..."
           # Wait up to 5 minutes for deployment, checking every 30 seconds
           for i in {1..10}; do
@@ -98,10 +98,10 @@ jobs:
         run: |
           echo "## Deployment Complete" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "Deployed to: https://ai-ensemble--${{ vars.FIREBASE_PROJECT_ID }}.us-central1.hosted.app" >> $GITHUB_STEP_SUMMARY
+          echo "Deployed to: https://ensemble-app--${{ vars.FIREBASE_PROJECT_ID }}.us-central1.hosted.app" >> $GITHUB_STEP_SUMMARY
 
     outputs:
-      deploy_url: https://ai-ensemble--${{ vars.FIREBASE_PROJECT_ID }}.us-central1.hosted.app
+      deploy_url: https://ensemble-app--${{ vars.FIREBASE_PROJECT_ID }}.us-central1.hosted.app
 
   # Post-deployment E2E tests run against the actual deployed infrastructure
   # These tests verify the real deployment works correctly
