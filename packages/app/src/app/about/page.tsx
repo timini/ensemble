@@ -29,14 +29,14 @@ export default function AboutPage() {
   }) as ResearchPaper[];
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-4xl">
+    <div className="container mx-auto px-4 py-8 max-w-4xl" data-testid="about-page">
       <PageHero
         title={t('pages.about.title')}
         description={t('pages.about.description')}
       />
 
       {/* What is Ensemble AI? */}
-      <section className="mt-12 space-y-4">
+      <section className="mt-12 space-y-4" data-testid="about-what-section">
         <Heading level={2} size="2xl">
           {t('pages.about.whatIsEnsemble.heading')}
         </Heading>
@@ -44,7 +44,7 @@ export default function AboutPage() {
       </section>
 
       {/* Why an Ensemble? */}
-      <section className="mt-12 space-y-4">
+      <section className="mt-12 space-y-4" data-testid="about-why-section">
         <Heading level={2} size="2xl">
           {t('pages.about.whyEnsemble.heading')}
         </Heading>
@@ -52,7 +52,7 @@ export default function AboutPage() {
       </section>
 
       {/* The Research */}
-      <section className="mt-12 space-y-4">
+      <section className="mt-12 space-y-4" data-testid="about-research-section">
         <Heading level={2} size="2xl">
           {t('pages.about.research.heading')}
         </Heading>

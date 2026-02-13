@@ -38,14 +38,14 @@ export default function FeaturesPage() {
   }) as ProviderInfo[];
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-4xl">
+    <div className="container mx-auto px-4 py-8 max-w-4xl" data-testid="features-page">
       <PageHero
         title={t('pages.features.title')}
         description={t('pages.features.description')}
       />
 
       {/* How It Works */}
-      <section className="mt-12 space-y-4">
+      <section className="mt-12 space-y-4" data-testid="features-how-it-works-section">
         <Heading level={2} size="2xl">
           {t('pages.features.howItWorks.heading')}
         </Heading>
@@ -63,7 +63,7 @@ export default function FeaturesPage() {
       </section>
 
       {/* Operating Modes */}
-      <section className="mt-12 space-y-6">
+      <section className="mt-12 space-y-6" data-testid="features-modes-section">
         <Heading level={2} size="2xl">
           {t('pages.features.modes.heading')}
         </Heading>
@@ -82,7 +82,7 @@ export default function FeaturesPage() {
       </section>
 
       {/* Supported Providers */}
-      <section className="mt-12 space-y-4">
+      <section className="mt-12 space-y-4" data-testid="features-providers-section">
         <Heading level={2} size="2xl">
           {t('pages.features.providers.heading')}
         </Heading>
@@ -105,7 +105,7 @@ export default function FeaturesPage() {
       </section>
 
       {/* Security & Privacy */}
-      <section className="mt-12 space-y-4">
+      <section className="mt-12 space-y-4" data-testid="features-security-section">
         <Heading level={2} size="2xl">
           {t('pages.features.security.heading')}
         </Heading>
