@@ -12,7 +12,8 @@
  * Skips gracefully when any key is missing.
  */
 
-import { test, expect, type Page } from '@playwright/test';
+import { test, expect } from '@playwright/test';
+import { fillAndValidateKey, selectModel } from './helpers';
 
 const OPENAI_API_KEY = process.env.TEST_OPENAI_API_KEY;
 const ANTHROPIC_API_KEY = process.env.TEST_ANTHROPIC_API_KEY;
@@ -40,31 +41,13 @@ const API_KEYS: Record<string, string | undefined> = {
   xai: XAI_API_KEY,
 };
 
-/** Model card testid prefixes — one per provider. */
-const MODEL_PREFIXES = ['gpt', 'claude', 'gemini', 'grok'];
-
-/** Response card testid prefixes with display labels. */
-const RESPONSE_PROVIDERS = [
-  { prefix: 'response-card-openai-', label: 'OpenAI' },
-  { prefix: 'response-card-anthropic-', label: 'Anthropic' },
-  { prefix: 'response-card-google-', label: 'Google' },
-  { prefix: 'response-card-xai-', label: 'XAI' },
+/** Provider prefixes used for model selection and response card matching. */
+const PROVIDERS = [
+  { modelPrefix: 'gpt', responsePrefix: 'response-card-openai-', label: 'OpenAI' },
+  { modelPrefix: 'claude', responsePrefix: 'response-card-anthropic-', label: 'Anthropic' },
+  { modelPrefix: 'gemini', responsePrefix: 'response-card-google-', label: 'Google' },
+  { modelPrefix: 'grok', responsePrefix: 'response-card-xai-', label: 'XAI' },
 ];
-
-/** Fill an API key input by provider and wait for the configured count. */
-const fillAndValidateKey = async (
-  page: Page,
-  provider: string,
-  value: string,
-  expectedCount: number,
-) => {
-  await page.locator(`[data-provider="${provider}"] input`).fill(value);
-  const label =
-    expectedCount === 1
-      ? /1 API key configured/i
-      : new RegExp(`${expectedCount} API keys configured`, 'i');
-  await expect(page.getByText(label)).toBeVisible({ timeout: TIMEOUT.API_VALIDATION });
-};
 
 test.describe('Free Mode — Happy Path', () => {
   test.skip(!hasAllKeys, 'Skipping — one or more TEST_*_API_KEY env vars not set');
@@ -112,10 +95,8 @@ test.describe('Free Mode — Happy Path', () => {
       await expect(page).toHaveURL('/ensemble');
       await expect(page.getByTestId('model-selection-list')).toBeVisible();
 
-      for (const prefix of MODEL_PREFIXES) {
-        const model = page.locator(`[data-testid^="model-card-${prefix}-"]`).first();
-        await expect(model).toBeVisible({ timeout: TIMEOUT.MODEL_VISIBLE });
-        await model.click();
+      for (const { modelPrefix } of PROVIDERS) {
+        await selectModel(page, modelPrefix, TIMEOUT.MODEL_VISIBLE);
       }
 
       const selectedCards = page.locator(
@@ -147,8 +128,8 @@ test.describe('Free Mode — Happy Path', () => {
     // STEP 4: Review Page — verify everything loads
     // ==========================================
     await test.step('Verify all 4 provider responses complete', async () => {
-      for (const { prefix, label } of RESPONSE_PROVIDERS) {
-        const card = page.locator(`[data-testid^="${prefix}"]`).first();
+      for (const { responsePrefix, label } of PROVIDERS) {
+        const card = page.locator(`[data-testid^="${responsePrefix}"]`).first();
         await expect(card).toBeVisible({ timeout: TIMEOUT.RESPONSE_VISIBLE });
         await expect(card).toHaveAttribute('data-status', 'complete', {
           timeout: TIMEOUT.RESPONSE_COMPLETE,

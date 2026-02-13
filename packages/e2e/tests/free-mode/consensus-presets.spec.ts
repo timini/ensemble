@@ -7,7 +7,8 @@
  * Skipped in CI unless API key secrets are configured.
  */
 
-import { test, expect, type Page } from '@playwright/test';
+import { test, expect } from '@playwright/test';
+import { fillAndValidateKey, selectModel } from './helpers';
 
 const OPENAI_API_KEY = process.env.TEST_OPENAI_API_KEY;
 const ANTHROPIC_API_KEY = process.env.TEST_ANTHROPIC_API_KEY;
@@ -23,21 +24,6 @@ const TIMEOUT = {
   RESPONSE_VISIBLE: 30_000,
   RESPONSE_COMPLETE: 60_000,
 } as const;
-
-/** Fill an API key input by provider data attribute and wait for the configured count. */
-const fillAndValidateKey = async (
-  page: Page,
-  provider: string,
-  value: string,
-  expectedCount: number,
-) => {
-  await page.locator(`[data-provider="${provider}"] input`).fill(value);
-  const label =
-    expectedCount === 1
-      ? /1 API key configured/i
-      : new RegExp(`${expectedCount} API keys configured`, 'i');
-  await expect(page.getByText(label)).toBeVisible({ timeout: TIMEOUT.API_VALIDATION });
-};
 
 test.describe('Consensus Presets (Free Mode)', () => {
   test.skip(!hasRequiredKeys, 'Skipping — requires TEST_OPENAI_API_KEY, TEST_ANTHROPIC_API_KEY, and TEST_GOOGLE_API_KEY');
@@ -75,13 +61,8 @@ test.describe('Consensus Presets (Free Mode)', () => {
       await expect(page.getByTestId('model-selection-list')).toBeVisible();
 
       // Select one OpenAI model and one Google model
-      const openaiModel = page.locator('[data-testid^="model-card-gpt-"]').first();
-      await expect(openaiModel).toBeVisible({ timeout: TIMEOUT.MODEL_VISIBLE });
-      await openaiModel.click();
-
-      const googleModel = page.locator('[data-testid^="model-card-gemini-"]').first();
-      await expect(googleModel).toBeVisible({ timeout: TIMEOUT.MODEL_VISIBLE });
-      await googleModel.click();
+      await selectModel(page, 'gpt', TIMEOUT.MODEL_VISIBLE);
+      await selectModel(page, 'gemini', TIMEOUT.MODEL_VISIBLE);
 
       // Verify 2 models selected
       const selectedCards = page.locator('[data-testid^="model-card-"][data-selected="true"]');
@@ -114,9 +95,7 @@ test.describe('Consensus Presets (Free Mode)', () => {
       await expect(page).toHaveURL('/ensemble');
 
       // Select a Claude model as the 3rd
-      const claudeModel = page.locator('[data-testid^="model-card-claude-"]').first();
-      await expect(claudeModel).toBeVisible({ timeout: TIMEOUT.MODEL_VISIBLE });
-      await claudeModel.click();
+      await selectModel(page, 'claude', TIMEOUT.MODEL_VISIBLE);
 
       // Verify 3 models selected
       const selectedCards = page.locator('[data-testid^="model-card-"][data-selected="true"]');
