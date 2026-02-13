@@ -59,7 +59,7 @@ export const WorkflowNavigator = React.forwardRef<HTMLElement, WorkflowNavigator
         ref={ref}
         data-testid="workflow-navigator"
         className={cn(
-          'flex',
+          'flex items-center gap-3',
           showBackButton ? 'justify-between' : 'justify-end'
         )}
       >
