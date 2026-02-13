@@ -145,7 +145,8 @@
       "noResponses": "No responses generated yet.",
       "backButton": "Back to Prompt",
       "startOverButton": "Start Over",
-      "newComparisonButton": "New Comparison"
+      "newComparisonButton": "New Comparison",
+      "defaultSummarizerLabel": "AI Model"
     }
   }
 }

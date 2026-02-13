@@ -137,7 +137,8 @@
       "noResponses": "Aucune réponse générée pour le moment.",
       "backButton": "Retour à l'invite",
       "startOverButton": "Recommencer",
-      "newComparisonButton": "Nouvelle comparaison"
+      "newComparisonButton": "Nouvelle comparaison",
+      "defaultSummarizerLabel": "Modèle d'IA"
     }
   }
 }

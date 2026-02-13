@@ -74,8 +74,8 @@ test.describe('Review Page', () => {
   });
 
   test('displays responses section', async ({ page }) => {
-    // Check for responses heading
-    await expect(page.getByText(/model responses/i)).toBeVisible();
+    // Check for responses heading (use role to avoid matching consensus awaiting text)
+    await expect(page.getByRole('heading', { name: /model responses/i })).toBeVisible();
   });
 
   test('streams responses on review page', async ({ page }) => {
