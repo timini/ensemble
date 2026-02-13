@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Card, CardContent } from '../../atoms/Card';
 import { Badge } from '../../atoms/Badge';
 import { Heading } from '../../atoms/Heading';
+import { cn } from '../../../lib/utils';
 
 export interface EnsembleConfigurationSummaryProps {
   /** List of selected model IDs */
@@ -18,6 +19,8 @@ export interface EnsembleConfigurationSummaryProps {
   topN?: number;
   onConsensusMethodChange?: (method: 'standard' | 'elo') => void;
   onTopNChange?: (n: number) => void;
+  /** Optional callback when user clicks a model to set it as summarizer */
+  onSummarizerChange?: (modelId: string) => void;
 }
 
 /**
@@ -48,6 +51,7 @@ export const EnsembleConfigurationSummary = React.forwardRef<
       topN = 3,
       onConsensusMethodChange,
       onTopNChange,
+      onSummarizerChange,
     },
     ref
   ) => {
@@ -71,16 +75,38 @@ export const EnsembleConfigurationSummary = React.forwardRef<
                   {t('organisms.ensembleConfigurationSummary.selectedModels', { count: selectedModels.length })}
                 </Heading>
                 <div className="flex flex-wrap gap-2">
-                  {selectedModels.map((model, index) => (
-                    <Badge
-                      key={index}
-                      variant="outline"
-                      className="bg-muted"
-                      data-testid={`selected-model-${index}`}
-                    >
-                      {model}
-                    </Badge>
-                  ))}
+                  {selectedModels.map((model, index) => {
+                    const isSummarizer = model === summarizerModel;
+                    const badge = (
+                      <Badge
+                        variant="outline"
+                        className={cn(
+                          'bg-muted',
+                          onSummarizerChange && !isSummarizer && 'cursor-pointer hover:border-primary/40 hover:shadow-sm transition-all',
+                          onSummarizerChange && isSummarizer && 'ring-2 ring-primary/20',
+                        )}
+                        data-testid={`selected-model-${index}`}
+                      >
+                        {model}
+                      </Badge>
+                    );
+
+                    if (onSummarizerChange) {
+                      return (
+                        <button
+                          key={index}
+                          onClick={() => onSummarizerChange(model)}
+                          className="focus:outline-none focus:ring-2 focus:ring-ring rounded-full"
+                          aria-label={t('organisms.ensembleConfigurationSummary.setSummarizer', { model })}
+                          type="button"
+                        >
+                          {badge}
+                        </button>
+                      );
+                    }
+
+                    return <React.Fragment key={index}>{badge}</React.Fragment>;
+                  })}
                 </div>
               </div>
 

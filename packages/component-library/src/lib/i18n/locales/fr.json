@@ -101,7 +101,8 @@
       "description": "Ces modèles recevront l'invite et contribueront à la comparaison.",
       "selectedModels": "Modèles Sélectionnés ({{count}})",
       "summarizer": "Synthétiseur",
-      "noSummarizer": "Non sélectionné"
+      "noSummarizer": "Non sélectionné",
+      "setSummarizer": "Définir {{model}} comme synthétiseur"
     },
     "ensembleManagementPanel": {
       "quickPresets": "Préréglages rapides",

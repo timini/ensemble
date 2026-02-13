@@ -147,6 +147,43 @@ test.describe('Prompt Page', () => {
     await expect(promptStep).toHaveAttribute('data-active', 'true');
   });
 
+  test('can change summarizer by clicking model badges', async ({ page }) => {
+    const summaryCard = page.getByTestId('ensemble-configuration-summary');
+    await expect(summaryCard).toBeVisible();
+
+    const summarizerBadge = page.getByTestId('summarizer-model');
+
+    // Click on the first model badge (index 0) to set it as summarizer
+    const firstModelBadge = page.getByTestId('selected-model-0');
+    await firstModelBadge.click();
+
+    // The summarizer badge should now show the first model
+    const firstModelText = await firstModelBadge.textContent();
+    await expect(summarizerBadge).toHaveText(firstModelText!);
+
+    // Click on the second model badge to change summarizer
+    const secondModelBadge = page.getByTestId('selected-model-1');
+    await secondModelBadge.click();
+
+    const secondModelText = await secondModelBadge.textContent();
+    await expect(summarizerBadge).toHaveText(secondModelText!);
+  });
+
+  test('summarizer selection persists after page reload', async ({ page }) => {
+    // Click on the first model badge to set as summarizer
+    const firstModelBadge = page.getByTestId('selected-model-0');
+    await firstModelBadge.click();
+
+    const firstModelText = await firstModelBadge.textContent();
+
+    // Reload the page
+    await page.reload();
+
+    // Summarizer should persist
+    const summarizerBadge = page.getByTestId('summarizer-model');
+    await expect(summarizerBadge).toHaveText(firstModelText!);
+  });
+
   test('displays manual responses preview when manual responses exist', async ({ page }) => {
     await page.goto('/ensemble');
     await addManualResponse(page);

@@ -1,5 +1,6 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { EnsembleConfigurationSummary } from './EnsembleConfigurationSummary';
 import { renderWithI18n } from '../../../lib/test-utils/i18n-test-wrapper';
 
@@ -466,6 +467,136 @@ describe('EnsembleConfigurationSummary', () => {
       expect(screen.getByText('Ces modèles recevront l\'invite et contribueront à la comparaison.')).toBeInTheDocument();
       expect(screen.getByText('Modèles Sélectionnés (3)')).toBeInTheDocument();
       expect(screen.getByText('Synthétiseur')).toBeInTheDocument();
+    });
+  });
+
+  describe('interactive summarizer selection', () => {
+    it('wraps badges in buttons when onSummarizerChange is provided', () => {
+      const handleChange = vi.fn();
+      renderWithI18n(
+        <EnsembleConfigurationSummary
+          selectedModels={mockSelectedModels}
+          summarizerModel={mockSummarizerModel}
+          onSummarizerChange={handleChange}
+        />,
+        { language: 'en' }
+      );
+
+      // Each selected model should have a button wrapper
+      mockSelectedModels.forEach((model) => {
+        expect(
+          screen.getByRole('button', { name: new RegExp(`set ${model} as summarizer`, 'i') })
+        ).toBeInTheDocument();
+      });
+    });
+
+    it('invokes callback with correct model ID when badge is clicked', async () => {
+      const handleChange = vi.fn();
+      const user = userEvent.setup();
+      renderWithI18n(
+        <EnsembleConfigurationSummary
+          selectedModels={mockSelectedModels}
+          summarizerModel={mockSummarizerModel}
+          onSummarizerChange={handleChange}
+        />,
+        { language: 'en' }
+      );
+
+      const firstModelButton = screen.getByRole('button', {
+        name: /set claude-3-haiku-20240307 as summarizer/i,
+      });
+      await user.click(firstModelButton);
+
+      expect(handleChange).toHaveBeenCalledTimes(1);
+      expect(handleChange).toHaveBeenCalledWith('claude-3-haiku-20240307');
+    });
+
+    it('allows clicking current summarizer', async () => {
+      const handleChange = vi.fn();
+      const user = userEvent.setup();
+      renderWithI18n(
+        <EnsembleConfigurationSummary
+          selectedModels={mockSelectedModels}
+          summarizerModel={mockSummarizerModel}
+          onSummarizerChange={handleChange}
+        />,
+        { language: 'en' }
+      );
+
+      const summarizerButton = screen.getByRole('button', {
+        name: /set claude-3-opus-20240229 as summarizer/i,
+      });
+      await user.click(summarizerButton);
+
+      expect(handleChange).toHaveBeenCalledWith('claude-3-opus-20240229');
+    });
+
+    it('applies interactive styles to non-summarizer badges', () => {
+      const handleChange = vi.fn();
+      renderWithI18n(
+        <EnsembleConfigurationSummary
+          selectedModels={mockSelectedModels}
+          summarizerModel={mockSummarizerModel}
+          onSummarizerChange={handleChange}
+        />,
+        { language: 'en' }
+      );
+
+      const nonSummarizerBadge = screen.getByTestId('selected-model-0');
+      expect(nonSummarizerBadge).toHaveClass('cursor-pointer');
+    });
+
+    it('highlights current summarizer badge with ring', () => {
+      const handleChange = vi.fn();
+      renderWithI18n(
+        <EnsembleConfigurationSummary
+          selectedModels={mockSelectedModels}
+          summarizerModel={mockSummarizerModel}
+          onSummarizerChange={handleChange}
+        />,
+        { language: 'en' }
+      );
+
+      // The summarizer model is 'claude-3-opus-20240229' which is at index 1
+      const summarizerBadge = screen.getByTestId('selected-model-1');
+      expect(summarizerBadge).toHaveClass('ring-2');
+    });
+
+    it('remains static when onSummarizerChange is not provided', () => {
+      renderWithI18n(
+        <EnsembleConfigurationSummary
+          selectedModels={mockSelectedModels}
+          summarizerModel={mockSummarizerModel}
+        />,
+        { language: 'en' }
+      );
+
+      // Should NOT have clickable button wrappers for model badges
+      const buttons = screen.queryAllByRole('button', {
+        name: /set .+ as summarizer/i,
+      });
+      expect(buttons).toHaveLength(0);
+    });
+
+    it('supports keyboard activation', async () => {
+      const handleChange = vi.fn();
+      const user = userEvent.setup();
+      renderWithI18n(
+        <EnsembleConfigurationSummary
+          selectedModels={mockSelectedModels}
+          summarizerModel={mockSummarizerModel}
+          onSummarizerChange={handleChange}
+        />,
+        { language: 'en' }
+      );
+
+      const firstButton = screen.getByRole('button', {
+        name: /set claude-3-haiku-20240307 as summarizer/i,
+      });
+      firstButton.focus();
+      await user.keyboard('{Enter}');
+
+      expect(handleChange).toHaveBeenCalledWith('claude-3-haiku-20240307');
     });
   });
 });
