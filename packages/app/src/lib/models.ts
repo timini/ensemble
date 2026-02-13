@@ -44,35 +44,35 @@ export const FALLBACK_MODELS: Model[] = [
 
   // Google (Gemini)
   {
-    id: 'gemini-1.5-pro',
+    id: 'gemini-2.0-flash',
     provider: 'google',
-    name: 'Gemini 1.5 Pro',
-  },
-  {
-    id: 'gemini-1.5-flash',
-    provider: 'google',
-    name: 'Gemini 1.5 Flash',
+    name: 'Gemini 2.0 Flash',
   },
   {
     id: 'gemini-2.5-flash',
     provider: 'google',
     name: 'Gemini 2.5 Flash',
   },
+  {
+    id: 'gemini-1.5-flash',
+    provider: 'google',
+    name: 'Gemini 1.5 Flash',
+  },
 
   // Anthropic (Claude)
   {
-    id: 'claude-3.5-sonnet',
+    id: 'claude-3-5-sonnet-20241022',
     provider: 'anthropic',
     name: 'Claude 3.5 Sonnet',
   },
   {
-    id: 'claude-3-opus',
+    id: 'claude-3-5-haiku-20241022',
     provider: 'anthropic',
-    name: 'Claude 3 Opus',
+    name: 'Claude 3.5 Haiku',
   },
   {
-    id: 'claude-3-haiku',
+    id: 'claude-3-opus-20240229',
     provider: 'anthropic',
-    name: 'Claude 3 Haiku',
+    name: 'Claude 3 Opus',
   },
 ];
