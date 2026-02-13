@@ -94,7 +94,8 @@
       "generatingText": "Génération du consensus…",
       "failedText": "Échec de la génération du consensus",
       "failedDescription": "Une erreur s'est produite lors de la génération du résumé consensuel.",
-      "errorLabel": "Erreur :"
+      "errorLabel": "Erreur :",
+      "summarizerBadge": "Résumé par : {{model}}"
     },
     "ensembleConfigurationSummary": {
       "heading": "Configuration de Votre Ensemble",

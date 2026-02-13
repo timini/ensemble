@@ -73,7 +73,9 @@ export const ConsensusCard = React.forwardRef<HTMLDivElement, ConsensusCardProps
               )}
             </div>
             <Badge className="bg-card/80 text-primary border-primary/20">
-              {t('organisms.consensusCard.generatedBy', { model: summarizerModel })}
+              {status === 'success'
+                ? t('organisms.consensusCard.generatedBy', { model: summarizerModel })
+                : t('organisms.consensusCard.summarizerBadge', { model: summarizerModel })}
             </Badge>
           </div>
 

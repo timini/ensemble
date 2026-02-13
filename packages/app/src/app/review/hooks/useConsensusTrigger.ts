@@ -42,7 +42,7 @@ export function useConsensusTrigger({
     const allResponsesComplete = responses.every(
       (r) => r.isComplete && !r.isStreaming,
     );
-    if (!allResponsesComplete && responses.length > 0) return;
+    if (responses.length > 0 && !allResponsesComplete) return;
 
     const allCompletedResponses = [
       ...responses

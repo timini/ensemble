@@ -8,11 +8,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
-import { useHasHydrated } from "~/hooks/useHasHydrated";
-import { FALLBACK_MODELS } from "~/lib/models";
-import { formatModelLabelFromId } from "~/lib/providerModels";
 import { PageHero } from "@/components/organisms/PageHero";
 import { ResponseCard } from "@/components/molecules/ResponseCard";
 import { ConsensusCard } from "@/components/organisms/ConsensusCard";
@@ -21,86 +17,28 @@ import { ProgressSteps } from "@/components/molecules/ProgressSteps";
 import { WorkflowNavigator } from "@/components/organisms/WorkflowNavigator";
 import { PromptCard } from "@/components/organisms/PromptCard";
 import type { Provider } from "@/components/molecules/ResponseCard";
-import { useReviewPageState } from "./hooks/useReviewPageState";
-import { useReviewAnalytics } from "./hooks/useReviewAnalytics";
-import { useResponseEmbeddings } from "./hooks/useResponseEmbeddings";
-import { useStreamingResponses } from "./hooks/useStreamingResponses";
-import { useConsensusGeneration } from "./hooks/useConsensusGeneration";
-import { useConsensusStatus } from "./hooks/useConsensusStatus";
-import { useConsensusTrigger } from "./hooks/useConsensusTrigger";
+import { useReviewOrchestration } from "./hooks/useReviewOrchestration";
 
 export default function ReviewPage() {
   const { t } = useTranslation();
   const router = useRouter();
-  const hasHydrated = useHasHydrated();
 
   const {
-    prompt,
-    summarizerModel,
-    selectedModels,
-    metaAnalysis,
-    mode,
-    embeddingsProvider,
-    setCurrentStep,
-    resetStreamingState,
-    setEmbeddings,
-    calculateAgreement,
+    displayPrompt,
+    consensusStatus,
+    summarizerDisplayName,
+    viewMetaAnalysis,
+    consensusError,
+    completedResponses,
+    pairwiseComparisons,
+    overallAgreement,
+    averageConfidence,
     viewResponses,
     viewManualResponses,
-    viewAgreementStats,
-    viewMetaAnalysis,
-    viewEmbeddings,
-    viewSimilarityMatrix,
-  } = useReviewPageState(hasHydrated);
-
-  const { completedResponses, pairwiseComparisons, overallAgreement, averageConfidence } =
-    useReviewAnalytics(viewResponses, viewAgreementStats, viewSimilarityMatrix);
-
-  const { retryModel } = useStreamingResponses({ hasHydrated, prompt, mode });
-
-  useResponseEmbeddings({
-    hasHydrated,
-    completedResponses,
-    embeddingsProvider,
-    viewEmbeddings,
-    viewSimilarityMatrix,
-    mode,
-    setEmbeddings,
-    calculateAgreementState: calculateAgreement,
-  });
-
-  const {
-    generateConsensus,
-    isGenerating: isGeneratingConsensus,
-    error: consensusError,
-  } = useConsensusGeneration();
-
-  useConsensusTrigger({
-    hasHydrated,
-    responses: viewResponses,
-    manualResponses: viewManualResponses,
-    metaAnalysis,
-    summarizerModel,
-    selectedModels,
-    prompt,
-    generateConsensus,
-    isGenerating: isGeneratingConsensus,
-  });
-
-  const summarizerDisplayName = useMemo(() => {
-    const modelId = summarizerModel ?? selectedModels[0]?.model;
-    if (!modelId) return t("pages.review.defaultSummarizerLabel");
-    const modelDef = FALLBACK_MODELS.find((m) => m.id === modelId);
-    return modelDef ? modelDef.name : formatModelLabelFromId(modelId);
-  }, [summarizerModel, selectedModels, t]);
-
-  const consensusStatus = useConsensusStatus({
-    hasHydrated,
-    responses: viewResponses,
-    metaAnalysis: viewMetaAnalysis,
-    isGenerating: isGeneratingConsensus,
-    error: consensusError,
-  });
+    retryModel,
+    setCurrentStep,
+    resetStreamingState,
+  } = useReviewOrchestration();
 
   const handleBack = () => {
     setCurrentStep("prompt");
@@ -118,8 +56,6 @@ export default function ReviewPage() {
     resetStreamingState();
     router.push("/config");
   };
-
-  const displayPrompt = hasHydrated ? (prompt ?? "") : "";
 
   return (
     <div className="container mx-auto max-w-6xl px-4 py-8">

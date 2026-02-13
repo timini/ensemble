@@ -94,7 +94,8 @@
       "generatingText": "Generating consensus…",
       "failedText": "Failed to generate consensus",
       "failedDescription": "An error occurred while generating the consensus summary.",
-      "errorLabel": "Error:"
+      "errorLabel": "Error:",
+      "summarizerBadge": "Summarizer: {{model}}"
     },
     "promptCard": {
       "heading": "Your Prompt",

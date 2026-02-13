@@ -439,6 +439,7 @@ describe('ConsensusCard', () => {
 
       expect(screen.getByTestId('consensus-card')).toBeInTheDocument();
       expect(screen.getByText(/awaiting model responses/i)).toBeInTheDocument();
+      expect(screen.getByText(/Summarizer: Claude 3 Opus/)).toBeInTheDocument();
     });
 
     it('renders awaiting state description', () => {
@@ -489,6 +490,7 @@ describe('ConsensusCard', () => {
       expect(screen.getByTestId('consensus-card')).toBeInTheDocument();
       expect(screen.getByText(/failed to generate consensus/i)).toBeInTheDocument();
       expect(screen.getByText(errorMessage)).toBeInTheDocument();
+      expect(screen.getByText(/Summarizer: Claude 3 Opus/)).toBeInTheDocument();
     });
 
     it('renders failed state without error details', () => {
