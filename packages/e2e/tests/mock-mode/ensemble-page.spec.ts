@@ -169,7 +169,7 @@ test.describe('Ensemble Page', () => {
     await page.locator('[data-provider="openai"] input').fill('sk-test-openai-key');
     await page.getByRole('button', { name: 'Next', exact: true }).click();
 
-    const selector = '[data-testid="model-card-gemini-1.5-pro"]';
+    const selector = '[data-testid="model-card-gemini-2.0-flash"]';
     const googleCard = page.locator(selector);
     await expect(googleCard).toHaveAttribute('data-disabled', 'true');
 
