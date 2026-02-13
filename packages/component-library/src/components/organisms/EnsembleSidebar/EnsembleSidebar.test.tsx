@@ -600,6 +600,64 @@ describe('EnsembleSidebar', () => {
       expect(onAddManualResponse).toHaveBeenCalled();
     });
 
+    it('calls onContinue when continue button clicked', async () => {
+      const user = userEvent.setup();
+      const onContinue = vi.fn();
+
+      render(
+        <EnsembleSidebar
+          selectedModels={mockSelectedModels}
+          presets={[]}
+          currentEnsembleName=""
+          onLoadPreset={vi.fn()}
+          onSavePreset={vi.fn()}
+          onDeletePreset={vi.fn()}
+          onAddManualResponse={vi.fn()}
+          onContinue={onContinue}
+        />
+      );
+
+      const continueButton = screen.getByTestId('continue-to-prompt');
+      await user.click(continueButton);
+
+      expect(onContinue).toHaveBeenCalled();
+    });
+
+    it('disables continue button when continueDisabled is true', () => {
+      render(
+        <EnsembleSidebar
+          selectedModels={[]}
+          presets={[]}
+          currentEnsembleName=""
+          onLoadPreset={vi.fn()}
+          onSavePreset={vi.fn()}
+          onDeletePreset={vi.fn()}
+          onAddManualResponse={vi.fn()}
+          onContinue={vi.fn()}
+          continueDisabled={true}
+        />
+      );
+
+      const continueButton = screen.getByTestId('continue-to-prompt');
+      expect(continueButton).toBeDisabled();
+    });
+
+    it('does not render continue button when onContinue not provided', () => {
+      render(
+        <EnsembleSidebar
+          selectedModels={mockSelectedModels}
+          presets={[]}
+          currentEnsembleName=""
+          onLoadPreset={vi.fn()}
+          onSavePreset={vi.fn()}
+          onDeletePreset={vi.fn()}
+          onAddManualResponse={vi.fn()}
+        />
+      );
+
+      expect(screen.queryByTestId('continue-to-prompt')).not.toBeInTheDocument();
+    });
+
     it('calls onClearAll when clear button clicked', async () => {
       const user = userEvent.setup();
       const onClearAll = vi.fn();

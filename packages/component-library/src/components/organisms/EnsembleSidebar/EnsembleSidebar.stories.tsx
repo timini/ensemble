@@ -167,7 +167,7 @@ export const WithContinueButton: Story = {
     currentEnsembleName: '',
     showQuickPresets: false,
     showSaveEnsemble: false,
-    onContinue: () => console.log('Continue clicked'),
+    onContinue: () => {},
     continueDisabled: false,
   },
 };
@@ -180,7 +180,7 @@ export const ContinueButtonDisabled: Story = {
     currentEnsembleName: '',
     showQuickPresets: false,
     showSaveEnsemble: false,
-    onContinue: () => console.log('Continue clicked'),
+    onContinue: () => {},
     continueDisabled: true,
   },
 };
