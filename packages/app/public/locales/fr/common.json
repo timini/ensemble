@@ -101,7 +101,8 @@
       "manualResponsesDescription": "Ajoutez des réponses de référence ou des sorties de benchmark pour l'étape de révision.",
       "manualResponsesInfo": "Incluez des réponses personnalisées à comparer aux modèles en direct.",
       "addManualResponse": "Ajouter une réponse manuelle",
-      "manualResponsesNote": "Ajoutez des réponses de référence ou des benchmarks à comparer aux réponses des modèles."
+      "manualResponsesNote": "Ajoutez des réponses de référence ou des benchmarks à comparer aux réponses des modèles.",
+      "continueToPrompt": "Continuer vers l'Invite"
     }
   },
   "pages": {
@@ -136,7 +137,8 @@
       "noResponses": "Aucune réponse générée pour le moment.",
       "backButton": "Retour à l'invite",
       "startOverButton": "Recommencer",
-      "newComparisonButton": "Nouvelle comparaison"
+      "newComparisonButton": "Nouvelle comparaison",
+      "defaultSummarizerLabel": "Modèle d'IA"
     }
   }
 }

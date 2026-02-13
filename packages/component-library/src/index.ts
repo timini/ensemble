@@ -78,7 +78,7 @@ export { SummarizerIndicator, type SummarizerIndicatorProps } from './components
 export { ModeSelector, type ModeSelectorProps, type Mode as ModeType } from './components/organisms/ModeSelector';
 export { ApiKeyConfiguration, type ApiKeyConfigurationProps, type ApiKeyConfigurationItem } from './components/organisms/ApiKeyConfiguration';
 export { EnsembleConfigurationSummary, type EnsembleConfigurationSummaryProps } from './components/organisms/EnsembleConfigurationSummary';
-export { ConsensusCard, type ConsensusCardProps } from './components/organisms/ConsensusCard';
+export { ConsensusCard, type ConsensusCardProps, type ConsensusStatus } from './components/organisms/ConsensusCard';
 export { SettingsModal, type SettingsModalProps, type Theme, type Language } from './components/organisms/SettingsModal';
 export { ManualResponseModal, type ManualResponseModalProps, type ManualResponseData } from './components/organisms/ManualResponseModal';
 export { PromptTips, type PromptTipsProps } from './components/organisms/PromptTips';

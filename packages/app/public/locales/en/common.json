@@ -101,7 +101,8 @@
       "manualResponsesDescription": "Add reference answers or benchmark outputs to include in the review step.",
       "manualResponsesInfo": "Include custom responses to compare against live model outputs.",
       "addManualResponse": "Add Manual Response",
-      "manualResponsesNote": "Add reference answers or benchmark outputs to compare against live model responses."
+      "manualResponsesNote": "Add reference answers or benchmark outputs to compare against live model responses.",
+      "continueToPrompt": "Continue to Prompt"
     },
     "apiKeyConfiguration": {
       "heading": "Configure API Keys",
@@ -144,7 +145,8 @@
       "noResponses": "No responses generated yet.",
       "backButton": "Back to Prompt",
       "startOverButton": "Start Over",
-      "newComparisonButton": "New Comparison"
+      "newComparisonButton": "New Comparison",
+      "defaultSummarizerLabel": "AI Model"
     }
   }
 }
