@@ -20,6 +20,20 @@ describe('EnsembleHeader', () => {
     expect(settingsButton).toBeInTheDocument();
   });
 
+  it('renders the About link', () => {
+    render(<EnsembleHeader />);
+    const aboutLink = screen.getByRole('link', { name: /about/i });
+    expect(aboutLink).toBeInTheDocument();
+    expect(aboutLink).toHaveAttribute('href', '/about');
+  });
+
+  it('renders the Features link', () => {
+    render(<EnsembleHeader />);
+    const featuresLink = screen.getByRole('link', { name: /features/i });
+    expect(featuresLink).toBeInTheDocument();
+    expect(featuresLink).toHaveAttribute('href', '/features');
+  });
+
   it('applies correct styling classes', () => {
     const { container } = render(<EnsembleHeader />);
     const header = container.firstChild;

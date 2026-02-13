@@ -2,7 +2,9 @@
   "ensemble": {
     "header": {
       "title": "Ensemble AI",
-      "tagline": "The smartest AI is an ensemble."
+      "tagline": "The smartest AI is an ensemble.",
+      "about": "About",
+      "features": "Features"
     },
     "steps": {
       "config": "Config",

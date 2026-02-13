@@ -139,6 +139,104 @@
       "startOverButton": "Recommencer",
       "newComparisonButton": "Nouvelle comparaison",
       "defaultSummarizerLabel": "Modèle d'IA"
+    },
+    "about": {
+      "title": "À propos d'Ensemble AI",
+      "description": "La science derrière de meilleures décisions avec les ensembles d'IA",
+      "whatIsEnsemble": {
+        "heading": "Qu'est-ce qu'Ensemble AI ?",
+        "body": "Ensemble AI vous permet d'interroger simultanément plusieurs grands modèles de langage et de comparer leurs réponses côte à côte. Au lieu de vous fier à la perspective d'un seul modèle, vous obtenez des points de vue diversifiés d'OpenAI, Anthropic, Google et xAI, puis les synthétisez en une réponse consensuelle."
+      },
+      "whyEnsemble": {
+        "heading": "Pourquoi un ensemble ?",
+        "body": "Chaque modèle d'IA a ses angles morts. Une question qui déroute un modèle peut être triviale pour un autre. C'est le paradoxe de la sélection de modèle : vous ne pouvez pas savoir quel modèle sera le plus performant sur votre question spécifique avant de l'avoir posée. L'approche d'ensemble élimine cette incertitude en exploitant les forces complémentaires de plusieurs modèles, produisant des réponses plus fiables et équilibrées."
+      },
+      "research": {
+        "heading": "La recherche",
+        "intro": "L'approche d'ensemble est fondée sur des recherches évaluées par des pairs démontrant que plusieurs modèles d'IA travaillant ensemble surpassent systématiquement tout modèle individuel.",
+        "papers": [
+          {
+            "title": "Mixture-of-Agents Enhances Large Language Model Capabilities",
+            "authors": "Wang et al.",
+            "venue": "ICLR 2025",
+            "finding": "Les ensembles de LLM open source ont collectivement surpassé GPT-4o de 7,6 % sur AlpacaEval 2.0.",
+            "url": "https://arxiv.org/abs/2406.04692"
+          },
+          {
+            "title": "Improving Factuality and Reasoning in Language Models through Multiagent Debate",
+            "authors": "Du et al.",
+            "venue": "ICML 2024",
+            "finding": "Le débat multi-modèle a amélioré la précision en mathématiques GSM8K de 77 % à 85 %.",
+            "url": "https://arxiv.org/abs/2305.14325"
+          },
+          {
+            "title": "ReConcile: Round-Table Conference Improves Reasoning via Consensus",
+            "authors": "Chen et al.",
+            "venue": "ACL 2024",
+            "finding": "Jusqu'à 11,4 % d'amélioration par rapport aux références mono-modèle grâce à un consensus structuré.",
+            "url": "https://arxiv.org/abs/2309.13007"
+          },
+          {
+            "title": "Iterative Consensus Ensemble of LLMs for Medical Question Answering",
+            "authors": "Dong et al.",
+            "venue": "2025",
+            "finding": "Un gain de précision de 23 % sur les questions médicales grâce au consensus itératif de LLM.",
+            "url": "https://arxiv.org/abs/2503.18263"
+          },
+          {
+            "title": "Harnessing Multiple LLMs: A Survey on Collaboration, Competition and Synergy",
+            "authors": "Yin et al.",
+            "venue": "2025",
+            "finding": "Taxonomie complète des stratégies de collaboration multi-LLM et de leur efficacité.",
+            "url": "https://arxiv.org/abs/2502.00773"
+          }
+        ]
+      }
+    },
+    "features": {
+      "title": "Fonctionnalités",
+      "description": "Tout ce dont vous avez besoin pour exploiter la puissance de plusieurs modèles d'IA",
+      "howItWorks": {
+        "heading": "Comment ça marche",
+        "steps": [
+          { "name": "Configurer", "description": "Choisissez votre mode de fonctionnement et fournissez vos identifiants API." },
+          { "name": "Ensemble", "description": "Sélectionnez 2 à 6 modèles d'IA et désignez un synthétiseur." },
+          { "name": "Invite", "description": "Entrez votre question ou tâche pour l'ensemble." },
+          { "name": "Révision", "description": "Consultez les réponses en streaming, l'analyse de concordance et le consensus synthétisé." }
+        ]
+      },
+      "modes": {
+        "heading": "Modes de fonctionnement",
+        "free": {
+          "heading": "Mode Gratuit",
+          "body": "Utilisez vos propres clés API d'OpenAI, Anthropic, Google et xAI. Vos clés sont chiffrées avec AES-256 via l'API Web Crypto et ne quittent jamais votre navigateur. Il n'y a aucun frais d'utilisation de la part d'Ensemble AI — vous ne payez que les jetons consommés directement auprès de chaque fournisseur."
+        },
+        "pro": {
+          "heading": "Mode Pro",
+          "body": "Achetez des crédits pour accéder à tous les fournisseurs sans gérer de clés API. Ensemble AI gère les connexions aux fournisseurs pour vous, afin que vous puissiez vous concentrer sur l'obtention de réponses. Simple, sécurisé et sans tracas."
+        }
+      },
+      "security": {
+        "heading": "Sécurité et confidentialité",
+        "body": "La sécurité de vos données est un principe de conception fondamental, pas une réflexion après coup.",
+        "features": [
+          "Les clés API sont chiffrées avec AES-256 via l'API Web Crypto avant le stockage.",
+          "Les clés ne quittent jamais votre navigateur en Mode Gratuit — aucun stockage côté serveur.",
+          "Aucune invite ni réponse n'est enregistrée ou stockée sur nos serveurs.",
+          "Toute communication avec les fournisseurs se fait directement depuis votre navigateur en Mode Gratuit.",
+          "Code source ouvert pour une transparence et une auditabilité complètes."
+        ]
+      },
+      "providers": {
+        "heading": "Fournisseurs supportés",
+        "body": "Ensemble AI prend en charge les principaux fournisseurs de modèles d'IA, vous donnant accès aux meilleurs modèles de l'industrie.",
+        "list": [
+          { "name": "OpenAI", "description": "GPT-4o, GPT-4 et plus" },
+          { "name": "Anthropic", "description": "Claude Opus, Sonnet et Haiku" },
+          { "name": "Google", "description": "Gemini Pro et Ultra" },
+          { "name": "xAI", "description": "Modèles Grok" }
+        ]
+      }
     }
   }
 }

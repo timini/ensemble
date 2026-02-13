@@ -2,7 +2,9 @@
   "ensemble": {
     "header": {
       "title": "IA Ensemble",
-      "tagline": "L'IA la plus intelligente est un ensemble."
+      "tagline": "L'IA la plus intelligente est un ensemble.",
+      "about": "À propos",
+      "features": "Fonctionnalités"
     },
     "steps": {
       "config": "Config",
