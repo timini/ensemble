@@ -13,6 +13,11 @@ const meta = {
       control: 'text',
       description: 'Heading text for the consensus section',
     },
+    status: {
+      control: 'select',
+      options: ['awaiting', 'generating', 'success', 'failed'],
+      description: 'Current status of consensus generation',
+    },
     onShare: {
       action: 'shared',
       description: 'Callback when share button is clicked',
@@ -29,6 +34,7 @@ export const Default: Story = {
     consensusText:
       'Your question has a clear focus that allows for a direct response. We can examine this through multiple lenses: theoretical foundations, real-world examples, and future considerations. This comprehensive approach ensures that all relevant factors are taken into account when formulating a complete response.',
     summarizerModel: 'Claude 3 Opus',
+    status: 'success',
     onShare: () => console.log('Share clicked'),
   },
 };
@@ -38,6 +44,7 @@ export const ShortConsensus: Story = {
   args: {
     consensusText: 'This is a straightforward topic with a direct answer.',
     summarizerModel: 'Claude 3 Opus',
+    status: 'success',
     onShare: () => console.log('Share clicked'),
   },
 };
@@ -48,6 +55,7 @@ export const LongConsensus: Story = {
     consensusText:
       'Your question has a clear focus that allows for a detailed and comprehensive response. We can examine this through multiple lenses: theoretical foundations that provide the conceptual framework, real-world examples that demonstrate practical applications, historical context that shows evolution over time, current best practices that reflect modern understanding, and future considerations that anticipate upcoming developments. This multi-faceted comprehensive approach ensures that all relevant factors are taken into account when formulating a complete response. By considering each of these dimensions, we can provide a thorough analysis that addresses the question from various angles and provides a well-rounded understanding of the topic at hand. The integration of these different perspectives creates a more robust and nuanced answer that considers both breadth and depth of understanding.',
     summarizerModel: 'Claude 3 Opus',
+    status: 'success',
     onShare: () => console.log('Share clicked'),
   },
 };
@@ -58,6 +66,7 @@ export const DifferentModel: Story = {
     consensusText:
       'The analysis reveals several key insights. By examining patterns and drawing conclusions, we can better understand the underlying dynamics at play.',
     summarizerModel: 'GPT-4 Turbo',
+    status: 'success',
     onShare: () => console.log('Share clicked'),
   },
 };
@@ -68,6 +77,7 @@ export const CustomHeading: Story = {
     consensusText:
       'Your question has a clear focus that allows for a direct response. We can examine this through multiple lenses: theoretical foundations, real-world examples, and future considerations.',
     summarizerModel: 'Claude 3 Opus',
+    status: 'success',
     heading: 'Synthesized Response',
     onShare: () => console.log('Share clicked'),
   },
@@ -79,6 +89,7 @@ export const WithoutShareHandler: Story = {
     consensusText:
       'Your question has a clear focus that allows for a direct response. We can examine this through multiple lenses: theoretical foundations, real-world examples, and future considerations.',
     summarizerModel: 'Claude 3 Opus',
+    status: 'success',
   },
 };
 
@@ -88,6 +99,7 @@ export const TechnicalConsensus: Story = {
     consensusText:
       'The implementation requires careful consideration of architectural patterns, data structures, and algorithmic complexity. Optimal performance can be achieved through caching strategies, lazy loading, and efficient memory management. Error handling and edge cases must be thoroughly addressed to ensure system reliability.',
     summarizerModel: 'Claude 3 Sonnet',
+    status: 'success',
     onShare: () => console.log('Share clicked'),
   },
 };
@@ -98,6 +110,7 @@ export const CreativeConsensus: Story = {
     consensusText:
       'The narrative weaves together themes of hope and resilience, creating a tapestry of human experience. Through vivid imagery and emotional depth, the story explores the complexities of relationships and the power of personal transformation.',
     summarizerModel: 'Claude 3 Opus',
+    status: 'success',
     onShare: () => console.log('Share clicked'),
   },
 };
@@ -108,6 +121,40 @@ export const MultilineConsensus: Story = {
     consensusText:
       'First key point: The foundation is built on solid principles.\n\nSecond key point: Implementation requires careful planning.\n\nThird key point: Results should be measured and validated.',
     summarizerModel: 'Claude 3 Opus',
+    status: 'success',
     onShare: () => console.log('Share clicked'),
+  },
+};
+
+// Awaiting responses state
+export const AwaitingResponses: Story = {
+  args: {
+    status: 'awaiting',
+    summarizerModel: 'Claude 3 Opus',
+  },
+};
+
+// Generating consensus state
+export const GeneratingConsensus: Story = {
+  args: {
+    status: 'generating',
+    summarizerModel: 'Claude 3 Opus',
+  },
+};
+
+// Failed state with error details
+export const FailedWithError: Story = {
+  args: {
+    status: 'failed',
+    error: 'API rate limit exceeded. Please try again in 60 seconds.',
+    summarizerModel: 'Claude 3 Opus',
+  },
+};
+
+// Failed state without error details
+export const FailedWithoutError: Story = {
+  args: {
+    status: 'failed',
+    summarizerModel: 'Claude 3 Opus',
   },
 };
