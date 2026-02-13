@@ -36,12 +36,9 @@ jobs:
           path: ~/.cache/ms-playwright
           key: playwright-${{ runner.os }}-${{ steps.playwright-version.outputs.version }}
       - name: Install Playwright browsers
-        if: steps.playwright-cache.outputs.cache-hit != 'true'
-        run: npx playwright install --with-deps chromium
-        working-directory: packages/component-library
-      - name: Install Playwright system deps
-        if: steps.playwright-cache.outputs.cache-hit == 'true'
-        run: npx playwright install-deps chromium
+        # On GitHub-hosted ubuntu-latest runners, Chromium system deps are preinstalled.
+        # We only ensure browser binaries are present to avoid flaky apt repository failures.
+        run: npx playwright install chromium
         working-directory: packages/component-library
       - run: npm run test:storybook:ci --workspace=packages/component-library
 
@@ -102,12 +99,9 @@ jobs:
           path: ~/.cache/ms-playwright
           key: playwright-${{ runner.os }}-${{ steps.playwright-version.outputs.version }}
       - name: Install Playwright browsers
-        if: steps.playwright-cache.outputs.cache-hit != 'true'
-        run: npx playwright install --with-deps chromium
-        working-directory: packages/e2e
-      - name: Install Playwright system deps
-        if: steps.playwright-cache.outputs.cache-hit == 'true'
-        run: npx playwright install-deps chromium
+        # On GitHub-hosted ubuntu-latest runners, Chromium system deps are preinstalled.
+        # We only ensure browser binaries are present to avoid flaky apt repository failures.
+        run: npx playwright install chromium
         working-directory: packages/e2e
       - name: Run Mock Mode E2E Tests
         run: npm run test:mock --workspace=packages/e2e

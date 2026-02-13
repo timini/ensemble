@@ -3,6 +3,7 @@ import axios from 'axios';
 import { BaseFreeClient, type StreamOptions } from '../base/BaseFreeClient';
 import type { ValidationResult } from '../../types';
 import { extractAxiosErrorMessage } from '../../utils/extractAxiosError';
+import { hasNonTextModality } from '../../utils/modelFilters';
 
 interface XaiModelEntry {
   id?: string;
@@ -52,7 +53,12 @@ export class FreeXAIClient extends BaseFreeClient {
     const data = response.data?.data ?? [];
     return data
       .map((entry) => entry.id ?? entry.name ?? '')
-      .filter((value): value is string => value.length > 0 && value.startsWith('grok-'));
+      .filter(
+        (value): value is string =>
+          value.length > 0 &&
+          value.startsWith('grok-') &&
+          !hasNonTextModality(value),
+      );
   }
 
   protected override async streamWithProvider(options: StreamOptions): Promise<void> {

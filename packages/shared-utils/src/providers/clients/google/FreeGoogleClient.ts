@@ -3,6 +3,7 @@ import axios from 'axios';
 import { BaseFreeClient, type StreamOptions } from '../base/BaseFreeClient';
 import type { ValidationResult } from '../../types';
 import { extractAxiosErrorMessage } from '../../utils/extractAxiosError';
+import { hasNonTextModality } from '../../utils/modelFilters';
 
 interface GoogleModelEntry {
   name?: string;
@@ -57,7 +58,9 @@ export class FreeGoogleClient extends BaseFreeClient {
       })
       .filter(
         (value): value is string =>
-          value.length > 0 && value.startsWith('gemini-') && !value.includes('embedding'),
+          value.length > 0 &&
+          value.startsWith('gemini-') &&
+          !hasNonTextModality(value),
       );
   }
 
