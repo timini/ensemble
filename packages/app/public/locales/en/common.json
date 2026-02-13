@@ -147,6 +147,104 @@
       "startOverButton": "Start Over",
       "newComparisonButton": "New Comparison",
       "defaultSummarizerLabel": "AI Model"
+    },
+    "about": {
+      "title": "About Ensemble AI",
+      "description": "The science behind better decisions with AI ensembles",
+      "whatIsEnsemble": {
+        "heading": "What is Ensemble AI?",
+        "body": "Ensemble AI lets you query multiple large language models simultaneously and compare their responses side by side. Instead of relying on a single model's perspective, you get diverse viewpoints from OpenAI, Anthropic, Google, and xAI — then synthesise them into a consensus answer."
+      },
+      "whyEnsemble": {
+        "heading": "Why an Ensemble?",
+        "body": "Every AI model has blind spots. A question that stumps one model may be trivial for another. This is the model selection paradox: you cannot know which model will perform best on your specific question until you have already asked it. An ensemble approach eliminates this guesswork by harnessing the complementary strengths of multiple models, producing more reliable and well-rounded answers."
+      },
+      "research": {
+        "heading": "The Research",
+        "intro": "The ensemble approach is grounded in peer-reviewed research demonstrating that multiple AI models working together consistently outperform any single model.",
+        "papers": [
+          {
+            "title": "Mixture-of-Agents Enhances Large Language Model Capabilities",
+            "authors": "Wang et al.",
+            "venue": "ICLR 2025",
+            "finding": "Open-source LLM ensembles collectively surpassed GPT-4o by 7.6% on AlpacaEval 2.0.",
+            "url": "https://arxiv.org/abs/2406.04692"
+          },
+          {
+            "title": "Improving Factuality and Reasoning in Language Models through Multiagent Debate",
+            "authors": "Du et al.",
+            "venue": "ICML 2024",
+            "finding": "Multi-model debate improved GSM8K math accuracy from 77% to 85%.",
+            "url": "https://arxiv.org/abs/2305.14325"
+          },
+          {
+            "title": "ReConcile: Round-Table Conference Improves Reasoning via Consensus",
+            "authors": "Chen et al.",
+            "venue": "ACL 2024",
+            "finding": "Up to 11.4% improvement over single-model baselines through structured consensus.",
+            "url": "https://arxiv.org/abs/2309.13007"
+          },
+          {
+            "title": "Iterative Consensus Ensemble of LLMs for Medical Question Answering",
+            "authors": "Dong et al.",
+            "venue": "2025",
+            "finding": "Achieved a 23% accuracy gain on medical questions through iterative LLM consensus.",
+            "url": "https://arxiv.org/abs/2503.18263"
+          },
+          {
+            "title": "Harnessing Multiple LLMs: A Survey on Collaboration, Competition and Synergy",
+            "authors": "Yin et al.",
+            "venue": "2025",
+            "finding": "Comprehensive taxonomy of multi-LLM collaboration strategies and their effectiveness.",
+            "url": "https://arxiv.org/abs/2502.00773"
+          }
+        ]
+      }
+    },
+    "features": {
+      "title": "Features",
+      "description": "Everything you need to harness the power of multiple AI models",
+      "howItWorks": {
+        "heading": "How It Works",
+        "steps": [
+          { "name": "Configure", "description": "Choose your operating mode and provide API credentials." },
+          { "name": "Ensemble", "description": "Select 2–6 AI models and designate a summariser." },
+          { "name": "Prompt", "description": "Enter your question or task for the ensemble." },
+          { "name": "Review", "description": "View streaming responses, agreement analysis, and a synthesised consensus." }
+        ]
+      },
+      "modes": {
+        "heading": "Operating Modes",
+        "free": {
+          "heading": "Free Mode",
+          "body": "Bring your own API keys from OpenAI, Anthropic, Google, and xAI. Your keys are encrypted with AES-256 using the Web Crypto API and never leave your browser. There are no usage fees from Ensemble AI — you pay only for the tokens you consume directly with each provider."
+        },
+        "pro": {
+          "heading": "Pro Mode",
+          "body": "Purchase credits to access all providers without managing API keys. Ensemble AI handles the provider connections on your behalf, so you can focus on getting answers. Simple, secure, and hassle-free."
+        }
+      },
+      "security": {
+        "heading": "Security & Privacy",
+        "body": "Your data security is a core design principle, not an afterthought.",
+        "features": [
+          "API keys are encrypted with AES-256 via the Web Crypto API before storage.",
+          "Keys never leave your browser in Free Mode — no server-side storage.",
+          "No prompts or responses are logged or stored on our servers.",
+          "All provider communication happens directly from your browser in Free Mode.",
+          "Open-source codebase for full transparency and auditability."
+        ]
+      },
+      "providers": {
+        "heading": "Supported Providers",
+        "body": "Ensemble AI supports the leading AI model providers, giving you access to the best models across the industry.",
+        "list": [
+          { "name": "OpenAI", "description": "GPT-4o, GPT-4, and more" },
+          { "name": "Anthropic", "description": "Claude Opus, Sonnet, and Haiku" },
+          { "name": "Google", "description": "Gemini Pro and Ultra" },
+          { "name": "xAI", "description": "Grok models" }
+        ]
+      }
     }
   }
 }
