@@ -223,7 +223,8 @@ test.describe('Full Workflow - Mock Mode', () => {
 
       const startOverButton = page.getByRole('button', { name: /start over/i });
       await expect(startOverButton).toBeVisible({ timeout: 10000 });
-      await startOverButton.click();
+      await startOverButton.scrollIntoViewIfNeeded();
+      await startOverButton.click({ force: true });
       await expect(page).toHaveURL('/config', { timeout: 10000 });
 
       // Verify we're back at config page
