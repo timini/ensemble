@@ -44,6 +44,7 @@ export default function PromptPage() {
   const eloTopN = useStore((state) => state.eloTopN);
   const setConsensusMethod = useStore((state) => state.setConsensusMethod);
   const setEloTopN = useStore((state) => state.setEloTopN);
+  const setSummarizer = useStore((state) => state.setSummarizer);
 
   const currentStep = useStore((state) => state.currentStep);
   const setCurrentStep = useStore((state) => state.setCurrentStep);
@@ -132,6 +133,10 @@ export default function PromptPage() {
     router.push('/review');
   };
 
+  const handleSummarizerChange = (modelId: string) => {
+    setSummarizer(modelId);
+  };
+
   const handleBack = () => {
     setCurrentStep('ensemble');
     router.push('/ensemble');
@@ -162,6 +167,7 @@ export default function PromptPage() {
             topN={eloTopN}
             onConsensusMethodChange={setConsensusMethod}
             onTopNChange={setEloTopN}
+            onSummarizerChange={handleSummarizerChange}
           />
         )}
 

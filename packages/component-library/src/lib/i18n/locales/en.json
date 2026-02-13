@@ -98,7 +98,8 @@
       "description": "These models will receive the prompt and contribute to the comparison.",
       "selectedModels": "Selected Models ({{count}})",
       "summarizer": "Summarizer",
-      "noSummarizer": "Not selected"
+      "noSummarizer": "Not selected",
+      "setSummarizer": "Set {{model}} as summarizer"
     },
     "ensembleManagementPanel": {
       "quickPresets": "Quick presets",
