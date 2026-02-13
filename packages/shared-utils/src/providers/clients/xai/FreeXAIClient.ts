@@ -3,6 +3,7 @@ import axios from 'axios';
 import { BaseFreeClient, type StreamOptions } from '../base/BaseFreeClient';
 import type { ValidationResult } from '../../types';
 import { extractAxiosErrorMessage } from '../../utils/extractAxiosError';
+import { hasNonTextModality } from '../../utils/modelFilters';
 
 interface XaiModelEntry {
   id?: string;
@@ -12,9 +13,6 @@ interface XaiModelEntry {
 interface XaiModelsResponse {
   data?: XaiModelEntry[];
 }
-
-const NON_TEXT_MODALITY_PATTERN =
-  /(?:^|[-_])(audio|video|vision|image|imagine|embedding|tts|speech)(?:$|[-_])/i;
 
 export class FreeXAIClient extends BaseFreeClient {
   private createClient(apiKey: string) {
@@ -59,7 +57,7 @@ export class FreeXAIClient extends BaseFreeClient {
         (value): value is string =>
           value.length > 0 &&
           value.startsWith('grok-') &&
-          !NON_TEXT_MODALITY_PATTERN.test(value),
+          !hasNonTextModality(value),
       );
   }
 

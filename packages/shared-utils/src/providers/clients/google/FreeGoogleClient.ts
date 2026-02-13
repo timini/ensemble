@@ -3,6 +3,7 @@ import axios from 'axios';
 import { BaseFreeClient, type StreamOptions } from '../base/BaseFreeClient';
 import type { ValidationResult } from '../../types';
 import { extractAxiosErrorMessage } from '../../utils/extractAxiosError';
+import { hasNonTextModality } from '../../utils/modelFilters';
 
 interface GoogleModelEntry {
   name?: string;
@@ -11,9 +12,6 @@ interface GoogleModelEntry {
 interface GoogleModelsResponse {
   models?: GoogleModelEntry[];
 }
-
-const NON_TEXT_MODALITY_PATTERN =
-  /(?:^|[-_])(audio|video|vision|image|imagine|embedding|tts|speech)(?:$|[-_])/i;
 
 export class FreeGoogleClient extends BaseFreeClient {
   private createClient(apiKey: string) {
@@ -62,7 +60,7 @@ export class FreeGoogleClient extends BaseFreeClient {
         (value): value is string =>
           value.length > 0 &&
           value.startsWith('gemini-') &&
-          !NON_TEXT_MODALITY_PATTERN.test(value),
+          !hasNonTextModality(value),
       );
   }
 

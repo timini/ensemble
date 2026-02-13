@@ -1,6 +1,7 @@
 import OpenAI from 'openai';
 import { BaseFreeClient, type StreamOptions } from '../base/BaseFreeClient';
 import type { ValidationResult } from '../../types';
+import { hasNonTextModality } from '../../utils/modelFilters';
 
 export class FreeOpenAIClient extends BaseFreeClient {
   private createClient(apiKey: string) {
@@ -42,11 +43,7 @@ export class FreeOpenAIClient extends BaseFreeClient {
         // Exclude models that don't support the Chat Completions endpoint.
         // Patterns derived from probing the OpenAI API (404 = not chat).
         const isNonChat =
-          id.includes('audio') ||
-          id.includes('tts') ||
-          id.includes('dall-e') ||
-          id.includes('whisper') ||
-          id.includes('embedding') ||
+          hasNonTextModality(id) ||
           id.includes('realtime') ||
           id.includes('transcribe') ||
           id.includes('image') ||
