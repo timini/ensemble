@@ -33,6 +33,7 @@ export function useConsensusTrigger({
   useEffect(() => {
     if (!hasHydrated || metaAnalysis || isGenerating) return;
 
+    // selectedModels[].model is an API identifier (e.g., "gpt-4o"), not a display name
     const effectiveSummarizerId =
       summarizerModel ?? selectedModels[0]?.model;
 

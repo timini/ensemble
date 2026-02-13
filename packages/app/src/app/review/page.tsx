@@ -10,13 +10,7 @@
 import { useRouter } from "next/navigation";
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
-import { useStore } from "~/store";
 import { useHasHydrated } from "~/hooks/useHasHydrated";
-import {
-  buildPairwiseComparisons,
-  calculateAverageConfidence,
-  normalizeSimilarity,
-} from "~/lib/agreement";
 import { FALLBACK_MODELS } from "~/lib/models";
 import { formatModelLabelFromId } from "~/lib/providerModels";
 import { PageHero } from "@/components/organisms/PageHero";
@@ -27,6 +21,8 @@ import { ProgressSteps } from "@/components/molecules/ProgressSteps";
 import { WorkflowNavigator } from "@/components/organisms/WorkflowNavigator";
 import { PromptCard } from "@/components/organisms/PromptCard";
 import type { Provider } from "@/components/molecules/ResponseCard";
+import { useReviewPageState } from "./hooks/useReviewPageState";
+import { useReviewAnalytics } from "./hooks/useReviewAnalytics";
 import { useResponseEmbeddings } from "./hooks/useResponseEmbeddings";
 import { useStreamingResponses } from "./hooks/useStreamingResponses";
 import { useConsensusGeneration } from "./hooks/useConsensusGeneration";
@@ -38,85 +34,29 @@ export default function ReviewPage() {
   const router = useRouter();
   const hasHydrated = useHasHydrated();
 
-  const prompt = useStore((state) => state.prompt);
-  const summarizerModel = useStore((state) => state.summarizerModel);
-  const selectedModels = useStore((state) => state.selectedModels);
-  const responses = useStore((state) => state.responses);
-
-  const agreementStats = useStore((state) => state.agreementStats);
-  const metaAnalysis = useStore((state) => state.metaAnalysis);
-  const manualResponses = useStore((state) => state.manualResponses);
-  const embeddings = useStore((state) => state.embeddings);
-  const similarityMatrix = useStore((state) => state.similarityMatrix);
-  const mode = useStore((state) => state.mode);
-  const embeddingsProvider = useStore((state) => state.embeddingsProvider);
-
-  const viewResponses = useMemo(
-    () => (hasHydrated ? responses : []),
-    [hasHydrated, responses],
-  );
-
-  const viewManualResponses = useMemo(
-    () => (hasHydrated ? manualResponses : []),
-    [hasHydrated, manualResponses],
-  );
-
-  const viewAgreementStats = useMemo(
-    () => (hasHydrated ? agreementStats : null),
-    [agreementStats, hasHydrated],
-  );
-
-  const viewMetaAnalysis = useMemo(
-    () => (hasHydrated ? metaAnalysis : null),
-    [hasHydrated, metaAnalysis],
-  );
-  const viewEmbeddings = useMemo(
-    () => (hasHydrated ? embeddings : []),
-    [embeddings, hasHydrated],
-  );
-  const viewSimilarityMatrix = useMemo(
-    () => (hasHydrated ? similarityMatrix : null),
-    [hasHydrated, similarityMatrix],
-  );
-
-  const setCurrentStep = useStore((state) => state.setCurrentStep);
-  const resetStreamingState = useStore((state) => state.resetStreamingState);
-  const setEmbeddings = useStore((state) => state.setEmbeddings);
-
-  const calculateAgreementState = useStore((state) => state.calculateAgreement);
-
-  const completedResponses = useMemo(
-    () =>
-      viewResponses.filter(
-        (response) =>
-          response.isComplete &&
-          !response.error &&
-          response.response.trim().length > 0,
-      ),
-    [viewResponses],
-  );
-
-  const pairwiseComparisons = useMemo(
-    () => buildPairwiseComparisons(completedResponses, viewSimilarityMatrix),
-    [completedResponses, viewSimilarityMatrix],
-  );
-
-  const overallAgreement = useMemo(
-    () =>
-      viewAgreementStats ? normalizeSimilarity(viewAgreementStats.mean) : 0,
-    [viewAgreementStats],
-  );
-
-  const averageConfidence = useMemo(
-    () => calculateAverageConfidence(pairwiseComparisons),
-    [pairwiseComparisons],
-  );
-
-  const { retryModel } = useStreamingResponses({
-    hasHydrated,
+  const {
     prompt,
+    summarizerModel,
+    selectedModels,
+    metaAnalysis,
     mode,
-  });
+    embeddingsProvider,
+    setCurrentStep,
+    resetStreamingState,
+    setEmbeddings,
+    calculateAgreement,
+    viewResponses,
+    viewManualResponses,
+    viewAgreementStats,
+    viewMetaAnalysis,
+    viewEmbeddings,
+    viewSimilarityMatrix,
+  } = useReviewPageState(hasHydrated);
+
+  const { completedResponses, pairwiseComparisons, overallAgreement, averageConfidence } =
+    useReviewAnalytics(viewResponses, viewAgreementStats, viewSimilarityMatrix);
+
+  const { retryModel } = useStreamingResponses({ hasHydrated, prompt, mode });
 
   useResponseEmbeddings({
     hasHydrated,
@@ -126,7 +66,7 @@ export default function ReviewPage() {
     viewSimilarityMatrix,
     mode,
     setEmbeddings,
-    calculateAgreementState,
+    calculateAgreementState: calculateAgreement,
   });
 
   const {
@@ -149,10 +89,10 @@ export default function ReviewPage() {
 
   const summarizerDisplayName = useMemo(() => {
     const modelId = summarizerModel ?? selectedModels[0]?.model;
-    if (!modelId) return "AI Model";
+    if (!modelId) return t("pages.review.defaultSummarizerLabel");
     const modelDef = FALLBACK_MODELS.find((m) => m.id === modelId);
     return modelDef ? modelDef.name : formatModelLabelFromId(modelId);
-  }, [summarizerModel, selectedModels]);
+  }, [summarizerModel, selectedModels, t]);
 
   const consensusStatus = useConsensusStatus({
     hasHydrated,
