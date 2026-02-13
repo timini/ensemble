@@ -195,6 +195,8 @@ describe('Free mode provider clients', () => {
           models: [
             { name: 'models/gemini-1.5-pro' },
             { name: 'models/gemini-1.5-flash' },
+            { name: 'models/gemini-2.5-flash-native-audio-preview-12-2025' },
+            { name: 'models/gemini-2.0-flash-vision-exp' },
             { name: '' },
           ],
         },
@@ -231,6 +233,8 @@ describe('Free mode provider clients', () => {
           data: [
             { id: 'grok-2' },
             { name: 'grok-2-mini' },
+            { id: 'grok-imagine-video' },
+            { id: 'grok-2-vision-1212' },
             {},
           ],
         },

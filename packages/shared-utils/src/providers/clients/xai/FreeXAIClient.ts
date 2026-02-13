@@ -13,6 +13,9 @@ interface XaiModelsResponse {
   data?: XaiModelEntry[];
 }
 
+const NON_TEXT_MODALITY_PATTERN =
+  /(?:^|[-_])(audio|video|vision|image|imagine|embedding|tts|speech)(?:$|[-_])/i;
+
 export class FreeXAIClient extends BaseFreeClient {
   private createClient(apiKey: string) {
     return new OpenAI({
@@ -52,7 +55,12 @@ export class FreeXAIClient extends BaseFreeClient {
     const data = response.data?.data ?? [];
     return data
       .map((entry) => entry.id ?? entry.name ?? '')
-      .filter((value): value is string => value.length > 0 && value.startsWith('grok-'));
+      .filter(
+        (value): value is string =>
+          value.length > 0 &&
+          value.startsWith('grok-') &&
+          !NON_TEXT_MODALITY_PATTERN.test(value),
+      );
   }
 
   protected override async streamWithProvider(options: StreamOptions): Promise<void> {

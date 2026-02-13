@@ -12,6 +12,9 @@ interface GoogleModelsResponse {
   models?: GoogleModelEntry[];
 }
 
+const NON_TEXT_MODALITY_PATTERN =
+  /(?:^|[-_])(audio|video|vision|image|imagine|embedding|tts|speech)(?:$|[-_])/i;
+
 export class FreeGoogleClient extends BaseFreeClient {
   private createClient(apiKey: string) {
     return new GoogleGenerativeAI(apiKey);
@@ -57,7 +60,9 @@ export class FreeGoogleClient extends BaseFreeClient {
       })
       .filter(
         (value): value is string =>
-          value.length > 0 && value.startsWith('gemini-') && !value.includes('embedding'),
+          value.length > 0 &&
+          value.startsWith('gemini-') &&
+          !NON_TEXT_MODALITY_PATTERN.test(value),
       );
   }
 
