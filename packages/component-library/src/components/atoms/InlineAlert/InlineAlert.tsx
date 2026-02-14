@@ -9,7 +9,7 @@ const alertVariants = cva(
   {
     variants: {
       variant: {
-        info: 'bg-primary/10 border-primary/20 text-foreground',
+        info: 'bg-info/10 border-info/20 text-foreground',
         success: 'bg-success/10 border-success/20 text-foreground',
         warning: 'bg-warning/10 border-warning/20 text-foreground',
         error: 'bg-destructive/10 border-destructive/20 text-foreground',
@@ -24,7 +24,7 @@ const alertVariants = cva(
 const iconVariants = cva('h-4 w-4 shrink-0 mt-0.5', {
   variants: {
     variant: {
-      info: 'text-primary',
+      info: 'text-info',
       success: 'text-success',
       warning: 'text-warning',
       error: 'text-destructive',
