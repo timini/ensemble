@@ -1,12 +1,12 @@
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
+import type { ModelModality } from '@ensemble-ai/shared-utils/providers';
 import { Card, CardContent } from '../../atoms/Card';
 import { Badge } from '../../atoms/Badge';
 import { cn } from '@/lib/utils';
 
 export type Provider = 'openai' | 'anthropic' | 'google' | 'xai';
-// Keep in sync with `ModelModality` in shared-utils providers types.
-export type ModelModality = 'text' | 'image' | 'audio' | 'video';
+export type { ModelModality };
 
 export interface ModelCardProps {
   /** AI provider for the model */
@@ -142,7 +142,7 @@ export const ModelCard = React.forwardRef<HTMLDivElement, ModelCardProps>(
                 <Badge
                   key={modality}
                   variant="outline"
-                  className="px-1.5 py-0 text-[10px] font-medium uppercase tracking-wide text-muted-foreground"
+                  className="px-1.5 py-0 text-xs font-medium uppercase tracking-wide text-muted-foreground"
                   data-testid={
                     modelId
                       ? `model-modality-${modelId}-${modality}`
