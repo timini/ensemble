@@ -3,7 +3,7 @@
  *
  * Tests the /ensemble page workflow:
  * - Page loads
- * - Model selection (min 2, max 6)
+ * - Model selection (min 2, no max)
  * - Summarizer designation
  * - Embeddings provider selection
  * - Navigation to /prompt after valid selection
@@ -77,7 +77,7 @@ test.describe('Ensemble Page', () => {
     await expect(nextButton).toBeEnabled();
   });
 
-  test('enforces maximum 6 models', async ({ page }) => {
+  test('does not enforce an upper model selection limit', async ({ page }) => {
     // Ensure enough providers are enabled
     await page.goto('/config');
     await page.locator('[data-mode="free"]').click();
@@ -89,13 +89,14 @@ test.describe('Ensemble Page', () => {
     const enabledCards = enabledModels(page);
     const count = await enabledCards.count();
 
-    for (let i = 0; i < Math.min(6, count); i++) {
+    for (let i = 0; i < Math.min(7, count); i++) {
       await enabledCards.nth(i).click();
     }
 
     const seventhEnabled = enabledCards.nth(6);
     if (await seventhEnabled.count()) {
-      await expect(seventhEnabled).toHaveAttribute('data-disabled', 'true');
+      await expect(seventhEnabled).toHaveAttribute('data-disabled', 'false');
+      await expect(seventhEnabled).toHaveAttribute('data-selected', 'true');
     }
   });
 

@@ -132,10 +132,7 @@ export function useEnsemblePage() {
             // Remove using the selected model's unique ID
             removeModel(selectedModel.id);
         } else {
-            // Add model if under limit
-            if (selectedModels.length < 6) {
-                addModel(availableModel.provider, availableModel.id);
-            }
+            addModel(availableModel.provider, availableModel.id);
         }
     };
 
@@ -225,9 +222,9 @@ export function useEnsemblePage() {
         };
     });
 
-    // Continue button enabled if 2-6 models selected
+    // Continue button enabled if at least 2 models selected
     const isValid =
-        hasHydrated && selectedModels.length >= 2 && selectedModels.length <= 6;
+        hasHydrated && selectedModels.length >= 2;
 
     return {
         t,

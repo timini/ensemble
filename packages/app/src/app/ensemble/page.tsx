@@ -2,7 +2,7 @@
  * Ensemble Page (T158)
  *
  * Step 2 of the 4-step workflow: Model Selection
- * User selects 2-6 AI models and designates one as the summarizer
+ * User selects 2+ AI models and designates one as the summarizer
  */
 
 'use client';
@@ -58,7 +58,6 @@ export default function EnsemblePage() {
             models={availableModels}
             selectedModelIds={displayedSelectedModelIds}
             summarizerModelId={displayedSummarizer}
-            maxSelection={6}
             providerStatus={providerStatus}
             isMockMode={isMockMode}
             onModelToggle={handleModelToggle}
