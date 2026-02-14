@@ -54,10 +54,10 @@ export default function EnsemblePage() {
 
       <div className="mt-6" data-testid="ensemble-selection-guidance">
         <InlineAlert variant="info">
-          <p className="font-semibold">
+          <p className="font-semibold" data-testid="selection-guidance-title">
             {t('pages.ensemble.selectionGuidanceTitle')}
           </p>
-          <p className="mt-1">
+          <p className="mt-1" data-testid="selection-guidance-description">
             {t('pages.ensemble.selectionGuidanceDescription')}
           </p>
         </InlineAlert>

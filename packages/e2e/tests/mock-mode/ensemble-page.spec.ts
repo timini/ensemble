@@ -40,7 +40,8 @@ test.describe('Ensemble Page', () => {
     await expect(page.locator('h1')).toBeVisible();
     const guidance = page.getByTestId('ensemble-selection-guidance');
     await expect(guidance).toBeVisible();
-    await expect(guidance.locator('p').first()).toBeVisible();
+    await expect(guidance.getByTestId('selection-guidance-title')).toBeVisible();
+    await expect(guidance.getByTestId('selection-guidance-description')).toBeVisible();
 
     // Check for workflow navigator
     await expect(page.getByTestId('workflow-navigator')).toBeVisible();
