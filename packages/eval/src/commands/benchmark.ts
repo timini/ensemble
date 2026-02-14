@@ -1,7 +1,12 @@
 import { Command } from 'commander';
 import { ProviderRegistry } from '@ensemble-ai/shared-utils/providers';
+import {
+  assertValidResumedOutput,
+  createBenchmarkFile,
+} from './benchmarkOutput.js';
 import { loadBenchmarkQuestions } from '../lib/benchmarkDatasets.js';
 import { generateConsensus, parseStrategies } from '../lib/consensus.js';
+import { evaluateResponses } from '../lib/evaluation.js';
 import { createEvaluatorForDataset } from '../lib/evaluators.js';
 import { fileExists, readJsonFile, writeJsonFile } from '../lib/io.js';
 import { parseModelSpec, parseModelSpecs } from '../lib/modelSpecs.js';
@@ -9,10 +14,8 @@ import { registerProviders } from '../lib/providers.js';
 import { runPromptWithModels } from '../lib/runPrompt.js';
 import type {
   BenchmarkResultsFile,
-  EvaluationResult,
   EvalMode,
   PromptRunResult,
-  StrategyName,
 } from '../types.js';
 
 interface BenchmarkCommandOptions {
@@ -23,92 +26,6 @@ interface BenchmarkCommandOptions {
   resume?: boolean;
   mode: EvalMode;
   summarizer?: string;
-}
-
-interface ResumeValidationOptions {
-  dataset: string;
-  mode: EvalMode;
-  models: string[];
-  strategies: StrategyName[];
-  sampleSize: number;
-}
-
-function sorted(values: string[]): string[] {
-  return [...values].sort();
-}
-
-function assertValidResumedOutput(
-  outputPath: string,
-  parsed: unknown,
-  options: ResumeValidationOptions,
-): asserts parsed is BenchmarkResultsFile {
-  if (!parsed || typeof parsed !== 'object') {
-    throw new Error(
-      `Resumed file "${outputPath}" does not contain a valid "runs" array.`,
-    );
-  }
-
-  const candidate = parsed as Partial<BenchmarkResultsFile>;
-  if (!Array.isArray(candidate.runs)) {
-    throw new Error(
-      `Resumed file "${outputPath}" does not contain a valid "runs" array.`,
-    );
-  }
-
-  const mismatches: string[] = [];
-  if (candidate.dataset !== options.dataset) {
-    mismatches.push(
-      `dataset (file: ${candidate.dataset}, new: ${options.dataset})`,
-    );
-  }
-  if (candidate.mode !== options.mode) {
-    mismatches.push(`mode (file: ${candidate.mode}, new: ${options.mode})`);
-  }
-  if (
-    !Array.isArray(candidate.models) ||
-    JSON.stringify(sorted(candidate.models)) !== JSON.stringify(sorted(options.models))
-  ) {
-    mismatches.push('models');
-  }
-  if (
-    !Array.isArray(candidate.strategies) ||
-    JSON.stringify(sorted(candidate.strategies)) !==
-      JSON.stringify(sorted(options.strategies))
-  ) {
-    mismatches.push('strategies');
-  }
-  if (candidate.sampleSize !== options.sampleSize) {
-    mismatches.push(
-      `sampleSize (file: ${candidate.sampleSize}, new: ${options.sampleSize})`,
-    );
-  }
-
-  if (mismatches.length > 0) {
-    throw new Error(
-      `Cannot resume benchmark with different parameters: ${mismatches.join('; ')}`,
-    );
-  }
-}
-
-function createBenchmarkFile(
-  dataset: string,
-  mode: EvalMode,
-  models: string[],
-  strategies: StrategyName[],
-  sampleSize: number,
-): BenchmarkResultsFile {
-  const now = new Date().toISOString();
-  return {
-    type: 'benchmark',
-    dataset,
-    mode,
-    models,
-    strategies,
-    sampleSize,
-    createdAt: now,
-    updatedAt: now,
-    runs: [],
-  };
 }
 
 export function createBenchmarkCommand(): Command {
@@ -213,39 +130,11 @@ export function createBenchmarkCommand(): Command {
             )
           : {};
 
-        const evaluation =
-          evaluator && question.groundTruth.length > 0
-            ? (() => {
-                const results: Record<string, EvaluationResult> = {};
-                let evaluatedResponses = 0;
-                let correctResponses = 0;
-
-                for (const response of responses) {
-                  if (response.error) {
-                    continue;
-                  }
-
-                  const key = `${response.provider}:${response.model}`;
-                  const evaluationResult = evaluator.evaluate(
-                    response.content,
-                    question.groundTruth,
-                  );
-                  results[key] = evaluationResult;
-                  evaluatedResponses += 1;
-                  if (evaluationResult.correct) {
-                    correctResponses += 1;
-                  }
-                }
-
-                return {
-                  evaluator: evaluator.name,
-                  groundTruth: question.groundTruth,
-                  accuracy:
-                    evaluatedResponses === 0 ? 0 : correctResponses / evaluatedResponses,
-                  results,
-                };
-              })()
-            : undefined;
+        const evaluation = evaluateResponses(
+          evaluator,
+          responses,
+          question.groundTruth,
+        );
 
         const run: PromptRunResult = {
           questionId: question.id,

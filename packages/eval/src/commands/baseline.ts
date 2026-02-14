@@ -1,6 +1,7 @@
 import { Command } from 'commander';
 import { ProviderRegistry } from '@ensemble-ai/shared-utils/providers';
 import { loadBenchmarkQuestions } from '../lib/benchmarkDatasets.js';
+import { evaluateResponses } from '../lib/evaluation.js';
 import { createEvaluatorForDataset } from '../lib/evaluators.js';
 import { writeJsonFile } from '../lib/io.js';
 import { parseModelSpec } from '../lib/modelSpecs.js';
@@ -51,29 +52,11 @@ export function createBaselineCommand(): Command {
           [modelSpec],
         );
 
-        const evaluation =
-          evaluator && question.groundTruth.length > 0
-            ? (() => {
-                const response = responses[0];
-                if (!response || response.error) {
-                  return {
-                    evaluator: evaluator.name,
-                    groundTruth: question.groundTruth,
-                    accuracy: 0,
-                    results: {},
-                  };
-                }
-
-                const key = `${response.provider}:${response.model}`;
-                const result = evaluator.evaluate(response.content, question.groundTruth);
-                return {
-                  evaluator: evaluator.name,
-                  groundTruth: question.groundTruth,
-                  accuracy: result.correct ? 1 : 0,
-                  results: { [key]: result },
-                };
-              })()
-            : undefined;
+        const evaluation = evaluateResponses(
+          evaluator,
+          responses,
+          question.groundTruth,
+        );
 
         runs.push({
           questionId: question.id,
