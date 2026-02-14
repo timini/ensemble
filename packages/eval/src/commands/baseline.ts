@@ -33,7 +33,7 @@ export function createBaselineCommand(): Command {
       const prompts = await loadDatasetPrompts(dataset);
       const sampledPrompts = prompts.slice(0, sampleCount);
 
-      const registry = ProviderRegistry.getInstance();
+      const registry = new ProviderRegistry();
       registerProviders(registry, [modelSpec.provider], options.mode);
 
       const runs: PromptRunResult[] = [];

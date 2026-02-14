@@ -7,6 +7,7 @@ import { explodeList } from './modelSpecs.js';
 
 const VALID_STRATEGIES: StrategyName[] = ['standard', 'elo'];
 const VALID_STRATEGY_SET = new Set<StrategyName>(VALID_STRATEGIES);
+const MIN_RESPONSES_FOR_ELO = 3;
 
 export function parseStrategies(values: string[]): StrategyName[] {
   const items = explodeList(values).map((value) => value.toLowerCase().trim());
@@ -61,9 +62,9 @@ export async function generateConsensus(
     }
 
     if (strategy === 'elo') {
-      if (consensusResponses.length < 3) {
+      if (consensusResponses.length < MIN_RESPONSES_FOR_ELO) {
         outputs.elo =
-          'ELO strategy requires at least 3 successful model responses.';
+          `ELO strategy requires at least ${MIN_RESPONSES_FOR_ELO} successful model responses.`;
         continue;
       }
 
@@ -75,7 +76,7 @@ export async function generateConsensus(
       );
       outputs.elo = await elo.generateConsensus(
         consensusResponses,
-        Math.min(3, consensusResponses.length),
+        Math.min(MIN_RESPONSES_FOR_ELO, consensusResponses.length),
         prompt,
       );
     }

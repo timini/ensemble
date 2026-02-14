@@ -29,7 +29,6 @@ export function registerProviders(
   mode: EvalMode,
 ): void {
   const uniqueProviders = [...new Set(providers)];
-  registry.clearAll();
 
   for (const provider of uniqueProviders) {
     if (mode === 'free' && !getApiKeyForProvider(provider)) {

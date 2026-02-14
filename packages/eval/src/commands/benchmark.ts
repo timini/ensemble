@@ -3,7 +3,7 @@ import { ProviderRegistry } from '@ensemble-ai/shared-utils/providers';
 import { generateConsensus, parseStrategies } from '../lib/consensus.js';
 import { loadDatasetPrompts } from '../lib/dataset.js';
 import { fileExists, readJsonFile, writeJsonFile } from '../lib/io.js';
-import { parseModelSpecs } from '../lib/modelSpecs.js';
+import { parseModelSpec, parseModelSpecs } from '../lib/modelSpecs.js';
 import { registerProviders } from '../lib/providers.js';
 import { runPromptWithModels } from '../lib/runPrompt.js';
 import type {
@@ -20,15 +20,70 @@ interface BenchmarkCommandOptions {
   output: string;
   resume?: boolean;
   mode: EvalMode;
+  summarizer?: string;
+}
+
+interface ResumeValidationOptions {
+  dataset: string;
+  mode: EvalMode;
+  models: string[];
+  strategies: StrategyName[];
+  sampleSize: number;
+}
+
+function sorted(values: string[]): string[] {
+  return [...values].sort();
 }
 
 function assertValidResumedOutput(
   outputPath: string,
-  parsed: BenchmarkResultsFile,
-): void {
-  if (!Array.isArray(parsed?.runs)) {
+  parsed: unknown,
+  options: ResumeValidationOptions,
+): asserts parsed is BenchmarkResultsFile {
+  if (!parsed || typeof parsed !== 'object') {
     throw new Error(
       `Resumed file "${outputPath}" does not contain a valid "runs" array.`,
+    );
+  }
+
+  const candidate = parsed as Partial<BenchmarkResultsFile>;
+  if (!Array.isArray(candidate.runs)) {
+    throw new Error(
+      `Resumed file "${outputPath}" does not contain a valid "runs" array.`,
+    );
+  }
+
+  const mismatches: string[] = [];
+  if (candidate.dataset !== options.dataset) {
+    mismatches.push(
+      `dataset (file: ${candidate.dataset}, new: ${options.dataset})`,
+    );
+  }
+  if (candidate.mode !== options.mode) {
+    mismatches.push(`mode (file: ${candidate.mode}, new: ${options.mode})`);
+  }
+  if (
+    !Array.isArray(candidate.models) ||
+    JSON.stringify(sorted(candidate.models)) !== JSON.stringify(sorted(options.models))
+  ) {
+    mismatches.push('models');
+  }
+  if (
+    !Array.isArray(candidate.strategies) ||
+    JSON.stringify(sorted(candidate.strategies)) !==
+      JSON.stringify(sorted(options.strategies))
+  ) {
+    mismatches.push('strategies');
+  }
+  if (candidate.sampleSize !== options.sampleSize) {
+    mismatches.push(
+      `sampleSize (file: ${candidate.sampleSize}, new: ${options.sampleSize})`,
+    );
+  }
+
+  if (mismatches.length > 0) {
+    throw new Error(
+      `Cannot resume benchmark with different parameters: ${mismatches.join('; ')}`,
     );
   }
 }
@@ -70,11 +125,18 @@ export function createBenchmarkCommand(): Command {
     .option('--sample <count>', 'Number of prompts to evaluate.', '10')
     .requiredOption('--output <file>', 'Output JSON file')
     .option('--resume', 'Resume from an existing output file if present')
+    .option(
+      '--summarizer <provider:model>',
+      'Optional explicit summarizer model (provider:model). Defaults to first successful response model.',
+    )
     .option('--mode <mode>', 'Provider mode to use (mock or free)', 'mock')
     .action(async (dataset: string, options: BenchmarkCommandOptions) => {
       const models = parseModelSpecs(options.models);
       const modelStrings = models.map((model) => `${model.provider}:${model.model}`);
       const strategies = parseStrategies(options.strategies ?? ['standard']);
+      const summarizer = options.summarizer
+        ? parseModelSpec(options.summarizer)
+        : null;
 
       const sampleCount = Number.parseInt(options.sample, 10);
       if (!Number.isInteger(sampleCount) || sampleCount <= 0) {
@@ -93,16 +155,25 @@ export function createBenchmarkCommand(): Command {
       );
 
       if (options.resume && (await fileExists(options.output))) {
-        const parsed = await readJsonFile<BenchmarkResultsFile>(options.output);
-        assertValidResumedOutput(options.output, parsed);
+        const parsed = await readJsonFile<unknown>(options.output);
+        assertValidResumedOutput(options.output, parsed, {
+          dataset,
+          mode: options.mode,
+          models: modelStrings,
+          strategies,
+          sampleSize: sampledPrompts.length,
+        });
         output = parsed;
       }
 
       const completedPrompts = new Set(output.runs.map((run) => run.prompt));
-      const registry = ProviderRegistry.getInstance();
+      const registry = new ProviderRegistry();
       registerProviders(
         registry,
-        models.map((model) => model.provider),
+        [
+          ...models.map((model) => model.provider),
+          ...(summarizer ? [summarizer.provider] : []),
+        ],
         options.mode,
       );
 
@@ -119,13 +190,18 @@ export function createBenchmarkCommand(): Command {
         );
 
         const firstSuccessful = responses.find((response) => !response.error);
-        const consensus = firstSuccessful
+        const summarizerTarget = summarizer
+          ? summarizer
+          : firstSuccessful
+            ? { provider: firstSuccessful.provider, model: firstSuccessful.model }
+            : null;
+        const consensus = summarizerTarget
           ? await generateConsensus(
               strategies,
               prompt,
               responses,
-              registry.getProvider(firstSuccessful.provider, options.mode),
-              firstSuccessful.model,
+              registry.getProvider(summarizerTarget.provider, options.mode),
+              summarizerTarget.model,
             )
           : {};
 
