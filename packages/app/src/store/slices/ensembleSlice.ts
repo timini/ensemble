@@ -21,7 +21,7 @@ export interface SavedEnsemble {
   description: string;
   models: ModelSelection[];
   summarizer: string;
-  consensusMethod: 'standard' | 'elo';
+  consensusMethod: 'standard' | 'elo' | 'majority';
   eloTopN: number;
 }
 
@@ -31,14 +31,14 @@ export interface EnsembleSlice {
   embeddingsProvider: ProviderType;
   savedEnsembles: SavedEnsemble[];
   currentEnsembleId: string | null;
-  consensusMethod: 'standard' | 'elo';
+  consensusMethod: 'standard' | 'elo' | 'majority';
   eloTopN: number;
 
   addModel: (provider: ProviderType, model: string) => void;
   removeModel: (modelId: string) => void;
   setSummarizer: (modelId: string) => void;
   setEmbeddingsProvider: (provider: ProviderType) => void;
-  setConsensusMethod: (method: 'standard' | 'elo') => void;
+  setConsensusMethod: (method: 'standard' | 'elo' | 'majority') => void;
   setEloTopN: (n: number) => void;
   saveEnsemble: (name: string, description: string) => void;
   loadEnsemble: (ensembleId: string) => void;

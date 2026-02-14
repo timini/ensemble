@@ -136,7 +136,7 @@ export function useEnsemblePage() {
         }
     };
 
-    const handleConsensusMethodChange = (method: 'standard' | 'elo') => {
+    const handleConsensusMethodChange = (method: 'standard' | 'elo' | 'majority') => {
         setConsensusMethod(method);
     };
 

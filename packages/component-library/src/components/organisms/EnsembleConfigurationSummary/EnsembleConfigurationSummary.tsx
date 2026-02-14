@@ -15,9 +15,9 @@ export interface EnsembleConfigurationSummaryProps {
   /** Optional description text */
   description?: string;
   /** Arguments for Consensus Mode */
-  consensusMethod?: 'standard' | 'elo';
+  consensusMethod?: 'standard' | 'elo' | 'majority';
   topN?: number;
-  onConsensusMethodChange?: (method: 'standard' | 'elo') => void;
+  onConsensusMethodChange?: (method: 'standard' | 'elo' | 'majority') => void;
   onTopNChange?: (n: number) => void;
   /** Optional callback when user clicks a model to set it as summarizer */
   onSummarizerChange?: (modelId: string) => void;
@@ -126,8 +126,8 @@ export const EnsembleConfigurationSummary = React.forwardRef<
               <div className="border-t pt-4">
                 <Heading level={4} size="sm" className="mb-3">Consensus Preset</Heading>
                 <div className="flex flex-col gap-3">
-                  <div className="flex items-center gap-6">
-                    <label className="flex items-center gap-2 cursor-pointer">
+                  <div className="flex flex-wrap items-start gap-6">
+                    <label className="flex items-start gap-2 cursor-pointer">
                       <input
                         type="radio"
                         name="consensusMethod"
@@ -136,10 +136,15 @@ export const EnsembleConfigurationSummary = React.forwardRef<
                         className="w-4 h-4 text-primary accent-primary"
                         data-testid="preset-standard"
                       />
-                      <span className="text-sm font-medium">Standard Summarisation</span>
+                      <span className="space-y-1">
+                        <span className="block text-sm font-medium">Standard Summarisation</span>
+                        <span className="block text-xs text-muted-foreground">
+                          Synthesise all selected model responses equally.
+                        </span>
+                      </span>
                     </label>
 
-                    <label className={`flex items-center gap-2 ${selectedModels.length < 3 ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}>
+                    <label className={`flex items-start gap-2 ${selectedModels.length < 3 ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}>
                       <input
                         type="radio"
                         name="consensusMethod"
@@ -149,7 +154,29 @@ export const EnsembleConfigurationSummary = React.forwardRef<
                         className="w-4 h-4 text-primary accent-primary disabled:opacity-50"
                         data-testid="preset-elo"
                       />
-                      <span className="text-sm font-medium">ELO Ranked Summarisation</span>
+                      <span className="space-y-1">
+                        <span className="block text-sm font-medium">ELO Ranked Summarisation</span>
+                        <span className="block text-xs text-muted-foreground">
+                          Pairwise ranking with Top N synthesis. Requires at least 3 models.
+                        </span>
+                      </span>
+                    </label>
+
+                    <label className="flex items-start gap-2 cursor-pointer">
+                      <input
+                        type="radio"
+                        name="consensusMethod"
+                        checked={consensusMethod === 'majority'}
+                        onChange={() => onConsensusMethodChange('majority')}
+                        className="w-4 h-4 text-primary accent-primary"
+                        data-testid="preset-majority"
+                      />
+                      <span className="space-y-1">
+                        <span className="block text-sm font-medium">Majority Voting</span>
+                        <span className="block text-xs text-muted-foreground">
+                          Favors the majority position across responses. Works with 2+ models.
+                        </span>
+                      </span>
                     </label>
 
                     {consensusMethod === 'elo' && onTopNChange && (
