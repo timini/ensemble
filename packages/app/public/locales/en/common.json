@@ -116,7 +116,7 @@
   "pages": {
     "config": {
       "title": "Configuration",
-      "description": "Choose your operating mode to get started with AI Ensemble",
+      "description": "Choose Free Mode to use your own API keys, or Pro Mode for managed access. Then continue to select your ensemble models.",
       "apiKeyInfoBold": "Configure an API key to continue.",
       "apiKeyInfoNormal": "Your keys are stored locally and never sent to our servers.",
       "apiKeysConfigured": "{{count}} API key configured.",
