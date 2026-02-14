@@ -28,8 +28,42 @@ describe('provider model utilities', () => {
     const result = mapModelMetadataToModels('google', metadata);
 
     expect(result).toEqual<Model[]>([
-      { id: 'gemini-2-pro', name: 'Gemini 2 Pro', provider: 'google' },
-      { id: 'gemini-2-flash', name: 'Gemini 2 Flash', provider: 'google' },
+      {
+        id: 'gemini-2-pro',
+        name: 'Gemini 2 Pro',
+        provider: 'google',
+        modalities: ['text', 'image'],
+      },
+      {
+        id: 'gemini-2-flash',
+        name: 'Gemini 2 Flash',
+        provider: 'google',
+        modalities: ['text', 'image'],
+      },
+    ]);
+  });
+
+  it('uses explicit metadata modalities when provided', () => {
+    const metadata: ModelMetadata[] = [
+      {
+        id: 'gpt-audio-lite',
+        name: 'GPT Audio Lite',
+        provider: 'openai',
+        contextWindow: 0,
+        costPer1kTokens: 0,
+        modalities: ['text', 'audio'],
+      },
+    ];
+
+    const result = mapModelMetadataToModels('openai', metadata);
+
+    expect(result).toEqual<Model[]>([
+      {
+        id: 'gpt-audio-lite',
+        name: 'GPT Audio Lite',
+        provider: 'openai',
+        modalities: ['text', 'audio'],
+      },
     ]);
   });
 

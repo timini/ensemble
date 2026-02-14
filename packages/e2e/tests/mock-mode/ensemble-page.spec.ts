@@ -45,6 +45,9 @@ test.describe('Ensemble Page', () => {
 
     // Check for workflow navigator
     await expect(page.getByTestId('workflow-navigator')).toBeVisible();
+
+    // Model cards should expose modality pills
+    await expect(page.locator('[data-testid^="model-modality-"]').first()).toBeVisible();
   });
 
   test('displays model selection list', async ({ page }) => {

@@ -1,12 +1,13 @@
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { ModelCard, type Provider } from '../../molecules/ModelCard';
+import { ModelCard, type ModelModality, type Provider } from '../../molecules/ModelCard';
 import { Heading } from '../../atoms/Heading';
 
 export interface Model {
   id: string;
   provider: Provider;
   name: string;
+  modalities?: ModelModality[];
 }
 
 export interface ModelSelectionListProps {
@@ -162,6 +163,7 @@ export const ModelSelectionList = React.forwardRef<HTMLDivElement, ModelSelectio
                       modelId={model.id}
                       provider={model.provider}
                       modelName={model.name}
+                      modalities={model.modalities}
                       selected={isSelected}
                       isSummarizer={isSummarizer}
                       disabled={isDisabled}

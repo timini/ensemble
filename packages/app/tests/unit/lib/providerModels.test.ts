@@ -67,8 +67,18 @@ describe('fetchProviderModels', () => {
     const models = await fetchProviderModels({ provider: 'google', mode: 'free' });
 
     expect(models).toEqual([
-      { id: 'gemini-1.5-pro', name: 'Gemini 1.5 Pro', provider: 'google' },
-      { id: 'gemini-1.5-flash', name: 'Gemini 1.5 Flash', provider: 'google' },
+      {
+        id: 'gemini-1.5-pro',
+        name: 'Gemini 1.5 Pro',
+        provider: 'google',
+        modalities: ['text', 'image'],
+      },
+      {
+        id: 'gemini-1.5-flash',
+        name: 'Gemini 1.5 Flash',
+        provider: 'google',
+        modalities: ['text', 'image'],
+      },
     ]);
     expect(initializeProviders).toHaveBeenCalledTimes(1);
   });
@@ -84,7 +94,14 @@ describe('fetchProviderModels', () => {
 
     const models = await fetchProviderModels({ provider: 'openai', mode: 'free' });
 
-    expect(models).toEqual([{ id: 'gpt-4o-mini', name: 'GPT-4o Mini', provider: 'openai' }]);
+    expect(models).toEqual([
+      {
+        id: 'gpt-4o-mini',
+        name: 'GPT-4o Mini',
+        provider: 'openai',
+        modalities: ['text', 'image'],
+      },
+    ]);
     expect(initializeProviders).toHaveBeenCalledTimes(1);
   });
 });

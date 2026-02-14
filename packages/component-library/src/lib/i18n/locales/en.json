@@ -30,7 +30,13 @@
       "invalidKey": "Invalid API key"
     },
     "modelCard": {
-      "summarizer": "Summarizer"
+      "summarizer": "Summarizer",
+      "modalities": {
+        "text": "Text",
+        "image": "Image",
+        "audio": "Audio",
+        "video": "Video"
+      }
     },
     "modeSelectionCard": {
       "free": {
