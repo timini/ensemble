@@ -14,6 +14,7 @@ import { WorkflowNavigator } from '@/components/organisms/WorkflowNavigator';
 import { ApiKeyConfigurationModal } from '@/components/organisms/ApiKeyConfigurationModal';
 import { ProgressSteps } from '@/components/molecules/ProgressSteps';
 import { ManualResponseModal } from '@/components/organisms/ManualResponseModal';
+import { InlineAlert } from '@/components/atoms/InlineAlert';
 import { useEnsemblePage } from './hooks/useEnsemblePage';
 
 export default function EnsemblePage() {
@@ -50,6 +51,17 @@ export default function EnsemblePage() {
         title={t('pages.ensemble.title')}
         description={t('pages.ensemble.description')}
       />
+
+      <div className="mt-6" data-testid="ensemble-selection-guidance">
+        <InlineAlert variant="info">
+          <p className="font-semibold" data-testid="selection-guidance-title">
+            {t('pages.ensemble.selectionGuidanceTitle')}
+          </p>
+          <p className="mt-1" data-testid="selection-guidance-description">
+            {t('pages.ensemble.selectionGuidanceDescription')}
+          </p>
+        </InlineAlert>
+      </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-8">
         {/* Model Selection List - Takes 2/3 width on large screens */}
