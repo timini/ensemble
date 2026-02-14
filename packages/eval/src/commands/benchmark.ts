@@ -1,13 +1,15 @@
 import { Command } from 'commander';
 import { ProviderRegistry } from '@ensemble-ai/shared-utils/providers';
+import { loadBenchmarkQuestions } from '../lib/benchmarkDatasets.js';
 import { generateConsensus, parseStrategies } from '../lib/consensus.js';
-import { loadDatasetPrompts } from '../lib/dataset.js';
+import { createEvaluatorForDataset } from '../lib/evaluators.js';
 import { fileExists, readJsonFile, writeJsonFile } from '../lib/io.js';
 import { parseModelSpec, parseModelSpecs } from '../lib/modelSpecs.js';
 import { registerProviders } from '../lib/providers.js';
 import { runPromptWithModels } from '../lib/runPrompt.js';
 import type {
   BenchmarkResultsFile,
+  EvaluationResult,
   EvalMode,
   PromptRunResult,
   StrategyName,
@@ -113,7 +115,10 @@ export function createBenchmarkCommand(): Command {
   const command = new Command('benchmark');
   command
     .description('Run benchmark prompts across multiple models and consensus strategies.')
-    .argument('<dataset>', 'Path to dataset JSON (array of prompts or {prompt} objects)')
+    .argument(
+      '<dataset>',
+      'Dataset alias (gsm8k, truthfulqa, gpqa) or path to dataset JSON (array of prompts or {prompt} objects)',
+    )
     .requiredOption(
       '--models <models...>',
       'Model specs in provider:model format. Supports comma-separated values.',
@@ -143,15 +148,17 @@ export function createBenchmarkCommand(): Command {
         throw new Error(`Invalid sample count "${options.sample}".`);
       }
 
-      const prompts = await loadDatasetPrompts(dataset);
-      const sampledPrompts = prompts.slice(0, sampleCount);
+      const { datasetName, questions } = await loadBenchmarkQuestions(dataset, {
+        sample: sampleCount,
+      });
+      const evaluator = createEvaluatorForDataset(datasetName);
 
       let output: BenchmarkResultsFile = createBenchmarkFile(
         dataset,
         options.mode,
         modelStrings,
         strategies,
-        sampledPrompts.length,
+        questions.length,
       );
 
       if (options.resume && (await fileExists(options.output))) {
@@ -161,7 +168,7 @@ export function createBenchmarkCommand(): Command {
           mode: options.mode,
           models: modelStrings,
           strategies,
-          sampleSize: sampledPrompts.length,
+          sampleSize: questions.length,
         });
         output = parsed;
       }
@@ -177,7 +184,8 @@ export function createBenchmarkCommand(): Command {
         options.mode,
       );
 
-      for (const prompt of sampledPrompts) {
+      for (const question of questions) {
+        const prompt = question.prompt;
         if (completedPrompts.has(prompt)) {
           continue;
         }
@@ -205,7 +213,48 @@ export function createBenchmarkCommand(): Command {
             )
           : {};
 
-        const run: PromptRunResult = { prompt, responses, consensus };
+        const evaluation =
+          evaluator && question.groundTruth.length > 0
+            ? (() => {
+                const results: Record<string, EvaluationResult> = {};
+                let evaluatedResponses = 0;
+                let correctResponses = 0;
+
+                for (const response of responses) {
+                  if (response.error) {
+                    continue;
+                  }
+
+                  const key = `${response.provider}:${response.model}`;
+                  const evaluationResult = evaluator.evaluate(
+                    response.content,
+                    question.groundTruth,
+                  );
+                  results[key] = evaluationResult;
+                  evaluatedResponses += 1;
+                  if (evaluationResult.correct) {
+                    correctResponses += 1;
+                  }
+                }
+
+                return {
+                  evaluator: evaluator.name,
+                  groundTruth: question.groundTruth,
+                  accuracy:
+                    evaluatedResponses === 0 ? 0 : correctResponses / evaluatedResponses,
+                  results,
+                };
+              })()
+            : undefined;
+
+        const run: PromptRunResult = {
+          questionId: question.id,
+          prompt,
+          groundTruth: question.groundTruth || undefined,
+          responses,
+          consensus,
+          evaluation,
+        };
         output.runs.push(run);
         output.updatedAt = new Date().toISOString();
         await writeJsonFile(options.output, output);
