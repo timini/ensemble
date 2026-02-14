@@ -16,14 +16,34 @@ test.describe('Features Page', () => {
     await expect(hero.getByRole('heading')).toBeVisible();
   });
 
+  test('displays Differentiators section with 3 cards', async ({ page }) => {
+    const section = page.getByTestId('features-differentiators-section');
+    await expect(section).toBeVisible();
+    await expect(section.getByRole('heading', { level: 2 })).toBeVisible();
+
+    // Verify 3 differentiator cards with h3 headings
+    const cardHeadings = section.getByRole('heading', { level: 3 });
+    await expect(cardHeadings).toHaveCount(3);
+  });
+
+  test('displays Capabilities section with 4 stats', async ({ page }) => {
+    const section = page.getByTestId('features-capabilities-section');
+    await expect(section).toBeVisible();
+    await expect(section.getByRole('heading', { level: 2 })).toBeVisible();
+
+    // Verify 4 capability items with h3 headings
+    const statHeadings = section.getByRole('heading', { level: 3 });
+    await expect(statHeadings).toHaveCount(4);
+  });
+
   test('displays How It Works section with 4 steps', async ({ page }) => {
     const section = page.getByTestId('features-how-it-works-section');
     await expect(section).toBeVisible();
     await expect(section.getByRole('heading', { level: 2 })).toBeVisible();
 
-    // Verify 4 workflow steps are rendered
-    const listItems = section.getByRole('listitem');
-    await expect(listItems).toHaveCount(4);
+    // Verify 4 workflow step headings
+    const stepHeadings = section.getByRole('heading', { level: 3 });
+    await expect(stepHeadings).toHaveCount(4);
   });
 
   test('displays Operating Modes section with Free and Pro', async ({ page }) => {
@@ -33,16 +53,21 @@ test.describe('Features Page', () => {
     // Verify both mode headings
     const headings = section.getByRole('heading', { level: 3 });
     await expect(headings).toHaveCount(2);
+
+    // Verify feature checklists exist
+    const listItems = section.getByRole('listitem');
+    const count = await listItems.count();
+    expect(count).toBeGreaterThanOrEqual(10);
   });
 
-  test('displays Supported Providers section with 4 providers', async ({ page }) => {
-    const section = page.getByTestId('features-providers-section');
+  test('displays Model Ecosystem section with 4 providers', async ({ page }) => {
+    const section = page.getByTestId('features-models-section');
     await expect(section).toBeVisible();
     await expect(section.getByRole('heading', { level: 2 })).toBeVisible();
 
-    // Verify 4 provider cards
+    // Verify 4 provider cards (each has 2 h3s: avatar letter + name)
     const providerHeadings = section.getByRole('heading', { level: 3 });
-    await expect(providerHeadings).toHaveCount(4);
+    await expect(providerHeadings).toHaveCount(8);
   });
 
   test('displays Security & Privacy section with feature list', async ({ page }) => {
@@ -50,10 +75,10 @@ test.describe('Features Page', () => {
     await expect(section).toBeVisible();
     await expect(section.getByRole('heading', { level: 2 })).toBeVisible();
 
-    // Verify security features are listed (at least 3)
+    // Verify security features are listed (at least 6)
     const listItems = section.getByRole('listitem');
     const count = await listItems.count();
-    expect(count).toBeGreaterThanOrEqual(3);
+    expect(count).toBeGreaterThanOrEqual(6);
   });
 
   test('header Features link navigates to features page', async ({ page }) => {
