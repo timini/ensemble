@@ -59,12 +59,12 @@ export default function FeaturesPage() {
 
       {/* Primary CTA after hero */}
       <div className="mt-8 text-center" data-testid="features-hero-cta">
-        <Link href="/config">
-          <Button size="lg">
+        <Button asChild size="lg">
+          <Link href="/config">
             {t("app.getStarted")}
             <ArrowRight className="h-4 w-4" />
-          </Button>
-        </Link>
+          </Link>
+        </Button>
       </div>
 
       <DifferentiatorsSection
@@ -121,12 +121,12 @@ export default function FeaturesPage() {
 
       {/* Secondary CTA after workflow steps */}
       <div className="mt-8 text-center" data-testid="features-workflow-cta">
-        <Link href="/config">
-          <Button variant="outline" size="lg">
+        <Button asChild variant="outline" size="lg">
+          <Link href="/config">
             {t("app.tryItNow")}
             <ArrowRight className="h-4 w-4" />
-          </Button>
-        </Link>
+          </Link>
+        </Button>
       </div>
 
       <ModesSection
@@ -165,12 +165,12 @@ export default function FeaturesPage() {
         data-testid="features-bottom-cta"
       >
         <div>
-          <Link href="/config">
-            <Button size="lg">
+          <Button asChild size="lg">
+            <Link href="/config">
               {t("app.getStarted")}
               <ArrowRight className="h-4 w-4" />
-            </Button>
-          </Link>
+            </Link>
+          </Button>
         </div>
         <div>
           <Link

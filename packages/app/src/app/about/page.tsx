@@ -144,12 +144,12 @@ export default function AboutPage() {
         data-testid="about-bottom-cta"
       >
         <div>
-          <Link href="/config">
-            <Button size="lg">
+          <Button asChild size="lg">
+            <Link href="/config">
               {t("app.seeItInAction")}
               <ArrowRight className="h-4 w-4" />
-            </Button>
-          </Link>
+            </Link>
+          </Button>
         </div>
         <div>
           <Link
