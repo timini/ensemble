@@ -1,0 +1,26 @@
+{
+  "name": "@ensemble-ai/eval",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "bin": {
+    "ensemble-eval": "./bin/ensemble-eval.mjs"
+  },
+  "scripts": {
+    "build": "tsc --noEmit",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run --coverage",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "@ensemble-ai/shared-utils": "*",
+    "commander": "^13.1.0",
+    "tsx": "^4.20.6"
+  },
+  "devDependencies": {
+    "@types/node": "^22.7.9",
+    "@vitest/coverage-v8": "^3.2.4",
+    "typescript": "^5.8.2",
+    "vitest": "^3.2.4"
+  }
+}

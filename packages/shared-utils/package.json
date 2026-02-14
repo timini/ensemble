@@ -22,6 +22,14 @@
     "./providers": {
       "types": "./dist/providers/index.d.ts",
       "import": "./dist/providers/index.js"
+    },
+    "./consensus": {
+      "types": "./dist/consensus/index.d.ts",
+      "import": "./dist/consensus/index.js"
+    },
+    "./consensus/*": {
+      "types": "./dist/consensus/*.d.ts",
+      "import": "./dist/consensus/*.js"
     }
   },
   "scripts": {
