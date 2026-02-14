@@ -11,3 +11,4 @@
 export * from './similarity/index.js';
 export * from './security/index.js';
 export * from './providers/index.js';
+export * from './consensus/index.js';

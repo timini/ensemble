@@ -6,7 +6,8 @@
     "packages/app",
     "packages/component-library",
     "packages/shared-utils",
-    "packages/e2e"
+    "packages/e2e",
+    "packages/eval"
   ],
   "scripts": {
     "dev": "npm run dev:free",
@@ -14,7 +15,7 @@
     "dev:mock": "npm run dev:mock --workspace=packages/app",
     "dev:components": "npm run storybook --workspace=packages/component-library",
     "analyze:fta": "node ./scripts/check-fta.mjs",
-    "build": "npm run build --workspace=@ensemble-ai/shared-utils --workspace=@ai-ensemble/component-library --workspace=@ai-ensemble/app",
+    "build": "npm run build --workspace=@ensemble-ai/shared-utils --workspace=@ensemble-ai/eval --workspace=@ai-ensemble/component-library --workspace=@ai-ensemble/app",
     "lint": "npm run lint --workspaces --if-present",
     "lint:fix": "npm run lint:fix --workspaces --if-present",
     "test": "npm run test --workspaces --if-present",
