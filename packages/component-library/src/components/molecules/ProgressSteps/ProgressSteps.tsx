@@ -83,7 +83,7 @@ export function ProgressSteps({ currentStep, fallbackStep }: ProgressStepsProps)
         {steps.map((step, index) => (
           <div key={step.id} className="flex items-center">
             <span
-              className={`w-12 text-center text-sm font-medium transition-colors ${
+              className={`inline-block w-12 text-center text-sm font-medium transition-colors ${
                 index < currentIndex
                   ? 'text-success'
                   : index === currentIndex
