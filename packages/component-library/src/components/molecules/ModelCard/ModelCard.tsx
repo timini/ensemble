@@ -5,6 +5,7 @@ import { Badge } from '../../atoms/Badge';
 import { cn } from '@/lib/utils';
 
 export type Provider = 'openai' | 'anthropic' | 'google' | 'xai';
+// Keep in sync with `ModelModality` in shared-utils providers types.
 export type ModelModality = 'text' | 'image' | 'audio' | 'video';
 
 export interface ModelCardProps {

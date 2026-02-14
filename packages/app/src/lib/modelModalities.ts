@@ -41,26 +41,21 @@ export function inferModelModalities(
 }
 
 function supportsImage(provider: ProviderName, identifier: string): boolean {
-  if (provider === 'openai') {
-    return (
-      identifier.includes('gpt-4o') ||
-      identifier.includes('gpt-4-turbo') ||
-      identifier.includes('gpt-4.1') ||
-      identifier.includes('vision')
-    );
+  switch (provider) {
+    case 'openai':
+      return (
+        identifier.includes('gpt-4o') ||
+        identifier.includes('gpt-4-turbo') ||
+        identifier.includes('gpt-4.1') ||
+        identifier.includes('vision')
+      );
+    case 'anthropic':
+      return identifier.startsWith('claude-3');
+    case 'google':
+      return identifier.startsWith('gemini-');
+    case 'xai':
+      return identifier.includes('vision') || identifier.includes('image');
+    default:
+      return false;
   }
-
-  if (provider === 'anthropic') {
-    return identifier.startsWith('claude-3');
-  }
-
-  if (provider === 'google') {
-    return identifier.startsWith('gemini-');
-  }
-
-  if (provider === 'xai') {
-    return identifier.includes('vision') || identifier.includes('image');
-  }
-
-  return false;
 }
