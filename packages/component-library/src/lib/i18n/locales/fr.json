@@ -30,7 +30,13 @@
       "invalidKey": "Clé API invalide"
     },
     "modelCard": {
-      "summarizer": "Synthétiseur"
+      "summarizer": "Synthétiseur",
+      "modalities": {
+        "text": "Texte",
+        "image": "Image",
+        "audio": "Audio",
+        "video": "Vidéo"
+      }
     },
     "modeSelectionCard": {
       "free": {

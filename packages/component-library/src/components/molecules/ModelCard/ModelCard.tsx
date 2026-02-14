@@ -1,10 +1,12 @@
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
+import type { ModelModality } from '@ensemble-ai/shared-utils/providers';
 import { Card, CardContent } from '../../atoms/Card';
 import { Badge } from '../../atoms/Badge';
 import { cn } from '@/lib/utils';
 
 export type Provider = 'openai' | 'anthropic' | 'google' | 'xai';
+export type { ModelModality };
 
 export interface ModelCardProps {
   /** AI provider for the model */
@@ -23,6 +25,8 @@ export interface ModelCardProps {
   onClick?: () => void;
   /** Callback when summarizer button is clicked */
   onSummarizerClick?: () => void;
+  /** Supported modalities for the model */
+  modalities?: ModelModality[];
 }
 
 const PROVIDER_CONFIG = {
@@ -72,6 +76,7 @@ export const ModelCard = React.forwardRef<HTMLDivElement, ModelCardProps>(
       disabled = false,
       onClick,
       onSummarizerClick,
+      modalities = [],
     },
     ref
   ) => {
@@ -131,6 +136,24 @@ export const ModelCard = React.forwardRef<HTMLDivElement, ModelCardProps>(
         <CardContent className="p-4 text-center">
           <div className="text-2xl mb-2">{config.icon}</div>
           <div className="font-medium text-sm">{modelName}</div>
+          {modalities.length > 0 && (
+            <div className="mt-2 flex flex-wrap items-center justify-center gap-1">
+              {modalities.map((modality) => (
+                <Badge
+                  key={modality}
+                  variant="outline"
+                  className="px-1.5 py-0 text-xs font-medium uppercase tracking-wide text-muted-foreground"
+                  data-testid={
+                    modelId
+                      ? `model-modality-${modelId}-${modality}`
+                      : `model-modality-${modality}`
+                  }
+                >
+                  {t(`molecules.modelCard.modalities.${modality}`)}
+                </Badge>
+              ))}
+            </div>
+          )}
           {isSummarizer && (
             <Badge className="absolute -top-2 -right-2 bg-warning text-warning-foreground text-xs">
               {t('molecules.modelCard.summarizer')}

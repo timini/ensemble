@@ -28,6 +28,24 @@ describe('ModelCard', () => {
       const content = container.querySelector('.text-center');
       expect(content).toBeInTheDocument();
     });
+
+    it('renders modality badges when provided', () => {
+      render(
+        <ModelCard
+          provider="openai"
+          modelName="GPT-4o"
+          selected={false}
+          isSummarizer={false}
+          modelId="gpt-4o"
+          modalities={['text', 'image']}
+        />
+      );
+
+      expect(screen.getByText('Text')).toBeInTheDocument();
+      expect(screen.getByText('Image')).toBeInTheDocument();
+      expect(screen.getByTestId('model-modality-gpt-4o-text')).toBeInTheDocument();
+      expect(screen.getByTestId('model-modality-gpt-4o-image')).toBeInTheDocument();
+    });
   });
 
   describe('selection states', () => {
@@ -259,6 +277,22 @@ describe('ModelCard', () => {
     it('does not render summarizer badge when isSummarizer is false in French', () => {
       renderWithI18n(<ModelCard provider="openai" modelName="GPT-4" selected={true} isSummarizer={false} />, { language: 'fr' });
       expect(screen.queryByText('Synthétiseur')).not.toBeInTheDocument();
+    });
+
+    it('renders modality badges in French', () => {
+      renderWithI18n(
+        <ModelCard
+          provider="google"
+          modelName="Gemini"
+          selected={false}
+          isSummarizer={false}
+          modalities={['text', 'image']}
+        />,
+        { language: 'fr' }
+      );
+
+      expect(screen.getByText('Texte')).toBeInTheDocument();
+      expect(screen.getByText('Image')).toBeInTheDocument();
     });
   });
 

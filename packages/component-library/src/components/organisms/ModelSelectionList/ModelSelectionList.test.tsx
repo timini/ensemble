@@ -5,7 +5,7 @@ import { ModelSelectionList } from './ModelSelectionList';
 import { renderWithI18n } from '../../../lib/test-utils/i18n-test-wrapper';
 
 const mockModels = [
-  { id: 'gpt-4', provider: 'openai' as const, name: 'GPT-4' },
+  { id: 'gpt-4', provider: 'openai' as const, name: 'GPT-4', modalities: ['text', 'image'] },
   { id: 'gpt-4-turbo', provider: 'openai' as const, name: 'GPT-4 Turbo' },
   { id: 'claude-3-opus', provider: 'anthropic' as const, name: 'Claude 3 Opus' },
   { id: 'claude-3-sonnet', provider: 'anthropic' as const, name: 'Claude 3 Sonnet' },
@@ -75,6 +75,20 @@ describe('ModelSelectionList', () => {
       );
 
       expect(screen.getByText('No models available')).toBeInTheDocument();
+    });
+
+    it('renders model modality badges from model metadata', () => {
+      render(
+        <ModelSelectionList
+          models={mockModels}
+          selectedModelIds={[]}
+          onModelToggle={vi.fn()}
+          onSummarizerChange={vi.fn()}
+        />
+      );
+
+      expect(screen.getByTestId('model-modality-gpt-4-text')).toBeInTheDocument();
+      expect(screen.getByTestId('model-modality-gpt-4-image')).toBeInTheDocument();
     });
   });
 

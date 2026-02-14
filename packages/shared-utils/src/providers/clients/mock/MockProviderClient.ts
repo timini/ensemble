@@ -104,6 +104,7 @@ export class MockProviderClient implements AIProvider {
         provider: 'openai',
         contextWindow: 128000,
         costPer1kTokens: 0.005,
+        modalities: ['text', 'image'],
       },
       {
         id: 'gpt-4o-mini',
@@ -111,6 +112,7 @@ export class MockProviderClient implements AIProvider {
         provider: 'openai',
         contextWindow: 128000,
         costPer1kTokens: 0.00015,
+        modalities: ['text', 'image'],
       },
       {
         id: 'o1-preview',
@@ -118,6 +120,7 @@ export class MockProviderClient implements AIProvider {
         provider: 'openai',
         contextWindow: 128000,
         costPer1kTokens: 0.003,
+        modalities: ['text'],
       },
       {
         id: 'claude-3-5-sonnet',
@@ -125,6 +128,7 @@ export class MockProviderClient implements AIProvider {
         provider: 'anthropic',
         contextWindow: 200000,
         costPer1kTokens: 0.003,
+        modalities: ['text', 'image'],
       },
       {
         id: 'claude-3-opus',
@@ -132,6 +136,7 @@ export class MockProviderClient implements AIProvider {
         provider: 'anthropic',
         contextWindow: 200000,
         costPer1kTokens: 0.015,
+        modalities: ['text', 'image'],
       },
       {
         id: 'claude-3-haiku',
@@ -139,6 +144,7 @@ export class MockProviderClient implements AIProvider {
         provider: 'anthropic',
         contextWindow: 200000,
         costPer1kTokens: 0.0015,
+        modalities: ['text', 'image'],
       },
       {
         id: 'gemini-1.5-pro',
@@ -146,6 +152,7 @@ export class MockProviderClient implements AIProvider {
         provider: 'google',
         contextWindow: 1000000,
         costPer1kTokens: 0.00125,
+        modalities: ['text', 'image'],
       },
       {
         id: 'gemini-1.5-flash',
@@ -153,6 +160,7 @@ export class MockProviderClient implements AIProvider {
         provider: 'google',
         contextWindow: 1000000,
         costPer1kTokens: 0.000075,
+        modalities: ['text', 'image'],
       },
       {
         id: 'grok-2',
@@ -160,6 +168,7 @@ export class MockProviderClient implements AIProvider {
         provider: 'xai',
         contextWindow: 128000,
         costPer1kTokens: 0.002,
+        modalities: ['text'],
       },
       {
         id: 'grok-2-mini',
@@ -167,6 +176,7 @@ export class MockProviderClient implements AIProvider {
         provider: 'xai',
         contextWindow: 128000,
         costPer1kTokens: 0.0002,
+        modalities: ['text'],
       },
     ];
 

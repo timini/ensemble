@@ -1,5 +1,6 @@
 export type ProviderName = 'openai' | 'anthropic' | 'google' | 'xai';
 export type ProviderMode = 'mock' | 'free' | 'pro';
+export type ModelModality = 'text' | 'image' | 'audio' | 'video';
 
 export interface ModelMetadata {
   id: string;
@@ -7,6 +8,7 @@ export interface ModelMetadata {
   provider: ProviderName;
   contextWindow: number;
   costPer1kTokens: number;
+  modalities?: ModelModality[];
 }
 
 export interface ValidationResult {

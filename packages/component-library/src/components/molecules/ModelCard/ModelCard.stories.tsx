@@ -22,6 +22,10 @@ const meta = {
       control: 'boolean',
       description: 'Whether this model is designated as the summarizer',
     },
+    modalities: {
+      control: 'object',
+      description: 'Supported modalities for the model',
+    },
   },
 } satisfies Meta<typeof ModelCard>;
 
@@ -53,6 +57,28 @@ export const Summarizer: Story = {
     modelName: 'Claude 3.5 Sonnet',
     selected: true,
     isSummarizer: true,
+  },
+};
+
+export const WithModalities: Story = {
+  args: {
+    provider: 'openai',
+    modelName: 'GPT-4o',
+    modelId: 'gpt-4o',
+    selected: true,
+    isSummarizer: false,
+    modalities: ['text', 'image'],
+  },
+};
+
+export const AudioCapable: Story = {
+  args: {
+    provider: 'openai',
+    modelName: 'GPT-4o Realtime',
+    modelId: 'gpt-4o-realtime',
+    selected: false,
+    isSummarizer: false,
+    modalities: ['text', 'audio'],
   },
 };
 
@@ -177,24 +203,28 @@ export const AllProviders: Story = {
         modelName="GPT-4 Turbo"
         selected={true}
         isSummarizer={false}
+        modalities={['text', 'image']}
       />
       <ModelCard
         provider="anthropic"
         modelName="Claude 3.5 Sonnet"
         selected={true}
         isSummarizer={true}
+        modalities={['text', 'image']}
       />
       <ModelCard
         provider="google"
         modelName="Gemini Pro"
         selected={true}
         isSummarizer={false}
+        modalities={['text', 'image']}
       />
       <ModelCard
         provider="xai"
         modelName="Grok"
         selected={false}
         isSummarizer={false}
+        modalities={['text']}
       />
     </div>
   ),

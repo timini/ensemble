@@ -10,6 +10,7 @@ import { FALLBACK_MODELS } from './models';
 import { toError } from './errors';
 import { initializeProviders } from '~/providers';
 import { logger } from '~/lib/logger';
+import { inferModelModalities, normalizeModelModalities } from './modelModalities';
 
 export function mapModelMetadataToModels(
   provider: ProviderName,
@@ -19,13 +20,17 @@ export function mapModelMetadataToModels(
     .map((model) => {
       const id = model.id ?? model.name;
       if (!id) return null;
-      return {
+      const mapped: Model = {
         id,
         name: model.name ?? id,
         provider,
+        modalities: model.modalities?.length
+          ? normalizeModelModalities(model.modalities)
+          : inferModelModalities(provider, id),
       };
+      return mapped;
     })
-    .filter((model): model is Model => Boolean(model));
+    .filter((model): model is Model => model !== null);
 }
 
 export function replaceProviderModels(
@@ -115,6 +120,7 @@ function createModelFromId(provider: ProviderName, identifier: string): Model {
     id: identifier,
     name: formatModelLabelFromId(identifier),
     provider,
+    modalities: inferModelModalities(provider, identifier),
   };
 }
 
