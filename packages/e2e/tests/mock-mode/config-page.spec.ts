@@ -41,6 +41,24 @@ test.describe('Config Page', () => {
     await expect(page.getByTestId('workflow-navigator')).toBeVisible();
   });
 
+  test('shows prominent API key security messaging', async ({ page }) => {
+    await expect(
+      page.getByText(/your api keys stay secure in free mode/i)
+    ).toBeVisible();
+    await expect(
+      page.getByText(/api keys never leave your browser/i)
+    ).toBeVisible();
+    await expect(
+      page.getByText(/keys are encrypted locally with aes-256/i)
+    ).toBeVisible();
+    await expect(
+      page.getByText(/no keys are sent to or stored on ensemble ai servers/i)
+    ).toBeVisible();
+    await expect(
+      page.getByText(/api requests are sent directly from your browser to each provider/i)
+    ).toBeVisible();
+  });
+
   test('displays mode selection cards', async ({ page }) => {
     // Check for Free mode card
     await expect(page.locator('[data-mode="free"]')).toBeVisible();
