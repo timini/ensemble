@@ -20,6 +20,8 @@ describe('FreeGoogleClient', () => {
                     { name: 'models/gemini-1.0-pro', displayName: 'Gemini 1.0 Pro' },
                     { name: 'models/gemini-1.5-flash', displayName: 'Gemini 1.5 Flash' },
                     { name: 'models/embedding-001', displayName: 'Embedding 001' }, // Should be filtered out (embedding models are not text models)
+                    { name: 'models/gemini-2.5-flash-native-audio-preview-12-2025', displayName: 'Gemini Audio Preview' }, // Should be filtered out (audio model)
+                    { name: 'models/gemini-2.0-flash-vision-exp', displayName: 'Gemini Vision' }, // Should be filtered out (vision model)
                     { name: 'models/other-model', displayName: 'Other Model' }, // Should be filtered out (doesn't start with 'gemini-')
                 ],
             },
@@ -42,6 +44,8 @@ describe('FreeGoogleClient', () => {
         expect(models).toContain('gemini-1.0-pro');
         expect(models).toContain('gemini-1.5-flash');
         expect(models).not.toContain('embedding-001'); // Filtered out as embedding model
+        expect(models).not.toContain('gemini-2.5-flash-native-audio-preview-12-2025'); // Filtered out as audio model
+        expect(models).not.toContain('gemini-2.0-flash-vision-exp'); // Filtered out as vision model
         expect(models).not.toContain('other-model'); // Filtered out as non-gemini model
         expect(models).toHaveLength(2);
     });

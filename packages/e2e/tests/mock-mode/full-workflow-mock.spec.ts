@@ -218,11 +218,20 @@ test.describe('Full Workflow - Mock Mode', () => {
     });
 
     await test.step('Test "Start Over" navigation', async () => {
-      // Don't wait for all streams to complete — "Start Over" works regardless of streaming state.
-      // Waiting for completion was flaky on CI where mock streaming is slow after multiple re-submissions.
+      // Wait for at least one response card to appear so the page is fully interactive
+      await expect(page.locator('[data-testid^="response-card-"]').first()).toBeVisible({ timeout: 10000 });
+
       const startOverButton = page.getByRole('button', { name: /start over/i });
       await expect(startOverButton).toBeVisible({ timeout: 10000 });
-      await startOverButton.click({ force: true });
+      await expect(startOverButton).toBeEnabled({ timeout: 10000 });
+      await startOverButton.scrollIntoViewIfNeeded();
+      await startOverButton.click({ timeout: 5000 }).catch(async () => {
+        // Fallback for CI layout-shift/overlay races: trigger the button's click handler directly.
+        await startOverButton.evaluate((button: HTMLButtonElement) => button.click());
+      });
+      if (!page.url().endsWith('/config')) {
+        await startOverButton.evaluate((button: HTMLButtonElement) => button.click());
+      }
       await expect(page).toHaveURL('/config', { timeout: 10000 });
 
       // Verify we're back at config page

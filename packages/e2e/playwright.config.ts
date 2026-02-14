@@ -66,9 +66,12 @@ export default defineConfig({
     // Free Mode: Tests with real API keys
     // Only runs when TEST_OPENAI_API_KEY and TEST_ANTHROPIC_API_KEY are set
     // Skips automatically if keys are not available
+    // Sequential execution: real API keys are shared across tests so parallel
+    // runs cause rate-limiting and intermittent provider errors
     {
       name: 'free-mode',
       testDir: './tests/free-mode',
+      fullyParallel: false,
       use: { ...devices['Desktop Chrome'] },
     },
 
