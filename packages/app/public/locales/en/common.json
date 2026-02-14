@@ -122,12 +122,18 @@
       "apiKeysConfigured": "{{count}} API key configured.",
       "apiKeysConfigured_other": "{{count}} API keys configured.",
       "configureMoreOrContinue": "Configure more or continue selecting models.",
+      "securityNoticeTitle": "Your API keys stay secure in Free Mode",
+      "securityNoticeDescription": "Before you add a key, here is exactly how Free Mode protects your credentials:",
+      "securityNoticeBulletNeverLeavesBrowser": "API keys never leave your browser.",
+      "securityNoticeBulletAesEncryption": "Keys are encrypted locally with AES-256.",
+      "securityNoticeBulletNoServerStorage": "No keys are sent to or stored on Ensemble AI servers.",
+      "securityNoticeBulletDirectApiCalls": "API requests are sent directly from your browser to each provider.",
       "webCryptoUnsupportedTitle": "Browser not supported for Free Mode",
       "webCryptoUnsupportedDescription": "Free Mode requires the Web Crypto API to encrypt your API keys locally. Switch to a modern browser or use Pro Mode when it becomes available."
     },
     "ensemble": {
       "title": "Build Your Ensemble",
-      "description": "Select 2-6 AI models to compare their responses",
+      "description": "Select at least 2 AI models to compare their responses",
       "selectionGuidanceTitle": "How model selection works",
       "selectionGuidanceDescription": "Choose at least 2 models to continue, and mix providers for broader perspective."
     },

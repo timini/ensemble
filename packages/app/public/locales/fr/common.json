@@ -114,12 +114,18 @@
       "apiKeysConfigured": "{{count}} clé API configurée.",
       "apiKeysConfigured_other": "{{count}} clés API configurées.",
       "configureMoreOrContinue": "Configurez-en plus ou continuez à sélectionner des modèles.",
+      "securityNoticeTitle": "Vos clés API restent sécurisées en mode gratuit",
+      "securityNoticeDescription": "Avant d'ajouter une clé, voici précisément comment le mode gratuit protège vos identifiants :",
+      "securityNoticeBulletNeverLeavesBrowser": "Les clés API ne quittent jamais votre navigateur.",
+      "securityNoticeBulletAesEncryption": "Les clés sont chiffrées localement avec AES-256.",
+      "securityNoticeBulletNoServerStorage": "Aucune clé n'est envoyée ni stockée sur les serveurs d'Ensemble AI.",
+      "securityNoticeBulletDirectApiCalls": "Les requêtes API sont envoyées directement depuis votre navigateur vers chaque fournisseur.",
       "webCryptoUnsupportedTitle": "Navigateur incompatible avec le mode gratuit",
       "webCryptoUnsupportedDescription": "Le mode gratuit nécessite l'API Web Crypto pour chiffrer vos clés API localement. Utilisez un navigateur moderne ou passez au mode Pro lorsqu'il sera disponible."
     },
     "ensemble": {
       "title": "Construire votre ensemble",
-      "description": "Sélectionnez 2 à 6 modèles d'IA pour comparer leurs réponses",
+      "description": "Sélectionnez au moins 2 modèles d'IA pour comparer leurs réponses",
       "selectionGuidanceTitle": "Fonctionnement de la sélection des modèles",
       "selectionGuidanceDescription": "Choisissez au moins 2 modèles pour continuer, et variez les fournisseurs pour obtenir une perspective plus large."
     },
