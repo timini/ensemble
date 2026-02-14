@@ -31,6 +31,11 @@ test.describe('Config Page', () => {
 
     // Check for page hero heading (should be visible on the page)
     await expect(page.getByText(/configuration/i).first()).toBeVisible();
+    await expect(
+      page.getByText(
+        /Choose Free Mode to use your own API keys, or Pro Mode for managed access/i
+      )
+    ).toBeVisible();
 
     // Check for workflow navigator
     await expect(page.getByTestId('workflow-navigator')).toBeVisible();
