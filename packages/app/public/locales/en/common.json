@@ -211,46 +211,94 @@
     },
     "features": {
       "title": "Features",
-      "description": "Everything you need to harness the power of multiple AI models",
+      "description": "Query 12+ AI models simultaneously, analyse their agreement, and synthesise the best answer",
+      "differentiators": {
+        "heading": "What Makes Ensemble AI Different",
+        "items": [
+          {
+            "title": "Agreement Analysis",
+            "body": "See exactly where models agree or diverge. Vector embeddings and cosine similarity create an N\u00d7N comparison matrix with colour-coded results.",
+            "metrics": ["N\u00d7N Matrix", "Cosine Similarity", "Real-time Stats"]
+          },
+          {
+            "title": "Dual Consensus Strategies",
+            "body": "Standard: synthesise all responses. Elo Ranking: tournament-style LLM judging ranks responses, then synthesises only the top performers.",
+            "metrics": ["Elo Rating", "Top N Selection", "Impartial Judge"]
+          },
+          {
+            "title": "Human + AI Integration",
+            "body": "Add responses from external tools, human experts, or other AI services. Included in agreement analysis and consensus generation.",
+            "metrics": ["Full Integration", "Agreement Scoring", "Consensus Synthesis"]
+          }
+        ]
+      },
+      "capabilities": {
+        "heading": "Built for Performance",
+        "items": [
+          { "number": "12+", "label": "AI Models", "description": "Across OpenAI, Anthropic, Google, and xAI" },
+          { "number": "<100ms", "label": "Streaming", "description": "Buffered chunks with parallel responses" },
+          { "number": "AES-256", "label": "Encryption", "description": "GCM mode with random 96-bit IVs" },
+          { "number": "Zero", "label": "Lock-in", "description": "Direct browser-to-API in Free Mode" }
+        ]
+      },
       "howItWorks": {
-        "heading": "How It Works",
+        "heading": "From Question to Consensus in 4 Steps",
         "steps": [
-          { "name": "Configure", "description": "Choose your operating mode and provide API credentials." },
-          { "name": "Ensemble", "description": "Select 2–6 AI models and designate a summariser." },
-          { "name": "Prompt", "description": "Enter your question or task for the ensemble." },
-          { "name": "Review", "description": "View streaming responses, agreement analysis, and a synthesised consensus." }
+          { "name": "Configure", "description": "Choose Free Mode with AES-256 encrypted API keys or Pro Mode with managed credits." },
+          { "name": "Select Ensemble", "description": "Pick 2\u20136 models across 4 providers. Choose your summariser and consensus method." },
+          { "name": "Enter Prompt", "description": "Write your question. Optionally add manual responses from experts or external tools." },
+          { "name": "Review & Analyse", "description": "Watch responses stream in parallel. See agreement analysis and synthesised consensus in real-time." }
         ]
       },
       "modes": {
-        "heading": "Operating Modes",
+        "heading": "Two Ways to Use Ensemble AI",
         "free": {
           "heading": "Free Mode",
-          "body": "Bring your own API keys from OpenAI, Anthropic, Google, and xAI. Your keys are encrypted with AES-256 using the Web Crypto API and never leave your browser. There are no usage fees from Ensemble AI — you pay only for the tokens you consume directly with each provider."
+          "badge": "BYOK",
+          "body": "Bring your own API keys. Direct browser-to-API communication with zero server dependency.",
+          "features": [
+            "AES-256-GCM browser encryption",
+            "Direct provider API calls",
+            "Pay only provider token costs",
+            "Full feature access",
+            "No usage fees"
+          ]
         },
         "pro": {
           "heading": "Pro Mode",
-          "body": "Purchase credits to access all providers without managing API keys. Ensemble AI handles the provider connections on your behalf, so you can focus on getting answers. Simple, secure, and hassle-free."
+          "badge": "Coming Soon",
+          "body": "Managed backend with credit-based billing. No API key management needed.",
+          "features": [
+            "Managed API connections",
+            "Credit-based billing",
+            "No key management",
+            "Usage analytics",
+            "Priority support"
+          ]
         }
+      },
+      "models": {
+        "heading": "12+ Models Across 4 Providers",
+        "body": "Access the best models from every leading AI provider. New models appear automatically via dynamic discovery.",
+        "providers": [
+          { "name": "OpenAI", "models": "GPT-4o, GPT-4o Mini, o1-preview, o1-mini" },
+          { "name": "Anthropic", "models": "Claude 3.5 Sonnet, Claude 3 Opus, Claude 3 Haiku" },
+          { "name": "Google", "models": "Gemini 1.5 Pro, Gemini 1.5 Flash, Gemini 2.5 Flash" },
+          { "name": "xAI", "models": "Grok 2, Grok 2 Mini" }
+        ]
       },
       "security": {
         "heading": "Security & Privacy",
-        "body": "Your data security is a core design principle, not an afterthought.",
+        "body": "Military-grade encryption with zero server-side storage in Free Mode.",
         "features": [
-          "API keys are encrypted with AES-256 via the Web Crypto API before storage.",
-          "Keys never leave your browser in Free Mode — no server-side storage.",
-          "No prompts or responses are logged or stored on our servers.",
-          "All provider communication happens directly from your browser in Free Mode.",
-          "Open-source codebase for full transparency and auditability."
-        ]
-      },
-      "providers": {
-        "heading": "Supported Providers",
-        "body": "Ensemble AI supports the leading AI model providers, giving you access to the best models across the industry.",
-        "list": [
-          { "name": "OpenAI", "description": "GPT-4o, GPT-4, and more" },
-          { "name": "Anthropic", "description": "Claude Opus, Sonnet, and Haiku" },
-          { "name": "Google", "description": "Gemini Pro and Ultra" },
-          { "name": "xAI", "description": "Grok models" }
+          "AES-256-GCM encryption via Web Crypto API",
+          "Device-specific key derivation (SHA-256)",
+          "Random 96-bit IV per encryption",
+          "Plaintext keys never touch localStorage",
+          "No server-side key storage in Free Mode",
+          "No prompts or responses logged or stored",
+          "Direct browser-to-provider communication",
+          "Open-source for full transparency"
         ]
       }
     }

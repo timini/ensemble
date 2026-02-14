@@ -203,46 +203,94 @@
     },
     "features": {
       "title": "Fonctionnalités",
-      "description": "Tout ce dont vous avez besoin pour exploiter la puissance de plusieurs modèles d'IA",
+      "description": "Interrogez plus de 12 modèles d'IA simultanément, analysez leur concordance et synthétisez la meilleure réponse",
+      "differentiators": {
+        "heading": "Ce qui rend Ensemble AI unique",
+        "items": [
+          {
+            "title": "Analyse de concordance",
+            "body": "Voyez exactement où les modèles concordent ou divergent. Les embeddings vectoriels et la similarité cosinus créent une matrice N\u00d7N avec des résultats codés par couleur.",
+            "metrics": ["Matrice N\u00d7N", "Similarité cosinus", "Stats en temps réel"]
+          },
+          {
+            "title": "Double stratégie de consensus",
+            "body": "Standard : synthétise toutes les réponses. Classement Elo : un jugement LLM par tournoi classe les réponses, puis ne synthétise que les meilleures.",
+            "metrics": ["Classement Elo", "Sélection Top N", "Juge impartial"]
+          },
+          {
+            "title": "Intégration Humain + IA",
+            "body": "Ajoutez des réponses d'outils externes, d'experts humains ou d'autres services d'IA. Incluses dans l'analyse de concordance et la génération de consensus.",
+            "metrics": ["Intégration complète", "Score de concordance", "Synthèse de consensus"]
+          }
+        ]
+      },
+      "capabilities": {
+        "heading": "Conçu pour la performance",
+        "items": [
+          { "number": "12+", "label": "Modèles d'IA", "description": "OpenAI, Anthropic, Google et xAI" },
+          { "number": "<100ms", "label": "Streaming", "description": "Chunks tamponnés avec réponses parallèles" },
+          { "number": "AES-256", "label": "Chiffrement", "description": "Mode GCM avec IV 96 bits aléatoires" },
+          { "number": "Zéro", "label": "Verrouillage", "description": "Communication navigateur-API directe en Mode Gratuit" }
+        ]
+      },
       "howItWorks": {
-        "heading": "Comment ça marche",
+        "heading": "De la question au consensus en 4 étapes",
         "steps": [
-          { "name": "Configurer", "description": "Choisissez votre mode de fonctionnement et fournissez vos identifiants API." },
-          { "name": "Ensemble", "description": "Sélectionnez 2 à 6 modèles d'IA et désignez un synthétiseur." },
-          { "name": "Invite", "description": "Entrez votre question ou tâche pour l'ensemble." },
-          { "name": "Révision", "description": "Consultez les réponses en streaming, l'analyse de concordance et le consensus synthétisé." }
+          { "name": "Configurer", "description": "Choisissez le Mode Gratuit avec clés API chiffrées AES-256 ou le Mode Pro avec crédits gérés." },
+          { "name": "Sélectionner l'ensemble", "description": "Choisissez 2 à 6 modèles parmi 4 fournisseurs. Sélectionnez votre synthétiseur et méthode de consensus." },
+          { "name": "Entrer l'invite", "description": "Rédigez votre question. Ajoutez optionnellement des réponses manuelles d'experts ou d'outils externes." },
+          { "name": "Examiner et analyser", "description": "Regardez les réponses en streaming parallèle. Consultez l'analyse de concordance et le consensus synthétisé en temps réel." }
         ]
       },
       "modes": {
-        "heading": "Modes de fonctionnement",
+        "heading": "Deux façons d'utiliser Ensemble AI",
         "free": {
           "heading": "Mode Gratuit",
-          "body": "Utilisez vos propres clés API d'OpenAI, Anthropic, Google et xAI. Vos clés sont chiffrées avec AES-256 via l'API Web Crypto et ne quittent jamais votre navigateur. Il n'y a aucun frais d'utilisation de la part d'Ensemble AI — vous ne payez que les jetons consommés directement auprès de chaque fournisseur."
+          "badge": "BYOK",
+          "body": "Utilisez vos propres clés API. Communication directe navigateur-API sans dépendance serveur.",
+          "features": [
+            "Chiffrement AES-256-GCM dans le navigateur",
+            "Appels API directs aux fournisseurs",
+            "Ne payez que les jetons consommés",
+            "Accès complet aux fonctionnalités",
+            "Aucun frais d'utilisation"
+          ]
         },
         "pro": {
           "heading": "Mode Pro",
-          "body": "Achetez des crédits pour accéder à tous les fournisseurs sans gérer de clés API. Ensemble AI gère les connexions aux fournisseurs pour vous, afin que vous puissiez vous concentrer sur l'obtention de réponses. Simple, sécurisé et sans tracas."
+          "badge": "Bientôt disponible",
+          "body": "Backend géré avec facturation par crédits. Aucune gestion de clés API nécessaire.",
+          "features": [
+            "Connexions API gérées",
+            "Facturation par crédits",
+            "Pas de gestion de clés",
+            "Analytique d'utilisation",
+            "Support prioritaire"
+          ]
         }
+      },
+      "models": {
+        "heading": "Plus de 12 modèles chez 4 fournisseurs",
+        "body": "Accédez aux meilleurs modèles de chaque fournisseur d'IA. Les nouveaux modèles apparaissent automatiquement grâce à la découverte dynamique.",
+        "providers": [
+          { "name": "OpenAI", "models": "GPT-4o, GPT-4o Mini, o1-preview, o1-mini" },
+          { "name": "Anthropic", "models": "Claude 3.5 Sonnet, Claude 3 Opus, Claude 3 Haiku" },
+          { "name": "Google", "models": "Gemini 1.5 Pro, Gemini 1.5 Flash, Gemini 2.5 Flash" },
+          { "name": "xAI", "models": "Grok 2, Grok 2 Mini" }
+        ]
       },
       "security": {
         "heading": "Sécurité et confidentialité",
-        "body": "La sécurité de vos données est un principe de conception fondamental, pas une réflexion après coup.",
+        "body": "Chiffrement de niveau militaire sans stockage côté serveur en Mode Gratuit.",
         "features": [
-          "Les clés API sont chiffrées avec AES-256 via l'API Web Crypto avant le stockage.",
-          "Les clés ne quittent jamais votre navigateur en Mode Gratuit — aucun stockage côté serveur.",
-          "Aucune invite ni réponse n'est enregistrée ou stockée sur nos serveurs.",
-          "Toute communication avec les fournisseurs se fait directement depuis votre navigateur en Mode Gratuit.",
-          "Code source ouvert pour une transparence et une auditabilité complètes."
-        ]
-      },
-      "providers": {
-        "heading": "Fournisseurs supportés",
-        "body": "Ensemble AI prend en charge les principaux fournisseurs de modèles d'IA, vous donnant accès aux meilleurs modèles de l'industrie.",
-        "list": [
-          { "name": "OpenAI", "description": "GPT-4o, GPT-4 et plus" },
-          { "name": "Anthropic", "description": "Claude Opus, Sonnet et Haiku" },
-          { "name": "Google", "description": "Gemini Pro et Ultra" },
-          { "name": "xAI", "description": "Modèles Grok" }
+          "Chiffrement AES-256-GCM via l'API Web Crypto",
+          "Dérivation de clé spécifique à l'appareil (SHA-256)",
+          "IV 96 bits aléatoire par chiffrement",
+          "Les clés en clair ne touchent jamais le localStorage",
+          "Aucun stockage côté serveur en Mode Gratuit",
+          "Aucune invite ni réponse enregistrée ou stockée",
+          "Communication directe navigateur-fournisseur",
+          "Code source ouvert pour une transparence totale"
         ]
       }
     }

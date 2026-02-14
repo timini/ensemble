@@ -1,26 +1,37 @@
 /**
  * Features Page
  *
- * Static informational page covering product features: the 4-step workflow,
- * operating modes (Free & Pro), supported providers, and security & privacy.
+ * Showcases Ensemble AI's unique differentiators, technical capabilities,
+ * 4-step workflow, operating modes, model ecosystem, and security.
  */
 
 'use client';
 
+import Link from 'next/link';
 import { useTranslation } from 'react-i18next';
+import { Settings, Users, MessageSquare, BarChart3, ArrowRight } from 'lucide-react';
 import { PageHero } from '@/components/organisms/PageHero';
 import { Heading } from '@/components/atoms/Heading';
 import { Text } from '@/components/atoms/Text';
+import { Badge } from '@/components/atoms/Badge';
+import { Card, CardContent } from '@/components/atoms/Card';
+import { DifferentiatorsSection } from './_components/DifferentiatorsSection';
+import { CapabilitiesSection } from './_components/CapabilitiesSection';
+import { ModesSection } from './_components/ModesSection';
+import { ModelsSection } from './_components/ModelsSection';
+import { SecuritySection } from './_components/SecuritySection';
+
+import type { Differentiator } from './_components/DifferentiatorsSection';
+import type { Capability } from './_components/CapabilitiesSection';
+import type { ModeInfo } from './_components/ModesSection';
+import type { ProviderModel } from './_components/ModelsSection';
 
 interface WorkflowStep {
   name: string;
   description: string;
 }
 
-interface ProviderInfo {
-  name: string;
-  description: string;
-}
+const STEP_ICONS = [Settings, Users, MessageSquare, BarChart3];
 
 export default function FeaturesPage() {
   const { t } = useTranslation('common');
@@ -29,14 +40,6 @@ export default function FeaturesPage() {
     returnObjects: true,
   }) as WorkflowStep[];
 
-  const securityFeatures = t('pages.features.security.features', {
-    returnObjects: true,
-  }) as string[];
-
-  const providers = t('pages.features.providers.list', {
-    returnObjects: true,
-  }) as ProviderInfo[];
-
   return (
     <div className="container mx-auto px-4 py-8 max-w-4xl" data-testid="features-page">
       <PageHero
@@ -44,78 +47,77 @@ export default function FeaturesPage() {
         description={t('pages.features.description')}
       />
 
+      <DifferentiatorsSection
+        heading={t('pages.features.differentiators.heading')}
+        items={t('pages.features.differentiators.items', { returnObjects: true }) as Differentiator[]}
+      />
+
+      <CapabilitiesSection
+        heading={t('pages.features.capabilities.heading')}
+        items={t('pages.features.capabilities.items', { returnObjects: true }) as Capability[]}
+      />
+
       {/* How It Works */}
-      <section className="mt-12 space-y-4" data-testid="features-how-it-works-section">
-        <Heading level={2} size="2xl">
+      <section className="mt-16" data-testid="features-how-it-works-section">
+        <Heading level={2} size="2xl" className="text-center mb-8">
           {t('pages.features.howItWorks.heading')}
         </Heading>
-        <ol className="space-y-3 list-decimal list-inside">
-          {steps.map((step, i) => (
-            <li key={i} className="text-foreground">
-              <span className="font-semibold">{step.name}</span>
-              <span className="text-muted-foreground">
-                {' '}
-                — {step.description}
-              </span>
-            </li>
-          ))}
-        </ol>
-      </section>
-
-      {/* Operating Modes */}
-      <section className="mt-12 space-y-6" data-testid="features-modes-section">
-        <Heading level={2} size="2xl">
-          {t('pages.features.modes.heading')}
-        </Heading>
-        <div>
-          <Heading level={3} size="lg">
-            {t('pages.features.modes.free.heading')}
-          </Heading>
-          <Text className="mt-2">{t('pages.features.modes.free.body')}</Text>
-        </div>
-        <div>
-          <Heading level={3} size="lg">
-            {t('pages.features.modes.pro.heading')}
-          </Heading>
-          <Text className="mt-2">{t('pages.features.modes.pro.body')}</Text>
-        </div>
-      </section>
-
-      {/* Supported Providers */}
-      <section className="mt-12 space-y-4" data-testid="features-providers-section">
-        <Heading level={2} size="2xl">
-          {t('pages.features.providers.heading')}
-        </Heading>
-        <Text>{t('pages.features.providers.body')}</Text>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {providers.map((provider, i) => (
-            <div
-              key={i}
-              className="rounded-lg border border-border p-4 bg-card"
-            >
-              <Heading level={3} size="md">
-                {provider.name}
-              </Heading>
-              <Text variant="helper" className="mt-1">
-                {provider.description}
-              </Text>
-            </div>
-          ))}
+          {steps.map((step, i) => {
+            const StepIcon = STEP_ICONS[i] ?? Settings;
+            return (
+              <Card key={i} className="relative overflow-hidden">
+                <CardContent className="pt-6">
+                  <div className="flex items-start gap-4">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10">
+                      <StepIcon className="h-5 w-5 text-primary" />
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2 mb-1">
+                        <Badge variant="secondary" className="text-xs">
+                          {i + 1}
+                        </Badge>
+                        <Heading level={3} size="md">{step.name}</Heading>
+                      </div>
+                      <Text variant="helper">{step.description}</Text>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })}
         </div>
       </section>
 
-      {/* Security & Privacy */}
-      <section className="mt-12 space-y-4" data-testid="features-security-section">
-        <Heading level={2} size="2xl">
-          {t('pages.features.security.heading')}
-        </Heading>
-        <Text>{t('pages.features.security.body')}</Text>
-        <ul className="space-y-2 list-disc list-inside text-foreground">
-          {securityFeatures.map((feature, i) => (
-            <li key={i}>{feature}</li>
-          ))}
-        </ul>
-      </section>
+      <ModesSection
+        heading={t('pages.features.modes.heading')}
+        freeMode={t('pages.features.modes.free', { returnObjects: true }) as ModeInfo}
+        proMode={t('pages.features.modes.pro', { returnObjects: true }) as ModeInfo}
+      />
+
+      <ModelsSection
+        heading={t('pages.features.models.heading')}
+        body={t('pages.features.models.body')}
+        providers={t('pages.features.models.providers', { returnObjects: true }) as ProviderModel[]}
+      />
+
+      <SecuritySection
+        heading={t('pages.features.security.heading')}
+        body={t('pages.features.security.body')}
+        features={t('pages.features.security.features', { returnObjects: true }) as string[]}
+      />
+
+      {/* CTA */}
+      <div className="mt-12 text-center">
+        <Link
+          href="/about"
+          data-testid="about-cta-link"
+          className="inline-flex items-center gap-2 text-primary hover:text-primary/80 font-semibold transition-colors"
+        >
+          {t('pages.about.title')}
+          <ArrowRight className="h-4 w-4" />
+        </Link>
+      </div>
     </div>
   );
 }
