@@ -96,7 +96,7 @@ exports[`ProgressSteps > snapshots > matches snapshot for config step 1`] = `
       class="flex items-center"
     >
       <span
-        class="w-12 text-center text-sm font-medium transition-colors text-primary"
+        class="inline-block w-12 text-center text-sm font-medium transition-colors text-primary"
       >
         Config
       </span>
@@ -108,7 +108,7 @@ exports[`ProgressSteps > snapshots > matches snapshot for config step 1`] = `
       class="flex items-center"
     >
       <span
-        class="w-12 text-center text-sm font-medium transition-colors text-muted-foreground"
+        class="inline-block w-12 text-center text-sm font-medium transition-colors text-muted-foreground"
       >
         Ensemble
       </span>
@@ -120,7 +120,7 @@ exports[`ProgressSteps > snapshots > matches snapshot for config step 1`] = `
       class="flex items-center"
     >
       <span
-        class="w-12 text-center text-sm font-medium transition-colors text-muted-foreground"
+        class="inline-block w-12 text-center text-sm font-medium transition-colors text-muted-foreground"
       >
         Prompt
       </span>
@@ -132,7 +132,7 @@ exports[`ProgressSteps > snapshots > matches snapshot for config step 1`] = `
       class="flex items-center"
     >
       <span
-        class="w-12 text-center text-sm font-medium transition-colors text-muted-foreground"
+        class="inline-block w-12 text-center text-sm font-medium transition-colors text-muted-foreground"
       >
         Review
       </span>
@@ -253,7 +253,7 @@ exports[`ProgressSteps > snapshots > matches snapshot for ensemble step 1`] = `
       class="flex items-center"
     >
       <span
-        class="w-12 text-center text-sm font-medium transition-colors text-success"
+        class="inline-block w-12 text-center text-sm font-medium transition-colors text-success"
       >
         Config
       </span>
@@ -265,7 +265,7 @@ exports[`ProgressSteps > snapshots > matches snapshot for ensemble step 1`] = `
       class="flex items-center"
     >
       <span
-        class="w-12 text-center text-sm font-medium transition-colors text-primary"
+        class="inline-block w-12 text-center text-sm font-medium transition-colors text-primary"
       >
         Ensemble
       </span>
@@ -277,7 +277,7 @@ exports[`ProgressSteps > snapshots > matches snapshot for ensemble step 1`] = `
       class="flex items-center"
     >
       <span
-        class="w-12 text-center text-sm font-medium transition-colors text-muted-foreground"
+        class="inline-block w-12 text-center text-sm font-medium transition-colors text-muted-foreground"
       >
         Prompt
       </span>
@@ -289,7 +289,7 @@ exports[`ProgressSteps > snapshots > matches snapshot for ensemble step 1`] = `
       class="flex items-center"
     >
       <span
-        class="w-12 text-center text-sm font-medium transition-colors text-muted-foreground"
+        class="inline-block w-12 text-center text-sm font-medium transition-colors text-muted-foreground"
       >
         Review
       </span>
@@ -426,7 +426,7 @@ exports[`ProgressSteps > snapshots > matches snapshot for prompt step 1`] = `
       class="flex items-center"
     >
       <span
-        class="w-12 text-center text-sm font-medium transition-colors text-success"
+        class="inline-block w-12 text-center text-sm font-medium transition-colors text-success"
       >
         Config
       </span>
@@ -438,7 +438,7 @@ exports[`ProgressSteps > snapshots > matches snapshot for prompt step 1`] = `
       class="flex items-center"
     >
       <span
-        class="w-12 text-center text-sm font-medium transition-colors text-success"
+        class="inline-block w-12 text-center text-sm font-medium transition-colors text-success"
       >
         Ensemble
       </span>
@@ -450,7 +450,7 @@ exports[`ProgressSteps > snapshots > matches snapshot for prompt step 1`] = `
       class="flex items-center"
     >
       <span
-        class="w-12 text-center text-sm font-medium transition-colors text-primary"
+        class="inline-block w-12 text-center text-sm font-medium transition-colors text-primary"
       >
         Prompt
       </span>
@@ -462,7 +462,7 @@ exports[`ProgressSteps > snapshots > matches snapshot for prompt step 1`] = `
       class="flex items-center"
     >
       <span
-        class="w-12 text-center text-sm font-medium transition-colors text-muted-foreground"
+        class="inline-block w-12 text-center text-sm font-medium transition-colors text-muted-foreground"
       >
         Review
       </span>
@@ -615,7 +615,7 @@ exports[`ProgressSteps > snapshots > matches snapshot for review step 1`] = `
       class="flex items-center"
     >
       <span
-        class="w-12 text-center text-sm font-medium transition-colors text-success"
+        class="inline-block w-12 text-center text-sm font-medium transition-colors text-success"
       >
         Config
       </span>
@@ -627,7 +627,7 @@ exports[`ProgressSteps > snapshots > matches snapshot for review step 1`] = `
       class="flex items-center"
     >
       <span
-        class="w-12 text-center text-sm font-medium transition-colors text-success"
+        class="inline-block w-12 text-center text-sm font-medium transition-colors text-success"
       >
         Ensemble
       </span>
@@ -639,7 +639,7 @@ exports[`ProgressSteps > snapshots > matches snapshot for review step 1`] = `
       class="flex items-center"
     >
       <span
-        class="w-12 text-center text-sm font-medium transition-colors text-success"
+        class="inline-block w-12 text-center text-sm font-medium transition-colors text-success"
       >
         Prompt
       </span>
@@ -651,7 +651,7 @@ exports[`ProgressSteps > snapshots > matches snapshot for review step 1`] = `
       class="flex items-center"
     >
       <span
-        class="w-12 text-center text-sm font-medium transition-colors text-primary"
+        class="inline-block w-12 text-center text-sm font-medium transition-colors text-primary"
       >
         Review
       </span>

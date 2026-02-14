@@ -44,6 +44,15 @@ describe('ProgressSteps', () => {
     expect(completedSteps.length).toBeGreaterThan(0);
   });
 
+  it('uses fixed-width label containers for horizontal centering', () => {
+    render(<ProgressSteps currentStep="config" />);
+    const ensembleLabel = screen.getByText('Ensemble');
+    const promptLabel = screen.getByText('Prompt');
+
+    expect(ensembleLabel).toHaveClass('inline-block', 'w-12', 'text-center');
+    expect(promptLabel).toHaveClass('inline-block', 'w-12', 'text-center');
+  });
+
   describe('snapshots', () => {
     it('matches snapshot for config step', () => {
       const { container } = render(<ProgressSteps currentStep="config" />);
