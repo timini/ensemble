@@ -1,7 +1,10 @@
 {
   "app": {
     "name": "Ensemble AI",
-    "tagline": "Make better decisions with multiple AI perspectives"
+    "tagline": "Make better decisions with multiple AI perspectives",
+    "getStarted": "Get Started Free",
+    "tryItNow": "Try It Now",
+    "seeItInAction": "See It in Action"
   },
   "navigation": {
     "config": "Configuration",

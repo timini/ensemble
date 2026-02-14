@@ -1,7 +1,10 @@
 {
   "app": {
     "name": "Ensemble IA",
-    "tagline": "Prenez de meilleures décisions avec plusieurs perspectives d'IA"
+    "tagline": "Prenez de meilleures décisions avec plusieurs perspectives d'IA",
+    "getStarted": "Commencer gratuitement",
+    "tryItNow": "Essayer maintenant",
+    "seeItInAction": "Voir en action"
   },
   "navigation": {
     "config": "Configuration",
