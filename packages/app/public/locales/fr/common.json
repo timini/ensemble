@@ -119,7 +119,7 @@
     },
     "ensemble": {
       "title": "Construire votre ensemble",
-      "description": "Sélectionnez 2 à 6 modèles d'IA pour comparer leurs réponses"
+      "description": "Sélectionnez au moins 2 modèles d'IA pour comparer leurs réponses"
     },
     "prompt": {
       "title": "Entrez votre invite",

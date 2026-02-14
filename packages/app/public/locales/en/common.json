@@ -127,7 +127,7 @@
     },
     "ensemble": {
       "title": "Build Your Ensemble",
-      "description": "Select 2-6 AI models to compare their responses"
+      "description": "Select at least 2 AI models to compare their responses"
     },
     "prompt": {
       "title": "Enter Your Prompt",
