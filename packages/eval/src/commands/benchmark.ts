@@ -22,6 +22,17 @@ interface BenchmarkCommandOptions {
   mode: EvalMode;
 }
 
+function assertValidResumedOutput(
+  outputPath: string,
+  parsed: BenchmarkResultsFile,
+): void {
+  if (!Array.isArray(parsed?.runs)) {
+    throw new Error(
+      `Resumed file "${outputPath}" does not contain a valid "runs" array.`,
+    );
+  }
+}
+
 function createBenchmarkFile(
   dataset: string,
   mode: EvalMode,
@@ -82,7 +93,9 @@ export function createBenchmarkCommand(): Command {
       );
 
       if (options.resume && (await fileExists(options.output))) {
-        output = await readJsonFile<BenchmarkResultsFile>(options.output);
+        const parsed = await readJsonFile<BenchmarkResultsFile>(options.output);
+        assertValidResumedOutput(options.output, parsed);
+        output = parsed;
       }
 
       const completedPrompts = new Set(output.runs.map((run) => run.prompt));

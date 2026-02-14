@@ -1,4 +1,7 @@
-import { ProviderRegistry, type AIProvider } from '@ensemble-ai/shared-utils/providers';
+import type {
+  AIProvider,
+  ProviderRegistry,
+} from '@ensemble-ai/shared-utils/providers';
 import type { EvalMode, ModelSpec, ProviderResponse } from '../types.js';
 
 async function streamModelResponse(
