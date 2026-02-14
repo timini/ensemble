@@ -64,7 +64,24 @@ export default function ConfigPage() {
       </div>
 
       {displayMode === 'free' && (
-        <div className="mt-8">
+        <div className="mt-8 space-y-6">
+          <InlineAlert variant="info">
+            <div>
+              <p className="text-base font-semibold">
+                {t('pages.config.securityNoticeTitle')}
+              </p>
+              <p className="mt-1">
+                {t('pages.config.securityNoticeDescription')}
+              </p>
+              <ul className="mt-3 list-disc space-y-1 pl-5">
+                <li>{t('pages.config.securityNoticeBulletNeverLeavesBrowser')}</li>
+                <li>{t('pages.config.securityNoticeBulletAesEncryption')}</li>
+                <li>{t('pages.config.securityNoticeBulletNoServerStorage')}</li>
+                <li>{t('pages.config.securityNoticeBulletDirectApiCalls')}</li>
+              </ul>
+            </div>
+          </InlineAlert>
+
           <ApiKeyConfiguration
             items={displayApiKeyItems}
             configuredCountOverride={configuredCountOverride}
