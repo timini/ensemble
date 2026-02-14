@@ -104,9 +104,9 @@ export default function AboutPage() {
           {t('pages.about.research.intro')}
         </Text>
         <div className="space-y-4">
-          {papers.map((paper, i) => (
+          {papers.map((paper) => (
             <a
-              key={i}
+              key={paper.url}
               href={paper.url}
               target="_blank"
               rel="noopener noreferrer"

@@ -36,7 +36,7 @@ export function ModelsSection({ heading, body, providers }: Props) {
           <Card key={i}>
             <CardContent className="pt-6 pb-6">
               <div className="flex items-center gap-3 mb-3">
-                <div className={`flex h-10 w-10 items-center justify-center rounded-full ${COLORS[i]}`}>
+                <div className={`flex h-10 w-10 items-center justify-center rounded-full ${COLORS[i % COLORS.length]}`}>
                   <span className="text-base font-bold" aria-hidden="true">
                     {provider.name.charAt(0)}
                   </span>

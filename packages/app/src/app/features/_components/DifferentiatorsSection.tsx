@@ -36,7 +36,7 @@ export function DifferentiatorsSection({ heading, items }: Props) {
           return (
             <Card key={i} className="border-2 hover:border-primary/50 transition-all">
               <CardContent className="pt-6">
-                <div className={`mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full ${COLORS[i]}`}>
+                <div className={`mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full ${COLORS[i % COLORS.length]}`}>
                   <Icon className="h-7 w-7" />
                 </div>
                 <Heading level={3} size="md" className="text-center mb-2">
