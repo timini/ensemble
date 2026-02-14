@@ -8,6 +8,7 @@
 'use client';
 
 import { useTranslation } from 'react-i18next';
+import Link from 'next/link';
 import {
   Brain,
   Shuffle,
@@ -139,14 +140,14 @@ export default function AboutPage() {
 
       {/* CTA to Features */}
       <div className="mt-12 text-center">
-        <a
+        <Link
           href="/features"
           data-testid="features-cta-link"
           className="inline-flex items-center gap-2 text-primary hover:text-primary/80 font-semibold transition-colors"
         >
           {t('pages.features.title')}
           <ArrowRight className="h-4 w-4" />
-        </a>
+        </Link>
       </div>
     </div>
   );

@@ -65,9 +65,9 @@ test.describe('Features Page', () => {
     await expect(section).toBeVisible();
     await expect(section.getByRole('heading', { level: 2 })).toBeVisible();
 
-    // Verify 4 provider cards (each has 2 h3s: avatar letter + name)
+    // Verify 4 provider cards
     const providerHeadings = section.getByRole('heading', { level: 3 });
-    await expect(providerHeadings).toHaveCount(8);
+    await expect(providerHeadings).toHaveCount(4);
   });
 
   test('displays Security & Privacy section with feature list', async ({ page }) => {
