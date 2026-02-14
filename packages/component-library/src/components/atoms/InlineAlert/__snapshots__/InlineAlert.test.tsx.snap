@@ -2,12 +2,12 @@
 
 exports[`InlineAlert > snapshots > matches snapshot for dismissible alert 1`] = `
 <div
-  class="flex items-start gap-3 p-4 rounded-md border bg-primary/10 border-primary/20 text-foreground"
+  class="flex items-start gap-3 p-4 rounded-md border bg-info/10 border-info/20 text-foreground"
   role="alert"
 >
   <svg
     aria-hidden="true"
-    class="lucide lucide-info h-4 w-4 shrink-0 mt-0.5 text-primary"
+    class="lucide lucide-info h-4 w-4 shrink-0 mt-0.5 text-info"
     fill="none"
     height="24"
     stroke="currentColor"
@@ -66,12 +66,12 @@ exports[`InlineAlert > snapshots > matches snapshot for dismissible alert 1`] = 
 
 exports[`InlineAlert > snapshots > matches snapshot for info variant 1`] = `
 <div
-  class="flex items-start gap-3 p-4 rounded-md border bg-primary/10 border-primary/20 text-foreground"
+  class="flex items-start gap-3 p-4 rounded-md border bg-info/10 border-info/20 text-foreground"
   role="alert"
 >
   <svg
     aria-hidden="true"
-    class="lucide lucide-info h-4 w-4 shrink-0 mt-0.5 text-primary"
+    class="lucide lucide-info h-4 w-4 shrink-0 mt-0.5 text-info"
     fill="none"
     height="24"
     stroke="currentColor"

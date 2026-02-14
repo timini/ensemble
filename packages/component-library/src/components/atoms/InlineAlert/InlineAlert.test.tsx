@@ -14,7 +14,7 @@ describe('InlineAlert', () => {
     it('renders with info variant by default', () => {
       const { container } = render(<InlineAlert>Message</InlineAlert>);
       const alert = container.firstChild;
-      expect(alert).toHaveClass('bg-primary/10');
+      expect(alert).toHaveClass('bg-info/10');
     });
 
     it('renders with success variant', () => {
@@ -38,7 +38,7 @@ describe('InlineAlert', () => {
     it('renders info icon for info variant', () => {
       const { container } = render(<InlineAlert variant="info">Message</InlineAlert>);
       const icon = container.querySelector('svg');
-      expect(icon).toHaveClass('text-primary');
+      expect(icon).toHaveClass('text-info');
     });
 
     it('renders check icon for success variant', () => {

@@ -31,6 +31,10 @@ export default {
           DEFAULT: 'rgb(var(--color-warning) / <alpha-value>)',
           foreground: 'rgb(var(--color-warning-foreground) / <alpha-value>)',
         },
+        info: {
+          DEFAULT: 'rgb(var(--color-info) / <alpha-value>)',
+          foreground: 'rgb(var(--color-info-foreground) / <alpha-value>)',
+        },
         muted: {
           DEFAULT: 'rgb(var(--color-muted) / <alpha-value>)',
           foreground: 'rgb(var(--color-muted-foreground) / <alpha-value>)',

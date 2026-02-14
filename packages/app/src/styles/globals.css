@@ -25,6 +25,8 @@
     --color-success-foreground: 15 23 42;
     --color-warning: 245 158 11;
     --color-warning-foreground: 15 23 42;
+    --color-info: 59 130 246;
+    --color-info-foreground: 255 255 255;
     --color-border: 226 232 240;
     --color-input: 226 232 240;
     --color-ring: 79 70 229;
@@ -53,6 +55,8 @@
     --color-success-foreground: 15 15 25;
     --color-warning: 251 191 36;
     --color-warning-foreground: 15 15 25;
+    --color-info: 96 165 250;
+    --color-info-foreground: 15 15 25;
     --color-border: 40 40 65;
     --color-input: 40 40 65;
     --color-ring: 129 140 248;
