@@ -108,7 +108,7 @@
   "pages": {
     "config": {
       "title": "Configuration",
-      "description": "Choisissez votre mode de fonctionnement pour commencer avec AI Ensemble",
+      "description": "Choisissez le mode Gratuit pour utiliser vos propres clés API, ou le mode Pro pour un accès géré. Continuez ensuite vers la sélection des modèles de votre ensemble.",
       "apiKeyInfoBold": "Configurez une clé API pour continuer.",
       "apiKeyInfoNormal": "Vos clés sont stockées localement et ne sont jamais envoyées à nos serveurs.",
       "apiKeysConfigured": "{{count}} clé API configurée.",
