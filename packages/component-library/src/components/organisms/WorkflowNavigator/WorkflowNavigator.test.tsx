@@ -203,6 +203,7 @@ describe('WorkflowNavigator', () => {
 
       const nav = container.querySelector('[data-testid="workflow-navigator"]');
       expect(nav).toHaveClass('flex');
+      expect(nav).toHaveClass('gap-3');
       expect(nav).toHaveClass('justify-between');
     });
 
