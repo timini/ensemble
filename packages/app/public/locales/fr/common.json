@@ -120,7 +120,7 @@
     "ensemble": {
       "title": "Construire votre ensemble",
       "description": "Sélectionnez 2 à 6 modèles d'IA pour comparer leurs réponses",
-      "selectionGuidanceTitle": "Sélectionnez 2 à 6 modèles d'IA pour comparer leurs réponses.",
+      "selectionGuidanceTitle": "Fonctionnement de la sélection des modèles",
       "selectionGuidanceDescription": "Choisissez au moins 2 modèles pour continuer, et variez les fournisseurs pour obtenir une perspective plus large."
     },
     "prompt": {

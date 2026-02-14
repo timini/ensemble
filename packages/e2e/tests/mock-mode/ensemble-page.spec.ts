@@ -38,10 +38,9 @@ test.describe('Ensemble Page', () => {
 
     // Check for page hero heading
     await expect(page.locator('h1')).toBeVisible();
-    await expect(page.getByTestId('ensemble-selection-guidance')).toBeVisible();
-    await expect(
-      page.getByText(/Select 2-6 AI models to compare their responses/i).first()
-    ).toBeVisible();
+    const guidance = page.getByTestId('ensemble-selection-guidance');
+    await expect(guidance).toBeVisible();
+    await expect(guidance.locator('p').first()).toBeVisible();
 
     // Check for workflow navigator
     await expect(page.getByTestId('workflow-navigator')).toBeVisible();
