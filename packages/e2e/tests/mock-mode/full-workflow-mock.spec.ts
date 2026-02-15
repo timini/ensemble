@@ -229,10 +229,6 @@ test.describe('Full Workflow - Mock Mode', () => {
         await startOverButton.evaluate((button: HTMLButtonElement) => button.click());
       });
 
-      if (!page.url().endsWith('/config')) {
-        await startOverButton.evaluate((button: HTMLButtonElement) => button.click());
-      }
-
       await page.waitForURL('**/config', { timeout: 15000 });
       await expect(page).toHaveURL('/config', { timeout: 10000 });
 
