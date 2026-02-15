@@ -4,7 +4,7 @@ import { parseStrategies, generateConsensus } from '../lib/consensus.js';
 import { writeJsonFile } from '../lib/io.js';
 import { parseModelSpec, parseModelSpecs } from '../lib/modelSpecs.js';
 import { registerProviders } from '../lib/providers.js';
-import { runPromptWithModels } from '../lib/runPrompt.js';
+import { EnsembleRunner } from '../lib/ensembleRunner.js';
 import type { EvalMode, PromptRunResult } from '../types.js';
 
 interface RunCommandOptions {
@@ -13,6 +13,7 @@ interface RunCommandOptions {
   mode: EvalMode;
   output?: string;
   summarizer?: string;
+  requestDelayMs?: string;
 }
 
 export function createRunCommand(): Command {
@@ -26,11 +27,16 @@ export function createRunCommand(): Command {
     )
     .option(
       '--strategy <strategies...>',
-      'Consensus strategies (standard, elo). Supports comma-separated values.',
+      'Consensus strategies (standard, elo, majority). Supports comma-separated values.',
     )
     .option(
       '--summarizer <provider:model>',
       'Optional explicit summarizer model (provider:model). Defaults to first successful response model.',
+    )
+    .option(
+      '--request-delay-ms <ms>',
+      'Optional delay in milliseconds between starting model calls.',
+      '0',
     )
     .option('--mode <mode>', 'Provider mode to use (mock or free)', 'mock')
     .option('--output <file>', 'Write full run output as JSON')
@@ -41,6 +47,10 @@ export function createRunCommand(): Command {
       const summarizer = options.summarizer
         ? parseModelSpec(options.summarizer)
         : null;
+      const requestDelayMs = Number.parseInt(options.requestDelayMs ?? '0', 10);
+      if (!Number.isInteger(requestDelayMs) || requestDelayMs < 0) {
+        throw new Error(`Invalid request delay "${options.requestDelayMs}".`);
+      }
 
       const registry = new ProviderRegistry();
       registerProviders(
@@ -52,7 +62,8 @@ export function createRunCommand(): Command {
         mode,
       );
 
-      const responses = await runPromptWithModels(registry, mode, prompt, models);
+      const runner = new EnsembleRunner(registry, mode, { requestDelayMs });
+      const responses = await runner.runPrompt(prompt, models);
       const firstSuccessful = responses.find((response) => !response.error);
       const summarizerTarget = summarizer
         ? summarizer

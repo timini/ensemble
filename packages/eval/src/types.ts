@@ -2,11 +2,38 @@ import type { ProviderMode, ProviderName } from '@ensemble-ai/shared-utils/provi
 
 export type EvalProvider = ProviderName;
 export type EvalMode = Extract<ProviderMode, 'mock' | 'free'>;
-export type StrategyName = 'standard' | 'elo';
+export type StrategyName = 'standard' | 'elo' | 'majority';
+export type BenchmarkDatasetName = 'gsm8k' | 'truthfulqa' | 'gpqa';
 
 export interface ModelSpec {
   provider: EvalProvider;
   model: string;
+}
+
+export interface BenchmarkQuestion {
+  id: string;
+  prompt: string;
+  groundTruth: string;
+  category?: string;
+  difficulty?: string;
+}
+
+export interface BenchmarkLoader {
+  name: BenchmarkDatasetName;
+  load(options?: { sample?: number }): Promise<BenchmarkQuestion[]>;
+}
+
+export interface EvaluationResult {
+  correct: boolean;
+  expected: string;
+  predicted: string | null;
+}
+
+export interface PromptEvaluation {
+  evaluator: 'numeric' | 'mcq' | 'generative';
+  groundTruth: string;
+  accuracy: number;
+  results: Record<string, EvaluationResult>;
 }
 
 export interface ProviderResponse {
@@ -15,13 +42,27 @@ export interface ProviderResponse {
   content: string;
   responseTimeMs: number;
   tokenCount?: number;
+  estimatedCostUsd?: number;
   error?: string;
 }
 
+export interface SelfConsistencyResult {
+  runs: number;
+  majorityAnswer: string | null;
+  majorityCount: number;
+  correct: boolean | null;
+}
+
 export interface PromptRunResult {
+  questionId?: string;
   prompt: string;
+  groundTruth?: string;
+  category?: string;
+  difficulty?: string;
   responses: ProviderResponse[];
   consensus: Partial<Record<StrategyName, string>>;
+  evaluation?: PromptEvaluation;
+  selfConsistency?: SelfConsistencyResult;
 }
 
 export interface BenchmarkResultsFile {

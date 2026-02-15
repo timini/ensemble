@@ -1,7 +1,7 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
 exports[`EnsembleHeader > snapshots > matches snapshot for default render 1`] = `
-<div
+<header
   class="bg-background border-b border-border"
 >
   <div
@@ -25,17 +25,18 @@ exports[`EnsembleHeader > snapshots > matches snapshot for default render 1`] = 
           The smartest AI is an ensemble.
         </p>
       </a>
-      <div
+      <nav
+        aria-label="Main navigation"
         class="flex items-center gap-4"
       >
         <a
-          class="text-sm text-muted-foreground hover:text-foreground transition-colors"
+          class="text-sm transition-colors text-muted-foreground hover:text-foreground"
           href="/features"
         >
           Features
         </a>
         <a
-          class="text-sm text-muted-foreground hover:text-foreground transition-colors"
+          class="text-sm transition-colors text-muted-foreground hover:text-foreground"
           href="/about"
         >
           About
@@ -67,8 +68,8 @@ exports[`EnsembleHeader > snapshots > matches snapshot for default render 1`] = 
             />
           </svg>
         </button>
-      </div>
+      </nav>
     </div>
   </div>
-</div>
+</header>
 `;

@@ -1,37 +1,44 @@
 import { describe, expect, it } from 'vitest';
+import { analyzeBenchmarkRuns } from './analysis.js';
 import { createMarkdownReport } from './report.js';
+import type { PromptRunResult } from '../types.js';
 
 describe('createMarkdownReport', () => {
-  it('summarizes runs and consensus coverage', () => {
-    const markdown = createMarkdownReport('results.json', [
+  it('renders rich analysis sections', () => {
+    const runs: PromptRunResult[] = [
       {
-        prompt: 'What is the capital of France?',
+        questionId: 'q1',
+        prompt: '1+1?',
+        groundTruth: '2',
+        category: 'math',
+        difficulty: 'easy',
         responses: [
           {
             provider: 'openai',
             model: 'gpt-4o',
-            content: 'Paris',
-            responseTimeMs: 120,
+            content: '2',
+            responseTimeMs: 100,
             tokenCount: 12,
-          },
-          {
-            provider: 'anthropic',
-            model: 'claude-3-5-sonnet-latest',
-            content: '',
-            responseTimeMs: 0,
-            error: 'timeout',
+            estimatedCostUsd: 0.001,
           },
         ],
-        consensus: {
-          standard: 'Paris is the capital of France.',
+        consensus: { standard: '2' },
+        evaluation: {
+          evaluator: 'numeric',
+          groundTruth: '2',
+          accuracy: 1,
+          results: {
+            'openai:gpt-4o': { correct: true, expected: '2', predicted: '2' },
+          },
         },
       },
-    ]);
+    ];
+    const analysis = analyzeBenchmarkRuns(runs, { bootstrapIterations: 100 });
+    const markdown = createMarkdownReport('results.json', analysis);
 
-    expect(markdown).toContain('# Ensemble Eval Report');
-    expect(markdown).toContain('Prompts evaluated: 1');
-    expect(markdown).toContain('Successful responses: 1');
-    expect(markdown).toContain('Failed responses: 1');
-    expect(markdown).toContain('`standard`: 1 prompt(s)');
+    expect(markdown).toContain('# Ensemble Eval Analysis Report');
+    expect(markdown).toContain('## Accuracy Summary - Models');
+    expect(markdown).toContain('## Statistical Significance');
+    expect(markdown).toContain('## Cost Analysis');
   });
 });

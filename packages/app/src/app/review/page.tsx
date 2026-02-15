@@ -18,6 +18,7 @@ import { ResponseCard } from "@/components/molecules/ResponseCard";
 import { ConsensusCard } from "@/components/organisms/ConsensusCard";
 import { AgreementAnalysis } from "@/components/organisms/AgreementAnalysis";
 import { ProgressSteps } from "@/components/molecules/ProgressSteps";
+import { Button } from "@/components/atoms/Button";
 import { WorkflowNavigator } from "@/components/organisms/WorkflowNavigator";
 import { PromptCard } from "@/components/organisms/PromptCard";
 import type { Provider } from "@/components/molecules/ResponseCard";
@@ -28,6 +29,8 @@ import { useStreamingResponses } from "./hooks/useStreamingResponses";
 import { useConsensusGeneration } from "./hooks/useConsensusGeneration";
 import { useConsensusStatus } from "./hooks/useConsensusStatus";
 import { useConsensusTrigger } from "./hooks/useConsensusTrigger";
+
+const MAX_EXPANDED_CARDS = 3;
 
 export default function ReviewPage() {
   const { t } = useTranslation();
@@ -174,7 +177,7 @@ export default function ReviewPage() {
           </div>
         ) : (
           <div className="space-y-4">
-            {viewResponses.map((response) => (
+            {viewResponses.map((response, index) => (
               <ResponseCard
                 key={response.modelId}
                 modelName={response.model}
@@ -197,6 +200,7 @@ export default function ReviewPage() {
                 testId={`response-card-${response.modelId}`}
                 tokenCount={response.tokenCount ?? undefined}
                 onRetry={() => retryModel(response.modelId)}
+                defaultExpanded={index < MAX_EXPANDED_CARDS}
               />
             ))}
             {viewManualResponses.map((manual) => (
@@ -223,12 +227,13 @@ export default function ReviewPage() {
           onBack={handleBack}
           onContinue={handleStartOver}
         />
-        <button
+        <Button
+          variant="outline"
           onClick={handleNewComparison}
-          className="self-end rounded-lg border border-border px-6 py-2 transition-colors hover:bg-accent md:self-auto"
+          className="self-end md:self-auto"
         >
           {t("pages.review.newComparisonButton")}
-        </button>
+        </Button>
       </div>
     </div>
   );
