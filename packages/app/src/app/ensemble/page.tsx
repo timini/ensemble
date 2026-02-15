@@ -66,6 +66,14 @@ export default function EnsemblePage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-8">
         {/* Model Selection List - Takes 2/3 width on large screens */}
         <div className="lg:col-span-2">
+          <div className="mb-4 flex items-center justify-between">
+            <p className="text-sm text-muted-foreground" data-testid="model-selection-counter">
+              {t('pages.ensemble.selectionCounter', {
+                count: displayedSelectedModelIds.length,
+                max: 6,
+              })}
+            </p>
+          </div>
           <ModelSelectionList
             models={availableModels}
             selectedModelIds={displayedSelectedModelIds}
