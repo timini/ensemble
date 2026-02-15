@@ -682,6 +682,88 @@ describe('EnsembleSidebar', () => {
     });
   });
 
+  describe('remove model', () => {
+    it('renders remove buttons when onRemoveModel is provided', () => {
+      render(
+        <EnsembleSidebar
+          selectedModels={mockSelectedModels}
+          summarizerId="claude-3-opus"
+          presets={[]}
+          currentEnsembleName=""
+          onLoadPreset={vi.fn()}
+          onSavePreset={vi.fn()}
+          onDeletePreset={vi.fn()}
+          onAddManualResponse={vi.fn()}
+          onRemoveModel={vi.fn()}
+        />
+      );
+
+      expect(screen.getByTestId('remove-model-claude-3-opus')).toBeInTheDocument();
+      expect(screen.getByTestId('remove-model-gpt-4o')).toBeInTheDocument();
+    });
+
+    it('does not render remove buttons when onRemoveModel is not provided', () => {
+      render(
+        <EnsembleSidebar
+          selectedModels={mockSelectedModels}
+          summarizerId="claude-3-opus"
+          presets={[]}
+          currentEnsembleName=""
+          onLoadPreset={vi.fn()}
+          onSavePreset={vi.fn()}
+          onDeletePreset={vi.fn()}
+          onAddManualResponse={vi.fn()}
+        />
+      );
+
+      expect(screen.queryByTestId('remove-model-claude-3-opus')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('remove-model-gpt-4o')).not.toBeInTheDocument();
+    });
+
+    it('calls onRemoveModel with the correct model id when clicked', async () => {
+      const user = userEvent.setup();
+      const onRemoveModel = vi.fn();
+
+      render(
+        <EnsembleSidebar
+          selectedModels={mockSelectedModels}
+          summarizerId="claude-3-opus"
+          presets={[]}
+          currentEnsembleName=""
+          onLoadPreset={vi.fn()}
+          onSavePreset={vi.fn()}
+          onDeletePreset={vi.fn()}
+          onAddManualResponse={vi.fn()}
+          onRemoveModel={onRemoveModel}
+        />
+      );
+
+      await user.click(screen.getByTestId('remove-model-gpt-4o'));
+
+      expect(onRemoveModel).toHaveBeenCalledWith('gpt-4o');
+      expect(onRemoveModel).toHaveBeenCalledTimes(1);
+    });
+
+    it('provides accessible aria-label for remove buttons', () => {
+      render(
+        <EnsembleSidebar
+          selectedModels={mockSelectedModels}
+          summarizerId="claude-3-opus"
+          presets={[]}
+          currentEnsembleName=""
+          onLoadPreset={vi.fn()}
+          onSavePreset={vi.fn()}
+          onDeletePreset={vi.fn()}
+          onAddManualResponse={vi.fn()}
+          onRemoveModel={vi.fn()}
+        />
+      );
+
+      expect(screen.getByLabelText('Remove Claude 3 Opus')).toBeInTheDocument();
+      expect(screen.getByLabelText('Remove GPT-4o')).toBeInTheDocument();
+    });
+  });
+
   describe('layout', () => {
     it('uses Card component', () => {
       render(
