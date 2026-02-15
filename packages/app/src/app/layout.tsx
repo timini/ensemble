@@ -5,6 +5,7 @@ import '~/lib/i18n'; // Initialize i18next
 
 import { useEffect, useState } from 'react';
 import { Geist } from 'next/font/google';
+import { usePathname } from 'next/navigation';
 import { useTranslation } from 'react-i18next';
 import { TRPCReactProvider } from '~/trpc/react';
 import { useStore } from '~/store';
@@ -27,6 +28,7 @@ export default function RootLayout({
   const { theme, language, setTheme, setLanguage } = useStore();
   const initializeEncryption = useStore((state) => state.initializeEncryption);
   const { i18n } = useTranslation();
+  const pathname = usePathname();
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [hasHydrated, setHasHydrated] = useState(false);
 
@@ -113,7 +115,7 @@ export default function RootLayout({
       </head>
       <body>
         <TRPCReactProvider>
-          <EnsembleHeader onSettingsClick={() => setSettingsOpen(true)} />
+          <EnsembleHeader onSettingsClick={() => setSettingsOpen(true)} currentPath={pathname} />
           {children}
           <Footer />
           <SettingsModal

@@ -5,3 +5,8 @@ export * from './lib/evaluators.js';
 export * from './lib/parsers.js';
 export * from './lib/modelSpecs.js';
 export * from './lib/report.js';
+export * from './lib/ensembleRunner.js';
+export * from './lib/benchmarkRunner.js';
+export * from './lib/selfConsistency.js';
+export * from './lib/analysis.js';
+export * from './lib/statistics.js';
