@@ -3,13 +3,34 @@ import { useTranslation } from 'react-i18next';
 import { Heading } from '../../atoms/Heading';
 
 export interface ConsensusPresetSelectorProps {
+  /** Number of currently selected models in the ensemble. */
   selectedModelCount: number;
+  /** Active consensus method. */
   consensusMethod: ConsensusMethod;
+  /** Optional Top N value used by ELO mode (defaults to 3). */
   topN?: number;
+  /** Called when the user selects a consensus method. */
   onConsensusMethodChange: (method: ConsensusMethod) => void;
+  /** Called when the user changes the Top N value in ELO mode. */
   onTopNChange?: (n: number) => void;
 }
 
+/**
+ * Selector for choosing the consensus preset used during response synthesis.
+ *
+ * Renders standard, ELO, and majority methods, and conditionally shows
+ * ELO-specific Top N controls when applicable.
+ *
+ * @example
+ * ```tsx
+ * <ConsensusPresetSelector
+ *   selectedModelCount={4}
+ *   consensusMethod="standard"
+ *   onConsensusMethodChange={setConsensusMethod}
+ *   onTopNChange={setTopN}
+ * />
+ * ```
+ */
 export function ConsensusPresetSelector({
   selectedModelCount,
   consensusMethod,
