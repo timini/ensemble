@@ -15,7 +15,7 @@ describe('ProgressSteps', () => {
 
   it('highlights the current step', () => {
     render(<ProgressSteps currentStep="prompt" />);
-    const promptStep = screen.getByTestId('workflow-step-prompt');
+    const promptStep = screen.getByTestId('progress-step-circle-prompt');
     expect(promptStep).toHaveClass('bg-primary');
   });
 
@@ -57,10 +57,10 @@ describe('ProgressSteps', () => {
   it('renders completed steps as clickable buttons when onStepClick is provided', () => {
     render(<ProgressSteps currentStep="prompt" onStepClick={() => {}} />);
 
-    expect(screen.getByTestId('progress-step-config').tagName).toBe('BUTTON');
-    expect(screen.getByTestId('progress-step-ensemble').tagName).toBe('BUTTON');
-    expect(screen.getByTestId('progress-step-prompt').tagName).toBe('DIV');
-    expect(screen.getByTestId('progress-step-review').tagName).toBe('DIV');
+    expect(screen.getByTestId('progress-step-container-config').tagName).toBe('BUTTON');
+    expect(screen.getByTestId('progress-step-container-ensemble').tagName).toBe('BUTTON');
+    expect(screen.getByTestId('progress-step-container-prompt').tagName).toBe('DIV');
+    expect(screen.getByTestId('progress-step-container-review').tagName).toBe('DIV');
   });
 
   it('calls onStepClick when clicking a completed step button', async () => {
@@ -69,16 +69,16 @@ describe('ProgressSteps', () => {
 
     render(<ProgressSteps currentStep="review" onStepClick={onStepClick} />);
 
-    await user.click(screen.getByTestId('progress-step-config'));
+    await user.click(screen.getByTestId('progress-step-container-config'));
     expect(onStepClick).toHaveBeenCalledWith('config');
   });
 
   it('does not render step buttons when onStepClick is not provided', () => {
     render(<ProgressSteps currentStep="review" />);
 
-    expect(screen.getByTestId('progress-step-config').tagName).toBe('DIV');
-    expect(screen.getByTestId('progress-step-ensemble').tagName).toBe('DIV');
-    expect(screen.getByTestId('progress-step-prompt').tagName).toBe('DIV');
+    expect(screen.getByTestId('progress-step-container-config').tagName).toBe('DIV');
+    expect(screen.getByTestId('progress-step-container-ensemble').tagName).toBe('DIV');
+    expect(screen.getByTestId('progress-step-container-prompt').tagName).toBe('DIV');
   });
 
   describe('snapshots', () => {

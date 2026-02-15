@@ -164,7 +164,7 @@ test.describe('Ensemble Page', () => {
 
   test('workflow navigator shows ensemble step as active', async ({ page }) => {
     // Check that ensemble step is active
-    await expect(page.getByTestId('workflow-step-ensemble')).toHaveAttribute(
+    await expect(page.getByTestId('progress-step-circle-ensemble')).toHaveAttribute(
       'data-active',
       'true'
     );

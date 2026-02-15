@@ -142,16 +142,16 @@ test.describe('Prompt Page', () => {
 
   test('workflow navigator shows prompt step as active', async ({ page }) => {
     // Check that prompt step is active in progress steps
-    const promptStep = page.getByTestId('progress-step-prompt');
+    const promptStep = page.getByTestId('progress-step-container-prompt');
     await expect(promptStep).toBeVisible();
     await expect(promptStep).toHaveAttribute('data-active', 'true');
   });
 
   test('completed progress steps are clickable and navigate to earlier pages', async ({ page }) => {
-    const configStep = page.getByTestId('progress-step-config');
-    const ensembleStep = page.getByTestId('progress-step-ensemble');
-    const promptStep = page.getByTestId('progress-step-prompt');
-    const reviewStep = page.getByTestId('progress-step-review');
+    const configStep = page.getByTestId('progress-step-container-config');
+    const ensembleStep = page.getByTestId('progress-step-container-ensemble');
+    const promptStep = page.getByTestId('progress-step-container-prompt');
+    const reviewStep = page.getByTestId('progress-step-container-review');
 
     await expect(configStep).toHaveAttribute('type', 'button');
     await expect(ensembleStep).toHaveAttribute('type', 'button');

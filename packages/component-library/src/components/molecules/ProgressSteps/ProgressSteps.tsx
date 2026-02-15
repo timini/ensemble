@@ -54,7 +54,7 @@ export function ProgressSteps({
 
           const circle = (
             <div
-              data-testid={`workflow-step-${step.id}`}
+              data-testid={`progress-step-circle-${step.id}`}
               data-active={isActive}
               data-completed={isCompleted}
               className={`w-12 h-12 rounded-full flex items-center justify-center font-semibold text-sm transition-colors${
@@ -79,7 +79,7 @@ export function ProgressSteps({
                 <button
                   type="button"
                   onClick={() => onStepClick?.(step.id)}
-                  data-testid={`progress-step-${step.id}`}
+                  data-testid={`progress-step-container-${step.id}`}
                   data-active={false}
                   data-completed={true}
                   aria-label={step.label}
@@ -89,7 +89,7 @@ export function ProgressSteps({
                 </button>
               ) : (
                 <div
-                  data-testid={`progress-step-${step.id}`}
+                  data-testid={`progress-step-container-${step.id}`}
                   data-active={isActive}
                   data-completed={isCompleted}
                 >
