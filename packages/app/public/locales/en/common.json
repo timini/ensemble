@@ -138,7 +138,8 @@
       "title": "Build Your Ensemble",
       "description": "Select at least 2 AI models to compare their responses",
       "selectionGuidanceTitle": "How model selection works",
-      "selectionGuidanceDescription": "Choose at least 2 models to continue, and mix providers for broader perspective."
+      "selectionGuidanceDescription": "Choose at least 2 models to continue, and mix providers for broader perspective.",
+      "selectionCounter": "{{count}} of {{max}} models selected"
     },
     "prompt": {
       "title": "Enter Your Prompt",
