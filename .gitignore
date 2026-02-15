@@ -29,6 +29,7 @@ dist/
 .idea/
 .vscode/
 *.log*
+packages/eval/datasets/
 
 # Debug
 npm-debug.log*
