@@ -53,7 +53,7 @@ test.describe('Review Page', () => {
     await expect(page).toHaveTitle(/Ensemble AI/i);
 
     // Check for page hero heading
-    await expect(page.locator('h1')).toBeVisible();
+    await expect(page.getByTestId('page-hero').locator('h1')).toBeVisible();
 
     // Check for workflow navigator
     await expect(page.getByTestId('workflow-navigator')).toBeVisible();
@@ -126,9 +126,22 @@ test.describe('Review Page', () => {
 
   test('workflow shows review step as active', async ({ page }) => {
     // Check that review step is shown in progress steps
-    const reviewStep = page.getByTestId('progress-step-review');
+    const reviewStep = page.getByTestId('progress-step-container-review');
     await expect(reviewStep).toBeVisible();
     await expect(reviewStep).toHaveAttribute('data-active', 'true');
+  });
+
+  test('completed progress steps are clickable and navigate to earlier pages', async ({ page }) => {
+    const configStep = page.getByTestId('progress-step-container-config');
+    const promptStep = page.getByTestId('progress-step-container-prompt');
+    const reviewStep = page.getByTestId('progress-step-container-review');
+
+    await expect(configStep).toHaveAttribute('type', 'button');
+    await expect(promptStep).toHaveAttribute('type', 'button');
+    await expect(reviewStep).not.toHaveAttribute('type', 'button');
+
+    await promptStep.click();
+    await expect(page).toHaveURL('/prompt');
   });
 
   test('displays progress steps component', async ({ page }) => {

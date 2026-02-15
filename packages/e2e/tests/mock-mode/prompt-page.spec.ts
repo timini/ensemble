@@ -50,7 +50,7 @@ test.describe('Prompt Page', () => {
     await expect(page).toHaveTitle(/Ensemble AI/i);
 
     // Check for page hero heading
-    await expect(page.locator('h1')).toBeVisible();
+    await expect(page.getByTestId('page-hero').locator('h1')).toBeVisible();
 
     // Check for workflow navigator
     await expect(page.getByTestId('workflow-navigator')).toBeVisible();
@@ -142,9 +142,24 @@ test.describe('Prompt Page', () => {
 
   test('workflow navigator shows prompt step as active', async ({ page }) => {
     // Check that prompt step is active in progress steps
-    const promptStep = page.getByTestId('progress-step-prompt');
+    const promptStep = page.getByTestId('progress-step-container-prompt');
     await expect(promptStep).toBeVisible();
     await expect(promptStep).toHaveAttribute('data-active', 'true');
+  });
+
+  test('completed progress steps are clickable and navigate to earlier pages', async ({ page }) => {
+    const configStep = page.getByTestId('progress-step-container-config');
+    const ensembleStep = page.getByTestId('progress-step-container-ensemble');
+    const promptStep = page.getByTestId('progress-step-container-prompt');
+    const reviewStep = page.getByTestId('progress-step-container-review');
+
+    await expect(configStep).toHaveAttribute('type', 'button');
+    await expect(ensembleStep).toHaveAttribute('type', 'button');
+    await expect(promptStep).not.toHaveAttribute('type', 'button');
+    await expect(reviewStep).not.toHaveAttribute('type', 'button');
+
+    await configStep.click();
+    await expect(page).toHaveURL('/config');
   });
 
   test('can change summarizer by clicking model badges', async ({ page }) => {

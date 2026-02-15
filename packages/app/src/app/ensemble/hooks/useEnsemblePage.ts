@@ -3,6 +3,7 @@ import { useRouter } from 'next/navigation';
 import { useTranslation } from 'react-i18next';
 import type { ConsensusMethod } from '@ensemble-ai/shared-utils/consensus/types';
 import { useStore } from '~/store';
+import { useStepNavigation } from '~/hooks/useStepNavigation';
 import type { ProviderType } from '~/store/slices/ensembleSlice';
 import type { OperatingMode } from '~/store/slices/modeSlice';
 import type { Provider, ValidationStatus } from '@/components/molecules/ApiKeyInput';
@@ -22,6 +23,7 @@ import { logger } from '~/lib/logger';
 export function useEnsemblePage() {
     const { t } = useTranslation('common');
     const router = useRouter();
+    const handleProgressStepClick = useStepNavigation();
 
     const mode = useStore((state) => state.mode);
     const apiKeys = useStore((state) => state.apiKeys);
@@ -249,6 +251,7 @@ export function useEnsemblePage() {
         clearSelection,
         handleContinue,
         handleBack,
+        handleProgressStepClick,
         isValid,
         handleConsensusMethodChange,
         handleTopNChange,

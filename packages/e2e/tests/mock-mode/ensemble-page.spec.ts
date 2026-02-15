@@ -37,7 +37,7 @@ test.describe('Ensemble Page', () => {
     await expect(page).toHaveTitle(/Ensemble AI/i);
 
     // Check for page hero heading
-    await expect(page.locator('h1')).toBeVisible();
+    await expect(page.getByTestId('page-hero').locator('h1')).toBeVisible();
     const guidance = page.getByTestId('ensemble-selection-guidance');
     await expect(guidance).toBeVisible();
     await expect(guidance.getByTestId('selection-guidance-title')).toBeVisible();
@@ -164,7 +164,7 @@ test.describe('Ensemble Page', () => {
 
   test('workflow navigator shows ensemble step as active', async ({ page }) => {
     // Check that ensemble step is active
-    await expect(page.getByTestId('workflow-step-ensemble')).toHaveAttribute(
+    await expect(page.getByTestId('progress-step-circle-ensemble')).toHaveAttribute(
       'data-active',
       'true'
     );

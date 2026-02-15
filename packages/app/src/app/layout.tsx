@@ -11,6 +11,7 @@ import { TRPCReactProvider } from '~/trpc/react';
 import { useStore } from '~/store';
 import { useSyncStepWithRoute } from '~/hooks/useSyncStepWithRoute';
 import { EnsembleHeader } from '@/components/molecules/EnsembleHeader';
+import { Footer } from '@/components/molecules/Footer';
 import { SettingsModal } from '@/components/organisms/SettingsModal';
 import type { Theme, Language } from '@/components/organisms/SettingsModal';
 import { initializeProviders } from '~/providers';
@@ -122,6 +123,7 @@ export default function RootLayout({
           </a>
           <EnsembleHeader onSettingsClick={() => setSettingsOpen(true)} currentPath={pathname} />
           <main id="main-content">{children}</main>
+          <Footer />
           <SettingsModal
             open={settingsOpen}
             onOpenChange={setSettingsOpen}

@@ -13,13 +13,13 @@ exports[`ProgressSteps Snapshots > matches snapshot for config step 1`] = `
       <div
         data-active="true"
         data-completed="false"
-        data-testid="progress-step-config"
+        data-testid="progress-step-container-config"
       >
         <div
           class="w-12 h-12 rounded-full flex items-center justify-center font-semibold text-sm transition-colors bg-primary text-primary-foreground"
           data-active="true"
           data-completed="false"
-          data-testid="workflow-step-config"
+          data-testid="progress-step-circle-config"
         >
           1
         </div>
@@ -34,13 +34,13 @@ exports[`ProgressSteps Snapshots > matches snapshot for config step 1`] = `
       <div
         data-active="false"
         data-completed="false"
-        data-testid="progress-step-ensemble"
+        data-testid="progress-step-container-ensemble"
       >
         <div
           class="w-12 h-12 rounded-full flex items-center justify-center font-semibold text-sm transition-colors bg-muted text-muted-foreground"
           data-active="false"
           data-completed="false"
-          data-testid="workflow-step-ensemble"
+          data-testid="progress-step-circle-ensemble"
         >
           2
         </div>
@@ -55,13 +55,13 @@ exports[`ProgressSteps Snapshots > matches snapshot for config step 1`] = `
       <div
         data-active="false"
         data-completed="false"
-        data-testid="progress-step-prompt"
+        data-testid="progress-step-container-prompt"
       >
         <div
           class="w-12 h-12 rounded-full flex items-center justify-center font-semibold text-sm transition-colors bg-muted text-muted-foreground"
           data-active="false"
           data-completed="false"
-          data-testid="workflow-step-prompt"
+          data-testid="progress-step-circle-prompt"
         >
           3
         </div>
@@ -76,13 +76,13 @@ exports[`ProgressSteps Snapshots > matches snapshot for config step 1`] = `
       <div
         data-active="false"
         data-completed="false"
-        data-testid="progress-step-review"
+        data-testid="progress-step-container-review"
       >
         <div
           class="w-12 h-12 rounded-full flex items-center justify-center font-semibold text-sm transition-colors bg-muted text-muted-foreground"
           data-active="false"
           data-completed="false"
-          data-testid="workflow-step-review"
+          data-testid="progress-step-circle-review"
         >
           4
         </div>
@@ -154,13 +154,13 @@ exports[`ProgressSteps Snapshots > matches snapshot for ensemble step 1`] = `
       <div
         data-active="false"
         data-completed="true"
-        data-testid="progress-step-config"
+        data-testid="progress-step-container-config"
       >
         <div
           class="w-12 h-12 rounded-full flex items-center justify-center font-semibold text-sm transition-colors bg-success text-success-foreground"
           data-active="false"
           data-completed="true"
-          data-testid="workflow-step-config"
+          data-testid="progress-step-circle-config"
         >
           <svg
             class="lucide lucide-check w-4 h-4"
@@ -191,13 +191,13 @@ exports[`ProgressSteps Snapshots > matches snapshot for ensemble step 1`] = `
       <div
         data-active="true"
         data-completed="false"
-        data-testid="progress-step-ensemble"
+        data-testid="progress-step-container-ensemble"
       >
         <div
           class="w-12 h-12 rounded-full flex items-center justify-center font-semibold text-sm transition-colors bg-primary text-primary-foreground"
           data-active="true"
           data-completed="false"
-          data-testid="workflow-step-ensemble"
+          data-testid="progress-step-circle-ensemble"
         >
           2
         </div>
@@ -212,13 +212,13 @@ exports[`ProgressSteps Snapshots > matches snapshot for ensemble step 1`] = `
       <div
         data-active="false"
         data-completed="false"
-        data-testid="progress-step-prompt"
+        data-testid="progress-step-container-prompt"
       >
         <div
           class="w-12 h-12 rounded-full flex items-center justify-center font-semibold text-sm transition-colors bg-muted text-muted-foreground"
           data-active="false"
           data-completed="false"
-          data-testid="workflow-step-prompt"
+          data-testid="progress-step-circle-prompt"
         >
           3
         </div>
@@ -233,13 +233,13 @@ exports[`ProgressSteps Snapshots > matches snapshot for ensemble step 1`] = `
       <div
         data-active="false"
         data-completed="false"
-        data-testid="progress-step-review"
+        data-testid="progress-step-container-review"
       >
         <div
           class="w-12 h-12 rounded-full flex items-center justify-center font-semibold text-sm transition-colors bg-muted text-muted-foreground"
           data-active="false"
           data-completed="false"
-          data-testid="workflow-step-review"
+          data-testid="progress-step-circle-review"
         >
           4
         </div>
@@ -311,13 +311,13 @@ exports[`ProgressSteps Snapshots > matches snapshot for prompt step 1`] = `
       <div
         data-active="false"
         data-completed="true"
-        data-testid="progress-step-config"
+        data-testid="progress-step-container-config"
       >
         <div
           class="w-12 h-12 rounded-full flex items-center justify-center font-semibold text-sm transition-colors bg-success text-success-foreground"
           data-active="false"
           data-completed="true"
-          data-testid="workflow-step-config"
+          data-testid="progress-step-circle-config"
         >
           <svg
             class="lucide lucide-check w-4 h-4"
@@ -348,13 +348,13 @@ exports[`ProgressSteps Snapshots > matches snapshot for prompt step 1`] = `
       <div
         data-active="false"
         data-completed="true"
-        data-testid="progress-step-ensemble"
+        data-testid="progress-step-container-ensemble"
       >
         <div
           class="w-12 h-12 rounded-full flex items-center justify-center font-semibold text-sm transition-colors bg-success text-success-foreground"
           data-active="false"
           data-completed="true"
-          data-testid="workflow-step-ensemble"
+          data-testid="progress-step-circle-ensemble"
         >
           <svg
             class="lucide lucide-check w-4 h-4"
@@ -385,13 +385,13 @@ exports[`ProgressSteps Snapshots > matches snapshot for prompt step 1`] = `
       <div
         data-active="true"
         data-completed="false"
-        data-testid="progress-step-prompt"
+        data-testid="progress-step-container-prompt"
       >
         <div
           class="w-12 h-12 rounded-full flex items-center justify-center font-semibold text-sm transition-colors bg-primary text-primary-foreground"
           data-active="true"
           data-completed="false"
-          data-testid="workflow-step-prompt"
+          data-testid="progress-step-circle-prompt"
         >
           3
         </div>
@@ -406,13 +406,13 @@ exports[`ProgressSteps Snapshots > matches snapshot for prompt step 1`] = `
       <div
         data-active="false"
         data-completed="false"
-        data-testid="progress-step-review"
+        data-testid="progress-step-container-review"
       >
         <div
           class="w-12 h-12 rounded-full flex items-center justify-center font-semibold text-sm transition-colors bg-muted text-muted-foreground"
           data-active="false"
           data-completed="false"
-          data-testid="workflow-step-review"
+          data-testid="progress-step-circle-review"
         >
           4
         </div>
@@ -484,13 +484,13 @@ exports[`ProgressSteps Snapshots > matches snapshot for review step 1`] = `
       <div
         data-active="false"
         data-completed="true"
-        data-testid="progress-step-config"
+        data-testid="progress-step-container-config"
       >
         <div
           class="w-12 h-12 rounded-full flex items-center justify-center font-semibold text-sm transition-colors bg-success text-success-foreground"
           data-active="false"
           data-completed="true"
-          data-testid="workflow-step-config"
+          data-testid="progress-step-circle-config"
         >
           <svg
             class="lucide lucide-check w-4 h-4"
@@ -521,13 +521,13 @@ exports[`ProgressSteps Snapshots > matches snapshot for review step 1`] = `
       <div
         data-active="false"
         data-completed="true"
-        data-testid="progress-step-ensemble"
+        data-testid="progress-step-container-ensemble"
       >
         <div
           class="w-12 h-12 rounded-full flex items-center justify-center font-semibold text-sm transition-colors bg-success text-success-foreground"
           data-active="false"
           data-completed="true"
-          data-testid="workflow-step-ensemble"
+          data-testid="progress-step-circle-ensemble"
         >
           <svg
             class="lucide lucide-check w-4 h-4"
@@ -558,13 +558,13 @@ exports[`ProgressSteps Snapshots > matches snapshot for review step 1`] = `
       <div
         data-active="false"
         data-completed="true"
-        data-testid="progress-step-prompt"
+        data-testid="progress-step-container-prompt"
       >
         <div
           class="w-12 h-12 rounded-full flex items-center justify-center font-semibold text-sm transition-colors bg-success text-success-foreground"
           data-active="false"
           data-completed="true"
-          data-testid="workflow-step-prompt"
+          data-testid="progress-step-circle-prompt"
         >
           <svg
             class="lucide lucide-check w-4 h-4"
@@ -595,13 +595,13 @@ exports[`ProgressSteps Snapshots > matches snapshot for review step 1`] = `
       <div
         data-active="true"
         data-completed="false"
-        data-testid="progress-step-review"
+        data-testid="progress-step-container-review"
       >
         <div
           class="w-12 h-12 rounded-full flex items-center justify-center font-semibold text-sm transition-colors bg-primary text-primary-foreground"
           data-active="true"
           data-completed="false"
-          data-testid="workflow-step-review"
+          data-testid="progress-step-circle-review"
         >
           4
         </div>

@@ -11,6 +11,7 @@ import { useRouter } from "next/navigation";
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { useHasHydrated } from "~/hooks/useHasHydrated";
+import { useStepNavigation } from "~/hooks/useStepNavigation";
 import { FALLBACK_MODELS } from "~/lib/models";
 import { formatModelLabelFromId } from "~/lib/providerModels";
 import { PageHero } from "@/components/organisms/PageHero";
@@ -36,6 +37,7 @@ export default function ReviewPage() {
   const { t } = useTranslation();
   const router = useRouter();
   const hasHydrated = useHasHydrated();
+  const handleProgressStepClick = useStepNavigation();
 
   const {
     prompt,
@@ -126,7 +128,11 @@ export default function ReviewPage() {
 
   return (
     <div className="container mx-auto max-w-6xl px-4 py-8">
-      <ProgressSteps currentStep="review" fallbackStep="review" />
+      <ProgressSteps
+        currentStep="review"
+        fallbackStep="review"
+        onStepClick={handleProgressStepClick}
+      />
 
       <PageHero
         title={t("pages.review.title")}

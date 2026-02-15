@@ -3,6 +3,7 @@ import { useRouter } from 'next/navigation';
 import { useTranslation } from 'react-i18next';
 import { useStore } from '~/store';
 import { useHasHydrated } from '~/hooks/useHasHydrated';
+import { useStepNavigation } from '~/hooks/useStepNavigation';
 import type { OperatingMode } from '~/store/slices/modeSlice';
 import type { Provider, ValidationStatus } from '@/components/molecules/ApiKeyInput';
 import { validateApiKey, createDebouncedValidator } from '~/lib/validation';
@@ -16,6 +17,7 @@ const PROVIDERS: Provider[] = ['openai', 'anthropic', 'google', 'xai'];
 export function useConfigPage() {
     const { t } = useTranslation('common');
     const router = useRouter();
+    const handleProgressStepClick = useStepNavigation();
 
     const mode = useStore((state) => state.mode);
     const setMode = useStore((state) => state.setMode);
@@ -241,6 +243,7 @@ export function useConfigPage() {
         handleKeyChange,
         handleToggleShow,
         handleContinue,
+        handleProgressStepClick,
         allowContinue,
     };
 }

@@ -72,7 +72,7 @@ export const PageHero = React.forwardRef<HTMLDivElement, PageHeroProps>(
 
         {/* Hero Section */}
         <div className="text-center mb-8">
-          <Heading level={2} size="3xl" className="text-foreground mb-4">{title}</Heading>
+          <Heading level={1} size="3xl" className="text-foreground mb-4">{title}</Heading>
           <Text color="muted">{description}</Text>
         </div>
       </div>

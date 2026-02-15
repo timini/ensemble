@@ -152,6 +152,11 @@
       "newComparisonButton": "Nouvelle comparaison",
       "defaultSummarizerLabel": "Modèle d'IA"
     },
+    "notFound": {
+      "title": "Page introuvable",
+      "description": "La page que vous recherchez n'existe pas ou a été déplacée. Revenez au début pour configurer votre ensemble IA.",
+      "exploreFeatures": "Explorer les fonctionnalités"
+    },
     "about": {
       "title": "À propos d'Ensemble AI",
       "description": "La science derrière de meilleures décisions avec les ensembles d'IA",
