@@ -4,9 +4,11 @@ import { useTranslation } from 'react-i18next';
 export interface EnsembleHeaderProps {
   /** Callback when settings icon is clicked */
   onSettingsClick?: () => void;
+  /** Current page path for active link highlighting (e.g. '/features') */
+  currentPath?: string;
 }
 
-export function EnsembleHeader({ onSettingsClick }: EnsembleHeaderProps) {
+export function EnsembleHeader({ onSettingsClick, currentPath }: EnsembleHeaderProps) {
   const { t, i18n, ready } = useTranslation();
 
   const isReady = ready || i18n.isInitialized;
@@ -29,13 +31,15 @@ export function EnsembleHeader({ onSettingsClick }: EnsembleHeaderProps) {
           <div className="flex items-center gap-4">
             <a
               href="/features"
-              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+              className={`text-sm transition-colors ${currentPath === '/features' ? 'text-foreground font-semibold' : 'text-muted-foreground hover:text-foreground'}`}
+              {...(currentPath === '/features' ? { 'aria-current': 'page' as const } : {})}
             >
               {featuresLabel}
             </a>
             <a
               href="/about"
-              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+              className={`text-sm transition-colors ${currentPath === '/about' ? 'text-foreground font-semibold' : 'text-muted-foreground hover:text-foreground'}`}
+              {...(currentPath === '/about' ? { 'aria-current': 'page' as const } : {})}
             >
               {aboutLabel}
             </a>

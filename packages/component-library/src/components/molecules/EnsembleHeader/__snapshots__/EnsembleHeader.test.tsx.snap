@@ -29,13 +29,13 @@ exports[`EnsembleHeader > snapshots > matches snapshot for default render 1`] = 
         class="flex items-center gap-4"
       >
         <a
-          class="text-sm text-muted-foreground hover:text-foreground transition-colors"
+          class="text-sm transition-colors text-muted-foreground hover:text-foreground"
           href="/features"
         >
           Features
         </a>
         <a
-          class="text-sm text-muted-foreground hover:text-foreground transition-colors"
+          class="text-sm transition-colors text-muted-foreground hover:text-foreground"
           href="/about"
         >
           About
