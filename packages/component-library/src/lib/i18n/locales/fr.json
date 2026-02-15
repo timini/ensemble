@@ -6,6 +6,12 @@
       "about": "À propos",
       "features": "Fonctionnalités"
     },
+    "footer": {
+      "getStarted": "Commencer",
+      "features": "Fonctionnalités",
+      "about": "À propos",
+      "copyright": "\u00a9 {{year}} IA Ensemble"
+    },
     "steps": {
       "config": "Config",
       "ensemble": "Ensemble",
