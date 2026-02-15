@@ -9,6 +9,7 @@ import { createCachePath, normalizeSample } from './benchmarkDatasetShared.js';
 const HUGGING_FACE_ROWS_ENDPOINT = 'https://datasets-server.huggingface.co/rows';
 const PAGE_SIZE = 100;
 const MAX_ROWS = 5000;
+const FETCH_TIMEOUT_MS = 15_000;
 
 interface HuggingFaceRowsResponse<TRow> {
   rows: Array<{ row_idx: number; row: TRow }>;
@@ -38,7 +39,9 @@ async function fetchRowsPage<TRow>(
   url.searchParams.set('offset', String(offset));
   url.searchParams.set('length', String(PAGE_SIZE));
 
-  const response = await fetch(url);
+  const response = await fetch(url, {
+    signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
+  });
   if (!response.ok) {
     const body = await response.text();
     throw new Error(
@@ -115,17 +118,24 @@ export class HuggingFaceBenchmarkLoader<TRow> implements BenchmarkLoader {
     const errors: string[] = [];
 
     for (const source of this.sources) {
+      let rows: Array<{ row_idx: number; row: TRow }>;
       try {
-        const rows = await fetchAllRows<TRow>(source);
-        const questions = rows.map((entry) => this.mapRow(entry.row, entry.row_idx));
-        if (questions.length === 0) {
-          throw new Error('Dataset returned no rows');
-        }
-        return questions;
+        rows = await fetchAllRows<TRow>(source);
       } catch (error) {
         const message = error instanceof Error ? error.message : String(error);
         errors.push(message);
+        continue;
       }
+
+      // Mapping failures indicate malformed rows or parser bugs and should fail fast.
+      const questions = rows.map((entry) => this.mapRow(entry.row, entry.row_idx));
+      if (questions.length === 0) {
+        errors.push(
+          `Dataset ${source.dataset}/${source.config}/${source.split} returned no rows`,
+        );
+        continue;
+      }
+      return questions;
     }
 
     throw new Error(

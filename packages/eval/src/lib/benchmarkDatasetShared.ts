@@ -30,6 +30,10 @@ export function normalizeSample(sample: number | undefined, total: number): numb
 }
 
 export function toChoiceLetter(index: number): string {
+  if (!Number.isInteger(index) || index < 0 || index >= 26) {
+    throw new Error(`Choice index out of range: ${index}`);
+  }
+
   const letterCode = 'A'.charCodeAt(0) + index;
   return String.fromCharCode(letterCode);
 }

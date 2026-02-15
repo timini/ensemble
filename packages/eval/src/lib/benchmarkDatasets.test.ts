@@ -6,6 +6,7 @@ import {
   loadBenchmarkQuestions,
   resolveBenchmarkDatasetName,
 } from './benchmarkDatasets.js';
+import { toChoiceLetter } from './benchmarkDatasetShared.js';
 
 function jsonResponse(data: unknown): Response {
   return new Response(JSON.stringify(data), {
@@ -65,6 +66,9 @@ describe('benchmark dataset loaders', () => {
     const second = await loadBenchmarkQuestions('gsm8k', { sample: 1 });
     expect(second.questions).toHaveLength(1);
     expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(fetchMock.mock.calls[0][1]).toMatchObject({
+      signal: expect.any(AbortSignal),
+    });
   });
 
   it('maps TruthfulQA MCQ rows into letter-labeled prompts', async () => {
@@ -129,6 +133,42 @@ describe('benchmark dataset loaders', () => {
     );
   });
 
+  it('surfaces GPQA mapping errors instead of silently falling back', async () => {
+    fetchMock.mockResolvedValueOnce(
+      jsonResponse({
+        rows: [
+          {
+            row_idx: 0,
+            row: {
+              problem: 'Question text\n(A) A\n(B) B\n(C) C\n(D) D',
+              solution: 'No valid option marker',
+            },
+          },
+        ],
+        num_rows_total: 1,
+      }),
+    );
+    fetchMock.mockResolvedValueOnce(
+      jsonResponse({
+        rows: [
+          {
+            row_idx: 2,
+            row: {
+              problem: 'Question text\n(A) A\n(B) B\n(C) C\n(D) D',
+              solution: '\\boxed{C}',
+            },
+          },
+        ],
+        num_rows_total: 1,
+      }),
+    );
+
+    await expect(loadBenchmarkQuestions('gpqa', { sample: 1 })).rejects.toThrow(
+      'Failed to parse GPQA answer at row 0',
+    );
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
   it('loads local dataset files when alias is not provided', async () => {
     const localPath = join(datasetsDir, 'local.json');
     await writeFile(
@@ -152,5 +192,12 @@ describe('benchmark dataset loaders', () => {
     expect(resolveBenchmarkDatasetName('truthful_qa')).toBe('truthfulqa');
     expect(resolveBenchmarkDatasetName('gpqa-diamond')).toBe('gpqa');
     expect(resolveBenchmarkDatasetName('custom-dataset')).toBeNull();
+  });
+
+  it('converts supported choice indexes and rejects out-of-range values', () => {
+    expect(toChoiceLetter(0)).toBe('A');
+    expect(toChoiceLetter(25)).toBe('Z');
+    expect(() => toChoiceLetter(26)).toThrow('Choice index out of range: 26');
+    expect(() => toChoiceLetter(-1)).toThrow('Choice index out of range: -1');
   });
 });

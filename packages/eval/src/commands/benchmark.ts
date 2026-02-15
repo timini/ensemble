@@ -90,6 +90,11 @@ export function createBenchmarkCommand(): Command {
         output = parsed;
       }
 
+      const completedQuestionIds = new Set(
+        output.runs
+          .map((run) => run.questionId)
+          .filter((questionId): questionId is string => Boolean(questionId)),
+      );
       const completedPrompts = new Set(output.runs.map((run) => run.prompt));
       const registry = new ProviderRegistry();
       registerProviders(
@@ -103,7 +108,7 @@ export function createBenchmarkCommand(): Command {
 
       for (const question of questions) {
         const prompt = question.prompt;
-        if (completedPrompts.has(prompt)) {
+        if (completedQuestionIds.has(question.id) || completedPrompts.has(prompt)) {
           continue;
         }
 
@@ -146,6 +151,8 @@ export function createBenchmarkCommand(): Command {
           evaluation,
         };
         output.runs.push(run);
+        completedQuestionIds.add(question.id);
+        completedPrompts.add(prompt);
         output.updatedAt = new Date().toISOString();
         await writeJsonFile(options.output, output);
       }

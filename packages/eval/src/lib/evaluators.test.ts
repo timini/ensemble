@@ -15,6 +15,12 @@ describe('extractNumericAnswer', () => {
   it('falls back to the final numeric token', () => {
     expect(extractNumericAnswer('First 7, then 10, final 42')).toBe('42');
   });
+
+  it('ignores trailing confidence percentages in responses', () => {
+    expect(
+      extractNumericAnswer("Step by step: 5 + 3 = 8. I'm 95% confident."),
+    ).toBe('8');
+  });
 });
 
 describe('extractChoiceLetter', () => {
@@ -24,6 +30,14 @@ describe('extractChoiceLetter', () => {
 
   it('extracts labeled answers', () => {
     expect(extractChoiceLetter('Answer: b')).toBe('B');
+  });
+
+  it('avoids single-letter false positives in free-form text', () => {
+    expect(extractChoiceLetter('I think the answer is clearly correct.')).toBeNull();
+  });
+
+  it('extracts selected choices from natural phrasing', () => {
+    expect(extractChoiceLetter('I choose option d.')).toBe('D');
   });
 });
 
