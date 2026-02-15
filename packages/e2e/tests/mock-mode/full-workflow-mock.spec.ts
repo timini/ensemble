@@ -225,7 +225,8 @@ test.describe('Full Workflow - Mock Mode', () => {
       await expect(startOverButton).toBeVisible({ timeout: 10000 });
       await expect(startOverButton).toBeEnabled({ timeout: 10000 });
       await startOverButton.click({ timeout: 5000 }).catch(async () => {
-        // Fallback for CI layout-shift races: fire click directly without actionability checks.
+        // Fallback for CI layout-shift/overlay races: bypass Playwright's actionability checks
+        // and trigger the DOM click event directly.
         await startOverButton.evaluate((button: HTMLButtonElement) => button.click());
       });
 
