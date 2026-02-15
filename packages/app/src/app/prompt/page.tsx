@@ -149,7 +149,7 @@ export default function PromptPage() {
   const modelNames = selectedModelIds;
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-4xl">
+    <div className="container mx-auto px-4 py-8 max-w-6xl">
       <ProgressSteps currentStep={currentStep} fallbackStep="prompt" />
 
       <PageHero
@@ -158,7 +158,16 @@ export default function PromptPage() {
       />
 
       <div className="mt-8 space-y-8">
-        {/* Ensemble Configuration Summary */}
+        {/* Prompt Input (primary action — immediately visible) */}
+        <PromptInputWithHint
+          value={localPrompt}
+          onChange={handlePromptChange}
+        />
+
+        {/* Tips for better prompts */}
+        <PromptTips />
+
+        {/* Ensemble Configuration Summary (secondary info) */}
         {selectedModelIds.length > 0 && (
           <EnsembleConfigurationSummary
             selectedModels={modelNames}
@@ -192,15 +201,6 @@ export default function PromptPage() {
             </div>
           </div>
         )}
-
-        {/* Prompt Input */}
-        <PromptInputWithHint
-          value={localPrompt}
-          onChange={handlePromptChange}
-        />
-
-        {/* Tips for better prompts */}
-        <PromptTips />
       </div>
 
       <div className="mt-12">
