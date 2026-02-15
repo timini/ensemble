@@ -47,53 +47,55 @@ export function ProgressSteps({
     <div className="progress-steps flex flex-col items-center mb-12">
       {/* Circles and connectors row */}
       <div className="flex items-center">
-        {steps.map((step, index) => (
-          <div key={step.id} className="flex items-center">
-            {index < currentIndex && onStepClick ? (
-              <button
-                type="button"
-                onClick={() => onStepClick(step.id)}
-                data-testid={`progress-step-${step.id}`}
-                data-active={index === currentIndex}
-                data-completed={index < currentIndex}
-                aria-label={step.label}
-                className="rounded-full focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
-              >
-                <div
-                  data-testid={`workflow-step-${step.id}`}
-                  data-active={index === currentIndex}
-                  data-completed={index < currentIndex}
-                  className="w-12 h-12 rounded-full flex items-center justify-center font-semibold text-sm transition-colors bg-success text-success-foreground cursor-pointer hover:brightness-95"
+        {steps.map((step, index) => {
+          const isCompleted = index < currentIndex;
+          const isActive = index === currentIndex;
+          const isClickable = Boolean(onStepClick && isCompleted);
+
+          const circle = (
+            <div
+              data-testid={`workflow-step-${step.id}`}
+              data-active={isActive}
+              data-completed={isCompleted}
+              className={`w-12 h-12 rounded-full flex items-center justify-center font-semibold text-sm transition-colors${
+                isCompleted
+                  ? ' bg-success text-success-foreground'
+                  : isActive
+                    ? ' bg-primary text-primary-foreground'
+                    : ' bg-muted text-muted-foreground'
+              }${isClickable ? ' cursor-pointer hover:brightness-95' : ''}`}
+            >
+              {isCompleted ? (
+                <Check className="w-4 h-4" role="img" />
+              ) : (
+                step.number
+              )}
+            </div>
+          );
+
+          return (
+            <div key={step.id} className="flex items-center">
+              {isClickable ? (
+                <button
+                  type="button"
+                  onClick={() => onStepClick?.(step.id)}
+                  data-testid={`progress-step-${step.id}`}
+                  data-active={false}
+                  data-completed={true}
+                  aria-label={step.label}
+                  className="rounded-full focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
                 >
-                  <Check className="w-4 h-4" role="img" />
-                </div>
-              </button>
-            ) : (
-              <div
-                data-testid={`progress-step-${step.id}`}
-                data-active={index === currentIndex}
-                data-completed={index < currentIndex}
-              >
+                  {circle}
+                </button>
+              ) : (
                 <div
-                  data-testid={`workflow-step-${step.id}`}
-                  data-active={index === currentIndex}
-                  data-completed={index < currentIndex}
-                  className={`w-12 h-12 rounded-full flex items-center justify-center font-semibold text-sm transition-colors ${
-                    index < currentIndex
-                      ? 'bg-success text-success-foreground'
-                      : index === currentIndex
-                        ? 'bg-primary text-primary-foreground'
-                        : 'bg-muted text-muted-foreground'
-                  }`}
+                  data-testid={`progress-step-${step.id}`}
+                  data-active={isActive}
+                  data-completed={isCompleted}
                 >
-                  {index < currentIndex ? (
-                    <Check className="w-4 h-4" role="img" />
-                  ) : (
-                    step.number
-                  )}
+                  {circle}
                 </div>
-              </div>
-            )}
+              )}
             {index < steps.length - 1 && (
               <div
                 className={`w-16 h-0.5 mx-4 transition-colors ${
@@ -101,8 +103,9 @@ export function ProgressSteps({
                 }`}
               />
             )}
-          </div>
-        ))}
+            </div>
+          );
+        })}
       </div>
       {/* Labels row */}
       <div className="flex items-start mt-2">

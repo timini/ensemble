@@ -25,13 +25,7 @@ import {
 } from '@ensemble-ai/shared-utils/providers';
 import { FALLBACK_MODELS } from '~/lib/models';
 import { toError } from '~/lib/errors';
-
-const STEP_ROUTES: Record<Step, string> = {
-  config: '/config',
-  ensemble: '/ensemble',
-  prompt: '/prompt',
-  review: '/review',
-};
+import { STEP_ROUTES } from '~/lib/workflowRoutes';
 
 export default function PromptPage() {
   const { t } = useTranslation();

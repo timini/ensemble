@@ -10,6 +10,7 @@ import type { Step } from '@/components/molecules/ProgressSteps';
 import { validateApiKey, createDebouncedValidator } from '~/lib/validation';
 import { getHydratedStatus, createProviderStatusLabels } from '~/lib/providerStatus';
 import { useHasHydrated } from '~/hooks/useHasHydrated';
+import { STEP_ROUTES } from '~/lib/workflowRoutes';
 import { useManualResponseModal } from './useManualResponseModal';
 import { useApiKeyModal } from './useApiKeyModal';
 import { useAvailableModels } from './useAvailableModels';
@@ -19,13 +20,6 @@ import {
     DEFAULT_ENSEMBLE_NAME,
 } from '../page.constants';
 import { logger } from '~/lib/logger';
-
-const STEP_ROUTES: Record<Step, string> = {
-    config: '/config',
-    ensemble: '/ensemble',
-    prompt: '/prompt',
-    review: '/review',
-};
 
 export function useEnsemblePage() {
     const { t } = useTranslation('common');

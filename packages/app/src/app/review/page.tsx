@@ -29,13 +29,7 @@ import { useStreamingResponses } from "./hooks/useStreamingResponses";
 import { useConsensusGeneration } from "./hooks/useConsensusGeneration";
 import { useConsensusStatus } from "./hooks/useConsensusStatus";
 import { useConsensusTrigger } from "./hooks/useConsensusTrigger";
-
-const STEP_ROUTES: Record<Step, string> = {
-  config: "/config",
-  ensemble: "/ensemble",
-  prompt: "/prompt",
-  review: "/review",
-};
+import { STEP_ROUTES } from "~/lib/workflowRoutes";
 
 export default function ReviewPage() {
   const { t } = useTranslation();

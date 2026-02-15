@@ -7,19 +7,13 @@ import type { OperatingMode } from '~/store/slices/modeSlice';
 import type { Provider, ValidationStatus } from '@/components/molecules/ApiKeyInput';
 import type { Step } from '@/components/molecules/ProgressSteps';
 import { validateApiKey, createDebouncedValidator } from '~/lib/validation';
+import { STEP_ROUTES } from '~/lib/workflowRoutes';
 import { isWebCryptoAvailable } from '@ensemble-ai/shared-utils/security';
 import { toError } from '~/lib/errors';
 import { getHydratedStatus } from '~/lib/providerStatus';
 import { logger } from '~/lib/logger';
 
 const PROVIDERS: Provider[] = ['openai', 'anthropic', 'google', 'xai'];
-const STEP_ROUTES: Record<Step, string> = {
-    config: '/config',
-    ensemble: '/ensemble',
-    prompt: '/prompt',
-    review: '/review',
-};
-
 export function useConfigPage() {
     const { t } = useTranslation('common');
     const router = useRouter();
