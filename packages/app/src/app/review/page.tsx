@@ -30,6 +30,7 @@ import { useStreamingResponses } from "./hooks/useStreamingResponses";
 import { useConsensusGeneration } from "./hooks/useConsensusGeneration";
 import { useConsensusStatus } from "./hooks/useConsensusStatus";
 import { useConsensusTrigger } from "./hooks/useConsensusTrigger";
+import { ResponseCardSkeleton } from "./_components/ResponseCardSkeleton";
 
 const MAX_EXPANDED_CARDS = 3;
 
@@ -124,6 +125,12 @@ export default function ReviewPage() {
     router.push("/config");
   };
 
+  const pendingModels = useMemo(() => {
+    if (!hasHydrated) return [];
+    const respondedIds = new Set(viewResponses.map((r) => r.modelId));
+    return selectedModels.filter((m) => !respondedIds.has(m.id));
+  }, [hasHydrated, selectedModels, viewResponses]);
+
   const displayPrompt = hasHydrated ? (prompt ?? "") : "";
 
   return (
@@ -175,7 +182,9 @@ export default function ReviewPage() {
           {t("pages.review.responsesHeading")}
         </h3>
 
-        {viewResponses.length === 0 && viewManualResponses.length === 0 ? (
+        {viewResponses.length === 0 &&
+        pendingModels.length === 0 &&
+        viewManualResponses.length === 0 ? (
           <div className="rounded-lg bg-muted p-8 text-center">
             <p className="text-muted-foreground">
               {t("pages.review.noResponses")}
@@ -207,6 +216,14 @@ export default function ReviewPage() {
                 tokenCount={response.tokenCount ?? undefined}
                 onRetry={() => retryModel(response.modelId)}
                 defaultExpanded={index < MAX_EXPANDED_CARDS}
+              />
+            ))}
+            {pendingModels.map((model) => (
+              <ResponseCardSkeleton
+                key={model.id}
+                modelName={formatModelLabelFromId(model.model)}
+                provider={model.provider}
+                testId={`response-skeleton-${model.id}`}
               />
             ))}
             {viewManualResponses.map((manual) => (
