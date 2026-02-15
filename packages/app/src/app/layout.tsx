@@ -27,7 +27,7 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   const { theme, language, setTheme, setLanguage } = useStore();
   const initializeEncryption = useStore((state) => state.initializeEncryption);
-  const { i18n } = useTranslation();
+  const { i18n, t } = useTranslation('common');
   const pathname = usePathname();
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [hasHydrated, setHasHydrated] = useState(false);
@@ -115,8 +115,16 @@ export default function RootLayout({
       </head>
       <body>
         <TRPCReactProvider>
+          <a
+            href="#main-content"
+            className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-md focus:bg-primary focus:px-4 focus:py-2 focus:text-primary-foreground focus:ring-2 focus:ring-ring focus:ring-offset-2"
+          >
+            {t('accessibility.skipToMainContent')}
+          </a>
           <EnsembleHeader onSettingsClick={() => setSettingsOpen(true)} currentPath={pathname} />
-          {children}
+          <main id="main-content">
+            {children}
+          </main>
           <Footer />
           <SettingsModal
             open={settingsOpen}
