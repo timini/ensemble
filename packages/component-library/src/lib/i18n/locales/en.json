@@ -6,6 +6,13 @@
       "about": "About",
       "features": "Features"
     },
+    "footer": {
+      "getStarted": "Get Started",
+      "features": "Features",
+      "about": "About",
+      "github": "GitHub",
+      "copyright": "\u00a9 {{year}} Ensemble AI"
+    },
     "steps": {
       "config": "Config",
       "ensemble": "Ensemble",

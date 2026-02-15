@@ -67,6 +67,7 @@ export { PromptInput, type PromptInputProps } from './components/molecules/Promp
 export { ResponseCard, type ResponseCardProps, type ResponseStatus, type ResponseType } from './components/molecules/ResponseCard';
 export { ModeSelectionCard, type ModeSelectionCardProps, type Mode } from './components/molecules/ModeSelectionCard';
 export { EnsembleHeader } from './components/molecules/EnsembleHeader';
+export { Footer, type FooterProps } from './components/molecules/Footer';
 export {
   ConsensusPresetSelector,
   type ConsensusPresetSelectorProps,

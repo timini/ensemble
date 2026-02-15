@@ -110,7 +110,7 @@ test.describe('Features Page', () => {
 
   test('header Features link navigates to features page', async ({ page }) => {
     await page.goto('/config');
-    await page.getByRole('link', { name: /features/i }).click();
+    await page.getByRole('navigation', { name: /main/i }).getByRole('link', { name: /features/i }).click();
     await expect(page).toHaveURL('/features');
     await expect(page.getByTestId('features-page')).toBeVisible();
   });
