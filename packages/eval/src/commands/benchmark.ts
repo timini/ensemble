@@ -1,7 +1,13 @@
 import { Command } from 'commander';
 import { ProviderRegistry } from '@ensemble-ai/shared-utils/providers';
+import {
+  assertValidResumedOutput,
+  createBenchmarkFile,
+} from './benchmarkOutput.js';
+import { loadBenchmarkQuestions } from '../lib/benchmarkDatasets.js';
 import { generateConsensus, parseStrategies } from '../lib/consensus.js';
-import { loadDatasetPrompts } from '../lib/dataset.js';
+import { evaluateResponses } from '../lib/evaluation.js';
+import { createEvaluatorForDataset } from '../lib/evaluators.js';
 import { fileExists, readJsonFile, writeJsonFile } from '../lib/io.js';
 import { parseModelSpec, parseModelSpecs } from '../lib/modelSpecs.js';
 import { registerProviders } from '../lib/providers.js';
@@ -10,7 +16,6 @@ import type {
   BenchmarkResultsFile,
   EvalMode,
   PromptRunResult,
-  StrategyName,
 } from '../types.js';
 
 interface BenchmarkCommandOptions {
@@ -23,97 +28,14 @@ interface BenchmarkCommandOptions {
   summarizer?: string;
 }
 
-interface ResumeValidationOptions {
-  dataset: string;
-  mode: EvalMode;
-  models: string[];
-  strategies: StrategyName[];
-  sampleSize: number;
-}
-
-function sorted(values: string[]): string[] {
-  return [...values].sort();
-}
-
-function assertValidResumedOutput(
-  outputPath: string,
-  parsed: unknown,
-  options: ResumeValidationOptions,
-): asserts parsed is BenchmarkResultsFile {
-  if (!parsed || typeof parsed !== 'object') {
-    throw new Error(
-      `Resumed file "${outputPath}" does not contain a valid "runs" array.`,
-    );
-  }
-
-  const candidate = parsed as Partial<BenchmarkResultsFile>;
-  if (!Array.isArray(candidate.runs)) {
-    throw new Error(
-      `Resumed file "${outputPath}" does not contain a valid "runs" array.`,
-    );
-  }
-
-  const mismatches: string[] = [];
-  if (candidate.dataset !== options.dataset) {
-    mismatches.push(
-      `dataset (file: ${candidate.dataset}, new: ${options.dataset})`,
-    );
-  }
-  if (candidate.mode !== options.mode) {
-    mismatches.push(`mode (file: ${candidate.mode}, new: ${options.mode})`);
-  }
-  if (
-    !Array.isArray(candidate.models) ||
-    JSON.stringify(sorted(candidate.models)) !== JSON.stringify(sorted(options.models))
-  ) {
-    mismatches.push('models');
-  }
-  if (
-    !Array.isArray(candidate.strategies) ||
-    JSON.stringify(sorted(candidate.strategies)) !==
-      JSON.stringify(sorted(options.strategies))
-  ) {
-    mismatches.push('strategies');
-  }
-  if (candidate.sampleSize !== options.sampleSize) {
-    mismatches.push(
-      `sampleSize (file: ${candidate.sampleSize}, new: ${options.sampleSize})`,
-    );
-  }
-
-  if (mismatches.length > 0) {
-    throw new Error(
-      `Cannot resume benchmark with different parameters: ${mismatches.join('; ')}`,
-    );
-  }
-}
-
-function createBenchmarkFile(
-  dataset: string,
-  mode: EvalMode,
-  models: string[],
-  strategies: StrategyName[],
-  sampleSize: number,
-): BenchmarkResultsFile {
-  const now = new Date().toISOString();
-  return {
-    type: 'benchmark',
-    dataset,
-    mode,
-    models,
-    strategies,
-    sampleSize,
-    createdAt: now,
-    updatedAt: now,
-    runs: [],
-  };
-}
-
 export function createBenchmarkCommand(): Command {
   const command = new Command('benchmark');
   command
     .description('Run benchmark prompts across multiple models and consensus strategies.')
-    .argument('<dataset>', 'Path to dataset JSON (array of prompts or {prompt} objects)')
+    .argument(
+      '<dataset>',
+      'Dataset alias (gsm8k, truthfulqa, gpqa) or path to dataset JSON (array of prompts or {prompt} objects)',
+    )
     .requiredOption(
       '--models <models...>',
       'Model specs in provider:model format. Supports comma-separated values.',
@@ -143,15 +65,17 @@ export function createBenchmarkCommand(): Command {
         throw new Error(`Invalid sample count "${options.sample}".`);
       }
 
-      const prompts = await loadDatasetPrompts(dataset);
-      const sampledPrompts = prompts.slice(0, sampleCount);
+      const { datasetName, questions } = await loadBenchmarkQuestions(dataset, {
+        sample: sampleCount,
+      });
+      const evaluator = createEvaluatorForDataset(datasetName);
 
       let output: BenchmarkResultsFile = createBenchmarkFile(
         dataset,
         options.mode,
         modelStrings,
         strategies,
-        sampledPrompts.length,
+        questions.length,
       );
 
       if (options.resume && (await fileExists(options.output))) {
@@ -161,11 +85,17 @@ export function createBenchmarkCommand(): Command {
           mode: options.mode,
           models: modelStrings,
           strategies,
-          sampleSize: sampledPrompts.length,
+          sampleSize: questions.length,
         });
         output = parsed;
       }
 
+      const completedQuestionIds = new Set(
+        output.runs
+          .map((run) => run.questionId)
+          .filter((questionId): questionId is string => Boolean(questionId)),
+      );
+      // Prompt-based fallback keeps resume compatibility with legacy output files.
       const completedPrompts = new Set(output.runs.map((run) => run.prompt));
       const registry = new ProviderRegistry();
       registerProviders(
@@ -177,8 +107,9 @@ export function createBenchmarkCommand(): Command {
         options.mode,
       );
 
-      for (const prompt of sampledPrompts) {
-        if (completedPrompts.has(prompt)) {
+      for (const question of questions) {
+        const prompt = question.prompt;
+        if (completedQuestionIds.has(question.id) || completedPrompts.has(prompt)) {
           continue;
         }
 
@@ -205,8 +136,24 @@ export function createBenchmarkCommand(): Command {
             )
           : {};
 
-        const run: PromptRunResult = { prompt, responses, consensus };
+        const evaluation = await evaluateResponses(
+          evaluator,
+          responses,
+          question.groundTruth,
+          question.prompt,
+        );
+
+        const run: PromptRunResult = {
+          questionId: question.id,
+          prompt,
+          groundTruth: question.groundTruth,
+          responses,
+          consensus,
+          evaluation,
+        };
         output.runs.push(run);
+        completedQuestionIds.add(question.id);
+        completedPrompts.add(prompt);
         output.updatedAt = new Date().toISOString();
         await writeJsonFile(options.output, output);
       }
