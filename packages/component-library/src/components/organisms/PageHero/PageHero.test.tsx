@@ -144,7 +144,7 @@ describe('PageHero', () => {
       render(<PageHero title="Configure Your AI Ensemble" description="Test description" />);
 
       const heading = screen.getByRole('heading');
-      expect(heading.tagName).toBe('H2');
+      expect(heading.tagName).toBe('H1');
     });
 
     it('has accessible breadcrumb navigation', () => {
