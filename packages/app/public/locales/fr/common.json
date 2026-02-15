@@ -12,6 +12,9 @@
     "prompt": "Invite",
     "review": "Révision"
   },
+  "accessibility": {
+    "skipToMainContent": "Aller au contenu principal"
+  },
   "common": {
     "loading": "Chargement...",
     "error": "Erreur",

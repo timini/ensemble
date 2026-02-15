@@ -12,6 +12,9 @@
     "prompt": "Prompt",
     "review": "Review"
   },
+  "accessibility": {
+    "skipToMainContent": "Skip to main content"
+  },
   "common": {
     "loading": "Loading...",
     "error": "Error",
