@@ -94,6 +94,8 @@ export function createBaselineCommand(): Command {
           questionId: question.id,
           prompt: question.prompt,
           groundTruth: question.groundTruth,
+          category: question.category,
+          difficulty: question.difficulty,
           responses,
           consensus: {},
           evaluation,
