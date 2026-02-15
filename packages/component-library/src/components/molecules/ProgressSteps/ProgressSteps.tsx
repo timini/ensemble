@@ -1,12 +1,18 @@
 import { Check } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useEffect, useState } from 'react';
+import { cn } from '@/lib/utils';
 
 type Step = 'config' | 'ensemble' | 'prompt' | 'review';
 
+/** Props for the ProgressSteps workflow indicator. */
 interface ProgressStepsProps {
+  /** The currently active step in the workflow. */
   currentStep: Step;
+  /** Step to display before client hydration (avoids flash). */
   fallbackStep?: Step;
+  /** Called when a completed step circle is clicked for navigation. */
+  onStepClick?: (step: Step) => void;
 }
 
 function useHasHydrated() {
@@ -19,7 +25,11 @@ function useHasHydrated() {
   return hydrated;
 }
 
-export function ProgressSteps({ currentStep, fallbackStep }: ProgressStepsProps) {
+export function ProgressSteps({
+  currentStep,
+  fallbackStep,
+  onStepClick,
+}: ProgressStepsProps) {
   const { t } = useTranslation();
   const hasHydrated = useHasHydrated();
 
@@ -42,41 +52,65 @@ export function ProgressSteps({ currentStep, fallbackStep }: ProgressStepsProps)
     <div className="progress-steps flex flex-col items-center mb-12">
       {/* Circles and connectors row */}
       <div className="flex items-center">
-        {steps.map((step, index) => (
-          <div key={step.id} className="flex items-center">
+        {steps.map((step, index) => {
+          const isCompleted = index < currentIndex;
+          const isActive = index === currentIndex;
+          const isClickable = onStepClick && isCompleted;
+
+          const circle = (
             <div
-              data-testid={`progress-step-${step.id}`}
-              data-active={index === currentIndex}
-              data-completed={index < currentIndex}
+              data-testid={`progress-step-circle-${step.id}`}
+              data-active={isActive}
+              data-completed={isCompleted}
+              className={cn(
+                'w-12 h-12 rounded-full flex items-center justify-center font-semibold text-sm transition-colors',
+                isCompleted && 'bg-success text-success-foreground',
+                isActive && 'bg-primary text-primary-foreground',
+                !isCompleted && !isActive && 'bg-muted text-muted-foreground',
+                isClickable && 'cursor-pointer hover:brightness-95',
+              )}
             >
-              <div
-                data-testid={`workflow-step-${step.id}`}
-                data-active={index === currentIndex}
-                data-completed={index < currentIndex}
-                className={`w-12 h-12 rounded-full flex items-center justify-center font-semibold text-sm transition-colors ${
-                  index < currentIndex
-                    ? 'bg-success text-success-foreground'
-                    : index === currentIndex
-                      ? 'bg-primary text-primary-foreground'
-                      : 'bg-muted text-muted-foreground'
-                }`}
-              >
-                {index < currentIndex ? (
-                  <Check className="w-4 h-4" role="img" />
-                ) : (
-                  step.number
-                )}
-              </div>
+              {isCompleted ? (
+                <Check className="w-4 h-4" role="img" />
+              ) : (
+                step.number
+              )}
             </div>
-            {index < steps.length - 1 && (
-              <div
-                className={`w-16 h-0.5 mx-4 transition-colors ${
-                  index < currentIndex ? 'bg-success' : 'bg-muted'
-                }`}
-              />
-            )}
-          </div>
-        ))}
+          );
+
+          return (
+            <div key={step.id} className="flex items-center">
+              {isClickable ? (
+                <button
+                  type="button"
+                  onClick={() => onStepClick?.(step.id)}
+                  data-testid={`progress-step-container-${step.id}`}
+                  data-active={isActive}
+                  data-completed={isCompleted}
+                  aria-label={`Navigate to ${step.label} step`}
+                  className="rounded-full focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background"
+                >
+                  {circle}
+                </button>
+              ) : (
+                <div
+                  data-testid={`progress-step-container-${step.id}`}
+                  data-active={isActive}
+                  data-completed={isCompleted}
+                >
+                  {circle}
+                </div>
+              )}
+              {index < steps.length - 1 && (
+                <div
+                  className={`w-16 h-0.5 mx-4 transition-colors ${
+                    index < currentIndex ? 'bg-success' : 'bg-muted'
+                  }`}
+                />
+              )}
+            </div>
+          );
+        })}
       </div>
       {/* Labels row */}
       <div className="flex items-start mt-2">

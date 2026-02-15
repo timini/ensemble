@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { ProgressSteps } from './ProgressSteps';
+import * as React from 'react';
 
 const meta = {
   title: 'Molecules/ProgressSteps',
@@ -13,6 +14,10 @@ const meta = {
       control: 'select',
       options: ['config', 'ensemble', 'prompt', 'review'],
       description: 'The current active step in the workflow',
+    },
+    onStepClick: {
+      action: 'step-clicked',
+      description: 'Optional callback for completed step navigation',
     },
   },
 } satisfies Meta<typeof ProgressSteps>;
@@ -68,4 +73,20 @@ export const AllSteps: Story = {
       </div>
     </div>
   ),
+};
+
+export const ClickableCompletedSteps: Story = {
+  args: {
+    currentStep: 'review',
+  },
+  render: function Render(args) {
+    const [currentStep, setCurrentStep] = React.useState(args.currentStep);
+
+    return (
+      <ProgressSteps
+        currentStep={currentStep}
+        onStepClick={setCurrentStep}
+      />
+    );
+  },
 };

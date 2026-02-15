@@ -11,6 +11,7 @@ import { useRouter } from 'next/navigation';
 import { useState, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useStore } from '~/store';
+import { useStepNavigation } from '~/hooks/useStepNavigation';
 import { PageHero } from '@/components/organisms/PageHero';
 import { EnsembleConfigurationSummary } from '@/components/organisms/EnsembleConfigurationSummary';
 import { WorkflowNavigator } from '@/components/organisms/WorkflowNavigator';
@@ -28,6 +29,7 @@ import { toError } from '~/lib/errors';
 export default function PromptPage() {
   const { t } = useTranslation();
   const router = useRouter();
+  const handleProgressStepClick = useStepNavigation();
 
   const selectedModels = useStore((state) => state.selectedModels);
   const summarizerModel = useStore((state) => state.summarizerModel);
@@ -150,7 +152,11 @@ export default function PromptPage() {
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-6xl">
-      <ProgressSteps currentStep={currentStep} fallbackStep="prompt" />
+      <ProgressSteps
+        currentStep={currentStep}
+        fallbackStep="prompt"
+        onStepClick={handleProgressStepClick}
+      />
 
       <PageHero
         title={t('pages.prompt.title')}

@@ -46,7 +46,7 @@ test.describe('Full Workflow - Mock Mode', () => {
       await expect(page.getByText(/configuration/i).first()).toBeVisible();
 
       // Progress indicator should show step 1
-      await expect(page.getByTestId('progress-step-config')).toBeVisible();
+      await expect(page.getByTestId('progress-step-container-config')).toBeVisible();
 
       // Next button should be disabled initially
       const nextButton = page.getByRole('button', { name: 'Next', exact: true });
@@ -94,7 +94,7 @@ test.describe('Full Workflow - Mock Mode', () => {
       await expect(page.getByTestId('model-selection-list')).toBeVisible();
 
       // Progress indicator should show step 2
-      await expect(page.getByTestId('progress-step-ensemble')).toBeVisible();
+      await expect(page.getByTestId('progress-step-container-ensemble')).toBeVisible();
 
       // Next button disabled initially (need min 2 models)
       const nextButton = page.getByRole('button', { name: 'Next', exact: true });
@@ -136,7 +136,7 @@ test.describe('Full Workflow - Mock Mode', () => {
       await expect(page.getByTestId('prompt-input-with-hint')).toBeVisible();
 
       // Progress indicator should show step 3
-      await expect(page.getByTestId('progress-step-prompt')).toBeVisible();
+      await expect(page.getByTestId('progress-step-container-prompt')).toBeVisible();
 
       // Verify ensemble configuration summary is visible
       await expect(page.getByTestId('ensemble-configuration-summary')).toBeVisible();
@@ -174,7 +174,7 @@ test.describe('Full Workflow - Mock Mode', () => {
     // ==========================================
     await test.step('Verify review page displays prompt', async () => {
       // Progress indicator should show step 4
-      await expect(page.getByTestId('progress-step-review')).toBeVisible();
+      await expect(page.getByTestId('progress-step-container-review')).toBeVisible();
 
       // Verify the submitted prompt is displayed
       await expect(page.getByText(/What are the key differences between functional and object-oriented programming/i)).toBeVisible();
