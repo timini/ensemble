@@ -50,11 +50,6 @@ describe('useStepNavigation', () => {
 
     expect(setCallOrder).toBeDefined();
     expect(pushCallOrder).toBeDefined();
-
-    if (setCallOrder === undefined || pushCallOrder === undefined) {
-      throw new Error('Expected call order data for both mocks');
-    }
-
-    expect(setCallOrder).toBeLessThan(pushCallOrder);
+    expect(setCallOrder).toBeLessThan(pushCallOrder!);
   });
 });

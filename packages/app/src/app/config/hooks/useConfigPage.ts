@@ -13,6 +13,7 @@ import { getHydratedStatus } from '~/lib/providerStatus';
 import { logger } from '~/lib/logger';
 
 const PROVIDERS: Provider[] = ['openai', 'anthropic', 'google', 'xai'];
+
 export function useConfigPage() {
     const { t } = useTranslation('common');
     const router = useRouter();

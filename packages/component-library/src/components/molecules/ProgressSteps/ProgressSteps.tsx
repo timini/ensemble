@@ -1,12 +1,17 @@
 import { Check } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useEffect, useState } from 'react';
+import { cn } from '@/lib/utils';
 
 type Step = 'config' | 'ensemble' | 'prompt' | 'review';
 
+/** Props for the ProgressSteps workflow indicator. */
 interface ProgressStepsProps {
+  /** The currently active step in the workflow. */
   currentStep: Step;
+  /** Step to display before client hydration (avoids flash). */
   fallbackStep?: Step;
+  /** Called when a completed step circle is clicked for navigation. */
   onStepClick?: (step: Step) => void;
 }
 
@@ -57,13 +62,13 @@ export function ProgressSteps({
               data-testid={`progress-step-circle-${step.id}`}
               data-active={isActive}
               data-completed={isCompleted}
-              className={`w-12 h-12 rounded-full flex items-center justify-center font-semibold text-sm transition-colors${
-                isCompleted
-                  ? ' bg-success text-success-foreground'
-                  : isActive
-                    ? ' bg-primary text-primary-foreground'
-                    : ' bg-muted text-muted-foreground'
-              }${isClickable ? ' cursor-pointer hover:brightness-95' : ''}`}
+              className={cn(
+                'w-12 h-12 rounded-full flex items-center justify-center font-semibold text-sm transition-colors',
+                isCompleted && 'bg-success text-success-foreground',
+                isActive && 'bg-primary text-primary-foreground',
+                !isCompleted && !isActive && 'bg-muted text-muted-foreground',
+                isClickable && 'cursor-pointer hover:brightness-95',
+              )}
             >
               {isCompleted ? (
                 <Check className="w-4 h-4" role="img" />
@@ -83,7 +88,7 @@ export function ProgressSteps({
                   data-active={isActive}
                   data-completed={isCompleted}
                   aria-label={`Navigate to ${step.label} step`}
-                  className="rounded-full focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+                  className="rounded-full focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background"
                 >
                   {circle}
                 </button>
