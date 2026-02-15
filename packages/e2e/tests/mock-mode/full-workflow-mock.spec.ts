@@ -224,15 +224,13 @@ test.describe('Full Workflow - Mock Mode', () => {
       const startOverButton = page.getByRole('button', { name: /start over/i });
       await expect(startOverButton).toBeVisible({ timeout: 10000 });
       await expect(startOverButton).toBeEnabled({ timeout: 10000 });
-      await startOverButton.scrollIntoViewIfNeeded();
       await startOverButton.click({ timeout: 5000 }).catch(async () => {
-        // Fallback for CI layout-shift/overlay races: trigger the button's click handler directly.
+        // Fallback for CI layout-shift/overlay races: bypass Playwright's actionability checks
+        // and trigger the DOM click event directly.
         await startOverButton.evaluate((button: HTMLButtonElement) => button.click());
       });
-      if (!page.url().endsWith('/config')) {
-        await startOverButton.evaluate((button: HTMLButtonElement) => button.click());
-      }
-      await expect(page).toHaveURL('/config', { timeout: 10000 });
+
+      await expect(page).toHaveURL(/\/config$/, { timeout: 15000 });
 
       // Verify we're back at config page
       await expect(page.locator('[data-mode="free"]')).toBeVisible();

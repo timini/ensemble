@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { useStore } from '~/store';
 import { EloRankingConsensus } from '@ensemble-ai/shared-utils/consensus/EloRankingConsensus';
+import { MajorityVotingConsensus } from '@ensemble-ai/shared-utils/consensus/MajorityVotingConsensus';
 import { StandardConsensus } from '@ensemble-ai/shared-utils/consensus/StandardConsensus';
 import { ProviderRegistry, type ProviderName } from '@ensemble-ai/shared-utils/providers';
 import type { ConsensusModelResponse } from '@ensemble-ai/shared-utils/consensus/types';
@@ -80,7 +81,13 @@ export function useConsensusGeneration() {
                 );
 
                 resultText = await strategy.generateConsensus(consensusResponses, eloTopN, originalPrompt);
+            } else if (consensusMethod === 'majority') {
+                const strategy = new MajorityVotingConsensus(
+                    providerClient,
+                    effectiveSummarizerModelId
+                );
 
+                resultText = await strategy.generateConsensus(consensusResponses, 0, originalPrompt);
             } else {
                 const strategy = new StandardConsensus(
                     providerClient,
@@ -116,4 +123,3 @@ function validateProviderName(provider: string): ProviderName {
     }
     throw new Error(`Invalid provider: ${provider}`);
 }
-

@@ -72,6 +72,11 @@ describe('ensembleSlice', () => {
     expect(store.getState().embeddingsProvider).toBe('anthropic');
   });
 
+  it('sets majority consensus method', () => {
+    store.getState().setConsensusMethod('majority');
+    expect(store.getState().consensusMethod).toBe('majority');
+  });
+
   it('saves an ensemble', () => {
     store.getState().addModel('openai', 'gpt-4o');
     store.getState().addModel('anthropic', 'claude-3-5-sonnet');

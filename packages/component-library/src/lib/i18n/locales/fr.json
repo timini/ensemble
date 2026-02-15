@@ -110,7 +110,24 @@
       "selectedModels": "Modèles Sélectionnés ({{count}})",
       "summarizer": "Synthétiseur",
       "noSummarizer": "Non sélectionné",
-      "setSummarizer": "Définir {{model}} comme synthétiseur"
+      "setSummarizer": "Définir {{model}} comme synthétiseur",
+      "consensusPreset": {
+        "heading": "Préréglage de Consensus",
+        "topN": "Top N :",
+        "standard": {
+          "title": "Synthèse Standard",
+          "description": "Synthétise toutes les réponses des modèles sélectionnés de manière égale."
+        },
+        "elo": {
+          "title": "Synthèse Classée ELO",
+          "description": "Classement par paires avec synthèse Top N. Nécessite 3+ modèles.",
+          "warning": "La synthèse classée ELO nécessite au moins 3 modèles sélectionnés ({{count}} sélectionnés)"
+        },
+        "majority": {
+          "title": "Vote Majoritaire",
+          "description": "Privilégie la position majoritaire parmi les réponses. Fonctionne avec 2+ modèles."
+        }
+      }
     },
     "ensembleManagementPanel": {
       "quickPresets": "Préréglages rapides",
