@@ -9,6 +9,7 @@ interface EvalLike {
   evaluate(
     response: string,
     groundTruth: string,
+    prompt?: string,
   ): EvaluationResult | Promise<EvaluationResult>;
 }
 
@@ -16,6 +17,7 @@ export async function evaluateResponses(
   evaluator: EvalLike | null,
   responses: ProviderResponse[],
   groundTruth: string,
+  prompt?: string,
 ): Promise<PromptEvaluation | undefined> {
   if (!evaluator || groundTruth.length === 0) {
     return undefined;
@@ -32,7 +34,7 @@ export async function evaluateResponses(
 
     const baseKey = `${response.provider}:${response.model}`;
     const key = results[baseKey] ? `${baseKey}#${index + 1}` : baseKey;
-    const result = await evaluator.evaluate(response.content, groundTruth);
+    const result = await evaluator.evaluate(response.content, groundTruth, prompt);
     results[key] = result;
     evaluatedResponses += 1;
     if (result.correct) {

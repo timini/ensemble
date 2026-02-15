@@ -56,12 +56,13 @@ export function createBaselineCommand(): Command {
           evaluator,
           responses,
           question.groundTruth,
+          question.prompt,
         );
 
         runs.push({
           questionId: question.id,
           prompt: question.prompt,
-          groundTruth: question.groundTruth || undefined,
+          groundTruth: question.groundTruth,
           responses,
           consensus: {},
           evaluation,

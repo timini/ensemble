@@ -4,8 +4,6 @@ import type {
 } from '../types.js';
 import { extractChoiceLetter, extractNumericAnswer } from './parsers.js';
 
-export { extractChoiceLetter, extractNumericAnswer };
-
 function numericValuesMatch(predicted: string, expected: string): boolean {
   const predictedNumber = Number(predicted);
   const expectedNumber = Number(expected);

@@ -1,12 +1,11 @@
 import { describe, expect, it, vi } from 'vitest';
 import {
   createEvaluatorForDataset,
-  extractChoiceLetter,
-  extractNumericAnswer,
   GenerativeEvaluator,
   MCQEvaluator,
   NumericEvaluator,
 } from './evaluators.js';
+import { extractChoiceLetter, extractNumericAnswer } from './parsers.js';
 
 describe('extractNumericAnswer', () => {
   it('extracts answer after GSM8K marker', () => {

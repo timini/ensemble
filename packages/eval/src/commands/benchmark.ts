@@ -134,12 +134,13 @@ export function createBenchmarkCommand(): Command {
           evaluator,
           responses,
           question.groundTruth,
+          question.prompt,
         );
 
         const run: PromptRunResult = {
           questionId: question.id,
           prompt,
-          groundTruth: question.groundTruth || undefined,
+          groundTruth: question.groundTruth,
           responses,
           consensus,
           evaluation,
