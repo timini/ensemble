@@ -59,7 +59,7 @@ test.describe('About Page', () => {
 
   test('header About link navigates to about page', async ({ page }) => {
     await page.goto('/config');
-    await page.getByRole('link', { name: /about/i }).click();
+    await page.getByRole('navigation', { name: /main/i }).getByRole('link', { name: /about/i }).click();
     await expect(page).toHaveURL('/about');
     await expect(page.getByTestId('about-page')).toBeVisible();
   });
