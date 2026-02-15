@@ -1,10 +1,11 @@
 import type { ConsensusMethod } from '@ensemble-ai/shared-utils/consensus/types';
 import { useTranslation } from 'react-i18next';
+import { Heading } from '../../atoms/Heading';
 
 export interface ConsensusPresetSelectorProps {
   selectedModelCount: number;
   consensusMethod: ConsensusMethod;
-  topN: number;
+  topN?: number;
   onConsensusMethodChange: (method: ConsensusMethod) => void;
   onTopNChange?: (n: number) => void;
 }
@@ -12,7 +13,7 @@ export interface ConsensusPresetSelectorProps {
 export function ConsensusPresetSelector({
   selectedModelCount,
   consensusMethod,
-  topN,
+  topN = 3,
   onConsensusMethodChange,
   onTopNChange,
 }: ConsensusPresetSelectorProps) {
@@ -20,9 +21,9 @@ export function ConsensusPresetSelector({
 
   return (
     <div className="border-t pt-4">
-      <h4 className="font-semibold text-sm mb-3">
+      <Heading level={4} size="sm" className="mb-3">
         {t('organisms.ensembleConfigurationSummary.consensusPreset.heading')}
-      </h4>
+      </Heading>
 
       <div className="flex flex-col gap-3">
         <div className="flex flex-wrap items-start gap-6">

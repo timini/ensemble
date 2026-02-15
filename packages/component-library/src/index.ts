@@ -68,6 +68,10 @@ export { ResponseCard, type ResponseCardProps, type ResponseStatus, type Respons
 export { ModeSelectionCard, type ModeSelectionCardProps, type Mode } from './components/molecules/ModeSelectionCard';
 export { EnsembleHeader } from './components/molecules/EnsembleHeader';
 export {
+  ConsensusPresetSelector,
+  type ConsensusPresetSelectorProps,
+} from './components/molecules/ConsensusPresetSelector';
+export {
   ProgressSteps,
   type Step,
   type ProgressStepsProps,
