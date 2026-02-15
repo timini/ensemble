@@ -48,25 +48,25 @@ export default function FeaturesPage() {
   }) as WorkflowStep[];
 
   return (
-    <div
-      className="container mx-auto max-w-4xl px-4 py-8"
-      data-testid="features-page"
-    >
-      <PageHero
-        title={t("pages.features.title")}
-        description={t("pages.features.description")}
-      />
+    <div data-testid="features-page">
+      <div className="container mx-auto max-w-4xl px-4 py-8">
+        <PageHero
+          title={t("pages.features.title")}
+          description={t("pages.features.description")}
+        />
 
-      {/* Primary CTA after hero */}
-      <div className="mt-8 text-center" data-testid="features-hero-cta">
-        <Button asChild size="lg">
-          <Link href="/config">
-            {t("app.getStarted")}
-            <ArrowRight className="h-4 w-4" />
-          </Link>
-        </Button>
+        {/* Primary CTA after hero */}
+        <div className="mt-8 text-center" data-testid="features-hero-cta">
+          <Button asChild size="lg">
+            <Link href="/config">
+              {t("app.getStarted")}
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+          </Button>
+        </div>
       </div>
 
+      <div className="container mx-auto max-w-4xl px-4">
       <DifferentiatorsSection
         heading={t("pages.features.differentiators.heading")}
         items={
@@ -84,51 +84,55 @@ export default function FeaturesPage() {
           }) as Capability[]
         }
       />
-
-      {/* How It Works */}
-      <section className="mt-16" data-testid="features-how-it-works-section">
-        <Heading level={2} size="2xl" className="mb-8 text-center">
-          {t("pages.features.howItWorks.heading")}
-        </Heading>
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          {steps.map((step, i) => {
-            const StepIcon = STEP_ICONS[i] ?? Settings;
-            return (
-              <Card key={i} className="relative overflow-hidden">
-                <CardContent className="pt-6">
-                  <div className="flex items-start gap-4">
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10">
-                      <StepIcon className="h-5 w-5 text-primary" />
-                    </div>
-                    <div>
-                      <div className="mb-1 flex items-center gap-2">
-                        <Badge variant="secondary" className="text-xs">
-                          {i + 1}
-                        </Badge>
-                        <Heading level={3} size="md">
-                          {step.name}
-                        </Heading>
-                      </div>
-                      <Text variant="helper">{step.description}</Text>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            );
-          })}
-        </div>
-      </section>
-
-      {/* Secondary CTA after workflow steps */}
-      <div className="mt-8 text-center" data-testid="features-workflow-cta">
-        <Button asChild variant="outline" size="lg">
-          <Link href="/config">
-            {t("app.tryItNow")}
-            <ArrowRight className="h-4 w-4" />
-          </Link>
-        </Button>
       </div>
 
+      {/* How It Works — alternating background for visual variety */}
+      <div className="mt-16 bg-muted/40 py-16 border-y border-border">
+        <section className="container mx-auto max-w-4xl px-4" data-testid="features-how-it-works-section">
+          <Heading level={2} size="2xl" className="mb-8 text-center">
+            {t("pages.features.howItWorks.heading")}
+          </Heading>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            {steps.map((step, i) => {
+              const StepIcon = STEP_ICONS[i] ?? Settings;
+              return (
+                <Card key={i} className="relative overflow-hidden">
+                  <CardContent className="pt-6">
+                    <div className="flex items-start gap-4">
+                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10">
+                        <StepIcon className="h-5 w-5 text-primary" />
+                      </div>
+                      <div>
+                        <div className="mb-1 flex items-center gap-2">
+                          <Badge variant="secondary" className="text-xs">
+                            {i + 1}
+                          </Badge>
+                          <Heading level={3} size="md">
+                            {step.name}
+                          </Heading>
+                        </div>
+                        <Text variant="helper">{step.description}</Text>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
+
+          {/* Secondary CTA after workflow steps */}
+          <div className="mt-8 text-center" data-testid="features-workflow-cta">
+            <Button asChild variant="outline" size="lg">
+              <Link href="/config">
+                {t("app.tryItNow")}
+                <ArrowRight className="h-4 w-4" />
+              </Link>
+            </Button>
+          </div>
+        </section>
+      </div>
+
+      <div className="container mx-auto max-w-4xl px-4">
       <ModesSection
         heading={t("pages.features.modes.heading")}
         freeMode={
@@ -149,6 +153,8 @@ export default function FeaturesPage() {
         }
       />
 
+      <hr className="mt-16 border-border" />
+
       <SecuritySection
         heading={t("pages.features.security.heading")}
         body={t("pages.features.security.body")}
@@ -161,7 +167,7 @@ export default function FeaturesPage() {
 
       {/* Bottom CTA */}
       <div
-        className="mt-12 space-y-4 text-center"
+        className="mt-12 mb-8 space-y-4 text-center"
         data-testid="features-bottom-cta"
       >
         <div>
@@ -182,6 +188,7 @@ export default function FeaturesPage() {
             <ArrowRight className="h-4 w-4" />
           </Link>
         </div>
+      </div>
       </div>
     </div>
   );
