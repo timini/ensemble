@@ -11,6 +11,8 @@ exports[`ProgressSteps > snapshots > matches snapshot for config step 1`] = `
       class="flex items-center"
     >
       <div
+        data-active="true"
+        data-completed="false"
         data-testid="progress-step-container-config"
       >
         <div
@@ -30,6 +32,8 @@ exports[`ProgressSteps > snapshots > matches snapshot for config step 1`] = `
       class="flex items-center"
     >
       <div
+        data-active="false"
+        data-completed="false"
         data-testid="progress-step-container-ensemble"
       >
         <div
@@ -49,6 +53,8 @@ exports[`ProgressSteps > snapshots > matches snapshot for config step 1`] = `
       class="flex items-center"
     >
       <div
+        data-active="false"
+        data-completed="false"
         data-testid="progress-step-container-prompt"
       >
         <div
@@ -68,6 +74,8 @@ exports[`ProgressSteps > snapshots > matches snapshot for config step 1`] = `
       class="flex items-center"
     >
       <div
+        data-active="false"
+        data-completed="false"
         data-testid="progress-step-container-review"
       >
         <div
@@ -144,6 +152,8 @@ exports[`ProgressSteps > snapshots > matches snapshot for ensemble step 1`] = `
       class="flex items-center"
     >
       <div
+        data-active="false"
+        data-completed="true"
         data-testid="progress-step-container-config"
       >
         <div
@@ -179,6 +189,8 @@ exports[`ProgressSteps > snapshots > matches snapshot for ensemble step 1`] = `
       class="flex items-center"
     >
       <div
+        data-active="true"
+        data-completed="false"
         data-testid="progress-step-container-ensemble"
       >
         <div
@@ -198,6 +210,8 @@ exports[`ProgressSteps > snapshots > matches snapshot for ensemble step 1`] = `
       class="flex items-center"
     >
       <div
+        data-active="false"
+        data-completed="false"
         data-testid="progress-step-container-prompt"
       >
         <div
@@ -217,6 +231,8 @@ exports[`ProgressSteps > snapshots > matches snapshot for ensemble step 1`] = `
       class="flex items-center"
     >
       <div
+        data-active="false"
+        data-completed="false"
         data-testid="progress-step-container-review"
       >
         <div
@@ -293,6 +309,8 @@ exports[`ProgressSteps > snapshots > matches snapshot for prompt step 1`] = `
       class="flex items-center"
     >
       <div
+        data-active="false"
+        data-completed="true"
         data-testid="progress-step-container-config"
       >
         <div
@@ -328,6 +346,8 @@ exports[`ProgressSteps > snapshots > matches snapshot for prompt step 1`] = `
       class="flex items-center"
     >
       <div
+        data-active="false"
+        data-completed="true"
         data-testid="progress-step-container-ensemble"
       >
         <div
@@ -363,6 +383,8 @@ exports[`ProgressSteps > snapshots > matches snapshot for prompt step 1`] = `
       class="flex items-center"
     >
       <div
+        data-active="true"
+        data-completed="false"
         data-testid="progress-step-container-prompt"
       >
         <div
@@ -382,6 +404,8 @@ exports[`ProgressSteps > snapshots > matches snapshot for prompt step 1`] = `
       class="flex items-center"
     >
       <div
+        data-active="false"
+        data-completed="false"
         data-testid="progress-step-container-review"
       >
         <div
@@ -458,6 +482,8 @@ exports[`ProgressSteps > snapshots > matches snapshot for review step 1`] = `
       class="flex items-center"
     >
       <div
+        data-active="false"
+        data-completed="true"
         data-testid="progress-step-container-config"
       >
         <div
@@ -493,6 +519,8 @@ exports[`ProgressSteps > snapshots > matches snapshot for review step 1`] = `
       class="flex items-center"
     >
       <div
+        data-active="false"
+        data-completed="true"
         data-testid="progress-step-container-ensemble"
       >
         <div
@@ -528,6 +556,8 @@ exports[`ProgressSteps > snapshots > matches snapshot for review step 1`] = `
       class="flex items-center"
     >
       <div
+        data-active="false"
+        data-completed="true"
         data-testid="progress-step-container-prompt"
       >
         <div
@@ -563,6 +593,8 @@ exports[`ProgressSteps > snapshots > matches snapshot for review step 1`] = `
       class="flex items-center"
     >
       <div
+        data-active="true"
+        data-completed="false"
         data-testid="progress-step-container-review"
       >
         <div
