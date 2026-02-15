@@ -18,6 +18,7 @@ import { ResponseCard } from "@/components/molecules/ResponseCard";
 import { ConsensusCard } from "@/components/organisms/ConsensusCard";
 import { AgreementAnalysis } from "@/components/organisms/AgreementAnalysis";
 import { ProgressSteps } from "@/components/molecules/ProgressSteps";
+import { Button } from "@/components/atoms/Button";
 import { WorkflowNavigator } from "@/components/organisms/WorkflowNavigator";
 import { PromptCard } from "@/components/organisms/PromptCard";
 import type { Provider } from "@/components/molecules/ResponseCard";
@@ -223,12 +224,13 @@ export default function ReviewPage() {
           onBack={handleBack}
           onContinue={handleStartOver}
         />
-        <button
+        <Button
+          variant="outline"
           onClick={handleNewComparison}
-          className="self-end rounded-lg border border-border px-6 py-2 transition-colors hover:bg-accent md:self-auto"
+          className="self-end md:self-auto"
         >
           {t("pages.review.newComparisonButton")}
-        </button>
+        </Button>
       </div>
     </div>
   );
