@@ -25,7 +25,7 @@ export default function NotFound() {
         <Button asChild size="lg">
           <Link href="/config">
             {t("app.getStarted")}
-            <ArrowRight className="h-4 w-4" />
+            <ArrowRight className="ml-2 h-4 w-4" />
           </Link>
         </Button>
         <Button asChild variant="outline" size="lg">
