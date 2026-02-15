@@ -227,7 +227,7 @@ test.describe('Full Workflow - Mock Mode', () => {
       let navigatedToConfig = false;
       for (let attempt = 0; attempt < 3; attempt += 1) {
         await startOverButton.click({ force: true, timeout: 5000 }).catch(async () => {
-          await startOverButton.dispatchEvent('click');
+          await startOverButton.evaluate((button: HTMLButtonElement) => button.click());
         });
         const reachedConfig = await page
           .waitForURL('**/config', { timeout: 3000 })

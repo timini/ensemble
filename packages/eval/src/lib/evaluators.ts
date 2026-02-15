@@ -84,13 +84,15 @@ export function createEvaluatorForDataset(
     return null;
   }
 
-  if (datasetName === 'gsm8k') {
-    return new NumericEvaluator();
+  switch (datasetName) {
+    case 'gsm8k':
+      return new NumericEvaluator();
+    case 'truthfulqa':
+    case 'gpqa':
+      return new MCQEvaluator();
+    default: {
+      const exhaustiveCheck: never = datasetName;
+      return exhaustiveCheck;
+    }
   }
-
-  if (datasetName === 'truthfulqa' || datasetName === 'gpqa') {
-    return new MCQEvaluator();
-  }
-
-  return null;
 }

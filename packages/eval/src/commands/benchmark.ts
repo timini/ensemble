@@ -95,6 +95,7 @@ export function createBenchmarkCommand(): Command {
           .map((run) => run.questionId)
           .filter((questionId): questionId is string => Boolean(questionId)),
       );
+      // Prompt-based fallback keeps resume compatibility with legacy output files.
       const completedPrompts = new Set(output.runs.map((run) => run.prompt));
       const registry = new ProviderRegistry();
       registerProviders(

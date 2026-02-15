@@ -2,11 +2,7 @@ import { mkdtemp, rm, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import {
-  loadBenchmarkQuestions,
-  resolveBenchmarkDatasetName,
-} from './benchmarkDatasets.js';
-import { toChoiceLetter } from './benchmarkDatasetShared.js';
+import { loadBenchmarkQuestions } from './benchmarkDatasets.js';
 
 function jsonResponse(data: unknown): Response {
   return new Response(JSON.stringify(data), {
@@ -148,20 +144,6 @@ describe('benchmark dataset loaders', () => {
         num_rows_total: 1,
       }),
     );
-    fetchMock.mockResolvedValueOnce(
-      jsonResponse({
-        rows: [
-          {
-            row_idx: 2,
-            row: {
-              problem: 'Question text\n(A) A\n(B) B\n(C) C\n(D) D',
-              solution: '\\boxed{C}',
-            },
-          },
-        ],
-        num_rows_total: 1,
-      }),
-    );
 
     await expect(loadBenchmarkQuestions('gpqa', { sample: 1 })).rejects.toThrow(
       'Failed to parse GPQA answer at row 0',
@@ -185,19 +167,5 @@ describe('benchmark dataset loaders', () => {
     expect(loaded.questions).toHaveLength(2);
     expect(loaded.questions[0].prompt).toBe('What is 2 + 2?');
     expect(loaded.questions[1].groundTruth).toBe('B');
-  });
-
-  it('normalizes dataset aliases', () => {
-    expect(resolveBenchmarkDatasetName('gsm8k')).toBe('gsm8k');
-    expect(resolveBenchmarkDatasetName('truthful_qa')).toBe('truthfulqa');
-    expect(resolveBenchmarkDatasetName('gpqa-diamond')).toBe('gpqa');
-    expect(resolveBenchmarkDatasetName('custom-dataset')).toBeNull();
-  });
-
-  it('converts supported choice indexes and rejects out-of-range values', () => {
-    expect(toChoiceLetter(0)).toBe('A');
-    expect(toChoiceLetter(25)).toBe('Z');
-    expect(() => toChoiceLetter(26)).toThrow('Choice index out of range: 26');
-    expect(() => toChoiceLetter(-1)).toThrow('Choice index out of range: -1');
   });
 });

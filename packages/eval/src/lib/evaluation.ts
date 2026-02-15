@@ -24,16 +24,19 @@ export async function evaluateResponses(
   }
 
   const results: Record<string, EvaluationResult> = {};
+  const keyOccurrences: Record<string, number> = {};
   let evaluatedResponses = 0;
   let correctResponses = 0;
 
-  for (const [index, response] of responses.entries()) {
+  for (const response of responses) {
     if (response.error) {
       continue;
     }
 
     const baseKey = `${response.provider}:${response.model}`;
-    const key = results[baseKey] ? `${baseKey}#${index + 1}` : baseKey;
+    const occurrence = (keyOccurrences[baseKey] ?? 0) + 1;
+    keyOccurrences[baseKey] = occurrence;
+    const key = occurrence === 1 ? baseKey : `${baseKey}#${occurrence}`;
     const result = await evaluator.evaluate(response.content, groundTruth, prompt);
     results[key] = result;
     evaluatedResponses += 1;
