@@ -10,9 +10,12 @@ exports[`EnsembleHeader > snapshots > matches snapshot for default render 1`] = 
     <div
       class="flex items-center justify-between"
     >
-      <div>
+      <a
+        class="group block"
+        href="/config"
+      >
         <h1
-          class="text-2xl font-bold text-foreground"
+          class="text-2xl font-bold text-foreground group-hover:text-primary transition-colors"
         >
           Ensemble AI
         </h1>
@@ -21,7 +24,7 @@ exports[`EnsembleHeader > snapshots > matches snapshot for default render 1`] = 
         >
           The smartest AI is an ensemble.
         </p>
-      </div>
+      </a>
       <div
         class="flex items-center gap-4"
       >
