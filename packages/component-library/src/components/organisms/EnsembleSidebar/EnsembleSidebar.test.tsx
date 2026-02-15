@@ -137,9 +137,7 @@ describe('EnsembleSidebar', () => {
         />
       );
 
-      // Claude 3 Opus appears twice (model name + badge)
-      const claudeElements = screen.getAllByText('Claude 3 Opus');
-      expect(claudeElements.length).toBe(2);
+      expect(screen.getByText('Claude 3 Opus')).toBeInTheDocument();
       expect(screen.getByText('GPT-4o')).toBeInTheDocument();
     });
 
@@ -174,9 +172,9 @@ describe('EnsembleSidebar', () => {
         />
       );
 
-      // Badge should show summarizer model name
-      const badges = screen.getAllByText('Claude 3 Opus');
-      expect(badges.length).toBe(2); // model name + badge
+      // Badge should show "Summarizer" label on the designated model
+      const summarizerBadges = screen.getAllByText('Summarizer');
+      expect(summarizerBadges.length).toBeGreaterThanOrEqual(1);
     });
 
     it('shows empty state when no models selected', () => {

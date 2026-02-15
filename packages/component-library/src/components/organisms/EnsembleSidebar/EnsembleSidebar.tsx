@@ -124,7 +124,6 @@ export const EnsembleSidebar = React.forwardRef<HTMLDivElement, EnsembleSidebarP
                 {t('organisms.ensembleSidebar.selectedModels', { count: selectedModels.length })}
               </Heading>
               <div className="flex items-center gap-2">
-                {summarizerId && <Text as="span" variant="small" color="primary">{t('organisms.ensembleSidebar.summarizerLabel')}</Text>}
                 {selectedModels.length > 0 && onClearAll && (
                   <Button
                     variant="ghost"
@@ -151,7 +150,7 @@ export const EnsembleSidebar = React.forwardRef<HTMLDivElement, EnsembleSidebarP
                           variant="outline"
                           className="text-xs bg-primary/10 text-primary border-primary/20"
                         >
-                          {model.name}
+                          {t('organisms.ensembleSidebar.summarizerLabel')}
                         </Badge>
                       )}
                       {onRemoveModel && (
