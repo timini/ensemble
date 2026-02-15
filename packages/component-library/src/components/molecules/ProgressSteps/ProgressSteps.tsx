@@ -7,6 +7,7 @@ type Step = 'config' | 'ensemble' | 'prompt' | 'review';
 interface ProgressStepsProps {
   currentStep: Step;
   fallbackStep?: Step;
+  onStepClick?: (step: Step) => void;
 }
 
 function useHasHydrated() {
@@ -19,7 +20,11 @@ function useHasHydrated() {
   return hydrated;
 }
 
-export function ProgressSteps({ currentStep, fallbackStep }: ProgressStepsProps) {
+export function ProgressSteps({
+  currentStep,
+  fallbackStep,
+  onStepClick,
+}: ProgressStepsProps) {
   const { t } = useTranslation();
   const hasHydrated = useHasHydrated();
 
@@ -44,30 +49,51 @@ export function ProgressSteps({ currentStep, fallbackStep }: ProgressStepsProps)
       <div className="flex items-center">
         {steps.map((step, index) => (
           <div key={step.id} className="flex items-center">
-            <div
-              data-testid={`progress-step-${step.id}`}
-              data-active={index === currentIndex}
-              data-completed={index < currentIndex}
-            >
-              <div
-                data-testid={`workflow-step-${step.id}`}
+            {index < currentIndex && onStepClick ? (
+              <button
+                type="button"
+                onClick={() => onStepClick(step.id)}
+                data-testid={`progress-step-${step.id}`}
                 data-active={index === currentIndex}
                 data-completed={index < currentIndex}
-                className={`w-12 h-12 rounded-full flex items-center justify-center font-semibold text-sm transition-colors ${
-                  index < currentIndex
-                    ? 'bg-success text-success-foreground'
-                    : index === currentIndex
-                      ? 'bg-primary text-primary-foreground'
-                      : 'bg-muted text-muted-foreground'
-                }`}
+                aria-label={step.label}
+                className="rounded-full focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
               >
-                {index < currentIndex ? (
+                <div
+                  data-testid={`workflow-step-${step.id}`}
+                  data-active={index === currentIndex}
+                  data-completed={index < currentIndex}
+                  className="w-12 h-12 rounded-full flex items-center justify-center font-semibold text-sm transition-colors bg-success text-success-foreground cursor-pointer hover:brightness-95"
+                >
                   <Check className="w-4 h-4" role="img" />
-                ) : (
-                  step.number
-                )}
+                </div>
+              </button>
+            ) : (
+              <div
+                data-testid={`progress-step-${step.id}`}
+                data-active={index === currentIndex}
+                data-completed={index < currentIndex}
+              >
+                <div
+                  data-testid={`workflow-step-${step.id}`}
+                  data-active={index === currentIndex}
+                  data-completed={index < currentIndex}
+                  className={`w-12 h-12 rounded-full flex items-center justify-center font-semibold text-sm transition-colors ${
+                    index < currentIndex
+                      ? 'bg-success text-success-foreground'
+                      : index === currentIndex
+                        ? 'bg-primary text-primary-foreground'
+                        : 'bg-muted text-muted-foreground'
+                  }`}
+                >
+                  {index < currentIndex ? (
+                    <Check className="w-4 h-4" role="img" />
+                  ) : (
+                    step.number
+                  )}
+                </div>
               </div>
-            </div>
+            )}
             {index < steps.length - 1 && (
               <div
                 className={`w-16 h-0.5 mx-4 transition-colors ${

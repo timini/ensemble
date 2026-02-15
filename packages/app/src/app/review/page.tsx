@@ -18,6 +18,7 @@ import { ResponseCard } from "@/components/molecules/ResponseCard";
 import { ConsensusCard } from "@/components/organisms/ConsensusCard";
 import { AgreementAnalysis } from "@/components/organisms/AgreementAnalysis";
 import { ProgressSteps } from "@/components/molecules/ProgressSteps";
+import type { Step } from "@/components/molecules/ProgressSteps";
 import { WorkflowNavigator } from "@/components/organisms/WorkflowNavigator";
 import { PromptCard } from "@/components/organisms/PromptCard";
 import type { Provider } from "@/components/molecules/ResponseCard";
@@ -28,6 +29,13 @@ import { useStreamingResponses } from "./hooks/useStreamingResponses";
 import { useConsensusGeneration } from "./hooks/useConsensusGeneration";
 import { useConsensusStatus } from "./hooks/useConsensusStatus";
 import { useConsensusTrigger } from "./hooks/useConsensusTrigger";
+
+const STEP_ROUTES: Record<Step, string> = {
+  config: "/config",
+  ensemble: "/ensemble",
+  prompt: "/prompt",
+  review: "/review",
+};
 
 export default function ReviewPage() {
   const { t } = useTranslation();
@@ -119,11 +127,20 @@ export default function ReviewPage() {
     router.push("/config");
   };
 
+  const handleProgressStepClick = (step: Step) => {
+    setCurrentStep(step);
+    router.push(STEP_ROUTES[step]);
+  };
+
   const displayPrompt = hasHydrated ? (prompt ?? "") : "";
 
   return (
     <div className="container mx-auto max-w-6xl px-4 py-8">
-      <ProgressSteps currentStep="review" fallbackStep="review" />
+      <ProgressSteps
+        currentStep="review"
+        fallbackStep="review"
+        onStepClick={handleProgressStepClick}
+      />
 
       <PageHero
         title={t("pages.review.title")}

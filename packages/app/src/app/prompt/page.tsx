@@ -17,6 +17,7 @@ import { WorkflowNavigator } from '@/components/organisms/WorkflowNavigator';
 import { PromptTips } from '@/components/organisms/PromptTips';
 import { PromptInputWithHint } from '@/components/organisms/PromptInputWithHint';
 import { ProgressSteps } from '@/components/molecules/ProgressSteps';
+import type { Step } from '@/components/molecules/ProgressSteps';
 import { ResponseCard } from '@/components/molecules/ResponseCard';
 import {
   ProviderRegistry,
@@ -24,6 +25,13 @@ import {
 } from '@ensemble-ai/shared-utils/providers';
 import { FALLBACK_MODELS } from '~/lib/models';
 import { toError } from '~/lib/errors';
+
+const STEP_ROUTES: Record<Step, string> = {
+  config: '/config',
+  ensemble: '/ensemble',
+  prompt: '/prompt',
+  review: '/review',
+};
 
 export default function PromptPage() {
   const { t } = useTranslation();
@@ -142,6 +150,11 @@ export default function PromptPage() {
     router.push('/ensemble');
   };
 
+  const handleProgressStepClick = (step: Step) => {
+    setCurrentStep(step);
+    router.push(STEP_ROUTES[step]);
+  };
+
   // Validate: prompt must not be empty
   const isValid = localPrompt.trim().length > 0;
 
@@ -150,7 +163,11 @@ export default function PromptPage() {
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-4xl">
-      <ProgressSteps currentStep={currentStep} fallbackStep="prompt" />
+      <ProgressSteps
+        currentStep={currentStep}
+        fallbackStep="prompt"
+        onStepClick={handleProgressStepClick}
+      />
 
       <PageHero
         title={t('pages.prompt.title')}

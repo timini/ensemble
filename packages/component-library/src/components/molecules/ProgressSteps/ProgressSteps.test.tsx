@@ -1,5 +1,6 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { ProgressSteps } from './ProgressSteps';
 import { renderWithI18n } from '../../../lib/test-utils/i18n-test-wrapper';
 
@@ -51,6 +52,33 @@ describe('ProgressSteps', () => {
 
     expect(ensembleLabel).toHaveClass('inline-block', 'w-12', 'text-center');
     expect(promptLabel).toHaveClass('inline-block', 'w-12', 'text-center');
+  });
+
+  it('renders completed steps as clickable buttons when onStepClick is provided', () => {
+    render(<ProgressSteps currentStep="prompt" onStepClick={() => {}} />);
+
+    expect(screen.getByTestId('progress-step-config').tagName).toBe('BUTTON');
+    expect(screen.getByTestId('progress-step-ensemble').tagName).toBe('BUTTON');
+    expect(screen.getByTestId('progress-step-prompt').tagName).toBe('DIV');
+    expect(screen.getByTestId('progress-step-review').tagName).toBe('DIV');
+  });
+
+  it('calls onStepClick when clicking a completed step button', async () => {
+    const user = userEvent.setup();
+    const onStepClick = vi.fn();
+
+    render(<ProgressSteps currentStep="review" onStepClick={onStepClick} />);
+
+    await user.click(screen.getByTestId('progress-step-config'));
+    expect(onStepClick).toHaveBeenCalledWith('config');
+  });
+
+  it('does not render step buttons when onStepClick is not provided', () => {
+    render(<ProgressSteps currentStep="review" />);
+
+    expect(screen.getByTestId('progress-step-config').tagName).toBe('DIV');
+    expect(screen.getByTestId('progress-step-ensemble').tagName).toBe('DIV');
+    expect(screen.getByTestId('progress-step-prompt').tagName).toBe('DIV');
   });
 
   describe('snapshots', () => {
