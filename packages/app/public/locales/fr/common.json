@@ -150,6 +150,7 @@
       "promptLabel": "Votre invite",
       "responsesHeading": "Réponses de l'IA",
       "noResponses": "Aucune réponse générée pour le moment.",
+      "noResponsesHint": "Les réponses apparaîtront ici au fur et à mesure que les modèles terminent. Revenez en arrière pour soumettre une invite.",
       "backButton": "Retour à l'invite",
       "startOverButton": "Recommencer",
       "newComparisonButton": "Nouvelle comparaison",

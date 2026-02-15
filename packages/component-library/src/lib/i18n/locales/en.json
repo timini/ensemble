@@ -161,6 +161,7 @@
       "selectedModels": "Selected Models ({{count}})",
       "summarizerLabel": "Summarizer",
       "noModels": "No models selected yet",
+      "selectModelsHint": "Pick at least 2 models to start comparing.",
       "quickPresets": "Quick presets",
       "quickPresetsDescription": "Start from a curated ensemble tuned for common workflows.",
       "noPresets": "No saved presets yet. Save your first ensemble below to get started.",

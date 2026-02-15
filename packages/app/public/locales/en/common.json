@@ -158,6 +158,7 @@
       "promptLabel": "Your Prompt",
       "responsesHeading": "AI Responses",
       "noResponses": "No responses generated yet.",
+      "noResponsesHint": "Responses will appear here as models complete. Go back to submit a prompt.",
       "backButton": "Back to Prompt",
       "startOverButton": "Start Over",
       "newComparisonButton": "New Comparison",

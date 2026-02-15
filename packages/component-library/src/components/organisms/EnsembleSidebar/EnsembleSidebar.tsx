@@ -5,7 +5,7 @@ import { Button } from '../../atoms/Button';
 import { Badge } from '../../atoms/Badge';
 import { Heading } from '../../atoms/Heading';
 import { Text } from '../../atoms/Text';
-import { ArrowRight, X } from 'lucide-react';
+import { ArrowRight, Layers, X } from 'lucide-react';
 import { QuickPresetsSection } from './QuickPresetsSection';
 import { SaveEnsembleSection } from './SaveEnsembleSection';
 import { ManualResponsesSection } from './ManualResponsesSection';
@@ -139,7 +139,11 @@ export const EnsembleSidebar = React.forwardRef<HTMLDivElement, EnsembleSidebarP
             </div>
             <div className="space-y-2">
               {selectedModels.length === 0 ? (
-                <Text variant="small" color="muted">{t('organisms.ensembleSidebar.noModels')}</Text>
+                <div className="flex flex-col items-center text-center p-4 border border-dashed border-border rounded-lg bg-background/50">
+                  <Layers className="w-8 h-8 text-muted-foreground mb-2" />
+                  <Text variant="small" color="muted" className="font-medium">{t('organisms.ensembleSidebar.noModels')}</Text>
+                  <Text variant="helper" color="muted" className="text-xs mt-1">{t('organisms.ensembleSidebar.selectModelsHint')}</Text>
+                </div>
               ) : (
                 selectedModels.map((model) => (
                   <div key={model.id} className="flex items-center justify-between text-sm">
