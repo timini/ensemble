@@ -284,7 +284,7 @@
       },
       "security": {
         "heading": "Sécurité et confidentialité",
-        "body": "Chiffrement de niveau militaire sans stockage côté serveur en Mode Gratuit.",
+        "body": "Chiffrement AES-256-GCM sans stockage côté serveur en Mode Gratuit.",
         "features": [
           "Chiffrement AES-256-GCM via l'API Web Crypto",
           "Dérivation de clé spécifique à l'appareil (SHA-256)",

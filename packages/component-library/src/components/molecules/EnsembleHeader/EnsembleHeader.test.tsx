@@ -14,6 +14,13 @@ describe('EnsembleHeader', () => {
     expect(screen.getByText('The smartest AI is an ensemble.')).toBeInTheDocument();
   });
 
+  it('renders the brand name as a link to /config', () => {
+    render(<EnsembleHeader />);
+    const brandLink = screen.getByRole('link', { name: /ensemble ai/i });
+    expect(brandLink).toBeInTheDocument();
+    expect(brandLink).toHaveAttribute('href', '/config');
+  });
+
   it('renders the settings button', () => {
     render(<EnsembleHeader />);
     const settingsButton = screen.getByRole('button', { name: /open settings/i });

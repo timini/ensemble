@@ -22,10 +22,10 @@ export function EnsembleHeader({ onSettingsClick }: EnsembleHeaderProps) {
     <div className="bg-background border-b border-border">
       <div className="max-w-6xl mx-auto px-6 py-6">
         <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold text-foreground">{title}</h1>
+          <a href="/config" className="group block">
+            <h1 className="text-2xl font-bold text-foreground group-hover:text-primary transition-colors">{title}</h1>
             <p className="text-muted-foreground mt-1">{tagline}</p>
-          </div>
+          </a>
           <div className="flex items-center gap-4">
             <a
               href="/features"
