@@ -5,18 +5,13 @@ import {
   createBenchmarkFile,
 } from './benchmarkOutput.js';
 import { loadBenchmarkQuestions } from '../lib/benchmarkDatasets.js';
-import { generateConsensus, parseStrategies } from '../lib/consensus.js';
-import { evaluateResponses } from '../lib/evaluation.js';
+import { parseStrategies } from '../lib/consensus.js';
 import { createEvaluatorForDataset } from '../lib/evaluators.js';
-import { fileExists, readJsonFile, writeJsonFile } from '../lib/io.js';
+import { fileExists, readJsonFile } from '../lib/io.js';
 import { parseModelSpec, parseModelSpecs } from '../lib/modelSpecs.js';
 import { registerProviders } from '../lib/providers.js';
-import { runPromptWithModels } from '../lib/runPrompt.js';
-import type {
-  BenchmarkResultsFile,
-  EvalMode,
-  PromptRunResult,
-} from '../types.js';
+import { BenchmarkRunner } from '../lib/benchmarkRunner.js';
+import type { BenchmarkResultsFile, EvalMode } from '../types.js';
 
 interface BenchmarkCommandOptions {
   models: string[];
@@ -26,6 +21,7 @@ interface BenchmarkCommandOptions {
   resume?: boolean;
   mode: EvalMode;
   summarizer?: string;
+  requestDelayMs?: string;
 }
 
 export function createBenchmarkCommand(): Command {
@@ -42,7 +38,7 @@ export function createBenchmarkCommand(): Command {
     )
     .option(
       '--strategies <strategies...>',
-      'Consensus strategies (standard, elo). Supports comma-separated values.',
+      'Consensus strategies (standard, elo, majority). Supports comma-separated values.',
     )
     .option('--sample <count>', 'Number of prompts to evaluate.', '10')
     .requiredOption('--output <file>', 'Output JSON file')
@@ -50,6 +46,11 @@ export function createBenchmarkCommand(): Command {
     .option(
       '--summarizer <provider:model>',
       'Optional explicit summarizer model (provider:model). Defaults to first successful response model.',
+    )
+    .option(
+      '--request-delay-ms <ms>',
+      'Optional delay in milliseconds between starting model calls.',
+      '0',
     )
     .option('--mode <mode>', 'Provider mode to use (mock or free)', 'mock')
     .action(async (dataset: string, options: BenchmarkCommandOptions) => {
@@ -63,6 +64,10 @@ export function createBenchmarkCommand(): Command {
       const sampleCount = Number.parseInt(options.sample, 10);
       if (!Number.isInteger(sampleCount) || sampleCount <= 0) {
         throw new Error(`Invalid sample count "${options.sample}".`);
+      }
+      const requestDelayMs = Number.parseInt(options.requestDelayMs ?? '0', 10);
+      if (!Number.isInteger(requestDelayMs) || requestDelayMs < 0) {
+        throw new Error(`Invalid request delay "${options.requestDelayMs}".`);
       }
 
       const { datasetName, questions } = await loadBenchmarkQuestions(dataset, {
@@ -90,13 +95,6 @@ export function createBenchmarkCommand(): Command {
         output = parsed;
       }
 
-      const completedQuestionIds = new Set(
-        output.runs
-          .map((run) => run.questionId)
-          .filter((questionId): questionId is string => Boolean(questionId)),
-      );
-      // Prompt-based fallback keeps resume compatibility with legacy output files.
-      const completedPrompts = new Set(output.runs.map((run) => run.prompt));
       const registry = new ProviderRegistry();
       registerProviders(
         registry,
@@ -107,56 +105,26 @@ export function createBenchmarkCommand(): Command {
         options.mode,
       );
 
-      for (const question of questions) {
-        const prompt = question.prompt;
-        if (completedQuestionIds.has(question.id) || completedPrompts.has(prompt)) {
-          continue;
-        }
-
-        const responses = await runPromptWithModels(
-          registry,
-          options.mode,
-          prompt,
-          models,
-        );
-
-        const firstSuccessful = responses.find((response) => !response.error);
-        const summarizerTarget = summarizer
-          ? summarizer
-          : firstSuccessful
-            ? { provider: firstSuccessful.provider, model: firstSuccessful.model }
-            : null;
-        const consensus = summarizerTarget
-          ? await generateConsensus(
-              strategies,
-              prompt,
-              responses,
-              registry.getProvider(summarizerTarget.provider, options.mode),
-              summarizerTarget.model,
-            )
-          : {};
-
-        const evaluation = await evaluateResponses(
-          evaluator,
-          responses,
-          question.groundTruth,
-          question.prompt,
-        );
-
-        const run: PromptRunResult = {
-          questionId: question.id,
-          prompt,
-          groundTruth: question.groundTruth,
-          responses,
-          consensus,
-          evaluation,
-        };
-        output.runs.push(run);
-        completedQuestionIds.add(question.id);
-        completedPrompts.add(prompt);
-        output.updatedAt = new Date().toISOString();
-        await writeJsonFile(options.output, output);
-      }
+      const runner = new BenchmarkRunner({
+        mode: options.mode,
+        registry,
+        models,
+        strategies,
+        evaluator,
+        summarizer,
+        requestDelayMs,
+      });
+      await runner.run({
+        questions,
+        outputPath: options.output,
+        output,
+        onProgress: (progress) => {
+          const status = progress.skipped ? 'skipped' : 'done';
+          process.stdout.write(
+            `[${progress.completed}/${progress.total}] ${progress.questionId} ${status}\n`,
+          );
+        },
+      });
 
       process.stdout.write(
         `Benchmark completed. ${output.runs.length} prompt(s) written to ${options.output}\n`,
