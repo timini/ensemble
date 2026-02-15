@@ -22,6 +22,7 @@ import { Text } from "@/components/atoms/Text";
 import { Badge } from "@/components/atoms/Badge";
 import { Button } from "@/components/atoms/Button";
 import { Card, CardHeader, CardContent } from "@/components/atoms/Card";
+import { EnsembleFlowDiagram } from "./_components/EnsembleFlowDiagram";
 
 interface ResearchPaper {
   title: string;
@@ -61,10 +62,11 @@ export default function AboutPage() {
               </Heading>
             </div>
           </CardHeader>
-          <CardContent>
+          <CardContent className="space-y-6">
             <Text className="leading-relaxed">
               {t("pages.about.whatIsEnsemble.body")}
             </Text>
+            <EnsembleFlowDiagram />
           </CardContent>
         </Card>
       </section>
@@ -82,10 +84,37 @@ export default function AboutPage() {
               </Heading>
             </div>
           </CardHeader>
-          <CardContent>
+          <CardContent className="space-y-6">
             <Text className="leading-relaxed">
               {t("pages.about.whyEnsemble.body")}
             </Text>
+
+            {/* Research highlight stats */}
+            <div
+              className="grid grid-cols-1 gap-3 sm:grid-cols-3"
+              data-testid="about-research-stats"
+            >
+              <div className="rounded-lg border border-border bg-muted/30 p-4 text-center">
+                <Text className="text-2xl font-bold text-primary">+7.6%</Text>
+                <Text variant="caption" className="mt-1">
+                  {t("pages.about.whyEnsemble.statEnsembleVsSingle")}
+                </Text>
+              </div>
+              <div className="rounded-lg border border-border bg-muted/30 p-4 text-center">
+                <Text className="text-2xl font-bold text-primary">
+                  77% → 85%
+                </Text>
+                <Text variant="caption" className="mt-1">
+                  {t("pages.about.whyEnsemble.statMathAccuracy")}
+                </Text>
+              </div>
+              <div className="rounded-lg border border-border bg-muted/30 p-4 text-center">
+                <Text className="text-2xl font-bold text-primary">+23%</Text>
+                <Text variant="caption" className="mt-1">
+                  {t("pages.about.whyEnsemble.statMedicalAccuracy")}
+                </Text>
+              </div>
+            </div>
           </CardContent>
         </Card>
       </section>
@@ -116,18 +145,21 @@ export default function AboutPage() {
                 <CardContent className="pt-6">
                   <div className="flex items-start justify-between gap-4">
                     <div className="min-w-0 flex-1">
-                      <div className="mb-2 flex items-center gap-2">
+                      <Text className="text-base font-semibold text-primary">
+                        {paper.finding}
+                      </Text>
+                      <Text
+                        variant="helper"
+                        className="mt-2 transition-colors group-hover:text-foreground"
+                      >
+                        {paper.title}
+                      </Text>
+                      <div className="mt-2 flex items-center gap-2">
                         <Badge variant="outline">{paper.venue}</Badge>
                         <Text variant="caption" as="span">
                           {paper.authors}
                         </Text>
                       </div>
-                      <Text className="font-semibold transition-colors group-hover:text-primary">
-                        {paper.title}
-                      </Text>
-                      <Text variant="helper" className="mt-2">
-                        {paper.finding}
-                      </Text>
                     </div>
                     <ExternalLink className="mt-1 h-4 w-4 shrink-0 text-muted-foreground transition-colors group-hover:text-primary" />
                   </div>

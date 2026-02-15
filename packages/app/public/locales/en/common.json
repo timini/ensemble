@@ -177,7 +177,15 @@
       },
       "whyEnsemble": {
         "heading": "Why an Ensemble?",
-        "body": "Every AI model has blind spots. A question that stumps one model may be trivial for another. This is the model selection paradox: you cannot know which model will perform best on your specific question until you have already asked it. An ensemble approach eliminates this guesswork by harnessing the complementary strengths of multiple models, producing more reliable and well-rounded answers."
+        "body": "Every AI model has blind spots. A question that stumps one model may be trivial for another. This is the model selection paradox: you cannot know which model will perform best on your specific question until you have already asked it. An ensemble approach eliminates this guesswork by harnessing the complementary strengths of multiple models, producing more reliable and well-rounded answers.",
+        "statEnsembleVsSingle": "Ensemble vs single model on AlpacaEval 2.0",
+        "statMathAccuracy": "Math accuracy via multi-model debate",
+        "statMedicalAccuracy": "Medical QA via iterative consensus"
+      },
+      "flow": {
+        "prompt": "Your Prompt",
+        "models": "AI Models",
+        "consensus": "Consensus"
       },
       "research": {
         "heading": "The Research",
