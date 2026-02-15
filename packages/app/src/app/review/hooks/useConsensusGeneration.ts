@@ -87,7 +87,7 @@ export function useConsensusGeneration() {
                     effectiveSummarizerModelId
                 );
 
-                resultText = await strategy.generateConsensus(consensusResponses, eloTopN, originalPrompt);
+                resultText = await strategy.generateConsensus(consensusResponses, 0, originalPrompt);
             } else {
                 const strategy = new StandardConsensus(
                     providerClient,

@@ -124,7 +124,9 @@ export const EnsembleConfigurationSummary = React.forwardRef<
             {/* Consensus Presets Row */}
             {onConsensusMethodChange && (
               <div className="border-t pt-4">
-                <Heading level={4} size="sm" className="mb-3">Consensus Preset</Heading>
+                <Heading level={4} size="sm" className="mb-3">
+                  {t('organisms.ensembleConfigurationSummary.consensusPreset.heading')}
+                </Heading>
                 <div className="flex flex-col gap-3">
                   <div className="flex flex-wrap items-start gap-6">
                     <label className="flex items-start gap-2 cursor-pointer">
@@ -137,9 +139,11 @@ export const EnsembleConfigurationSummary = React.forwardRef<
                         data-testid="preset-standard"
                       />
                       <span className="space-y-1">
-                        <span className="block text-sm font-medium">Standard Summarisation</span>
+                        <span className="block text-sm font-medium">
+                          {t('organisms.ensembleConfigurationSummary.consensusPreset.standard.title')}
+                        </span>
                         <span className="block text-xs text-muted-foreground">
-                          Synthesise all selected model responses equally.
+                          {t('organisms.ensembleConfigurationSummary.consensusPreset.standard.description')}
                         </span>
                       </span>
                     </label>
@@ -155,9 +159,11 @@ export const EnsembleConfigurationSummary = React.forwardRef<
                         data-testid="preset-elo"
                       />
                       <span className="space-y-1">
-                        <span className="block text-sm font-medium">ELO Ranked Summarisation</span>
+                        <span className="block text-sm font-medium">
+                          {t('organisms.ensembleConfigurationSummary.consensusPreset.elo.title')}
+                        </span>
                         <span className="block text-xs text-muted-foreground">
-                          Pairwise ranking with Top N synthesis. Requires at least 3 models.
+                          {t('organisms.ensembleConfigurationSummary.consensusPreset.elo.description')}
                         </span>
                       </span>
                     </label>
@@ -172,16 +178,20 @@ export const EnsembleConfigurationSummary = React.forwardRef<
                         data-testid="preset-majority"
                       />
                       <span className="space-y-1">
-                        <span className="block text-sm font-medium">Majority Voting</span>
+                        <span className="block text-sm font-medium">
+                          {t('organisms.ensembleConfigurationSummary.consensusPreset.majority.title')}
+                        </span>
                         <span className="block text-xs text-muted-foreground">
-                          Favors the majority position across responses. Works with 2+ models.
+                          {t('organisms.ensembleConfigurationSummary.consensusPreset.majority.description')}
                         </span>
                       </span>
                     </label>
 
                     {consensusMethod === 'elo' && onTopNChange && (
                       <div className="flex items-center gap-2 ml-4">
-                        <span className="text-sm text-muted-foreground">Top N:</span>
+                        <span className="text-sm text-muted-foreground">
+                          {t('organisms.ensembleConfigurationSummary.consensusPreset.topN')}
+                        </span>
                         <input
                           type="number"
                           min={3}
@@ -196,9 +206,14 @@ export const EnsembleConfigurationSummary = React.forwardRef<
                   </div>
 
                   {selectedModels.length < 3 && (
-                    <p className="text-xs text-warning flex items-center gap-1">
+                    <p
+                      className="text-xs text-warning flex items-center gap-1"
+                      data-testid="preset-elo-warning"
+                    >
                       <span>ℹ️</span>
-                      ELO Ranked Summarisation requires at least 3 models selected ({selectedModels.length} selected)
+                      {t('organisms.ensembleConfigurationSummary.consensusPreset.elo.warning', {
+                        count: selectedModels.length,
+                      })}
                     </p>
                   )}
                 </div>

@@ -115,7 +115,24 @@
       "selectedModels": "Selected Models ({{count}})",
       "summarizer": "Summarizer",
       "noSummarizer": "Not selected",
-      "setSummarizer": "Set {{model}} as summarizer"
+      "setSummarizer": "Set {{model}} as summarizer",
+      "consensusPreset": {
+        "heading": "Consensus Preset",
+        "topN": "Top N:",
+        "standard": {
+          "title": "Standard Summarisation",
+          "description": "Synthesise all selected model responses equally."
+        },
+        "elo": {
+          "title": "ELO Ranked Summarisation",
+          "description": "Pairwise ranking with Top N synthesis. Needs 3+ models.",
+          "warning": "ELO Ranked Summarisation requires at least 3 models selected ({{count}} selected)"
+        },
+        "majority": {
+          "title": "Majority Voting",
+          "description": "Favors the majority position across responses. Works with 2+ models."
+        }
+      }
     },
     "ensembleManagementPanel": {
       "quickPresets": "Quick presets",
