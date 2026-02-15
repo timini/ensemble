@@ -292,7 +292,7 @@
       },
       "security": {
         "heading": "Security & Privacy",
-        "body": "Military-grade encryption with zero server-side storage in Free Mode.",
+        "body": "AES-256-GCM encryption with zero server-side storage in Free Mode.",
         "features": [
           "AES-256-GCM encryption via Web Crypto API",
           "Device-specific key derivation (SHA-256)",
