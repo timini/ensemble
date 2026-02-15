@@ -50,7 +50,7 @@ export function ProgressSteps({
         {steps.map((step, index) => {
           const isCompleted = index < currentIndex;
           const isActive = index === currentIndex;
-          const isClickable = Boolean(onStepClick && isCompleted);
+          const isClickable = onStepClick && isCompleted;
 
           const circle = (
             <div
@@ -80,9 +80,7 @@ export function ProgressSteps({
                   type="button"
                   onClick={() => onStepClick?.(step.id)}
                   data-testid={`progress-step-container-${step.id}`}
-                  data-active={false}
-                  data-completed={true}
-                  aria-label={step.label}
+                  aria-label={`Navigate to ${step.label} step`}
                   className="rounded-full focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
                 >
                   {circle}
@@ -90,8 +88,6 @@ export function ProgressSteps({
               ) : (
                 <div
                   data-testid={`progress-step-container-${step.id}`}
-                  data-active={isActive}
-                  data-completed={isCompleted}
                 >
                   {circle}
                 </div>
