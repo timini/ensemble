@@ -153,7 +153,7 @@ export default function FeaturesPage() {
         }
       />
 
-      <hr className="mt-16 border-border" />
+      <div className="mt-16 border-b border-border" />
 
       <SecuritySection
         heading={t("pages.features.security.heading")}
