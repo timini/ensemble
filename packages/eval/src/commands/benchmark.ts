@@ -130,7 +130,7 @@ export function createBenchmarkCommand(): Command {
             )
           : {};
 
-        const evaluation = evaluateResponses(
+        const evaluation = await evaluateResponses(
           evaluator,
           responses,
           question.groundTruth,

@@ -65,12 +65,11 @@ async function fetchAllRows<TRow>(
 
   while (true) {
     const page = await fetchRowsPage<TRow>(source, offset);
-    rows.push(...page.rows);
-    offset += page.rows.length;
-
-    if (rows.length > MAX_ROWS) {
+    if (rows.length + page.rows.length > MAX_ROWS) {
       throw new Error(`Dataset exceeds maximum supported rows (${MAX_ROWS})`);
     }
+    rows.push(...page.rows);
+    offset += page.rows.length;
 
     if (page.num_rows_total !== undefined) {
       totalRows = page.num_rows_total;

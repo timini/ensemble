@@ -6,14 +6,17 @@ import type {
 
 interface EvalLike {
   name: PromptEvaluation['evaluator'];
-  evaluate(response: string, groundTruth: string): EvaluationResult;
+  evaluate(
+    response: string,
+    groundTruth: string,
+  ): EvaluationResult | Promise<EvaluationResult>;
 }
 
-export function evaluateResponses(
+export async function evaluateResponses(
   evaluator: EvalLike | null,
   responses: ProviderResponse[],
   groundTruth: string,
-): PromptEvaluation | undefined {
+): Promise<PromptEvaluation | undefined> {
   if (!evaluator || groundTruth.length === 0) {
     return undefined;
   }
@@ -22,13 +25,14 @@ export function evaluateResponses(
   let evaluatedResponses = 0;
   let correctResponses = 0;
 
-  for (const response of responses) {
+  for (const [index, response] of responses.entries()) {
     if (response.error) {
       continue;
     }
 
-    const key = `${response.provider}:${response.model}`;
-    const result = evaluator.evaluate(response.content, groundTruth);
+    const baseKey = `${response.provider}:${response.model}`;
+    const key = results[baseKey] ? `${baseKey}#${index + 1}` : baseKey;
+    const result = await evaluator.evaluate(response.content, groundTruth);
     results[key] = result;
     evaluatedResponses += 1;
     if (result.correct) {

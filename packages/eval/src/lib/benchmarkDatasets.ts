@@ -4,16 +4,10 @@ import type {
   BenchmarkQuestion,
 } from '../types.js';
 import { benchmarkLoaders } from './benchmarkDatasetLoaders.js';
-import {
-  resolveBenchmarkDatasetName as resolveAliasName,
-} from './benchmarkDatasetShared.js';
+import { resolveBenchmarkDatasetName } from './benchmarkDatasetShared.js';
 import { loadLocalQuestions } from './localBenchmarkDataset.js';
 
-export function resolveBenchmarkDatasetName(
-  dataset: string,
-): BenchmarkDatasetName | null {
-  return resolveAliasName(dataset);
-}
+export { resolveBenchmarkDatasetName } from './benchmarkDatasetShared.js';
 
 export function getBenchmarkLoader(name: BenchmarkDatasetName): BenchmarkLoader {
   return benchmarkLoaders[name];
@@ -23,7 +17,7 @@ export async function loadBenchmarkQuestions(
   dataset: string,
   options?: { sample?: number },
 ): Promise<{ datasetName: BenchmarkDatasetName | null; questions: BenchmarkQuestion[] }> {
-  const datasetName = resolveAliasName(dataset);
+  const datasetName = resolveBenchmarkDatasetName(dataset);
   if (!datasetName) {
     return {
       datasetName: null,

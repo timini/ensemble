@@ -52,7 +52,7 @@ export function createBaselineCommand(): Command {
           [modelSpec],
         );
 
-        const evaluation = evaluateResponses(
+        const evaluation = await evaluateResponses(
           evaluator,
           responses,
           question.groundTruth,
