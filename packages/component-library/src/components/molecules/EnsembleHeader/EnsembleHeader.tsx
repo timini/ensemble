@@ -19,14 +19,14 @@ export function EnsembleHeader({ onSettingsClick }: EnsembleHeaderProps) {
   const featuresLabel = isReady ? t('ensemble.header.features') : 'Features';
 
   return (
-    <div className="bg-background border-b border-border">
+    <header className="bg-background border-b border-border">
       <div className="max-w-6xl mx-auto px-6 py-6">
         <div className="flex items-center justify-between">
           <a href="/config" className="group block">
             <h1 className="text-2xl font-bold text-foreground group-hover:text-primary transition-colors">{title}</h1>
             <p className="text-muted-foreground mt-1">{tagline}</p>
           </a>
-          <div className="flex items-center gap-4">
+          <nav className="flex items-center gap-4" aria-label="Main navigation">
             <a
               href="/features"
               className="text-sm text-muted-foreground hover:text-foreground transition-colors"
@@ -46,9 +46,9 @@ export function EnsembleHeader({ onSettingsClick }: EnsembleHeaderProps) {
             >
               <Settings className="w-5 h-5 text-muted-foreground" />
             </button>
-          </div>
+          </nav>
         </div>
       </div>
-    </div>
+    </header>
   );
 }
