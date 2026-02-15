@@ -53,7 +53,7 @@ test.describe('Review Page', () => {
     await expect(page).toHaveTitle(/Ensemble AI/i);
 
     // Check for page hero heading
-    await expect(page.locator('h1')).toBeVisible();
+    await expect(page.getByTestId('page-hero').locator('h1')).toBeVisible();
 
     // Check for workflow navigator
     await expect(page.getByTestId('workflow-navigator')).toBeVisible();
