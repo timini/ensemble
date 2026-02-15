@@ -38,7 +38,7 @@ export function Footer({ githubUrl = 'https://github.com/timini/ensemble' }: Foo
               rel="noopener noreferrer"
               className="text-sm text-muted-foreground hover:text-foreground transition-colors"
             >
-              GitHub
+              {isReady ? t('ensemble.footer.github') : 'GitHub'}
             </a>
           </div>
           <p className="text-sm text-muted-foreground">
