@@ -159,6 +159,11 @@
       "newComparisonButton": "New Comparison",
       "defaultSummarizerLabel": "AI Model"
     },
+    "notFound": {
+      "title": "Page Not Found",
+      "description": "The page you are looking for does not exist or has been moved. Head back to the start to configure your AI ensemble.",
+      "exploreFeatures": "Explore Features"
+    },
     "about": {
       "title": "About Ensemble AI",
       "description": "The science behind better decisions with AI ensembles",
