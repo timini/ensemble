@@ -41,6 +41,37 @@ describe('EnsembleHeader', () => {
     expect(featuresLink).toHaveAttribute('href', '/features');
   });
 
+  it('highlights the active Features link with aria-current and font-semibold', () => {
+    render(<EnsembleHeader currentPath="/features" />);
+    const featuresLink = screen.getByRole('link', { name: /features/i });
+    expect(featuresLink).toHaveAttribute('aria-current', 'page');
+    expect(featuresLink).toHaveClass('font-semibold');
+
+    const aboutLink = screen.getByRole('link', { name: /about/i });
+    expect(aboutLink).not.toHaveAttribute('aria-current');
+  });
+
+  it('highlights the active About link with aria-current and font-semibold', () => {
+    render(<EnsembleHeader currentPath="/about" />);
+    const aboutLink = screen.getByRole('link', { name: /about/i });
+    expect(aboutLink).toHaveAttribute('aria-current', 'page');
+    expect(aboutLink).toHaveClass('font-semibold');
+
+    const featuresLink = screen.getByRole('link', { name: /features/i });
+    expect(featuresLink).not.toHaveAttribute('aria-current');
+  });
+
+  it('uses semantic header element', () => {
+    const { container } = render(<EnsembleHeader />);
+    expect(container.firstChild?.nodeName).toBe('HEADER');
+  });
+
+  it('wraps navigation links in a nav element', () => {
+    render(<EnsembleHeader />);
+    const nav = screen.getByRole('navigation', { name: /main navigation/i });
+    expect(nav).toBeInTheDocument();
+  });
+
   it('applies correct styling classes', () => {
     const { container } = render(<EnsembleHeader />);
     const header = container.firstChild;

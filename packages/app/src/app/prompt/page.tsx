@@ -164,7 +164,16 @@ export default function PromptPage() {
       />
 
       <div className="mt-8 space-y-8">
-        {/* Ensemble Configuration Summary */}
+        {/* Prompt Input (primary action — immediately visible) */}
+        <PromptInputWithHint
+          value={localPrompt}
+          onChange={handlePromptChange}
+        />
+
+        {/* Tips for better prompts */}
+        <PromptTips />
+
+        {/* Ensemble Configuration Summary (secondary info) */}
         {selectedModelIds.length > 0 && (
           <EnsembleConfigurationSummary
             selectedModels={modelNames}
@@ -198,15 +207,6 @@ export default function PromptPage() {
             </div>
           </div>
         )}
-
-        {/* Prompt Input */}
-        <PromptInputWithHint
-          value={localPrompt}
-          onChange={handlePromptChange}
-        />
-
-        {/* Tips for better prompts */}
-        <PromptTips />
       </div>
 
       <div className="mt-12">
