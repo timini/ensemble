@@ -70,7 +70,7 @@ export default function EnsemblePage() {
             <p className="text-sm text-muted-foreground" data-testid="model-selection-counter">
               {t('pages.ensemble.selectionCounter', {
                 count: displayedSelectedModelIds.length,
-                max: 6,
+                max: availableModels.length,
               })}
             </p>
           </div>
