@@ -37,7 +37,7 @@ test.describe('Ensemble Page', () => {
     await expect(page).toHaveTitle(/Ensemble AI/i);
 
     // Check for page hero heading
-    await expect(page.locator('h1')).toBeVisible();
+    await expect(page.getByTestId('page-hero').locator('h1')).toBeVisible();
     const guidance = page.getByTestId('ensemble-selection-guidance');
     await expect(guidance).toBeVisible();
     await expect(guidance.getByTestId('selection-guidance-title')).toBeVisible();
