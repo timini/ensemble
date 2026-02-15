@@ -6,16 +6,14 @@ export interface FooterProps {
 }
 
 export function Footer({ githubUrl = 'https://github.com/timini/ensemble' }: FooterProps) {
-  const { t, i18n, ready } = useTranslation();
-
-  const isReady = ready || i18n.isInitialized;
+  const { t } = useTranslation();
 
   const year = new Date().getFullYear();
 
   const navLinks = [
-    { href: '/config', label: isReady ? t('ensemble.footer.getStarted') : 'Get Started' },
-    { href: '/features', label: isReady ? t('ensemble.footer.features') : 'Features' },
-    { href: '/about', label: isReady ? t('ensemble.footer.about') : 'About' },
+    { href: '/config', label: t('ensemble.footer.getStarted') },
+    { href: '/features', label: t('ensemble.footer.features') },
+    { href: '/about', label: t('ensemble.footer.about') },
   ];
 
   return (
@@ -38,13 +36,11 @@ export function Footer({ githubUrl = 'https://github.com/timini/ensemble' }: Foo
               rel="noopener noreferrer"
               className="text-sm text-muted-foreground hover:text-foreground transition-colors"
             >
-              {isReady ? t('ensemble.footer.github') : 'GitHub'}
+              {t('ensemble.footer.github')}
             </a>
           </div>
           <p className="text-sm text-muted-foreground">
-            {isReady
-              ? t('ensemble.footer.copyright', { year })
-              : `\u00A9 ${year} Ensemble AI`}
+            {t('ensemble.footer.copyright', { year })}
           </p>
         </div>
       </div>
