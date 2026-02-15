@@ -28,12 +28,17 @@ export default function ConfigPage() {
     handleKeyChange,
     handleToggleShow,
     handleContinue,
+    handleProgressStepClick,
     allowContinue,
   } = useConfigPage();
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-6xl">
-      <ProgressSteps currentStep={currentStep} fallbackStep="config" />
+      <ProgressSteps
+        currentStep={currentStep}
+        fallbackStep="config"
+        onStepClick={handleProgressStepClick}
+      />
 
       <PageHero
         title={t('pages.config.title')}

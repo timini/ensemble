@@ -5,14 +5,15 @@ import { useStore } from '~/store';
 import { useHasHydrated } from '~/hooks/useHasHydrated';
 import type { OperatingMode } from '~/store/slices/modeSlice';
 import type { Provider, ValidationStatus } from '@/components/molecules/ApiKeyInput';
+import type { Step } from '@/components/molecules/ProgressSteps';
 import { validateApiKey, createDebouncedValidator } from '~/lib/validation';
+import { STEP_ROUTES } from '~/lib/workflowRoutes';
 import { isWebCryptoAvailable } from '@ensemble-ai/shared-utils/security';
 import { toError } from '~/lib/errors';
 import { getHydratedStatus } from '~/lib/providerStatus';
 import { logger } from '~/lib/logger';
 
 const PROVIDERS: Provider[] = ['openai', 'anthropic', 'google', 'xai'];
-
 export function useConfigPage() {
     const { t } = useTranslation('common');
     const router = useRouter();
@@ -130,6 +131,11 @@ export function useConfigPage() {
         router.push('/ensemble');
     };
 
+    const handleProgressStepClick = (step: Step) => {
+        setCurrentStep(step);
+        router.push(STEP_ROUTES[step]);
+    };
+
     // Prepare API key configuration items for Free mode
     const isFreeModeActive = displayMode === 'free' && webCryptoSupported;
 
@@ -241,6 +247,7 @@ export function useConfigPage() {
         handleKeyChange,
         handleToggleShow,
         handleContinue,
+        handleProgressStepClick,
         allowContinue,
     };
 }

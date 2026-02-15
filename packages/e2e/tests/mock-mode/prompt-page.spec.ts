@@ -147,6 +147,21 @@ test.describe('Prompt Page', () => {
     await expect(promptStep).toHaveAttribute('data-active', 'true');
   });
 
+  test('completed progress steps are clickable and navigate to earlier pages', async ({ page }) => {
+    const configStep = page.getByTestId('progress-step-config');
+    const ensembleStep = page.getByTestId('progress-step-ensemble');
+    const promptStep = page.getByTestId('progress-step-prompt');
+    const reviewStep = page.getByTestId('progress-step-review');
+
+    await expect(configStep).toHaveAttribute('type', 'button');
+    await expect(ensembleStep).toHaveAttribute('type', 'button');
+    await expect(promptStep).not.toHaveAttribute('type', 'button');
+    await expect(reviewStep).not.toHaveAttribute('type', 'button');
+
+    await configStep.click();
+    await expect(page).toHaveURL('/config');
+  });
+
   test('can change summarizer by clicking model badges', async ({ page }) => {
     const summaryCard = page.getByTestId('ensemble-configuration-summary');
     await expect(summaryCard).toBeVisible();

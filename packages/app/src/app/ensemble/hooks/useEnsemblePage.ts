@@ -6,9 +6,11 @@ import { useStore } from '~/store';
 import type { ProviderType } from '~/store/slices/ensembleSlice';
 import type { OperatingMode } from '~/store/slices/modeSlice';
 import type { Provider, ValidationStatus } from '@/components/molecules/ApiKeyInput';
+import type { Step } from '@/components/molecules/ProgressSteps';
 import { validateApiKey, createDebouncedValidator } from '~/lib/validation';
 import { getHydratedStatus, createProviderStatusLabels } from '~/lib/providerStatus';
 import { useHasHydrated } from '~/hooks/useHasHydrated';
+import { STEP_ROUTES } from '~/lib/workflowRoutes';
 import { useManualResponseModal } from './useManualResponseModal';
 import { useApiKeyModal } from './useApiKeyModal';
 import { useAvailableModels } from './useAvailableModels';
@@ -180,6 +182,11 @@ export function useEnsemblePage() {
         router.push('/config');
     };
 
+    const handleProgressStepClick = (step: Step) => {
+        setCurrentStep(step);
+        router.push(STEP_ROUTES[step]);
+    };
+
     // Placeholder handlers for EnsembleManagementPanel
     const handleLoadPreset = (presetId: string) => {
         logger.debug('Load preset:', presetId);
@@ -249,6 +256,7 @@ export function useEnsemblePage() {
         clearSelection,
         handleContinue,
         handleBack,
+        handleProgressStepClick,
         isValid,
         handleConsensusMethodChange,
         handleTopNChange,

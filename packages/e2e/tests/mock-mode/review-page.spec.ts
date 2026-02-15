@@ -131,6 +131,19 @@ test.describe('Review Page', () => {
     await expect(reviewStep).toHaveAttribute('data-active', 'true');
   });
 
+  test('completed progress steps are clickable and navigate to earlier pages', async ({ page }) => {
+    const configStep = page.getByTestId('progress-step-config');
+    const promptStep = page.getByTestId('progress-step-prompt');
+    const reviewStep = page.getByTestId('progress-step-review');
+
+    await expect(configStep).toHaveAttribute('type', 'button');
+    await expect(promptStep).toHaveAttribute('type', 'button');
+    await expect(reviewStep).not.toHaveAttribute('type', 'button');
+
+    await promptStep.click();
+    await expect(page).toHaveURL('/prompt');
+  });
+
   test('displays progress steps component', async ({ page }) => {
     // Check progress steps component is present
     const progressSteps = page.locator('[class*="progress"]').first();

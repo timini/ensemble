@@ -40,12 +40,17 @@ export default function EnsemblePage() {
     clearSelection,
     handleContinue,
     handleBack,
+    handleProgressStepClick,
     isValid,
   } = useEnsemblePage();
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-6xl">
-      <ProgressSteps currentStep={currentStep} fallbackStep="ensemble" />
+      <ProgressSteps
+        currentStep={currentStep}
+        fallbackStep="ensemble"
+        onStepClick={handleProgressStepClick}
+      />
 
       <PageHero
         title={t('pages.ensemble.title')}
