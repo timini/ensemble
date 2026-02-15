@@ -57,6 +57,8 @@ export interface PromptRunResult {
   questionId?: string;
   prompt: string;
   groundTruth?: string;
+  category?: string;
+  difficulty?: string;
   responses: ProviderResponse[];
   consensus: Partial<Record<StrategyName, string>>;
   evaluation?: PromptEvaluation;
