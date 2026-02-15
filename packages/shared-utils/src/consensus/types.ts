@@ -5,6 +5,8 @@ export interface ConsensusModelResponse {
     content: string;   // "response" in ModelResponse
 }
 
+export type ConsensusMethod = 'standard' | 'elo' | 'majority';
+
 export interface Pairing {
     modelA: ConsensusModelResponse;
     modelB: ConsensusModelResponse;

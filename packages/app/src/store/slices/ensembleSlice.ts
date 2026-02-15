@@ -5,6 +5,7 @@
  */
 
 import type { StateCreator } from 'zustand';
+import type { ConsensusMethod } from '@ensemble-ai/shared-utils/consensus/types';
 
 export type ProviderType = 'openai' | 'anthropic' | 'google' | 'xai';
 
@@ -21,7 +22,7 @@ export interface SavedEnsemble {
   description: string;
   models: ModelSelection[];
   summarizer: string;
-  consensusMethod: 'standard' | 'elo';
+  consensusMethod: ConsensusMethod;
   eloTopN: number;
 }
 
@@ -31,14 +32,14 @@ export interface EnsembleSlice {
   embeddingsProvider: ProviderType;
   savedEnsembles: SavedEnsemble[];
   currentEnsembleId: string | null;
-  consensusMethod: 'standard' | 'elo';
+  consensusMethod: ConsensusMethod;
   eloTopN: number;
 
   addModel: (provider: ProviderType, model: string) => void;
   removeModel: (modelId: string) => void;
   setSummarizer: (modelId: string) => void;
   setEmbeddingsProvider: (provider: ProviderType) => void;
-  setConsensusMethod: (method: 'standard' | 'elo') => void;
+  setConsensusMethod: (method: ConsensusMethod) => void;
   setEloTopN: (n: number) => void;
   saveEnsemble: (name: string, description: string) => void;
   loadEnsemble: (ensembleId: string) => void;

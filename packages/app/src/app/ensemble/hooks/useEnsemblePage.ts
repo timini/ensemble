@@ -1,6 +1,7 @@
 import { useRef, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslation } from 'react-i18next';
+import type { ConsensusMethod } from '@ensemble-ai/shared-utils/consensus/types';
 import { useStore } from '~/store';
 import type { ProviderType } from '~/store/slices/ensembleSlice';
 import type { OperatingMode } from '~/store/slices/modeSlice';
@@ -136,7 +137,7 @@ export function useEnsemblePage() {
         }
     };
 
-    const handleConsensusMethodChange = (method: 'standard' | 'elo') => {
+    const handleConsensusMethodChange = (method: ConsensusMethod) => {
         setConsensusMethod(method);
     };
 

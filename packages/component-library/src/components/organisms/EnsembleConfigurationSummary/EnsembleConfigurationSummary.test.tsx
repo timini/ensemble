@@ -440,6 +440,68 @@ describe('EnsembleConfigurationSummary', () => {
     });
   });
 
+  describe('consensus presets', () => {
+    it('renders majority voting option when consensus controls are enabled', () => {
+      render(
+        <EnsembleConfigurationSummary
+          selectedModels={mockSelectedModels}
+          summarizerModel={mockSummarizerModel}
+          onConsensusMethodChange={() => {}}
+        />
+      );
+
+      expect(screen.getByTestId('preset-standard')).toBeInTheDocument();
+      expect(screen.getByTestId('preset-elo')).toBeInTheDocument();
+      expect(screen.getByTestId('preset-majority')).toBeInTheDocument();
+      expect(
+        screen.getByText('Favors the majority position across responses. Works with 2+ models.')
+      ).toBeInTheDocument();
+    });
+
+    it('calls onConsensusMethodChange with majority when selected', async () => {
+      const handleConsensusMethodChange = vi.fn();
+      const user = userEvent.setup();
+
+      render(
+        <EnsembleConfigurationSummary
+          selectedModels={mockSelectedModels}
+          summarizerModel={mockSummarizerModel}
+          onConsensusMethodChange={handleConsensusMethodChange}
+        />
+      );
+
+      await user.click(screen.getByTestId('preset-majority'));
+
+      expect(handleConsensusMethodChange).toHaveBeenCalledWith('majority');
+    });
+
+    it('shows Top N input for elo only', () => {
+      const { rerender } = render(
+        <EnsembleConfigurationSummary
+          selectedModels={mockSelectedModels}
+          summarizerModel={mockSummarizerModel}
+          consensusMethod="majority"
+          onConsensusMethodChange={() => {}}
+          onTopNChange={() => {}}
+        />
+      );
+
+      expect(screen.queryByTestId('input-top-n')).not.toBeInTheDocument();
+
+      rerender(
+        <EnsembleConfigurationSummary
+          selectedModels={mockSelectedModels}
+          summarizerModel={mockSummarizerModel}
+          consensusMethod="elo"
+          onConsensusMethodChange={() => {}}
+          onTopNChange={() => {}}
+        />
+      );
+
+      expect(screen.getByTestId('input-top-n')).toBeInTheDocument();
+    });
+  });
+
   describe('internationalization', () => {
     it('renders English text', () => {
       renderWithI18n(

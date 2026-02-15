@@ -167,6 +167,19 @@ export const DarkModeWithConsensus: Story = {
   ],
 };
 
+export const MajorityVotingConsensus: Story = {
+  args: {
+    selectedModels: [
+      'claude-3-opus-20240229',
+      'gpt-4-turbo',
+    ],
+    summarizerModel: 'gpt-4-turbo',
+    consensusMethod: 'majority',
+    onConsensusMethodChange: () => {},
+    onTopNChange: () => {},
+  },
+};
+
 // Long model names
 export const LongModelNames: Story = {
   args: {
