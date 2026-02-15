@@ -28,3 +28,11 @@ export const WithPage: Story = {
     </div>
   ),
 };
+
+export const ActiveFeatures: Story = {
+  args: { currentPath: '/features' },
+};
+
+export const ActiveAbout: Story = {
+  args: { currentPath: '/about' },
+};

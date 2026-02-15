@@ -61,6 +61,17 @@ describe('EnsembleHeader', () => {
     expect(featuresLink).not.toHaveAttribute('aria-current');
   });
 
+  it('uses semantic header element', () => {
+    const { container } = render(<EnsembleHeader />);
+    expect(container.firstChild?.nodeName).toBe('HEADER');
+  });
+
+  it('wraps navigation links in a nav element', () => {
+    render(<EnsembleHeader />);
+    const nav = screen.getByRole('navigation', { name: /main navigation/i });
+    expect(nav).toBeInTheDocument();
+  });
+
   it('applies correct styling classes', () => {
     const { container } = render(<EnsembleHeader />);
     const header = container.firstChild;

@@ -21,28 +21,31 @@ export function EnsembleHeader({ onSettingsClick, currentPath }: EnsembleHeaderP
   const featuresLabel = isReady ? t('ensemble.header.features') : 'Features';
 
   return (
-    <div className="bg-background border-b border-border">
+    <header className="bg-background border-b border-border">
       <div className="max-w-6xl mx-auto px-6 py-6">
         <div className="flex items-center justify-between">
           <a href="/config" className="group block">
             <h1 className="text-2xl font-bold text-foreground group-hover:text-primary transition-colors">{title}</h1>
             <p className="text-muted-foreground mt-1">{tagline}</p>
           </a>
-          <div className="flex items-center gap-4">
-            <a
-              href="/features"
-              className={`text-sm transition-colors ${currentPath === '/features' ? 'text-foreground font-semibold' : 'text-muted-foreground hover:text-foreground'}`}
-              {...(currentPath === '/features' ? { 'aria-current': 'page' as const } : {})}
-            >
-              {featuresLabel}
-            </a>
-            <a
-              href="/about"
-              className={`text-sm transition-colors ${currentPath === '/about' ? 'text-foreground font-semibold' : 'text-muted-foreground hover:text-foreground'}`}
-              {...(currentPath === '/about' ? { 'aria-current': 'page' as const } : {})}
-            >
-              {aboutLabel}
-            </a>
+          <nav className="flex items-center gap-4" aria-label="Main navigation">
+            {[
+              { href: '/features', label: featuresLabel },
+              { href: '/about', label: aboutLabel },
+            ].map(({ href, label }) => (
+              <a
+                key={href}
+                href={href}
+                className={`text-sm transition-colors ${
+                  currentPath === href
+                    ? 'text-foreground font-semibold'
+                    : 'text-muted-foreground hover:text-foreground'
+                }`}
+                aria-current={currentPath === href ? 'page' : undefined}
+              >
+                {label}
+              </a>
+            ))}
             <button
               onClick={onSettingsClick}
               className="p-2 hover:bg-accent rounded-md transition-colors"
@@ -50,9 +53,9 @@ export function EnsembleHeader({ onSettingsClick, currentPath }: EnsembleHeaderP
             >
               <Settings className="w-5 h-5 text-muted-foreground" />
             </button>
-          </div>
+          </nav>
         </div>
       </div>
-    </div>
+    </header>
   );
 }
