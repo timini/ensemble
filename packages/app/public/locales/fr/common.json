@@ -130,7 +130,8 @@
       "title": "Construire votre ensemble",
       "description": "Sélectionnez au moins 2 modèles d'IA pour comparer leurs réponses",
       "selectionGuidanceTitle": "Fonctionnement de la sélection des modèles",
-      "selectionGuidanceDescription": "Choisissez au moins 2 modèles pour continuer, et variez les fournisseurs pour obtenir une perspective plus large."
+      "selectionGuidanceDescription": "Choisissez au moins 2 modèles pour continuer, et variez les fournisseurs pour obtenir une perspective plus large.",
+      "selectionCounter": "{{count}} sur {{max}} modèles sélectionnés"
     },
     "prompt": {
       "title": "Entrez votre invite",

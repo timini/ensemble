@@ -1,13 +1,15 @@
 import type { AIProvider } from '@ensemble-ai/shared-utils/providers';
 import { EloRankingConsensus } from '@ensemble-ai/shared-utils/consensus/EloRankingConsensus';
+import { MajorityVotingConsensus } from '@ensemble-ai/shared-utils/consensus/MajorityVotingConsensus';
 import { StandardConsensus } from '@ensemble-ai/shared-utils/consensus/StandardConsensus';
 import type { ConsensusModelResponse } from '@ensemble-ai/shared-utils/consensus/types';
 import type { ProviderResponse, StrategyName } from '../types.js';
 import { explodeList } from './modelSpecs.js';
 
-const VALID_STRATEGIES: StrategyName[] = ['standard', 'elo'];
+const VALID_STRATEGIES: StrategyName[] = ['standard', 'elo', 'majority'];
 const VALID_STRATEGY_SET = new Set<StrategyName>(VALID_STRATEGIES);
 const MIN_RESPONSES_FOR_ELO = 3;
+const MIN_RESPONSES_FOR_MAJORITY = 2;
 
 export function parseStrategies(values: string[]): StrategyName[] {
   const items = explodeList(values).map((value) => value.toLowerCase().trim());
@@ -77,6 +79,22 @@ export async function generateConsensus(
       outputs.elo = await elo.generateConsensus(
         consensusResponses,
         Math.min(MIN_RESPONSES_FOR_ELO, consensusResponses.length),
+        prompt,
+      );
+      continue;
+    }
+
+    if (strategy === 'majority') {
+      if (consensusResponses.length < MIN_RESPONSES_FOR_MAJORITY) {
+        outputs.majority =
+          `Majority strategy requires at least ${MIN_RESPONSES_FOR_MAJORITY} successful model responses.`;
+        continue;
+      }
+
+      const majority = new MajorityVotingConsensus(summarizerClient, summarizerModel);
+      outputs.majority = await majority.generateConsensus(
+        consensusResponses,
+        consensusResponses.length,
         prompt,
       );
     }

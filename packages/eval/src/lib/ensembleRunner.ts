@@ -1,0 +1,112 @@
+import type {
+  AIProvider,
+  ModelMetadata,
+  ProviderRegistry,
+} from '@ensemble-ai/shared-utils/providers';
+import type { EvalMode, ModelSpec, ProviderResponse } from '../types.js';
+
+export interface EnsembleRunnerOptions {
+  requestDelayMs?: number;
+}
+
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function estimateCostUsd(
+  tokenCount: number | undefined,
+  metadata: ModelMetadata | null,
+): number | undefined {
+  if (!metadata || tokenCount === undefined || tokenCount <= 0) {
+    return undefined;
+  }
+
+  return (tokenCount / 1000) * metadata.costPer1kTokens;
+}
+
+async function streamModelResponse(
+  client: AIProvider,
+  prompt: string,
+  model: string,
+): Promise<Pick<ProviderResponse, 'content' | 'responseTimeMs' | 'tokenCount' | 'error'>> {
+  return new Promise((resolve) => {
+    let content = '';
+    let settled = false;
+
+    const safeResolve = (
+      value: Pick<ProviderResponse, 'content' | 'responseTimeMs' | 'tokenCount' | 'error'>,
+    ) => {
+      if (settled) {
+        return;
+      }
+      settled = true;
+      resolve(value);
+    };
+
+    client
+      .streamResponse(
+        prompt,
+        model,
+        (chunk) => {
+          content += chunk;
+        },
+        (fullResponse, responseTime, tokenCount) => {
+          safeResolve({
+            content: fullResponse || content,
+            responseTimeMs: responseTime,
+            tokenCount,
+          });
+        },
+        (error) => {
+          safeResolve({
+            content,
+            responseTimeMs: 0,
+            error: error.message,
+          });
+        },
+      )
+      .catch((error: unknown) => {
+        const message = error instanceof Error ? error.message : String(error);
+        safeResolve({
+          content,
+          responseTimeMs: 0,
+          error: message,
+        });
+      });
+  });
+}
+
+export class EnsembleRunner {
+  private readonly requestDelayMs: number;
+
+  constructor(
+    private readonly registry: ProviderRegistry,
+    private readonly mode: EvalMode,
+    options?: EnsembleRunnerOptions,
+  ) {
+    this.requestDelayMs = Math.max(0, options?.requestDelayMs ?? 0);
+  }
+
+  async runPrompt(prompt: string, models: ModelSpec[]): Promise<ProviderResponse[]> {
+    const tasks = models.map(async ({ provider, model }, index) => {
+      if (this.requestDelayMs > 0 && index > 0) {
+        await sleep(index * this.requestDelayMs);
+      }
+
+      const client = this.registry.getProvider(provider, this.mode);
+      const metadata =
+        client.listAvailableModels().find((candidate) => candidate.id === model) ?? null;
+      const result = await streamModelResponse(client, prompt, model);
+      const estimatedCostUsd = estimateCostUsd(result.tokenCount, metadata);
+
+      return {
+        provider,
+        model,
+        ...result,
+        ...(estimatedCostUsd === undefined ? {} : { estimatedCostUsd }),
+      } satisfies ProviderResponse;
+    });
+
+    return Promise.all(tasks);
+  }
+}

@@ -4,7 +4,7 @@ import type {
   ProviderResponse,
 } from '../types.js';
 
-interface EvalLike {
+export interface EvaluatorLike {
   name: PromptEvaluation['evaluator'];
   evaluate(
     response: string,
@@ -14,7 +14,7 @@ interface EvalLike {
 }
 
 export async function evaluateResponses(
-  evaluator: EvalLike | null,
+  evaluator: EvaluatorLike | null,
   responses: ProviderResponse[],
   groundTruth: string,
   prompt?: string,
