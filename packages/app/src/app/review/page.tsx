@@ -29,6 +29,8 @@ import { useConsensusGeneration } from "./hooks/useConsensusGeneration";
 import { useConsensusStatus } from "./hooks/useConsensusStatus";
 import { useConsensusTrigger } from "./hooks/useConsensusTrigger";
 
+const MAX_EXPANDED_CARDS = 3;
+
 export default function ReviewPage() {
   const { t } = useTranslation();
   const router = useRouter();
@@ -197,7 +199,7 @@ export default function ReviewPage() {
                 testId={`response-card-${response.modelId}`}
                 tokenCount={response.tokenCount ?? undefined}
                 onRetry={() => retryModel(response.modelId)}
-                defaultExpanded={index < 3}
+                defaultExpanded={index < MAX_EXPANDED_CARDS}
               />
             ))}
             {viewManualResponses.map((manual) => (
