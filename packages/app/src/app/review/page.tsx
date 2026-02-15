@@ -174,7 +174,7 @@ export default function ReviewPage() {
           </div>
         ) : (
           <div className="space-y-4">
-            {viewResponses.map((response) => (
+            {viewResponses.map((response, index) => (
               <ResponseCard
                 key={response.modelId}
                 modelName={response.model}
@@ -197,6 +197,7 @@ export default function ReviewPage() {
                 testId={`response-card-${response.modelId}`}
                 tokenCount={response.tokenCount ?? undefined}
                 onRetry={() => retryModel(response.modelId)}
+                defaultExpanded={index < 3}
               />
             ))}
             {viewManualResponses.map((manual) => (
