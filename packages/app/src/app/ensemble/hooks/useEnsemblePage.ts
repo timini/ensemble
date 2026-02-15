@@ -3,14 +3,13 @@ import { useRouter } from 'next/navigation';
 import { useTranslation } from 'react-i18next';
 import type { ConsensusMethod } from '@ensemble-ai/shared-utils/consensus/types';
 import { useStore } from '~/store';
+import { useStepNavigation } from '~/hooks/useStepNavigation';
 import type { ProviderType } from '~/store/slices/ensembleSlice';
 import type { OperatingMode } from '~/store/slices/modeSlice';
 import type { Provider, ValidationStatus } from '@/components/molecules/ApiKeyInput';
-import type { Step } from '@/components/molecules/ProgressSteps';
 import { validateApiKey, createDebouncedValidator } from '~/lib/validation';
 import { getHydratedStatus, createProviderStatusLabels } from '~/lib/providerStatus';
 import { useHasHydrated } from '~/hooks/useHasHydrated';
-import { STEP_ROUTES } from '~/lib/workflowRoutes';
 import { useManualResponseModal } from './useManualResponseModal';
 import { useApiKeyModal } from './useApiKeyModal';
 import { useAvailableModels } from './useAvailableModels';
@@ -24,6 +23,7 @@ import { logger } from '~/lib/logger';
 export function useEnsemblePage() {
     const { t } = useTranslation('common');
     const router = useRouter();
+    const handleProgressStepClick = useStepNavigation();
 
     const mode = useStore((state) => state.mode);
     const apiKeys = useStore((state) => state.apiKeys);
@@ -180,11 +180,6 @@ export function useEnsemblePage() {
     const handleBack = () => {
         setCurrentStep('config');
         router.push('/config');
-    };
-
-    const handleProgressStepClick = (step: Step) => {
-        setCurrentStep(step);
-        router.push(STEP_ROUTES[step]);
     };
 
     // Placeholder handlers for EnsembleManagementPanel

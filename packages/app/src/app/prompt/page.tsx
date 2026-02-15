@@ -11,13 +11,13 @@ import { useRouter } from 'next/navigation';
 import { useState, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useStore } from '~/store';
+import { useStepNavigation } from '~/hooks/useStepNavigation';
 import { PageHero } from '@/components/organisms/PageHero';
 import { EnsembleConfigurationSummary } from '@/components/organisms/EnsembleConfigurationSummary';
 import { WorkflowNavigator } from '@/components/organisms/WorkflowNavigator';
 import { PromptTips } from '@/components/organisms/PromptTips';
 import { PromptInputWithHint } from '@/components/organisms/PromptInputWithHint';
 import { ProgressSteps } from '@/components/molecules/ProgressSteps';
-import type { Step } from '@/components/molecules/ProgressSteps';
 import { ResponseCard } from '@/components/molecules/ResponseCard';
 import {
   ProviderRegistry,
@@ -25,11 +25,11 @@ import {
 } from '@ensemble-ai/shared-utils/providers';
 import { FALLBACK_MODELS } from '~/lib/models';
 import { toError } from '~/lib/errors';
-import { STEP_ROUTES } from '~/lib/workflowRoutes';
 
 export default function PromptPage() {
   const { t } = useTranslation();
   const router = useRouter();
+  const handleProgressStepClick = useStepNavigation();
 
   const selectedModels = useStore((state) => state.selectedModels);
   const summarizerModel = useStore((state) => state.summarizerModel);
@@ -142,11 +142,6 @@ export default function PromptPage() {
   const handleBack = () => {
     setCurrentStep('ensemble');
     router.push('/ensemble');
-  };
-
-  const handleProgressStepClick = (step: Step) => {
-    setCurrentStep(step);
-    router.push(STEP_ROUTES[step]);
   };
 
   // Validate: prompt must not be empty

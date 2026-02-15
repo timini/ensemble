@@ -96,13 +96,13 @@ export function ProgressSteps({
                   {circle}
                 </div>
               )}
-            {index < steps.length - 1 && (
-              <div
-                className={`w-16 h-0.5 mx-4 transition-colors ${
-                  index < currentIndex ? 'bg-success' : 'bg-muted'
-                }`}
-              />
-            )}
+              {index < steps.length - 1 && (
+                <div
+                  className={`w-16 h-0.5 mx-4 transition-colors ${
+                    index < currentIndex ? 'bg-success' : 'bg-muted'
+                  }`}
+                />
+              )}
             </div>
           );
         })}

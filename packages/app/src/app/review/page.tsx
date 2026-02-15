@@ -11,6 +11,7 @@ import { useRouter } from "next/navigation";
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { useHasHydrated } from "~/hooks/useHasHydrated";
+import { useStepNavigation } from "~/hooks/useStepNavigation";
 import { FALLBACK_MODELS } from "~/lib/models";
 import { formatModelLabelFromId } from "~/lib/providerModels";
 import { PageHero } from "@/components/organisms/PageHero";
@@ -18,7 +19,6 @@ import { ResponseCard } from "@/components/molecules/ResponseCard";
 import { ConsensusCard } from "@/components/organisms/ConsensusCard";
 import { AgreementAnalysis } from "@/components/organisms/AgreementAnalysis";
 import { ProgressSteps } from "@/components/molecules/ProgressSteps";
-import type { Step } from "@/components/molecules/ProgressSteps";
 import { WorkflowNavigator } from "@/components/organisms/WorkflowNavigator";
 import { PromptCard } from "@/components/organisms/PromptCard";
 import type { Provider } from "@/components/molecules/ResponseCard";
@@ -29,12 +29,12 @@ import { useStreamingResponses } from "./hooks/useStreamingResponses";
 import { useConsensusGeneration } from "./hooks/useConsensusGeneration";
 import { useConsensusStatus } from "./hooks/useConsensusStatus";
 import { useConsensusTrigger } from "./hooks/useConsensusTrigger";
-import { STEP_ROUTES } from "~/lib/workflowRoutes";
 
 export default function ReviewPage() {
   const { t } = useTranslation();
   const router = useRouter();
   const hasHydrated = useHasHydrated();
+  const handleProgressStepClick = useStepNavigation();
 
   const {
     prompt,
@@ -119,11 +119,6 @@ export default function ReviewPage() {
     setCurrentStep("config");
     resetStreamingState();
     router.push("/config");
-  };
-
-  const handleProgressStepClick = (step: Step) => {
-    setCurrentStep(step);
-    router.push(STEP_ROUTES[step]);
   };
 
   const displayPrompt = hasHydrated ? (prompt ?? "") : "";

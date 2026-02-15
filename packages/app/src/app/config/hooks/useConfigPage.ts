@@ -3,11 +3,10 @@ import { useRouter } from 'next/navigation';
 import { useTranslation } from 'react-i18next';
 import { useStore } from '~/store';
 import { useHasHydrated } from '~/hooks/useHasHydrated';
+import { useStepNavigation } from '~/hooks/useStepNavigation';
 import type { OperatingMode } from '~/store/slices/modeSlice';
 import type { Provider, ValidationStatus } from '@/components/molecules/ApiKeyInput';
-import type { Step } from '@/components/molecules/ProgressSteps';
 import { validateApiKey, createDebouncedValidator } from '~/lib/validation';
-import { STEP_ROUTES } from '~/lib/workflowRoutes';
 import { isWebCryptoAvailable } from '@ensemble-ai/shared-utils/security';
 import { toError } from '~/lib/errors';
 import { getHydratedStatus } from '~/lib/providerStatus';
@@ -17,6 +16,7 @@ const PROVIDERS: Provider[] = ['openai', 'anthropic', 'google', 'xai'];
 export function useConfigPage() {
     const { t } = useTranslation('common');
     const router = useRouter();
+    const handleProgressStepClick = useStepNavigation();
 
     const mode = useStore((state) => state.mode);
     const setMode = useStore((state) => state.setMode);
@@ -129,11 +129,6 @@ export function useConfigPage() {
         completeStep('config');
         setCurrentStep('ensemble');
         router.push('/ensemble');
-    };
-
-    const handleProgressStepClick = (step: Step) => {
-        setCurrentStep(step);
-        router.push(STEP_ROUTES[step]);
     };
 
     // Prepare API key configuration items for Free mode
