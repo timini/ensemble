@@ -227,12 +227,28 @@ describe('ApiKeyInput', () => {
       expect(input).toHaveClass('bg-success/10');
     });
 
+    it('uses success focus ring when valid', () => {
+      const { container } = render(
+        <ApiKeyInput provider="openai" label="API Key" validationStatus="valid" value="sk-valid" />
+      );
+      const input = container.querySelector('input');
+      expect(input).toHaveClass('focus-visible:ring-success/40');
+    });
+
     it('uses destructive token for invalid border', () => {
       const { container } = render(
         <ApiKeyInput provider="openai" label="API Key" validationStatus="invalid" value="bad" error="Invalid" />
       );
       const input = container.querySelector('input');
       expect(input).toHaveClass('border-destructive');
+    });
+
+    it('uses destructive focus ring when invalid', () => {
+      const { container } = render(
+        <ApiKeyInput provider="openai" label="API Key" validationStatus="invalid" value="bad" error="Invalid" />
+      );
+      const input = container.querySelector('input');
+      expect(input).toHaveClass('focus-visible:ring-destructive/40');
     });
 
     it('uses success token for valid icon', () => {

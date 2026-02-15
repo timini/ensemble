@@ -140,8 +140,10 @@ export const ApiKeyInput = React.forwardRef<HTMLInputElement, ApiKeyInputProps>(
             }
             className={cn(
               'pr-20',
-              validationStatus === 'valid' && 'border-success/50 bg-success/10',
-              validationStatus === 'invalid' && 'border-destructive',
+              validationStatus === 'valid' &&
+                'border-success/50 bg-success/10 focus-visible:border-success focus-visible:ring-success/40',
+              validationStatus === 'invalid' &&
+                'border-destructive focus-visible:border-destructive focus-visible:ring-destructive/40',
               disabled && 'disabled:opacity-50'
             )}
           />
