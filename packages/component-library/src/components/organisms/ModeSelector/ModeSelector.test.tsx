@@ -45,7 +45,7 @@ describe('ModeSelector', () => {
         <ModeSelector onSelectFreeMode={vi.fn()} onSelectProMode={vi.fn()} />
       );
 
-      const grid = container.querySelector('.grid.grid-cols-2');
+      const grid = container.querySelector('.grid.md\\:grid-cols-2');
       expect(grid).toBeInTheDocument();
     });
 
@@ -247,12 +247,12 @@ describe('ModeSelector', () => {
   });
 
   describe('layout', () => {
-    it('uses 2-column grid layout', () => {
+    it('uses responsive grid layout', () => {
       const { container } = render(
         <ModeSelector onSelectFreeMode={vi.fn()} onSelectProMode={vi.fn()} />
       );
 
-      const grid = container.querySelector('.grid-cols-2');
+      const grid = container.querySelector('.md\\:grid-cols-2');
       expect(grid).toBeInTheDocument();
     });
 
