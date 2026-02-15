@@ -8,7 +8,7 @@ import { Text } from "@/components/atoms/Text";
 import { Button } from "@/components/atoms/Button";
 
 export default function NotFound() {
-  const { t } = useTranslation();
+  const { t } = useTranslation("common");
 
   return (
     <div
