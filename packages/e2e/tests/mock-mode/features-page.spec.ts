@@ -81,6 +81,33 @@ test.describe('Features Page', () => {
     expect(count).toBeGreaterThanOrEqual(6);
   });
 
+  test('displays hero CTA linking to config', async ({ page }) => {
+    const cta = page.getByTestId('features-hero-cta');
+    await expect(cta).toBeVisible();
+    const link = cta.getByRole('link');
+    await expect(link).toHaveAttribute('href', '/config');
+  });
+
+  test('displays workflow CTA linking to config', async ({ page }) => {
+    const cta = page.getByTestId('features-workflow-cta');
+    await expect(cta).toBeVisible();
+    const link = cta.getByRole('link');
+    await expect(link).toHaveAttribute('href', '/config');
+  });
+
+  test('displays bottom CTA with config link and about link', async ({ page }) => {
+    const cta = page.getByTestId('features-bottom-cta');
+    await expect(cta).toBeVisible();
+
+    // Primary CTA links to /config
+    const configLink = cta.getByRole('link', { name: /get started/i });
+    await expect(configLink).toHaveAttribute('href', '/config');
+
+    // Secondary link to /about
+    const aboutLink = page.getByTestId('about-cta-link');
+    await expect(aboutLink).toHaveAttribute('href', '/about');
+  });
+
   test('header Features link navigates to features page', async ({ page }) => {
     await page.goto('/config');
     await page.getByRole('link', { name: /features/i }).click();
