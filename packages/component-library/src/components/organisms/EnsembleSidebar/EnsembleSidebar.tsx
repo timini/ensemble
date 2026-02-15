@@ -5,7 +5,7 @@ import { Button } from '../../atoms/Button';
 import { Badge } from '../../atoms/Badge';
 import { Heading } from '../../atoms/Heading';
 import { Text } from '../../atoms/Text';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, X } from 'lucide-react';
 import { QuickPresetsSection } from './QuickPresetsSection';
 import { SaveEnsembleSection } from './SaveEnsembleSection';
 import { ManualResponsesSection } from './ManualResponsesSection';
@@ -45,6 +45,8 @@ export interface EnsembleSidebarProps {
   onAddManualResponse: () => void;
   /** Manual responses to display */
   manualResponses?: Array<{ id: string; label: string; response?: string }>;
+  /** Callback when a model is removed from the selection */
+  onRemoveModel?: (modelId: string) => void;
   /** Callback when clear all models is clicked */
   onClearAll?: () => void;
   /** Feature flag to show Quick Presets section (default: true) */
@@ -97,6 +99,7 @@ export const EnsembleSidebar = React.forwardRef<HTMLDivElement, EnsembleSidebarP
       onDeletePreset,
       onAddManualResponse,
       manualResponses = [],
+      onRemoveModel,
       onClearAll,
       showQuickPresets = true,
       showSaveEnsemble = true,
@@ -142,14 +145,27 @@ export const EnsembleSidebar = React.forwardRef<HTMLDivElement, EnsembleSidebarP
                 selectedModels.map((model) => (
                   <div key={model.id} className="flex items-center justify-between text-sm">
                     <span>{model.name}</span>
-                    {model.id === summarizerId && (
-                      <Badge
-                        variant="outline"
-                        className="text-xs bg-primary/10 text-primary border-primary/20"
-                      >
-                        {model.name}
-                      </Badge>
-                    )}
+                    <div className="flex items-center gap-1">
+                      {model.id === summarizerId && (
+                        <Badge
+                          variant="outline"
+                          className="text-xs bg-primary/10 text-primary border-primary/20"
+                        >
+                          {model.name}
+                        </Badge>
+                      )}
+                      {onRemoveModel && (
+                        <button
+                          type="button"
+                          className="ml-1 rounded-sm p-0.5 text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
+                          onClick={() => onRemoveModel(model.id)}
+                          aria-label={t('organisms.ensembleSidebar.removeModel', { name: model.name })}
+                          data-testid={`remove-model-${model.id}`}
+                        >
+                          <X className="h-3.5 w-3.5" />
+                        </button>
+                      )}
+                    </div>
                   </div>
                 ))
               )}

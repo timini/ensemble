@@ -14,6 +14,7 @@ const meta = {
     onDeletePreset: () => { },
     onAddManualResponse: () => { },
     onClearAll: () => { },
+    onRemoveModel: (modelId: string) => { console.log('Remove model:', modelId); },
   },
 } satisfies Meta<typeof EnsembleSidebar>;
 

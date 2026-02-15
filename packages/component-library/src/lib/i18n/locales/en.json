@@ -178,7 +178,8 @@
       "manualResponsesInfo": "Include custom responses to compare against live model outputs.",
       "addManualResponse": "Add Manual Response",
       "manualResponsesNote": "Add reference answers or benchmark outputs to compare against live model responses.",
-      "continueToPrompt": "Continue to Prompt"
+      "continueToPrompt": "Continue to Prompt",
+      "removeModel": "Remove {{name}}"
     },
     "manualResponseModal": {
       "title": "Manual Response",

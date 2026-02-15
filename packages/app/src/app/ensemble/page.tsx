@@ -103,6 +103,7 @@ export default function EnsemblePage() {
             onDeletePreset={handleDeletePreset}
             onAddManualResponse={manualModal.openModal}
             manualResponses={viewManualResponses}
+            onRemoveModel={handleModelToggle}
             onClearAll={clearSelection}
             showQuickPresets={false}
             showSaveEnsemble={false}

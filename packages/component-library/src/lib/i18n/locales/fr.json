@@ -173,7 +173,8 @@
       "manualResponsesInfo": "Incluez des réponses personnalisées à comparer avec les résultats des modèles en direct.",
       "addManualResponse": "Ajouter une Réponse Manuelle",
       "manualResponsesNote": "Ajoutez des réponses de référence ou des résultats de référence à comparer avec les réponses des modèles en direct.",
-      "continueToPrompt": "Continuer vers l'Invite"
+      "continueToPrompt": "Continuer vers l'Invite",
+      "removeModel": "Retirer {{name}}"
     },
     "manualResponseModal": {
       "title": "Réponse Manuelle",
