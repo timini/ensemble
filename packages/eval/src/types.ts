@@ -18,9 +18,15 @@ export interface BenchmarkQuestion {
   difficulty?: string;
 }
 
+export interface DatasetLoadOptions {
+  sample?: number;
+  skipDownload?: boolean;
+  forceDownload?: boolean;
+}
+
 export interface BenchmarkLoader {
   name: BenchmarkDatasetName;
-  load(options?: { sample?: number }): Promise<BenchmarkQuestion[]>;
+  load(options?: DatasetLoadOptions): Promise<BenchmarkQuestion[]>;
 }
 
 export interface EvaluationResult {

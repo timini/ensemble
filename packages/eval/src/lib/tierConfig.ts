@@ -35,7 +35,7 @@ export const CI_TIER_CONFIG: TierConfig = {
  * comprehensive regression detection. Targets approximately $2-3 per run.
  *
  * - 1 run (deterministic with temperature=0)
- * - p < 0.05 significance threshold (Fisher's exact test; McNemar's planned for future)
+ * - p < 0.05 significance threshold (McNemar's test + Holm-Bonferroni correction)
  */
 export const POST_MERGE_TIER_CONFIG: TierConfig = {
   name: 'post-merge',
