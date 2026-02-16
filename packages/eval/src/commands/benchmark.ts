@@ -23,6 +23,8 @@ interface BenchmarkCommandOptions {
   summarizer?: string;
   requestDelayMs?: string;
   temperature?: string;
+  skipDownload?: boolean;
+  forceDownload?: boolean;
 }
 
 export function createBenchmarkCommand(): Command {
@@ -58,6 +60,14 @@ export function createBenchmarkCommand(): Command {
       'Temperature for model responses (e.g. 0 for deterministic).',
     )
     .option('--mode <mode>', 'Provider mode to use (mock or free)', 'mock')
+    .option(
+      '--skip-download',
+      'Error if dataset is not cached (do not attempt network access). Useful for CI.',
+    )
+    .option(
+      '--force-download',
+      'Re-download dataset even if cache exists.',
+    )
     .action(async (dataset: string, options: BenchmarkCommandOptions) => {
       const models = parseModelSpecs(options.models);
       const modelStrings = models.map((model) => `${model.provider}:${model.model}`);
@@ -83,6 +93,8 @@ export function createBenchmarkCommand(): Command {
 
       const { datasetName, questions } = await loadBenchmarkQuestions(dataset, {
         sample: sampleCount,
+        skipDownload: options.skipDownload,
+        forceDownload: options.forceDownload,
       });
       const evaluator = createEvaluatorForDataset(datasetName);
 

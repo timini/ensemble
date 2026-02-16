@@ -18,6 +18,8 @@ interface BaselineCommandOptions {
   requestDelayMs?: string;
   selfConsistencyRuns?: string;
   temperature?: string;
+  skipDownload?: boolean;
+  forceDownload?: boolean;
 }
 
 export function createBaselineCommand(): Command {
@@ -46,6 +48,14 @@ export function createBaselineCommand(): Command {
       'Temperature for model responses (e.g. 0 for deterministic).',
     )
     .option('--mode <mode>', 'Provider mode to use (mock or free)', 'mock')
+    .option(
+      '--skip-download',
+      'Error if dataset is not cached (do not attempt network access). Useful for CI.',
+    )
+    .option(
+      '--force-download',
+      'Re-download dataset even if cache exists.',
+    )
     .action(async (dataset: string, options: BaselineCommandOptions) => {
       const modelSpec = parseModelSpec(options.model);
       const sampleCount = Number.parseInt(options.samples, 10);
@@ -74,6 +84,8 @@ export function createBaselineCommand(): Command {
 
       const { datasetName, questions } = await loadBenchmarkQuestions(dataset, {
         sample: sampleCount,
+        skipDownload: options.skipDownload,
+        forceDownload: options.forceDownload,
       });
       const evaluator = createEvaluatorForDataset(datasetName);
 
