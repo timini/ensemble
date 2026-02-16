@@ -5,9 +5,11 @@ import type {
   StreamResponseOptions,
 } from '@ensemble-ai/shared-utils/providers';
 import type { EvalMode, ModelSpec, ProviderResponse } from '../types.js';
+import { isRateLimitOrServerError, retryable, type RetryOptions } from './retryable.js';
 
 export interface EnsembleRunnerOptions {
   requestDelayMs?: number;
+  retry?: RetryOptions;
   temperature?: number;
 }
 
@@ -82,6 +84,7 @@ async function streamModelResponse(
 
 export class EnsembleRunner {
   private readonly requestDelayMs: number;
+  private readonly retryOptions: RetryOptions | undefined;
   private readonly streamOptions: StreamResponseOptions | undefined;
 
   constructor(
@@ -90,6 +93,7 @@ export class EnsembleRunner {
     options?: EnsembleRunnerOptions,
   ) {
     this.requestDelayMs = Math.max(0, options?.requestDelayMs ?? 0);
+    this.retryOptions = options?.retry;
     this.streamOptions =
       options?.temperature !== undefined ? { temperature: options.temperature } : undefined;
   }
@@ -103,7 +107,26 @@ export class EnsembleRunner {
       const client = this.registry.getProvider(provider, this.mode);
       const metadata =
         client.listAvailableModels().find((candidate) => candidate.id === model) ?? null;
-      const result = await streamModelResponse(client, prompt, model, this.streamOptions);
+
+      type StreamResult = Pick<ProviderResponse, 'content' | 'responseTimeMs' | 'tokenCount' | 'error'>;
+      const result: StreamResult = this.retryOptions
+        ? await retryable(
+            async () => {
+              const r = await streamModelResponse(client, prompt, model, this.streamOptions);
+              if (r.error && isRateLimitOrServerError(new Error(r.error))) {
+                throw new Error(r.error);
+              }
+              return r;
+            },
+            this.retryOptions,
+          ).catch((error: unknown): StreamResult => ({
+            content: '',
+            responseTimeMs: 0,
+            tokenCount: undefined,
+            error: error instanceof Error ? error.message : String(error),
+          }))
+        : await streamModelResponse(client, prompt, model, this.streamOptions);
+
       const estimatedCostUsd = estimateCostUsd(result.tokenCount, metadata);
 
       return {
