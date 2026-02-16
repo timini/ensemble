@@ -6,6 +6,7 @@ import type {
   DatasetLoadOptions,
 } from '../types.js';
 import {
+  checksumPath,
   computeSha256,
   verifyCacheIntegrity,
   writeChecksumFile,
@@ -174,7 +175,7 @@ export class HuggingFaceBenchmarkLoader<TRow> implements BenchmarkLoader {
       // File may not exist
     }
     try {
-      await unlink(`${cachePath}.sha256`);
+      await unlink(checksumPath(cachePath));
     } catch {
       // File may not exist
     }
