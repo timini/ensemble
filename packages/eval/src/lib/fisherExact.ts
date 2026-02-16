@@ -104,12 +104,7 @@ export function fisherExact(
   }
 
   // Clamp to [0, 1] to account for floating point imprecision
-  if (pValue > 1) {
-    pValue = 1;
-  }
-  if (pValue < 0) {
-    pValue = 0;
-  }
+  pValue = Math.max(0, Math.min(1, pValue));
 
   return { pValue, oddsRatio };
 }

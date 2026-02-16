@@ -52,7 +52,7 @@ describe('fisherExact', () => {
     // a=8, b=2, c=3, d=7
     // One-sided Fisher p (lower tail for c) should be ~0.0325
     const result = fisherExact(8, 2, 3, 7);
-    expect(result.pValue).toBeCloseTo(0.0325, 2);
+    expect(result.pValue).toBeCloseTo(0.0349, 3);
     expect(result.oddsRatio).toBeCloseTo((8 * 7) / (2 * 3), 5);
   });
 
