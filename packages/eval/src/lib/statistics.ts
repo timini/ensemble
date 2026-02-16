@@ -117,11 +117,87 @@ export function computePairedBootstrapDelta(
   }
 
   deltas.sort((left, right) => left - right);
-  const meanDelta = deltas.reduce((sum, value) => sum + value, 0) / deltas.length;
+  const meanDelta =
+    deltas.reduce((sum, value) => sum + value, 0) / deltas.length;
 
   return {
     meanDelta,
     ciLow: quantile(deltas, 0.025),
     ciHigh: quantile(deltas, 0.975),
   };
+}
+
+export interface CorrectedPValue {
+  originalPValue: number;
+  correctedPValue: number;
+  significant: boolean;
+  label: string;
+}
+
+/**
+ * Holm-Bonferroni step-down correction for multiple comparisons.
+ * Controls the family-wise error rate when testing multiple hypotheses.
+ *
+ * @param pValues Array of { pValue, label } for each test
+ * @param alpha Family-wise error rate (default: 0.05)
+ * @returns Array of corrected p-values with significance flags
+ */
+export function holmBonferroni(
+  pValues: Array<{ pValue: number; label: string }>,
+  alpha: number = 0.05,
+): CorrectedPValue[] {
+  if (pValues.length === 0) {
+    return [];
+  }
+
+  const m = pValues.length;
+
+  // Create indexed entries and sort by p-value ascending
+  const indexed = pValues.map((entry, originalIndex) => ({
+    ...entry,
+    originalIndex,
+  }));
+  indexed.sort((a, b) => a.pValue - b.pValue);
+
+  // Compute corrected p-values with monotonicity enforcement
+  const corrected: number[] = [];
+  for (let i = 0; i < m; i += 1) {
+    const raw = Math.min(1, indexed[i].pValue * (m - i));
+    corrected.push(i === 0 ? raw : Math.max(raw, corrected[i - 1]));
+  }
+
+  // Determine significance using step-down procedure
+  const significant: boolean[] = new Array<boolean>(m).fill(false);
+  for (let i = 0; i < m; i += 1) {
+    const threshold = alpha / (m - i);
+    if (indexed[i].pValue <= threshold) {
+      significant[i] = true;
+    } else {
+      // Step-down: stop at first non-rejection
+      break;
+    }
+  }
+
+  // Build results in sorted order, then restore original order
+  const sortedResults: Array<CorrectedPValue & { originalIndex: number }> =
+    indexed.map((entry, i) => ({
+      originalPValue: entry.pValue,
+      correctedPValue: corrected[i],
+      significant: significant[i],
+      label: entry.label,
+      originalIndex: entry.originalIndex,
+    }));
+
+  // Restore original order
+  const results: CorrectedPValue[] = new Array<CorrectedPValue>(m);
+  for (const item of sortedResults) {
+    results[item.originalIndex] = {
+      originalPValue: item.originalPValue,
+      correctedPValue: item.correctedPValue,
+      significant: item.significant,
+      label: item.label,
+    };
+  }
+
+  return results;
 }
