@@ -2,7 +2,9 @@ import { Command } from 'commander';
 import { createAnalyzeCommand } from './commands/analyze.js';
 import { createBaselineCommand } from './commands/baseline.js';
 import { createBenchmarkCommand } from './commands/benchmark.js';
+import { createCompareCommand } from './commands/compare.js';
 import { createRunCommand } from './commands/run.js';
+import { createUpdateBaselineCommand } from './commands/updateBaseline.js';
 
 export function createProgram(): Command {
   const program = new Command();
@@ -16,7 +18,9 @@ export function createProgram(): Command {
   program.addCommand(createBenchmarkCommand());
   program.addCommand(createBaselineCommand());
   program.addCommand(createAnalyzeCommand());
+  program.addCommand(createCompareCommand());
   program.addCommand(createRunCommand());
+  program.addCommand(createUpdateBaselineCommand());
 
   return program;
 }
