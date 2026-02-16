@@ -8,13 +8,14 @@ import { useTranslation } from "react-i18next";
 import { MessageSquare, Cpu, GitMerge, ArrowRight } from "lucide-react";
 import { Text } from "@/components/atoms/Text";
 
-const MODEL_LABELS = ["OpenAI", "Anthropic", "Google", "xAI"];
+const MODEL_LABELS = ["OpenAI", "Anthropic", "Google", "xAI", "Perplexity"];
 
 const COLORS = [
   "bg-success/15 text-success border-success/30",
   "bg-warning/15 text-warning border-warning/30",
   "bg-info/15 text-info border-info/30",
   "bg-accent text-accent-foreground border-accent-foreground/30",
+  "bg-primary/15 text-primary border-primary/30",
 ];
 
 export function EnsembleFlowDiagram() {

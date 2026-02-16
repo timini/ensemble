@@ -206,7 +206,7 @@ export const Interactive: Story = {
       undefined
     );
     const [providerFilter, setProviderFilter] = React.useState<
-      'all' | 'openai' | 'anthropic' | 'google' | 'xai'
+      'all' | 'openai' | 'anthropic' | 'google' | 'xai' | 'perplexity'
     >('all');
 
     const handleModelToggle = (modelId: string) => {
@@ -242,11 +242,11 @@ export const Interactive: Story = {
         <div className="flex items-center gap-4">
           <div className="text-sm font-medium">Filter by provider:</div>
           <div className="flex gap-2">
-            {['all', 'openai', 'anthropic', 'google', 'xai'].map((filter) => (
+            {['all', 'openai', 'anthropic', 'google', 'xai', 'perplexity'].map((filter) => (
               <button
                 key={filter}
                 onClick={() =>
-                  setProviderFilter(filter as 'all' | 'openai' | 'anthropic' | 'google' | 'xai')
+                  setProviderFilter(filter as 'all' | 'openai' | 'anthropic' | 'google' | 'xai' | 'perplexity')
                 }
                 className={`px-3 py-1 text-sm rounded border ${
                   providerFilter === filter

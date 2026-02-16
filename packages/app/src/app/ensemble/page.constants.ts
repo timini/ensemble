@@ -2,7 +2,7 @@ import type { Provider } from '@/components/molecules/ApiKeyInput';
 import type { Preset } from '@/components/organisms/EnsembleSidebar';
 import type { StoreState } from '~/store';
 
-export const PROVIDERS: Provider[] = ['openai', 'anthropic', 'google', 'xai', 'deepseek'];
+export const PROVIDERS: Provider[] = ['openai', 'anthropic', 'google', 'xai', 'deepseek', 'perplexity'];
 
 export const PRESETS: Preset[] = [
   {
@@ -37,6 +37,7 @@ export const EMPTY_API_KEYS: StoreState['apiKeys'] = {
   google: null,
   xai: null,
   deepseek: null,
+  perplexity: null,
 };
 
 export const DEFAULT_ENSEMBLE_NAME = '';

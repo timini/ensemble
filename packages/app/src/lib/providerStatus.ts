@@ -7,6 +7,7 @@ const DEFAULT_STATUS: Record<Provider, ValidationStatus> = {
   google: 'idle',
   xai: 'idle',
   deepseek: 'idle',
+  perplexity: 'idle',
 };
 
 const READY_STATUS: Record<Provider, string> = {
@@ -15,6 +16,7 @@ const READY_STATUS: Record<Provider, string> = {
   google: 'Ready',
   xai: 'Ready',
   deepseek: 'Ready',
+  perplexity: 'Ready',
 };
 
 export function getHydratedStatus(
@@ -56,5 +58,6 @@ export function createProviderStatusLabels(options: {
     google: mapStatusToLabel(statuses.google),
     xai: mapStatusToLabel(statuses.xai),
     deepseek: mapStatusToLabel(statuses.deepseek),
+    perplexity: mapStatusToLabel(statuses.perplexity),
   };
 }

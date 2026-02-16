@@ -7,3 +7,4 @@ export * from './clients/anthropic/FreeAnthropicClient';
 export * from './clients/google/FreeGoogleClient';
 export * from './clients/xai/FreeXAIClient';
 export * from './clients/deepseek/FreeDeepSeekClient';
+export * from './clients/perplexity/FreePerplexityClient';

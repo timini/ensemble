@@ -34,6 +34,7 @@ describe('Ensemble Page - Model Selection Integration', () => {
         google: { key: '', encrypted: null, visible: false, status: 'idle' },
         xai: { key: '', encrypted: null, visible: false, status: 'idle' },
         deepseek: { key: '', encrypted: null, visible: false, status: 'idle' },
+        perplexity: { key: '', encrypted: null, visible: false, status: 'idle' },
       },
       encryptionInitialized: true,
       selectedModels: [],
