@@ -41,11 +41,11 @@ describe('ModeSelector', () => {
     });
 
     it('renders both mode cards in a grid', () => {
-      const { container } = render(
+      render(
         <ModeSelector onSelectFreeMode={vi.fn()} onSelectProMode={vi.fn()} />
       );
 
-      const grid = container.querySelector('.grid.md\\:grid-cols-2');
+      const grid = screen.getByTestId('mode-selector-grid');
       expect(grid).toBeInTheDocument();
     });
 
@@ -248,11 +248,11 @@ describe('ModeSelector', () => {
 
   describe('layout', () => {
     it('uses responsive grid layout', () => {
-      const { container } = render(
+      render(
         <ModeSelector onSelectFreeMode={vi.fn()} onSelectProMode={vi.fn()} />
       );
 
-      const grid = container.querySelector('.md\\:grid-cols-2');
+      const grid = screen.getByTestId('mode-selector-grid');
       expect(grid).toBeInTheDocument();
     });
 

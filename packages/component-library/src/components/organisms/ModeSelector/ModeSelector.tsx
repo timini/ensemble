@@ -59,7 +59,7 @@ export const ModeSelector = React.forwardRef<HTMLDivElement, ModeSelectorProps>(
           {t('organisms.modeSelector.heading')}
         </Heading>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6" data-testid="mode-selector-grid">
           <ModeSelectionCard
             mode="free"
             selected={selectedMode === 'free'}
