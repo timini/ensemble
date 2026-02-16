@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { useStore } from '~/store';
 import { useHasHydrated } from '~/hooks/useHasHydrated';
 import { useStepNavigation } from '~/hooks/useStepNavigation';
+import { useApiKeyAutoHide } from './useApiKeyAutoHide';
 import type { OperatingMode } from '~/store/slices/modeSlice';
 import type { Provider, ValidationStatus } from '@/components/molecules/ApiKeyInput';
 import { validateApiKey, createDebouncedValidator } from '~/lib/validation';
@@ -40,6 +41,7 @@ export function useConfigPage() {
         google: null,
         xai: null,
     });
+    const { resetAutoHideTimer } = useApiKeyAutoHide();
     const [webCryptoSupported, setWebCryptoSupported] = useState(true);
 
     const handleSelectFreeMode = () => {
@@ -119,6 +121,7 @@ export function useConfigPage() {
             );
         });
         debouncedValidate(provider, value, mode, handleValidationStatusChange);
+        resetAutoHideTimer();
     };
 
     const handleToggleShow = (provider: Provider) => {

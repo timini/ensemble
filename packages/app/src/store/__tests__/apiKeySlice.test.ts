@@ -135,6 +135,24 @@ describe('apiKeySlice', () => {
     expect(decryptMock).toHaveBeenCalledTimes(1);
   });
 
+  it('hides all visible API keys', async () => {
+    await store.getState().setApiKey('openai', 'sk-key1');
+    await store.getState().setApiKey('anthropic', 'sk-key2');
+    store.getState().toggleApiKeyVisibility('openai');
+    store.getState().toggleApiKeyVisibility('anthropic');
+    expect(store.getState().apiKeys.openai?.visible).toBe(true);
+    expect(store.getState().apiKeys.anthropic?.visible).toBe(true);
+
+    store.getState().hideAllApiKeys();
+    expect(store.getState().apiKeys.openai?.visible).toBe(false);
+    expect(store.getState().apiKeys.anthropic?.visible).toBe(false);
+  });
+
+  it('hideAllApiKeys is a no-op when no keys are visible', () => {
+    store.getState().hideAllApiKeys();
+    expect(store.getState().apiKeys.openai).toBeNull();
+  });
+
   it('handles decryption failures by clearing encrypted values', async () => {
     decryptMock.mockRejectedValueOnce(new Error('bad decrypt'));
     store.setState({
