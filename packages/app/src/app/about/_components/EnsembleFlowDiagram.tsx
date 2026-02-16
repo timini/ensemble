@@ -11,10 +11,10 @@ import { Text } from "@/components/atoms/Text";
 const MODEL_LABELS = ["OpenAI", "Anthropic", "Google", "xAI"];
 
 const COLORS = [
-  "bg-green-500/15 text-green-700 dark:text-green-400 border-green-500/30",
-  "bg-orange-500/15 text-orange-700 dark:text-orange-400 border-orange-500/30",
-  "bg-blue-500/15 text-blue-700 dark:text-blue-400 border-blue-500/30",
-  "bg-purple-500/15 text-purple-700 dark:text-purple-400 border-purple-500/30",
+  "bg-success/15 text-success border-success/30",
+  "bg-warning/15 text-warning border-warning/30",
+  "bg-info/15 text-info border-info/30",
+  "bg-accent text-accent-foreground border-accent-foreground/30",
 ];
 
 export function EnsembleFlowDiagram() {
