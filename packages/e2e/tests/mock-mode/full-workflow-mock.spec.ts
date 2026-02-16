@@ -35,6 +35,8 @@ const fillAndValidateKey = async (
 
 test.describe('Full Workflow - Mock Mode', () => {
   test('completes full user journey from config to review', async ({ page }) => {
+    // Mock streaming can take several seconds per response card; give enough headroom
+    test.setTimeout(90_000);
     // ==========================================
     // STEP 1: Config Page - Mode Selection & API Keys
     // ==========================================
@@ -223,7 +225,7 @@ test.describe('Full Workflow - Mock Mode', () => {
       await expect(responseCards.first()).toBeVisible({ timeout: 10000 });
       const count = await responseCards.count();
       for (let i = 0; i < count; i++) {
-        await expect(responseCards.nth(i)).toHaveAttribute('data-status', 'complete', { timeout: 15000 });
+        await expect(responseCards.nth(i)).toHaveAttribute('data-status', 'complete', { timeout: 30000 });
       }
 
       const startOverButton = page.getByRole('button', { name: /start over/i });
