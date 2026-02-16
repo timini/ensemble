@@ -69,7 +69,7 @@ const sanitizeStateForPersist = (state: StoreState): StoreState => {
         [provider]: {
           encrypted: entry.encrypted,
           key: '',
-          visible: entry.visible,
+          visible: false,
           status: entry.status,
         },
       };

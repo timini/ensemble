@@ -30,6 +30,7 @@ export interface ApiKeySlice {
 
   setApiKey: (provider: ProviderType, key: string) => Promise<void>;
   toggleApiKeyVisibility: (provider: ProviderType) => void;
+  hideAllApiKeys: () => void;
   getApiKey: (provider: ProviderType) => string | null;
   clearApiKeys: () => void;
   initializeEncryption: () => Promise<void>;
@@ -168,6 +169,20 @@ export const createApiKeySlice: StateCreator<ApiKeySlice> = (set, get) => ({
           },
         },
       };
+    });
+  },
+
+  hideAllApiKeys: () => {
+    set((state) => {
+      const providers: ProviderType[] = ['openai', 'anthropic', 'google', 'xai'];
+      const updatedKeys = { ...state.apiKeys };
+      for (const provider of providers) {
+        const entry = updatedKeys[provider];
+        if (entry?.visible) {
+          updatedKeys[provider] = { ...entry, visible: false };
+        }
+      }
+      return { apiKeys: updatedKeys };
     });
   },
 
