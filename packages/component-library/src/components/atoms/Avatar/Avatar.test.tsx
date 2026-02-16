@@ -23,70 +23,70 @@ describe('Avatar', () => {
     expect(img).toHaveAttribute('alt', 'User avatar');
   });
 
-  it('applies default size classes', () => {
+  it('applies default size', () => {
     render(<Avatar data-testid="avatar">AB</Avatar>);
     const avatar = screen.getByTestId('avatar');
-    expect(avatar).toHaveClass('h-10', 'w-10');
+    expect(avatar).toHaveAttribute('data-size', 'default');
   });
 
-  it('applies small size classes', () => {
+  it('applies small size', () => {
     render(
       <Avatar size="sm" data-testid="avatar">
         SM
       </Avatar>
     );
     const avatar = screen.getByTestId('avatar');
-    expect(avatar).toHaveClass('h-8', 'w-8');
+    expect(avatar).toHaveAttribute('data-size', 'sm');
   });
 
-  it('applies large size classes', () => {
+  it('applies large size', () => {
     render(
       <Avatar size="lg" data-testid="avatar">
         LG
       </Avatar>
     );
     const avatar = screen.getByTestId('avatar');
-    expect(avatar).toHaveClass('h-12', 'w-12');
+    expect(avatar).toHaveAttribute('data-size', 'lg');
   });
 
-  it('applies anthropic variant classes', () => {
+  it('applies anthropic variant', () => {
     render(
       <Avatar variant="anthropic" data-testid="avatar">
         A
       </Avatar>
     );
     const avatar = screen.getByTestId('avatar');
-    expect(avatar).toHaveClass('bg-warning/10', 'text-warning');
+    expect(avatar).toHaveAttribute('data-variant', 'anthropic');
   });
 
-  it('applies openai variant classes', () => {
+  it('applies openai variant', () => {
     render(
       <Avatar variant="openai" data-testid="avatar">
         O
       </Avatar>
     );
     const avatar = screen.getByTestId('avatar');
-    expect(avatar).toHaveClass('bg-primary/10', 'text-primary');
+    expect(avatar).toHaveAttribute('data-variant', 'openai');
   });
 
-  it('applies google variant classes', () => {
+  it('applies google variant', () => {
     render(
       <Avatar variant="google" data-testid="avatar">
         G
       </Avatar>
     );
     const avatar = screen.getByTestId('avatar');
-    expect(avatar).toHaveClass('bg-success/10', 'text-success');
+    expect(avatar).toHaveAttribute('data-variant', 'google');
   });
 
-  it('applies warning variant classes', () => {
+  it('applies warning variant', () => {
     render(
       <Avatar variant="warning" data-testid="avatar">
         W
       </Avatar>
     );
     const avatar = screen.getByTestId('avatar');
-    expect(avatar).toHaveClass('bg-warning/10', 'text-warning');
+    expect(avatar).toHaveAttribute('data-variant', 'warning');
   });
 
   it('applies custom className', () => {

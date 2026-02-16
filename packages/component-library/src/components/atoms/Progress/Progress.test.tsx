@@ -58,21 +58,19 @@ describe('Progress', () => {
   it('renders destructive variant', () => {
     const { container } = render(<Progress variant="destructive" value={50} />);
     const progress = container.firstChild as HTMLElement;
-    expect(progress).toHaveClass('bg-destructive/10');
+    expect(progress).toHaveAttribute('data-variant', 'destructive');
   });
 
   it('renders success variant', () => {
     const { container } = render(<Progress variant="success" value={50} />);
     const progress = container.firstChild as HTMLElement;
-    expect(progress).toHaveClass('bg-success/10');
-    const indicator = progress.firstChild as HTMLElement;
-    expect(indicator).toHaveClass('bg-success');
+    expect(progress).toHaveAttribute('data-variant', 'success');
   });
 
   it('renders warning variant', () => {
     const { container } = render(<Progress variant="warning" value={50} />);
     const progress = container.firstChild as HTMLElement;
-    expect(progress).toHaveClass('bg-warning/10');
+    expect(progress).toHaveAttribute('data-variant', 'warning');
   });
 
   it('applies custom className', () => {

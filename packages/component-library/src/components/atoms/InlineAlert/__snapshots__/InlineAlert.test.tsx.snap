@@ -3,6 +3,7 @@
 exports[`InlineAlert > snapshots > matches snapshot for dismissible alert 1`] = `
 <div
   class="flex items-start gap-3 p-4 rounded-md border bg-info/10 border-info/20 text-foreground"
+  data-variant="info"
   role="alert"
 >
   <svg
@@ -67,6 +68,7 @@ exports[`InlineAlert > snapshots > matches snapshot for dismissible alert 1`] = 
 exports[`InlineAlert > snapshots > matches snapshot for info variant 1`] = `
 <div
   class="flex items-start gap-3 p-4 rounded-md border bg-info/10 border-info/20 text-foreground"
+  data-variant="info"
   role="alert"
 >
   <svg
@@ -105,6 +107,7 @@ exports[`InlineAlert > snapshots > matches snapshot for info variant 1`] = `
 exports[`InlineAlert > snapshots > matches snapshot for success variant 1`] = `
 <div
   class="flex items-start gap-3 p-4 rounded-md border bg-success/10 border-success/20 text-foreground"
+  data-variant="success"
   role="alert"
 >
   <svg

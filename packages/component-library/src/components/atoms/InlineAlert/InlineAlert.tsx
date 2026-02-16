@@ -75,6 +75,7 @@ const InlineAlert = React.forwardRef<HTMLDivElement, InlineAlertProps>(
         ref={ref}
         role={role}
         className={cn(alertVariants({ variant, className }))}
+        data-variant={variant || 'info'}
         {...props}
       >
         <Icon className={cn(iconVariants({ variant }))} aria-hidden="true" />

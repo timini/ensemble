@@ -50,6 +50,7 @@ export const Link = React.forwardRef<HTMLAnchorElement, LinkProps>(
       <a
         ref={ref}
         className={cn(linkVariants({ variant, className }))}
+        data-variant={variant || 'default'}
         {...(external && { target: '_blank', rel: 'noopener noreferrer' })}
         {...props}
       >

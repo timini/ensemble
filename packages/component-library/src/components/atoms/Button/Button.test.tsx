@@ -19,44 +19,44 @@ describe('Button', () => {
     expect(handleClick).toHaveBeenCalledOnce();
   });
 
-  it('applies variant classes correctly', () => {
+  it('applies variant data attribute correctly', () => {
     const { rerender } = render(<Button variant="default">Default</Button>);
-    expect(screen.getByRole('button')).toHaveClass('bg-primary');
+    expect(screen.getByRole('button')).toHaveAttribute('data-variant', 'default');
 
     rerender(<Button variant="destructive">Destructive</Button>);
-    expect(screen.getByRole('button')).toHaveClass('bg-destructive');
+    expect(screen.getByRole('button')).toHaveAttribute('data-variant', 'destructive');
 
     rerender(<Button variant="outline">Outline</Button>);
-    expect(screen.getByRole('button')).toHaveClass('border-input');
+    expect(screen.getByRole('button')).toHaveAttribute('data-variant', 'outline');
 
     rerender(<Button variant="secondary">Secondary</Button>);
-    expect(screen.getByRole('button')).toHaveClass('bg-secondary');
+    expect(screen.getByRole('button')).toHaveAttribute('data-variant', 'secondary');
 
     rerender(<Button variant="ghost">Ghost</Button>);
-    expect(screen.getByRole('button')).toHaveClass('hover:bg-accent');
+    expect(screen.getByRole('button')).toHaveAttribute('data-variant', 'ghost');
 
     rerender(<Button variant="link">Link</Button>);
-    expect(screen.getByRole('button')).toHaveClass('underline-offset-4');
+    expect(screen.getByRole('button')).toHaveAttribute('data-variant', 'link');
 
     rerender(<Button variant="warning">Warning</Button>);
-    expect(screen.getByRole('button')).toHaveClass('bg-warning');
+    expect(screen.getByRole('button')).toHaveAttribute('data-variant', 'warning');
 
     rerender(<Button variant="success">Success</Button>);
-    expect(screen.getByRole('button')).toHaveClass('bg-success');
+    expect(screen.getByRole('button')).toHaveAttribute('data-variant', 'success');
   });
 
-  it('applies size classes correctly', () => {
+  it('applies size data attribute correctly', () => {
     const { rerender } = render(<Button size="default">Default</Button>);
-    expect(screen.getByRole('button')).toHaveClass('h-9');
+    expect(screen.getByRole('button')).toHaveAttribute('data-size', 'default');
 
     rerender(<Button size="sm">Small</Button>);
-    expect(screen.getByRole('button')).toHaveClass('h-8');
+    expect(screen.getByRole('button')).toHaveAttribute('data-size', 'sm');
 
     rerender(<Button size="lg">Large</Button>);
-    expect(screen.getByRole('button')).toHaveClass('h-10');
+    expect(screen.getByRole('button')).toHaveAttribute('data-size', 'lg');
 
     rerender(<Button size="icon">Icon</Button>);
-    expect(screen.getByRole('button')).toHaveClass('w-9');
+    expect(screen.getByRole('button')).toHaveAttribute('data-size', 'icon');
   });
 
   it('is disabled when disabled prop is true', () => {

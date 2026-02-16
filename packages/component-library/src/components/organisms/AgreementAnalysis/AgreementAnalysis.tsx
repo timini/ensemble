@@ -53,9 +53,9 @@ export const AgreementAnalysis = React.forwardRef<HTMLDivElement, AgreementAnaly
 
     // Determine agreement level and color
     const getAgreementLevel = (agreement: number) => {
-      if (agreement > 0.8) return { label: t('organisms.agreementAnalysis.highAgreement'), color: 'text-success' };
-      if (agreement >= 0.5) return { label: t('organisms.agreementAnalysis.mediumAgreement'), color: 'text-warning' };
-      return { label: t('organisms.agreementAnalysis.lowAgreement'), color: 'text-destructive' };
+      if (agreement > 0.8) return { label: t('organisms.agreementAnalysis.highAgreement'), color: 'text-success', level: 'high' };
+      if (agreement >= 0.5) return { label: t('organisms.agreementAnalysis.mediumAgreement'), color: 'text-warning', level: 'medium' };
+      return { label: t('organisms.agreementAnalysis.lowAgreement'), color: 'text-destructive', level: 'low' };
     };
 
     const agreementLevel = getAgreementLevel(overallAgreement);
@@ -77,7 +77,7 @@ export const AgreementAnalysis = React.forwardRef<HTMLDivElement, AgreementAnaly
           <div className="flex items-center justify-between mb-6">
             <Heading level={3} size="lg">{t('organisms.agreementAnalysis.title')}</Heading>
             <div className="text-right">
-              <div className={cn('text-2xl font-bold', agreementLevel.color)}>
+              <div className={cn('text-2xl font-bold', agreementLevel.color)} data-agreement-level={agreementLevel.level}>
                 {formatPercentage(overallAgreement)}%
               </div>
               <Text variant="small" color="muted">{t('organisms.agreementAnalysis.overallAgreement')}</Text>
@@ -116,7 +116,7 @@ export const AgreementAnalysis = React.forwardRef<HTMLDivElement, AgreementAnaly
           </div>
 
           {/* Statistics Grid */}
-          <div className="grid grid-cols-3 gap-8 text-center">
+          <div className="grid grid-cols-3 gap-8 text-center" data-testid="agreement-stats" role="group">
             <div>
               <div className="text-2xl font-bold text-primary">{responseCount}</div>
               <Text variant="small" color="muted">{t('organisms.agreementAnalysis.responsesAnalyzed')}</Text>

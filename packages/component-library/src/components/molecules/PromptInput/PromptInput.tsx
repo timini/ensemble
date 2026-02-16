@@ -102,15 +102,23 @@ export const PromptInput = React.forwardRef<HTMLTextAreaElement, PromptInputProp
     const charCount = internalValue.length;
     const isInvalid = !!error;
 
-    // Determine counter color based on usage
-    const getCounterColor = () => {
-      if (!maxLength) return 'text-muted-foreground';
+    // Determine counter status and color based on usage
+    const getCounterStatus = () => {
+      if (!maxLength) return 'normal';
 
       const percentage = (charCount / maxLength) * 100;
 
-      if (percentage >= 100) return 'text-destructive';
-      if (percentage >= 80) return 'text-warning';
+      if (percentage >= 100) return 'error';
+      if (percentage >= 80) return 'warning';
 
+      return 'normal';
+    };
+
+    const counterStatus = getCounterStatus();
+
+    const getCounterColor = () => {
+      if (counterStatus === 'error') return 'text-destructive';
+      if (counterStatus === 'warning') return 'text-warning';
       return 'text-muted-foreground';
     };
 
@@ -145,6 +153,7 @@ export const PromptInput = React.forwardRef<HTMLTextAreaElement, PromptInputProp
           {/* Character counter */}
           <div
             data-testid="character-counter"
+            data-counter-status={counterStatus}
             className={cn(
               'absolute bottom-2 right-2 text-xs font-medium',
               getCounterColor()

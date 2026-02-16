@@ -55,6 +55,7 @@ export const Heading = React.forwardRef<HTMLHeadingElement, HeadingProps>(
       <Component
         ref={ref as React.Ref<HTMLHeadingElement>}
         className={cn(headingVariants({ size, className }))}
+        data-size={size || 'lg'}
         {...props}
       >
         {children}

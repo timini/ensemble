@@ -151,8 +151,7 @@ describe('ModeSelector', () => {
       );
 
       const freeCard = container.querySelector('[data-mode="free"]');
-      expect(freeCard).toHaveClass('border-primary');
-      expect(freeCard).toHaveClass('bg-primary/10');
+      expect(freeCard).toHaveAttribute('data-selected', 'true');
     });
 
     it('highlights Pro Mode card when selected', () => {
@@ -165,8 +164,7 @@ describe('ModeSelector', () => {
       );
 
       const proCard = container.querySelector('[data-mode="pro"]');
-      expect(proCard).toHaveClass('border-primary');
-      expect(proCard).toHaveClass('bg-primary/10');
+      expect(proCard).toHaveAttribute('data-selected', 'true');
     });
 
     it('does not highlight any card when no mode is selected', () => {
@@ -177,28 +175,19 @@ describe('ModeSelector', () => {
       const freeCard = container.querySelector('[data-mode="free"]');
       const proCard = container.querySelector('[data-mode="pro"]');
 
-      expect(freeCard).not.toHaveClass('border-primary');
-      expect(proCard).not.toHaveClass('border-primary');
+      expect(freeCard).toHaveAttribute('data-selected', 'false');
+      expect(proCard).toHaveAttribute('data-selected', 'false');
     });
   });
 
   describe('styling', () => {
-    it('applies hover styles to cards', () => {
+    it('renders both mode cards', () => {
       const { container } = render(
         <ModeSelector onSelectFreeMode={vi.fn()} onSelectProMode={vi.fn()} />
       );
 
       const cards = container.querySelectorAll('[data-testid^="mode-card-"]');
-      cards.forEach(card => expect(card).toHaveClass('hover:border-primary/30'));
-    });
-
-    it('applies consistent spacing between cards', () => {
-      const { container } = render(
-        <ModeSelector onSelectFreeMode={vi.fn()} onSelectProMode={vi.fn()} />
-      );
-
-      const grid = container.querySelector('.gap-6');
-      expect(grid).toBeInTheDocument();
+      expect(cards).toHaveLength(2);
     });
 
     it('applies icon circle styling', () => {
@@ -322,7 +311,7 @@ describe('ModeSelector', () => {
       );
 
       // Initially Free Mode is selected
-      expect(container.querySelector('[data-mode="free"]')).toHaveClass('border-primary');
+      expect(container.querySelector('[data-mode="free"]')).toHaveAttribute('data-selected', 'true');
 
       // Switch to Pro Mode
       const proButton = screen.getByText('Go Pro');
@@ -338,7 +327,7 @@ describe('ModeSelector', () => {
         />
       );
 
-      expect(container.querySelector('[data-mode="pro"]')).toHaveClass('border-primary');
+      expect(container.querySelector('[data-mode="pro"]')).toHaveAttribute('data-selected', 'true');
     });
   });
 

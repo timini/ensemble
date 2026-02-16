@@ -6,39 +6,33 @@ describe('LoadingSpinner', () => {
   describe('rendering', () => {
     it('renders with default size', () => {
       const { container } = render(<LoadingSpinner />);
-      const spinner = container.querySelector('svg');
-      expect(spinner).toBeInTheDocument();
-      expect(spinner).toHaveClass('h-4', 'w-4');
+      expect(container.querySelector('svg')).toBeInTheDocument();
+      expect(container.firstChild).toHaveAttribute('data-size', 'default');
     });
 
     it('renders with small size', () => {
       const { container } = render(<LoadingSpinner size="sm" />);
-      const spinner = container.querySelector('svg');
-      expect(spinner).toHaveClass('h-3', 'w-3');
+      expect(container.firstChild).toHaveAttribute('data-size', 'sm');
     });
 
     it('renders with large size', () => {
       const { container } = render(<LoadingSpinner size="lg" />);
-      const spinner = container.querySelector('svg');
-      expect(spinner).toHaveClass('h-6', 'w-6');
+      expect(container.firstChild).toHaveAttribute('data-size', 'lg');
     });
 
     it('renders with default variant', () => {
       const { container } = render(<LoadingSpinner />);
-      const spinner = container.querySelector('svg');
-      expect(spinner).toHaveClass('text-foreground');
+      expect(container.firstChild).toHaveAttribute('data-variant', 'default');
     });
 
     it('renders with primary variant', () => {
       const { container } = render(<LoadingSpinner variant="primary" />);
-      const spinner = container.querySelector('svg');
-      expect(spinner).toHaveClass('text-primary');
+      expect(container.firstChild).toHaveAttribute('data-variant', 'primary');
     });
 
     it('renders with muted variant', () => {
       const { container } = render(<LoadingSpinner variant="muted" />);
-      const spinner = container.querySelector('svg');
-      expect(spinner).toHaveClass('text-muted-foreground');
+      expect(container.firstChild).toHaveAttribute('data-variant', 'muted');
     });
 
     it('applies custom className', () => {

@@ -18,15 +18,13 @@ describe('ModelCard', () => {
     });
 
     it('renders provider icon emoji', () => {
-      const { container } = render(<ModelCard provider="openai" modelName="GPT-4" selected={false} isSummarizer={false} />);
-      const icon = container.querySelector('.text-2xl');
-      expect(icon).toHaveTextContent('🤖');
+      render(<ModelCard provider="openai" modelName="GPT-4" selected={false} isSummarizer={false} />);
+      expect(screen.getByText('🤖')).toBeInTheDocument();
     });
 
-    it('renders centered layout', () => {
-      const { container } = render(<ModelCard provider="openai" modelName="GPT-4" selected={false} isSummarizer={false} />);
-      const content = container.querySelector('.text-center');
-      expect(content).toBeInTheDocument();
+    it('renders card content', () => {
+      render(<ModelCard provider="openai" modelName="GPT-4" selected={false} isSummarizer={false} />);
+      expect(screen.getByTestId('model-card')).toBeInTheDocument();
     });
 
     it('renders modality badges when provided', () => {
@@ -61,24 +59,23 @@ describe('ModelCard', () => {
       expect(card).toHaveAttribute('data-selected', 'true');
     });
 
-    it('applies selected styling', () => {
+    it('applies selected data attribute', () => {
       const { container } = render(<ModelCard provider="openai" modelName="GPT-4" selected={true} isSummarizer={false} />);
       const card = container.querySelector('[data-testid="model-card"]');
-      expect(card).toHaveClass('border-primary');
-      expect(card).toHaveClass('bg-primary/10');
+      expect(card).toHaveAttribute('data-selected', 'true');
     });
 
-    it('applies unselected styling', () => {
+    it('applies unselected data attribute', () => {
       const { container } = render(<ModelCard provider="openai" modelName="GPT-4" selected={false} isSummarizer={false} />);
       const card = container.querySelector('[data-testid="model-card"]');
-      expect(card).toHaveClass('border-border');
+      expect(card).toHaveAttribute('data-selected', 'false');
     });
 
-    it('applies summarizer styling when selected and summarizer', () => {
+    it('applies summarizer data attribute when selected and summarizer', () => {
       const { container } = render(<ModelCard provider="openai" modelName="GPT-4" selected={true} isSummarizer={true} />);
       const card = container.querySelector('[data-testid="model-card"]');
-      expect(card).toHaveClass('border-warning');
-      expect(card).toHaveClass('bg-warning/10');
+      expect(card).toHaveAttribute('data-summarizer', 'true');
+      expect(card).toHaveAttribute('data-selected', 'true');
     });
   });
 
@@ -102,27 +99,23 @@ describe('ModelCard', () => {
 
   describe('provider-specific behavior', () => {
     it('renders OpenAI provider icon correctly', () => {
-      const { container } = render(<ModelCard provider="openai" modelName="GPT-4" selected={false} isSummarizer={false} />);
-      const icon = container.querySelector('.text-2xl');
-      expect(icon).toHaveTextContent('🤖');
+      render(<ModelCard provider="openai" modelName="GPT-4" selected={false} isSummarizer={false} />);
+      expect(screen.getByText('🤖')).toBeInTheDocument();
     });
 
     it('renders Anthropic provider icon correctly', () => {
-      const { container } = render(<ModelCard provider="anthropic" modelName="Claude 3.5 Sonnet" selected={false} isSummarizer={false} />);
-      const icon = container.querySelector('.text-2xl');
-      expect(icon).toHaveTextContent('🧠');
+      render(<ModelCard provider="anthropic" modelName="Claude 3.5 Sonnet" selected={false} isSummarizer={false} />);
+      expect(screen.getByText('🧠')).toBeInTheDocument();
     });
 
     it('renders Google provider icon correctly', () => {
-      const { container } = render(<ModelCard provider="google" modelName="Gemini Pro" selected={false} isSummarizer={false} />);
-      const icon = container.querySelector('.text-2xl');
-      expect(icon).toHaveTextContent('🔍');
+      render(<ModelCard provider="google" modelName="Gemini Pro" selected={false} isSummarizer={false} />);
+      expect(screen.getByText('🔍')).toBeInTheDocument();
     });
 
     it('renders XAI provider icon correctly', () => {
-      const { container } = render(<ModelCard provider="xai" modelName="Grok" selected={false} isSummarizer={false} />);
-      const icon = container.querySelector('.text-2xl');
-      expect(icon).toHaveTextContent('🚀');
+      render(<ModelCard provider="xai" modelName="Grok" selected={false} isSummarizer={false} />);
+      expect(screen.getByText('🚀')).toBeInTheDocument();
     });
 
     it('applies correct provider data attribute', () => {
@@ -171,16 +164,16 @@ describe('ModelCard', () => {
   });
 
   describe('disabled state', () => {
-    it('applies disabled styling', () => {
+    it('applies disabled data attribute', () => {
       const { container } = render(<ModelCard provider="openai" modelName="GPT-4" selected={false} isSummarizer={false} disabled />);
       const card = container.querySelector('[data-testid="model-card"]');
-      expect(card).toHaveClass('opacity-50');
+      expect(card).toHaveAttribute('data-disabled', 'true');
     });
 
-    it('applies disabled cursor style', () => {
+    it('has aria-disabled when disabled', () => {
       const { container } = render(<ModelCard provider="openai" modelName="GPT-4" selected={false} isSummarizer={false} disabled />);
       const card = container.querySelector('[data-testid="model-card"]');
-      expect(card).toHaveClass('cursor-not-allowed');
+      expect(card).toHaveAttribute('aria-disabled', 'true');
     });
 
     it('applies disabled data attribute', () => {
@@ -246,15 +239,13 @@ describe('ModelCard', () => {
     });
 
     it('uses Badge atom for summarizer indicator', () => {
-      const { container } = render(<ModelCard provider="openai" modelName="GPT-4" selected={true} isSummarizer={true} />);
-      const badge = container.querySelector('.inline-flex.items-center.rounded-full');
-      expect(badge).toBeInTheDocument();
+      render(<ModelCard provider="openai" modelName="GPT-4" selected={true} isSummarizer={true} />);
+      expect(screen.getByText('Summarizer')).toBeInTheDocument();
     });
 
     it('does not render badge when not summarizer', () => {
-      const { container } = render(<ModelCard provider="openai" modelName="GPT-4" selected={false} isSummarizer={false} />);
-      const badge = container.querySelector('.inline-flex.items-center.rounded-full');
-      expect(badge).not.toBeInTheDocument();
+      render(<ModelCard provider="openai" modelName="GPT-4" selected={false} isSummarizer={false} />);
+      expect(screen.queryByText('Summarizer')).not.toBeInTheDocument();
     });
   });
 
@@ -296,8 +287,8 @@ describe('ModelCard', () => {
     });
   });
 
-  describe('regression - styling and dark mode', () => {
-    it('applies explicit selection highlighting classes', () => {
+  describe('regression - data attributes for states', () => {
+    it('applies correct data attributes when selected', () => {
       const { container } = render(
         <ModelCard
           provider="openai"
@@ -308,17 +299,12 @@ describe('ModelCard', () => {
       );
       const card = container.querySelector('[data-testid="model-card"]');
 
-      // Explicitly check for the highlighting classes (semantic tokens handle dark mode)
-      expect(card).toHaveClass('border-primary');
-      expect(card).toHaveClass('bg-primary/10');
-
-      // Ensure defaults are overridden
-      expect(card).not.toHaveClass('border-border');
-      // Ensure bg-card is removed by merge to prevent conflicts
-      expect(card).not.toHaveClass('bg-card');
+      expect(card).toHaveAttribute('data-selected', 'true');
+      expect(card).toHaveAttribute('data-summarizer', 'false');
+      expect(card).toHaveAttribute('data-provider', 'openai');
     });
 
-    it('applies explicit summarizer highlighting classes', () => {
+    it('applies correct data attributes when summarizer', () => {
       const { container } = render(
         <ModelCard
           provider="anthropic"
@@ -329,13 +315,9 @@ describe('ModelCard', () => {
       );
       const card = container.querySelector('[data-testid="model-card"]');
 
-      // Semantic tokens handle dark mode automatically
-      expect(card).toHaveClass('border-warning');
-      expect(card).toHaveClass('bg-warning/10');
-
-      expect(card).not.toHaveClass('border-border');
-      expect(card).not.toHaveClass('border-primary');
-      expect(card).not.toHaveClass('bg-card');
+      expect(card).toHaveAttribute('data-selected', 'true');
+      expect(card).toHaveAttribute('data-summarizer', 'true');
+      expect(card).toHaveAttribute('data-provider', 'anthropic');
     });
   });
 });

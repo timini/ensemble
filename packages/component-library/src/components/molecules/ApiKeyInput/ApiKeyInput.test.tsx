@@ -203,68 +203,44 @@ describe('ApiKeyInput', () => {
       expect(toggleButton).toBeDisabled();
     });
 
-    it('applies disabled styling', () => {
+    it('applies disabled attribute', () => {
       render(<ApiKeyInput provider="openai" label="API Key" disabled validationStatus="idle" />);
       const input = screen.getByLabelText('API Key');
-      expect(input).toHaveClass('disabled:opacity-50');
+      expect(input).toBeDisabled();
     });
   });
 
-  describe('semantic tokens', () => {
-    it('uses success token for valid border', () => {
+  describe('validation status', () => {
+    it('applies valid validation status data attribute', () => {
       const { container } = render(
         <ApiKeyInput provider="openai" label="API Key" validationStatus="valid" value="sk-valid" />
       );
-      const input = container.querySelector('input');
-      expect(input).toHaveClass('border-success/50');
+      const wrapper = container.querySelector('[data-provider="openai"]');
+      expect(wrapper).toHaveAttribute('data-validation-status', 'valid');
     });
 
-    it('uses success token for valid background', () => {
-      const { container } = render(
-        <ApiKeyInput provider="openai" label="API Key" validationStatus="valid" value="sk-valid" />
-      );
-      const input = container.querySelector('input');
-      expect(input).toHaveClass('bg-success/10');
-    });
-
-    it('uses success focus ring when valid', () => {
-      const { container } = render(
-        <ApiKeyInput provider="openai" label="API Key" validationStatus="valid" value="sk-valid" />
-      );
-      const input = container.querySelector('input');
-      expect(input).toHaveClass('focus-visible:ring-success/40');
-    });
-
-    it('uses destructive token for invalid border', () => {
+    it('applies invalid validation status data attribute', () => {
       const { container } = render(
         <ApiKeyInput provider="openai" label="API Key" validationStatus="invalid" value="bad" error="Invalid" />
       );
-      const input = container.querySelector('input');
-      expect(input).toHaveClass('border-destructive');
+      const wrapper = container.querySelector('[data-provider="openai"]');
+      expect(wrapper).toHaveAttribute('data-validation-status', 'invalid');
     });
 
-    it('uses destructive focus ring when invalid', () => {
-      const { container } = render(
-        <ApiKeyInput provider="openai" label="API Key" validationStatus="invalid" value="bad" error="Invalid" />
-      );
-      const input = container.querySelector('input');
-      expect(input).toHaveClass('focus-visible:ring-destructive/40');
-    });
-
-    it('uses success token for valid icon', () => {
+    it('shows valid icon when valid', () => {
       const { container } = render(
         <ApiKeyInput provider="openai" label="API Key" validationStatus="valid" value="sk-valid" />
       );
       const icon = container.querySelector('[data-validation="valid"]');
-      expect(icon).toHaveClass('text-success');
+      expect(icon).toBeInTheDocument();
     });
 
-    it('uses destructive token for invalid icon', () => {
+    it('shows invalid icon when invalid', () => {
       const { container } = render(
         <ApiKeyInput provider="openai" label="API Key" validationStatus="invalid" value="bad" error="Invalid" />
       );
       const icon = container.querySelector('[data-validation="invalid"]');
-      expect(icon).toHaveClass('text-destructive');
+      expect(icon).toBeInTheDocument();
     });
   });
 

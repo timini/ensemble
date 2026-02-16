@@ -68,16 +68,16 @@ describe('PromptInput', () => {
       expect(screen.getByText(/5.*100/)).toBeInTheDocument();
     });
 
-    it('shows warning color when near max length', () => {
+    it('shows warning status when near max length', () => {
       const { container } = render(<PromptInput label="Enter prompt" value={'A'.repeat(85)} maxLength={100} />);
       const counter = container.querySelector('[data-testid="character-counter"]');
-      expect(counter).toHaveClass('text-warning');
+      expect(counter).toHaveAttribute('data-counter-status', 'warning');
     });
 
-    it('shows error color when at max length', () => {
+    it('shows error status when at max length', () => {
       const { container } = render(<PromptInput label="Enter prompt" value={'A'.repeat(100)} maxLength={100} />);
       const counter = container.querySelector('[data-testid="character-counter"]');
-      expect(counter).toHaveClass('text-destructive');
+      expect(counter).toHaveAttribute('data-counter-status', 'error');
     });
   });
 
@@ -106,10 +106,10 @@ describe('PromptInput', () => {
       expect(textarea.value.length).toBe(100);
     });
 
-    it('applies error styling when validation fails', () => {
+    it('sets aria-invalid when validation fails', () => {
       render(<PromptInput label="Enter prompt" value="Short" minLength={10} error="Too short" />);
       const textarea = screen.getByLabelText('Enter prompt');
-      expect(textarea).toHaveClass('border-destructive');
+      expect(textarea).toHaveAttribute('aria-invalid', 'true');
     });
   });
 
@@ -198,10 +198,10 @@ describe('PromptInput', () => {
       expect(screen.getByLabelText('Enter prompt')).toBeDisabled();
     });
 
-    it('applies disabled styling', () => {
+    it('applies disabled attribute', () => {
       render(<PromptInput label="Enter prompt" value="" disabled />);
       const textarea = screen.getByLabelText('Enter prompt');
-      expect(textarea).toHaveClass('disabled:opacity-50');
+      expect(textarea).toBeDisabled();
     });
 
     it('shows character counter when disabled', () => {

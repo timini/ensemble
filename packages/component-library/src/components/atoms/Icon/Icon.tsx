@@ -52,6 +52,8 @@ const Icon = React.forwardRef<HTMLSpanElement, IconProps>(
         ref={ref}
         className={cn(iconVariants({ size, variant, className }))}
         role={role}
+        data-variant={variant || 'default'}
+        data-size={size || 'default'}
         {...props}
       >
         {React.Children.map(children, (child) => {

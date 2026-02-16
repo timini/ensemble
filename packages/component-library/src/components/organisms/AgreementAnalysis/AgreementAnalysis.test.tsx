@@ -130,10 +130,10 @@ describe('AgreementAnalysis', () => {
       );
 
       const percentage = screen.getByText('35%');
-      expect(percentage).toHaveClass('text-destructive');
+      expect(percentage).toHaveAttribute('data-agreement-level', 'low');
     });
 
-    it('applies yellow color for medium agreement', () => {
+    it('applies warning level for medium agreement', () => {
       render(
         <AgreementAnalysis
           overallAgreement={0.68}
@@ -145,10 +145,10 @@ describe('AgreementAnalysis', () => {
       );
 
       const percentage = screen.getByText('68%');
-      expect(percentage).toHaveClass('text-warning');
+      expect(percentage).toHaveAttribute('data-agreement-level', 'medium');
     });
 
-    it('applies green color for high agreement', () => {
+    it('applies success level for high agreement', () => {
       render(
         <AgreementAnalysis
           overallAgreement={0.89}
@@ -160,7 +160,7 @@ describe('AgreementAnalysis', () => {
       );
 
       const percentage = screen.getByText('89%');
-      expect(percentage).toHaveClass('text-success');
+      expect(percentage).toHaveAttribute('data-agreement-level', 'high');
     });
   });
 
@@ -278,7 +278,7 @@ describe('AgreementAnalysis', () => {
       );
 
       // Find the stats grid and check for avg confidence within it
-      const statsGrid = container.querySelector('.grid.grid-cols-3');
+      const statsGrid = container.querySelector('[data-testid="agreement-stats"]');
       expect(statsGrid).toBeInTheDocument();
       expect(screen.getByText('AVG CONFIDENCE')).toBeInTheDocument();
     });
@@ -294,7 +294,7 @@ describe('AgreementAnalysis', () => {
         />
       );
 
-      const statsGrid = container.querySelector('.grid.grid-cols-3');
+      const statsGrid = container.querySelector('[data-testid="agreement-stats"]');
       expect(statsGrid).toBeInTheDocument();
     });
   });
@@ -397,7 +397,7 @@ describe('AgreementAnalysis', () => {
       );
 
       // Check for 100% in the header
-      const headerPercentage = container.querySelector('.text-2xl.font-bold');
+      const headerPercentage = container.querySelector('[data-agreement-level]');
       expect(headerPercentage).toHaveTextContent('100%');
       expect(screen.getByText('High Agreement')).toBeInTheDocument();
     });
@@ -416,7 +416,7 @@ describe('AgreementAnalysis', () => {
       );
 
       // Check for 0% in the header
-      const headerPercentage = container.querySelector('.text-2xl.font-bold');
+      const headerPercentage = container.querySelector('[data-agreement-level]');
       expect(headerPercentage).toHaveTextContent('0%');
       expect(screen.getByText('Low Agreement')).toBeInTheDocument();
     });
@@ -433,7 +433,7 @@ describe('AgreementAnalysis', () => {
       );
 
       // Check for 50% in the header
-      const headerPercentage = container.querySelector('.text-2xl.font-bold');
+      const headerPercentage = container.querySelector('[data-agreement-level]');
       expect(headerPercentage).toHaveTextContent('50%');
       expect(screen.getByText('Medium Agreement')).toBeInTheDocument();
     });

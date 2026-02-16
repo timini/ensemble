@@ -3,6 +3,7 @@
 exports[`Rating > snapshots > matches snapshot for disabled 1`] = `
 <div
   class="flex items-center space-x-1 text-base"
+  data-size="default"
 >
   <button
     aria-label="1 star"
@@ -50,6 +51,7 @@ exports[`Rating > snapshots > matches snapshot for disabled 1`] = `
 exports[`Rating > snapshots > matches snapshot for five stars 1`] = `
 <div
   class="flex items-center space-x-1 text-base"
+  data-size="default"
 >
   <button
     aria-label="1 star"
@@ -92,6 +94,7 @@ exports[`Rating > snapshots > matches snapshot for five stars 1`] = `
 exports[`Rating > snapshots > matches snapshot for large size 1`] = `
 <div
   class="flex items-center space-x-1 text-xl"
+  data-size="lg"
 >
   <button
     aria-label="1 star"
@@ -134,6 +137,7 @@ exports[`Rating > snapshots > matches snapshot for large size 1`] = `
 exports[`Rating > snapshots > matches snapshot for read only 1`] = `
 <div
   class="flex items-center space-x-1 text-base"
+  data-size="default"
 >
   <button
     aria-label="1 star"
@@ -181,6 +185,7 @@ exports[`Rating > snapshots > matches snapshot for read only 1`] = `
 exports[`Rating > snapshots > matches snapshot for small size 1`] = `
 <div
   class="flex items-center space-x-1 text-sm"
+  data-size="sm"
 >
   <button
     aria-label="1 star"
@@ -223,6 +228,7 @@ exports[`Rating > snapshots > matches snapshot for small size 1`] = `
 exports[`Rating > snapshots > matches snapshot for three stars 1`] = `
 <div
   class="flex items-center space-x-1 text-base"
+  data-size="default"
 >
   <button
     aria-label="1 star"
@@ -265,6 +271,7 @@ exports[`Rating > snapshots > matches snapshot for three stars 1`] = `
 exports[`Rating > snapshots > matches snapshot for zero stars 1`] = `
 <div
   class="flex items-center space-x-1 text-base"
+  data-size="default"
 >
   <button
     aria-label="1 star"

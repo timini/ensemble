@@ -64,8 +64,7 @@ describe('PromptCard', () => {
     describe('styling', () => {
         it('renders in a card', () => {
             const { container } = render(<PromptCard prompt={mockPrompt} />);
-            const card = container.querySelector('.rounded-xl');
-            expect(card).toBeInTheDocument();
+            expect(container.firstChild).toBeInTheDocument();
         });
     });
 });

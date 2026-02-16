@@ -3,6 +3,9 @@
 exports[`Tag > snapshots > matches snapshot for default state 1`] = `
 <span
   class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-medium transition-colors border bg-secondary text-secondary-foreground border-border"
+  data-disabled="false"
+  data-selected="false"
+  data-variant="default"
 >
   Tag
 </span>
@@ -11,6 +14,9 @@ exports[`Tag > snapshots > matches snapshot for default state 1`] = `
 exports[`Tag > snapshots > matches snapshot for removable state 1`] = `
 <div
   class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-medium transition-colors border bg-secondary text-secondary-foreground border-border"
+  data-disabled="false"
+  data-selected="false"
+  data-variant="default"
 >
   Tag
   <button
@@ -45,6 +51,9 @@ exports[`Tag > snapshots > matches snapshot for removable state 1`] = `
 exports[`Tag > snapshots > matches snapshot for selected state 1`] = `
 <span
   class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-medium transition-colors border bg-secondary text-secondary-foreground border-primary"
+  data-disabled="false"
+  data-selected="true"
+  data-variant="default"
 >
   Tag
 </span>

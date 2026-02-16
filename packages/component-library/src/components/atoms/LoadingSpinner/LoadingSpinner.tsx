@@ -41,7 +41,7 @@ export interface LoadingSpinnerProps
 const LoadingSpinner = React.forwardRef<HTMLDivElement, LoadingSpinnerProps>(
   ({ className, size, variant, role = 'status', 'aria-live': ariaLive = 'polite', ...props }, ref) => {
     return (
-      <div ref={ref} role={role} aria-live={ariaLive} {...props}>
+      <div ref={ref} role={role} aria-live={ariaLive} data-variant={variant || 'default'} data-size={size || 'default'} {...props}>
         <Loader2 className={cn(spinnerVariants({ size, variant, className }))} />
       </div>
     );
