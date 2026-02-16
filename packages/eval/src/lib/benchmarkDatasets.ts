@@ -2,7 +2,6 @@ import type {
   BenchmarkDatasetName,
   BenchmarkLoader,
   BenchmarkQuestion,
-  DatasetLoadOptions,
 } from '../types.js';
 import { benchmarkLoaders } from './benchmarkDatasetLoaders.js';
 import { resolveBenchmarkDatasetName } from './benchmarkDatasetShared.js';
@@ -16,7 +15,7 @@ export function getBenchmarkLoader(name: BenchmarkDatasetName): BenchmarkLoader 
 
 export async function loadBenchmarkQuestions(
   dataset: string,
-  options?: DatasetLoadOptions,
+  options?: { sample?: number },
 ): Promise<{ datasetName: BenchmarkDatasetName | null; questions: BenchmarkQuestion[] }> {
   const datasetName = resolveBenchmarkDatasetName(dataset);
   if (!datasetName) {
