@@ -232,23 +232,30 @@ describe('EnsembleRunner', () => {
   });
 
   it('does not re-apply stagger delay on retry', async () => {
-    const callTimestamps: number[] = [];
-    let callCount = 0;
+    // Track timestamps per model so we can measure retry gap for index 1
+    const callTimestampsByModel: Record<string, number[]> = {};
+    const callCountByModel: Record<string, number> = {};
+
     const provider = buildProvider({
-      onStream: async (_prompt, _model, _onChunk, onComplete, onError) => {
-        callTimestamps.push(Date.now());
-        callCount++;
-        if (callCount === 1) {
-          // First call fails with retryable error
+      onStream: async (_prompt, model, _onChunk, onComplete, onError) => {
+        callCountByModel[model] = (callCountByModel[model] ?? 0) + 1;
+        (callTimestampsByModel[model] ??= []).push(Date.now());
+
+        if (model === 'gpt-4o-mini' && callCountByModel[model] === 1) {
+          // First call for the second model (index 1) fails with retryable error
           onError(new Error('Rate limit exceeded'));
           return;
         }
-        // Second call (retry) succeeds
+        // All other calls succeed
         onComplete('ok', 5, 20);
       },
+      models: [
+        { id: 'gpt-4o', costPer1kTokens: 0.01 },
+        { id: 'gpt-4o-mini', costPer1kTokens: 0.005 },
+      ],
     });
 
-    const staggerMs = 50;
+    const staggerMs = 100;
     const runner = new EnsembleRunner(
       buildRegistry({
         openai: provider,
@@ -265,17 +272,23 @@ describe('EnsembleRunner', () => {
 
     const results = await runner.runPrompt('Test', [
       { provider: 'openai', model: 'gpt-4o' },
+      { provider: 'openai', model: 'gpt-4o-mini' },
     ]);
 
-    expect(results).toHaveLength(1);
+    expect(results).toHaveLength(2);
     expect(results[0].content).toBe('ok');
-    expect(callCount).toBe(2);
+    expect(results[1].content).toBe('ok');
+    // Model at index 0 succeeds on first try, model at index 1 fails then retries
+    expect(callCountByModel['gpt-4o']).toBe(1);
+    expect(callCountByModel['gpt-4o-mini']).toBe(2);
 
-    // The retry (second call) should happen almost immediately after the first
-    // call fails (only the tiny baseDelayMs=1ms retry backoff, no stagger).
-    // If the stagger were re-applied, the gap would be >= staggerMs.
-    const retryGap = callTimestamps[1] - callTimestamps[0];
-    expect(retryGap).toBeLessThan(staggerMs);
+    // The retry for the second model (index 1) should happen almost immediately
+    // after its first call fails — only the tiny baseDelayMs=1ms retry backoff,
+    // NOT the 100ms stagger delay. If the stagger were re-applied on retry,
+    // the gap would be >= staggerMs.
+    const miniTimestamps = callTimestampsByModel['gpt-4o-mini'];
+    const retryGap = miniTimestamps[1] - miniTimestamps[0];
+    expect(retryGap).toBeLessThan(50);
   });
 
   it('works without retry options (backwards compatible)', async () => {
