@@ -231,6 +231,53 @@ describe('EnsembleRunner', () => {
     expect(callCount).toBe(1);
   });
 
+  it('does not re-apply stagger delay on retry', async () => {
+    const callTimestamps: number[] = [];
+    let callCount = 0;
+    const provider = buildProvider({
+      onStream: async (_prompt, _model, _onChunk, onComplete, onError) => {
+        callTimestamps.push(Date.now());
+        callCount++;
+        if (callCount === 1) {
+          // First call fails with retryable error
+          onError(new Error('Rate limit exceeded'));
+          return;
+        }
+        // Second call (retry) succeeds
+        onComplete('ok', 5, 20);
+      },
+    });
+
+    const staggerMs = 50;
+    const runner = new EnsembleRunner(
+      buildRegistry({
+        openai: provider,
+        anthropic: provider,
+        google: provider,
+        xai: provider,
+      }),
+      'mock',
+      {
+        requestDelayMs: staggerMs,
+        retry: { maxRetries: 2, baseDelayMs: 1, maxJitterMs: 0 },
+      },
+    );
+
+    const results = await runner.runPrompt('Test', [
+      { provider: 'openai', model: 'gpt-4o' },
+    ]);
+
+    expect(results).toHaveLength(1);
+    expect(results[0].content).toBe('ok');
+    expect(callCount).toBe(2);
+
+    // The retry (second call) should happen almost immediately after the first
+    // call fails (only the tiny baseDelayMs=1ms retry backoff, no stagger).
+    // If the stagger were re-applied, the gap would be >= staggerMs.
+    const retryGap = callTimestamps[1] - callTimestamps[0];
+    expect(retryGap).toBeLessThan(staggerMs);
+  });
+
   it('works without retry options (backwards compatible)', async () => {
     const provider = buildProvider({
       onStream: async (_prompt, _model, _onChunk, onComplete) => {
