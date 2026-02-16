@@ -17,6 +17,7 @@ interface BaselineCommandOptions {
   mode: EvalMode;
   requestDelayMs?: string;
   selfConsistencyRuns?: string;
+  temperature?: string;
 }
 
 export function createBaselineCommand(): Command {
@@ -40,6 +41,10 @@ export function createBaselineCommand(): Command {
       'Optional delay in milliseconds between starting model calls.',
       '0',
     )
+    .option(
+      '--temperature <value>',
+      'Temperature for model responses (e.g. 0 for deterministic).',
+    )
     .option('--mode <mode>', 'Provider mode to use (mock or free)', 'mock')
     .action(async (dataset: string, options: BaselineCommandOptions) => {
       const modelSpec = parseModelSpec(options.model);
@@ -60,6 +65,12 @@ export function createBaselineCommand(): Command {
       if (!Number.isInteger(requestDelayMs) || requestDelayMs < 0) {
         throw new Error(`Invalid request delay "${options.requestDelayMs}".`);
       }
+      const temperature = options.temperature !== undefined
+        ? Number.parseFloat(options.temperature)
+        : undefined;
+      if (temperature !== undefined && Number.isNaN(temperature)) {
+        throw new Error(`Invalid temperature "${options.temperature}".`);
+      }
 
       const { datasetName, questions } = await loadBenchmarkQuestions(dataset, {
         sample: sampleCount,
@@ -70,6 +81,7 @@ export function createBaselineCommand(): Command {
       registerProviders(registry, [modelSpec.provider], options.mode);
       const ensembleRunner = new EnsembleRunner(registry, options.mode, {
         requestDelayMs,
+        temperature,
       });
 
       const runs: PromptRunResult[] = [];

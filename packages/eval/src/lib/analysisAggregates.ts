@@ -1,4 +1,4 @@
-import type { PromptRunResult } from '../types.js';
+import type { PromptRunResult, StrategyName } from '../types.js';
 import {
   collectModelResults,
   evaluateConsensusAnswer,
@@ -129,7 +129,8 @@ export function collectAnalysisAggregates(runs: PromptRunResult[]): AnalysisAggr
     const strategyResults: QuestionSummary['strategyResults'] = {};
     const runCost = responseCostTotals(run);
     for (const [strategy, answer] of Object.entries(run.consensus)) {
-      const evaluated = evaluateConsensusAnswer(
+      const preComputed = run.consensusEvaluation?.results?.[strategy as StrategyName];
+      const evaluated = preComputed ?? evaluateConsensusAnswer(
         run.evaluation?.evaluator,
         answer,
         groundTruth,

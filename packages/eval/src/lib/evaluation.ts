@@ -1,7 +1,9 @@
 import type {
+  ConsensusEvaluation,
   EvaluationResult,
   PromptEvaluation,
   ProviderResponse,
+  StrategyName,
 } from '../types.js';
 
 export interface EvaluatorLike {
@@ -49,6 +51,32 @@ export async function evaluateResponses(
     evaluator: evaluator.name,
     groundTruth,
     accuracy: evaluatedResponses === 0 ? 0 : correctResponses / evaluatedResponses,
+    results,
+  };
+}
+
+export async function evaluateConsensusStrategies(
+  evaluator: EvaluatorLike | null,
+  consensus: Partial<Record<StrategyName, string>>,
+  groundTruth: string,
+  prompt?: string,
+): Promise<ConsensusEvaluation | undefined> {
+  if (!evaluator || groundTruth.length === 0) {
+    return undefined;
+  }
+
+  const results: Partial<Record<StrategyName, EvaluationResult>> = {};
+  for (const [strategy, answer] of Object.entries(consensus)) {
+    if (!answer) {
+      continue;
+    }
+    const result = await evaluator.evaluate(answer, groundTruth, prompt);
+    results[strategy as StrategyName] = result;
+  }
+
+  return {
+    evaluator: evaluator.name,
+    groundTruth,
     results,
   };
 }

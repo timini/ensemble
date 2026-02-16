@@ -1,4 +1,4 @@
-import type { AIProvider, ProviderName, ValidationResult } from '../../types';
+import type { AIProvider, ProviderName, StreamResponseOptions, ValidationResult } from '../../types';
 import { MockProviderClient } from '../mock/MockProviderClient';
 
 export interface StreamHandlers {
@@ -11,6 +11,7 @@ export interface StreamOptions extends StreamHandlers {
   apiKey: string;
   prompt: string;
   model: string;
+  streamOptions?: StreamResponseOptions;
 }
 
 /**
@@ -42,6 +43,7 @@ export abstract class BaseFreeClient implements AIProvider {
     onChunk: (chunk: string) => void,
     onComplete: (fullResponse: string, responseTime: number, tokenCount?: number) => void,
     onError: (error: Error) => void,
+    options?: StreamResponseOptions,
   ): Promise<void> {
     const apiKey = this.resolveApiKey();
 
@@ -76,6 +78,7 @@ export abstract class BaseFreeClient implements AIProvider {
           onChunk,
           onComplete,
           onError,
+          streamOptions: options,
         }),
         timeoutPromise,
       ]);

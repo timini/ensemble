@@ -53,6 +53,12 @@ export interface SelfConsistencyResult {
   correct: boolean | null;
 }
 
+export interface ConsensusEvaluation {
+  evaluator: PromptEvaluation['evaluator'];
+  groundTruth: string;
+  results: Partial<Record<StrategyName, EvaluationResult>>;
+}
+
 export interface PromptRunResult {
   questionId?: string;
   prompt: string;
@@ -62,6 +68,7 @@ export interface PromptRunResult {
   responses: ProviderResponse[];
   consensus: Partial<Record<StrategyName, string>>;
   evaluation?: PromptEvaluation;
+  consensusEvaluation?: ConsensusEvaluation;
   selfConsistency?: SelfConsistencyResult;
 }
 

@@ -2,6 +2,7 @@ import type {
   AIProvider,
   ModelMetadata,
   ProviderRegistry,
+  StreamResponseOptions,
 } from '@ensemble-ai/shared-utils/providers';
 import type { EvalMode, ModelSpec, ProviderResponse } from '../types.js';
 import { isRateLimitOrServerError, retryable, type RetryOptions } from './retryable.js';
@@ -9,6 +10,7 @@ import { isRateLimitOrServerError, retryable, type RetryOptions } from './retrya
 export interface EnsembleRunnerOptions {
   requestDelayMs?: number;
   retry?: RetryOptions;
+  temperature?: number;
 }
 
 function sleep(ms: number): Promise<void> {
@@ -30,6 +32,7 @@ async function streamModelResponse(
   client: AIProvider,
   prompt: string,
   model: string,
+  streamOptions?: StreamResponseOptions,
 ): Promise<Pick<ProviderResponse, 'content' | 'responseTimeMs' | 'tokenCount' | 'error'>> {
   return new Promise((resolve) => {
     let content = '';
@@ -66,6 +69,7 @@ async function streamModelResponse(
             error: error.message,
           });
         },
+        streamOptions,
       )
       .catch((error: unknown) => {
         const message = error instanceof Error ? error.message : String(error);
@@ -81,6 +85,7 @@ async function streamModelResponse(
 export class EnsembleRunner {
   private readonly requestDelayMs: number;
   private readonly retryOptions: RetryOptions | undefined;
+  private readonly streamOptions: StreamResponseOptions | undefined;
 
   constructor(
     private readonly registry: ProviderRegistry,
@@ -89,6 +94,8 @@ export class EnsembleRunner {
   ) {
     this.requestDelayMs = Math.max(0, options?.requestDelayMs ?? 0);
     this.retryOptions = options?.retry;
+    this.streamOptions =
+      options?.temperature !== undefined ? { temperature: options.temperature } : undefined;
   }
 
   async runPrompt(prompt: string, models: ModelSpec[]): Promise<ProviderResponse[]> {
@@ -105,7 +112,7 @@ export class EnsembleRunner {
       const result: StreamResult = this.retryOptions
         ? await retryable(
             async () => {
-              const r = await streamModelResponse(client, prompt, model);
+              const r = await streamModelResponse(client, prompt, model, this.streamOptions);
               if (r.error && isRateLimitOrServerError(new Error(r.error))) {
                 throw new Error(r.error);
               }
@@ -117,7 +124,7 @@ export class EnsembleRunner {
             responseTimeMs: 0,
             error: error instanceof Error ? error.message : String(error),
           }))
-        : await streamModelResponse(client, prompt, model);
+        : await streamModelResponse(client, prompt, model, this.streamOptions);
 
       const estimatedCostUsd = estimateCostUsd(result.tokenCount, metadata);
 
