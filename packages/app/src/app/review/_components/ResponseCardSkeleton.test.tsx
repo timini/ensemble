@@ -48,10 +48,9 @@ describe('ResponseCardSkeleton', () => {
   });
 
   it('renders pulse animation placeholders', () => {
-    const { container } = render(
-      <ResponseCardSkeleton modelName="GPT-4" provider="openai" />
+    render(
+      <ResponseCardSkeleton modelName="GPT-4" provider="openai" testId="pulse-test" />
     );
-    const pulseElements = container.querySelectorAll('.animate-pulse');
-    expect(pulseElements.length).toBeGreaterThanOrEqual(1);
+    expect(screen.getByTestId('skeleton-pulse')).toBeInTheDocument();
   });
 });
