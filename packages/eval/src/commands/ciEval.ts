@@ -72,10 +72,12 @@ export function createCiEvalCommand(): Command {
 
       // Step 4: Initialize provider registry with API keys
       const registry = new ProviderRegistry();
-      const providerNames: EvalProvider[] = [
-        ...tierConfig.models.map((m) => m.provider),
-        tierConfig.summarizer.provider,
-      ];
+      const providerNames: EvalProvider[] = Array.from(
+        new Set([
+          ...tierConfig.models.map((m) => m.provider),
+          tierConfig.summarizer.provider,
+        ]),
+      );
       registerProviders(registry, providerNames, options.mode);
 
       // Step 5: Create BenchmarkRunner with tier config
