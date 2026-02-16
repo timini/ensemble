@@ -1,6 +1,6 @@
 import type { ProviderRegistry } from '@ensemble-ai/shared-utils/providers';
 import { generateConsensus } from './consensus.js';
-import { evaluateResponses, type EvaluatorLike } from './evaluation.js';
+import { evaluateConsensusStrategies, evaluateResponses, type EvaluatorLike } from './evaluation.js';
 import { writeJsonFile } from './io.js';
 import { EnsembleRunner } from './ensembleRunner.js';
 import type {
@@ -109,6 +109,13 @@ export class BenchmarkRunner {
         question.prompt,
       );
 
+      const consensusEvaluation = await evaluateConsensusStrategies(
+        this.evaluator,
+        consensus,
+        question.groundTruth,
+        question.prompt,
+      );
+
       const run: PromptRunResult = {
         questionId: question.id,
         prompt: question.prompt,
@@ -118,6 +125,7 @@ export class BenchmarkRunner {
         responses,
         consensus,
         evaluation,
+        consensusEvaluation,
       };
       output.runs.push(run);
       output.updatedAt = new Date().toISOString();

@@ -107,4 +107,48 @@ describe('BenchmarkRunner', () => {
     expect(persisted.runs).toHaveLength(2);
     expect(persisted.runs[1].questionId).toBe('q2');
   });
+
+  it('populates consensusEvaluation when evaluator and groundTruth are present', async () => {
+    scratchDir = await mkdtemp(join(tmpdir(), 'ensemble-benchmark-consensus-'));
+    const outputPath = join(scratchDir, 'benchmark.json');
+    const output = createBenchmarkFile(
+      'gsm8k',
+      'mock',
+      ['openai:gpt-4o'],
+      ['standard'],
+      1,
+    );
+
+    const runner = new BenchmarkRunner({
+      mode: 'mock',
+      registry: buildRegistry(buildProvider()),
+      models: [{ provider: 'openai', model: 'gpt-4o' }],
+      strategies: ['standard'],
+      evaluator: {
+        name: 'generative',
+        evaluate: async (response, groundTruth) => ({
+          correct: response === groundTruth,
+          predicted: response,
+          expected: groundTruth,
+        }),
+      },
+      summarizer: { provider: 'openai', model: 'gpt-4o' },
+    });
+
+    await runner.run({
+      questions: [
+        { id: 'q1', prompt: 'What is 2+2?', groundTruth: '4' },
+      ],
+      output,
+      outputPath,
+    });
+
+    expect(output.runs).toHaveLength(1);
+    const run = output.runs[0];
+    expect(run.consensusEvaluation).toBeDefined();
+    expect(run.consensusEvaluation?.evaluator).toBe('generative');
+    expect(run.consensusEvaluation?.groundTruth).toBe('4');
+    expect(run.consensusEvaluation?.results.standard).toBeDefined();
+    expect(run.consensusEvaluation?.results.standard?.expected).toBe('4');
+  });
 });

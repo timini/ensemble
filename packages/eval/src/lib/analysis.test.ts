@@ -112,4 +112,50 @@ describe('analyzeBenchmarkRuns', () => {
     expect(analysis.charts.costVsAccuracyFrontier.length).toBeGreaterThanOrEqual(3);
     expect(analysis.charts.modelDiversityHeatmap.models).toHaveLength(2);
   });
+
+  it('uses pre-computed consensusEvaluation when present', () => {
+    const run: PromptRunResult = {
+      questionId: 'q1',
+      prompt: 'one',
+      groundTruth: '1',
+      category: 'math',
+      difficulty: 'easy',
+      responses: [
+        {
+          provider: 'openai',
+          model: 'gpt-4o',
+          content: '1',
+          responseTimeMs: 10,
+          tokenCount: 100,
+          estimatedCostUsd: 0.001,
+        },
+      ],
+      consensus: {
+        standard: 'summarized answer',
+      },
+      evaluation: {
+        evaluator: 'generative',
+        groundTruth: '1',
+        accuracy: 1,
+        results: {
+          'openai:gpt-4o': { predicted: '1', expected: '1', correct: true },
+        },
+      },
+      consensusEvaluation: {
+        evaluator: 'generative',
+        groundTruth: '1',
+        results: {
+          standard: { predicted: 'summarized answer', expected: '1', correct: true },
+        },
+      },
+    };
+
+    const analysis = analyzeBenchmarkRuns([run], { bootstrapIterations: 50 });
+
+    expect(analysis.strategyAccuracy[0]).toMatchObject({
+      label: 'standard',
+      correct: 1,
+      total: 1,
+    });
+  });
 });

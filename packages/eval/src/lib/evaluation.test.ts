@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { evaluateResponses } from './evaluation.js';
+import { evaluateConsensusStrategies, evaluateResponses } from './evaluation.js';
 import type { ProviderResponse } from '../types.js';
 
 describe('evaluateResponses', () => {
@@ -74,5 +74,70 @@ describe('evaluateResponses', () => {
       'answer',
       'prompt text',
     );
+  });
+});
+
+describe('evaluateConsensusStrategies', () => {
+  it('returns undefined when evaluator is null or ground truth is empty', async () => {
+    await expect(
+      evaluateConsensusStrategies(null, { standard: 'answer' }, 'truth'),
+    ).resolves.toBeUndefined();
+    await expect(
+      evaluateConsensusStrategies(
+        { name: 'numeric', evaluate: () => ({ correct: true, expected: 'x', predicted: 'x' }) },
+        { standard: 'answer' },
+        '',
+      ),
+    ).resolves.toBeUndefined();
+  });
+
+  it('evaluates each strategy against ground truth', async () => {
+    const evaluator = {
+      name: 'numeric' as const,
+      evaluate: vi.fn((response: string, groundTruth: string) =>
+        Promise.resolve({
+          correct: response === groundTruth,
+          expected: groundTruth,
+          predicted: response,
+        }),
+      ),
+    };
+
+    const result = await evaluateConsensusStrategies(
+      evaluator,
+      { standard: '42', majority: '99' },
+      '42',
+      'prompt text',
+    );
+
+    expect(result).toEqual({
+      evaluator: 'numeric',
+      groundTruth: '42',
+      results: {
+        standard: { correct: true, expected: '42', predicted: '42' },
+        majority: { correct: false, expected: '42', predicted: '99' },
+      },
+    });
+    expect(evaluator.evaluate).toHaveBeenCalledTimes(2);
+    expect(evaluator.evaluate).toHaveBeenCalledWith('42', '42', 'prompt text');
+    expect(evaluator.evaluate).toHaveBeenCalledWith('99', '42', 'prompt text');
+  });
+
+  it('skips empty consensus entries', async () => {
+    const evaluator = {
+      name: 'mcq' as const,
+      evaluate: vi.fn(() => ({ correct: true, expected: 'A', predicted: 'A' })),
+    };
+
+    const result = await evaluateConsensusStrategies(
+      evaluator,
+      { standard: 'A' },
+      'A',
+    );
+
+    expect(result?.results).toEqual({
+      standard: { correct: true, expected: 'A', predicted: 'A' },
+    });
+    expect(evaluator.evaluate).toHaveBeenCalledTimes(1);
   });
 });
