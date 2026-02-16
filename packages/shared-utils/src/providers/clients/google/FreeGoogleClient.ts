@@ -71,7 +71,12 @@ export class FreeGoogleClient extends BaseFreeClient {
 
     try {
       const genAI = this.createClient(options.apiKey);
-      const model = genAI.getGenerativeModel({ model: options.model });
+      const model = genAI.getGenerativeModel({
+        model: options.model,
+        ...(options.streamOptions?.temperature !== undefined && {
+          generationConfig: { temperature: options.streamOptions.temperature },
+        }),
+      });
 
       const result = await model.generateContentStream(options.prompt);
 

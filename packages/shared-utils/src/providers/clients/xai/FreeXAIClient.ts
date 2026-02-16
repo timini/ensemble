@@ -74,6 +74,12 @@ export class FreeXAIClient extends BaseFreeClient {
         stream: true,
         messages: [{ role: 'user', content: options.prompt }],
         stream_options: { include_usage: true },
+        ...(options.streamOptions?.temperature !== undefined && {
+          temperature: options.streamOptions.temperature,
+        }),
+        ...(options.streamOptions?.seed !== undefined && {
+          seed: options.streamOptions.seed,
+        }),
       });
 
       for await (const chunk of stream as AsyncIterable<{

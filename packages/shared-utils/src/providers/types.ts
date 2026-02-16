@@ -16,6 +16,11 @@ export interface ValidationResult {
   error?: string;
 }
 
+export interface StreamResponseOptions {
+  temperature?: number;
+  seed?: number;
+}
+
 export interface AIProvider {
   streamResponse(
     prompt: string,
@@ -27,6 +32,7 @@ export interface AIProvider {
       tokenCount?: number,
     ) => void,
     onError: (error: Error) => void,
+    options?: StreamResponseOptions,
   ): Promise<void>;
 
   generateEmbeddings(text: string): Promise<number[]>;

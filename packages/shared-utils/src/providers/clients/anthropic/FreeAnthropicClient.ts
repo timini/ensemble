@@ -61,6 +61,9 @@ export class FreeAnthropicClient extends BaseFreeClient {
         max_tokens: 1024, // Default limit
         messages: [{ role: 'user', content: options.prompt }],
         stream: true,
+        ...(options.streamOptions?.temperature !== undefined && {
+          temperature: options.streamOptions.temperature,
+        }),
       });
 
       for await (const event of stream) {

@@ -1,13 +1,21 @@
 import type {
   AIProvider,
   ProviderRegistry,
+  StreamResponseOptions,
 } from '@ensemble-ai/shared-utils/providers';
 import { describe, expect, it } from 'vitest';
 import { EnsembleRunner } from './ensembleRunner.js';
 import type { EvalProvider } from '../types.js';
 
 function buildProvider(args: {
-  onStream: AIProvider['streamResponse'];
+  onStream: (
+    prompt: string,
+    model: string,
+    onChunk: (chunk: string) => void,
+    onComplete: (fullResponse: string, responseTime: number, tokenCount?: number) => void,
+    onError: (error: Error) => void,
+    options?: StreamResponseOptions,
+  ) => Promise<void>;
   models?: Array<{ id: string; costPer1kTokens: number }>;
 }): AIProvider {
   return {
@@ -109,5 +117,54 @@ describe('EnsembleRunner', () => {
 
     expect(startTimes).toHaveLength(2);
     expect(startTimes[1] - startTimes[0]).toBeGreaterThanOrEqual(20);
+  });
+
+  it('passes temperature option through to streamResponse', async () => {
+    let receivedOptions: StreamResponseOptions | undefined;
+    const provider = buildProvider({
+      onStream: async (_prompt, _model, _onChunk, onComplete, _onError, options) => {
+        receivedOptions = options;
+        onComplete('ok', 1, 10);
+      },
+    });
+
+    const runner = new EnsembleRunner(
+      buildRegistry({
+        openai: provider,
+        anthropic: provider,
+        google: provider,
+        xai: provider,
+      }),
+      'mock',
+      { temperature: 0 },
+    );
+
+    await runner.runPrompt('Test', [{ provider: 'openai', model: 'gpt-4o' }]);
+
+    expect(receivedOptions).toEqual({ temperature: 0 });
+  });
+
+  it('does not pass streamOptions when temperature is not set', async () => {
+    let receivedOptions: StreamResponseOptions | undefined = { temperature: 999 };
+    const provider = buildProvider({
+      onStream: async (_prompt, _model, _onChunk, onComplete, _onError, options) => {
+        receivedOptions = options;
+        onComplete('ok', 1, 10);
+      },
+    });
+
+    const runner = new EnsembleRunner(
+      buildRegistry({
+        openai: provider,
+        anthropic: provider,
+        google: provider,
+        xai: provider,
+      }),
+      'mock',
+    );
+
+    await runner.runPrompt('Test', [{ provider: 'openai', model: 'gpt-4o' }]);
+
+    expect(receivedOptions).toBeUndefined();
   });
 });
