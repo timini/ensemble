@@ -1,4 +1,4 @@
-import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
+import { describe, expect, it, vi, beforeEach, afterEach, type MockInstance } from 'vitest';
 import { createCompareCommand, buildComparisonResult } from './compare.js';
 import type {
   BenchmarkResultsFile,
@@ -263,8 +263,7 @@ describe('buildComparisonResult', () => {
 // ── CLI command tests ──────────────────────────────────────────────
 
 describe('createCompareCommand', () => {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let stdoutSpy: any;
+  let stdoutSpy: MockInstance;
 
   beforeEach(() => {
     stdoutSpy = vi.spyOn(process.stdout, 'write').mockImplementation(() => true);
