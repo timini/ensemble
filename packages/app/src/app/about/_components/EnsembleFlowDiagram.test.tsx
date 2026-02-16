@@ -37,17 +37,16 @@ describe('EnsembleFlowDiagram', () => {
   });
 
   it('uses semantic color tokens instead of hardcoded colors', () => {
-    const { container } = render(<EnsembleFlowDiagram />);
-    const modelChips = container.querySelectorAll('.rounded-md');
+    render(<EnsembleFlowDiagram />);
+    const modelChips = screen.getAllByTestId('model-chip');
 
     expect(modelChips).toHaveLength(4);
 
-    const classes = Array.from(modelChips).map((el) => el.className);
-    classes.forEach((cls) => {
-      expect(cls).not.toMatch(/green-\d+/);
-      expect(cls).not.toMatch(/orange-\d+/);
-      expect(cls).not.toMatch(/blue-\d+/);
-      expect(cls).not.toMatch(/purple-\d+/);
+    modelChips.forEach((chip) => {
+      expect(chip.className).not.toMatch(/green-\d+/);
+      expect(chip.className).not.toMatch(/orange-\d+/);
+      expect(chip.className).not.toMatch(/blue-\d+/);
+      expect(chip.className).not.toMatch(/purple-\d+/);
     });
   });
 });

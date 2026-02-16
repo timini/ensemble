@@ -46,6 +46,7 @@ export function EnsembleFlowDiagram() {
             {MODEL_LABELS.map((label, i) => (
               <div
                 key={label}
+                data-testid="model-chip"
                 className={`flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-xs font-medium ${COLORS[i % COLORS.length]}`}
               >
                 <Cpu className="h-3.5 w-3.5" />
