@@ -221,24 +221,17 @@ test.describe('Full Workflow - Mock Mode', () => {
       // Wait for at least one response card to appear so the page is fully interactive
       await expect(page.locator('[data-testid^="response-card-"]').first()).toBeVisible({ timeout: 10000 });
 
-      const startOverButton = page.getByRole('button', { name: /start over/i }).first();
+      const startOverButton = page.getByRole('button', { name: /start over/i });
+      await expect(startOverButton).toHaveCount(1, { timeout: 10000 });
       await expect(startOverButton).toBeVisible({ timeout: 10000 });
       await expect(startOverButton).toBeEnabled({ timeout: 10000 });
-      let navigatedToConfig = false;
-      for (let attempt = 0; attempt < 3; attempt += 1) {
-        await startOverButton.click({ force: true, timeout: 5000 }).catch(async () => {
-          await startOverButton.evaluate((button: HTMLButtonElement) => button.click());
-        });
-        const reachedConfig = await page
-          .waitForURL('**/config', { timeout: 3000 })
-          .then(() => true)
-          .catch(() => false);
-        if (reachedConfig) {
-          navigatedToConfig = true;
-          break;
-        }
-      }
-      expect(navigatedToConfig).toBe(true);
+      await startOverButton.scrollIntoViewIfNeeded();
+
+      await Promise.all([
+        page.waitForURL('**/config', { timeout: 15000 }),
+        startOverButton.click({ timeout: 10000 }),
+      ]);
+
       await expect(page).toHaveURL(/\/config$/, { timeout: 10000 });
 
       // Verify we're back at config page
