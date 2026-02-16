@@ -156,6 +156,7 @@
       "selectedModels": "Modèles Sélectionnés ({{count}})",
       "summarizerLabel": "Synthétiseur",
       "noModels": "Aucun modèle sélectionné pour le moment",
+      "selectModelsHint": "Choisissez au moins 2 modèles pour commencer à comparer.",
       "quickPresets": "Préréglages rapides",
       "quickPresetsDescription": "Démarrez à partir d'un ensemble organisé et optimisé pour les flux de travail courants.",
       "noPresets": "Aucun préréglage enregistré pour le moment. Enregistrez votre premier ensemble ci-dessous pour commencer.",
