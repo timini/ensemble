@@ -67,6 +67,10 @@ export function fisherExact(
   c: number,
   d: number,
 ): FisherExactResult {
+  if (a < 0 || b < 0 || c < 0 || d < 0) {
+    throw new Error('Contingency table values must be non-negative.');
+  }
+
   const n = a + b + c + d;
 
   if (n === 0) {

@@ -50,7 +50,7 @@ describe('fisherExact', () => {
   it('matches textbook Fisher exact test result', () => {
     // Baseline: 8/10 correct, Current: 3/10 correct
     // a=8, b=2, c=3, d=7
-    // One-sided Fisher p (lower tail for c) should be ~0.0325
+    // One-sided Fisher p (lower tail for c) should be ~0.0349
     const result = fisherExact(8, 2, 3, 7);
     expect(result.pValue).toBeCloseTo(0.0349, 3);
     expect(result.oddsRatio).toBeCloseTo((8 * 7) / (2 * 3), 5);
@@ -80,5 +80,20 @@ describe('fisherExact', () => {
     // a=0, b=5, c=0, d=5 -> numerator=0, denominator=0
     const result = fisherExact(0, 5, 0, 5);
     expect(result.oddsRatio).toBe(1);
+  });
+
+  it('throws on negative input values', () => {
+    expect(() => fisherExact(-1, 10, 10, 10)).toThrow(
+      'Contingency table values must be non-negative.',
+    );
+    expect(() => fisherExact(10, -1, 10, 10)).toThrow(
+      'Contingency table values must be non-negative.',
+    );
+    expect(() => fisherExact(10, 10, -1, 10)).toThrow(
+      'Contingency table values must be non-negative.',
+    );
+    expect(() => fisherExact(10, 10, 10, -1)).toThrow(
+      'Contingency table values must be non-negative.',
+    );
   });
 });
