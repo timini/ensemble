@@ -30,6 +30,7 @@ const PREFERRED_MODELS: Record<string, string[]> = {
     'gemini-1.5-flash',
   ],
   grok: ['grok-2', 'grok-3'],
+  sonar: ['sonar', 'sonar-pro', 'sonar-reasoning'],
 };
 
 /**
