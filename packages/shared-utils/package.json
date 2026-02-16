@@ -67,6 +67,7 @@
     "form-data-encoder": "^1.7.2",
     "formdata-node": "^4.4.1",
     "node-fetch": "^2.7.0",
-    "openai": "^4.68.4"
+    "openai": "^4.68.4",
+    "zod": "^3.24.2"
   }
 }
