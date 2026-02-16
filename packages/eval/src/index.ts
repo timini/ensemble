@@ -13,3 +13,5 @@ export * from './lib/statistics.js';
 export * from './lib/regressionTypes.js';
 export * from './lib/regressionReport.js';
 export * from './lib/tierConfig.js';
+export * from './lib/questionPinning.js';
+export * from './lib/regression.js';
