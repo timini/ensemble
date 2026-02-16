@@ -17,7 +17,13 @@
       "config": "Config",
       "ensemble": "Ensemble",
       "prompt": "Prompt",
-      "review": "Review"
+      "review": "Review",
+      "tooltips": {
+        "config": "Configure your API keys and select operating mode",
+        "ensemble": "Select 2-6 AI models to compare",
+        "prompt": "Enter your question or prompt",
+        "review": "View and compare AI responses"
+      }
     }
   },
   "atoms": {

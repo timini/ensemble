@@ -16,7 +16,7 @@ describe('ProgressSteps', () => {
   it('highlights the current step', () => {
     render(<ProgressSteps currentStep="prompt" />);
     const promptStep = screen.getByTestId('progress-step-circle-prompt');
-    expect(promptStep).toHaveClass('bg-primary');
+    expect(promptStep).toHaveAttribute('data-active', 'true');
   });
 
   it('shows check marks for completed steps', () => {
@@ -34,15 +34,18 @@ describe('ProgressSteps', () => {
   });
 
   it('renders connector lines between steps', () => {
-    const { container } = render(<ProgressSteps currentStep="ensemble" />);
-    const connectors = container.querySelectorAll('.w-16.h-0\\.5');
-    expect(connectors.length).toBe(3); // 3 connectors for 4 steps
+    render(<ProgressSteps currentStep="ensemble" />);
+    expect(screen.getByTestId('progress-step-connector-0')).toBeInTheDocument();
+    expect(screen.getByTestId('progress-step-connector-1')).toBeInTheDocument();
+    expect(screen.getByTestId('progress-step-connector-2')).toBeInTheDocument();
   });
 
-  it('applies correct styling for completed steps', () => {
-    const { container } = render(<ProgressSteps currentStep="prompt" />);
-    const completedSteps = container.querySelectorAll('.bg-success');
-    expect(completedSteps.length).toBeGreaterThan(0);
+  it('marks completed steps with data-completed attribute', () => {
+    render(<ProgressSteps currentStep="prompt" />);
+    const configCircle = screen.getByTestId('progress-step-circle-config');
+    const ensembleCircle = screen.getByTestId('progress-step-circle-ensemble');
+    expect(configCircle).toHaveAttribute('data-completed', 'true');
+    expect(ensembleCircle).toHaveAttribute('data-completed', 'true');
   });
 
   it('uses fixed-width label containers for horizontal centering', () => {
@@ -79,6 +82,51 @@ describe('ProgressSteps', () => {
     expect(screen.getByTestId('progress-step-container-config').tagName).toBe('DIV');
     expect(screen.getByTestId('progress-step-container-ensemble').tagName).toBe('DIV');
     expect(screen.getByTestId('progress-step-container-prompt').tagName).toBe('DIV');
+  });
+
+  describe('tooltips', () => {
+    it('renders tooltip text for each step', () => {
+      render(<ProgressSteps currentStep="config" />);
+
+      expect(screen.getByTestId('progress-step-tooltip-config')).toHaveTextContent(
+        'Configure your API keys and select operating mode'
+      );
+      expect(screen.getByTestId('progress-step-tooltip-ensemble')).toHaveTextContent(
+        'Select 2-6 AI models to compare'
+      );
+      expect(screen.getByTestId('progress-step-tooltip-prompt')).toHaveTextContent(
+        'Enter your question or prompt'
+      );
+      expect(screen.getByTestId('progress-step-tooltip-review')).toHaveTextContent(
+        'View and compare AI responses'
+      );
+    });
+
+    it('renders tooltips with role="tooltip"', () => {
+      render(<ProgressSteps currentStep="config" />);
+
+      const tooltips = screen.getAllByRole('tooltip');
+      expect(tooltips).toHaveLength(4);
+    });
+
+    it('associates tooltips with step containers via aria-describedby', () => {
+      render(<ProgressSteps currentStep="config" />);
+
+      const configContainer = screen.getByTestId('progress-step-container-config');
+      const configTooltip = screen.getByTestId('progress-step-tooltip-config');
+
+      expect(configContainer).toHaveAttribute('aria-describedby', configTooltip.id);
+    });
+
+    it('associates tooltips with clickable step buttons via aria-describedby', () => {
+      render(<ProgressSteps currentStep="prompt" onStepClick={() => {}} />);
+
+      const configButton = screen.getByTestId('progress-step-container-config');
+      const configTooltip = screen.getByTestId('progress-step-tooltip-config');
+
+      expect(configButton.tagName).toBe('BUTTON');
+      expect(configButton).toHaveAttribute('aria-describedby', configTooltip.id);
+    });
   });
 
   describe('snapshots', () => {
@@ -122,52 +170,74 @@ describe('ProgressSteps', () => {
       expect(screen.getByText('Révision')).toBeInTheDocument();
     });
 
-    it('displays current step label in English when on config step', () => {
+    it('displays current step label with active state in English', () => {
       renderWithI18n(<ProgressSteps currentStep="config" />, { language: 'en' });
 
       const configLabel = screen.getByText('Config');
-      expect(configLabel).toHaveClass('text-primary');
+      expect(configLabel).toHaveAttribute('data-step-state', 'active');
     });
 
-    it('displays current step label in French when on config step', () => {
+    it('displays current step label with active state in French', () => {
       renderWithI18n(<ProgressSteps currentStep="config" />, { language: 'fr' });
 
       const configLabel = screen.getByText('Config');
-      expect(configLabel).toHaveClass('text-primary');
+      expect(configLabel).toHaveAttribute('data-step-state', 'active');
     });
 
     it('displays completed step labels in English when on review step', () => {
       renderWithI18n(<ProgressSteps currentStep="review" />, { language: 'en' });
 
-      expect(screen.getByText('Config')).toHaveClass('text-success');
-      expect(screen.getByText('Ensemble')).toHaveClass('text-success');
-      expect(screen.getByText('Prompt')).toHaveClass('text-success');
+      expect(screen.getByText('Config')).toHaveAttribute('data-step-state', 'completed');
+      expect(screen.getByText('Ensemble')).toHaveAttribute('data-step-state', 'completed');
+      expect(screen.getByText('Prompt')).toHaveAttribute('data-step-state', 'completed');
     });
 
     it('displays completed step labels in French when on review step', () => {
       renderWithI18n(<ProgressSteps currentStep="review" />, { language: 'fr' });
 
-      expect(screen.getByText('Config')).toHaveClass('text-success');
-      expect(screen.getByText('Ensemble')).toHaveClass('text-success');
-      expect(screen.getByText('Invite')).toHaveClass('text-success');
+      expect(screen.getByText('Config')).toHaveAttribute('data-step-state', 'completed');
+      expect(screen.getByText('Ensemble')).toHaveAttribute('data-step-state', 'completed');
+      expect(screen.getByText('Invite')).toHaveAttribute('data-step-state', 'completed');
     });
 
     it('displays English labels correctly for prompt step', () => {
       renderWithI18n(<ProgressSteps currentStep="prompt" />, { language: 'en' });
 
-      expect(screen.getByText('Config')).toHaveClass('text-success');
-      expect(screen.getByText('Ensemble')).toHaveClass('text-success');
-      expect(screen.getByText('Prompt')).toHaveClass('text-primary');
-      expect(screen.getByText('Review')).toHaveClass('text-muted-foreground');
+      expect(screen.getByText('Config')).toHaveAttribute('data-step-state', 'completed');
+      expect(screen.getByText('Ensemble')).toHaveAttribute('data-step-state', 'completed');
+      expect(screen.getByText('Prompt')).toHaveAttribute('data-step-state', 'active');
+      expect(screen.getByText('Review')).toHaveAttribute('data-step-state', 'upcoming');
     });
 
     it('displays French labels correctly for prompt step', () => {
       renderWithI18n(<ProgressSteps currentStep="prompt" />, { language: 'fr' });
 
-      expect(screen.getByText('Config')).toHaveClass('text-success');
-      expect(screen.getByText('Ensemble')).toHaveClass('text-success');
-      expect(screen.getByText('Invite')).toHaveClass('text-primary');
-      expect(screen.getByText('Révision')).toHaveClass('text-muted-foreground');
+      expect(screen.getByText('Config')).toHaveAttribute('data-step-state', 'completed');
+      expect(screen.getByText('Ensemble')).toHaveAttribute('data-step-state', 'completed');
+      expect(screen.getByText('Invite')).toHaveAttribute('data-step-state', 'active');
+      expect(screen.getByText('Révision')).toHaveAttribute('data-step-state', 'upcoming');
+    });
+
+    it('renders English tooltip text', () => {
+      renderWithI18n(<ProgressSteps currentStep="config" />, { language: 'en' });
+
+      expect(screen.getByTestId('progress-step-tooltip-config')).toHaveTextContent(
+        'Configure your API keys and select operating mode'
+      );
+      expect(screen.getByTestId('progress-step-tooltip-ensemble')).toHaveTextContent(
+        'Select 2-6 AI models to compare'
+      );
+    });
+
+    it('renders French tooltip text', () => {
+      renderWithI18n(<ProgressSteps currentStep="config" />, { language: 'fr' });
+
+      expect(screen.getByTestId('progress-step-tooltip-config')).toHaveTextContent(
+        'Configurez vos clés API et sélectionnez le mode de fonctionnement'
+      );
+      expect(screen.getByTestId('progress-step-tooltip-ensemble')).toHaveTextContent(
+        'Sélectionnez 2 à 6 modèles IA à comparer'
+      );
     });
   });
 });

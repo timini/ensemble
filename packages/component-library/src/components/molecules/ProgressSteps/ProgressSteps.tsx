@@ -1,6 +1,6 @@
 import { Check } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { useEffect, useState } from 'react';
+import { useEffect, useId, useState } from 'react';
 import { cn } from '@/lib/utils';
 
 type Step = 'config' | 'ensemble' | 'prompt' | 'review';
@@ -32,12 +32,13 @@ export function ProgressSteps({
 }: ProgressStepsProps) {
   const { t } = useTranslation();
   const hasHydrated = useHasHydrated();
+  const tooltipId = useId();
 
   const steps = [
-    { id: 'config' as const, label: t('ensemble.steps.config'), number: 1 },
-    { id: 'ensemble' as const, label: t('ensemble.steps.ensemble'), number: 2 },
-    { id: 'prompt' as const, label: t('ensemble.steps.prompt'), number: 3 },
-    { id: 'review' as const, label: t('ensemble.steps.review'), number: 4 },
+    { id: 'config' as const, label: t('ensemble.steps.config'), tooltip: t('ensemble.steps.tooltips.config'), number: 1 },
+    { id: 'ensemble' as const, label: t('ensemble.steps.ensemble'), tooltip: t('ensemble.steps.tooltips.ensemble'), number: 2 },
+    { id: 'prompt' as const, label: t('ensemble.steps.prompt'), tooltip: t('ensemble.steps.tooltips.prompt'), number: 3 },
+    { id: 'review' as const, label: t('ensemble.steps.review'), tooltip: t('ensemble.steps.tooltips.review'), number: 4 },
   ];
 
   const displayStep = hasHydrated ? currentStep : fallbackStep ?? currentStep;
@@ -56,6 +57,7 @@ export function ProgressSteps({
           const isCompleted = index < currentIndex;
           const isActive = index === currentIndex;
           const isClickable = onStepClick && isCompleted;
+          const stepTooltipId = `${tooltipId}-tooltip-${step.id}`;
 
           const circle = (
             <div
@@ -78,31 +80,50 @@ export function ProgressSteps({
             </div>
           );
 
+          const tooltip = (
+            <span
+              id={stepTooltipId}
+              role="tooltip"
+              data-testid={`progress-step-tooltip-${step.id}`}
+              className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2 whitespace-nowrap rounded bg-popover px-2 py-1 text-xs text-popover-foreground shadow-md opacity-0 transition-opacity group-hover:opacity-100"
+            >
+              {step.tooltip}
+            </span>
+          );
+
           return (
             <div key={step.id} className="flex items-center">
               {isClickable ? (
-                <button
-                  type="button"
-                  onClick={() => onStepClick?.(step.id)}
-                  data-testid={`progress-step-container-${step.id}`}
-                  data-active={isActive}
-                  data-completed={isCompleted}
-                  aria-label={`Navigate to ${step.label} step`}
-                  className="rounded-full focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background"
-                >
-                  {circle}
-                </button>
+                <div className="group relative">
+                  <button
+                    type="button"
+                    onClick={() => onStepClick?.(step.id)}
+                    data-testid={`progress-step-container-${step.id}`}
+                    data-active={isActive}
+                    data-completed={isCompleted}
+                    aria-label={`Navigate to ${step.label} step`}
+                    aria-describedby={stepTooltipId}
+                    className="rounded-full focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background"
+                  >
+                    {circle}
+                  </button>
+                  {tooltip}
+                </div>
               ) : (
                 <div
+                  className="group relative"
                   data-testid={`progress-step-container-${step.id}`}
                   data-active={isActive}
                   data-completed={isCompleted}
+                  aria-describedby={stepTooltipId}
                 >
                   {circle}
+                  {tooltip}
                 </div>
               )}
               {index < steps.length - 1 && (
                 <div
+                  data-testid={`progress-step-connector-${index}`}
                   className={`w-16 h-0.5 mx-4 transition-colors ${
                     index < currentIndex ? 'bg-success' : 'bg-muted'
                   }`}
@@ -117,6 +138,13 @@ export function ProgressSteps({
         {steps.map((step, index) => (
           <div key={step.id} className="flex items-center">
             <span
+              data-step-state={
+                index < currentIndex
+                  ? 'completed'
+                  : index === currentIndex
+                    ? 'active'
+                    : 'upcoming'
+              }
               className={`inline-block w-12 text-center text-sm font-medium transition-colors ${
                 index < currentIndex
                   ? 'text-success'

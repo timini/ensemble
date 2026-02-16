@@ -90,3 +90,18 @@ export const ClickableCompletedSteps: Story = {
     );
   },
 };
+
+/** Hover over any step circle to see its descriptive tooltip. */
+export const WithTooltips: Story = {
+  args: {
+    currentStep: 'ensemble',
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Each step displays a tooltip on hover describing what the step involves. Hover over the step circles to see the tooltips.',
+      },
+    },
+  },
+};

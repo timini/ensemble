@@ -17,7 +17,13 @@
       "config": "Config",
       "ensemble": "Ensemble",
       "prompt": "Invite",
-      "review": "Révision"
+      "review": "Révision",
+      "tooltips": {
+        "config": "Configurez vos clés API et sélectionnez le mode de fonctionnement",
+        "ensemble": "Sélectionnez 2 à 6 modèles IA à comparer",
+        "prompt": "Entrez votre question ou votre requête",
+        "review": "Consultez et comparez les réponses IA"
+      }
     }
   },
   "atoms": {
