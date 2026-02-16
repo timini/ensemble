@@ -10,3 +10,4 @@ export * from './lib/benchmarkRunner.js';
 export * from './lib/selfConsistency.js';
 export * from './lib/analysis.js';
 export * from './lib/statistics.js';
+export * from './lib/regressionTypes.js';
