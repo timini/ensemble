@@ -22,8 +22,9 @@ function toPercent(value: number): string {
  */
 function toDelta(value: number): string {
   const pct = (value * 100).toFixed(1);
-  if (value > 0) return `+${pct}%`;
-  if (value < 0) return `${pct}%`;
+  if (value > 0) {
+    return `+${pct}%`;
+  }
   return `${pct}%`;
 }
 
@@ -55,6 +56,7 @@ function statusEmoji(row: StrategyRegressionResult): string {
 function escapeCell(value: string): string {
   return value.replace(/\|/g, '\\|');
 }
+
 
 function renderHeader(result: RegressionResult): string[] {
   const lines: string[] = [];

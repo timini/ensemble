@@ -29,7 +29,7 @@ import { createBenchmarkFile } from '../commands/benchmarkOutput.js';
  */
 function median(values: number[]): number {
   if (values.length === 0) return 0;
-  const sorted = [...values].sort((a, b) => a - b);
+  const sorted = values.slice().sort((a, b) => a - b);
   const mid = Math.floor(sorted.length / 2);
   if (sorted.length % 2 === 1) return sorted[mid];
   return (sorted[mid - 1] + sorted[mid]) / 2;
@@ -439,15 +439,13 @@ export class RegressionDetector {
       const counts = countsByKey.get(key)!;
       const med = median(accs);
       // Find the run index with accuracy closest to median
-      let bestIndex = 0;
-      let bestDiff = Infinity;
-      for (let i = 0; i < accs.length; i++) {
-        const diff = Math.abs(accs[i] - med);
-        if (diff < bestDiff) {
-          bestDiff = diff;
-          bestIndex = i;
-        }
-      }
+      const bestIndex = accs.reduce(
+        (best, current, index) => {
+          const diff = Math.abs(current - med);
+          return diff < best.diff ? { diff, index } : best;
+        },
+        { diff: Infinity, index: 0 },
+      ).index;
       medianCounts.set(key, counts[bestIndex]);
     }
 
