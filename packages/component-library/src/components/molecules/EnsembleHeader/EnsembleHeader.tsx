@@ -22,13 +22,13 @@ export function EnsembleHeader({ onSettingsClick, currentPath }: EnsembleHeaderP
 
   return (
     <header className="bg-background border-b border-border">
-      <div className="max-w-6xl mx-auto px-6 py-6">
-        <div className="flex items-center justify-between">
-          <a href="/config" className="group block">
-            <h1 className="text-2xl font-bold text-foreground group-hover:text-primary transition-colors">{title}</h1>
-            <p className="text-muted-foreground mt-1">{tagline}</p>
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-4 sm:py-6">
+        <div className="flex items-center justify-between gap-4">
+          <a href="/config" className="group block min-w-0">
+            <h1 className="text-xl sm:text-2xl font-bold text-foreground group-hover:text-primary transition-colors truncate">{title}</h1>
+            <p className="text-muted-foreground mt-1 text-sm sm:text-base">{tagline}</p>
           </a>
-          <nav className="flex items-center gap-4" aria-label="Main navigation">
+          <nav className="flex items-center gap-2 sm:gap-4 shrink-0" aria-label="Main navigation">
             {[
               { href: '/features', label: featuresLabel },
               { href: '/about', label: aboutLabel },
