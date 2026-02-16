@@ -20,7 +20,7 @@ export interface ConsensusModelResponse {
     content: string;   // "response" in ModelResponse
 }
 
-export type ConsensusMethod = 'standard' | 'elo' | 'majority';
+export type ConsensusMethod = 'standard' | 'elo' | 'majority' | 'council';
 
 export interface Pairing {
     modelA: ConsensusModelResponse;
