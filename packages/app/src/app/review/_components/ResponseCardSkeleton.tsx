@@ -4,19 +4,13 @@
  */
 
 import { Card, CardHeader, CardContent } from "@/components/atoms/Card";
+import { PROVIDER_NAMES } from "@/components/molecules/ResponseCard";
 
 interface ResponseCardSkeletonProps {
   modelName: string;
   provider: string;
   testId?: string;
 }
-
-const PROVIDER_NAMES: Record<string, string> = {
-  openai: "OpenAI",
-  anthropic: "Anthropic",
-  google: "Google",
-  xai: "XAI",
-};
 
 export function ResponseCardSkeleton({
   modelName,
@@ -34,7 +28,7 @@ export function ResponseCardSkeleton({
         <div className="flex items-start justify-between gap-2">
           <div className="flex items-center gap-2">
             <span className="rounded-full border px-2.5 py-0.5 text-xs font-semibold text-muted-foreground">
-              {PROVIDER_NAMES[provider] ?? provider}
+              {PROVIDER_NAMES[provider as keyof typeof PROVIDER_NAMES] ?? provider}
             </span>
             <span className="text-base font-semibold text-muted-foreground">
               {modelName}
