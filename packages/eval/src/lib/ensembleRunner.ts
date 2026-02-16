@@ -100,6 +100,11 @@ export class EnsembleRunner {
 
   async runPrompt(prompt: string, models: ModelSpec[]): Promise<ProviderResponse[]> {
     const tasks = models.map(async ({ provider, model }, index) => {
+      // Stagger model requests: model 0 starts immediately, model 1 after requestDelayMs,
+      // model 2 after 2*requestDelayMs, etc. All promises are launched concurrently via
+      // Promise.all, but each internally sleeps before making the API call.
+      // Note: the stagger sleep is intentionally outside the retryable wrapper so that
+      // retries do NOT re-apply the initial stagger delay.
       if (this.requestDelayMs > 0 && index > 0) {
         await sleep(index * this.requestDelayMs);
       }
