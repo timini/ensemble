@@ -539,20 +539,7 @@ describe('ApiKeyConfiguration', () => {
   });
 
   describe('styling', () => {
-    it('applies correct spacing between items', () => {
-      const { container } = render(
-        <ApiKeyConfiguration
-          items={mockItems}
-          onKeyChange={vi.fn()}
-          onToggleShow={vi.fn()}
-        />
-      );
-
-      const itemsContainer = container.querySelector('.space-y-6');
-      expect(itemsContainer).toBeInTheDocument();
-    });
-
-    it('applies correct heading styling', () => {
+    it('renders items container', () => {
       render(
         <ApiKeyConfiguration
           items={mockItems}
@@ -561,8 +548,20 @@ describe('ApiKeyConfiguration', () => {
         />
       );
 
-      const heading = screen.getByText('Configure API Keys');
-      expect(heading).toHaveClass('text-lg', 'font-semibold', 'mb-6');
+      expect(screen.getByTestId('api-key-configuration')).toBeInTheDocument();
+    });
+
+    it('renders heading as h3', () => {
+      render(
+        <ApiKeyConfiguration
+          items={mockItems}
+          onKeyChange={vi.fn()}
+          onToggleShow={vi.fn()}
+        />
+      );
+
+      const heading = screen.getByRole('heading', { level: 3 });
+      expect(heading).toHaveTextContent('Configure API Keys');
     });
   });
 

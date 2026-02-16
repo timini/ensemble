@@ -3,6 +3,7 @@
 exports[`Separator > snapshots > matches snapshot for horizontal decorative separator 1`] = `
 <div
   class="shrink-0 bg-border h-[1px] w-full"
+  data-orientation="horizontal"
   role="none"
 />
 `;
@@ -11,6 +12,7 @@ exports[`Separator > snapshots > matches snapshot for horizontal semantic separa
 <div
   aria-orientation="horizontal"
   class="shrink-0 bg-border h-[1px] w-full"
+  data-orientation="horizontal"
   role="separator"
 />
 `;
@@ -18,6 +20,7 @@ exports[`Separator > snapshots > matches snapshot for horizontal semantic separa
 exports[`Separator > snapshots > matches snapshot for vertical decorative separator 1`] = `
 <div
   class="shrink-0 bg-border h-full w-[1px]"
+  data-orientation="vertical"
   role="none"
 />
 `;
@@ -26,6 +29,7 @@ exports[`Separator > snapshots > matches snapshot for vertical semantic separato
 <div
   aria-orientation="vertical"
   class="shrink-0 bg-border h-full w-[1px]"
+  data-orientation="vertical"
   role="separator"
 />
 `;
@@ -33,6 +37,7 @@ exports[`Separator > snapshots > matches snapshot for vertical semantic separato
 exports[`Separator > snapshots > matches snapshot with custom className 1`] = `
 <div
   class="shrink-0 bg-border h-[1px] w-full my-4"
+  data-orientation="horizontal"
   role="none"
 />
 `;

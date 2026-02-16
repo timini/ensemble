@@ -54,6 +54,8 @@ export const Text = React.forwardRef<HTMLParagraphElement, TextProps>(
       <Component
         ref={ref}
         className={cn(textVariants({ variant, color, className }))}
+        data-variant={variant || 'body'}
+        data-color={color || 'default'}
         {...props}
       >
         {children}

@@ -131,7 +131,7 @@ export const ConsensusCard = React.forwardRef<HTMLDivElement, ConsensusCardProps
           </div>
 
           {status === 'success' && consensusText && (
-            <div className="flex items-center justify-between mt-4 pt-4 border-t border-primary/20">
+            <div className="flex items-center justify-between mt-4 pt-4 border-t border-primary/20" data-testid="consensus-footer">
               <Button
                 variant="ghost"
                 size="sm"

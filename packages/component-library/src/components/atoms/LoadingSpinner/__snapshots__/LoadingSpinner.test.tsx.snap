@@ -3,6 +3,8 @@
 exports[`LoadingSpinner > snapshots > matches snapshot for default variant 1`] = `
 <div
   aria-live="polite"
+  data-size="default"
+  data-variant="default"
   role="status"
 >
   <svg
@@ -28,6 +30,8 @@ exports[`LoadingSpinner > snapshots > matches snapshot for default variant 1`] =
 exports[`LoadingSpinner > snapshots > matches snapshot for large size 1`] = `
 <div
   aria-live="polite"
+  data-size="lg"
+  data-variant="default"
   role="status"
 >
   <svg
@@ -53,6 +57,8 @@ exports[`LoadingSpinner > snapshots > matches snapshot for large size 1`] = `
 exports[`LoadingSpinner > snapshots > matches snapshot for primary variant 1`] = `
 <div
   aria-live="polite"
+  data-size="default"
+  data-variant="primary"
   role="status"
 >
   <svg

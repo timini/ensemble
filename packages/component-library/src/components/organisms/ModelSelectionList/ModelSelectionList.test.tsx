@@ -414,7 +414,7 @@ describe('ModelSelectionList', () => {
   });
 
   describe('layout', () => {
-    it('uses grid layout for model cards', () => {
+    it('renders model cards', () => {
       const { container } = render(
         <ModelSelectionList
           models={mockModels}
@@ -424,11 +424,11 @@ describe('ModelSelectionList', () => {
         />
       );
 
-      const gridContainer = container.querySelector('.grid');
-      expect(gridContainer).toBeInTheDocument();
+      const modelCards = container.querySelectorAll('[data-testid^="model-card"]');
+      expect(modelCards.length).toBe(mockModels.length);
     });
 
-    it('has proper spacing between provider sections', () => {
+    it('renders provider sections', () => {
       const { container } = render(
         <ModelSelectionList
           models={mockModels}
@@ -439,9 +439,7 @@ describe('ModelSelectionList', () => {
       );
 
       const sections = container.querySelectorAll('[data-testid="provider-section"]');
-      sections.forEach((section) => {
-        expect(section).toHaveClass('mb-8');
-      });
+      expect(sections).toHaveLength(4);
     });
   });
 

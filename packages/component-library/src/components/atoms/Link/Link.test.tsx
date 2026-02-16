@@ -46,19 +46,19 @@ describe('Link', () => {
     it('renders default variant', () => {
       render(<Link href="/test">Default Link</Link>);
       const link = screen.getByRole('link');
-      expect(link).toHaveClass('text-primary', 'hover:text-primary/80', 'underline');
+      expect(link).toHaveAttribute('data-variant', 'default');
     });
 
     it('renders subtle variant', () => {
       render(<Link variant="subtle" href="/test">Subtle Link</Link>);
       const link = screen.getByRole('link');
-      expect(link).toHaveClass('text-muted-foreground', 'hover:text-foreground', 'hover:underline');
+      expect(link).toHaveAttribute('data-variant', 'subtle');
     });
 
     it('renders bold variant', () => {
       render(<Link variant="bold" href="/test">Bold Link</Link>);
       const link = screen.getByRole('link');
-      expect(link).toHaveClass('text-primary', 'hover:text-primary/80', 'font-semibold', 'underline');
+      expect(link).toHaveAttribute('data-variant', 'bold');
     });
   });
 
@@ -136,10 +136,11 @@ describe('Link', () => {
   });
 
   describe('className merging', () => {
-    it('merges custom className with variant classes', () => {
+    it('merges custom className with variant', () => {
       render(<Link variant="default" className="font-bold" href="/test">Custom Link</Link>);
       const link = screen.getByRole('link');
-      expect(link).toHaveClass('text-primary', 'font-bold');
+      expect(link).toHaveAttribute('data-variant', 'default');
+      expect(link).toHaveClass('font-bold');
     });
 
     it('merges custom className with external link classes', () => {

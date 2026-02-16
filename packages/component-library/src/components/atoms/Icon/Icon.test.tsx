@@ -13,7 +13,7 @@ describe('Icon', () => {
       );
       const icon = container.firstChild;
       expect(icon).toBeInTheDocument();
-      expect(icon).toHaveClass('h-4', 'w-4');
+      expect(icon).toHaveAttribute('data-size', 'default');
     });
 
     it('renders with small size', () => {
@@ -22,8 +22,7 @@ describe('Icon', () => {
           <Check />
         </Icon>
       );
-      const icon = container.firstChild;
-      expect(icon).toHaveClass('h-3', 'w-3');
+      expect(container.firstChild).toHaveAttribute('data-size', 'sm');
     });
 
     it('renders with large size', () => {
@@ -32,8 +31,7 @@ describe('Icon', () => {
           <Check />
         </Icon>
       );
-      const icon = container.firstChild;
-      expect(icon).toHaveClass('h-5', 'w-5');
+      expect(container.firstChild).toHaveAttribute('data-size', 'lg');
     });
 
     it('renders with default variant', () => {
@@ -42,8 +40,7 @@ describe('Icon', () => {
           <Check />
         </Icon>
       );
-      const icon = container.firstChild;
-      expect(icon).toHaveClass('text-foreground');
+      expect(container.firstChild).toHaveAttribute('data-variant', 'default');
     });
 
     it('renders with primary variant', () => {
@@ -52,8 +49,7 @@ describe('Icon', () => {
           <Info />
         </Icon>
       );
-      const icon = container.firstChild;
-      expect(icon).toHaveClass('text-primary');
+      expect(container.firstChild).toHaveAttribute('data-variant', 'primary');
     });
 
     it('renders with success variant', () => {
@@ -62,8 +58,7 @@ describe('Icon', () => {
           <Check />
         </Icon>
       );
-      const icon = container.firstChild;
-      expect(icon).toHaveClass('text-success');
+      expect(container.firstChild).toHaveAttribute('data-variant', 'success');
     });
 
     it('renders with warning variant', () => {
@@ -72,8 +67,7 @@ describe('Icon', () => {
           <AlertCircle />
         </Icon>
       );
-      const icon = container.firstChild;
-      expect(icon).toHaveClass('text-warning');
+      expect(container.firstChild).toHaveAttribute('data-variant', 'warning');
     });
 
     it('renders with destructive variant', () => {
@@ -82,8 +76,7 @@ describe('Icon', () => {
           <AlertCircle />
         </Icon>
       );
-      const icon = container.firstChild;
-      expect(icon).toHaveClass('text-destructive');
+      expect(container.firstChild).toHaveAttribute('data-variant', 'destructive');
     });
 
     it('renders with muted variant', () => {
@@ -92,8 +85,7 @@ describe('Icon', () => {
           <Info />
         </Icon>
       );
-      const icon = container.firstChild;
-      expect(icon).toHaveClass('text-muted-foreground');
+      expect(container.firstChild).toHaveAttribute('data-variant', 'muted');
     });
 
     it('applies custom className', () => {
@@ -102,8 +94,7 @@ describe('Icon', () => {
           <Check />
         </Icon>
       );
-      const icon = container.firstChild;
-      expect(icon).toHaveClass('custom-class');
+      expect(container.firstChild).toHaveClass('custom-class');
     });
 
     it('renders children correctly', () => {

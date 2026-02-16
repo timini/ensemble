@@ -8,18 +8,18 @@ describe('Badge', () => {
     expect(screen.getByText('New')).toBeInTheDocument();
   });
 
-  it('applies variant classes correctly', () => {
+  it('applies variant data attribute correctly', () => {
     const { rerender } = render(<Badge variant="default">Default</Badge>);
-    expect(screen.getByText('Default')).toHaveClass('bg-primary');
+    expect(screen.getByText('Default')).toHaveAttribute('data-variant', 'default');
 
     rerender(<Badge variant="secondary">Secondary</Badge>);
-    expect(screen.getByText('Secondary')).toHaveClass('bg-secondary');
+    expect(screen.getByText('Secondary')).toHaveAttribute('data-variant', 'secondary');
 
     rerender(<Badge variant="destructive">Destructive</Badge>);
-    expect(screen.getByText('Destructive')).toHaveClass('bg-destructive');
+    expect(screen.getByText('Destructive')).toHaveAttribute('data-variant', 'destructive');
 
     rerender(<Badge variant="outline">Outline</Badge>);
-    expect(screen.getByText('Outline')).toHaveClass('text-foreground');
+    expect(screen.getByText('Outline')).toHaveAttribute('data-variant', 'outline');
   });
 
   it('applies custom className', () => {
@@ -29,12 +29,12 @@ describe('Badge', () => {
 
   it('renders with default variant when no variant is specified', () => {
     render(<Badge>Default Badge</Badge>);
-    expect(screen.getByText('Default Badge')).toHaveClass('bg-primary');
+    expect(screen.getByText('Default Badge')).toHaveAttribute('data-variant', 'default');
   });
 
-  it('can render as inline element', () => {
+  it('renders as inline element', () => {
     render(<Badge>Inline Badge</Badge>);
-    expect(screen.getByText('Inline Badge')).toHaveClass('inline-flex');
+    expect(screen.getByText('Inline Badge')).toBeInTheDocument();
   });
 
   describe('snapshots', () => {

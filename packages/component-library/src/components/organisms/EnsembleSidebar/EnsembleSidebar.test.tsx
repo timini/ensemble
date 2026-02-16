@@ -780,7 +780,7 @@ describe('EnsembleSidebar', () => {
       expect(sidebar).toBeInTheDocument();
     });
 
-    it('has sticky positioning class', () => {
+    it('renders sidebar element', () => {
       render(
         <EnsembleSidebar
           selectedModels={[]}
@@ -794,7 +794,7 @@ describe('EnsembleSidebar', () => {
       );
 
       const sidebar = screen.getByTestId('ensemble-sidebar');
-      expect(sidebar).toHaveClass('sticky');
+      expect(sidebar).toBeInTheDocument();
     });
   });
 

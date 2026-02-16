@@ -104,6 +104,7 @@ export const SettingsModal = React.forwardRef<HTMLDivElement, SettingsModalProps
                       )}
                       onClick={() => onThemeChange(t_)}
                       data-testid={`theme-${t_}`}
+                      data-selected={theme === t_}
                     >
                       <div className="p-6 flex flex-col items-center">
                         <div className={cn(

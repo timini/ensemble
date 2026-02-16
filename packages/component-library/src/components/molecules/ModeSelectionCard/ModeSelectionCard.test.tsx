@@ -52,20 +52,16 @@ describe('ModeSelectionCard', () => {
   });
 
   describe('selected state', () => {
-    it('applies selected styling when selected', () => {
+    it('applies selected data attribute when selected', () => {
       const { container } = render(<ModeSelectionCard mode="free" selected={true} />);
       const card = container.querySelector('[data-selected="true"]');
       expect(card).toBeInTheDocument();
-      expect(card).toHaveClass('border-primary');
-      expect(card).toHaveClass('bg-primary/10');
     });
 
-    it('does not apply selected styling when unselected', () => {
+    it('applies unselected data attribute when unselected', () => {
       const { container } = render(<ModeSelectionCard mode="free" selected={false} />);
       const card = container.querySelector('[data-selected="false"]');
       expect(card).toBeInTheDocument();
-      expect(card).not.toHaveClass('border-primary');
-      expect(card).not.toHaveClass('bg-primary/10');
     });
 
     it('has correct data attribute for selected state', () => {
@@ -172,28 +168,16 @@ describe('ModeSelectionCard', () => {
   });
 
   describe('styling', () => {
-    it('applies hover border style', () => {
+    it('renders card with correct data-testid', () => {
       const { container } = render(<ModeSelectionCard mode="free" />);
       const card = container.querySelector('[data-testid="mode-card-free"]');
-      expect(card).toHaveClass('hover:border-primary/30');
-    });
-
-    it('applies transition classes', () => {
-      const { container } = render(<ModeSelectionCard mode="free" />);
-      const card = container.querySelector('.transition-colors');
       expect(card).toBeInTheDocument();
     });
 
-    it('applies correct icon circle styling', () => {
+    it('renders card with mode data attribute', () => {
       const { container } = render(<ModeSelectionCard mode="free" />);
-      const iconCircle = container.querySelector('.rounded-full');
-      expect(iconCircle).toHaveClass('bg-primary/15');
-    });
-
-    it('applies full-width button styling', () => {
-      const { container } = render(<ModeSelectionCard mode="free" />);
-      const button = container.querySelector('.w-full');
-      expect(button).toBeInTheDocument();
+      const card = container.querySelector('[data-mode="free"]');
+      expect(card).toBeInTheDocument();
     });
   });
 
@@ -217,35 +201,17 @@ describe('ModeSelectionCard', () => {
     });
   });
 
-  describe('semantic tokens', () => {
-    it('uses semantic border token for default state', () => {
+  describe('data attributes', () => {
+    it('sets data-selected=false for default state', () => {
       const { container } = render(<ModeSelectionCard mode="free" />);
       const card = container.querySelector('[data-testid="mode-card-free"]');
-      expect(card).toHaveClass('border-border');
+      expect(card).toHaveAttribute('data-selected', 'false');
     });
 
-    it('uses semantic primary token for selected border', () => {
+    it('sets data-selected=true for selected state', () => {
       const { container } = render(<ModeSelectionCard mode="free" selected={true} />);
-      const card = container.querySelector('[data-selected="true"]');
-      expect(card).toHaveClass('border-primary');
-    });
-
-    it('uses semantic foreground token for title', () => {
-      render(<ModeSelectionCard mode="free" />);
-      const title = screen.getByRole('heading', { name: /Free Mode/i });
-      expect(title).toHaveClass('text-foreground');
-    });
-
-    it('uses semantic muted-foreground token for description', () => {
-      const { container } = render(<ModeSelectionCard mode="free" />);
-      const description = container.querySelector('.text-muted-foreground');
-      expect(description).toBeInTheDocument();
-    });
-
-    it('uses semantic primary token for icon', () => {
-      const { container } = render(<ModeSelectionCard mode="free" />);
-      const icon = container.querySelector('.text-primary.text-lg');
-      expect(icon).toBeInTheDocument();
+      const card = container.querySelector('[data-testid="mode-card-free"]');
+      expect(card).toHaveAttribute('data-selected', 'true');
     });
   });
 

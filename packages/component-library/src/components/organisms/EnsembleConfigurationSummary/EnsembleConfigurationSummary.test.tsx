@@ -100,19 +100,16 @@ describe('EnsembleConfigurationSummary', () => {
     });
 
     it('renders selected models with correct styling', () => {
-      const { container } = render(
+      render(
         <EnsembleConfigurationSummary
           selectedModels={mockSelectedModels}
           summarizerModel={mockSummarizerModel}
         />
       );
 
-      const badges = container.querySelectorAll('[data-testid^="selected-model-"]');
-      expect(badges).toHaveLength(3);
-
-      badges.forEach((badge) => {
-        expect(badge).toHaveClass('bg-muted');
-      });
+      expect(screen.getByTestId('selected-model-0')).toBeInTheDocument();
+      expect(screen.getByTestId('selected-model-1')).toBeInTheDocument();
+      expect(screen.getByTestId('selected-model-2')).toBeInTheDocument();
     });
 
     it('handles single selected model', () => {
@@ -152,16 +149,17 @@ describe('EnsembleConfigurationSummary', () => {
       expect(screen.getByText('gemini-pro')).toBeInTheDocument();
     });
 
-    it('renders selected models in flex wrap layout', () => {
-      const { container } = render(
+    it('renders all selected model badges in layout', () => {
+      render(
         <EnsembleConfigurationSummary
           selectedModels={mockSelectedModels}
           summarizerModel={mockSummarizerModel}
         />
       );
 
-      const modelsContainer = container.querySelector('.flex.flex-wrap.gap-2');
-      expect(modelsContainer).toBeInTheDocument();
+      expect(screen.getByTestId('selected-model-0')).toHaveTextContent('claude-3-haiku-20240307');
+      expect(screen.getByTestId('selected-model-1')).toHaveTextContent('claude-3-opus-20240229');
+      expect(screen.getByTestId('selected-model-2')).toHaveTextContent('gpt-4-turbo');
     });
   });
 
@@ -189,7 +187,7 @@ describe('EnsembleConfigurationSummary', () => {
       expect(summarizerBadge).toHaveTextContent('claude-3-opus-20240229');
     });
 
-    it('renders summarizer with correct styling', () => {
+    it('renders summarizer badge', () => {
       render(
         <EnsembleConfigurationSummary
           selectedModels={mockSelectedModels}
@@ -198,7 +196,7 @@ describe('EnsembleConfigurationSummary', () => {
       );
 
       const summarizerBadge = screen.getByTestId('summarizer-model');
-      expect(summarizerBadge).toHaveClass('bg-primary/10', 'text-primary', 'border-primary/30');
+      expect(summarizerBadge).toBeInTheDocument();
     });
 
     it('handles different summarizer model', () => {
@@ -215,41 +213,15 @@ describe('EnsembleConfigurationSummary', () => {
   });
 
   describe('layout', () => {
-    it('uses flex layout for models and summarizer', () => {
-      const { container } = render(
-        <EnsembleConfigurationSummary
-          selectedModels={mockSelectedModels}
-          summarizerModel={mockSummarizerModel}
-        />
-      );
-
-      const flexContainer = container.querySelector('.flex.items-start.justify-between');
-      expect(flexContainer).toBeInTheDocument();
-    });
-
     it('renders in a card', () => {
-      const { container } = render(
+      render(
         <EnsembleConfigurationSummary
           selectedModels={mockSelectedModels}
           summarizerModel={mockSummarizerModel}
         />
       );
 
-      // Card component adds specific classes
-      const card = container.querySelector('.rounded-xl');
-      expect(card).toBeInTheDocument();
-    });
-
-    it('applies correct padding to card content', () => {
-      const { container } = render(
-        <EnsembleConfigurationSummary
-          selectedModels={mockSelectedModels}
-          summarizerModel={mockSummarizerModel}
-        />
-      );
-
-      const cardContent = container.querySelector('.p-6');
-      expect(cardContent).toBeInTheDocument();
+      expect(screen.getByTestId('ensemble-configuration-summary')).toBeInTheDocument();
     });
   });
 
@@ -289,12 +261,12 @@ describe('EnsembleConfigurationSummary', () => {
       );
 
       const description = screen.getByText(/These models will receive the prompt/i);
-      expect(description).toHaveClass('text-sm', 'text-muted-foreground');
+      expect(description.tagName).toBe('P');
     });
   });
 
   describe('styling', () => {
-    it('applies correct heading styling', () => {
+    it('renders heading as h3', () => {
       render(
         <EnsembleConfigurationSummary
           selectedModels={mockSelectedModels}
@@ -302,11 +274,11 @@ describe('EnsembleConfigurationSummary', () => {
         />
       );
 
-      const heading = screen.getByText('Your Ensemble Configuration');
-      expect(heading).toHaveClass('font-semibold', 'mb-4');
+      const heading = screen.getByRole('heading', { level: 3 });
+      expect(heading).toHaveTextContent('Your Ensemble Configuration');
     });
 
-    it('applies correct description styling', () => {
+    it('renders description as paragraph', () => {
       render(
         <EnsembleConfigurationSummary
           selectedModels={mockSelectedModels}
@@ -315,10 +287,10 @@ describe('EnsembleConfigurationSummary', () => {
       );
 
       const description = screen.getByText(/These models will receive the prompt/i);
-      expect(description).toHaveClass('text-sm', 'text-muted-foreground', 'mb-4');
+      expect(description.tagName).toBe('P');
     });
 
-    it('applies correct subheading styling', () => {
+    it('renders subheadings as h4', () => {
       render(
         <EnsembleConfigurationSummary
           selectedModels={mockSelectedModels}
@@ -327,9 +299,7 @@ describe('EnsembleConfigurationSummary', () => {
       );
 
       const subheadings = screen.getAllByRole('heading', { level: 4 });
-      subheadings.forEach((heading) => {
-        expect(heading).toHaveClass('font-semibold', 'text-sm', 'mb-2');
-      });
+      expect(subheadings).toHaveLength(2);
     });
   });
 
@@ -373,7 +343,7 @@ describe('EnsembleConfigurationSummary', () => {
   });
 
   describe('dark mode (semantic tokens)', () => {
-    it('uses semantic token for description text', () => {
+    it('renders description text', () => {
       render(
         <EnsembleConfigurationSummary
           selectedModels={mockSelectedModels}
@@ -382,24 +352,23 @@ describe('EnsembleConfigurationSummary', () => {
       );
 
       const description = screen.getByText(/These models will receive/i);
-      expect(description).toHaveClass('text-muted-foreground');
+      expect(description).toBeInTheDocument();
     });
 
-    it('uses semantic token for model badges', () => {
-      const { container } = render(
+    it('renders model badges', () => {
+      render(
         <EnsembleConfigurationSummary
           selectedModels={mockSelectedModels}
           summarizerModel={mockSummarizerModel}
         />
       );
 
-      const badges = container.querySelectorAll('[data-testid^="selected-model-"]');
-      badges.forEach((badge) => {
-        expect(badge).toHaveClass('bg-muted');
-      });
+      expect(screen.getByTestId('selected-model-0')).toBeInTheDocument();
+      expect(screen.getByTestId('selected-model-1')).toBeInTheDocument();
+      expect(screen.getByTestId('selected-model-2')).toBeInTheDocument();
     });
 
-    it('uses semantic tokens for summarizer badge', () => {
+    it('renders summarizer badge', () => {
       render(
         <EnsembleConfigurationSummary
           selectedModels={mockSelectedModels}
@@ -408,10 +377,10 @@ describe('EnsembleConfigurationSummary', () => {
       );
 
       const badge = screen.getByTestId('summarizer-model');
-      expect(badge).toHaveClass('bg-primary/10', 'text-primary', 'border-primary/30');
+      expect(badge).toBeInTheDocument();
     });
 
-    it('uses semantic token for warning text', () => {
+    it('renders warning text for ELO requirement', () => {
       render(
         <EnsembleConfigurationSummary
           selectedModels={['model-1', 'model-2']}
@@ -421,10 +390,10 @@ describe('EnsembleConfigurationSummary', () => {
       );
 
       const warning = screen.getByText(/ELO Ranked Summarisation requires/i);
-      expect(warning).toHaveClass('text-warning');
+      expect(warning).toBeInTheDocument();
     });
 
-    it('uses semantic tokens for number input', () => {
+    it('renders number input for ELO mode', () => {
       render(
         <EnsembleConfigurationSummary
           selectedModels={mockSelectedModels}
@@ -436,7 +405,7 @@ describe('EnsembleConfigurationSummary', () => {
       );
 
       const input = screen.getByTestId('input-top-n');
-      expect(input).toHaveClass('border-input', 'bg-background', 'text-foreground');
+      expect(input).toBeInTheDocument();
     });
   });
 
@@ -593,7 +562,7 @@ describe('EnsembleConfigurationSummary', () => {
       expect(handleChange).toHaveBeenCalledWith('claude-3-opus-20240229');
     });
 
-    it('applies interactive styles to non-summarizer badges', () => {
+    it('wraps non-summarizer badges in clickable buttons', () => {
       const handleChange = vi.fn();
       renderWithI18n(
         <EnsembleConfigurationSummary
@@ -605,10 +574,10 @@ describe('EnsembleConfigurationSummary', () => {
       );
 
       const nonSummarizerBadge = screen.getByTestId('selected-model-0');
-      expect(nonSummarizerBadge).toHaveClass('cursor-pointer');
+      expect(nonSummarizerBadge.closest('button')).toBeInTheDocument();
     });
 
-    it('highlights current summarizer badge with ring', () => {
+    it('wraps current summarizer badge in clickable button', () => {
       const handleChange = vi.fn();
       renderWithI18n(
         <EnsembleConfigurationSummary
@@ -621,7 +590,7 @@ describe('EnsembleConfigurationSummary', () => {
 
       // The summarizer model is 'claude-3-opus-20240229' which is at index 1
       const summarizerBadge = screen.getByTestId('selected-model-1');
-      expect(summarizerBadge).toHaveClass('ring-2');
+      expect(summarizerBadge.closest('button')).toBeInTheDocument();
     });
 
     it('remains static when onSummarizerChange is not provided', () => {

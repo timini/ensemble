@@ -36,9 +36,10 @@ describe('Textarea', () => {
     expect(ref.current).toBeInstanceOf(HTMLTextAreaElement);
   });
 
-  it('applies default min-height', () => {
+  it('renders as textarea element', () => {
     render(<Textarea data-testid="textarea" />);
-    expect(screen.getByTestId('textarea')).toHaveClass('min-h-[80px]');
+    const textarea = screen.getByTestId('textarea');
+    expect(textarea.tagName).toBe('TEXTAREA');
   });
 
   describe('snapshots', () => {

@@ -83,6 +83,9 @@ const Tag = React.forwardRef<HTMLElement, TagProps>(
         className={cn(tagVariants({ variant, selected, clickable: isClickable, disabled, className }))}
         onClick={onClick ? handleClick : undefined}
         disabled={!removable ? disabled : undefined}
+        data-variant={variant || 'default'}
+        data-selected={selected ?? false}
+        data-disabled={disabled ?? false}
         {...props}
       >
         {children}

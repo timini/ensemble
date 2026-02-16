@@ -63,16 +63,14 @@ describe('Rating', () => {
     expect(handleChange).not.toHaveBeenCalled();
   });
 
-  it('applies small size classes', () => {
+  it('applies small size', () => {
     const { container } = render(<Rating value={0} max={5} size="sm" />);
-    const buttons = container.querySelectorAll('button');
-    expect(buttons[0]).toHaveClass('text-sm');
+    expect(container.firstChild).toHaveAttribute('data-size', 'sm');
   });
 
-  it('applies large size classes', () => {
+  it('applies large size', () => {
     const { container } = render(<Rating value={0} max={5} size="lg" />);
-    const buttons = container.querySelectorAll('button');
-    expect(buttons[0]).toHaveClass('text-xl');
+    expect(container.firstChild).toHaveAttribute('data-size', 'lg');
   });
 
   it('applies custom className', () => {

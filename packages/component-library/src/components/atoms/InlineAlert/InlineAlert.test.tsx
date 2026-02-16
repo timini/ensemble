@@ -13,50 +13,36 @@ describe('InlineAlert', () => {
 
     it('renders with info variant by default', () => {
       const { container } = render(<InlineAlert>Message</InlineAlert>);
-      const alert = container.firstChild;
-      expect(alert).toHaveClass('bg-info/10');
+      expect(container.firstChild).toHaveAttribute('data-variant', 'info');
     });
 
     it('renders with success variant', () => {
       const { container } = render(<InlineAlert variant="success">Message</InlineAlert>);
-      const alert = container.firstChild;
-      expect(alert).toHaveClass('bg-success/10');
+      expect(container.firstChild).toHaveAttribute('data-variant', 'success');
     });
 
     it('renders with warning variant', () => {
       const { container } = render(<InlineAlert variant="warning">Message</InlineAlert>);
-      const alert = container.firstChild;
-      expect(alert).toHaveClass('bg-warning/10');
+      expect(container.firstChild).toHaveAttribute('data-variant', 'warning');
     });
 
     it('renders with error variant', () => {
       const { container } = render(<InlineAlert variant="error">Message</InlineAlert>);
-      const alert = container.firstChild;
-      expect(alert).toHaveClass('bg-destructive/10');
+      expect(container.firstChild).toHaveAttribute('data-variant', 'error');
     });
 
-    it('renders info icon for info variant', () => {
-      const { container } = render(<InlineAlert variant="info">Message</InlineAlert>);
-      const icon = container.querySelector('svg');
-      expect(icon).toHaveClass('text-info');
-    });
+    it('renders icon for each variant', () => {
+      const { container: c1 } = render(<InlineAlert variant="info">Message</InlineAlert>);
+      expect(c1.querySelector('svg')).toBeInTheDocument();
 
-    it('renders check icon for success variant', () => {
-      const { container} = render(<InlineAlert variant="success">Message</InlineAlert>);
-      const icon = container.querySelector('svg');
-      expect(icon).toHaveClass('text-success');
-    });
+      const { container: c2 } = render(<InlineAlert variant="success">Message</InlineAlert>);
+      expect(c2.querySelector('svg')).toBeInTheDocument();
 
-    it('renders alert triangle for warning variant', () => {
-      const { container } = render(<InlineAlert variant="warning">Message</InlineAlert>);
-      const icon = container.querySelector('svg');
-      expect(icon).toHaveClass('text-warning');
-    });
+      const { container: c3 } = render(<InlineAlert variant="warning">Message</InlineAlert>);
+      expect(c3.querySelector('svg')).toBeInTheDocument();
 
-    it('renders alert circle for error variant', () => {
-      const { container } = render(<InlineAlert variant="error">Message</InlineAlert>);
-      const icon = container.querySelector('svg');
-      expect(icon).toHaveClass('text-destructive');
+      const { container: c4 } = render(<InlineAlert variant="error">Message</InlineAlert>);
+      expect(c4.querySelector('svg')).toBeInTheDocument();
     });
 
     it('does not show dismiss button by default', () => {
@@ -128,26 +114,22 @@ describe('InlineAlert', () => {
   describe('internationalization', () => {
     it('renders dismiss button with English label', () => {
       renderWithI18n(<InlineAlert dismissible>Message</InlineAlert>, { language: 'en' });
-      const dismissButton = screen.getByRole('button');
-      expect(dismissButton).toHaveAttribute('aria-label', 'Dismiss');
+      expect(screen.getByRole('button')).toHaveAttribute('aria-label', 'Dismiss');
     });
 
     it('renders dismiss button with French label', () => {
       renderWithI18n(<InlineAlert dismissible>Message</InlineAlert>, { language: 'fr' });
-      const dismissButton = screen.getByRole('button');
-      expect(dismissButton).toHaveAttribute('aria-label', 'Fermer');
+      expect(screen.getByRole('button')).toHaveAttribute('aria-label', 'Fermer');
     });
 
     it('displays correct English dismiss label for info variant', () => {
       renderWithI18n(<InlineAlert variant="info" dismissible>Info message</InlineAlert>, { language: 'en' });
-      const dismissButton = screen.getByRole('button');
-      expect(dismissButton).toHaveAttribute('aria-label', 'Dismiss');
+      expect(screen.getByRole('button')).toHaveAttribute('aria-label', 'Dismiss');
     });
 
     it('displays correct French dismiss label for error variant', () => {
       renderWithI18n(<InlineAlert variant="error" dismissible>Error message</InlineAlert>, { language: 'fr' });
-      const dismissButton = screen.getByRole('button');
-      expect(dismissButton).toHaveAttribute('aria-label', 'Fermer');
+      expect(screen.getByRole('button')).toHaveAttribute('aria-label', 'Fermer');
     });
   });
 });

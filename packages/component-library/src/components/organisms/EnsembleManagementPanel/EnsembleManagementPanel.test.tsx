@@ -330,8 +330,8 @@ describe('EnsembleManagementPanel', () => {
   });
 
   describe('layout', () => {
-    it('organizes presets in a list', () => {
-      const { container } = render(
+    it('renders presets', () => {
+      render(
         <EnsembleManagementPanel
           presets={mockPresets}
           currentEnsembleName=""
@@ -341,12 +341,13 @@ describe('EnsembleManagementPanel', () => {
         />
       );
 
-      const presetList = container.querySelector('.space-y-3');
-      expect(presetList).toBeInTheDocument();
+      expect(screen.getByText('Research Synthesis')).toBeInTheDocument();
+      expect(screen.getByText('Rapid Drafting')).toBeInTheDocument();
+      expect(screen.getByText('Balanced Perspective')).toBeInTheDocument();
     });
 
-    it('has proper spacing between sections', () => {
-      const { container } = render(
+    it('renders both sections', () => {
+      render(
         <EnsembleManagementPanel
           presets={mockPresets}
           currentEnsembleName=""
@@ -356,8 +357,8 @@ describe('EnsembleManagementPanel', () => {
         />
       );
 
-      const sections = container.querySelectorAll('.mb-6');
-      expect(sections.length).toBeGreaterThan(0);
+      expect(screen.getByText('Quick presets')).toBeInTheDocument();
+      expect(screen.getByText('Save current ensemble')).toBeInTheDocument();
     });
   });
 

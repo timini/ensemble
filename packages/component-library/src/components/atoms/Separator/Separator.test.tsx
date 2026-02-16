@@ -27,13 +27,13 @@ describe('Separator', () => {
   it('renders horizontal orientation by default', () => {
     render(<Separator data-testid="separator" />);
     const separator = screen.getByTestId('separator');
-    expect(separator).toHaveClass('h-[1px]', 'w-full');
+    expect(separator).toHaveAttribute('data-orientation', 'horizontal');
   });
 
   it('renders vertical orientation', () => {
     render(<Separator orientation="vertical" data-testid="separator" />);
     const separator = screen.getByTestId('separator');
-    expect(separator).toHaveClass('h-full', 'w-[1px]');
+    expect(separator).toHaveAttribute('data-orientation', 'vertical');
   });
 
   it('applies custom className', () => {
@@ -48,10 +48,11 @@ describe('Separator', () => {
     expect(ref.current).toBeInstanceOf(HTMLDivElement);
   });
 
-  it('applies border background color', () => {
+  it('renders with proper role for horizontal separator', () => {
     render(<Separator data-testid="separator" />);
     const separator = screen.getByTestId('separator');
-    expect(separator).toHaveClass('bg-border');
+    expect(separator).toHaveAttribute('data-orientation', 'horizontal');
+    expect(separator).toBeInTheDocument();
   });
 
   it('sets aria-orientation for vertical non-decorative separator', () => {

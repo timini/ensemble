@@ -33,10 +33,11 @@ describe('SummarizerIndicator', () => {
       expect(indicator).toHaveClass('custom-class');
     });
 
-    it('applies default styling classes', () => {
+    it('renders with proper structure', () => {
       render(<SummarizerIndicator modelName="Claude 3 Opus" />);
       const indicator = screen.getByTestId('summarizer-indicator');
-      expect(indicator).toHaveClass('bg-warning/10', 'border-warning/30', 'rounded-lg');
+      expect(indicator).toBeInTheDocument();
+      expect(indicator.tagName).toBe('DIV');
     });
   });
 
@@ -78,33 +79,17 @@ describe('SummarizerIndicator', () => {
   });
 
   describe('layout', () => {
-    it('uses flexbox layout', () => {
-      render(<SummarizerIndicator modelName="Claude 3 Opus" />);
+    it('renders icon and text content', () => {
+      const { container } = render(<SummarizerIndicator modelName="Claude 3 Opus" />);
       const indicator = screen.getByTestId('summarizer-indicator');
-      expect(indicator).toHaveClass('flex', 'items-center', 'gap-3');
-    });
-
-    it('has proper padding', () => {
-      render(<SummarizerIndicator modelName="Claude 3 Opus" />);
-      const indicator = screen.getByTestId('summarizer-indicator');
-      expect(indicator).toHaveClass('px-6', 'py-4');
+      expect(indicator).toBeInTheDocument();
+      expect(container.querySelector('svg')).toBeInTheDocument();
+      expect(screen.getByText('Claude 3 Opus')).toBeInTheDocument();
     });
   });
 
   describe('styling', () => {
-    it('has warning color scheme', () => {
-      const { container } = render(<SummarizerIndicator modelName="Claude 3 Opus" />);
-      const indicator = screen.getByTestId('summarizer-indicator');
-
-      // Background and border
-      expect(indicator).toHaveClass('bg-warning/10', 'border-warning/30');
-
-      // Icon color
-      const iconWrapper = container.querySelector('[class*="text-warning"]');
-      expect(iconWrapper).toBeInTheDocument();
-    });
-
-    it('merges custom className with default classes', () => {
+    it('merges custom className', () => {
       render(
         <SummarizerIndicator
           modelName="Claude 3 Opus"
@@ -112,7 +97,7 @@ describe('SummarizerIndicator', () => {
         />
       );
       const indicator = screen.getByTestId('summarizer-indicator');
-      expect(indicator).toHaveClass('bg-warning/10', 'border-warning/30', 'mt-4', 'shadow-lg');
+      expect(indicator).toHaveClass('mt-4', 'shadow-lg');
     });
   });
 

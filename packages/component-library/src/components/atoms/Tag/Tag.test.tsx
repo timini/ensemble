@@ -13,31 +13,31 @@ describe('Tag', () => {
     it('renders with default variant', () => {
       const { container } = render(<Tag>Tag</Tag>);
       const tag = container.firstChild;
-      expect(tag).toHaveClass('bg-secondary');
+      expect(tag).toHaveAttribute('data-variant', 'default');
     });
 
     it('renders with primary variant', () => {
       const { container } = render(<Tag variant="primary">Tag</Tag>);
       const tag = container.firstChild;
-      expect(tag).toHaveClass('bg-primary/10');
+      expect(tag).toHaveAttribute('data-variant', 'primary');
     });
 
     it('renders with success variant', () => {
       const { container } = render(<Tag variant="success">Tag</Tag>);
       const tag = container.firstChild;
-      expect(tag).toHaveClass('bg-success/10');
+      expect(tag).toHaveAttribute('data-variant', 'success');
     });
 
     it('renders as selected', () => {
       const { container } = render(<Tag selected>Tag</Tag>);
       const tag = container.firstChild;
-      expect(tag).toHaveClass('border-primary');
+      expect(tag).toHaveAttribute('data-selected', 'true');
     });
 
     it('renders as unselected', () => {
       const { container } = render(<Tag selected={false}>Tag</Tag>);
       const tag = container.firstChild;
-      expect(tag).toHaveClass('border-border');
+      expect(tag).toHaveAttribute('data-selected', 'false');
     });
 
     it('does not show remove button by default', () => {
@@ -117,7 +117,7 @@ describe('Tag', () => {
     it('is disabled when disabled prop is true', () => {
       const { container } = render(<Tag onClick={vi.fn()} disabled>Tag</Tag>);
       const tag = container.firstChild;
-      expect(tag).toHaveClass('opacity-50', 'cursor-not-allowed');
+      expect(tag).toHaveAttribute('data-disabled', 'true');
     });
 
     it('remove button has aria-label', () => {

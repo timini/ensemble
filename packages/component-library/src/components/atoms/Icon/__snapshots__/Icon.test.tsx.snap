@@ -3,6 +3,8 @@
 exports[`Icon > snapshots > matches snapshot for default variant 1`] = `
 <span
   class="inline-flex shrink-0 h-4 w-4 text-foreground"
+  data-size="default"
+  data-variant="default"
   role="img"
 >
   <svg
@@ -28,6 +30,8 @@ exports[`Icon > snapshots > matches snapshot for default variant 1`] = `
 exports[`Icon > snapshots > matches snapshot for large size 1`] = `
 <span
   class="inline-flex shrink-0 h-5 w-5 text-foreground"
+  data-size="lg"
+  data-variant="default"
   role="img"
 >
   <svg
@@ -53,6 +57,8 @@ exports[`Icon > snapshots > matches snapshot for large size 1`] = `
 exports[`Icon > snapshots > matches snapshot for primary variant 1`] = `
 <span
   class="inline-flex shrink-0 h-4 w-4 text-primary"
+  data-size="default"
+  data-variant="primary"
   role="img"
 >
   <svg

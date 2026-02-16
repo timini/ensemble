@@ -70,7 +70,7 @@ const Rating = React.forwardRef<HTMLDivElement, RatingProps>(
     };
 
     return (
-      <div ref={ref} className={cn(ratingVariants({ size }), className)} {...props}>
+      <div ref={ref} className={cn(ratingVariants({ size }), className)} data-size={size || 'default'} {...props}>
         {Array.from({ length: max }, (_, index) => {
           const starValue = index + 1;
           const isFilled = starValue <= value;

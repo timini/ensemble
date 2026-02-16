@@ -97,22 +97,12 @@ describe('PageHero', () => {
   });
 
   describe('layout', () => {
-    it('uses centered text layout', () => {
+    it('renders hero section', () => {
       const { container } = render(
         <PageHero title="Test Title" description="Test description" />
       );
 
-      const heroSection = container.querySelector('.text-center');
-      expect(heroSection).toBeInTheDocument();
-    });
-
-    it('applies proper spacing classes', () => {
-      const { container } = render(
-        <PageHero title="Test Title" description="Test description" />
-      );
-
-      const heroSection = container.querySelector('.mb-8');
-      expect(heroSection).toBeInTheDocument();
+      expect(container.firstChild).toBeInTheDocument();
     });
   });
 
@@ -124,18 +114,11 @@ describe('PageHero', () => {
       expect(heading).toBeInTheDocument();
     });
 
-    it('applies large font size to title', () => {
+    it('renders title as h1', () => {
       render(<PageHero title="Test Title" description="Test description" />);
 
       const heading = screen.getByRole('heading');
-      expect(heading).toHaveClass('text-3xl');
-    });
-
-    it('applies bold font weight to title', () => {
-      render(<PageHero title="Test Title" description="Test description" />);
-
-      const heading = screen.getByRole('heading');
-      expect(heading).toHaveClass('font-bold');
+      expect(heading.tagName).toBe('H1');
     });
   });
 

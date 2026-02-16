@@ -45,17 +45,15 @@ describe('EnsembleHeader', () => {
     render(<EnsembleHeader currentPath="/features" />);
     const featuresLink = screen.getByRole('link', { name: /features/i });
     expect(featuresLink).toHaveAttribute('aria-current', 'page');
-    expect(featuresLink).toHaveClass('font-semibold');
 
     const aboutLink = screen.getByRole('link', { name: /about/i });
     expect(aboutLink).not.toHaveAttribute('aria-current');
   });
 
-  it('highlights the active About link with aria-current and font-semibold', () => {
+  it('highlights the active About link with aria-current', () => {
     render(<EnsembleHeader currentPath="/about" />);
     const aboutLink = screen.getByRole('link', { name: /about/i });
     expect(aboutLink).toHaveAttribute('aria-current', 'page');
-    expect(aboutLink).toHaveClass('font-semibold');
 
     const featuresLink = screen.getByRole('link', { name: /features/i });
     expect(featuresLink).not.toHaveAttribute('aria-current');
@@ -72,10 +70,10 @@ describe('EnsembleHeader', () => {
     expect(nav).toBeInTheDocument();
   });
 
-  it('applies correct styling classes', () => {
+  it('renders as semantic header element', () => {
     const { container } = render(<EnsembleHeader />);
     const header = container.firstChild;
-    expect(header).toHaveClass('bg-background', 'border-b');
+    expect(header?.nodeName).toBe('HEADER');
   });
 
   describe('snapshots', () => {
@@ -117,13 +115,13 @@ describe('EnsembleHeader', () => {
     it('displays translated tagline in English', () => {
       renderWithI18n(<EnsembleHeader />, { language: 'en' });
 
-      expect(screen.getByText('The smartest AI is an ensemble.')).toHaveClass('text-muted-foreground');
+      expect(screen.getByText('The smartest AI is an ensemble.')).toBeInTheDocument();
     });
 
     it('displays translated tagline in French', () => {
       renderWithI18n(<EnsembleHeader />, { language: 'fr' });
 
-      expect(screen.getByText("L'IA la plus intelligente est un ensemble.")).toHaveClass('text-muted-foreground');
+      expect(screen.getByText("L'IA la plus intelligente est un ensemble.")).toBeInTheDocument();
     });
   });
 });

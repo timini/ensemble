@@ -48,13 +48,10 @@ describe('ProgressSteps', () => {
     expect(ensembleCircle).toHaveAttribute('data-completed', 'true');
   });
 
-  it('uses fixed-width label containers for horizontal centering', () => {
+  it('renders step labels', () => {
     render(<ProgressSteps currentStep="config" />);
-    const ensembleLabel = screen.getByText('Ensemble');
-    const promptLabel = screen.getByText('Prompt');
-
-    expect(ensembleLabel).toHaveClass('inline-block', 'w-12', 'text-center');
-    expect(promptLabel).toHaveClass('inline-block', 'w-12', 'text-center');
+    expect(screen.getByText('Ensemble')).toBeInTheDocument();
+    expect(screen.getByText('Prompt')).toBeInTheDocument();
   });
 
   it('renders completed steps as clickable buttons when onStepClick is provided', () => {

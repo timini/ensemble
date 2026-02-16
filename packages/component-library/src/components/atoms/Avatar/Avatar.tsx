@@ -41,6 +41,8 @@ const Avatar = React.forwardRef<HTMLDivElement, AvatarProps>(
       <div
         ref={ref}
         className={cn(avatarVariants({ size, variant }), className)}
+        data-variant={variant || 'default'}
+        data-size={size || 'default'}
         {...props}
       >
         {src && !imageError ? (

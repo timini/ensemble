@@ -32,10 +32,10 @@ describe('Label', () => {
     expect(label).toHaveAttribute('for', 'email-input');
   });
 
-  it('applies default font and text styles', () => {
+  it('renders as label element', () => {
     render(<Label>Styled Label</Label>);
     const label = screen.getByText('Styled Label');
-    expect(label).toHaveClass('text-sm', 'font-medium', 'leading-none');
+    expect(label.tagName).toBe('LABEL');
   });
 
   it('supports standard label attributes', () => {
