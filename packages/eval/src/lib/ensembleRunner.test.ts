@@ -110,4 +110,92 @@ describe('EnsembleRunner', () => {
     expect(startTimes).toHaveLength(2);
     expect(startTimes[1] - startTimes[0]).toBeGreaterThanOrEqual(20);
   });
+
+  it('retries on rate-limit error and eventually succeeds', async () => {
+    let callCount = 0;
+    const provider = buildProvider({
+      onStream: async (_prompt, _model, _onChunk, onComplete, onError) => {
+        callCount++;
+        if (callCount <= 2) {
+          onError(new Error('Rate limit exceeded'));
+          return;
+        }
+        onComplete('success', 10, 50);
+      },
+    });
+
+    const runner = new EnsembleRunner(
+      buildRegistry({
+        openai: provider,
+        anthropic: provider,
+        google: provider,
+        xai: provider,
+      }),
+      'mock',
+      { retry: { maxRetries: 3, baseDelayMs: 1, maxJitterMs: 0 } },
+    );
+
+    const results = await runner.runPrompt('Test', [
+      { provider: 'openai', model: 'gpt-4o' },
+    ]);
+
+    expect(results).toHaveLength(1);
+    expect(results[0].content).toBe('success');
+    expect(results[0].error).toBeUndefined();
+    expect(callCount).toBe(3);
+  });
+
+  it('does not retry non-retryable errors (auth failure)', async () => {
+    let callCount = 0;
+    const provider = buildProvider({
+      onStream: async (_prompt, _model, _onChunk, _onComplete, onError) => {
+        callCount++;
+        onError(new Error('Invalid API key'));
+      },
+    });
+
+    const runner = new EnsembleRunner(
+      buildRegistry({
+        openai: provider,
+        anthropic: provider,
+        google: provider,
+        xai: provider,
+      }),
+      'mock',
+      { retry: { maxRetries: 3, baseDelayMs: 1, maxJitterMs: 0 } },
+    );
+
+    const results = await runner.runPrompt('Test', [
+      { provider: 'openai', model: 'gpt-4o' },
+    ]);
+
+    expect(results).toHaveLength(1);
+    expect(results[0].error).toBe('Invalid API key');
+    expect(callCount).toBe(1);
+  });
+
+  it('works without retry options (backwards compatible)', async () => {
+    const provider = buildProvider({
+      onStream: async (_prompt, _model, _onChunk, onComplete) => {
+        onComplete('ok', 5, 20);
+      },
+    });
+
+    const runner = new EnsembleRunner(
+      buildRegistry({
+        openai: provider,
+        anthropic: provider,
+        google: provider,
+        xai: provider,
+      }),
+      'mock',
+    );
+
+    const results = await runner.runPrompt('Test', [
+      { provider: 'openai', model: 'gpt-4o' },
+    ]);
+
+    expect(results).toHaveLength(1);
+    expect(results[0].content).toBe('ok');
+  });
 });

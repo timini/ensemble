@@ -4,9 +4,11 @@ import type {
   ProviderRegistry,
 } from '@ensemble-ai/shared-utils/providers';
 import type { EvalMode, ModelSpec, ProviderResponse } from '../types.js';
+import { isRateLimitOrServerError, retryable, type RetryOptions } from './retryable.js';
 
 export interface EnsembleRunnerOptions {
   requestDelayMs?: number;
+  retry?: RetryOptions;
 }
 
 function sleep(ms: number): Promise<void> {
@@ -78,6 +80,7 @@ async function streamModelResponse(
 
 export class EnsembleRunner {
   private readonly requestDelayMs: number;
+  private readonly retryOptions: RetryOptions | undefined;
 
   constructor(
     private readonly registry: ProviderRegistry,
@@ -85,6 +88,7 @@ export class EnsembleRunner {
     options?: EnsembleRunnerOptions,
   ) {
     this.requestDelayMs = Math.max(0, options?.requestDelayMs ?? 0);
+    this.retryOptions = options?.retry;
   }
 
   async runPrompt(prompt: string, models: ModelSpec[]): Promise<ProviderResponse[]> {
@@ -96,7 +100,25 @@ export class EnsembleRunner {
       const client = this.registry.getProvider(provider, this.mode);
       const metadata =
         client.listAvailableModels().find((candidate) => candidate.id === model) ?? null;
-      const result = await streamModelResponse(client, prompt, model);
+
+      type StreamResult = Pick<ProviderResponse, 'content' | 'responseTimeMs' | 'tokenCount' | 'error'>;
+      const result: StreamResult = this.retryOptions
+        ? await retryable(
+            async () => {
+              const r = await streamModelResponse(client, prompt, model);
+              if (r.error && isRateLimitOrServerError(new Error(r.error))) {
+                throw new Error(r.error);
+              }
+              return r;
+            },
+            this.retryOptions,
+          ).catch((error: unknown): StreamResult => ({
+            content: '',
+            responseTimeMs: 0,
+            error: error instanceof Error ? error.message : String(error),
+          }))
+        : await streamModelResponse(client, prompt, model);
+
       const estimatedCostUsd = estimateCostUsd(result.tokenCount, metadata);
 
       return {
