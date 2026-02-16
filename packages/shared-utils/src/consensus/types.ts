@@ -8,6 +8,12 @@ import type {
   LLMCouncilResultSchema,
 } from './schemas';
 
+/**
+ * @module consensus/types
+ *
+ * Core types for consensus strategies.
+ */
+
 export interface ConsensusModelResponse {
     modelId: string;
     modelName: string; // "model" in ModelResponse

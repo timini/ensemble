@@ -4,7 +4,7 @@ import { benchmarkLoaders } from './benchmarkDatasetLoaders.js';
 
 /**
  * Simple seeded pseudo-random number generator (mulberry32).
- * Returns a function that produces deterministic values in [0, 1).
+ * Returns a function that produces deterministic values in [0, 1].
  */
 function seededRandom(seed: number): () => number {
   let s = seed | 0;
@@ -40,19 +40,30 @@ function seededShuffle<T>(items: readonly T[], rand: () => number): T[] {
 export async function loadPinnedQuestions(
   baseline: GoldenBaselineFile,
 ): Promise<Map<BenchmarkDatasetName, BenchmarkQuestion[]>> {
-  // Group pinned question IDs by dataset using the baseline results
-  const idsByDataset = new Map<BenchmarkDatasetName, Set<string>>();
+  // Build a lookup map from question ID to dataset using baseline results
+  const datasetByQuestionId = new Map<string, BenchmarkDatasetName>();
   for (const result of baseline.results) {
-    const dataset = result.dataset;
-    if (!idsByDataset.has(dataset)) {
-      idsByDataset.set(dataset, new Set());
+    datasetByQuestionId.set(result.questionId, result.dataset);
+  }
+
+  // Iterate questionIds (the source of truth for ordering) and group by dataset
+  const orderedIdsByDataset = new Map<BenchmarkDatasetName, string[]>();
+  for (const qid of baseline.questionIds) {
+    const dataset = datasetByQuestionId.get(qid);
+    if (dataset === undefined) {
+      throw new Error(
+        `Question ID ${qid} found in questionIds but not in baseline results`,
+      );
     }
-    idsByDataset.get(dataset)!.add(result.questionId);
+    if (!orderedIdsByDataset.has(dataset)) {
+      orderedIdsByDataset.set(dataset, []);
+    }
+    orderedIdsByDataset.get(dataset)!.push(qid);
   }
 
   const output = new Map<BenchmarkDatasetName, BenchmarkQuestion[]>();
 
-  for (const [dataset, pinnedIds] of idsByDataset) {
+  for (const [dataset, pinnedIds] of orderedIdsByDataset) {
     const loader = benchmarkLoaders[dataset];
     const allQuestions = await loader.load();
 
@@ -76,7 +87,7 @@ export async function loadPinnedQuestions(
       );
     }
 
-    // Collect matched questions preserving the order from pinnedIds
+    // Collect matched questions preserving the order from questionIds
     const matched: BenchmarkQuestion[] = [];
     for (const id of pinnedIds) {
       matched.push(questionById.get(id)!);
