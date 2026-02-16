@@ -5,29 +5,29 @@ exports[`EnsembleHeader Snapshots > matches snapshot for default header 1`] = `
   class="bg-background border-b border-border"
 >
   <div
-    class="max-w-6xl mx-auto px-6 py-6"
+    class="max-w-6xl mx-auto px-4 sm:px-6 py-4 sm:py-6"
   >
     <div
-      class="flex items-center justify-between"
+      class="flex items-center justify-between gap-4"
     >
       <a
-        class="group block"
+        class="group block min-w-0"
         href="/config"
       >
         <h1
-          class="text-2xl font-bold text-foreground group-hover:text-primary transition-colors"
+          class="text-xl sm:text-2xl font-bold text-foreground group-hover:text-primary transition-colors truncate"
         >
           Ensemble AI
         </h1>
         <p
-          class="text-muted-foreground mt-1"
+          class="text-muted-foreground mt-1 text-sm sm:text-base"
         >
           The smartest AI is an ensemble.
         </p>
       </a>
       <nav
         aria-label="Main navigation"
-        class="flex items-center gap-4"
+        class="flex items-center gap-2 sm:gap-4 shrink-0"
       >
         <a
           class="text-sm transition-colors text-muted-foreground hover:text-foreground"

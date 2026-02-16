@@ -20,6 +20,7 @@ import { ConsensusCard } from "@/components/organisms/ConsensusCard";
 import { AgreementAnalysis } from "@/components/organisms/AgreementAnalysis";
 import { ProgressSteps } from "@/components/molecules/ProgressSteps";
 import { Button } from "@/components/atoms/Button";
+import { MessageSquare } from "lucide-react";
 import { WorkflowNavigator } from "@/components/organisms/WorkflowNavigator";
 import { PromptCard } from "@/components/organisms/PromptCard";
 import type { Provider } from "@/components/molecules/ResponseCard";
@@ -185,10 +186,17 @@ export default function ReviewPage() {
         {viewResponses.length === 0 &&
         pendingModels.length === 0 &&
         viewManualResponses.length === 0 ? (
-          <div className="rounded-lg bg-muted p-8 text-center">
-            <p className="text-muted-foreground">
+          <div className="rounded-lg border border-dashed border-border bg-muted/30 p-12 text-center flex flex-col items-center" data-testid="empty-responses">
+            <MessageSquare className="w-12 h-12 text-muted-foreground mb-4" />
+            <p className="text-lg font-semibold mb-2">
               {t("pages.review.noResponses")}
             </p>
+            <p className="text-sm text-muted-foreground max-w-md mb-6">
+              {t("pages.review.noResponsesHint")}
+            </p>
+            <Button variant="outline" onClick={handleBack}>
+              {t("pages.review.backButton")}
+            </Button>
           </div>
         ) : (
           <div className="space-y-4">
