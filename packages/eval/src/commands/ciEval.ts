@@ -33,7 +33,7 @@ function resolveApiKeyEnvVars(): void {
 
   for (const [testKey, standardKey] of mappings) {
     const testValue = process.env[testKey];
-    if (testValue && testValue.trim().length > 0) {
+    if (testValue?.trim()) {
       process.env[standardKey] = testValue;
     }
   }
@@ -79,6 +79,9 @@ export function createCiEvalCommand(): Command {
       registerProviders(registry, providerNames, options.mode);
 
       // Step 5: Create BenchmarkRunner with tier config
+      if (!tierConfig.datasets || tierConfig.datasets.length === 0) {
+        throw new Error(`No datasets found for tier "${tier}"`);
+      }
       const evaluator = createEvaluatorForDataset(tierConfig.datasets[0].name);
       const runner = new BenchmarkRunner({
         mode: options.mode,

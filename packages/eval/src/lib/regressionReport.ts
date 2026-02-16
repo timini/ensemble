@@ -22,8 +22,9 @@ function toPercent(value: number): string {
  */
 function toDelta(value: number): string {
   const pct = (value * 100).toFixed(1);
-  if (value > 0) return `+${pct}%`;
-  if (value < 0) return `${pct}%`;
+  if (value > 0) {
+    return `+${pct}%`;
+  }
   return `${pct}%`;
 }
 

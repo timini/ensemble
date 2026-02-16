@@ -1,4 +1,5 @@
 import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
+import type { MockInstance } from 'vitest';
 import { Command } from 'commander';
 import type { GoldenBaselineFile, RegressionResult, TierConfig } from '../lib/regressionTypes.js';
 
@@ -135,17 +136,14 @@ async function runCommandCatchExit(args: string[]): Promise<void> {
 
 // ── Setup ────────────────────────────────────────────────────────────────────
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-let exitSpy: any;
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-let stderrSpy: any;
+let exitSpy: MockInstance;
+let stderrSpy: MockInstance;
 
 beforeEach(() => {
   vi.clearAllMocks();
-  exitSpy = vi.spyOn(process, 'exit').mockImplementation(((code?: number) => {
-    throw new ProcessExitError(code ?? 0);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  }) as any);
+  exitSpy = vi.spyOn(process, 'exit').mockImplementation(((code?: string | number | null) => {
+    throw new ProcessExitError(typeof code === 'number' ? code : 0);
+  }) as (code?: string | number | null) => never);
   stderrSpy = vi.spyOn(process.stderr, 'write').mockImplementation((() => true) as never);
 
   // Default mock implementations
