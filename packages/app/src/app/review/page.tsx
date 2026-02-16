@@ -1,9 +1,4 @@
-/**
- * Review Page (T167-T171)
- *
- * Step 4 of the 4-step workflow: Review Responses
- * Displays streaming responses, agreement analysis, and consensus
- */
+/** Review Page — Step 4: Review streaming responses, agreement analysis, and consensus */
 
 "use client";
 
@@ -15,15 +10,12 @@ import { useStepNavigation } from "~/hooks/useStepNavigation";
 import { FALLBACK_MODELS } from "~/lib/models";
 import { formatModelLabelFromId } from "~/lib/providerModels";
 import { PageHero } from "@/components/organisms/PageHero";
-import { ResponseCard } from "@/components/molecules/ResponseCard";
 import { ConsensusCard } from "@/components/organisms/ConsensusCard";
 import { AgreementAnalysis } from "@/components/organisms/AgreementAnalysis";
 import { ProgressSteps } from "@/components/molecules/ProgressSteps";
 import { Button } from "@/components/atoms/Button";
-import { MessageSquare } from "lucide-react";
 import { WorkflowNavigator } from "@/components/organisms/WorkflowNavigator";
 import { PromptCard } from "@/components/organisms/PromptCard";
-import type { Provider } from "@/components/molecules/ResponseCard";
 import { useReviewPageState } from "./hooks/useReviewPageState";
 import { useReviewAnalytics } from "./hooks/useReviewAnalytics";
 import { useResponseEmbeddings } from "./hooks/useResponseEmbeddings";
@@ -31,6 +23,7 @@ import { useStreamingResponses } from "./hooks/useStreamingResponses";
 import { useConsensusGeneration } from "./hooks/useConsensusGeneration";
 import { useConsensusStatus } from "./hooks/useConsensusStatus";
 import { useConsensusTrigger } from "./hooks/useConsensusTrigger";
+import { ResponsesSection } from "./_components/ResponsesSection";
 
 const MAX_EXPANDED_CARDS = 3;
 
@@ -125,6 +118,12 @@ export default function ReviewPage() {
     router.push("/config");
   };
 
+  const pendingModels = useMemo(() => {
+    if (!hasHydrated) return [];
+    const respondedIds = new Set(viewResponses.map((r) => r.modelId));
+    return selectedModels.filter((m) => !respondedIds.has(m.id));
+  }, [hasHydrated, selectedModels, viewResponses]);
+
   const displayPrompt = hasHydrated ? (prompt ?? "") : "";
 
   return (
@@ -171,66 +170,14 @@ export default function ReviewPage() {
       )}
 
       {/* 4. Individual Responses Section (matches wireframe order - at bottom) */}
-      <div className="mt-8 space-y-4">
-        <h3 className="text-xl font-semibold">
-          {t("pages.review.responsesHeading")}
-        </h3>
-
-        {viewResponses.length === 0 && viewManualResponses.length === 0 ? (
-          <div className="rounded-lg border border-dashed border-border bg-muted/30 p-12 text-center flex flex-col items-center" data-testid="empty-responses">
-            <MessageSquare className="w-12 h-12 text-muted-foreground mb-4" />
-            <p className="text-lg font-semibold mb-2">
-              {t("pages.review.noResponses")}
-            </p>
-            <p className="text-sm text-muted-foreground max-w-md mb-6">
-              {t("pages.review.noResponsesHint")}
-            </p>
-            <Button variant="outline" onClick={handleBack}>
-              {t("pages.review.backButton")}
-            </Button>
-          </div>
-        ) : (
-          <div className="space-y-4">
-            {viewResponses.map((response, index) => (
-              <ResponseCard
-                key={response.modelId}
-                modelName={response.model}
-                provider={response.provider as Provider}
-                status={
-                  response.error
-                    ? "error"
-                    : response.isStreaming
-                      ? "streaming"
-                      : "complete"
-                }
-                responseType="ai"
-                content={response.response}
-                error={response.error ?? undefined}
-                responseTime={
-                  response.responseTime
-                    ? `${response.responseTime}ms`
-                    : undefined
-                }
-                testId={`response-card-${response.modelId}`}
-                tokenCount={response.tokenCount ?? undefined}
-                onRetry={() => retryModel(response.modelId)}
-                defaultExpanded={index < MAX_EXPANDED_CARDS}
-              />
-            ))}
-            {viewManualResponses.map((manual) => (
-              <ResponseCard
-                key={manual.id}
-                modelName={manual.label}
-                status="complete"
-                responseType="manual"
-                content={manual.response}
-                defaultExpanded={false}
-                testId={`manual-response-card-${manual.id}`}
-              />
-            ))}
-          </div>
-        )}
-      </div>
+      <ResponsesSection
+        responses={viewResponses}
+        manualResponses={viewManualResponses}
+        pendingModels={pendingModels}
+        maxExpandedCards={MAX_EXPANDED_CARDS}
+        onRetry={retryModel}
+        onBack={handleBack}
+      />
 
       {/* 5. Action Buttons */}
       <div className="mt-12 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">

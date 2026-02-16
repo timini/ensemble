@@ -45,7 +45,7 @@ export interface ResponseCardProps {
   testId?: string;
 }
 
-const PROVIDER_NAMES = {
+export const PROVIDER_NAMES = {
   openai: 'OpenAI',
   anthropic: 'Anthropic',
   google: 'Google',
