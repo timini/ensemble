@@ -4,7 +4,7 @@ import { benchmarkLoaders } from './benchmarkDatasetLoaders.js';
 
 /**
  * Simple seeded pseudo-random number generator (mulberry32).
- * Returns a function that produces deterministic values in [0, 1].
+ * Returns a function that produces deterministic values in [0, 1).
  */
 function seededRandom(seed: number): () => number {
   let s = seed | 0;
