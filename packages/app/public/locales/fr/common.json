@@ -170,7 +170,15 @@
       },
       "whyEnsemble": {
         "heading": "Pourquoi un ensemble ?",
-        "body": "Chaque modèle d'IA a ses angles morts. Une question qui déroute un modèle peut être triviale pour un autre. C'est le paradoxe de la sélection de modèle : vous ne pouvez pas savoir quel modèle sera le plus performant sur votre question spécifique avant de l'avoir posée. L'approche d'ensemble élimine cette incertitude en exploitant les forces complémentaires de plusieurs modèles, produisant des réponses plus fiables et équilibrées."
+        "body": "Chaque modèle d'IA a ses angles morts. Une question qui déroute un modèle peut être triviale pour un autre. C'est le paradoxe de la sélection de modèle : vous ne pouvez pas savoir quel modèle sera le plus performant sur votre question spécifique avant de l'avoir posée. L'approche d'ensemble élimine cette incertitude en exploitant les forces complémentaires de plusieurs modèles, produisant des réponses plus fiables et équilibrées.",
+        "statEnsembleVsSingle": "Ensemble vs modèle unique sur AlpacaEval 2.0",
+        "statMathAccuracy": "Précision mathématique via débat multi-modèle",
+        "statMedicalAccuracy": "QA médicale via consensus itératif"
+      },
+      "flow": {
+        "prompt": "Votre invite",
+        "models": "Modèles d'IA",
+        "consensus": "Consensus"
       },
       "research": {
         "heading": "La recherche",
