@@ -35,9 +35,9 @@ function toDuration(ms: number): string {
   return `${minutes}m ${seconds}s`;
 }
 
-/** Format a token count with thousands separators. */
+/** Format a token count with thousands separators (locale-independent). */
 function toTokens(count: number): string {
-  return count.toLocaleString('en-US');
+  return count.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
 }
 
 /** Format a USD cost with 2 decimal places. */
@@ -45,11 +45,17 @@ function toUsd(value: number): string {
   return `$${value.toFixed(2)}`;
 }
 
-/** Return emoji status indicator based on whether the result is significant. */
+/** Return emoji status indicator — only significant regressions (negative delta) fail. */
 function statusEmoji(row: StrategyRegressionResult): string {
-  if (row.significant) return ':x:';
+  if (row.significant && row.delta < 0) return ':x:';
   return ':white_check_mark:';
 }
+
+/** Escape pipe characters in a string so they don't break markdown table cells. */
+function escapeCell(value: string): string {
+  return value.replace(/\|/g, '\\|');
+}
+
 
 function renderHeader(result: RegressionResult): string[] {
   const lines: string[] = [];
@@ -98,7 +104,7 @@ function renderBrokenQuestions(questions: BrokenQuestion[]): string[] {
 
   for (const q of questions) {
     lines.push(
-      `| ${q.questionId} | ${q.dataset} | ${q.strategy} | ${q.groundTruth} | ${q.baselineAnswer} | ${q.currentAnswer} |`,
+      `| ${escapeCell(q.questionId)} | ${q.dataset} | ${q.strategy} | ${escapeCell(q.groundTruth)} | ${escapeCell(q.baselineAnswer)} | ${escapeCell(q.currentAnswer)} |`,
     );
   }
 

@@ -164,21 +164,23 @@ function findBrokenQuestions(
 }
 
 /**
- * Aggregates cost metrics from benchmark results across all datasets.
+ * Aggregates cost metrics from benchmark results across all runs and datasets.
  */
 function computeCostMetrics(
-  runsByDataset: Map<BenchmarkDatasetName, BenchmarkResultsFile>,
+  allRunResults: Array<Map<BenchmarkDatasetName, BenchmarkResultsFile>>,
   durationMs: number,
 ): CostMetrics {
   let totalTokens = 0;
   let totalCostUsd = 0;
 
-  for (const results of runsByDataset.values()) {
-    for (const run of results.runs) {
-      for (const response of run.responses) {
-        if (!response.error) {
-          totalTokens += response.tokenCount ?? 0;
-          totalCostUsd += response.estimatedCostUsd ?? 0;
+  for (const runsByDataset of allRunResults) {
+    for (const results of runsByDataset.values()) {
+      for (const run of results.runs) {
+        for (const response of run.responses) {
+          if (!response.error) {
+            totalTokens += response.tokenCount ?? 0;
+            totalCostUsd += response.estimatedCostUsd ?? 0;
+          }
         }
       }
     }
@@ -190,6 +192,8 @@ function computeCostMetrics(
 /** Options for {@link RegressionDetector.evaluate}. */
 export interface RegressionDetectorEvaluateOptions {
   onProgress?: (progress: BenchmarkRunnerProgress) => void;
+  /** Git commit SHA of the code being evaluated. Defaults to `''` if not provided. */
+  commitSha?: string;
 }
 
 /**
@@ -252,7 +256,7 @@ export class RegressionDetector {
 
     if (numRuns > 1) {
       // CI tier: multiple runs, take median accuracy, compute stability
-      const { medianCounts, allAccuracies, bestRunByDataset } =
+      const { medianCounts, allAccuracies, firstRunByDataset } =
         this.computeMultiRunMetrics(allRunResults, strategies);
 
       // Compute baseline accuracy
@@ -270,7 +274,7 @@ export class RegressionDetector {
       // For broken questions, use the first run (representative)
       brokenQuestions = findBrokenQuestions(
         this.baseline,
-        bestRunByDataset,
+        firstRunByDataset,
         strategies,
       );
 
@@ -322,13 +326,13 @@ export class RegressionDetector {
     // Step 4: Determine if passed (no significant regressions)
     const passed = perStrategy.every((result) => !result.significant);
 
-    // Step 5: Compute cost metrics (use the last run for cost aggregation)
-    const cost = computeCostMetrics(allRunResults[allRunResults.length - 1], durationMs);
+    // Step 5: Compute cost metrics (aggregate across all runs)
+    const cost = computeCostMetrics(allRunResults, durationMs);
 
     return {
       tier: this.tier.name,
       timestamp: new Date().toISOString(),
-      commitSha: '',
+      commitSha: options?.commitSha ?? '',
       baselineCommitSha: this.baseline.commitSha,
       passed,
       perStrategy,
@@ -382,7 +386,7 @@ export class RegressionDetector {
   ): {
     medianCounts: Map<string, { correct: number; total: number }>;
     allAccuracies: Map<StrategyName, number[]>;
-    bestRunByDataset: Map<BenchmarkDatasetName, PromptRunResult[]>;
+    firstRunByDataset: Map<BenchmarkDatasetName, PromptRunResult[]>;
   } {
     // Collect per-strategy x dataset accuracies across all runs
     const accuraciesByKey = new Map<string, number[]>();
@@ -448,13 +452,13 @@ export class RegressionDetector {
     }
 
     // Use the first run for broken question analysis
-    const bestRunByDataset = new Map<BenchmarkDatasetName, PromptRunResult[]>();
+    const firstRunByDataset = new Map<BenchmarkDatasetName, PromptRunResult[]>();
     const firstRun = allRunResults[0];
     for (const [dataset, results] of firstRun) {
-      bestRunByDataset.set(dataset, results.runs);
+      firstRunByDataset.set(dataset, results.runs);
     }
 
-    return { medianCounts, allAccuracies, bestRunByDataset };
+    return { medianCounts, allAccuracies, firstRunByDataset };
   }
 
   /**

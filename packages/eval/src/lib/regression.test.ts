@@ -675,5 +675,51 @@ describe('RegressionDetector', () => {
       expect(sr).toHaveProperty('pValue');
       expect(sr).toHaveProperty('significant');
     });
+
+    it('uses commitSha from options when provided', async () => {
+      const baselineQuestions = [
+        makeBaselineQuestion('q1', 'gsm8k', '42', {
+          standard: makeEvalResult(true, '42', '42'),
+        }),
+      ];
+
+      const tier = makeTierConfig({
+        strategies: ['standard'],
+        datasets: [{ name: 'gsm8k', sampleSize: 1 }],
+      });
+      const baseline = makeBaseline(baselineQuestions);
+
+      const runner = mockRunner(() => [
+        makeRunResult('q1', '42', { standard: true }),
+      ]);
+
+      const detector = new RegressionDetector(tier, baseline, runner);
+      const result = await detector.evaluate({ commitSha: 'abc123current' });
+
+      expect(result.commitSha).toBe('abc123current');
+    });
+
+    it('defaults commitSha to empty string when not provided', async () => {
+      const baselineQuestions = [
+        makeBaselineQuestion('q1', 'gsm8k', '42', {
+          standard: makeEvalResult(true, '42', '42'),
+        }),
+      ];
+
+      const tier = makeTierConfig({
+        strategies: ['standard'],
+        datasets: [{ name: 'gsm8k', sampleSize: 1 }],
+      });
+      const baseline = makeBaseline(baselineQuestions);
+
+      const runner = mockRunner(() => [
+        makeRunResult('q1', '42', { standard: true }),
+      ]);
+
+      const detector = new RegressionDetector(tier, baseline, runner);
+      const result = await detector.evaluate();
+
+      expect(result.commitSha).toBe('');
+    });
   });
 });

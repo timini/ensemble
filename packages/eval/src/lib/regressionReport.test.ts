@@ -181,6 +181,27 @@ describe('createRegressionReport', () => {
     expect(report).toContain(':white_check_mark:');
   });
 
+  it('shows pass indicator for significant improvements (positive delta)', () => {
+    const result = makePassingResult({
+      perStrategy: [
+        makeStrategyResult({
+          baselineAccuracy: 0.7,
+          currentAccuracy: 0.9,
+          delta: 0.2,
+          pValue: 0.001,
+          significant: true,
+        }),
+      ],
+    });
+    const report = createRegressionReport(result);
+
+    // A significant improvement should NOT show a fail indicator
+    const lines = report.split('\n');
+    const accuracyRow = lines.find((l) => l.includes('standard') && l.includes('gsm8k'));
+    expect(accuracyRow).toContain(':white_check_mark:');
+    expect(accuracyRow).not.toContain(':x:');
+  });
+
   it('includes broken questions section with full details', () => {
     const result = makeFailingResult();
     const report = createRegressionReport(result);
@@ -194,6 +215,25 @@ describe('createRegressionReport', () => {
     expect(report).toContain('q-99');
     expect(report).toContain('Paris');
     expect(report).toContain('London');
+  });
+
+  it('escapes pipe characters in broken question cells', () => {
+    const result = makeFailingResult({
+      brokenQuestions: [
+        makeBrokenQuestion({
+          questionId: 'q|1',
+          groundTruth: 'a|b',
+          baselineAnswer: 'a|b',
+          currentAnswer: 'c|d',
+        }),
+      ],
+    });
+    const report = createRegressionReport(result);
+
+    // Pipes in user content should be escaped so they don't break the table
+    expect(report).toContain('q\\|1');
+    expect(report).toContain('a\\|b');
+    expect(report).toContain('c\\|d');
   });
 
   it('hides broken questions when includeDetails is false', () => {
