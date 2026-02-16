@@ -32,49 +32,45 @@ const mockResponses: ConsensusModelResponse[] = [
 /** Sets up all participant providers to return deterministic text */
 function setupDeterministicProviders(participants: CouncilParticipant[], summarizerProvider: AIProvider) {
     for (const p of participants) {
-        (p.provider.streamResponse as Mock).mockImplementation(async (
+        (p.provider.streamResponse as Mock).mockImplementation((
             prompt: string,
             _model: string,
             _onChunk: (chunk: string) => void,
             onComplete: (full: string, time: number, tokens?: number) => void
         ) => {
-            // Critique round: return a critique
             if (prompt.includes('critical reviewer')) {
                 onComplete('This response has some strengths but lacks detail on key aspects.', 100, 10);
-                return;
+                return Promise.resolve();
             }
-            // Rebuttal round: return a rebuttal
             if (prompt.includes('defending your original response')) {
                 onComplete('I stand by my response because it addresses the core question accurately.', 100, 10);
-                return;
+                return Promise.resolve();
             }
-            // Judgment round: return valid vote JSON
             if (prompt.includes('judge evaluating')) {
                 onComplete('{"isValid": true, "reasoning": "Position is sound."}', 100, 10);
-                return;
+                return Promise.resolve();
             }
-            // ELO judging round: prefer Model A
             if (prompt.includes('impartial judge')) {
                 if (prompt.includes('Model A')) {
                     onComplete('Winner: Model A', 100, 10);
                 } else {
                     onComplete('Winner: Model B', 100, 10);
                 }
-                return;
+                return Promise.resolve();
             }
-            // Default
             onComplete('Default response', 100, 10);
+            return Promise.resolve();
         });
     }
 
-    // Summarizer returns a final summary
-    (summarizerProvider.streamResponse as Mock).mockImplementation(async (
+    (summarizerProvider.streamResponse as Mock).mockImplementation((
         _prompt: string,
         _model: string,
         _onChunk: (chunk: string) => void,
         onComplete: (full: string, time: number, tokens?: number) => void
     ) => {
         onComplete('Council consensus: AI is a broad field encompassing machine intelligence.', 100, 10);
+        return Promise.resolve();
     });
 }
 
@@ -149,13 +145,15 @@ describe('CouncilConsensus', () => {
             }
         });
 
-        it('should populate votes on each branch', async () => {
+        it('should not include self-votes on branches', async () => {
             await strategy.generateConsensus(mockResponses, 3, 'What is AI?');
             const tree = strategy.getLastDebateTree();
 
-            // Each branch gets N = 3 votes (all models vote on each branch)
+            // Each branch gets N-1 = 2 votes (models do not vote on their own branch)
             for (const branch of tree!.branches) {
-                expect(branch.votes).toHaveLength(3);
+                expect(branch.votes).toHaveLength(2);
+                const selfVote = branch.votes.find((v) => v.voterModelId === branch.modelId);
+                expect(selfVote).toBeUndefined();
             }
         });
 
@@ -165,19 +163,16 @@ describe('CouncilConsensus', () => {
             // For 3 models:
             // Critiques: N*(N-1) = 6
             // Rebuttals: N = 3
-            // Judgments: N*N = 9
-            // ELO pairings for valid branches: up to V*(V-1)/2
+            // Judgments: N*(N-1) = 6 (no self-votes)
+            // ELO pairings: V*(V-1)/2 = 3
             // Summary: 1
-            // Total minimum (if all valid, 3 ELO pairs): 6 + 3 + 9 + 3 + 1 = 22
-            // Verify at least critique + rebuttal + judgment calls happened
+            // Total: 6 + 3 + 6 + 3 + 1 = 19
             let totalCalls = 0;
             for (const p of participants) {
                 totalCalls += (p.provider.streamResponse as Mock).mock.calls.length;
             }
             totalCalls += (summarizerProvider.streamResponse as Mock).mock.calls.length;
 
-            // At minimum: 6 critiques + 3 rebuttals + 9 judgments + 1 summary = 19
-            // (ELO calls use participants' providers too)
             expect(totalCalls).toBeGreaterThanOrEqual(19);
         });
 
@@ -188,7 +183,6 @@ describe('CouncilConsensus', () => {
             expect(rankings[0]!.rank).toBe(1);
             expect(rankings[1]!.rank).toBe(2);
             expect(rankings[2]!.rank).toBe(3);
-            // Rankings should have eloScore
             for (const r of rankings) {
                 expect(typeof r.eloScore).toBe('number');
             }
@@ -197,8 +191,7 @@ describe('CouncilConsensus', () => {
 
     describe('partial failure', () => {
         it('should complete pipeline when one provider throws during critique', async () => {
-            // Provider A throws, B and C work
-            (participants[0]!.provider.streamResponse as Mock).mockImplementation(async (
+            (participants[0]!.provider.streamResponse as Mock).mockImplementation((
                 _prompt: string,
                 _model: string,
                 _onChunk: (chunk: string) => void,
@@ -206,10 +199,11 @@ describe('CouncilConsensus', () => {
                 onError: (err: Error) => void
             ) => {
                 onError(new Error('Rate limit exceeded'));
+                return Promise.resolve();
             });
 
             for (const p of participants.slice(1)) {
-                (p.provider.streamResponse as Mock).mockImplementation(async (
+                (p.provider.streamResponse as Mock).mockImplementation((
                     prompt: string,
                     _model: string,
                     _onChunk: (chunk: string) => void,
@@ -217,31 +211,33 @@ describe('CouncilConsensus', () => {
                 ) => {
                     if (prompt.includes('critical reviewer')) {
                         onComplete('Good critique.', 100, 10);
-                        return;
+                        return Promise.resolve();
                     }
                     if (prompt.includes('defending your original response')) {
                         onComplete('Valid rebuttal.', 100, 10);
-                        return;
+                        return Promise.resolve();
                     }
                     if (prompt.includes('judge evaluating')) {
                         onComplete('{"isValid": true, "reasoning": "OK"}', 100, 10);
-                        return;
+                        return Promise.resolve();
                     }
                     if (prompt.includes('impartial judge')) {
                         onComplete('Winner: Model B', 100, 10);
-                        return;
+                        return Promise.resolve();
                     }
                     onComplete('Default', 100, 10);
+                    return Promise.resolve();
                 });
             }
 
-            (summarizerProvider.streamResponse as Mock).mockImplementation(async (
+            (summarizerProvider.streamResponse as Mock).mockImplementation((
                 _prompt: string,
                 _model: string,
                 _onChunk: (chunk: string) => void,
                 onComplete: (full: string, time: number, tokens?: number) => void
             ) => {
                 onComplete('Partial consensus result.', 100, 10);
+                return Promise.resolve();
             });
 
             const result = await strategy.generateConsensus(mockResponses, 3, 'What is AI?');
@@ -252,7 +248,7 @@ describe('CouncilConsensus', () => {
     describe('all branches invalid fallback', () => {
         it('should keep all branches when all votes are invalid', async () => {
             for (const p of participants) {
-                (p.provider.streamResponse as Mock).mockImplementation(async (
+                (p.provider.streamResponse as Mock).mockImplementation((
                     prompt: string,
                     _model: string,
                     _onChunk: (chunk: string) => void,
@@ -260,32 +256,33 @@ describe('CouncilConsensus', () => {
                 ) => {
                     if (prompt.includes('critical reviewer')) {
                         onComplete('Major flaws found.', 100, 10);
-                        return;
+                        return Promise.resolve();
                     }
                     if (prompt.includes('defending your original response')) {
                         onComplete('I concede the points raised.', 100, 10);
-                        return;
+                        return Promise.resolve();
                     }
                     if (prompt.includes('judge evaluating')) {
-                        // All votes are invalid
                         onComplete('{"isValid": false, "reasoning": "Fundamentally flawed."}', 100, 10);
-                        return;
+                        return Promise.resolve();
                     }
                     if (prompt.includes('impartial judge')) {
                         onComplete('Winner: Model A', 100, 10);
-                        return;
+                        return Promise.resolve();
                     }
                     onComplete('Default', 100, 10);
+                    return Promise.resolve();
                 });
             }
 
-            (summarizerProvider.streamResponse as Mock).mockImplementation(async (
+            (summarizerProvider.streamResponse as Mock).mockImplementation((
                 _prompt: string,
                 _model: string,
                 _onChunk: (chunk: string) => void,
                 onComplete: (full: string, time: number, tokens?: number) => void
             ) => {
                 onComplete('Fallback consensus.', 100, 10);
+                return Promise.resolve();
             });
 
             const result = await strategy.generateConsensus(mockResponses, 3, 'What is AI?');
@@ -294,6 +291,10 @@ describe('CouncilConsensus', () => {
             const tree = strategy.getLastDebateTree();
             // All branches should be kept as valid in fallback
             expect(tree!.validBranches).toHaveLength(3);
+            // Original branches should retain isValid: false
+            for (const branch of tree!.branches) {
+                expect(branch.isValid).toBe(false);
+            }
         });
     });
 
@@ -333,6 +334,24 @@ describe('CouncilConsensus', () => {
             expect(tree.summary).toBe('Council consensus: AI is a broad field encompassing machine intelligence.');
             expect(tree.branches).toHaveLength(3);
             expect(tree.metadata.durationMs).toBeGreaterThanOrEqual(0);
+        });
+    });
+
+    describe('ELO judge rotation', () => {
+        it('should rotate judges across ELO pairings', async () => {
+            setupDeterministicProviders(participants, summarizerProvider);
+
+            await strategy.generateConsensus(mockResponses, 3, 'What is AI?');
+
+            // With 3 valid branches, there are 3 ELO pairings
+            // Judges should rotate: participant[0], participant[1], participant[2]
+            // Check that more than one participant handled ELO judging calls
+            const eloCallCounts = participants.map((p) => {
+                const calls = (p.provider.streamResponse as Mock).mock.calls;
+                return calls.filter((c: string[]) => c[0].includes('impartial judge')).length;
+            });
+            const participantsUsedForElo = eloCallCounts.filter((c) => c > 0).length;
+            expect(participantsUsedForElo).toBeGreaterThan(1);
         });
     });
 });
