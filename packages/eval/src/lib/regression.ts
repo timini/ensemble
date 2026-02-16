@@ -1,0 +1,505 @@
+import { mkdtemp } from 'node:fs/promises';
+import { join } from 'node:path';
+import { tmpdir } from 'node:os';
+import type {
+  BenchmarkDatasetName,
+  BenchmarkQuestion,
+  BenchmarkResultsFile,
+  PromptRunResult,
+  StrategyName,
+} from '../types.js';
+import type {
+  BaselineQuestionResult,
+  BrokenQuestion,
+  CostMetrics,
+  GoldenBaselineFile,
+  RegressionResult,
+  StabilityMetrics,
+  StrategyRegressionResult,
+  TierConfig,
+} from './regressionTypes.js';
+import { BenchmarkRunner, type BenchmarkRunnerProgress } from './benchmarkRunner.js';
+import { loadPinnedQuestions } from './questionPinning.js';
+import { fisherExact } from './fisherExact.js';
+import { createBenchmarkFile } from '../commands/benchmarkOutput.js';
+
+/**
+ * Computes the median of a sorted array of numbers.
+ * For even-length arrays, returns the average of the two middle values.
+ */
+function median(values: number[]): number {
+  if (values.length === 0) return 0;
+  const sorted = [...values].sort((a, b) => a - b);
+  const mid = Math.floor(sorted.length / 2);
+  if (sorted.length % 2 === 1) return sorted[mid];
+  return (sorted[mid - 1] + sorted[mid]) / 2;
+}
+
+/**
+ * Computes the variance of a list of numbers.
+ * Uses population variance (divides by N).
+ */
+function variance(values: number[]): number {
+  if (values.length === 0) return 0;
+  const mean = values.reduce((sum, v) => sum + v, 0) / values.length;
+  return values.reduce((sum, v) => sum + (v - mean) ** 2, 0) / values.length;
+}
+
+/**
+ * Computes per-strategy accuracy from a set of prompt run results.
+ * Returns a map from strategy name to { correct, total }.
+ */
+function computeStrategyAccuracy(
+  runs: PromptRunResult[],
+  strategies: StrategyName[],
+): Map<StrategyName, { correct: number; total: number }> {
+  const counts = new Map<StrategyName, { correct: number; total: number }>();
+  for (const strategy of strategies) {
+    counts.set(strategy, { correct: 0, total: 0 });
+  }
+  for (const run of runs) {
+    for (const strategy of strategies) {
+      const evalResult = run.consensusEvaluation?.results?.[strategy];
+      if (evalResult) {
+        const entry = counts.get(strategy)!;
+        entry.total += 1;
+        if (evalResult.correct) entry.correct += 1;
+      }
+    }
+  }
+  return counts;
+}
+
+/**
+ * Computes per-strategy x dataset accuracy from a set of prompt run results.
+ */
+function computeStrategyDatasetAccuracy(
+  runsByDataset: Map<BenchmarkDatasetName, PromptRunResult[]>,
+  strategies: StrategyName[],
+): Map<string, { correct: number; total: number }> {
+  const counts = new Map<string, { correct: number; total: number }>();
+  for (const [dataset, runs] of runsByDataset) {
+    for (const strategy of strategies) {
+      const key = `${strategy}:${dataset}`;
+      let correct = 0;
+      let total = 0;
+      for (const run of runs) {
+        const evalResult = run.consensusEvaluation?.results?.[strategy];
+        if (evalResult) {
+          total += 1;
+          if (evalResult.correct) correct += 1;
+        }
+      }
+      counts.set(key, { correct, total });
+    }
+  }
+  return counts;
+}
+
+/**
+ * Computes baseline per-strategy x dataset accuracy from the golden baseline.
+ */
+function computeBaselineStrategyDatasetAccuracy(
+  baseline: GoldenBaselineFile,
+  strategies: StrategyName[],
+): Map<string, { correct: number; total: number }> {
+  const counts = new Map<string, { correct: number; total: number }>();
+  for (const result of baseline.results) {
+    for (const strategy of strategies) {
+      const key = `${strategy}:${result.dataset}`;
+      const evalResult = result.consensusResults[strategy];
+      if (evalResult) {
+        const entry = counts.get(key) ?? { correct: 0, total: 0 };
+        entry.total += 1;
+        if (evalResult.correct) entry.correct += 1;
+        counts.set(key, entry);
+      }
+    }
+  }
+  return counts;
+}
+
+/**
+ * Identifies broken questions: questions correct in baseline but wrong in current run.
+ */
+function findBrokenQuestions(
+  baseline: GoldenBaselineFile,
+  runsByDataset: Map<BenchmarkDatasetName, PromptRunResult[]>,
+  strategies: StrategyName[],
+): BrokenQuestion[] {
+  const broken: BrokenQuestion[] = [];
+
+  // Build a lookup from questionId -> current run
+  const currentByQuestionId = new Map<string, PromptRunResult>();
+  for (const runs of runsByDataset.values()) {
+    for (const run of runs) {
+      if (run.questionId) {
+        currentByQuestionId.set(run.questionId, run);
+      }
+    }
+  }
+
+  for (const baselineResult of baseline.results) {
+    const currentRun = currentByQuestionId.get(baselineResult.questionId);
+    if (!currentRun) continue;
+
+    for (const strategy of strategies) {
+      const baselineEval = baselineResult.consensusResults[strategy];
+      const currentEval = currentRun.consensusEvaluation?.results?.[strategy];
+
+      if (baselineEval?.correct && currentEval && !currentEval.correct) {
+        broken.push({
+          questionId: baselineResult.questionId,
+          dataset: baselineResult.dataset,
+          strategy,
+          groundTruth: baselineResult.groundTruth,
+          baselineAnswer: baselineEval.predicted ?? '',
+          currentAnswer: currentEval.predicted ?? '',
+        });
+      }
+    }
+  }
+
+  return broken;
+}
+
+/**
+ * Aggregates cost metrics from benchmark results across all datasets.
+ */
+function computeCostMetrics(
+  runsByDataset: Map<BenchmarkDatasetName, BenchmarkResultsFile>,
+  durationMs: number,
+): CostMetrics {
+  let totalTokens = 0;
+  let totalCostUsd = 0;
+
+  for (const results of runsByDataset.values()) {
+    for (const run of results.runs) {
+      for (const response of run.responses) {
+        if (!response.error) {
+          totalTokens += response.tokenCount ?? 0;
+          totalCostUsd += response.estimatedCostUsd ?? 0;
+        }
+      }
+    }
+  }
+
+  return { totalTokens, totalCostUsd, durationMs };
+}
+
+/** Options for {@link RegressionDetector.evaluate}. */
+export interface RegressionDetectorEvaluateOptions {
+  onProgress?: (progress: BenchmarkRunnerProgress) => void;
+}
+
+/**
+ * Detects regressions by running the current code against a golden baseline.
+ *
+ * For each strategy x dataset pair, compares current accuracy against the
+ * baseline using Fisher's exact test (one-sided). For CI tier with multiple
+ * runs, executes repeated runs and takes the median accuracy.
+ *
+ * @example
+ * ```typescript
+ * const detector = new RegressionDetector(tierConfig, baseline, runner);
+ * const result = await detector.evaluate({ onProgress: console.log });
+ * if (!result.passed) {
+ *   console.error('Regression detected!', result.brokenQuestions);
+ * }
+ * ```
+ */
+export class RegressionDetector {
+  constructor(
+    private readonly tier: TierConfig,
+    private readonly baseline: GoldenBaselineFile,
+    private readonly runner: BenchmarkRunner,
+  ) {}
+
+  /**
+   * Run the regression evaluation.
+   *
+   * 1. Loads pinned questions from the baseline
+   * 2. Runs benchmark for each dataset (multiple runs for CI tier)
+   * 3. Compares accuracy against baseline using Fisher's exact test
+   * 4. Identifies broken questions and computes metrics
+   *
+   * @param options - Optional progress callback
+   * @returns Complete regression evaluation result
+   */
+  async evaluate(options?: RegressionDetectorEvaluateOptions): Promise<RegressionResult> {
+    const startTime = Date.now();
+
+    // Step 1: Load pinned questions from baseline
+    const pinnedQuestions = await loadPinnedQuestions(this.baseline);
+
+    // Step 2: Run benchmarks (possibly multiple times for CI tier)
+    const numRuns = this.tier.runs;
+    const allRunResults: Array<Map<BenchmarkDatasetName, BenchmarkResultsFile>> = [];
+
+    for (let runIndex = 0; runIndex < numRuns; runIndex++) {
+      const datasetResults = await this.runAllDatasets(pinnedQuestions, options);
+      allRunResults.push(datasetResults);
+    }
+
+    const durationMs = Date.now() - startTime;
+
+    // Step 3: Compute per-strategy x dataset accuracy for current runs
+    const strategies = this.tier.strategies;
+
+    let perStrategy: StrategyRegressionResult[];
+    let brokenQuestions: BrokenQuestion[];
+    let stability: StabilityMetrics | undefined;
+
+    if (numRuns > 1) {
+      // CI tier: multiple runs, take median accuracy, compute stability
+      const { medianCounts, allAccuracies, bestRunByDataset } =
+        this.computeMultiRunMetrics(allRunResults, strategies);
+
+      // Compute baseline accuracy
+      const baselineCounts = computeBaselineStrategyDatasetAccuracy(
+        this.baseline,
+        strategies,
+      );
+
+      perStrategy = this.buildPerStrategyResults(
+        medianCounts,
+        baselineCounts,
+        strategies,
+      );
+
+      // For broken questions, use the first run (representative)
+      brokenQuestions = findBrokenQuestions(
+        this.baseline,
+        bestRunByDataset,
+        strategies,
+      );
+
+      // Compute stability metrics
+      const accuracyVariance: Record<StrategyName, number> = {} as Record<
+        StrategyName,
+        number
+      >;
+      for (const strategy of strategies) {
+        const accs = allAccuracies.get(strategy) ?? [];
+        accuracyVariance[strategy] = variance(accs);
+      }
+      stability = {
+        runsCompleted: numRuns,
+        accuracyVariance,
+      };
+    } else {
+      // Single run (post-merge or single run)
+      const datasetResults = allRunResults[0];
+      const currentRunsByDataset = new Map<BenchmarkDatasetName, PromptRunResult[]>();
+      for (const [dataset, results] of datasetResults) {
+        currentRunsByDataset.set(dataset, results.runs);
+      }
+
+      const currentCounts = computeStrategyDatasetAccuracy(
+        currentRunsByDataset,
+        strategies,
+      );
+      const baselineCounts = computeBaselineStrategyDatasetAccuracy(
+        this.baseline,
+        strategies,
+      );
+
+      perStrategy = this.buildPerStrategyResults(
+        currentCounts,
+        baselineCounts,
+        strategies,
+      );
+
+      brokenQuestions = findBrokenQuestions(
+        this.baseline,
+        currentRunsByDataset,
+        strategies,
+      );
+
+      stability = undefined;
+    }
+
+    // Step 4: Determine if passed (no significant regressions)
+    const passed = perStrategy.every((result) => !result.significant);
+
+    // Step 5: Compute cost metrics (use the last run for cost aggregation)
+    const cost = computeCostMetrics(allRunResults[allRunResults.length - 1], durationMs);
+
+    return {
+      tier: this.tier.name,
+      timestamp: new Date().toISOString(),
+      commitSha: '',
+      baselineCommitSha: this.baseline.commitSha,
+      passed,
+      perStrategy,
+      brokenQuestions,
+      stability,
+      cost,
+    };
+  }
+
+  /**
+   * Runs the benchmark for all datasets in the tier configuration.
+   */
+  private async runAllDatasets(
+    pinnedQuestions: Map<BenchmarkDatasetName, BenchmarkQuestion[]>,
+    options?: RegressionDetectorEvaluateOptions,
+  ): Promise<Map<BenchmarkDatasetName, BenchmarkResultsFile>> {
+    const scratchDir = await mkdtemp(join(tmpdir(), 'ensemble-regression-'));
+    const results = new Map<BenchmarkDatasetName, BenchmarkResultsFile>();
+
+    for (const { name: dataset, sampleSize } of this.tier.datasets) {
+      const questions = pinnedQuestions.get(dataset) ?? [];
+      const output = createBenchmarkFile(
+        dataset,
+        'mock',
+        this.tier.models.map((m) => `${m.provider}:${m.model}`),
+        this.tier.strategies,
+        sampleSize,
+      );
+
+      const outputPath = join(scratchDir, `${dataset}-regression.json`);
+
+      const result = await this.runner.run({
+        questions,
+        output,
+        outputPath,
+        onProgress: options?.onProgress,
+      });
+
+      results.set(dataset, result);
+    }
+
+    return results;
+  }
+
+  /**
+   * Computes median accuracy and stability metrics across multiple runs.
+   */
+  private computeMultiRunMetrics(
+    allRunResults: Array<Map<BenchmarkDatasetName, BenchmarkResultsFile>>,
+    strategies: StrategyName[],
+  ): {
+    medianCounts: Map<string, { correct: number; total: number }>;
+    allAccuracies: Map<StrategyName, number[]>;
+    bestRunByDataset: Map<BenchmarkDatasetName, PromptRunResult[]>;
+  } {
+    // Collect per-strategy x dataset accuracies across all runs
+    const accuraciesByKey = new Map<string, number[]>();
+    const countsByKey = new Map<string, { correct: number; total: number }[]>();
+    const allAccuracies = new Map<StrategyName, number[]>();
+
+    // Also collect per-strategy (aggregated across datasets) accuracies
+    const strategyAccuraciesPerRun = new Map<StrategyName, number[]>();
+    for (const strategy of strategies) {
+      strategyAccuraciesPerRun.set(strategy, []);
+    }
+
+    for (const datasetResults of allRunResults) {
+      const runsByDataset = new Map<BenchmarkDatasetName, PromptRunResult[]>();
+      for (const [dataset, results] of datasetResults) {
+        runsByDataset.set(dataset, results.runs);
+      }
+
+      const counts = computeStrategyDatasetAccuracy(runsByDataset, strategies);
+
+      for (const [key, { correct, total }] of counts) {
+        if (!accuraciesByKey.has(key)) accuraciesByKey.set(key, []);
+        if (!countsByKey.has(key)) countsByKey.set(key, []);
+        const acc = total > 0 ? correct / total : 0;
+        accuraciesByKey.get(key)!.push(acc);
+        countsByKey.get(key)!.push({ correct, total });
+      }
+
+      // Aggregate per-strategy accuracy across all datasets for this run
+      const strategyAcc = computeStrategyAccuracy(
+        [...runsByDataset.values()].flat(),
+        strategies,
+      );
+      for (const strategy of strategies) {
+        const entry = strategyAcc.get(strategy)!;
+        const acc = entry.total > 0 ? entry.correct / entry.total : 0;
+        strategyAccuraciesPerRun.get(strategy)!.push(acc);
+      }
+    }
+
+    // For allAccuracies, use per-strategy aggregated accuracies
+    for (const strategy of strategies) {
+      allAccuracies.set(strategy, strategyAccuraciesPerRun.get(strategy)!);
+    }
+
+    // Compute median counts: find the run whose accuracy is closest to the median
+    // and use that run's counts for the Fisher's exact test
+    const medianCounts = new Map<string, { correct: number; total: number }>();
+    for (const [key, accs] of accuraciesByKey) {
+      const counts = countsByKey.get(key)!;
+      const med = median(accs);
+      // Find the run index with accuracy closest to median
+      let bestIndex = 0;
+      let bestDiff = Infinity;
+      for (let i = 0; i < accs.length; i++) {
+        const diff = Math.abs(accs[i] - med);
+        if (diff < bestDiff) {
+          bestDiff = diff;
+          bestIndex = i;
+        }
+      }
+      medianCounts.set(key, counts[bestIndex]);
+    }
+
+    // Use the first run for broken question analysis
+    const bestRunByDataset = new Map<BenchmarkDatasetName, PromptRunResult[]>();
+    const firstRun = allRunResults[0];
+    for (const [dataset, results] of firstRun) {
+      bestRunByDataset.set(dataset, results.runs);
+    }
+
+    return { medianCounts, allAccuracies, bestRunByDataset };
+  }
+
+  /**
+   * Builds per-strategy regression results using Fisher's exact test.
+   */
+  private buildPerStrategyResults(
+    currentCounts: Map<string, { correct: number; total: number }>,
+    baselineCounts: Map<string, { correct: number; total: number }>,
+    strategies: StrategyName[],
+  ): StrategyRegressionResult[] {
+    const results: StrategyRegressionResult[] = [];
+
+    for (const { name: dataset } of this.tier.datasets) {
+      for (const strategy of strategies) {
+        const key = `${strategy}:${dataset}`;
+        const baseline = baselineCounts.get(key) ?? { correct: 0, total: 0 };
+        const current = currentCounts.get(key) ?? { correct: 0, total: 0 };
+
+        const baselineAccuracy =
+          baseline.total > 0 ? baseline.correct / baseline.total : 0;
+        const currentAccuracy =
+          current.total > 0 ? current.correct / current.total : 0;
+
+        // Fisher's exact test: baseline correct/wrong vs current correct/wrong
+        const baselineWrong = baseline.total - baseline.correct;
+        const currentWrong = current.total - current.correct;
+        const { pValue } = fisherExact(
+          baseline.correct,
+          baselineWrong,
+          current.correct,
+          currentWrong,
+        );
+
+        results.push({
+          strategy,
+          dataset,
+          baselineAccuracy,
+          currentAccuracy,
+          delta: currentAccuracy - baselineAccuracy,
+          pValue,
+          significant: pValue < this.tier.significanceThreshold,
+        });
+      }
+    }
+
+    return results;
+  }
+}
