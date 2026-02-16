@@ -36,23 +36,16 @@ function getStatusFromError(error: unknown): number | undefined {
   return undefined;
 }
 
+const RETRYABLE_MESSAGE_PATTERN =
+  /rate limit|too many requests|\b429\b|server error|internal server error|\b502\b|\b503\b|\b504\b/i;
+
 export function isRateLimitOrServerError(error: unknown): boolean {
   const status = getStatusFromError(error);
   if (status !== undefined) {
     return status === 429 || (status >= 500 && status < 600);
   }
   if (error instanceof Error) {
-    const msg = error.message.toLowerCase();
-    return (
-      msg.includes('rate limit') ||
-      msg.includes('429') ||
-      msg.includes('too many requests') ||
-      msg.includes('server error') ||
-      msg.includes('internal server error') ||
-      msg.includes('502') ||
-      msg.includes('503') ||
-      msg.includes('504')
-    );
+    return RETRYABLE_MESSAGE_PATTERN.test(error.message);
   }
   return false;
 }
@@ -81,6 +74,15 @@ export async function retryable<T>(
   let timedOut = false;
   let timeoutId: ReturnType<typeof setTimeout> | null = null;
 
+  const buildTimeoutError = () => {
+    let message = `Retry timed out after ${opts.timeoutMs}ms`;
+    if (lastError) {
+      const detail = lastError instanceof Error ? lastError.message : String(lastError);
+      message += `. Last error: ${detail}`;
+    }
+    return new Error(message);
+  };
+
   if (opts.timeoutMs !== undefined) {
     timeoutId = setTimeout(() => {
       timedOut = true;
@@ -90,7 +92,7 @@ export async function retryable<T>(
   try {
     for (let i = 0; i <= opts.maxRetries; i++) {
       if (timedOut) {
-        throw new Error(`Retry timed out after ${opts.timeoutMs}ms`);
+        throw buildTimeoutError();
       }
       try {
         const result = await fn();
@@ -98,7 +100,7 @@ export async function retryable<T>(
       } catch (error) {
         lastError = error;
         if (timedOut) {
-          throw new Error(`Retry timed out after ${opts.timeoutMs}ms`);
+          throw buildTimeoutError();
         }
         if (i === opts.maxRetries || !opts.isRetryable(error)) {
           throw error;
@@ -107,7 +109,7 @@ export async function retryable<T>(
         const delay = opts.baseDelayMs * Math.pow(2, i) + Math.random() * opts.maxJitterMs;
         await sleep(delay);
         if (timedOut) {
-          throw new Error(`Retry timed out after ${opts.timeoutMs}ms`);
+          throw buildTimeoutError();
         }
       }
     }

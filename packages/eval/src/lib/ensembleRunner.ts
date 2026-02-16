@@ -122,6 +122,7 @@ export class EnsembleRunner {
           ).catch((error: unknown): StreamResult => ({
             content: '',
             responseTimeMs: 0,
+            tokenCount: undefined,
             error: error instanceof Error ? error.message : String(error),
           }))
         : await streamModelResponse(client, prompt, model, this.streamOptions);
