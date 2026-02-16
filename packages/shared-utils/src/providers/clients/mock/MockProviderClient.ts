@@ -5,7 +5,7 @@
  * Generates lorem ipsum text with streaming behaviour that mimics real APIs.
  */
 
-import type { AIProvider, ModelMetadata, ValidationResult, ProviderName } from '../../types.js';
+import type { AIProvider, ModelMetadata, StreamResponseOptions, ValidationResult, ProviderName } from '../../types.js';
 
 export interface MockClientConfig {
   enableErrors?: boolean;
@@ -55,6 +55,7 @@ export class MockProviderClient implements AIProvider {
     onChunk: (chunk: string) => void,
     onComplete: (fullResponse: string, responseTime: number, tokenCount?: number) => void,
     onError: (error: Error) => void,
+    _options?: StreamResponseOptions,
   ): Promise<void> {
     if (this.config.enableErrors && Math.random() < this.config.errorProbability) {
       onError(new Error('Rate limit exceeded. Please try again in 60 seconds.'));

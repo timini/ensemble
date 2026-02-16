@@ -22,6 +22,7 @@ interface BenchmarkCommandOptions {
   mode: EvalMode;
   summarizer?: string;
   requestDelayMs?: string;
+  temperature?: string;
 }
 
 export function createBenchmarkCommand(): Command {
@@ -52,6 +53,10 @@ export function createBenchmarkCommand(): Command {
       'Optional delay in milliseconds between starting model calls.',
       '0',
     )
+    .option(
+      '--temperature <value>',
+      'Temperature for model responses (e.g. 0 for deterministic).',
+    )
     .option('--mode <mode>', 'Provider mode to use (mock or free)', 'mock')
     .action(async (dataset: string, options: BenchmarkCommandOptions) => {
       const models = parseModelSpecs(options.models);
@@ -68,6 +73,12 @@ export function createBenchmarkCommand(): Command {
       const requestDelayMs = Number.parseInt(options.requestDelayMs ?? '0', 10);
       if (!Number.isInteger(requestDelayMs) || requestDelayMs < 0) {
         throw new Error(`Invalid request delay "${options.requestDelayMs}".`);
+      }
+      const temperature = options.temperature !== undefined
+        ? Number.parseFloat(options.temperature)
+        : undefined;
+      if (temperature !== undefined && Number.isNaN(temperature)) {
+        throw new Error(`Invalid temperature "${options.temperature}".`);
       }
 
       const { datasetName, questions } = await loadBenchmarkQuestions(dataset, {
@@ -113,6 +124,7 @@ export function createBenchmarkCommand(): Command {
         evaluator,
         summarizer,
         requestDelayMs,
+        temperature,
       });
       await runner.run({
         questions,

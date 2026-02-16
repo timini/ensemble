@@ -2,11 +2,13 @@ import type {
   AIProvider,
   ModelMetadata,
   ProviderRegistry,
+  StreamResponseOptions,
 } from '@ensemble-ai/shared-utils/providers';
 import type { EvalMode, ModelSpec, ProviderResponse } from '../types.js';
 
 export interface EnsembleRunnerOptions {
   requestDelayMs?: number;
+  temperature?: number;
 }
 
 function sleep(ms: number): Promise<void> {
@@ -28,6 +30,7 @@ async function streamModelResponse(
   client: AIProvider,
   prompt: string,
   model: string,
+  streamOptions?: StreamResponseOptions,
 ): Promise<Pick<ProviderResponse, 'content' | 'responseTimeMs' | 'tokenCount' | 'error'>> {
   return new Promise((resolve) => {
     let content = '';
@@ -64,6 +67,7 @@ async function streamModelResponse(
             error: error.message,
           });
         },
+        streamOptions,
       )
       .catch((error: unknown) => {
         const message = error instanceof Error ? error.message : String(error);
@@ -78,6 +82,7 @@ async function streamModelResponse(
 
 export class EnsembleRunner {
   private readonly requestDelayMs: number;
+  private readonly streamOptions: StreamResponseOptions | undefined;
 
   constructor(
     private readonly registry: ProviderRegistry,
@@ -85,6 +90,8 @@ export class EnsembleRunner {
     options?: EnsembleRunnerOptions,
   ) {
     this.requestDelayMs = Math.max(0, options?.requestDelayMs ?? 0);
+    this.streamOptions =
+      options?.temperature !== undefined ? { temperature: options.temperature } : undefined;
   }
 
   async runPrompt(prompt: string, models: ModelSpec[]): Promise<ProviderResponse[]> {
@@ -96,7 +103,7 @@ export class EnsembleRunner {
       const client = this.registry.getProvider(provider, this.mode);
       const metadata =
         client.listAvailableModels().find((candidate) => candidate.id === model) ?? null;
-      const result = await streamModelResponse(client, prompt, model);
+      const result = await streamModelResponse(client, prompt, model, this.streamOptions);
       const estimatedCostUsd = estimateCostUsd(result.tokenCount, metadata);
 
       return {

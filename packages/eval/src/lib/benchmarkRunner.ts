@@ -27,6 +27,7 @@ interface BenchmarkRunnerConfig {
   evaluator: EvaluatorLike | null;
   summarizer: ModelSpec | null;
   requestDelayMs?: number;
+  temperature?: number;
 }
 
 interface RunBenchmarkOptions {
@@ -54,6 +55,7 @@ export class BenchmarkRunner {
     this.summarizer = config.summarizer;
     this.ensembleRunner = new EnsembleRunner(config.registry, config.mode, {
       requestDelayMs: config.requestDelayMs,
+      temperature: config.temperature,
     });
   }
 
