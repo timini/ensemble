@@ -121,6 +121,10 @@ export class HuggingFaceBenchmarkLoader<TRow> implements BenchmarkLoader {
     const skipDownload = options?.skipDownload ?? false;
     const forceDownload = options?.forceDownload ?? false;
 
+    if (skipDownload && forceDownload) {
+      throw new Error('--skip-download and --force-download are mutually exclusive.');
+    }
+
     if (forceDownload) {
       return this.downloadAndCache(cachePath);
     }
@@ -150,7 +154,7 @@ export class HuggingFaceBenchmarkLoader<TRow> implements BenchmarkLoader {
       }
       case 'mismatch': {
         process.stderr.write(
-          `Warning: checksum mismatch for cached dataset "${this.name}" at ${cachePath}. `,
+          `Warning: checksum mismatch for cached dataset "${this.name}" at ${cachePath}.\n`,
         );
         if (skipDownload) {
           throw new Error(
@@ -169,16 +173,14 @@ export class HuggingFaceBenchmarkLoader<TRow> implements BenchmarkLoader {
 
   private async downloadAndCache(cachePath: string): Promise<BenchmarkQuestion[]> {
     // Remove existing cache and checksum if present
-    try {
-      await unlink(cachePath);
-    } catch {
-      // File may not exist
-    }
-    try {
-      await unlink(checksumPath(cachePath));
-    } catch {
-      // File may not exist
-    }
+    await Promise.all([
+      unlink(cachePath).catch((err: NodeJS.ErrnoException) => {
+        if (err.code !== 'ENOENT') throw err;
+      }),
+      unlink(checksumPath(cachePath)).catch((err: NodeJS.ErrnoException) => {
+        if (err.code !== 'ENOENT') throw err;
+      }),
+    ]);
 
     const questions = await this.downloadQuestions();
     await writeJsonFile(cachePath, questions);
