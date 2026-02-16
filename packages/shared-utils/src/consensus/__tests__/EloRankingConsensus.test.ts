@@ -31,23 +31,24 @@ describe('EloRankingConsensus', () => {
         await expect(strategy.rankResponses(minimalResponses, 'Test Prompt')).rejects.toThrow('At least 3 responses are required for ELO ranking');
     });
 
-    it('should rank responses based on judge comparison using model IDs', async () => {
+    it('should rank responses based on judge comparison', async () => {
         (mockJudgeProvider.streamResponse as Mock).mockImplementation(async (
             prompt: string,
             _model: string,
             _onChunk: (chunk: string) => void,
             onComplete: (full: string, time: number, tokens?: number) => void
         ) => {
-            // Judge prompt now uses model IDs, not model names
-            const hasModelA = prompt.includes('model-a');
-            const hasModelB = prompt.includes('model-b');
-            const hasModelC = prompt.includes('model-c');
+            // Judge prompt uses anonymous labels (Model A / Model B)
+            // Determine winner by inspecting which response content is present
+            const hasResponseA = prompt.includes('Response A content');
+            const hasResponseB = prompt.includes('Response B content');
+            const hasResponseC = prompt.includes('Response C content');
 
+            // Model A always wins, Model B beats Model C
             let winner = 'TIE';
-
-            if (hasModelA && hasModelB) winner = 'model-a';
-            else if (hasModelA && hasModelC) winner = 'model-a';
-            else if (hasModelB && hasModelC) winner = 'model-b';
+            if (hasResponseA && hasResponseB) winner = 'A';
+            else if (hasResponseA && hasResponseC) winner = 'A';
+            else if (hasResponseB && hasResponseC) winner = 'A'; // first candidate (B) wins
 
             onComplete(`WINNER: ${winner}`, 100, 10);
             return Promise.resolve();
@@ -89,7 +90,14 @@ describe('EloRankingConsensus', () => {
         }
     });
 
-    it('should use improved judge prompt with decision rules', async () => {
+    it('should use anonymous labels in judge prompt to avoid bias', async () => {
+        // Use distinct model names/IDs so we can verify they don't leak
+        const namedResponses: ConsensusModelResponse[] = [
+            { modelId: 'gpt-4o', modelName: 'GPT-4o', content: 'Alpha response' },
+            { modelId: 'claude-3', modelName: 'Claude 3', content: 'Beta response' },
+            { modelId: 'gemini-pro', modelName: 'Gemini Pro', content: 'Gamma response' },
+        ];
+
         const capturedPrompts: string[] = [];
         (mockJudgeProvider.streamResponse as Mock).mockImplementation(async (
             prompt: string,
@@ -102,20 +110,26 @@ describe('EloRankingConsensus', () => {
             return Promise.resolve();
         });
 
-        await strategy.rankResponses(mockResponses, 'Test Prompt');
+        await strategy.rankResponses(namedResponses, 'Test Prompt');
 
         // 3 models = 3 pairwise comparisons
         expect(capturedPrompts).toHaveLength(3);
 
         const firstPrompt = capturedPrompts[0];
-        // Verify the improved judge prompt structure
+        // Verify the judge prompt uses anonymous labels
         expect(firstPrompt).toContain('impartial evaluator');
         expect(firstPrompt).toContain('Decision rules:');
-        expect(firstPrompt).toContain('factually correct');
-        expect(firstPrompt).toContain('Output exactly one of:');
-        expect(firstPrompt).toContain('WINNER:');
-        // Should use model IDs, not model names, to avoid bias
-        expect(firstPrompt).toContain('Model ID: model-a');
+        expect(firstPrompt).toContain('Model A:');
+        expect(firstPrompt).toContain('Model B:');
+        expect(firstPrompt).toContain('WINNER: A');
+        expect(firstPrompt).toContain('WINNER: B');
+        // Must NOT leak real model IDs or names to the judge
+        expect(firstPrompt).not.toContain('gpt-4o');
+        expect(firstPrompt).not.toContain('GPT-4o');
+        expect(firstPrompt).not.toContain('claude-3');
+        expect(firstPrompt).not.toContain('Claude 3');
+        expect(firstPrompt).not.toContain('gemini-pro');
+        expect(firstPrompt).not.toContain('Gemini Pro');
     });
 
     it('should generate consensus summary from top N responses', async () => {

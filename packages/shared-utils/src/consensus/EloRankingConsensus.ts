@@ -132,14 +132,10 @@ You are an impartial evaluator selecting the more correct answer.
 Original Question:
 ${originalPrompt}
 
-Candidate A:
-Model ID: ${modelA.modelId}
-Response:
+Model A:
 ${modelA.content}
 
-Candidate B:
-Model ID: ${modelB.modelId}
-Response:
+Model B:
 ${modelB.content}
 
 Decision rules:
@@ -148,8 +144,8 @@ Decision rules:
 - Ignore style, verbosity, and confidence wording.
 
 Output exactly one of:
-- WINNER: ${modelA.modelId}
-- WINNER: ${modelB.modelId}
+- WINNER: A
+- WINNER: B
 - WINNER: TIE
         `.trim();
 
@@ -159,9 +155,9 @@ Output exactly one of:
                 () => { void 0; },
                 (finalText: string) => {
                     const normalized = finalText.toUpperCase();
-                    if (normalized.includes(`WINNER: ${modelA.modelId.toUpperCase()}`)) {
+                    if (normalized.includes('WINNER: A')) {
                         resolve(modelA.modelId);
-                    } else if (normalized.includes(`WINNER: ${modelB.modelId.toUpperCase()}`)) {
+                    } else if (normalized.includes('WINNER: B')) {
                         resolve(modelB.modelId);
                     } else {
                         resolve(null); // Tie or unclear
