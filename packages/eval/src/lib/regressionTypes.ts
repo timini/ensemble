@@ -2,7 +2,7 @@ import type { BenchmarkDatasetName, EvaluationResult, ModelSpec, StrategyName } 
 
 /** Configuration for a CI or post-merge evaluation tier. */
 export interface TierConfig {
-  /** The evaluation tier: 'ci' for fast PR checks, 'post-merge' for thorough nightly runs. */
+  /** The evaluation tier: `'ci'` for fast PR checks, `'post-merge'` for thorough nightly runs. */
   name: 'ci' | 'post-merge';
   /** Datasets to evaluate with their sample sizes. */
   datasets: Array<{ name: BenchmarkDatasetName; sampleSize: number }>;
@@ -22,7 +22,7 @@ export interface TierConfig {
 
 /** Committed baseline file used for paired comparison against new runs. */
 export interface GoldenBaselineFile {
-  /** The evaluation tier this baseline was generated for. */
+  /** The evaluation tier this baseline was generated for: `'ci'` or `'post-merge'`. */
   tier: 'ci' | 'post-merge';
   /** ISO 8601 timestamp of when this baseline was created. */
   createdAt: string;
@@ -60,7 +60,7 @@ export interface StrategyRegressionResult {
   baselineAccuracy: number;
   /** Accuracy from the current evaluation run. */
   currentAccuracy: number;
-  /** Change in accuracy (current minus baseline). */
+  /** Change in accuracy (`currentAccuracy` - `baselineAccuracy`). */
   delta: number;
   /** p-value from the paired statistical test. */
   pValue: number;
@@ -118,7 +118,7 @@ export interface RegressionResult {
   perStrategy: StrategyRegressionResult[];
   /** Questions that were correct in baseline but wrong in current run. */
   brokenQuestions: BrokenQuestion[];
-  /** Stability metrics from repeated runs, if available. */
+  /** Stability metrics from repeated runs, if available (undefined if runs === 1). */
   stability: StabilityMetrics | undefined;
   /** Cost and resource usage for this evaluation. */
   cost: CostMetrics;
