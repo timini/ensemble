@@ -73,19 +73,30 @@ export async function saveBaseline(path: string, baseline: QuickEvalBaselineFile
   await writeJsonFile(path, baseline);
 }
 
+/**
+ * Check for regressions between a previous and current baseline.
+ *
+ * @param tolerance - Accuracy drop (as a fraction, e.g. 0.10 = 10%) that is
+ *   tolerated before flagging a regression.  With small sample sizes (e.g. 10
+ *   questions per dataset) LLM responses are non-deterministic and a single
+ *   question flip can cause a 5% swing.  The default tolerance of 10% avoids
+ *   false-positive failures from natural variance.
+ */
 export function checkRegression(
   previous: QuickEvalBaselineFile,
   current: QuickEvalBaselineFile,
+  tolerance = 0.10,
 ): RegressionCheckResult {
   const regressions: RegressionCheckResult['regressions'] = [];
 
-  // Check single-model regression
-  if (current.single.accuracy < previous.single.accuracy) {
+  // Check single-model regression (only flag if drop exceeds tolerance)
+  const singleDelta = current.single.accuracy - previous.single.accuracy;
+  if (singleDelta < -tolerance) {
     regressions.push({
       strategy: 'single',
       previous: previous.single.accuracy,
       current: current.single.accuracy,
-      delta: current.single.accuracy - previous.single.accuracy,
+      delta: singleDelta,
     });
   }
 
@@ -93,13 +104,16 @@ export function checkRegression(
   for (const strategy of current.strategies) {
     const prev = previous.ensemble[strategy];
     const curr = current.ensemble[strategy];
-    if (prev && curr && curr.accuracy < prev.accuracy) {
-      regressions.push({
-        strategy,
-        previous: prev.accuracy,
-        current: curr.accuracy,
-        delta: curr.accuracy - prev.accuracy,
-      });
+    if (prev && curr) {
+      const delta = curr.accuracy - prev.accuracy;
+      if (delta < -tolerance) {
+        regressions.push({
+          strategy,
+          previous: prev.accuracy,
+          current: curr.accuracy,
+          delta,
+        });
+      }
     }
   }
 

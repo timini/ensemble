@@ -106,5 +106,20 @@ describe('quickEvalBaseline', () => {
       expect(result.passed).toBe(false);
       expect(result.regressions).toHaveLength(3); // single + standard + elo
     });
+
+    it('passes when drop is within default tolerance (10%)', () => {
+      const prev = makeBaseline(0.5, { standard: 0.6 });
+      const curr = makeBaseline(0.45, { standard: 0.55 });
+      const result = checkRegression(prev, curr);
+      expect(result.passed).toBe(true);
+    });
+
+    it('fails when drop exceeds custom tolerance', () => {
+      const prev = makeBaseline(0.5, { standard: 0.6 });
+      const curr = makeBaseline(0.45, { standard: 0.55 });
+      const result = checkRegression(prev, curr, 0.01);
+      expect(result.passed).toBe(false);
+      expect(result.regressions).toHaveLength(2);
+    });
   });
 });
