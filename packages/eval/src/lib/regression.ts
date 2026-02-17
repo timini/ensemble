@@ -18,7 +18,8 @@ import type {
   StrategyRegressionResult,
   TierConfig,
 } from './regressionTypes.js';
-import { BenchmarkRunner, type BenchmarkRunnerProgress } from './benchmarkRunner.js';
+import type { BenchmarkRunnerProgress } from './benchmarkRunner.js';
+import { BenchmarkRunner } from './benchmarkRunner.js';
 import { loadPinnedQuestions } from './questionPinning.js';
 import { fisherExact } from './fisherExact.js';
 import { createBenchmarkFile } from '../commands/benchmarkOutput.js';
@@ -197,6 +198,15 @@ export interface RegressionDetectorEvaluateOptions {
 }
 
 /**
+ * Factory function that creates a {@link BenchmarkRunner} configured for a
+ * specific dataset.  This allows the regression detector to use the correct
+ * evaluator (e.g. `NumericEvaluator` for gsm8k, `MCQEvaluator` for
+ * truthfulqa) for each dataset rather than a single evaluator for all
+ * datasets.
+ */
+export type RunnerFactory = (datasetName: BenchmarkDatasetName) => BenchmarkRunner;
+
+/**
  * Detects regressions by running the current code against a golden baseline.
  *
  * For each strategy x dataset pair, compares current accuracy against the
@@ -205,7 +215,8 @@ export interface RegressionDetectorEvaluateOptions {
  *
  * @example
  * ```typescript
- * const detector = new RegressionDetector(tierConfig, baseline, runner);
+ * const factory = (ds) => new BenchmarkRunner({ ... evaluator: getEvaluator(ds) });
+ * const detector = new RegressionDetector(tierConfig, baseline, factory);
  * const result = await detector.evaluate({ onProgress: console.log });
  * if (!result.passed) {
  *   console.error('Regression detected!', result.brokenQuestions);
@@ -213,11 +224,20 @@ export interface RegressionDetectorEvaluateOptions {
  * ```
  */
 export class RegressionDetector {
+  private readonly runnerFactory: RunnerFactory;
+
   constructor(
     private readonly tier: TierConfig,
     private readonly baseline: GoldenBaselineFile,
-    private readonly runner: BenchmarkRunner,
-  ) {}
+    runnerOrFactory: BenchmarkRunner | RunnerFactory,
+  ) {
+    // Accept either a BenchmarkRunner (legacy) or a RunnerFactory.
+    // A BenchmarkRunner is wrapped into a factory that ignores the dataset name.
+    this.runnerFactory =
+      typeof runnerOrFactory === 'function'
+        ? runnerOrFactory
+        : () => runnerOrFactory;
+  }
 
   /**
    * Run the regression evaluation.
@@ -323,8 +343,11 @@ export class RegressionDetector {
       stability = undefined;
     }
 
-    // Step 4: Determine if passed (no significant regressions)
-    const passed = perStrategy.every((result) => !result.significant);
+    // Step 4: Determine if passed (no significant *regressions*)
+    // A significant change with delta >= 0 is an improvement, not a regression.
+    const passed = perStrategy.every(
+      (result) => !result.significant || result.delta >= 0,
+    );
 
     // Step 5: Compute cost metrics (aggregate across all runs)
     const cost = computeCostMetrics(allRunResults, durationMs);
@@ -363,8 +386,9 @@ export class RegressionDetector {
       );
 
       const outputPath = join(scratchDir, `${dataset}-regression.json`);
+      const runner = this.runnerFactory(dataset);
 
-      const result = await this.runner.run({
+      const result = await runner.run({
         questions,
         output,
         outputPath,

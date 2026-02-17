@@ -80,23 +80,28 @@ export function createCiEvalCommand(): Command {
       );
       registerProviders(registry, providerNames, options.mode);
 
-      // Step 5: Create BenchmarkRunner with tier config
+      // Step 5: Validate tier config has datasets
       if (!tierConfig.datasets || tierConfig.datasets.length === 0) {
         throw new Error(`No datasets found for tier "${tier}"`);
       }
-      const evaluator = createEvaluatorForDataset(tierConfig.datasets[0].name);
-      const runner = new BenchmarkRunner({
-        mode: options.mode,
-        registry,
-        models: tierConfig.models,
-        strategies: tierConfig.strategies,
-        evaluator,
-        summarizer: tierConfig.summarizer,
-        requestDelayMs: tierConfig.requestDelayMs,
-      });
 
-      // Step 6: Create RegressionDetector and run evaluation
-      const detector = new RegressionDetector(tierConfig, baseline, runner);
+      // Step 6: Create RegressionDetector with per-dataset runner factory.
+      // Each dataset needs its own evaluator (e.g. NumericEvaluator for gsm8k,
+      // MCQEvaluator for truthfulqa/gpqa).
+      const runnerFactory = (datasetName: import('../types.js').BenchmarkDatasetName) => {
+        const evaluator = createEvaluatorForDataset(datasetName);
+        return new BenchmarkRunner({
+          mode: options.mode,
+          registry,
+          models: tierConfig.models,
+          strategies: tierConfig.strategies,
+          evaluator,
+          summarizer: tierConfig.summarizer,
+          requestDelayMs: tierConfig.requestDelayMs,
+        });
+      };
+
+      const detector = new RegressionDetector(tierConfig, baseline, runnerFactory);
       process.stderr.write(`Running ${tier} regression evaluation...\n`);
 
       const result = await detector.evaluate({

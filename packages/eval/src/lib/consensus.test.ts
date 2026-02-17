@@ -25,6 +25,20 @@ describe('consensus', () => {
     );
   });
 
+  it('omits ELO key when fewer than 3 responses are available', async () => {
+    const result = await generateConsensus(
+      ['elo'],
+      'Q',
+      [
+        { provider: 'openai', model: 'a', content: 'A', responseTimeMs: 5 },
+        { provider: 'anthropic', model: 'b', content: 'B', responseTimeMs: 6 },
+      ],
+      buildProvider(async () => undefined),
+      'judge-model',
+    );
+    expect(result.elo).toBeUndefined();
+  });
+
   it('handles majority strategy for insufficient and sufficient response counts', async () => {
     const insufficient = await generateConsensus(
       ['majority'],
@@ -40,7 +54,7 @@ describe('consensus', () => {
       buildProvider(async () => undefined),
       'judge-model',
     );
-    expect(insufficient.majority).toContain('requires at least 2');
+    expect(insufficient.majority).toBeUndefined();
 
     let callCount = 0;
     const provider = buildProvider(async (_prompt, _model, _onChunk, onComplete) => {

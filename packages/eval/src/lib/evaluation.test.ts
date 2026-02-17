@@ -123,6 +123,29 @@ describe('evaluateConsensusStrategies', () => {
     expect(evaluator.evaluate).toHaveBeenCalledWith('99', '42', 'prompt text');
   });
 
+  it('skips consensus entries that are error strings', async () => {
+    const evaluator = {
+      name: 'numeric' as const,
+      evaluate: vi.fn(() => ({ correct: false, expected: '42', predicted: '3' })),
+    };
+
+    const result = await evaluateConsensusStrategies(
+      evaluator,
+      {
+        standard: '42',
+        elo: 'ELO strategy requires at least 3 successful model responses.',
+        majority: 'Majority strategy requires at least 2 successful model responses.',
+      },
+      '42',
+    );
+
+    // Only standard should be evaluated; error strings should be skipped
+    expect(evaluator.evaluate).toHaveBeenCalledTimes(1);
+    expect(result?.results.standard).toBeDefined();
+    expect(result?.results.elo).toBeUndefined();
+    expect(result?.results.majority).toBeUndefined();
+  });
+
   it('skips empty consensus entries', async () => {
     const evaluator = {
       name: 'mcq' as const,
