@@ -49,8 +49,12 @@ describe('consensus', () => {
       { provider: 'google', model: 'gemini-2.0-flash', content: 'C', responseTimeMs: 7 },
     ];
 
-    await generateConsensus(['standard'], 'Q', responses, provider, 'gemini-2.0-flash');
+    const result = await generateConsensus(['standard'], 'Q', responses, provider, 'gemini-2.0-flash');
 
+    expect(result.outputs.standard).toBeDefined();
+    expect(result.metrics.standard).toBeDefined();
+    expect(result.metrics.standard!.tokenCount).toBeGreaterThanOrEqual(0);
+    expect(result.metrics.standard!.durationMs).toBeGreaterThanOrEqual(0);
     expect(receivedResponses).toHaveLength(3);
     const ids = receivedResponses.map((r) => r.modelId);
     expect(new Set(ids).size).toBe(3);
@@ -72,7 +76,7 @@ describe('consensus', () => {
       buildProvider(async () => undefined),
       'judge-model',
     );
-    expect(result.elo).toBeUndefined();
+    expect(result.outputs.elo).toBeUndefined();
   });
 
   it('handles majority strategy for insufficient and sufficient response counts', async () => {
@@ -90,7 +94,7 @@ describe('consensus', () => {
       buildProvider(async () => undefined),
       'judge-model',
     );
-    expect(insufficient.majority).toBeUndefined();
+    expect(insufficient.outputs.majority).toBeUndefined();
 
     let callCount = 0;
     const provider = buildProvider(async (_prompt, _model, _onChunk, onComplete) => {
@@ -122,6 +126,8 @@ describe('consensus', () => {
       'judge-model',
     );
 
-    expect(sufficient.majority).toBe('majority answer');
+    expect(sufficient.outputs.majority).toBe('majority answer');
+    expect(sufficient.metrics.majority).toBeDefined();
+    expect(sufficient.metrics.majority!.tokenCount).toBe(40);
   });
 });

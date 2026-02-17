@@ -1,4 +1,4 @@
-import type { PromptRunResult, StrategyName } from '../types.js';
+import type { ConsensusStrategyMetrics, PromptRunResult, StrategyName } from '../types.js';
 
 export function toPercent(value: number): string {
   return `${(value * 100).toFixed(1)}%`;
@@ -39,6 +39,25 @@ export function avgDurationMs(runs: PromptRunResult[]): number {
 export function formatMs(ms: number): string {
   if (ms < 1000) return `${Math.round(ms)}ms`;
   return `${(ms / 1000).toFixed(1)}s`;
+}
+
+/** Sum per-strategy consensus metrics across runs. */
+export function sumStrategyMetrics(
+  runs: PromptRunResult[],
+  strategy: StrategyName,
+): ConsensusStrategyMetrics {
+  let tokenCount = 0;
+  let totalDuration = 0;
+  let count = 0;
+  for (const run of runs) {
+    const m = run.consensusMetrics?.[strategy];
+    if (m) {
+      tokenCount += m.tokenCount;
+      totalDuration += m.durationMs;
+      count += 1;
+    }
+  }
+  return { tokenCount, durationMs: count > 0 ? totalDuration / count : 0 };
 }
 
 export function computeAccuracy(runs: PromptRunResult[], strategy?: StrategyName): {

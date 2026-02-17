@@ -70,7 +70,7 @@ export function createRunCommand(): Command {
         : firstSuccessful
           ? { provider: firstSuccessful.provider, model: firstSuccessful.model }
           : null;
-      const consensus = summarizerTarget
+      const consensusResult = summarizerTarget
         ? await generateConsensus(
             strategies,
             prompt,
@@ -78,9 +78,16 @@ export function createRunCommand(): Command {
             registry.getProvider(summarizerTarget.provider, mode),
             summarizerTarget.model,
           )
-        : {};
+        : { outputs: {}, metrics: {} };
 
-      const result: PromptRunResult = { prompt, responses, consensus };
+      const result: PromptRunResult = {
+        prompt,
+        responses,
+        consensus: consensusResult.outputs,
+        consensusMetrics: Object.keys(consensusResult.metrics).length > 0
+          ? consensusResult.metrics
+          : undefined,
+      };
 
       if (options.output) {
         await writeJsonFile(options.output, result);

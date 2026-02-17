@@ -65,6 +65,13 @@ export interface ConsensusEvaluation {
   results: Partial<Record<StrategyName, EvaluationResult>>;
 }
 
+export interface ConsensusStrategyMetrics {
+  /** Total tokens consumed by this strategy's consensus LLM calls. */
+  tokenCount: number;
+  /** Wall-clock time for this strategy's consensus generation. */
+  durationMs: number;
+}
+
 export interface PromptRunResult {
   questionId?: string;
   prompt: string;
@@ -73,6 +80,8 @@ export interface PromptRunResult {
   difficulty?: string;
   responses: ProviderResponse[];
   consensus: Partial<Record<StrategyName, string>>;
+  /** Per-strategy token and timing metrics for consensus generation. */
+  consensusMetrics?: Partial<Record<StrategyName, ConsensusStrategyMetrics>>;
   evaluation?: PromptEvaluation;
   consensusEvaluation?: ConsensusEvaluation;
   selfConsistency?: SelfConsistencyResult;
