@@ -76,6 +76,8 @@ export interface PromptRunResult {
   evaluation?: PromptEvaluation;
   consensusEvaluation?: ConsensusEvaluation;
   selfConsistency?: SelfConsistencyResult;
+  /** Total wall-clock time for this question (model calls + consensus + eval). */
+  durationMs?: number;
 }
 
 export interface BenchmarkResultsFile {

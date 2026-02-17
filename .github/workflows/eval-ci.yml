@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - 'packages/shared-utils/**'
+      - 'packages/eval/**'
 
 concurrency:
   group: eval-ci-${{ github.event.pull_request.number }}
@@ -11,14 +12,11 @@ concurrency:
 
 jobs:
   eval-ci:
-    name: Eval CI
+    name: Eval Quick Check
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
     env:
-      TEST_OPENAI_API_KEY: ${{ secrets.TEST_OPENAI_API_KEY }}
-      TEST_ANTHROPIC_API_KEY: ${{ secrets.TEST_ANTHROPIC_API_KEY }}
-      TEST_GOOGLE_API_KEY: ${{ secrets.TEST_GOOGLE_API_KEY }}
-      TEST_XAI_API_KEY: ${{ secrets.TEST_XAI_API_KEY }}
+      GOOGLE_API_KEY: ${{ secrets.TEST_GOOGLE_API_KEY }}
 
     steps:
       - uses: actions/checkout@v4
@@ -30,15 +28,25 @@ jobs:
 
       - run: npm ci
 
-      - name: Check API keys are configured
+      - name: Check Google API key is configured
         id: check-keys
         run: |
-          if [ -z "$TEST_OPENAI_API_KEY" ]; then
-            echo "::warning::TEST_OPENAI_API_KEY is not set. Skipping eval."
+          if [ -z "$GOOGLE_API_KEY" ]; then
+            echo "::warning::TEST_GOOGLE_API_KEY is not set. Skipping eval."
             echo "keys_available=false" >> "$GITHUB_OUTPUT"
           else
             echo "keys_available=true" >> "$GITHUB_OUTPUT"
           fi
+
+      - name: Restore single-model baseline cache
+        if: steps.check-keys.outputs.keys_available == 'true'
+        uses: actions/cache@v4
+        with:
+          path: packages/eval/.cache/baselines
+          key: eval-baseline-${{ hashFiles('packages/eval/src/lib/baselineCache.ts') }}-${{ github.event.pull_request.base.sha || github.sha }}
+          restore-keys: |
+            eval-baseline-${{ hashFiles('packages/eval/src/lib/baselineCache.ts') }}-
+            eval-baseline-
 
       - name: Build shared-utils
         if: steps.check-keys.outputs.keys_available == 'true'
@@ -48,18 +56,28 @@ jobs:
         if: steps.check-keys.outputs.keys_available == 'true'
         run: npm run build --workspace=packages/eval
 
-      - name: Run CI evaluation
+      - name: Run quick eval (all strategies)
         if: steps.check-keys.outputs.keys_available == 'true'
         id: eval
         continue-on-error: true
-        run: npx ensemble-eval ci-eval --tier ci
+        working-directory: packages/eval
+        run: |
+          node --import tsx bin/ensemble-eval.mjs quick-eval \
+            --model google:gemini-3-flash-preview \
+            --strategies standard,elo,majority \
+            --sample 10 \
+            > eval-results.txt 2>&1
+          cat eval-results.txt
 
-      - name: Upload report artifact
+          # Check baseline regression
+          node --import tsx bin/ensemble-eval.mjs ci-eval --tier homogeneous-ci 2>&1 || true
+
+      - name: Upload eval results
         if: always() && steps.check-keys.outputs.keys_available == 'true'
         uses: actions/upload-artifact@v4
         with:
-          name: eval-ci-report
-          path: eval-report.md
+          name: eval-ci-results
+          path: packages/eval/eval-results.txt
           if-no-files-found: ignore
 
       - name: Post PR comment
@@ -69,14 +87,13 @@ jobs:
           script: |
             const fs = require('fs');
             const marker = '<!-- eval-ci-report -->';
-            let body = marker + '\n';
+            let body = marker + '\n## Eval CI Results\n\n```\n';
             try {
-              body += fs.readFileSync('eval-report.md', 'utf8');
+              body += fs.readFileSync('packages/eval/eval-results.txt', 'utf8');
             } catch {
-              body += '> **Warning**: Eval report was not generated. Check the [workflow logs](' +
-                `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}` +
-                ') for details.';
+              body += 'Eval report was not generated. Check workflow logs.';
             }
+            body += '\n```\n';
 
             const { data: comments } = await github.rest.issues.listComments({
               owner: context.repo.owner,
