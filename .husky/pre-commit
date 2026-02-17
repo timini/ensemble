@@ -1,20 +1,30 @@
 set -euo pipefail
 
 # Only run checks for packages that have staged changes
+# Dependency graph: shared-utils <- component-library <- app
 STAGED_FILES=$(git diff --cached --name-only --diff-filter=ACMR)
 
-if echo "$STAGED_FILES" | grep -q '^packages/component-library/'; then
+CHANGED_COMPONENT_LIB=false
+CHANGED_SHARED_UTILS=false
+CHANGED_APP=false
+
+echo "$STAGED_FILES" | grep -q '^packages/component-library/' && CHANGED_COMPONENT_LIB=true || true
+echo "$STAGED_FILES" | grep -q '^packages/shared-utils/' && CHANGED_SHARED_UTILS=true || true
+echo "$STAGED_FILES" | grep -q '^packages/app/' && CHANGED_APP=true || true
+
+if [ "$CHANGED_COMPONENT_LIB" = true ]; then
   echo "🧪 Component library quick checks..."
   npm run lint --workspace=packages/component-library
   npm run test:unit --workspace=packages/component-library
 fi
 
-if echo "$STAGED_FILES" | grep -q '^packages/shared-utils/'; then
+if [ "$CHANGED_SHARED_UTILS" = true ]; then
   echo "🧩 Shared utils tests..."
   npm run test --workspace=packages/shared-utils
 fi
 
-if echo "$STAGED_FILES" | grep -q '^packages/app/'; then
+# App depends on both shared-utils and component-library
+if [ "$CHANGED_APP" = true ] || [ "$CHANGED_SHARED_UTILS" = true ] || [ "$CHANGED_COMPONENT_LIB" = true ]; then
   echo "🏗️ App lint + typecheck..."
   npm run lint --workspace=packages/app
   npm run typecheck --workspace=packages/app
