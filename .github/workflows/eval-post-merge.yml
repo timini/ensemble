@@ -1,0 +1,97 @@
+name: Eval Post-Merge Baseline Update
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'packages/shared-utils/**'
+      - 'packages/eval/**'
+
+concurrency:
+  group: eval-post-merge
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+
+jobs:
+  update-baseline:
+    name: Update Eval Baseline
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      GOOGLE_API_KEY: ${{ secrets.TEST_GOOGLE_API_KEY }}
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # Need a token that can push back to main
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci --ignore-scripts
+      - run: npm rebuild
+
+      - name: Check Google API key is configured
+        id: check-keys
+        run: |
+          if [ -z "$GOOGLE_API_KEY" ]; then
+            echo "::warning::TEST_GOOGLE_API_KEY is not set. Skipping baseline update."
+            echo "keys_available=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "keys_available=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Restore HuggingFace dataset cache
+        if: steps.check-keys.outputs.keys_available == 'true'
+        uses: actions/cache@v4
+        with:
+          path: packages/eval/datasets
+          key: eval-datasets-${{ hashFiles('packages/eval/src/lib/benchmarkDatasetLoaders.ts') }}
+          restore-keys: eval-datasets-
+
+      - name: Restore single-model baseline cache
+        if: steps.check-keys.outputs.keys_available == 'true'
+        uses: actions/cache@v4
+        with:
+          path: packages/eval/.cache/baselines
+          key: eval-baseline-${{ hashFiles('packages/eval/src/lib/baselineCache.ts') }}-${{ github.sha }}
+          restore-keys: |
+            eval-baseline-${{ hashFiles('packages/eval/src/lib/baselineCache.ts') }}-
+            eval-baseline-
+
+      - name: Build shared-utils
+        if: steps.check-keys.outputs.keys_available == 'true'
+        run: npm run build --workspace=packages/shared-utils
+
+      - name: Build eval
+        if: steps.check-keys.outputs.keys_available == 'true'
+        run: npm run build --workspace=packages/eval
+
+      - name: Run quick eval and save baseline
+        if: steps.check-keys.outputs.keys_available == 'true'
+        working-directory: packages/eval
+        run: |
+          node --import tsx bin/ensemble-eval.mjs quick-eval \
+            --model google:gemini-3-flash-preview \
+            --strategies standard,elo,majority,council \
+            --sample 10 \
+            --baseline baselines/quick-eval.json
+
+      - name: Commit updated baseline
+        if: steps.check-keys.outputs.keys_available == 'true'
+        run: |
+          cd packages/eval
+          if git diff --quiet baselines/quick-eval.json 2>/dev/null || [ ! -f baselines/quick-eval.json ]; then
+            echo "No baseline changes to commit."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add baselines/quick-eval.json
+          git commit -m "chore(eval): update quick-eval baseline [skip ci]"
+          git push
