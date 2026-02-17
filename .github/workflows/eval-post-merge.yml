@@ -18,7 +18,7 @@ jobs:
   update-baseline:
     name: Update Eval Baseline
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 45
     env:
       GOOGLE_API_KEY: ${{ secrets.TEST_GOOGLE_API_KEY }}
 
@@ -79,7 +79,7 @@ jobs:
           node --import tsx bin/ensemble-eval.mjs quick-eval \
             --model google:gemini-3-flash-preview \
             --strategies standard,elo,majority,council \
-            --sample 10 \
+            --sample 50 \
             --baseline baselines/quick-eval.json
 
       - name: Commit updated baseline
