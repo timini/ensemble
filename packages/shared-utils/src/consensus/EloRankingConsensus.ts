@@ -30,10 +30,16 @@ export class EloRankingConsensus implements ConsensusStrategy {
         // For < 10 responses, All-vs-All is feasible. 3 models = 3 pairs. 5 models = 10 pairs.
         const pairings = this.generatePairings(responses);
 
-        // Run comparisons
-        for (const pair of pairings) {
-            const winnerId = await this.judgePair(pair[0], pair[1], prompt);
+        // Run all pairwise comparisons in parallel
+        const judgments = await Promise.all(
+            pairings.map(async (pair) => ({
+                pair,
+                winnerId: await this.judgePair(pair[0], pair[1], prompt),
+            })),
+        );
 
+        // Apply ELO updates in original pairing order
+        for (const { pair, winnerId } of judgments) {
             if (winnerId) {
                 this.updateElo(eloScores, pair[0].modelId, pair[1].modelId, winnerId);
             }

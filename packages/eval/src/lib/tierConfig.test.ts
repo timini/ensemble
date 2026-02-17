@@ -38,8 +38,8 @@ describe('CI_TIER_CONFIG', () => {
     expect(byModel['gemini-1.5-flash']).toBe('google');
   });
 
-  it('evaluates all 3 strategies', () => {
-    expect(CI_TIER_CONFIG.strategies).toEqual(['standard', 'elo', 'majority']);
+  it('evaluates all 4 strategies', () => {
+    expect(CI_TIER_CONFIG.strategies).toEqual(['standard', 'elo', 'majority', 'council']);
   });
 
   it('runs 3 times for median stability', () => {
@@ -97,8 +97,8 @@ describe('POST_MERGE_TIER_CONFIG', () => {
     expect(byModel['grok-2']).toBe('xai');
   });
 
-  it('evaluates all 3 strategies', () => {
-    expect(POST_MERGE_TIER_CONFIG.strategies).toEqual(['standard', 'elo', 'majority']);
+  it('evaluates all 4 strategies', () => {
+    expect(POST_MERGE_TIER_CONFIG.strategies).toEqual(['standard', 'elo', 'majority', 'council']);
   });
 
   it('runs once (deterministic with temperature=0)', () => {
@@ -132,14 +132,14 @@ describe('HOMOGENEOUS_CI_TIER_CONFIG', () => {
     expect(HOMOGENEOUS_CI_TIER_CONFIG.models).toHaveLength(3);
     for (const model of HOMOGENEOUS_CI_TIER_CONFIG.models) {
       expect(model.provider).toBe('google');
-      expect(model.model).toBe('gemini-2.0-flash');
+      expect(model.model).toBe('gemini-3-flash-preview');
     }
   });
 
   it('uses the same model as summarizer', () => {
     expect(HOMOGENEOUS_CI_TIER_CONFIG.summarizer).toEqual({
       provider: 'google',
-      model: 'gemini-2.0-flash',
+      model: 'gemini-3-flash-preview',
     });
   });
 
@@ -151,8 +151,8 @@ describe('HOMOGENEOUS_CI_TIER_CONFIG', () => {
     expect(total).toBe(30);
   });
 
-  it('evaluates all 3 strategies', () => {
-    expect(HOMOGENEOUS_CI_TIER_CONFIG.strategies).toEqual(['standard', 'elo', 'majority']);
+  it('evaluates all 4 strategies', () => {
+    expect(HOMOGENEOUS_CI_TIER_CONFIG.strategies).toEqual(['standard', 'elo', 'majority', 'council']);
   });
 
   it('has 3 runs for stability', () => {
@@ -174,7 +174,7 @@ describe('HOMOGENEOUS_POST_MERGE_TIER_CONFIG', () => {
     expect(HOMOGENEOUS_POST_MERGE_TIER_CONFIG.models).toHaveLength(3);
     for (const model of HOMOGENEOUS_POST_MERGE_TIER_CONFIG.models) {
       expect(model.provider).toBe('google');
-      expect(model.model).toBe('gemini-2.0-flash');
+      expect(model.model).toBe('gemini-3-flash-preview');
     }
   });
 

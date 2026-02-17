@@ -284,6 +284,7 @@ describe('createRegressionReport', () => {
         standard: 0.0012,
         majority: 0.0008,
         elo: 0.0015,
+        council: 0.0010,
       },
     };
     const result = makePassingResult({ stability });

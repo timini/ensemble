@@ -4,6 +4,7 @@ import { createBaselineCommand } from './commands/baseline.js';
 import { createBenchmarkCommand } from './commands/benchmark.js';
 import { createCiEvalCommand } from './commands/ciEval.js';
 import { createCompareCommand } from './commands/compare.js';
+import { createQuickEvalCommand } from './commands/quickEval.js';
 import { createRunCommand } from './commands/run.js';
 import { createUpdateBaselineCommand } from './commands/updateBaseline.js';
 
@@ -21,6 +22,7 @@ export function createProgram(): Command {
   program.addCommand(createAnalyzeCommand());
   program.addCommand(createCiEvalCommand());
   program.addCommand(createCompareCommand());
+  program.addCommand(createQuickEvalCommand());
   program.addCommand(createRunCommand());
   program.addCommand(createUpdateBaselineCommand());
 

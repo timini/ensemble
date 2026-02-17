@@ -4,8 +4,10 @@ import { useStore } from '~/store';
 import { EloRankingConsensus } from '@ensemble-ai/shared-utils/consensus/EloRankingConsensus';
 import { MajorityVotingConsensus } from '@ensemble-ai/shared-utils/consensus/MajorityVotingConsensus';
 import { StandardConsensus } from '@ensemble-ai/shared-utils/consensus/StandardConsensus';
+import { CouncilConsensus } from '@ensemble-ai/shared-utils/consensus/CouncilConsensus';
 import { ProviderRegistry, type ProviderName } from '@ensemble-ai/shared-utils/providers';
 import type { ConsensusModelResponse } from '@ensemble-ai/shared-utils/consensus/types';
+import type { CouncilParticipant } from '@ensemble-ai/shared-utils/consensus/councilTypes';
 import { FALLBACK_MODELS } from '~/lib/models';
 import { logger } from '~/lib/logger';
 
@@ -88,6 +90,25 @@ export function useConsensusGeneration() {
                 );
 
                 resultText = await strategy.generateConsensus(consensusResponses, 0, originalPrompt);
+            } else if (consensusMethod === 'council') {
+                const selectedModels = useStore.getState().selectedModels;
+                const participants: CouncilParticipant[] = selectedModels.map((m) => {
+                    const pName = validateProviderName(m.provider);
+                    return {
+                        modelId: m.id,
+                        modelName: m.model,
+                        provider: registry.getProvider(pName, clientMode),
+                        modelApiId: m.model,
+                    };
+                });
+
+                const strategy = new CouncilConsensus({
+                    participants,
+                    summarizerProvider: providerClient,
+                    summarizerModelId: effectiveSummarizerModelId,
+                });
+
+                resultText = await strategy.generateConsensus(consensusResponses, eloTopN, originalPrompt);
             } else {
                 const strategy = new StandardConsensus(
                     providerClient,

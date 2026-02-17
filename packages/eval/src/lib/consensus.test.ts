@@ -21,7 +21,7 @@ describe('consensus', () => {
       'elo',
     ]);
     expect(() => parseStrategies(['unknown'])).toThrow(
-      'Invalid strategy "unknown". Expected one of: standard, elo, majority.',
+      'Invalid strategy "unknown". Expected one of: standard, elo, majority, council.',
     );
   });
 
@@ -31,9 +31,6 @@ describe('consensus', () => {
       onComplete('consensus output', 5, 20);
     });
 
-    // Intercept to capture consensus responses
-    const origGenerate = (await import('@ensemble-ai/shared-utils/consensus/StandardConsensus'))
-      .StandardConsensus.prototype.generateConsensus;
     const { StandardConsensus } = await import(
       '@ensemble-ai/shared-utils/consensus/StandardConsensus'
     );
@@ -54,7 +51,6 @@ describe('consensus', () => {
 
     await generateConsensus(['standard'], 'Q', responses, provider, 'gemini-2.0-flash');
 
-    // Verify each instance gets a unique modelId
     expect(receivedResponses).toHaveLength(3);
     const ids = receivedResponses.map((r) => r.modelId);
     expect(new Set(ids).size).toBe(3);
@@ -62,7 +58,6 @@ describe('consensus', () => {
     expect(ids[1]).toBe('gemini-2.0-flash#2');
     expect(ids[2]).toBe('gemini-2.0-flash#3');
 
-    // Restore
     StandardConsensus.prototype.generateConsensus = origFn;
   });
 
