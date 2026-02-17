@@ -18,8 +18,8 @@ export interface ConsensusPresetSelectorProps {
 /**
  * Selector for choosing the consensus preset used during response synthesis.
  *
- * Renders standard, ELO, and majority methods, and conditionally shows
- * ELO-specific Top N controls when applicable.
+ * Renders standard, ELO, majority, and council methods, and conditionally
+ * shows ELO-specific Top N controls when applicable.
  *
  * @example
  * ```tsx

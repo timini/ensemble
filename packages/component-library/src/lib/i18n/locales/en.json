@@ -138,8 +138,7 @@
         },
         "elo": {
           "title": "ELO Ranked Summarisation",
-          "description": "Pairwise ranking with Top N synthesis. Needs 3+ models.",
-          "warning": "ELO Ranked Summarisation requires at least 3 models selected ({{count}} selected)"
+          "description": "Pairwise ranking with Top N synthesis. Needs 3+ models."
         },
         "majority": {
           "title": "Majority Voting",

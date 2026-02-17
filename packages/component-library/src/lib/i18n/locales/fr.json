@@ -133,8 +133,7 @@
         },
         "elo": {
           "title": "Synthèse Classée ELO",
-          "description": "Classement par paires avec synthèse Top N. Nécessite 3+ modèles.",
-          "warning": "La synthèse classée ELO nécessite au moins 3 modèles sélectionnés ({{count}} sélectionnés)"
+          "description": "Classement par paires avec synthèse Top N. Nécessite 3+ modèles."
         },
         "majority": {
           "title": "Vote Majoritaire",
