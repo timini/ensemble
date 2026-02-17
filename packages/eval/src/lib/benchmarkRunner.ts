@@ -10,7 +10,6 @@ import type {
   EvalMode,
   ModelSpec,
   PromptRunResult,
-  ProviderResponse,
   StrategyName,
 } from '../types.js';
 
@@ -40,8 +39,6 @@ interface RunBenchmarkOptions {
   outputPath: string;
   output: BenchmarkResultsFile;
   onProgress?: (progress: BenchmarkRunnerProgress) => void;
-  /** Pre-fetched responses keyed by question ID, skips LLM calls when present. */
-  cachedResponses?: Map<string, ProviderResponse[]>;
 }
 
 export class BenchmarkRunner {
@@ -69,13 +66,10 @@ export class BenchmarkRunner {
     });
   }
 
-  private async runQuestion(
-    question: BenchmarkQuestion,
-    preloadedResponses?: ProviderResponse[],
-  ): Promise<PromptRunResult> {
+  private async runQuestion(question: BenchmarkQuestion): Promise<PromptRunResult> {
     const questionStart = Date.now();
 
-    const responses = preloadedResponses ?? await this.ensembleRunner.runPrompt(
+    const responses = await this.ensembleRunner.runPrompt(
       question.prompt,
       this.models,
     );
@@ -125,7 +119,7 @@ export class BenchmarkRunner {
   }
 
   async run(options: RunBenchmarkOptions): Promise<BenchmarkResultsFile> {
-    const { questions, outputPath, output, onProgress, cachedResponses } = options;
+    const { questions, outputPath, output, onProgress } = options;
     const completedQuestionIds = new Set(
       output.runs
         .map((run) => run.questionId)
@@ -142,7 +136,7 @@ export class BenchmarkRunner {
       let completed = questions.length - pendingQuestions.length;
       const settled = await Promise.allSettled(
         pendingQuestions.map(async (question) => {
-          const run = await this.runQuestion(question, cachedResponses?.get(question.id));
+          const run = await this.runQuestion(question);
           completed += 1;
           onProgress?.({
             completed,
@@ -178,7 +172,7 @@ export class BenchmarkRunner {
           continue;
         }
 
-        const run = await this.runQuestion(question, cachedResponses?.get(question.id));
+        const run = await this.runQuestion(question);
         output.runs.push(run);
         output.updatedAt = new Date().toISOString();
         completedQuestionIds.add(question.id);

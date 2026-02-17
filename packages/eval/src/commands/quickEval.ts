@@ -27,7 +27,6 @@ interface QuickEvalOptions {
   sample: string;
   mode: string;
   cache: boolean;
-  ensembleCache: boolean;
   parallel: boolean;
   baseline?: string;
   significance?: string;
@@ -59,7 +58,6 @@ export function createQuickEvalCommand(): Command {
     .option('--sample <count>', 'Questions per dataset.', String(DEFAULT_SAMPLE))
     .option('--mode <mode>', 'Provider mode (mock or free).', 'free')
     .option('--no-cache', 'Disable single-model baseline caching.')
-    .option('--no-ensemble-cache', 'Disable ensemble response caching.')
     .option('--no-parallel', 'Run datasets sequentially instead of in parallel.')
     .option('--baseline <path>', 'Path to baseline JSON. Saves results and fails on regression.')
     .option('--significance <alpha>', 'Significance level for regression detection (0 < alpha < 1).', '0.10')
@@ -91,7 +89,6 @@ export function createQuickEvalCommand(): Command {
       const datasetNames = parseDatasets(options.datasets);
       const parallel = options.parallel;
       const useCache = options.cache && mode !== 'mock';
-      const useEnsembleCache = options.ensembleCache && mode !== 'mock';
       const registry = new ProviderRegistry();
       registerProviders(registry, [provider], mode);
 
@@ -110,7 +107,7 @@ export function createQuickEvalCommand(): Command {
       const runArgs: RunDatasetArgs[] = datasetQuestions.map(({ name, questions }) => ({
         datasetName: name, questions,
         model, provider, modelName, ensembleSize, strategies,
-        mode, registry, useCache, useEnsembleCache, sampleCount,
+        mode, registry, useCache, sampleCount,
       }));
 
       const allDatasetResults = parallel

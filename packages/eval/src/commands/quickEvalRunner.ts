@@ -1,9 +1,5 @@
 import { ProviderRegistry } from '@ensemble-ai/shared-utils/providers';
 import { loadCachedBaseline, saveCachedBaseline } from '../lib/baselineCache.js';
-import {
-  loadCachedEnsembleResponses,
-  saveCachedEnsembleResponses,
-} from '../lib/ensembleResponseCache.js';
 import { createEvaluatorForDataset } from '../lib/evaluators.js';
 import { BenchmarkRunner } from '../lib/benchmarkRunner.js';
 import { createBenchmarkFile } from './benchmarkOutput.js';
@@ -14,7 +10,6 @@ import type {
   EvalMode,
   EvalProvider,
   PromptRunResult,
-  ProviderResponse,
   StrategyName,
 } from '../types.js';
 
@@ -29,7 +24,6 @@ export interface RunDatasetArgs {
   mode: EvalMode;
   registry: ProviderRegistry;
   useCache: boolean;
-  useEnsembleCache: boolean;
   sampleCount: number;
 }
 
@@ -65,27 +59,9 @@ async function runSingleBaseline(args: RunDatasetArgs): Promise<PromptRunResult[
 }
 
 async function runEnsemble(args: RunDatasetArgs): Promise<PromptRunResult[]> {
-  const {
-    datasetName, questions, model, provider, modelName, ensembleSize,
-    strategies, mode, registry, useEnsembleCache, sampleCount,
-  } = args;
+  const { datasetName, questions, model, provider, modelName, ensembleSize, strategies, mode, registry } = args;
 
-  // Check ensemble response cache
-  const cached = useEnsembleCache
-    ? await loadCachedEnsembleResponses(model, datasetName, sampleCount, ensembleSize)
-    : null;
-
-  let cachedResponseMap: Map<string, ProviderResponse[]> | undefined;
-  if (cached && cached.length === questions.length) {
-    process.stderr.write(`  [${datasetName}] Ensemble responses — cached (consensus will re-run)\n`);
-    cachedResponseMap = new Map<string, ProviderResponse[]>();
-    for (let i = 0; i < questions.length; i++) {
-      cachedResponseMap.set(questions[i].id, cached[i]);
-    }
-  } else {
-    process.stderr.write(`  [${datasetName}] Ensemble (${ensembleSize}x ${modelName})...\n`);
-  }
-
+  process.stderr.write(`  [${datasetName}] Ensemble (${ensembleSize}x ${modelName})...\n`);
   const evaluator = createEvaluatorForDataset(datasetName);
   const ensembleModels = Array.from({ length: ensembleSize }, () => ({ provider, model: modelName }));
   const ensembleOutput = createBenchmarkFile(
@@ -99,18 +75,10 @@ async function runEnsemble(args: RunDatasetArgs): Promise<PromptRunResult[]> {
   });
   const result = await runner.run({
     questions, outputPath: '/dev/null', output: ensembleOutput,
-    cachedResponses: cachedResponseMap,
     onProgress: (p) => {
       process.stderr.write(`  [${datasetName}] ensemble [${p.completed}/${p.total}] ${p.questionId}\n`);
     },
   });
-
-  // Save ensemble responses to cache if not already cached
-  if (useEnsembleCache && !cachedResponseMap) {
-    const responsesPerQuestion = result.runs.map((run) => run.responses);
-    await saveCachedEnsembleResponses(model, datasetName, sampleCount, ensembleSize, responsesPerQuestion);
-  }
-
   return result.runs;
 }
 
