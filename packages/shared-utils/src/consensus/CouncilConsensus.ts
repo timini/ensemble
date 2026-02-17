@@ -1,4 +1,4 @@
-import type { AIProvider } from '../providers/types';
+import type { AIProvider, StreamResponseOptions } from '../providers/types';
 import type { ConsensusModelResponse, ConsensusStrategy, RankingResult } from './types';
 import type {
     CouncilParticipant,
@@ -142,13 +142,14 @@ export class CouncilConsensus implements ConsensusStrategy {
         }
     }
 
-    private completePrompt(provider: AIProvider, modelId: string, prompt: string): Promise<string> {
+    private completePrompt(provider: AIProvider, modelId: string, prompt: string, options?: StreamResponseOptions): Promise<string> {
         return new Promise((resolve, reject) => {
             provider.streamResponse(
                 prompt, modelId,
                 () => { void 0; },
                 (finalText: string) => resolve(finalText),
-                (err: Error) => reject(err)
+                (err: Error) => reject(err),
+                options,
             );
         });
     }

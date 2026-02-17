@@ -1,4 +1,4 @@
-import type { AIProvider } from '../providers/types';
+import type { AIProvider, StreamResponseOptions } from '../providers/types';
 import type { CouncilParticipant, CouncilBranch, Critique, BranchVote } from './councilTypes';
 import {
     buildCritiquePrompt,
@@ -8,7 +8,7 @@ import {
     calculateBranchValidity,
 } from './councilUtils';
 
-export type CompletePromptFn = (provider: AIProvider, modelId: string, prompt: string) => Promise<string>;
+export type CompletePromptFn = (provider: AIProvider, modelId: string, prompt: string, options?: StreamResponseOptions) => Promise<string>;
 export type FindParticipantFn = (modelId: string) => CouncilParticipant | undefined;
 
 /** N*(N-1) parallel critique calls — each model critiques every other model */
@@ -127,10 +127,12 @@ export async function runJudgmentRound(
         if (branch) branch.votes.push(vote);
     }
 
-    const totalVotersPerBranch = branches.length - 1;
     for (const branch of branches) {
-        const validVotes = branch.votes.filter((v) => v.isValid).length;
-        const validity = calculateBranchValidity(validVotes, totalVotersPerBranch, validityThreshold);
+        // Exclude null (abstain) votes from both numerator and denominator
+        const decidedVotes = branch.votes.filter((v) => v.isValid !== null);
+        const validVotes = decidedVotes.filter((v) => v.isValid === true).length;
+        const totalDecided = decidedVotes.length;
+        const validity = calculateBranchValidity(validVotes, totalDecided, validityThreshold);
         branch.validVoteCount = validity.validVoteCount;
         branch.isValid = validity.isValid;
     }

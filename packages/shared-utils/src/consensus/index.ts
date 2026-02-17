@@ -4,4 +4,5 @@ export * from './StandardConsensus';
 export * from './EloRankingConsensus';
 export * from './MajorityVotingConsensus';
 export * from './CouncilConsensus';
+export * from './SelfConsistencyConsensus';
 export * from './councilTypes';

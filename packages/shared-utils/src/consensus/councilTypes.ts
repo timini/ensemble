@@ -21,11 +21,11 @@ export interface Rebuttal {
     content: string;
 }
 
-/** One model's vote on whether a branch is valid */
+/** One model's vote on whether a branch is valid. null means abstain (unparseable). */
 export interface BranchVote {
     voterModelId: string;
     branchModelId: string;
-    isValid: boolean;
+    isValid: boolean | null;
     reasoning: string;
 }
 

@@ -26,9 +26,10 @@ describe('councilUtils', () => {
             expect(result).toContain('AI is machine intelligence.');
         });
 
-        it('should instruct the model to identify flaws and strengths', () => {
+        it('should instruct the model to assess factual accuracy', () => {
             const result = buildCritiquePrompt('What is AI?', 'GPT-4o', 'AI is machine intelligence.');
-            expect(result.toLowerCase()).toMatch(/flaw|weakness|strength/);
+            expect(result).toContain('FACTUAL ASSESSMENT');
+            expect(result).toContain('VERDICT');
         });
     });
 
@@ -125,10 +126,12 @@ describe('councilUtils', () => {
             expect(result).toContain('AI mimics human cognition.');
         });
 
-        it('should include model names and ranks', () => {
+        it('should use anonymous labels instead of model names', () => {
             const result = buildCouncilSummaryPrompt('What is AI?', branches);
-            expect(result).toContain('GPT-4o');
-            expect(result).toContain('Claude');
+            expect(result).toContain('Response 1');
+            expect(result).toContain('Response 2');
+            expect(result).not.toContain('GPT-4o');
+            expect(result).not.toContain('Claude');
         });
     });
 
@@ -157,15 +160,21 @@ describe('councilUtils', () => {
             expect(result).toEqual({ isValid: false, reasoning: 'Weak argument.' });
         });
 
-        it('should default to valid for lorem ipsum / unparseable output', () => {
+        it('should abstain (null) for lorem ipsum / unparseable output', () => {
             const input = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.';
             const result = parseJudgmentVote(input);
-            expect(result).toEqual({ isValid: true, reasoning: '' });
+            expect(result).toEqual({ isValid: null, reasoning: '' });
         });
 
-        it('should default to valid for empty string', () => {
+        it('should abstain (null) for empty string', () => {
             const result = parseJudgmentVote('');
-            expect(result).toEqual({ isValid: true, reasoning: '' });
+            expect(result).toEqual({ isValid: null, reasoning: '' });
+        });
+
+        it('should extract JSON embedded in prose via regex fallback', () => {
+            const input = 'After careful consideration, {"isValid": false, "reasoning": "Factually wrong."} is my judgment.';
+            const result = parseJudgmentVote(input);
+            expect(result).toEqual({ isValid: false, reasoning: 'Factually wrong.' });
         });
 
         it('should handle JSON with extra whitespace', () => {

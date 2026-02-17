@@ -1,4 +1,4 @@
-import type { AIProvider } from '../providers/types';
+import type { AIProvider, StreamResponseOptions } from '../providers/types';
 import type {
     ConsensusModelResponse,
     ConsensusStrategy,
@@ -27,11 +27,11 @@ export class MajorityVotingConsensus implements ConsensusStrategy {
             throw new Error('At least 2 responses are required for majority voting');
         }
 
-        const rankingPrompt = buildMajorityRankingPrompt(responses, prompt);
+        const { prompt: rankingPrompt, idMap } = buildMajorityRankingPrompt(responses, prompt);
 
         try {
             const llmOutput = await this.completePrompt(rankingPrompt);
-            const parsed = parseMajorityVotingOutput(llmOutput, responses);
+            const parsed = parseMajorityVotingOutput(llmOutput, responses, idMap);
             return parsed ?? buildFallbackRankings(responses);
         } catch {
             return buildFallbackRankings(responses);
@@ -60,21 +60,25 @@ export class MajorityVotingConsensus implements ConsensusStrategy {
             topModelIds.has(response.modelId)
         );
 
-        const rankedResponseText = selectedResponses
-            .map((response) => {
+        // Sort by rank order (most aligned first) and anonymize
+        const sortedResponses = [...selectedResponses].sort((a, b) => {
+            const rankA = rankings.find((item) => item.modelId === a.modelId)?.rank ?? 999;
+            const rankB = rankings.find((item) => item.modelId === b.modelId)?.rank ?? 999;
+            return rankA - rankB;
+        });
+
+        const rankedResponseText = sortedResponses
+            .map((response, i) => {
                 const result = rankings.find((item) => item.modelId === response.modelId);
                 const score = result?.eloScore ?? 0;
 
-                return `Model: ${response.modelName}\nModel ID: ${response.modelId}\nAlignment Score: ${score}\nResponse:\n${response.content}`;
+                return `Response ${i + 1}\nAlignment Score: ${score}\nResponse:\n${response.content}`;
             })
             .join('\n\n---\n\n');
-
-        const majorityModel = rankings[0]?.modelId ?? selectedResponses[0]?.modelId;
 
         const synthesisPrompt = buildMajoritySynthesisPrompt({
             prompt,
             rankedResponseText,
-            majorityModel,
         });
 
         try {
@@ -84,6 +88,8 @@ export class MajorityVotingConsensus implements ConsensusStrategy {
         }
     }
 
+    private static readonly JUDGE_OPTIONS: StreamResponseOptions = { temperature: 0, seed: 42 };
+
     private completePrompt(prompt: string): Promise<string> {
         return new Promise((resolve, reject) => {
             this.summarizerProvider.streamResponse(
@@ -91,7 +97,8 @@ export class MajorityVotingConsensus implements ConsensusStrategy {
                 this.summarizerModelId,
                 () => { void 0; },
                 (finalText: string) => resolve(finalText),
-                (err: Error) => reject(err)
+                (err: Error) => reject(err),
+                MajorityVotingConsensus.JUDGE_OPTIONS,
             );
         });
     }

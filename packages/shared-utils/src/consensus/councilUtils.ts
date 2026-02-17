@@ -7,7 +7,7 @@ export function buildCritiquePrompt(
     targetAnswer: string
 ): string {
     return `
-You are a critical reviewer evaluating an AI model's response.
+You are a factual accuracy reviewer evaluating an AI model's response.
 
 Original Question: ${originalPrompt}
 
@@ -15,11 +15,14 @@ Response from ${targetModelName}:
 ${targetAnswer}
 
 Your task:
-1. Identify any flaws, inaccuracies, or weakness in this response.
-2. Note any strengths or particularly good points.
-3. Be specific and constructive in your critique.
+1. Assess whether this response correctly answers the question.
+2. Identify any factual errors, logical flaws, or missing critical information.
+3. Note any strengths that support the answer's correctness.
 
-Provide your critique concisely.
+Output your assessment in this format:
+FACTUAL ASSESSMENT: [correct/incorrect/partially correct]
+ISSUES: [list specific problems, or "none" if correct]
+VERDICT: [keep/reject]
     `.trim();
 }
 
@@ -99,7 +102,13 @@ export function buildCouncilSummaryPrompt(
     rankedBranches: CouncilBranch[]
 ): string {
     const branchesText = rankedBranches
-        .map((b) => `Rank #${b.rank} - ${b.modelName}:\n${b.initialAnswer}`)
+        .map((b, i) => {
+            let content = `Rank #${b.rank} - Response ${i + 1}:\n${b.initialAnswer}`;
+            if (b.rebuttal?.content) {
+                content += `\n\nRebuttal:\n${b.rebuttal.content}`;
+            }
+            return content;
+        })
         .join('\n\n---\n\n');
 
     return `
@@ -115,12 +124,13 @@ Your task:
 Produce a SINGLE, UNIFIED response that directly answers the original question.
 Synthesize the best elements from all positions into one coherent, comprehensive answer.
 Do NOT compare or reference the individual models. Write as if answering the question yourself.
+If the question asks for a constrained format (single letter, number, JSON, etc.), output exactly that format and nothing else. No markdown formatting.
     `.trim();
 }
 
 /** Parses a judgment vote JSON from LLM output, with fallback for unparseable output */
-export function parseJudgmentVote(output: string): { isValid: boolean; reasoning: string } {
-    const fallback = { isValid: true, reasoning: '' };
+export function parseJudgmentVote(output: string): { isValid: boolean | null; reasoning: string } {
+    const fallback = { isValid: null as boolean | null, reasoning: '' };
 
     if (!output || output.trim().length === 0) {
         return fallback;
@@ -139,7 +149,15 @@ export function parseJudgmentVote(output: string): { isValid: boolean; reasoning
         if (fenced) return fenced;
     }
 
-    // Unparseable - default to valid
+    // Try regex fallback for JSON embedded in prose
+    const jsonRegex = /\{[^{}]*"isValid"\s*:\s*(true|false)[^{}]*\}/i;
+    const regexMatch = trimmed.match(jsonRegex);
+    if (regexMatch) {
+        const extracted = tryParseVoteJson(regexMatch[0]);
+        if (extracted) return extracted;
+    }
+
+    // Unparseable - abstain (null) instead of defaulting to valid
     return fallback;
 }
 
@@ -160,7 +178,7 @@ export function calculateBranchValidity(
     };
 }
 
-function tryParseVoteJson(text: string): { isValid: boolean; reasoning: string } | null {
+function tryParseVoteJson(text: string): { isValid: boolean | null; reasoning: string } | null {
     try {
         const parsed = JSON.parse(text) as { isValid?: unknown; reasoning?: unknown };
         if (typeof parsed.isValid === 'boolean') {

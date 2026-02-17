@@ -1,5 +1,5 @@
 
-import type { AIProvider } from '../providers/types';
+import type { AIProvider, StreamResponseOptions } from '../providers/types';
 import type { ConsensusModelResponse, ConsensusStrategy, RankingResult } from './types';
 
 const DEFAULT_TOP_K = 3;
@@ -7,13 +7,17 @@ const DEFAULT_TOP_K = 3;
 export class EloRankingConsensus implements ConsensusStrategy {
     private static readonly K_FACTOR = 32;
     private static readonly INITIAL_ELO = 1200;
+    private topK: number;
 
     constructor(
         private judgeProvider: AIProvider,
         private judgeModelId: string,
         private summarizerProvider: AIProvider,
-        private summarizerModelId: string
-    ) { }
+        private summarizerModelId: string,
+        options?: { topK?: number }
+    ) {
+        this.topK = options?.topK ?? DEFAULT_TOP_K;
+    }
 
     /**
      * Ranks responses using an ELO rating system based on pairwise comparisons judged by an LLM.
@@ -73,7 +77,7 @@ export class EloRankingConsensus implements ConsensusStrategy {
         const rankings = await this.rankResponses(responses, prompt);
 
         // Take top N
-        const requestedTopN = topN > 0 ? topN : DEFAULT_TOP_K;
+        const requestedTopN = topN > 0 ? topN : this.topK;
         const effectiveTopN = Math.max(1, Math.min(requestedTopN, rankings.length));
         const topNRankings = rankings.slice(0, effectiveTopN);
         const topNModelIds = new Set(topNRankings.map(r => r.modelId));
@@ -134,6 +138,8 @@ Output rules:
         return pairs;
     }
 
+    private static readonly JUDGE_OPTIONS: StreamResponseOptions = { temperature: 0, seed: 42 };
+
     private async judgePair(modelA: ConsensusModelResponse, modelB: ConsensusModelResponse, originalPrompt: string): Promise<string | null> {
         const prompt = `
 You are an impartial evaluator selecting the more correct answer.
@@ -152,6 +158,7 @@ Decision rules:
 - If both are equally valid, select TIE.
 - Ignore style, verbosity, and confidence wording.
 
+Before deciding, briefly compare both answers in 2-3 sentences. Then output your verdict on a new line.
 Output exactly one of:
 - WINNER: A
 - WINNER: B
@@ -175,7 +182,8 @@ Output exactly one of:
                 (err: Error) => {
                     console.error('Judge error:', err);
                     resolve(null);
-                }
+                },
+                EloRankingConsensus.JUDGE_OPTIONS,
             );
         });
     }

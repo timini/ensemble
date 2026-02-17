@@ -57,6 +57,7 @@ export async function generateConsensus(
   responses: ProviderResponse[],
   summarizerClient: AIProvider,
   summarizerModel: string,
+  perModelClients?: Map<string, { client: AIProvider; modelApiId: string }>,
 ): Promise<Partial<Record<StrategyName, string>>> {
   const consensusResponses = toConsensusResponses(responses);
   if (consensusResponses.length === 0) {
@@ -97,12 +98,15 @@ export async function generateConsensus(
       }
     } else if (strategy === 'council') {
       if (consensusResponses.length >= MIN_RESPONSES_FOR_COUNCIL) {
-        const participants: CouncilParticipant[] = consensusResponses.map((r) => ({
-          modelId: r.modelId,
-          modelName: r.modelName,
-          provider: summarizerClient,
-          modelApiId: summarizerModel,
-        }));
+        const participants: CouncilParticipant[] = consensusResponses.map((r) => {
+          const perModel = perModelClients?.get(r.modelId);
+          return {
+            modelId: r.modelId,
+            modelName: r.modelName,
+            provider: perModel?.client ?? summarizerClient,
+            modelApiId: perModel?.modelApiId ?? summarizerModel,
+          };
+        });
         tasks.push(
           new CouncilConsensus({
             participants,

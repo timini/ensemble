@@ -1,8 +1,10 @@
+import type { StreamResponseOptions } from '../providers/types';
 import type { CouncilParticipant, CouncilBranch } from './councilTypes';
 import type { CompletePromptFn } from './councilRounds';
 
 const INITIAL_ELO = 1200;
 const K_FACTOR = 32;
+const JUDGE_OPTIONS: StreamResponseOptions = { temperature: 0, seed: 42 };
 
 /** Sequential pairwise ELO ranking of valid branches, rotating judges across pairings */
 export async function runCouncilEloRanking(
@@ -50,6 +52,14 @@ export async function runCouncilEloRanking(
     return validBranches;
 }
 
+function buildBranchContent(branch: CouncilBranch): string {
+    let content = branch.initialAnswer;
+    if (branch.rebuttal?.content) {
+        content += `\n\nRebuttal:\n${branch.rebuttal.content}`;
+    }
+    return content;
+}
+
 async function judgeEloPair(
     judge: CouncilParticipant,
     branchA: CouncilBranch,
@@ -58,22 +68,34 @@ async function judgeEloPair(
     completePrompt: CompletePromptFn
 ): Promise<string | null> {
     const prompt = `
-You are an impartial judge evaluating two AI responses.
-Question: ${originalPrompt}
+You are an impartial evaluator selecting the more correct answer.
 
-Response A (from ${branchA.modelName}):
-${branchA.initialAnswer}
+Original Question:
+${originalPrompt}
 
-Response B (from ${branchB.modelName}):
-${branchB.initialAnswer}
+Response A:
+${buildBranchContent(branchA)}
 
-Which response is better? Reply EXACTLY with "Winner: ${branchA.modelName}" or "Winner: ${branchB.modelName}". If it is a tie, reply "Winner: Tie".
+Response B:
+${buildBranchContent(branchB)}
+
+Decision rules:
+- Choose the answer that is more factually correct and better follows the question constraints.
+- If both are equally valid, select TIE.
+- Ignore style, verbosity, and confidence wording.
+
+Before deciding, briefly compare both answers in 2-3 sentences. Then output your verdict on a new line.
+Output exactly one of:
+- WINNER: A
+- WINNER: B
+- WINNER: TIE
     `.trim();
 
     try {
-        const output = await completePrompt(judge.provider, judge.modelApiId, prompt);
-        if (output.includes(`Winner: ${branchA.modelName}`)) return branchA.modelId;
-        if (output.includes(`Winner: ${branchB.modelName}`)) return branchB.modelId;
+        const output = await completePrompt(judge.provider, judge.modelApiId, prompt, JUDGE_OPTIONS);
+        const normalized = output.toUpperCase();
+        if (normalized.includes('WINNER: A')) return branchA.modelId;
+        if (normalized.includes('WINNER: B')) return branchB.modelId;
         return null;
     } catch {
         return null;

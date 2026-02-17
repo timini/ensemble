@@ -10,15 +10,26 @@ interface MajorityVotingOutput {
 export function buildMajorityRankingPrompt(
     responses: ConsensusModelResponse[],
     originalPrompt: string
-): string {
+): { prompt: string; idMap: Map<string, string> } {
+    // Anonymize model IDs to prevent hallucination and bias
+    const idMap = new Map<string, string>(); // anonymous -> real
+    const reverseMap = new Map<string, string>(); // real -> anonymous
+    responses.forEach((response, i) => {
+        const anonId = `Response-${i + 1}`;
+        idMap.set(anonId, response.modelId);
+        reverseMap.set(response.modelId, anonId);
+    });
+
     const responseText = responses
         .map(
-            (response) =>
-                `Model ID: ${response.modelId}\nModel Name: ${response.modelName}\nResponse:\n${response.content}`
+            (response) => {
+                const anonId = reverseMap.get(response.modelId)!;
+                return `Response ID: ${anonId}\nResponse:\n${response.content}`;
+            }
         )
         .join('\n\n---\n\n');
 
-    return `
+    const prompt = `
 You are evaluating multiple AI responses for majority alignment.
 Original Question: ${originalPrompt}
 
@@ -31,42 +42,45 @@ Task:
 3) Output ONLY valid JSON in this shape:
 {
   "rankings": [
-    { "modelId": "exact-model-id", "alignmentScore": 0-100 }
+    { "modelId": "exact-response-id", "alignmentScore": 0-100 }
   ]
 }
 
 Rules:
-- Include every model exactly once.
+- Include every response exactly once, using its exact Response ID (e.g. "Response-1").
 - Higher alignmentScore means stronger alignment with majority position.
 - No prose, no markdown, JSON only.
     `.trim();
+
+    return { prompt, idMap };
 }
 
 export function buildMajoritySynthesisPrompt(params: {
     prompt: string;
     rankedResponseText: string;
-    majorityModel: string | undefined;
 }): string {
     return `
 You are a helpful assistant tasked with creating a final consensus answer from multiple model outputs.
 Original Question: ${params.prompt}
 
 Majority Signal:
-- Treat the model with ID "${params.majorityModel}" as the majority anchor.
+- Responses are ordered from most-aligned to least-aligned with the majority position. Weight the first response most heavily.
 - Prefer details repeated across multiple responses.
 - De-prioritize claims that appear in only one response unless they are clearly more correct or complete.
 
-Ranked model responses:
+Ranked responses:
 ${params.rankedResponseText}
 
 Return a SINGLE final answer that directly addresses the original question.
 Do not mention model names, ranking, or voting. Write only the final answer text.
+If the question asks for a constrained format (single letter, number, JSON, etc.), output exactly that format and nothing else. No markdown formatting.
     `.trim();
 }
 
 export function parseMajorityVotingOutput(
     output: string,
-    responses: ConsensusModelResponse[]
+    responses: ConsensusModelResponse[],
+    idMap?: Map<string, string>
 ): RankingResult[] | null {
     const parsed = tryParseMajorityVotingJson(output);
     if (!parsed) {
@@ -78,7 +92,12 @@ export function parseMajorityVotingOutput(
     const seenIds = new Set<string>();
 
     for (const item of parsed.rankings ?? []) {
-        if (!item?.modelId || !responseIds.has(item.modelId) || seenIds.has(item.modelId)) {
+        if (!item?.modelId) continue;
+
+        // Resolve anonymous ID back to real ID when idMap is provided
+        const realId = idMap?.get(item.modelId) ?? item.modelId;
+
+        if (!responseIds.has(realId) || seenIds.has(realId)) {
             continue;
         }
 
@@ -87,12 +106,12 @@ export function parseMajorityVotingOutput(
             : 0;
 
         rankings.push({
-            modelId: item.modelId,
+            modelId: realId,
             eloScore: score,
             rank: 0,
         });
 
-        seenIds.add(item.modelId);
+        seenIds.add(realId);
     }
 
     if (rankings.length === 0) {

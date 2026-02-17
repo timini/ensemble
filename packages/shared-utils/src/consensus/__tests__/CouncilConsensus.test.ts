@@ -38,8 +38,8 @@ function setupDeterministicProviders(participants: CouncilParticipant[], summari
             _onChunk: (chunk: string) => void,
             onComplete: (full: string, time: number, tokens?: number) => void
         ) => {
-            if (prompt.includes('critical reviewer')) {
-                onComplete('This response has some strengths but lacks detail on key aspects.', 100, 10);
+            if (prompt.includes('factual accuracy reviewer')) {
+                onComplete('FACTUAL ASSESSMENT: correct\nISSUES: none\nVERDICT: keep', 100, 10);
                 return Promise.resolve();
             }
             if (prompt.includes('defending your original response')) {
@@ -50,12 +50,9 @@ function setupDeterministicProviders(participants: CouncilParticipant[], summari
                 onComplete('{"isValid": true, "reasoning": "Position is sound."}', 100, 10);
                 return Promise.resolve();
             }
-            if (prompt.includes('impartial judge')) {
-                if (prompt.includes('Model A')) {
-                    onComplete('Winner: Model A', 100, 10);
-                } else {
-                    onComplete('Winner: Model B', 100, 10);
-                }
+            if (prompt.includes('impartial evaluator')) {
+                // Council ELO now uses anonymous labels (Response A/B → WINNER: A/B)
+                onComplete('WINNER: A', 100, 10);
                 return Promise.resolve();
             }
             onComplete('Default response', 100, 10);
@@ -209,7 +206,7 @@ describe('CouncilConsensus', () => {
                     _onChunk: (chunk: string) => void,
                     onComplete: (full: string, time: number, tokens?: number) => void
                 ) => {
-                    if (prompt.includes('critical reviewer')) {
+                    if (prompt.includes('factual accuracy reviewer')) {
                         onComplete('Good critique.', 100, 10);
                         return Promise.resolve();
                     }
@@ -221,8 +218,8 @@ describe('CouncilConsensus', () => {
                         onComplete('{"isValid": true, "reasoning": "OK"}', 100, 10);
                         return Promise.resolve();
                     }
-                    if (prompt.includes('impartial judge')) {
-                        onComplete('Winner: Model B', 100, 10);
+                    if (prompt.includes('impartial evaluator')) {
+                        onComplete('WINNER: A', 100, 10);
                         return Promise.resolve();
                     }
                     onComplete('Default', 100, 10);
@@ -254,7 +251,7 @@ describe('CouncilConsensus', () => {
                     _onChunk: (chunk: string) => void,
                     onComplete: (full: string, time: number, tokens?: number) => void
                 ) => {
-                    if (prompt.includes('critical reviewer')) {
+                    if (prompt.includes('factual accuracy reviewer')) {
                         onComplete('Major flaws found.', 100, 10);
                         return Promise.resolve();
                     }
@@ -266,8 +263,8 @@ describe('CouncilConsensus', () => {
                         onComplete('{"isValid": false, "reasoning": "Fundamentally flawed."}', 100, 10);
                         return Promise.resolve();
                     }
-                    if (prompt.includes('impartial judge')) {
-                        onComplete('Winner: Model A', 100, 10);
+                    if (prompt.includes('impartial evaluator')) {
+                        onComplete('WINNER: A', 100, 10);
                         return Promise.resolve();
                     }
                     onComplete('Default', 100, 10);
@@ -348,7 +345,7 @@ describe('CouncilConsensus', () => {
             // Check that more than one participant handled ELO judging calls
             const eloCallCounts = participants.map((p) => {
                 const calls = (p.provider.streamResponse as Mock).mock.calls;
-                return calls.filter((c: string[]) => c[0].includes('impartial judge')).length;
+                return calls.filter((c: string[]) => c[0].includes('impartial evaluator')).length;
             });
             const participantsUsedForElo = eloCallCounts.filter((c) => c > 0).length;
             expect(participantsUsedForElo).toBeGreaterThan(1);

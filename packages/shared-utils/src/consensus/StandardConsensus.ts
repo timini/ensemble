@@ -24,12 +24,10 @@ export class StandardConsensus implements ConsensusStrategy {
     }
 
     async generateConsensus(responses: ConsensusModelResponse[], topN: number, originalPrompt: string): Promise<string> {
-        // Standard consensus uses ALL responses, ignoring topN in principle,
-        // OR we can say "Standard" implies Top N = All?
-        // Usually standard means "Summarize everything".
-        void topN; // Unused
+        // Use topN to slice responses when set; 0 means use all
+        const effectiveResponses = topN > 0 ? responses.slice(0, topN) : responses;
 
-        const responsesText = responses.map(r => `Model: ${r.modelName}\nResponse:\n${r.content}`).join('\n\n---\n\n');
+        const responsesText = effectiveResponses.map((r, i) => `Response ${i + 1}:\n${r.content}`).join('\n\n---\n\n');
 
         const prompt = `
 You are a helpful assistant tasked with synthesizing multiple AI responses into a single, enhanced answer.
@@ -43,6 +41,7 @@ Your task is to produce a SINGLE, UNIFIED response that directly answers the ori
 Do NOT compare or analyze the responses. Do NOT mention "models agree/disagree" or reference the individual responses.
 Instead, synthesize the best elements from all responses into one coherent, comprehensive answer that a user would receive as the final response to their question.
 Write as if you are directly answering the original question yourself, enhanced by the collective intelligence of the ensemble.
+If the question asks for a constrained format (single letter, number, JSON, etc.), output exactly that format and nothing else. No markdown formatting.
         `.trim();
 
         return new Promise((resolve) => {

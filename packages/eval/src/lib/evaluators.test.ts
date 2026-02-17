@@ -59,6 +59,38 @@ describe('extractChoiceLetter', () => {
   it('extracts "The correct answer is (D)"', () => {
     expect(extractChoiceLetter('The correct answer is (D)')).toBe('D');
   });
+
+  it('handles markdown bold **A**', () => {
+    expect(extractChoiceLetter('**A**')).toBe('A');
+  });
+
+  it('handles "The correct answer is **A**"', () => {
+    expect(extractChoiceLetter('The correct answer is **A**')).toBe('A');
+  });
+
+  it('handles "The correct option is A"', () => {
+    expect(extractChoiceLetter('The correct option is A')).toBe('A');
+  });
+
+  it('handles "The best answer is B"', () => {
+    expect(extractChoiceLetter('The best answer is B')).toBe('B');
+  });
+
+  it('handles "The best option is C"', () => {
+    expect(extractChoiceLetter('The best option is C')).toBe('C');
+  });
+
+  it('handles "A. Some option text" at start of line', () => {
+    expect(extractChoiceLetter('A. Bananas are yellow')).toBe('A');
+  });
+
+  it('handles bare letter on last line after reasoning', () => {
+    expect(extractChoiceLetter('Let me think about this...\nB')).toBe('B');
+  });
+
+  it('handles markdown underscore __D__', () => {
+    expect(extractChoiceLetter('__D__')).toBe('D');
+  });
 });
 
 describe('NumericEvaluator', () => {

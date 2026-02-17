@@ -35,18 +35,19 @@ describe('MajorityVotingConsensus', () => {
         ).rejects.toThrow('At least 2 responses are required for majority voting');
     });
 
-    it('should rank responses based on majority alignment', async () => {
+    it('should rank responses based on majority alignment using anonymous IDs', async () => {
         (mockSummarizerProvider.streamResponse as Mock).mockImplementation(async (
             _prompt: string,
             _model: string,
             _onChunk: (chunk: string) => void,
             onComplete: (full: string, time: number, tokens?: number) => void
         ) => {
+            // LLM now sees anonymous IDs (Response-1, Response-2, Response-3)
             onComplete(JSON.stringify({
                 rankings: [
-                    { modelId: 'model-b', alignmentScore: 95 },
-                    { modelId: 'model-a', alignmentScore: 88 },
-                    { modelId: 'model-c', alignmentScore: 74 },
+                    { modelId: 'Response-2', alignmentScore: 95 },
+                    { modelId: 'Response-1', alignmentScore: 88 },
+                    { modelId: 'Response-3', alignmentScore: 74 },
                 ],
             }), 100, 10);
             return Promise.resolve();
@@ -55,6 +56,7 @@ describe('MajorityVotingConsensus', () => {
         const ranking = await strategy.rankResponses(mockResponses, 'Test Prompt');
 
         expect(ranking).toHaveLength(3);
+        // IDs should be resolved back to real model IDs
         expect(ranking[0]).toMatchObject({ modelId: 'model-b', rank: 1, eloScore: 95 });
         expect(ranking[1]).toMatchObject({ modelId: 'model-a', rank: 2, eloScore: 88 });
         expect(ranking[2]).toMatchObject({ modelId: 'model-c', rank: 3, eloScore: 74 });
@@ -85,9 +87,14 @@ describe('MajorityVotingConsensus', () => {
         const calls = (mockSummarizerProvider.streamResponse as Mock).mock.calls;
         const promptArg = calls[0][0];
 
-        expect(promptArg).toContain('Model B');
-        expect(promptArg).toContain('Model A');
+        // Should use anonymous labels, not model names
+        expect(promptArg).toContain('Response 1');
+        expect(promptArg).toContain('Response 2');
+        expect(promptArg).not.toContain('Model A');
+        expect(promptArg).not.toContain('Model B');
         expect(promptArg).not.toContain('Model C');
+        // Model C (rank 3) should be excluded with topN=2
+        expect(promptArg).not.toContain('Response C content');
     });
 
     it('should fall back to deterministic ranking when ranking JSON is invalid', async () => {
