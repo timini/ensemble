@@ -13,8 +13,83 @@ env:
   CI: true
 
 jobs:
+  detect-changes:
+    name: Detect Changes
+    runs-on: ubuntu-latest
+    # For workflow_call (from deploy.yml), there's no PR context,
+    # so paths-filter can't diff. We force all jobs to run.
+    outputs:
+      run_all: ${{ steps.trigger.outputs.run_all }}
+      shared_utils: ${{ steps.trigger.outputs.run_all == 'true' && 'true' || steps.filter.outputs.shared_utils }}
+      component_library: ${{ steps.trigger.outputs.run_all == 'true' && 'true' || steps.filter.outputs.component_library }}
+      app: ${{ steps.trigger.outputs.run_all == 'true' && 'true' || steps.filter.outputs.app }}
+      e2e: ${{ steps.trigger.outputs.run_all == 'true' && 'true' || steps.filter.outputs.e2e }}
+      analysis: ${{ steps.trigger.outputs.run_all == 'true' && 'true' || steps.filter.outputs.analysis }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check trigger type
+        id: trigger
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_call" ] || [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "run_all=true" >> $GITHUB_OUTPUT
+          else
+            echo "run_all=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Detect changed paths
+        if: steps.trigger.outputs.run_all != 'true'
+        uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            shared_utils:
+              - 'packages/shared-utils/**'
+              - 'package.json'
+              - 'package-lock.json'
+              - 'tsconfig*.json'
+              - '.github/workflows/ci.yml'
+
+            component_library:
+              - 'packages/component-library/**'
+              - 'packages/shared-utils/**'
+              - 'package.json'
+              - 'package-lock.json'
+              - 'tsconfig*.json'
+              - '.github/workflows/ci.yml'
+
+            app:
+              - 'packages/app/**'
+              - 'packages/component-library/**'
+              - 'packages/shared-utils/**'
+              - 'package.json'
+              - 'package-lock.json'
+              - 'tsconfig*.json'
+              - '.github/workflows/ci.yml'
+
+            e2e:
+              - 'packages/e2e/**'
+              - 'packages/app/**'
+              - 'packages/component-library/**'
+              - 'packages/shared-utils/**'
+              - 'package.json'
+              - 'package-lock.json'
+              - 'tsconfig*.json'
+              - '.github/workflows/ci.yml'
+
+            analysis:
+              - 'packages/**'
+              - 'scripts/**'
+              - 'package.json'
+              - 'package-lock.json'
+              - 'tsconfig*.json'
+              - '.github/workflows/ci.yml'
+              - '!**/*.md'
+
   component-library:
     name: Component Library
+    needs: [detect-changes]
+    if: needs.detect-changes.outputs.component_library == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -44,6 +119,8 @@ jobs:
 
   shared-utils:
     name: Shared Utils
+    needs: [detect-changes]
+    if: needs.detect-changes.outputs.shared_utils == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -61,6 +138,8 @@ jobs:
 
   app:
     name: App
+    needs: [detect-changes]
+    if: needs.detect-changes.outputs.app == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -69,15 +148,22 @@ jobs:
           node-version: 20
           cache: npm
       - run: npm ci
+      - name: Cache shared-utils build
+        uses: actions/cache@v4
+        with:
+          path: packages/shared-utils/dist
+          key: shared-utils-build-${{ hashFiles('packages/shared-utils/src/**', 'packages/shared-utils/tsconfig*.json') }}
       - run: npm run build --workspace=packages/shared-utils
       - run: npm run lint --workspace=packages/app
       - run: npm run typecheck --workspace=packages/app
       - run: npm run build --workspace=packages/app
 
-  # Mock Mode E2E Tests - Always run in CI
+  # Mock Mode E2E Tests
   # Uses mock API clients, no real API keys needed
   app-e2e-mock:
     name: App E2E (Mock Mode)
+    needs: [detect-changes]
+    if: needs.detect-changes.outputs.e2e == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -86,6 +172,11 @@ jobs:
           node-version: 20
           cache: npm
       - run: npm ci
+      - name: Cache shared-utils build
+        uses: actions/cache@v4
+        with:
+          path: packages/shared-utils/dist
+          key: shared-utils-build-${{ hashFiles('packages/shared-utils/src/**', 'packages/shared-utils/tsconfig*.json') }}
       - run: npm run build --workspace=packages/shared-utils
       - run: npm run build --workspace=packages/app
       - name: Get Playwright version
@@ -114,6 +205,8 @@ jobs:
 
   analysis:
     name: Static Analysis
+    needs: [detect-changes]
+    if: needs.detect-changes.outputs.analysis == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
