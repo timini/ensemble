@@ -1,5 +1,8 @@
 import type { StrategyName } from '../types.js';
 import { fileExists, readJsonFile, writeJsonFile } from '../lib/io.js';
+import { fisherExact } from '../lib/fisherExact.js';
+import { holmBonferroni } from '../lib/statistics.js';
+import { wilsonScoreInterval } from '../lib/wilsonScore.js';
 import { computeAccuracy } from './quickEvalHelpers.js';
 import type { DatasetResult } from './quickEvalOutput.js';
 
@@ -20,14 +23,21 @@ export interface QuickEvalBaselineFile {
   ensemble: Record<string, AccuracyRecord>;
 }
 
+export interface StrategyCheckResult {
+  strategy: string;
+  baselineAccuracy: number;
+  currentAccuracy: number;
+  delta: number;
+  pValue: number;
+  correctedPValue: number;
+  significant: boolean;
+  wilsonCI: { lower: number; upper: number };
+}
+
 export interface RegressionCheckResult {
   passed: boolean;
-  regressions: Array<{
-    strategy: string;
-    previous: number;
-    current: number;
-    delta: number;
-  }>;
+  significanceLevel: number;
+  results: StrategyCheckResult[];
 }
 
 export function buildBaselineFromResults(
@@ -74,65 +84,85 @@ export async function saveBaseline(path: string, baseline: QuickEvalBaselineFile
 }
 
 /**
- * Check for regressions between a previous and current baseline.
+ * Check for regressions between a previous and current baseline using
+ * Fisher's exact test with Holm-Bonferroni correction.
  *
- * @param tolerance - Accuracy drop (as a fraction, e.g. 0.10 = 10%) that is
- *   tolerated before flagging a regression.  With small sample sizes (e.g. 10
- *   questions per dataset) LLM responses are non-deterministic and a single
- *   question flip can cause a 5% swing.  The default tolerance of 10% avoids
- *   false-positive failures from natural variance.
+ * Uses one-sided Fisher's exact test (lower tail) to determine if current
+ * accuracy is significantly worse than baseline. With small sample sizes
+ * (e.g. 30 total questions), this avoids false-positive failures from
+ * natural LLM non-determinism while still catching real regressions.
+ *
+ * @param significanceLevel - Family-wise alpha level (default 0.10).
  */
 export function checkRegression(
   previous: QuickEvalBaselineFile,
   current: QuickEvalBaselineFile,
-  tolerance = 0.10,
+  significanceLevel = 0.10,
 ): RegressionCheckResult {
-  const regressions: RegressionCheckResult['regressions'] = [];
+  // Build list of all tests: single + each ensemble strategy
+  const tests: Array<{
+    strategy: string;
+    baseline: AccuracyRecord;
+    current: AccuracyRecord;
+  }> = [{ strategy: 'single', baseline: previous.single, current: current.single }];
 
-  // Check single-model regression (only flag if drop exceeds tolerance)
-  const singleDelta = current.single.accuracy - previous.single.accuracy;
-  if (singleDelta < -tolerance) {
-    regressions.push({
-      strategy: 'single',
-      previous: previous.single.accuracy,
-      current: current.single.accuracy,
-      delta: singleDelta,
-    });
-  }
-
-  // Check each strategy
   for (const strategy of current.strategies) {
     const prev = previous.ensemble[strategy];
     const curr = current.ensemble[strategy];
     if (prev && curr) {
-      const delta = curr.accuracy - prev.accuracy;
-      if (delta < -tolerance) {
-        regressions.push({
-          strategy,
-          previous: prev.accuracy,
-          current: curr.accuracy,
-          delta,
-        });
-      }
+      tests.push({ strategy, baseline: prev, current: curr });
     }
   }
 
-  return { passed: regressions.length === 0, regressions };
+  // Compute raw Fisher's exact p-values
+  const rawPValues = tests.map((t) => {
+    const baselineWrong = t.baseline.total - t.baseline.correct;
+    const currentWrong = t.current.total - t.current.correct;
+    const { pValue } = fisherExact(t.baseline.correct, baselineWrong, t.current.correct, currentWrong);
+    return { pValue, label: t.strategy };
+  });
+
+  // Apply Holm-Bonferroni correction
+  const corrected = holmBonferroni(rawPValues, significanceLevel);
+
+  // Build results with Wilson score CIs
+  const results: StrategyCheckResult[] = tests.map((t, i) => {
+    const baselineAccuracy = t.baseline.total > 0 ? t.baseline.correct / t.baseline.total : 0;
+    const currentAccuracy = t.current.total > 0 ? t.current.correct / t.current.total : 0;
+    const ci = wilsonScoreInterval(t.current.correct, t.current.total);
+    return {
+      strategy: t.strategy,
+      baselineAccuracy,
+      currentAccuracy,
+      delta: currentAccuracy - baselineAccuracy,
+      pValue: corrected[i].originalPValue,
+      correctedPValue: corrected[i].correctedPValue,
+      significant: corrected[i].significant,
+      wilsonCI: { lower: ci.lower, upper: ci.upper },
+    };
+  });
+
+  // Pass iff no result is both significant AND a regression (negative delta)
+  const passed = results.every((r) => !r.significant || r.delta >= 0);
+
+  return { passed, significanceLevel, results };
 }
 
 export function printRegressionReport(result: RegressionCheckResult): void {
   const w = (s: string) => process.stdout.write(s);
+  const pct = (v: number) => `${(v * 100).toFixed(1)}%`;
+  const pad = (s: string, len: number) => s.padEnd(len);
+  const fmtP = (p: number) => (p < 0.001 ? '<0.001' : p.toFixed(3));
 
-  if (result.passed) {
-    w('\n  ✓ No regressions detected.\n');
-    return;
+  w(`\n  REGRESSION ANALYSIS (alpha = ${result.significanceLevel}, Holm-Bonferroni corrected)\n\n`);
+  w(`  ${pad('Strategy', 13)}${pad('Baseline', 11)}${pad('Current', 10)}${pad('Delta', 9)}${pad('95% CI', 19)}${pad('p-value', 10)}Sig\n`);
+
+  for (const r of result.results) {
+    const ci = `[${pct(r.wilsonCI.lower)}, ${pct(r.wilsonCI.upper)}]`;
+    const sig = r.significant && r.delta < 0 ? '*' : '';
+    w(`  ${pad(r.strategy, 13)}${pad(pct(r.baselineAccuracy), 11)}${pad(pct(r.currentAccuracy), 10)}${pad((r.delta >= 0 ? '+' : '') + pct(r.delta), 9)}${pad(ci, 19)}${pad(fmtP(r.correctedPValue), 10)}${sig}\n`);
   }
 
-  w('\n  ✗ REGRESSIONS DETECTED:\n\n');
-  for (const r of result.regressions) {
-    const pct = (v: number) => `${(v * 100).toFixed(1)}%`;
-    const delta = `${((r.delta) * 100).toFixed(1)}%`;
-    w(`    ${r.strategy}: ${pct(r.previous)} → ${pct(r.current)} (${delta})\n`);
-  }
-  w('\n');
+  w('\n  * = significant regression after Holm-Bonferroni correction\n');
+  w(`  Result: ${result.passed ? 'PASSED (no significant regressions)' : 'FAILED (significant regression detected)'}\n`);
 }

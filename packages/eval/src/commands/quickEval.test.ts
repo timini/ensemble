@@ -61,4 +61,14 @@ describe('quickEval', () => {
     const opts = parseOpts(['--datasets', 'gsm8k,gpqa']);
     expect(opts.datasets).toEqual(['gsm8k,gpqa']);
   });
+
+  it('has default significance level of 0.10', () => {
+    const opts = parseOpts([]);
+    expect(opts.significance).toBe('0.10');
+  });
+
+  it('accepts custom significance level', () => {
+    const opts = parseOpts(['--significance', '0.05']);
+    expect(opts.significance).toBe('0.05');
+  });
 });

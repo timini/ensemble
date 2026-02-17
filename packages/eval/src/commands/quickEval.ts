@@ -29,6 +29,7 @@ interface QuickEvalOptions {
   cache: boolean;
   parallel: boolean;
   baseline?: string;
+  significance?: string;
 }
 
 function parseDatasets(raw?: string[]): BenchmarkDatasetName[] {
@@ -59,6 +60,7 @@ export function createQuickEvalCommand(): Command {
     .option('--no-cache', 'Disable single-model baseline caching.')
     .option('--no-parallel', 'Run datasets sequentially instead of in parallel.')
     .option('--baseline <path>', 'Path to baseline JSON. Saves results and fails on regression.')
+    .option('--significance <alpha>', 'Significance level for regression detection (0 < alpha < 1).', '0.10')
     .action(async (options: QuickEvalOptions) => {
       const { provider, model: modelName } = parseModelSpec(options.model);
       const model = options.model;
@@ -76,6 +78,11 @@ export function createQuickEvalCommand(): Command {
       const mode = options.mode as EvalMode;
       if (!VALID_MODES.includes(mode)) {
         throw new Error(`Invalid mode "${options.mode}". Expected one of: ${VALID_MODES.join(', ')}.`);
+      }
+
+      const significanceLevel = options.significance !== undefined ? Number.parseFloat(options.significance) : 0.10;
+      if (Number.isNaN(significanceLevel) || significanceLevel <= 0 || significanceLevel >= 1) {
+        throw new Error(`Significance level must be between 0 and 1 (exclusive), got "${options.significance}".`);
       }
 
       const strategies = parseStrategies(options.strategies ?? ['standard', 'elo', 'majority', 'council']);
@@ -116,7 +123,7 @@ export function createQuickEvalCommand(): Command {
         );
         const previous = await loadBaseline(options.baseline);
         if (previous) {
-          const result = checkRegression(previous, current);
+          const result = checkRegression(previous, current, significanceLevel);
           printRegressionReport(result);
           if (!result.passed) {
             await saveBaseline(options.baseline, current);
