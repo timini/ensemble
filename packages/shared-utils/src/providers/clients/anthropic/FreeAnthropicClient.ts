@@ -1,6 +1,6 @@
 import Anthropic from '@anthropic-ai/sdk';
-import { BaseFreeClient, type StreamOptions } from '../base/BaseFreeClient';
-import type { ValidationResult } from '../../types';
+import { BaseFreeClient, type StreamOptions, type StructuredOptions } from '../base/BaseFreeClient';
+import type { StructuredResponse, ValidationResult } from '../../types';
 
 export class FreeAnthropicClient extends BaseFreeClient {
   private createClient(apiKey: string) {
@@ -46,6 +46,50 @@ export class FreeAnthropicClient extends BaseFreeClient {
       // Fallback to known model list if SDK call fails
       return ['claude-3-5-sonnet-20241022', 'claude-3-opus-20240229', 'claude-3-sonnet-20240229', 'claude-3-haiku-20240307'];
     }
+  }
+
+  protected override async generateStructuredWithProvider<T>(
+    options: StructuredOptions,
+  ): Promise<StructuredResponse<T>> {
+    const client = this.createClient(options.apiKey);
+    const startTime = Date.now();
+
+    const response = await client.messages.create({
+      model: options.model,
+      max_tokens: 1024,
+      messages: [{ role: 'user', content: options.prompt }],
+      tools: [
+        {
+          name: options.schema.name,
+          description: 'Extract structured data from the response.',
+          input_schema: options.schema.schema as Anthropic.Tool.InputSchema,
+        },
+      ],
+      tool_choice: { type: 'tool' as const, name: options.schema.name },
+      ...(options.options?.temperature !== undefined && {
+        temperature: options.options.temperature,
+      }),
+    });
+
+    const toolBlock = response.content.find(
+      (block): block is Anthropic.ToolUseBlock => block.type === 'tool_use',
+    );
+
+    if (!toolBlock) {
+      throw new Error('Anthropic did not return a tool_use block for structured output.');
+    }
+
+    const parsed = toolBlock.input as T;
+    const raw = JSON.stringify(parsed);
+    const tokenCount =
+      (response.usage?.input_tokens ?? 0) + (response.usage?.output_tokens ?? 0);
+
+    return {
+      parsed,
+      raw,
+      responseTimeMs: Date.now() - startTime,
+      ...(tokenCount > 0 ? { tokenCount } : {}),
+    };
   }
 
   protected override async streamWithProvider(options: StreamOptions): Promise<void> {

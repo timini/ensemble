@@ -1,7 +1,9 @@
 import { describe, expect, it, vi } from 'vitest';
+import type { AIProvider } from '@ensemble-ai/shared-utils/providers';
 import {
   createEvaluatorForDataset,
   GenerativeEvaluator,
+  LLMJudgeMCQEvaluator,
   MCQEvaluator,
   NumericEvaluator,
 } from './evaluators.js';
@@ -155,11 +157,111 @@ describe('GenerativeEvaluator', () => {
   });
 });
 
+describe('LLMJudgeMCQEvaluator', () => {
+  function createMockProvider(answer: string): AIProvider {
+    return {
+      generateStructured: vi.fn().mockResolvedValue({
+        parsed: { answer },
+        raw: JSON.stringify({ answer }),
+        responseTimeMs: 50,
+      }),
+      streamResponse: vi.fn(),
+      generateEmbeddings: vi.fn(),
+      validateApiKey: vi.fn(),
+      listAvailableModels: vi.fn().mockReturnValue([]),
+      listAvailableTextModels: vi.fn().mockResolvedValue([]),
+    } as unknown as AIProvider;
+  }
+
+  it('uses judge LLM to extract the answer', async () => {
+    const provider = createMockProvider('B');
+    const evaluator = new LLMJudgeMCQEvaluator(provider, 'gpt-4o-mini');
+
+    const result = await evaluator.evaluate(
+      'I think the answer is B because...',
+      'B',
+    );
+
+    expect(result.correct).toBe(true);
+    expect(result.predicted).toBe('B');
+    expect(result.expected).toBe('B');
+    expect(provider.generateStructured).toHaveBeenCalledWith(
+      expect.stringContaining('I think the answer is B because...'),
+      'gpt-4o-mini',
+      expect.objectContaining({ name: 'mcq_answer' }),
+      { temperature: 0 },
+    );
+  });
+
+  it('marks incorrect when judge extracts wrong answer', async () => {
+    const provider = createMockProvider('A');
+    const evaluator = new LLMJudgeMCQEvaluator(provider, 'gpt-4o-mini');
+
+    const result = await evaluator.evaluate('The answer is A', 'C');
+
+    expect(result.correct).toBe(false);
+    expect(result.predicted).toBe('A');
+    expect(result.expected).toBe('C');
+  });
+
+  it('falls back to regex when judge call fails', async () => {
+    const provider = {
+      generateStructured: vi.fn().mockRejectedValue(new Error('API error')),
+      streamResponse: vi.fn(),
+      generateEmbeddings: vi.fn(),
+      validateApiKey: vi.fn(),
+      listAvailableModels: vi.fn().mockReturnValue([]),
+      listAvailableTextModels: vi.fn().mockResolvedValue([]),
+    } as unknown as AIProvider;
+
+    const evaluator = new LLMJudgeMCQEvaluator(provider, 'gpt-4o-mini');
+    const result = await evaluator.evaluate('Answer: D', 'D');
+
+    expect(result.correct).toBe(true);
+    expect(result.predicted).toBe('D');
+  });
+
+  it('has name "mcq" for compatibility with EvaluatorLike', () => {
+    const provider = createMockProvider('A');
+    const evaluator = new LLMJudgeMCQEvaluator(provider, 'gpt-4o-mini');
+    expect(evaluator.name).toBe('mcq');
+  });
+});
+
 describe('createEvaluatorForDataset', () => {
   it('returns the expected evaluator types', () => {
     expect(createEvaluatorForDataset('gsm8k')?.name).toBe('numeric');
     expect(createEvaluatorForDataset('truthfulqa')?.name).toBe('mcq');
     expect(createEvaluatorForDataset('gpqa')?.name).toBe('mcq');
     expect(createEvaluatorForDataset(null)).toBeNull();
+  });
+
+  it('returns LLMJudgeMCQEvaluator when judge config is provided for MCQ datasets', () => {
+    const mockProvider = {
+      generateStructured: vi.fn(),
+      streamResponse: vi.fn(),
+      generateEmbeddings: vi.fn(),
+      validateApiKey: vi.fn(),
+      listAvailableModels: vi.fn().mockReturnValue([]),
+      listAvailableTextModels: vi.fn().mockResolvedValue([]),
+    } as unknown as AIProvider;
+
+    const judge = { provider: mockProvider, model: 'gpt-4o-mini' };
+    const truthful = createEvaluatorForDataset('truthfulqa', judge);
+    const gpqa = createEvaluatorForDataset('gpqa', judge);
+    const gsm8k = createEvaluatorForDataset('gsm8k', judge);
+
+    expect(truthful).toBeInstanceOf(LLMJudgeMCQEvaluator);
+    expect(gpqa).toBeInstanceOf(LLMJudgeMCQEvaluator);
+    // gsm8k always returns NumericEvaluator regardless of judge
+    expect(gsm8k).toBeInstanceOf(NumericEvaluator);
+  });
+
+  it('returns MCQEvaluator when no judge config is provided', () => {
+    const truthful = createEvaluatorForDataset('truthfulqa');
+    const gpqa = createEvaluatorForDataset('gpqa');
+
+    expect(truthful).toBeInstanceOf(MCQEvaluator);
+    expect(gpqa).toBeInstanceOf(MCQEvaluator);
   });
 });

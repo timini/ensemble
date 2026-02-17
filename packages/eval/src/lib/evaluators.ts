@@ -1,3 +1,4 @@
+import type { AIProvider } from '@ensemble-ai/shared-utils/providers';
 import type {
   BenchmarkDatasetName,
   EvaluationResult,
@@ -77,9 +78,63 @@ export class GenerativeEvaluator {
   }
 }
 
+const MCQ_JUDGE_PROMPT =
+  'You are an answer extraction assistant. A student was asked a multiple-choice question with options A, B, C, D. Below is their response. Extract which single option letter (A, B, C, or D) the student selected.\n\nStudent response:\n';
+
+const MCQ_ANSWER_SCHEMA = {
+  name: 'mcq_answer',
+  schema: {
+    type: 'object' as const,
+    properties: {
+      answer: { type: 'string' as const, enum: ['A', 'B', 'C', 'D'] },
+    },
+    required: ['answer'],
+    additionalProperties: false,
+  },
+};
+
+export class LLMJudgeMCQEvaluator {
+  readonly name = 'mcq' as const;
+
+  constructor(
+    private readonly provider: AIProvider,
+    private readonly model: string,
+  ) {}
+
+  async evaluate(response: string, groundTruth: string): Promise<EvaluationResult> {
+    const expected = (extractChoiceLetter(groundTruth) ?? groundTruth.trim()).toUpperCase();
+
+    let predicted: string | null;
+    try {
+      const result = await this.provider.generateStructured<{ answer: string }>(
+        MCQ_JUDGE_PROMPT + response,
+        this.model,
+        MCQ_ANSWER_SCHEMA,
+        { temperature: 0 },
+      );
+      predicted = result.parsed.answer?.toUpperCase() ?? null;
+    } catch {
+      // Fall back to regex if judge call fails
+      predicted = extractChoiceLetter(response);
+    }
+
+    return {
+      correct: predicted !== null && expected.length > 0 ? predicted === expected : false,
+      expected,
+      predicted,
+    };
+  }
+}
+
+export interface JudgeConfig {
+  provider: AIProvider;
+  model: string;
+}
+
 export function createEvaluatorForDataset(
   datasetName: BenchmarkDatasetName | null,
-): NumericEvaluator | MCQEvaluator | null {
+  judge?: JudgeConfig,
+): NumericEvaluator | MCQEvaluator | LLMJudgeMCQEvaluator | null {
   if (!datasetName) {
     return null;
   }
@@ -89,7 +144,9 @@ export function createEvaluatorForDataset(
       return new NumericEvaluator();
     case 'truthfulqa':
     case 'gpqa':
-      return new MCQEvaluator();
+      return judge
+        ? new LLMJudgeMCQEvaluator(judge.provider, judge.model)
+        : new MCQEvaluator();
     default: {
       const exhaustiveCheck: never = datasetName;
       return exhaustiveCheck;

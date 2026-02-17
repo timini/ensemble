@@ -298,7 +298,7 @@ describe('benchmark command', () => {
 
       await runCommand(['gsm8k', '--models', 'openai:gpt-4o', '--output', 'out.json']);
 
-      expect(mockCreateEvaluatorForDataset).toHaveBeenCalledWith('gsm8k');
+      expect(mockCreateEvaluatorForDataset).toHaveBeenCalledWith('gsm8k', undefined);
       const config = MockBenchmarkRunner.mock.calls[0][0];
       expect(config.evaluator).toBe(fakeEvaluator);
     });

@@ -228,7 +228,7 @@ describe('baseline command', () => {
     it('creates evaluator from dataset', async () => {
       await runCommand(['gsm8k', '--model', 'openai:gpt-4o']);
 
-      expect(mockCreateEvaluatorForDataset).toHaveBeenCalledWith('gsm8k');
+      expect(mockCreateEvaluatorForDataset).toHaveBeenCalledWith('gsm8k', undefined);
     });
 
     it('calls evaluateResponses for each question', async () => {

@@ -21,6 +21,22 @@ export interface StreamResponseOptions {
   seed?: number;
 }
 
+export interface JsonSchema {
+  name: string;
+  schema: Record<string, unknown>;
+}
+
+export interface GenerateStructuredOptions {
+  temperature?: number;
+}
+
+export interface StructuredResponse<T> {
+  parsed: T;
+  raw: string;
+  responseTimeMs: number;
+  tokenCount?: number;
+}
+
 export interface AIProvider {
   streamResponse(
     prompt: string,
@@ -47,4 +63,16 @@ export interface AIProvider {
    * back to a reasonable default list when it is not.
    */
   listAvailableTextModels(): Promise<string[]>;
+
+  /**
+   * Generate a structured (JSON) response constrained to the given schema.
+   * Uses provider-native structured output (e.g. json_schema, tool_use).
+   * Non-streaming — returns the complete parsed result.
+   */
+  generateStructured<T>(
+    prompt: string,
+    model: string,
+    schema: JsonSchema,
+    options?: GenerateStructuredOptions,
+  ): Promise<StructuredResponse<T>>;
 }

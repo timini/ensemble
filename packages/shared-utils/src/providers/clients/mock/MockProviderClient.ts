@@ -5,7 +5,16 @@
  * Generates lorem ipsum text with streaming behaviour that mimics real APIs.
  */
 
-import type { AIProvider, ModelMetadata, StreamResponseOptions, ValidationResult, ProviderName } from '../../types.js';
+import type {
+  AIProvider,
+  GenerateStructuredOptions,
+  JsonSchema,
+  ModelMetadata,
+  StreamResponseOptions,
+  StructuredResponse,
+  ValidationResult,
+  ProviderName,
+} from '../../types.js';
 
 export interface MockClientConfig {
   enableErrors?: boolean;
@@ -95,6 +104,33 @@ export class MockProviderClient implements AIProvider {
     const delay = this.randomInt(100, 300);
     await new Promise((resolve) => setTimeout(resolve, delay));
     return { valid: true };
+  }
+
+  async generateStructured<T>(
+    _prompt: string,
+    _model: string,
+    schema: JsonSchema,
+    _options?: GenerateStructuredOptions,
+  ): Promise<StructuredResponse<T>> {
+    const delay = this.randomInt(50, 150);
+    await new Promise((resolve) => setTimeout(resolve, delay));
+
+    // Build a deterministic response using the first enum value for each property
+    const properties = (schema.schema as Record<string, unknown>).properties as
+      | Record<string, { enum?: string[] }>
+      | undefined;
+    const result: Record<string, unknown> = {};
+    if (properties) {
+      for (const [key, prop] of Object.entries(properties)) {
+        if (prop.enum && prop.enum.length > 0) {
+          result[key] = prop.enum[0];
+        }
+      }
+    }
+
+    const parsed = result as T;
+    const raw = JSON.stringify(parsed);
+    return { parsed, raw, responseTimeMs: delay };
   }
 
   listAvailableModels(): ModelMetadata[] {
