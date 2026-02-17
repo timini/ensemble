@@ -3,6 +3,7 @@ import { createRegressionReport } from './regressionReport.js';
 import type {
   BrokenQuestion,
   CostMetrics,
+  EnsembleDelta,
   RegressionResult,
   StabilityMetrics,
   StrategyRegressionResult,
@@ -378,6 +379,49 @@ describe('createRegressionReport', () => {
     const report = createRegressionReport(result);
 
     expect(report).toContain('post-merge');
+  });
+
+  it('includes ensemble value section when ensembleDelta is provided', () => {
+    const delta: EnsembleDelta = {
+      bestModelAccuracy: 0.75,
+      bestModelName: 'openai:gpt-4o-mini',
+      bestStrategyAccuracy: 0.85,
+      bestStrategyName: 'standard',
+      delta: 0.1,
+    };
+    const result = makePassingResult({ ensembleDelta: delta });
+    const report = createRegressionReport(result);
+
+    expect(report).toContain('## Ensemble Value');
+    expect(report).toContain('openai:gpt-4o-mini');
+    expect(report).toContain('75.0%');
+    expect(report).toContain('standard');
+    expect(report).toContain('85.0%');
+    expect(report).toContain('+10.0%');
+    expect(report).toContain(':white_check_mark:');
+  });
+
+  it('shows warning icon when ensemble delta is negative', () => {
+    const delta: EnsembleDelta = {
+      bestModelAccuracy: 0.85,
+      bestModelName: 'openai:gpt-4o-mini',
+      bestStrategyAccuracy: 0.75,
+      bestStrategyName: 'standard',
+      delta: -0.1,
+    };
+    const result = makePassingResult({ ensembleDelta: delta });
+    const report = createRegressionReport(result);
+
+    expect(report).toContain('## Ensemble Value');
+    expect(report).toContain(':warning:');
+    expect(report).toContain('-10.0%');
+  });
+
+  it('omits ensemble value section when ensembleDelta is undefined', () => {
+    const result = makePassingResult({ ensembleDelta: undefined });
+    const report = createRegressionReport(result);
+
+    expect(report).not.toContain('## Ensemble Value');
   });
 
   it('produces valid markdown table structure', () => {
