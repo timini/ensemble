@@ -6,16 +6,16 @@ import { parseStrategies } from '../lib/consensus.js';
 import { createEvaluatorForDataset } from '../lib/evaluators.js';
 import { registerProviders } from '../lib/providers.js';
 import { BenchmarkRunner } from '../lib/benchmarkRunner.js';
-import { computeEnsembleDelta } from '../lib/regression.js';
 import { createBenchmarkFile } from './benchmarkOutput.js';
 import type {
   BenchmarkDatasetName,
+  BenchmarkQuestion,
   EvalMode,
   PromptRunResult,
   StrategyName,
 } from '../types.js';
 
-const DEFAULT_MODEL = 'google:gemini-2.0-flash';
+const DEFAULT_MODEL = 'google:gemini-3-flash-preview';
 const DEFAULT_ENSEMBLE_SIZE = 3;
 const DEFAULT_SAMPLE = 10;
 const DEFAULT_DATASETS: BenchmarkDatasetName[] = ['gsm8k', 'truthfulqa'];
@@ -28,6 +28,7 @@ interface QuickEvalOptions {
   sample: string;
   mode: EvalMode;
   cache: boolean;
+  parallel: boolean;
 }
 
 interface DatasetResult {
@@ -52,8 +53,6 @@ function sumTokens(runs: PromptRunResult[]): number {
     for (const r of run.responses) {
       if (!r.error) total += r.tokenCount ?? 0;
     }
-    // Count consensus tokens (from the consensus output sizes as proxy)
-    // The actual token count is already in response tokenCount
   }
   return total;
 }
@@ -84,7 +83,6 @@ function computeAccuracy(runs: PromptRunResult[], strategy?: StrategyName): {
       }
     }
   } else {
-    // Per-model accuracy (use evaluation results)
     for (const run of runs) {
       if (!run.evaluation?.results) continue;
       for (const result of Object.values(run.evaluation.results)) {
@@ -94,6 +92,170 @@ function computeAccuracy(runs: PromptRunResult[], strategy?: StrategyName): {
     }
   }
   return { correct, total, accuracy: total > 0 ? correct / total : 0 };
+}
+
+interface RunDatasetArgs {
+  datasetName: BenchmarkDatasetName;
+  questions: BenchmarkQuestion[];
+  model: string;
+  provider: string;
+  modelName: string;
+  ensembleSize: number;
+  strategies: StrategyName[];
+  mode: EvalMode;
+  requestDelayMs: number;
+  registry: ProviderRegistry;
+  useCache: boolean;
+  sampleCount: number;
+}
+
+async function runSingleBaseline(args: RunDatasetArgs): Promise<PromptRunResult[]> {
+  const { datasetName, questions, model, provider, modelName, mode, requestDelayMs, registry, useCache, sampleCount } = args;
+
+  const cached = useCache
+    ? await loadCachedBaseline(model, datasetName, sampleCount)
+    : null;
+
+  if (cached) {
+    process.stderr.write(`  [${datasetName}] Single (1x ${modelName}) — cached\n`);
+    return cached;
+  }
+
+  process.stderr.write(`  [${datasetName}] Single (1x ${modelName})...\n`);
+  const evaluator = createEvaluatorForDataset(datasetName);
+  const singleModels = [{ provider: provider as import('../types.js').EvalProvider, model: modelName }];
+  const singleOutput = createBenchmarkFile(
+    datasetName, mode, [model], ['standard'], questions.length,
+  );
+  const singleRunner = new BenchmarkRunner({
+    mode, registry, models: singleModels, strategies: ['standard'],
+    evaluator, summarizer: null, requestDelayMs,
+  });
+  const singleResult = await singleRunner.run({
+    questions, outputPath: '/dev/null', output: singleOutput,
+    onProgress: (p) => {
+      process.stderr.write(`  [${datasetName}] single [${p.completed}/${p.total}] ${p.questionId}\n`);
+    },
+  });
+
+  if (useCache) {
+    await saveCachedBaseline(model, datasetName, sampleCount, singleResult.runs);
+  }
+  return singleResult.runs;
+}
+
+async function runEnsemble(args: RunDatasetArgs): Promise<PromptRunResult[]> {
+  const { datasetName, questions, model, provider, modelName, ensembleSize, strategies, mode, requestDelayMs, registry } = args;
+
+  process.stderr.write(`  [${datasetName}] Ensemble (${ensembleSize}x ${modelName})...\n`);
+  const evaluator = createEvaluatorForDataset(datasetName);
+  const ensembleModels = Array.from({ length: ensembleSize }, () => ({
+    provider: provider as import('../types.js').EvalProvider,
+    model: modelName,
+  }));
+  const ensembleOutput = createBenchmarkFile(
+    datasetName, mode, Array(ensembleSize).fill(model), strategies, questions.length,
+  );
+  const ensembleRunner = new BenchmarkRunner({
+    mode, registry, models: ensembleModels, strategies, evaluator,
+    summarizer: { provider: provider as import('../types.js').EvalProvider, model: modelName },
+    requestDelayMs,
+  });
+  const ensembleResult = await ensembleRunner.run({
+    questions, outputPath: '/dev/null', output: ensembleOutput,
+    onProgress: (p) => {
+      process.stderr.write(`  [${datasetName}] ensemble [${p.completed}/${p.total}] ${p.questionId}\n`);
+    },
+  });
+  return ensembleResult.runs;
+}
+
+async function runDataset(args: RunDatasetArgs, parallel: boolean): Promise<DatasetResult> {
+  let singleRuns: PromptRunResult[];
+  let ensembleRuns: PromptRunResult[];
+
+  if (parallel) {
+    [singleRuns, ensembleRuns] = await Promise.all([
+      runSingleBaseline(args),
+      runEnsemble(args),
+    ]);
+  } else {
+    singleRuns = await runSingleBaseline(args);
+    ensembleRuns = await runEnsemble(args);
+  }
+
+  return { dataset: args.datasetName, singleRuns, ensembleRuns };
+}
+
+function printResults(
+  model: string,
+  ensembleSize: number,
+  strategies: StrategyName[],
+  allDatasetResults: DatasetResult[],
+  durationMs: number,
+): void {
+  const allSingleRuns = allDatasetResults.flatMap((d) => d.singleRuns);
+  const allEnsembleRuns = allDatasetResults.flatMap((d) => d.ensembleRuns);
+  const singleAcc = computeAccuracy(allSingleRuns);
+  const singleTokens = sumTokens(allSingleRuns);
+  const singleCost = sumCost(allSingleRuns);
+
+  process.stdout.write(`\n${'='.repeat(70)}\n`);
+  process.stdout.write(`  QUICK EVAL RESULTS — ${model}\n`);
+  process.stdout.write(`${'='.repeat(70)}\n\n`);
+
+  // Per-dataset breakdown
+  for (const dr of allDatasetResults) {
+    const dsSingle = computeAccuracy(dr.singleRuns);
+    const dsSingleTokens = sumTokens(dr.singleRuns);
+    process.stdout.write(`  ${dr.dataset}:\n`);
+    process.stdout.write(`    Single:   ${toPercent(dsSingle.accuracy)} (${dsSingle.correct}/${dsSingle.total})  tokens: ${dsSingleTokens.toLocaleString()}\n`);
+    for (const strategy of strategies) {
+      const dsStrat = computeAccuracy(dr.ensembleRuns, strategy);
+      const dsTokens = sumTokens(dr.ensembleRuns);
+      const delta = dsStrat.accuracy - dsSingle.accuracy;
+      const tokenDelta = dsTokens - dsSingleTokens;
+      process.stdout.write(`    ${strategy.padEnd(10)} ${toPercent(dsStrat.accuracy)} (${dsStrat.correct}/${dsStrat.total})  delta: ${toDelta(delta)}  tokens: ${dsTokens.toLocaleString()} (${tokenDelta > 0 ? '+' : ''}${tokenDelta.toLocaleString()})\n`);
+    }
+    process.stdout.write('\n');
+  }
+
+  // Summary table
+  process.stdout.write(`  ${'—'.repeat(60)}\n`);
+  process.stdout.write(`  SUMMARY\n`);
+  process.stdout.write(`  ${'—'.repeat(60)}\n\n`);
+
+  process.stdout.write(`  ${''.padEnd(14)} ${'Accuracy'.padEnd(22)} ${'Tokens'.padEnd(16)} Cost\n`);
+  process.stdout.write(`  ${'Single (1x)'.padEnd(14)} ${`${toPercent(singleAcc.accuracy)} (${singleAcc.correct}/${singleAcc.total})`.padEnd(22)} ${singleTokens.toLocaleString().padEnd(16)} $${singleCost.toFixed(4)}\n`);
+
+  for (const strategy of strategies) {
+    const stratAcc = computeAccuracy(allEnsembleRuns, strategy);
+    const stratTokens = sumTokens(allEnsembleRuns);
+    const stratCost = sumCost(allEnsembleRuns);
+    process.stdout.write(`  ${`${strategy} (${ensembleSize}x)`.padEnd(14)} ${`${toPercent(stratAcc.accuracy)} (${stratAcc.correct}/${stratAcc.total})`.padEnd(22)} ${stratTokens.toLocaleString().padEnd(16)} $${stratCost.toFixed(4)}\n`);
+  }
+
+  process.stdout.write('\n');
+
+  // Delta highlights
+  for (const strategy of strategies) {
+    const stratAcc = computeAccuracy(allEnsembleRuns, strategy);
+    const stratTokens = sumTokens(allEnsembleRuns);
+    const stratCost = sumCost(allEnsembleRuns);
+    const accDelta = stratAcc.accuracy - singleAcc.accuracy;
+    const tokenDelta = stratTokens - singleTokens;
+    const costDelta = stratCost - singleCost;
+    const tokenMultiplier = singleTokens > 0 ? stratTokens / singleTokens : 0;
+    const accIcon = accDelta > 0 ? ' ✓' : accDelta < 0 ? ' ✗' : '';
+
+    process.stdout.write(`  ${strategy} vs single:\n`);
+    process.stdout.write(`    Accuracy: ${toDelta(accDelta)}${accIcon}\n`);
+    process.stdout.write(`    Tokens:   ${tokenDelta > 0 ? '+' : ''}${tokenDelta.toLocaleString()} (${tokenMultiplier.toFixed(1)}x)\n`);
+    process.stdout.write(`    Cost:     ${costDelta >= 0 ? '+' : ''}$${costDelta.toFixed(4)} (${tokenMultiplier.toFixed(1)}x)\n`);
+  }
+
+  process.stdout.write(`\n  Duration: ${Math.round(durationMs / 1000)}s\n`);
+  process.stdout.write(`${'='.repeat(70)}\n`);
 }
 
 export function createQuickEvalCommand(): Command {
@@ -123,7 +285,8 @@ export function createQuickEvalCommand(): Command {
     )
     .option('--sample <count>', 'Questions per dataset.', String(DEFAULT_SAMPLE))
     .option('--mode <mode>', 'Provider mode (mock or free).', 'free')
-    .option('--no-cache', 'Disable single-model baseline caching (re-run baseline from scratch).')
+    .option('--no-cache', 'Disable single-model baseline caching.')
+    .option('--no-parallel', 'Run datasets sequentially instead of in parallel.')
     .action(async (options: QuickEvalOptions) => {
       const model = options.model;
       const [provider, modelName] = model.split(':');
@@ -147,7 +310,9 @@ export function createQuickEvalCommand(): Command {
         : DEFAULT_DATASETS;
 
       const mode = options.mode;
-      const requestDelayMs = mode === 'mock' ? 0 : 100;
+      const requestDelayMs = mode === 'mock' ? 0 : 0;
+      const parallel = options.parallel;
+      const useCache = options.cache && mode !== 'mock';
       const registry = new ProviderRegistry();
       registerProviders(registry, [provider as import('../types.js').EvalProvider], mode);
 
@@ -157,161 +322,40 @@ export function createQuickEvalCommand(): Command {
       process.stderr.write(`  Ensemble: ${ensembleSize}x ${model}\n`);
       process.stderr.write(`  Strategy: ${strategies.join(', ')}\n`);
       process.stderr.write(`  Datasets: ${datasetNames.join(', ')}\n`);
-      process.stderr.write(`  Sample:   ${sampleCount} per dataset\n\n`);
+      process.stderr.write(`  Sample:   ${sampleCount} per dataset\n`);
+      process.stderr.write(`  Parallel: ${parallel ? 'yes' : 'no'}\n\n`);
 
-      const allDatasetResults: DatasetResult[] = [];
+      // Load questions for all datasets
+      const datasetQuestions = await Promise.all(
+        datasetNames.map(async (name) => ({
+          name,
+          questions: (await loadBenchmarkQuestions(name, { sample: sampleCount })).questions,
+        })),
+      );
 
-      for (const datasetName of datasetNames) {
-        process.stderr.write(`--- ${datasetName} ---\n`);
+      // Build run args for each dataset
+      const runArgs: RunDatasetArgs[] = datasetQuestions.map(({ name, questions }) => ({
+        datasetName: name,
+        questions,
+        model, provider, modelName, ensembleSize, strategies,
+        mode, requestDelayMs, registry, useCache, sampleCount,
+      }));
 
-        const { questions } = await loadBenchmarkQuestions(datasetName, {
-          sample: sampleCount,
-        });
-
-        const evaluator = createEvaluatorForDataset(datasetName);
-
-        // Run 1: Single instance (check cache first)
-        let singleRuns: PromptRunResult[];
-        const useCache = options.cache && mode !== 'mock';
-        const cached = useCache
-          ? await loadCachedBaseline(model, datasetName, sampleCount)
-          : null;
-
-        if (cached) {
-          process.stderr.write(`  Single instance (1x ${modelName}) — cached\n`);
-          singleRuns = cached;
-        } else {
-          process.stderr.write(`  Single instance (1x ${modelName})...\n`);
-          const singleModels = [{ provider: provider as import('../types.js').EvalProvider, model: modelName }];
-          const singleOutput = createBenchmarkFile(
-            datasetName, mode, [model], ['standard'], questions.length,
-          );
-          const singleRunner = new BenchmarkRunner({
-            mode,
-            registry,
-            models: singleModels,
-            strategies: ['standard'],
-            evaluator,
-            summarizer: null,
-            requestDelayMs,
-          });
-          const singleResult = await singleRunner.run({
-            questions,
-            outputPath: '/dev/null',
-            output: singleOutput,
-            onProgress: (p) => {
-              process.stderr.write(`    [${p.completed}/${p.total}] ${p.questionId}\n`);
-            },
-          });
-          singleRuns = singleResult.runs;
-
-          if (useCache) {
-            await saveCachedBaseline(model, datasetName, sampleCount, singleRuns);
-          }
-        }
-
-        // Run 2: Ensemble (N instances of the same model)
-        process.stderr.write(`  Ensemble (${ensembleSize}x ${modelName})...\n`);
-        const ensembleModels = Array.from({ length: ensembleSize }, () => ({
-          provider: provider as import('../types.js').EvalProvider,
-          model: modelName,
-        }));
-        const ensembleOutput = createBenchmarkFile(
-          datasetName, mode, Array(ensembleSize).fill(model), strategies, questions.length,
+      // Run all datasets (parallel or sequential)
+      let allDatasetResults: DatasetResult[];
+      if (parallel) {
+        allDatasetResults = await Promise.all(
+          runArgs.map((args) => runDataset(args, true)),
         );
-        const ensembleRunner = new BenchmarkRunner({
-          mode,
-          registry,
-          models: ensembleModels,
-          strategies,
-          evaluator,
-          summarizer: { provider: provider as import('../types.js').EvalProvider, model: modelName },
-          requestDelayMs,
-        });
-        const ensembleResult = await ensembleRunner.run({
-          questions,
-          outputPath: '/dev/null',
-          output: ensembleOutput,
-          onProgress: (p) => {
-            process.stderr.write(`    [${p.completed}/${p.total}] ${p.questionId}\n`);
-          },
-        });
-
-        allDatasetResults.push({
-          dataset: datasetName,
-          singleRuns,
-          ensembleRuns: ensembleResult.runs,
-        });
+      } else {
+        allDatasetResults = [];
+        for (const args of runArgs) {
+          allDatasetResults.push(await runDataset(args, false));
+        }
       }
 
       const durationMs = Date.now() - startTime;
-
-      // Print results
-      const allSingleRuns = allDatasetResults.flatMap((d) => d.singleRuns);
-      const allEnsembleRuns = allDatasetResults.flatMap((d) => d.ensembleRuns);
-
-      const singleAcc = computeAccuracy(allSingleRuns);
-      const singleTokens = sumTokens(allSingleRuns);
-      const singleCost = sumCost(allSingleRuns);
-
-      process.stdout.write(`\n${'='.repeat(70)}\n`);
-      process.stdout.write(`  QUICK EVAL RESULTS — ${model}\n`);
-      process.stdout.write(`${'='.repeat(70)}\n\n`);
-
-      // Per-dataset breakdown
-      for (const dr of allDatasetResults) {
-        const dsSingle = computeAccuracy(dr.singleRuns);
-        const dsSingleTokens = sumTokens(dr.singleRuns);
-        process.stdout.write(`  ${dr.dataset}:\n`);
-        process.stdout.write(`    Single:   ${toPercent(dsSingle.accuracy)} (${dsSingle.correct}/${dsSingle.total})  tokens: ${dsSingleTokens.toLocaleString()}\n`);
-        for (const strategy of strategies) {
-          const dsStrat = computeAccuracy(dr.ensembleRuns, strategy);
-          const dsTokens = sumTokens(dr.ensembleRuns);
-          const delta = dsStrat.accuracy - dsSingle.accuracy;
-          const tokenDelta = dsTokens - dsSingleTokens;
-          process.stdout.write(`    ${strategy.padEnd(10)} ${toPercent(dsStrat.accuracy)} (${dsStrat.correct}/${dsStrat.total})  delta: ${toDelta(delta)}  tokens: ${dsTokens.toLocaleString()} (${tokenDelta > 0 ? '+' : ''}${tokenDelta.toLocaleString()})\n`);
-        }
-        process.stdout.write('\n');
-      }
-
-      // Summary section — the key numbers at a glance
-      process.stdout.write(`  ${'—'.repeat(60)}\n`);
-      process.stdout.write(`  SUMMARY\n`);
-      process.stdout.write(`  ${'—'.repeat(60)}\n\n`);
-
-      process.stdout.write(`  ${''.padEnd(14)} ${'Accuracy'.padEnd(22)} ${'Tokens'.padEnd(16)} Cost\n`);
-      process.stdout.write(`  ${'Single (1x)'.padEnd(14)} ${`${toPercent(singleAcc.accuracy)} (${singleAcc.correct}/${singleAcc.total})`.padEnd(22)} ${singleTokens.toLocaleString().padEnd(16)} $${singleCost.toFixed(4)}\n`);
-
-      for (const strategy of strategies) {
-        const stratAcc = computeAccuracy(allEnsembleRuns, strategy);
-        const stratTokens = sumTokens(allEnsembleRuns);
-        const stratCost = sumCost(allEnsembleRuns);
-
-        process.stdout.write(`  ${`${strategy} (${ensembleSize}x)`.padEnd(14)} ${`${toPercent(stratAcc.accuracy)} (${stratAcc.correct}/${stratAcc.total})`.padEnd(22)} ${stratTokens.toLocaleString().padEnd(16)} $${stratCost.toFixed(4)}\n`);
-      }
-
-      process.stdout.write('\n');
-
-      // Delta highlights
-      for (const strategy of strategies) {
-        const stratAcc = computeAccuracy(allEnsembleRuns, strategy);
-        const stratTokens = sumTokens(allEnsembleRuns);
-        const stratCost = sumCost(allEnsembleRuns);
-        const accDelta = stratAcc.accuracy - singleAcc.accuracy;
-        const tokenDelta = stratTokens - singleTokens;
-        const costDelta = stratCost - singleCost;
-        const tokenMultiplier = singleTokens > 0 ? stratTokens / singleTokens : 0;
-
-        const accIcon = accDelta > 0 ? ' ✓' : accDelta < 0 ? ' ✗' : '';
-
-        process.stdout.write(`  ${strategy} vs single:\n`);
-        process.stdout.write(`    Accuracy: ${toDelta(accDelta)}${accIcon}\n`);
-        process.stdout.write(`    Tokens:   ${tokenDelta > 0 ? '+' : ''}${tokenDelta.toLocaleString()} (${tokenMultiplier.toFixed(1)}x)\n`);
-        process.stdout.write(`    Cost:     ${costDelta >= 0 ? '+' : ''}$${costDelta.toFixed(4)} (${tokenMultiplier.toFixed(1)}x)\n`);
-      }
-
-      process.stdout.write(`\n  Duration: ${Math.round(durationMs / 1000)}s\n`);
-      process.stdout.write(`${'='.repeat(70)}\n`);
+      printResults(model, ensembleSize, strategies, allDatasetResults, durationMs);
     });
 
   return command;
