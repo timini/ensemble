@@ -389,7 +389,7 @@ describe('EnsembleConfigurationSummary', () => {
         />
       );
 
-      const warning = screen.getByText(/ELO Ranked Summarisation requires/i);
+      const warning = screen.getByText(/ELO and Council require at least 3 models/i);
       expect(warning).toBeInTheDocument();
     });
 

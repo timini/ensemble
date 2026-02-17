@@ -106,6 +106,26 @@ export function ConsensusPresetSelector({
             </span>
           </label>
 
+          <label className={`flex items-start gap-2 ${selectedModelCount < 3 ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}>
+            <input
+              type="radio"
+              name="consensusMethod"
+              checked={consensusMethod === 'council'}
+              onChange={() => onConsensusMethodChange('council')}
+              disabled={selectedModelCount < 3}
+              className="w-4 h-4 text-primary accent-primary disabled:opacity-50"
+              data-testid="preset-council"
+            />
+            <span className="space-y-1">
+              <span className="block text-sm font-medium">
+                {t('organisms.ensembleConfigurationSummary.consensusPreset.council.title')}
+              </span>
+              <span className="block text-xs text-muted-foreground">
+                {t('organisms.ensembleConfigurationSummary.consensusPreset.council.description')}
+              </span>
+            </span>
+          </label>
+
           {consensusMethod === 'elo' && onTopNChange && (
             <div className="flex items-center gap-2 ml-4">
               <span className="text-sm text-muted-foreground">
@@ -127,10 +147,10 @@ export function ConsensusPresetSelector({
         {selectedModelCount < 3 && (
           <p
             className="text-xs text-warning flex items-center gap-1"
-            data-testid="preset-elo-warning"
+            data-testid="preset-min-models-warning"
           >
             <span>ℹ️</span>
-            {t('organisms.ensembleConfigurationSummary.consensusPreset.elo.warning', {
+            {t('organisms.ensembleConfigurationSummary.consensusPreset.minModelsWarning', {
               count: selectedModelCount,
             })}
           </p>

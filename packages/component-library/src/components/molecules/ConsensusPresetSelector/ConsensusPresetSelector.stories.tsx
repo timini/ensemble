@@ -17,7 +17,7 @@ const meta = {
     },
     consensusMethod: {
       control: 'radio',
-      options: ['standard', 'elo', 'majority'],
+      options: ['standard', 'elo', 'majority', 'council'],
       description: 'Active consensus method',
     },
     topN: {
@@ -54,6 +54,16 @@ export const Majority: Story = {
   args: {
     selectedModelCount: 4,
     consensusMethod: 'majority',
+    topN: 3,
+    onConsensusMethodChange: () => {},
+    onTopNChange: () => {},
+  },
+};
+
+export const Council: Story = {
+  args: {
+    selectedModelCount: 4,
+    consensusMethod: 'council',
     topN: 3,
     onConsensusMethodChange: () => {},
     onTopNChange: () => {},

@@ -55,8 +55,8 @@ test.describe('Consensus Presets (Mock Mode)', () => {
         const eloRadio = page.getByTestId('preset-elo');
         await expect(eloRadio).toBeDisabled();
 
-        // Check ELO warning message is visible
-        await expect(page.getByTestId('preset-elo-warning')).toBeVisible();
+        // Check min-models warning message is visible
+        await expect(page.getByTestId('preset-min-models-warning')).toBeVisible();
 
         // Standard should be checked
         await expect(page.getByTestId('preset-standard')).toBeChecked();

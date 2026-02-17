@@ -144,7 +144,12 @@
         "majority": {
           "title": "Majority Voting",
           "description": "Favors the majority position across responses. Works with 2+ models."
-        }
+        },
+        "council": {
+          "title": "Council Debate",
+          "description": "Multi-round debate between models with critique and rebuttal. Needs 3+ models."
+        },
+        "minModelsWarning": "ELO and Council require at least 3 models selected ({{count}} selected)"
       }
     },
     "ensembleManagementPanel": {
