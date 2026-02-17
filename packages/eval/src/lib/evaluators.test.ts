@@ -59,6 +59,42 @@ describe('extractChoiceLetter', () => {
   it('extracts "The correct answer is (D)"', () => {
     expect(extractChoiceLetter('The correct answer is (D)')).toBe('D');
   });
+
+  it('extracts markdown bold **A**', () => {
+    expect(extractChoiceLetter('The answer is **A**')).toBe('A');
+  });
+
+  it('extracts markdown underscore __D__', () => {
+    expect(extractChoiceLetter('The answer is __D__')).toBe('D');
+  });
+
+  it('extracts "The correct option is A"', () => {
+    expect(extractChoiceLetter('The correct option is A')).toBe('A');
+  });
+
+  it('extracts "The best answer is B"', () => {
+    expect(extractChoiceLetter('The best answer is B')).toBe('B');
+  });
+
+  it('extracts "The best option is C"', () => {
+    expect(extractChoiceLetter('The best option is C')).toBe('C');
+  });
+
+  it('extracts "A. Bananas are yellow" format', () => {
+    expect(extractChoiceLetter('A. Bananas are yellow')).toBe('A');
+  });
+
+  it('extracts bare letter on last line', () => {
+    expect(extractChoiceLetter('After analysis, I believe the answer is:\nB')).toBe('B');
+  });
+
+  it('extracts single bold letter **C**', () => {
+    expect(extractChoiceLetter('**C**')).toBe('C');
+  });
+
+  it('extracts italic *A*', () => {
+    expect(extractChoiceLetter('The answer is *A*')).toBe('A');
+  });
 });
 
 describe('NumericEvaluator', () => {
