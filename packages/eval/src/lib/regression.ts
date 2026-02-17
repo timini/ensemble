@@ -12,6 +12,7 @@ import type {
   BaselineQuestionResult,
   BrokenQuestion,
   CostMetrics,
+  EnsembleDelta,
   GoldenBaselineFile,
   RegressionResult,
   StabilityMetrics,
@@ -190,6 +191,73 @@ function computeCostMetrics(
   return { totalTokens, totalCostUsd, durationMs };
 }
 
+/**
+ * Computes per-model accuracy across all runs.
+ * Returns a map from model key (e.g. "openai:gpt-4o-mini") to { correct, total }.
+ */
+function computeModelAccuracy(
+  runs: PromptRunResult[],
+): Map<string, { correct: number; total: number }> {
+  const counts = new Map<string, { correct: number; total: number }>();
+  for (const run of runs) {
+    if (!run.evaluation?.results) continue;
+    for (const [modelKey, evalResult] of Object.entries(run.evaluation.results)) {
+      const entry = counts.get(modelKey) ?? { correct: 0, total: 0 };
+      entry.total += 1;
+      if (evalResult.correct) entry.correct += 1;
+      counts.set(modelKey, entry);
+    }
+  }
+  return counts;
+}
+
+/**
+ * Computes the ensemble delta: best consensus strategy accuracy minus best
+ * individual model accuracy.  Positive delta means ensemble adds value.
+ */
+export function computeEnsembleDelta(
+  runs: PromptRunResult[],
+  strategies: StrategyName[],
+): EnsembleDelta | undefined {
+  // Best model
+  const modelAccuracy = computeModelAccuracy(runs);
+  let bestModelName = '';
+  let bestModelAcc = -1;
+  for (const [modelKey, { correct, total }] of modelAccuracy) {
+    if (total === 0) continue;
+    const acc = correct / total;
+    if (acc > bestModelAcc) {
+      bestModelAcc = acc;
+      bestModelName = modelKey;
+    }
+  }
+
+  // Best strategy
+  const strategyAccuracy = computeStrategyAccuracy(runs, strategies);
+  let bestStrategyName: StrategyName = strategies[0];
+  let bestStrategyAcc = -1;
+  for (const [strategy, { correct, total }] of strategyAccuracy) {
+    if (total === 0) continue;
+    const acc = correct / total;
+    if (acc > bestStrategyAcc) {
+      bestStrategyAcc = acc;
+      bestStrategyName = strategy;
+    }
+  }
+
+  if (bestModelAcc < 0 || bestStrategyAcc < 0) {
+    return undefined;
+  }
+
+  return {
+    bestModelAccuracy: bestModelAcc,
+    bestModelName,
+    bestStrategyAccuracy: bestStrategyAcc,
+    bestStrategyName,
+    delta: bestStrategyAcc - bestModelAcc,
+  };
+}
+
 /** Options for {@link RegressionDetector.evaluate}. */
 export interface RegressionDetectorEvaluateOptions {
   onProgress?: (progress: BenchmarkRunnerProgress) => void;
@@ -352,6 +420,15 @@ export class RegressionDetector {
     // Step 5: Compute cost metrics (aggregate across all runs)
     const cost = computeCostMetrics(allRunResults, durationMs);
 
+    // Step 6: Compute ensemble delta (best strategy vs best individual model)
+    // Use the first run's results for ensemble delta computation.
+    const firstRunResults = allRunResults[0];
+    const allFirstRunRuns: PromptRunResult[] = [];
+    for (const results of firstRunResults.values()) {
+      allFirstRunRuns.push(...results.runs);
+    }
+    const ensembleDelta = computeEnsembleDelta(allFirstRunRuns, strategies);
+
     return {
       tier: this.tier.name,
       timestamp: new Date().toISOString(),
@@ -362,6 +439,7 @@ export class RegressionDetector {
       brokenQuestions,
       stability,
       cost,
+      ensembleDelta,
     };
   }
 

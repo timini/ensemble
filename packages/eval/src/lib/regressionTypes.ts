@@ -109,6 +109,20 @@ export interface CostMetrics {
   durationMs: number;
 }
 
+/** Measures whether ensemble consensus adds value over individual models. */
+export interface EnsembleDelta {
+  /** Accuracy of the best individual model across all datasets. */
+  bestModelAccuracy: number;
+  /** Name of the best individual model (e.g. "openai:gpt-4o-mini"). */
+  bestModelName: string;
+  /** Accuracy of the best consensus strategy across all datasets. */
+  bestStrategyAccuracy: number;
+  /** Name of the best consensus strategy (e.g. "standard"). */
+  bestStrategyName: StrategyName;
+  /** Difference: bestStrategyAccuracy - bestModelAccuracy. Positive = ensemble adds value. */
+  delta: number;
+}
+
 /** Complete output of a regression evaluation comparing current code against a baseline. */
 export interface RegressionResult {
   /** The evaluation tier that produced this result. */
@@ -129,4 +143,6 @@ export interface RegressionResult {
   stability: StabilityMetrics | undefined;
   /** Cost and resource usage for this evaluation. */
   cost: CostMetrics;
+  /** Ensemble value: does consensus beat the best individual model? */
+  ensembleDelta?: EnsembleDelta;
 }
