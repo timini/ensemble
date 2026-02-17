@@ -1,4 +1,3 @@
-
 import { describe, it, expect, vi, beforeEach, type Mock } from 'vitest';
 import { StandardConsensus } from '../StandardConsensus';
 import type { ConsensusModelResponse } from '../types';
