@@ -8,9 +8,9 @@ CHANGED_COMPONENT_LIB=false
 CHANGED_SHARED_UTILS=false
 CHANGED_APP=false
 
-echo "$STAGED_FILES" | grep -q '^packages/component-library/' && CHANGED_COMPONENT_LIB=true || true
-echo "$STAGED_FILES" | grep -q '^packages/shared-utils/' && CHANGED_SHARED_UTILS=true || true
-echo "$STAGED_FILES" | grep -q '^packages/app/' && CHANGED_APP=true || true
+if echo "$STAGED_FILES" | grep -q '^packages/component-library/'; then CHANGED_COMPONENT_LIB=true; fi
+if echo "$STAGED_FILES" | grep -q '^packages/shared-utils/'; then CHANGED_SHARED_UTILS=true; fi
+if echo "$STAGED_FILES" | grep -q '^packages/app/'; then CHANGED_APP=true; fi
 
 # Component library depends on shared-utils
 if [ "$CHANGED_COMPONENT_LIB" = true ] || [ "$CHANGED_SHARED_UTILS" = true ]; then

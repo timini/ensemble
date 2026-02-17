@@ -47,17 +47,17 @@ export function sumStrategyMetrics(
   strategy: StrategyName,
 ): ConsensusStrategyMetrics {
   let tokenCount = 0;
-  let totalDuration = 0;
+  let durationSum = 0;
   let count = 0;
   for (const run of runs) {
     const m = run.consensusMetrics?.[strategy];
     if (m) {
       tokenCount += m.tokenCount;
-      totalDuration += m.durationMs;
+      durationSum += m.durationMs;
       count += 1;
     }
   }
-  return { tokenCount, durationMs: count > 0 ? totalDuration / count : 0 };
+  return { tokenCount, durationMs: count > 0 ? durationSum / count : 0 };
 }
 
 export function computeAccuracy(runs: PromptRunResult[], strategy?: StrategyName): {
