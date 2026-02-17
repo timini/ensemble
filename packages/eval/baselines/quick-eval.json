@@ -4,34 +4,41 @@
   "sample": 10,
   "datasets": [
     "gsm8k",
-    "truthfulqa"
+    "truthfulqa",
+    "gpqa"
   ],
   "strategies": [
     "standard",
     "elo",
-    "majority"
+    "majority",
+    "council"
   ],
-  "updatedAt": "2026-02-17T13:12:28.192Z",
+  "updatedAt": "2026-02-17T13:36:07.868Z",
   "single": {
-    "accuracy": 0.5,
-    "correct": 10,
-    "total": 20
+    "accuracy": 0.6666666666666666,
+    "correct": 20,
+    "total": 30
   },
   "ensemble": {
     "standard": {
-      "accuracy": 0.45,
-      "correct": 9,
-      "total": 20
+      "accuracy": 0.6666666666666666,
+      "correct": 20,
+      "total": 30
     },
     "elo": {
-      "accuracy": 0.45,
-      "correct": 9,
-      "total": 20
+      "accuracy": 0.7,
+      "correct": 21,
+      "total": 30
     },
     "majority": {
-      "accuracy": 0.75,
-      "correct": 15,
-      "total": 20
+      "accuracy": 0.8333333333333334,
+      "correct": 25,
+      "total": 30
+    },
+    "council": {
+      "accuracy": 0.7333333333333333,
+      "correct": 22,
+      "total": 30
     }
   }
 }
