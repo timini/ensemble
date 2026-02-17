@@ -23,7 +23,7 @@ vi.mock('../lib/providers.js', () => ({
 
 vi.mock('../lib/consensus.js', () => ({
   parseStrategies: vi.fn((values: string[]) => values),
-  generateConsensus: vi.fn().mockResolvedValue({}),
+  generateConsensus: vi.fn().mockResolvedValue({ outputs: {}, metrics: {} }),
 }));
 
 vi.mock('../lib/ensembleRunner.js', () => {
@@ -57,7 +57,7 @@ function makeResponse(overrides?: Partial<ProviderResponse>): ProviderResponse {
 
 function setupDefaults(): void {
   mockRunPrompt.mockResolvedValue([makeResponse()]);
-  mockGenerateConsensus.mockResolvedValue({ standard: 'Consensus text' });
+  mockGenerateConsensus.mockResolvedValue({ outputs: { standard: 'Consensus text' }, metrics: { standard: { tokenCount: 100, durationMs: 500 } } });
 }
 
 async function runCommand(args: string[]): Promise<void> {

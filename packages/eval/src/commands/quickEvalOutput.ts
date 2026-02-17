@@ -1,7 +1,7 @@
 import type { PromptRunResult, StrategyName } from '../types.js';
 import {
   toPercent, toDelta, sumTokens, sumCost,
-  avgDurationMs, formatMs, computeAccuracy,
+  avgDurationMs, formatMs, computeAccuracy, sumStrategyMetrics,
 } from './quickEvalHelpers.js';
 
 export interface DatasetResult {
@@ -35,13 +35,14 @@ export function printResults(
     const dsSingleTime = avgDurationMs(dr.singleRuns);
     process.stdout.write(`  ${dr.dataset}:\n`);
     process.stdout.write(`    Single:   ${toPercent(dsSingle.accuracy)} (${dsSingle.correct}/${dsSingle.total})  tokens: ${dsSingleTokens.toLocaleString()}  avg: ${formatMs(dsSingleTime)}/q\n`);
+    const dsModelToks = sumTokens(dr.ensembleRuns);
     for (const strategy of strategies) {
       const dsStrat = computeAccuracy(dr.ensembleRuns, strategy);
-      const dsTokens = sumTokens(dr.ensembleRuns);
-      const dsTime = avgDurationMs(dr.ensembleRuns);
       const delta = dsStrat.accuracy - dsSingle.accuracy;
-      const tokenDelta = dsTokens - dsSingleTokens;
-      process.stdout.write(`    ${strategy.padEnd(10)} ${toPercent(dsStrat.accuracy)} (${dsStrat.correct}/${dsStrat.total})  delta: ${toDelta(delta)}  tokens: ${dsTokens.toLocaleString()} (${tokenDelta > 0 ? '+' : ''}${tokenDelta.toLocaleString()})  avg: ${formatMs(dsTime)}/q\n`);
+      const sm = sumStrategyMetrics(dr.ensembleRuns, strategy);
+      const stratTokens = dsModelToks + sm.tokenCount;
+      const stratTokenDelta = stratTokens - dsSingleTokens;
+      process.stdout.write(`    ${strategy.padEnd(10)} ${toPercent(dsStrat.accuracy)} (${dsStrat.correct}/${dsStrat.total})  delta: ${toDelta(delta)}  tokens: ${stratTokens.toLocaleString()} (${stratTokenDelta > 0 ? '+' : ''}${stratTokenDelta.toLocaleString()})  avg: ${formatMs(sm.durationMs)}/q\n`);
     }
     process.stdout.write('\n');
   }
@@ -51,39 +52,37 @@ export function printResults(
   process.stdout.write(`  SUMMARY\n`);
   process.stdout.write(`  ${'—'.repeat(66)}\n\n`);
 
-  const ensembleTokens = sumTokens(allEnsembleRuns);
   const ensembleCost = sumCost(allEnsembleRuns);
-  const ensembleAvgTime = avgDurationMs(allEnsembleRuns);
+  const modelTokens = sumTokens(allEnsembleRuns);
 
-  process.stdout.write(`  ${''.padEnd(14)} ${'Accuracy'.padEnd(22)} ${'Tokens'.padEnd(14)} ${'Avg Time'.padEnd(12)} Cost\n`);
-  process.stdout.write(`  ${'Single (1x)'.padEnd(14)} ${`${toPercent(singleAcc.accuracy)} (${singleAcc.correct}/${singleAcc.total})`.padEnd(22)} ${singleTokens.toLocaleString().padEnd(14)} ${`${formatMs(singleAvgTime)}/q`.padEnd(12)} $${singleCost.toFixed(4)}\n`);
+  const hasCost = singleCost > 0 || ensembleCost > 0;
+  const costHeader = hasCost ? ' Cost' : '';
+  process.stdout.write(`  ${''.padEnd(16)} ${'Accuracy'.padEnd(22)} ${'Tokens'.padEnd(14)} ${'Avg Time'.padEnd(12)}${costHeader}\n`);
 
+  const singleCostStr = hasCost ? ` $${singleCost.toFixed(4)}` : '';
+  process.stdout.write(`  ${'Single (1x)'.padEnd(16)} ${`${toPercent(singleAcc.accuracy)} (${singleAcc.correct}/${singleAcc.total})`.padEnd(22)} ${singleTokens.toLocaleString().padEnd(14)} ${`${formatMs(singleAvgTime)}/q`.padEnd(12)}${singleCostStr}\n`);
+
+  const ensembleCostStr = hasCost ? ` $${ensembleCost.toFixed(4)}` : '';
   for (const strategy of strategies) {
     const stratAcc = computeAccuracy(allEnsembleRuns, strategy);
-    process.stdout.write(`  ${`${strategy} (${ensembleSize}x)`.padEnd(14)} ${`${toPercent(stratAcc.accuracy)} (${stratAcc.correct}/${stratAcc.total})`.padEnd(22)} ${ensembleTokens.toLocaleString().padEnd(14)} ${`${formatMs(ensembleAvgTime)}/q`.padEnd(12)} $${ensembleCost.toFixed(4)}\n`);
+    const sm = sumStrategyMetrics(allEnsembleRuns, strategy);
+    const stratTokens = modelTokens + sm.tokenCount;
+    process.stdout.write(`  ${`${strategy} (${ensembleSize}x)`.padEnd(16)} ${`${toPercent(stratAcc.accuracy)} (${stratAcc.correct}/${stratAcc.total})`.padEnd(22)} ${stratTokens.toLocaleString().padEnd(14)} ${`${formatMs(sm.durationMs)}/q`.padEnd(12)}${ensembleCostStr}\n`);
   }
 
   process.stdout.write('\n');
 
-  // Delta highlights (tokens/cost/time hoisted out of loop since they don't vary by strategy)
-  const tokenDelta = ensembleTokens - singleTokens;
-  const costDelta = ensembleCost - singleCost;
-  const tokenMultiplier = singleTokens > 0 ? ensembleTokens / singleTokens : null;
-  const timeDelta = ensembleAvgTime - singleAvgTime;
-  const timeMultiplier = singleAvgTime > 0 ? ensembleAvgTime / singleAvgTime : null;
-
+  // Per-strategy overhead vs single
   for (const strategy of strategies) {
     const stratAcc = computeAccuracy(allEnsembleRuns, strategy);
     const accDelta = stratAcc.accuracy - singleAcc.accuracy;
     const accIcon = accDelta > 0 ? ' ✓' : accDelta < 0 ? ' ✗' : '';
-    const tokenMultiplierStr = tokenMultiplier !== null ? ` (${tokenMultiplier.toFixed(1)}x)` : '';
-    const timeMultiplierStr = timeMultiplier !== null ? ` (${timeMultiplier.toFixed(1)}x)` : '';
-
-    process.stdout.write(`  ${strategy} vs single:\n`);
-    process.stdout.write(`    Accuracy: ${toDelta(accDelta)}${accIcon}\n`);
-    process.stdout.write(`    Tokens:   ${tokenDelta > 0 ? '+' : ''}${tokenDelta.toLocaleString()}${tokenMultiplierStr}\n`);
-    process.stdout.write(`    Time:     ${timeDelta > 0 ? '+' : ''}${formatMs(timeDelta)}/q${timeMultiplierStr}\n`);
-    process.stdout.write(`    Cost:     ${costDelta >= 0 ? '+' : ''}$${costDelta.toFixed(4)}${tokenMultiplierStr}\n`);
+    const sm = sumStrategyMetrics(allEnsembleRuns, strategy);
+    const stratTokens = modelTokens + sm.tokenCount;
+    const tokenDelta = stratTokens - singleTokens;
+    const tokenMult = singleTokens > 0 ? stratTokens / singleTokens : null;
+    const tokenMultStr = tokenMult !== null ? ` (${tokenMult.toFixed(1)}x)` : '';
+    process.stdout.write(`  ${strategy} vs single:  ${toDelta(accDelta)}${accIcon}  tokens: ${tokenDelta > 0 ? '+' : ''}${tokenDelta.toLocaleString()}${tokenMultStr}\n`);
   }
 
   process.stdout.write(`\n  Wall clock: ${Math.round(durationMs / 1000)}s\n`);

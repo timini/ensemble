@@ -1,11 +1,10 @@
 {
   "model": "google:gemini-3-flash-preview",
   "ensembleSize": 3,
-  "sample": 10,
+  "sample": 50,
   "datasets": [
     "gsm8k",
-    "truthfulqa",
-    "gpqa"
+    "truthfulqa"
   ],
   "strategies": [
     "standard",
@@ -13,32 +12,32 @@
     "majority",
     "council"
   ],
-  "updatedAt": "2026-02-17T13:36:07.868Z",
+  "updatedAt": "2026-02-17T17:40:43.230Z",
   "single": {
-    "accuracy": 0.6666666666666666,
-    "correct": 20,
-    "total": 30
+    "accuracy": 0.59,
+    "correct": 59,
+    "total": 100
   },
   "ensemble": {
     "standard": {
-      "accuracy": 0.6666666666666666,
-      "correct": 20,
-      "total": 30
+      "accuracy": 0.6,
+      "correct": 60,
+      "total": 100
     },
     "elo": {
-      "accuracy": 0.7,
-      "correct": 21,
-      "total": 30
+      "accuracy": 0.9,
+      "correct": 90,
+      "total": 100
     },
     "majority": {
-      "accuracy": 0.8333333333333334,
-      "correct": 25,
-      "total": 30
+      "accuracy": 0.82,
+      "correct": 82,
+      "total": 100
     },
     "council": {
-      "accuracy": 0.7333333333333333,
-      "correct": 22,
-      "total": 30
+      "accuracy": 0.59,
+      "correct": 59,
+      "total": 100
     }
   }
 }

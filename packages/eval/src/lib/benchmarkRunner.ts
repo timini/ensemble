@@ -80,7 +80,7 @@ export class BenchmarkRunner {
       : firstSuccessful
         ? { provider: firstSuccessful.provider, model: firstSuccessful.model }
         : null;
-    const consensus = summarizerTarget
+    const consensusResult = summarizerTarget
       ? await generateConsensus(
           this.strategies,
           question.prompt,
@@ -88,7 +88,11 @@ export class BenchmarkRunner {
           this.registry.getProvider(summarizerTarget.provider, this.mode),
           summarizerTarget.model,
         )
-      : {};
+      : { outputs: {}, metrics: {} };
+    const consensus = consensusResult.outputs;
+    const consensusMetrics = Object.keys(consensusResult.metrics).length > 0
+      ? consensusResult.metrics
+      : undefined;
 
     const evaluation = await evaluateResponses(
       this.evaluator,
@@ -112,6 +116,7 @@ export class BenchmarkRunner {
       difficulty: question.difficulty,
       responses,
       consensus,
+      consensusMetrics,
       evaluation,
       consensusEvaluation,
       durationMs: Date.now() - questionStart,

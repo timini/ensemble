@@ -28,6 +28,12 @@ export interface StrategyCheckResult {
   baselineAccuracy: number;
   currentAccuracy: number;
   delta: number;
+  /** Delta over single (strategy_acc - single_acc) from baseline run. */
+  baselineLift?: number;
+  /** Delta over single (strategy_acc - single_acc) from current run. */
+  currentLift?: number;
+  /** Change in lift (currentLift - baselineLift). */
+  liftChange?: number;
   pValue: number;
   correctedPValue: number;
   significant: boolean;
@@ -125,16 +131,29 @@ export function checkRegression(
   // Apply Holm-Bonferroni correction
   const corrected = holmBonferroni(rawPValues, significanceLevel);
 
+  // Compute single-model accuracy for lift calculations
+  const baselineSingleAcc = previous.single.total > 0 ? previous.single.correct / previous.single.total : 0;
+  const currentSingleAcc = current.single.total > 0 ? current.single.correct / current.single.total : 0;
+
   // Build results with Wilson score CIs
   const results: StrategyCheckResult[] = tests.map((t, i) => {
     const baselineAccuracy = t.baseline.total > 0 ? t.baseline.correct / t.baseline.total : 0;
     const currentAccuracy = t.current.total > 0 ? t.current.correct / t.current.total : 0;
     const ci = wilsonScoreInterval(t.current.correct, t.current.total);
+    const isStrategy = t.strategy !== 'single';
+    const baselineLift = isStrategy ? baselineAccuracy - baselineSingleAcc : undefined;
+    const currentLift = isStrategy ? currentAccuracy - currentSingleAcc : undefined;
+    const liftChange = baselineLift !== undefined && currentLift !== undefined
+      ? currentLift - baselineLift
+      : undefined;
     return {
       strategy: t.strategy,
       baselineAccuracy,
       currentAccuracy,
       delta: currentAccuracy - baselineAccuracy,
+      baselineLift,
+      currentLift,
+      liftChange,
       pValue: corrected[i].originalPValue,
       correctedPValue: corrected[i].correctedPValue,
       significant: corrected[i].significant,
@@ -151,18 +170,25 @@ export function checkRegression(
 export function printRegressionReport(result: RegressionCheckResult): void {
   const w = (s: string) => process.stdout.write(s);
   const pct = (v: number) => `${(v * 100).toFixed(1)}%`;
+  const signedPct = (v: number) => `${v >= 0 ? '+' : ''}${(v * 100).toFixed(1)}%`;
   const pad = (s: string, len: number) => s.padEnd(len);
   const fmtP = (p: number) => (p < 0.001 ? '<0.001' : p.toFixed(3));
 
   w(`\n  REGRESSION ANALYSIS (alpha = ${result.significanceLevel}, Holm-Bonferroni corrected)\n\n`);
-  w(`  ${pad('Strategy', 13)}${pad('Baseline', 11)}${pad('Current', 10)}${pad('Delta', 9)}${pad('95% CI', 19)}${pad('p-value', 10)}Sig\n`);
+  w(`  ${pad('Strategy', 13)}${pad('Base Δ', 11)}${pad('Curr Δ', 11)}${pad('Change', 10)}${pad('p-value', 10)}Sig\n`);
 
   for (const r of result.results) {
-    const ci = `[${pct(r.wilsonCI.lower)}, ${pct(r.wilsonCI.upper)}]`;
     const sig = r.significant && r.delta < 0 ? '*' : '';
-    w(`  ${pad(r.strategy, 13)}${pad(pct(r.baselineAccuracy), 11)}${pad(pct(r.currentAccuracy), 10)}${pad((r.delta >= 0 ? '+' : '') + pct(r.delta), 9)}${pad(ci, 19)}${pad(fmtP(r.correctedPValue), 10)}${sig}\n`);
+    if (r.baselineLift !== undefined && r.currentLift !== undefined && r.liftChange !== undefined) {
+      // Ensemble strategy: show lift over single
+      w(`  ${pad(r.strategy, 13)}${pad(signedPct(r.baselineLift), 11)}${pad(signedPct(r.currentLift), 11)}${pad(signedPct(r.liftChange), 10)}${pad(fmtP(r.correctedPValue), 10)}${sig}\n`);
+    } else {
+      // Single: show absolute accuracy
+      w(`  ${pad(r.strategy, 13)}${pad(pct(r.baselineAccuracy), 11)}${pad(pct(r.currentAccuracy), 11)}${pad(signedPct(r.delta), 10)}${pad(fmtP(r.correctedPValue), 10)}${sig}\n`);
+    }
   }
 
-  w('\n  * = significant regression after Holm-Bonferroni correction\n');
+  w('\n  Deltas show lift over single baseline (strategy_acc - single_acc)\n');
+  w('  * = significant regression after Holm-Bonferroni correction\n');
   w(`  Result: ${result.passed ? 'PASSED (no significant regressions)' : 'FAILED (significant regression detected)'}\n`);
 }
