@@ -1,5 +1,6 @@
 import { Command } from 'commander';
 import { ProviderRegistry } from '@ensemble-ai/shared-utils/providers';
+import { loadCachedBaseline, saveCachedBaseline } from '../lib/baselineCache.js';
 import { loadBenchmarkQuestions } from '../lib/benchmarkDatasets.js';
 import { parseStrategies } from '../lib/consensus.js';
 import { createEvaluatorForDataset } from '../lib/evaluators.js';
@@ -26,6 +27,7 @@ interface QuickEvalOptions {
   datasets?: string[];
   sample: string;
   mode: EvalMode;
+  cache: boolean;
 }
 
 interface DatasetResult {
@@ -121,6 +123,7 @@ export function createQuickEvalCommand(): Command {
     )
     .option('--sample <count>', 'Questions per dataset.', String(DEFAULT_SAMPLE))
     .option('--mode <mode>', 'Provider mode (mock or free).', 'free')
+    .option('--no-cache', 'Disable single-model baseline caching (re-run baseline from scratch).')
     .action(async (options: QuickEvalOptions) => {
       const model = options.model;
       const [provider, modelName] = model.split(':');
@@ -167,29 +170,45 @@ export function createQuickEvalCommand(): Command {
 
         const evaluator = createEvaluatorForDataset(datasetName);
 
-        // Run 1: Single instance
-        process.stderr.write(`  Single instance (1x ${modelName})...\n`);
-        const singleModels = [{ provider: provider as import('../types.js').EvalProvider, model: modelName }];
-        const singleOutput = createBenchmarkFile(
-          datasetName, mode, [model], ['standard'], questions.length,
-        );
-        const singleRunner = new BenchmarkRunner({
-          mode,
-          registry,
-          models: singleModels,
-          strategies: ['standard'],
-          evaluator,
-          summarizer: null,
-          requestDelayMs,
-        });
-        const singleResult = await singleRunner.run({
-          questions,
-          outputPath: '/dev/null',
-          output: singleOutput,
-          onProgress: (p) => {
-            process.stderr.write(`    [${p.completed}/${p.total}] ${p.questionId}\n`);
-          },
-        });
+        // Run 1: Single instance (check cache first)
+        let singleRuns: PromptRunResult[];
+        const useCache = options.cache && mode !== 'mock';
+        const cached = useCache
+          ? await loadCachedBaseline(model, datasetName, sampleCount)
+          : null;
+
+        if (cached) {
+          process.stderr.write(`  Single instance (1x ${modelName}) — cached\n`);
+          singleRuns = cached;
+        } else {
+          process.stderr.write(`  Single instance (1x ${modelName})...\n`);
+          const singleModels = [{ provider: provider as import('../types.js').EvalProvider, model: modelName }];
+          const singleOutput = createBenchmarkFile(
+            datasetName, mode, [model], ['standard'], questions.length,
+          );
+          const singleRunner = new BenchmarkRunner({
+            mode,
+            registry,
+            models: singleModels,
+            strategies: ['standard'],
+            evaluator,
+            summarizer: null,
+            requestDelayMs,
+          });
+          const singleResult = await singleRunner.run({
+            questions,
+            outputPath: '/dev/null',
+            output: singleOutput,
+            onProgress: (p) => {
+              process.stderr.write(`    [${p.completed}/${p.total}] ${p.questionId}\n`);
+            },
+          });
+          singleRuns = singleResult.runs;
+
+          if (useCache) {
+            await saveCachedBaseline(model, datasetName, sampleCount, singleRuns);
+          }
+        }
 
         // Run 2: Ensemble (N instances of the same model)
         process.stderr.write(`  Ensemble (${ensembleSize}x ${modelName})...\n`);
@@ -220,7 +239,7 @@ export function createQuickEvalCommand(): Command {
 
         allDatasetResults.push({
           dataset: datasetName,
-          singleRuns: singleResult.runs,
+          singleRuns,
           ensembleRuns: ensembleResult.runs,
         });
       }
@@ -239,47 +258,60 @@ export function createQuickEvalCommand(): Command {
       process.stdout.write(`  QUICK EVAL RESULTS — ${model}\n`);
       process.stdout.write(`${'='.repeat(70)}\n\n`);
 
-      process.stdout.write(`  Single Instance (1x)\n`);
-      process.stdout.write(`    Accuracy: ${toPercent(singleAcc.accuracy)} (${singleAcc.correct}/${singleAcc.total})\n`);
-      process.stdout.write(`    Tokens:   ${singleTokens.toLocaleString()}\n`);
-      process.stdout.write(`    Cost:     $${singleCost.toFixed(4)}\n\n`);
+      // Per-dataset breakdown
+      for (const dr of allDatasetResults) {
+        const dsSingle = computeAccuracy(dr.singleRuns);
+        const dsSingleTokens = sumTokens(dr.singleRuns);
+        process.stdout.write(`  ${dr.dataset}:\n`);
+        process.stdout.write(`    Single:   ${toPercent(dsSingle.accuracy)} (${dsSingle.correct}/${dsSingle.total})  tokens: ${dsSingleTokens.toLocaleString()}\n`);
+        for (const strategy of strategies) {
+          const dsStrat = computeAccuracy(dr.ensembleRuns, strategy);
+          const dsTokens = sumTokens(dr.ensembleRuns);
+          const delta = dsStrat.accuracy - dsSingle.accuracy;
+          const tokenDelta = dsTokens - dsSingleTokens;
+          process.stdout.write(`    ${strategy.padEnd(10)} ${toPercent(dsStrat.accuracy)} (${dsStrat.correct}/${dsStrat.total})  delta: ${toDelta(delta)}  tokens: ${dsTokens.toLocaleString()} (${tokenDelta > 0 ? '+' : ''}${tokenDelta.toLocaleString()})\n`);
+        }
+        process.stdout.write('\n');
+      }
 
-      process.stdout.write(`  Ensemble (${ensembleSize}x) — per strategy\n`);
+      // Summary section — the key numbers at a glance
       process.stdout.write(`  ${'—'.repeat(60)}\n`);
-      process.stdout.write(`  ${'Strategy'.padEnd(12)} ${'Accuracy'.padEnd(20)} ${'Delta'.padEnd(12)} ${'Tokens'.padEnd(12)} Cost\n`);
-      process.stdout.write(`  ${'—'.repeat(60)}\n`);
+      process.stdout.write(`  SUMMARY\n`);
+      process.stdout.write(`  ${'—'.repeat(60)}\n\n`);
+
+      process.stdout.write(`  ${''.padEnd(14)} ${'Accuracy'.padEnd(22)} ${'Tokens'.padEnd(16)} Cost\n`);
+      process.stdout.write(`  ${'Single (1x)'.padEnd(14)} ${`${toPercent(singleAcc.accuracy)} (${singleAcc.correct}/${singleAcc.total})`.padEnd(22)} ${singleTokens.toLocaleString().padEnd(16)} $${singleCost.toFixed(4)}\n`);
 
       for (const strategy of strategies) {
         const stratAcc = computeAccuracy(allEnsembleRuns, strategy);
         const stratTokens = sumTokens(allEnsembleRuns);
         const stratCost = sumCost(allEnsembleRuns);
-        const delta = stratAcc.accuracy - singleAcc.accuracy;
 
-        const deltaStr = toDelta(delta);
-        const icon = delta > 0 ? ' ✓' : delta < 0 ? ' ✗' : '';
-
-        process.stdout.write(
-          `  ${strategy.padEnd(12)} ${`${toPercent(stratAcc.accuracy)} (${stratAcc.correct}/${stratAcc.total})`.padEnd(20)} ${(deltaStr + icon).padEnd(12)} ${stratTokens.toLocaleString().padEnd(12)} $${stratCost.toFixed(4)}\n`,
-        );
+        process.stdout.write(`  ${`${strategy} (${ensembleSize}x)`.padEnd(14)} ${`${toPercent(stratAcc.accuracy)} (${stratAcc.correct}/${stratAcc.total})`.padEnd(22)} ${stratTokens.toLocaleString().padEnd(16)} $${stratCost.toFixed(4)}\n`);
       }
 
-      process.stdout.write(`\n  ${'—'.repeat(60)}\n`);
-      process.stdout.write(`  Duration: ${Math.round(durationMs / 1000)}s\n`);
+      process.stdout.write('\n');
 
-      // Per-dataset breakdown
-      process.stdout.write(`\n  Per-dataset breakdown:\n`);
-      for (const dr of allDatasetResults) {
-        process.stdout.write(`\n  ${dr.dataset}:\n`);
-        const dsSingle = computeAccuracy(dr.singleRuns);
-        process.stdout.write(`    Single:   ${toPercent(dsSingle.accuracy)} (${dsSingle.correct}/${dsSingle.total})\n`);
-        for (const strategy of strategies) {
-          const dsStrat = computeAccuracy(dr.ensembleRuns, strategy);
-          const delta = dsStrat.accuracy - dsSingle.accuracy;
-          process.stdout.write(`    ${strategy.padEnd(10)} ${toPercent(dsStrat.accuracy)} (${dsStrat.correct}/${dsStrat.total})  delta: ${toDelta(delta)}\n`);
-        }
+      // Delta highlights
+      for (const strategy of strategies) {
+        const stratAcc = computeAccuracy(allEnsembleRuns, strategy);
+        const stratTokens = sumTokens(allEnsembleRuns);
+        const stratCost = sumCost(allEnsembleRuns);
+        const accDelta = stratAcc.accuracy - singleAcc.accuracy;
+        const tokenDelta = stratTokens - singleTokens;
+        const costDelta = stratCost - singleCost;
+        const tokenMultiplier = singleTokens > 0 ? stratTokens / singleTokens : 0;
+
+        const accIcon = accDelta > 0 ? ' ✓' : accDelta < 0 ? ' ✗' : '';
+
+        process.stdout.write(`  ${strategy} vs single:\n`);
+        process.stdout.write(`    Accuracy: ${toDelta(accDelta)}${accIcon}\n`);
+        process.stdout.write(`    Tokens:   ${tokenDelta > 0 ? '+' : ''}${tokenDelta.toLocaleString()} (${tokenMultiplier.toFixed(1)}x)\n`);
+        process.stdout.write(`    Cost:     ${costDelta >= 0 ? '+' : ''}$${costDelta.toFixed(4)} (${tokenMultiplier.toFixed(1)}x)\n`);
       }
 
-      process.stdout.write(`\n${'='.repeat(70)}\n`);
+      process.stdout.write(`\n  Duration: ${Math.round(durationMs / 1000)}s\n`);
+      process.stdout.write(`${'='.repeat(70)}\n`);
     });
 
   return command;
