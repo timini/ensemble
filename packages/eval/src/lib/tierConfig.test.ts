@@ -1,7 +1,13 @@
 import { describe, expect, it } from 'vitest';
 
 import type { TierConfig } from './regressionTypes.js';
-import { CI_TIER_CONFIG, POST_MERGE_TIER_CONFIG, getTierConfig } from './tierConfig.js';
+import {
+  CI_TIER_CONFIG,
+  HOMOGENEOUS_CI_TIER_CONFIG,
+  HOMOGENEOUS_POST_MERGE_TIER_CONFIG,
+  POST_MERGE_TIER_CONFIG,
+  getTierConfig,
+} from './tierConfig.js';
 
 describe('CI_TIER_CONFIG', () => {
   it('has name "ci"', () => {
@@ -32,8 +38,8 @@ describe('CI_TIER_CONFIG', () => {
     expect(byModel['gemini-1.5-flash']).toBe('google');
   });
 
-  it('evaluates all 3 strategies', () => {
-    expect(CI_TIER_CONFIG.strategies).toEqual(['standard', 'elo', 'majority']);
+  it('evaluates all 4 strategies', () => {
+    expect(CI_TIER_CONFIG.strategies).toEqual(['standard', 'elo', 'majority', 'council']);
   });
 
   it('runs 3 times for median stability', () => {
@@ -91,8 +97,8 @@ describe('POST_MERGE_TIER_CONFIG', () => {
     expect(byModel['grok-2']).toBe('xai');
   });
 
-  it('evaluates all 3 strategies', () => {
-    expect(POST_MERGE_TIER_CONFIG.strategies).toEqual(['standard', 'elo', 'majority']);
+  it('evaluates all 4 strategies', () => {
+    expect(POST_MERGE_TIER_CONFIG.strategies).toEqual(['standard', 'elo', 'majority', 'council']);
   });
 
   it('runs once (deterministic with temperature=0)', () => {
@@ -117,6 +123,79 @@ describe('POST_MERGE_TIER_CONFIG', () => {
   });
 });
 
+describe('HOMOGENEOUS_CI_TIER_CONFIG', () => {
+  it('has name "homogeneous-ci"', () => {
+    expect(HOMOGENEOUS_CI_TIER_CONFIG.name).toBe('homogeneous-ci');
+  });
+
+  it('uses 3 identical Google Gemini Flash models', () => {
+    expect(HOMOGENEOUS_CI_TIER_CONFIG.models).toHaveLength(3);
+    for (const model of HOMOGENEOUS_CI_TIER_CONFIG.models) {
+      expect(model.provider).toBe('google');
+      expect(model.model).toBe('gemini-3-flash-preview');
+    }
+  });
+
+  it('uses the same model as summarizer', () => {
+    expect(HOMOGENEOUS_CI_TIER_CONFIG.summarizer).toEqual({
+      provider: 'google',
+      model: 'gemini-3-flash-preview',
+    });
+  });
+
+  it('includes 30 questions across 3 datasets', () => {
+    const total = HOMOGENEOUS_CI_TIER_CONFIG.datasets.reduce(
+      (sum, d) => sum + d.sampleSize,
+      0,
+    );
+    expect(total).toBe(30);
+  });
+
+  it('evaluates all 4 strategies', () => {
+    expect(HOMOGENEOUS_CI_TIER_CONFIG.strategies).toEqual(['standard', 'elo', 'majority', 'council']);
+  });
+
+  it('has 3 runs for stability', () => {
+    expect(HOMOGENEOUS_CI_TIER_CONFIG.runs).toBe(3);
+  });
+
+  it('satisfies the TierConfig type', () => {
+    const config: TierConfig = HOMOGENEOUS_CI_TIER_CONFIG;
+    expect(config).toBeDefined();
+  });
+});
+
+describe('HOMOGENEOUS_POST_MERGE_TIER_CONFIG', () => {
+  it('has name "homogeneous-post-merge"', () => {
+    expect(HOMOGENEOUS_POST_MERGE_TIER_CONFIG.name).toBe('homogeneous-post-merge');
+  });
+
+  it('uses 3 identical Google Gemini Flash models', () => {
+    expect(HOMOGENEOUS_POST_MERGE_TIER_CONFIG.models).toHaveLength(3);
+    for (const model of HOMOGENEOUS_POST_MERGE_TIER_CONFIG.models) {
+      expect(model.provider).toBe('google');
+      expect(model.model).toBe('gemini-3-flash-preview');
+    }
+  });
+
+  it('includes 150 questions across 3 datasets', () => {
+    const total = HOMOGENEOUS_POST_MERGE_TIER_CONFIG.datasets.reduce(
+      (sum, d) => sum + d.sampleSize,
+      0,
+    );
+    expect(total).toBe(150);
+  });
+
+  it('runs once (deterministic)', () => {
+    expect(HOMOGENEOUS_POST_MERGE_TIER_CONFIG.runs).toBe(1);
+  });
+
+  it('satisfies the TierConfig type', () => {
+    const config: TierConfig = HOMOGENEOUS_POST_MERGE_TIER_CONFIG;
+    expect(config).toBeDefined();
+  });
+});
+
 describe('getTierConfig', () => {
   it('returns CI config for "ci" tier', () => {
     expect(getTierConfig('ci')).toBe(CI_TIER_CONFIG);
@@ -124,6 +203,14 @@ describe('getTierConfig', () => {
 
   it('returns post-merge config for "post-merge" tier', () => {
     expect(getTierConfig('post-merge')).toBe(POST_MERGE_TIER_CONFIG);
+  });
+
+  it('returns homogeneous-ci config', () => {
+    expect(getTierConfig('homogeneous-ci')).toBe(HOMOGENEOUS_CI_TIER_CONFIG);
+  });
+
+  it('returns homogeneous-post-merge config', () => {
+    expect(getTierConfig('homogeneous-post-merge')).toBe(HOMOGENEOUS_POST_MERGE_TIER_CONFIG);
   });
 
   it('throws on invalid tier name', () => {

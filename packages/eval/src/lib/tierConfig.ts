@@ -1,4 +1,4 @@
-import type { TierConfig } from './regressionTypes.js';
+import type { TierConfig, TierName } from './regressionTypes.js';
 
 /**
  * CI tier configuration for fast PR gate checks.
@@ -21,7 +21,7 @@ export const CI_TIER_CONFIG: TierConfig = {
     { provider: 'anthropic', model: 'claude-3-haiku-20240307' },
     { provider: 'google', model: 'gemini-1.5-flash' },
   ],
-  strategies: ['standard', 'elo', 'majority'],
+  strategies: ['standard', 'elo', 'majority', 'council'],
   runs: 3,
   requestDelayMs: 200,
   significanceThreshold: 0.1,
@@ -50,7 +50,7 @@ export const POST_MERGE_TIER_CONFIG: TierConfig = {
     { provider: 'google', model: 'gemini-1.5-pro' },
     { provider: 'xai', model: 'grok-2' },
   ],
-  strategies: ['standard', 'elo', 'majority'],
+  strategies: ['standard', 'elo', 'majority', 'council'],
   runs: 1,
   requestDelayMs: 500,
   significanceThreshold: 0.05,
@@ -58,18 +58,78 @@ export const POST_MERGE_TIER_CONFIG: TierConfig = {
 };
 
 /**
+ * Homogeneous CI tier: 3 instances of the same model (Gemini Flash).
+ *
+ * Tests the core hypothesis: does an ensemble of N identical models beat
+ * a single instance? Uses only one API key (Google) for simplicity.
+ *
+ * - 3 runs for stability
+ * - p < 0.10 significance threshold
+ */
+export const HOMOGENEOUS_CI_TIER_CONFIG: TierConfig = {
+  name: 'homogeneous-ci',
+  datasets: [
+    { name: 'gsm8k', sampleSize: 10 },
+    { name: 'truthfulqa', sampleSize: 10 },
+    { name: 'gpqa', sampleSize: 10 },
+  ],
+  models: [
+    { provider: 'google', model: 'gemini-3-flash-preview' },
+    { provider: 'google', model: 'gemini-3-flash-preview' },
+    { provider: 'google', model: 'gemini-3-flash-preview' },
+  ],
+  strategies: ['standard', 'elo', 'majority', 'council'],
+  runs: 3,
+  requestDelayMs: 200,
+  significanceThreshold: 0.1,
+  summarizer: { provider: 'google', model: 'gemini-3-flash-preview' },
+};
+
+/**
+ * Homogeneous post-merge tier: 3 instances of the same model (Gemini Flash).
+ *
+ * Thorough evaluation testing whether ensemble consensus strategies add
+ * value over a single model instance.
+ *
+ * - 1 run (deterministic with temperature=0)
+ * - p < 0.05 significance threshold
+ */
+export const HOMOGENEOUS_POST_MERGE_TIER_CONFIG: TierConfig = {
+  name: 'homogeneous-post-merge',
+  datasets: [
+    { name: 'gsm8k', sampleSize: 50 },
+    { name: 'truthfulqa', sampleSize: 50 },
+    { name: 'gpqa', sampleSize: 50 },
+  ],
+  models: [
+    { provider: 'google', model: 'gemini-3-flash-preview' },
+    { provider: 'google', model: 'gemini-3-flash-preview' },
+    { provider: 'google', model: 'gemini-3-flash-preview' },
+  ],
+  strategies: ['standard', 'elo', 'majority', 'council'],
+  runs: 1,
+  requestDelayMs: 500,
+  significanceThreshold: 0.05,
+  summarizer: { provider: 'google', model: 'gemini-3-flash-preview' },
+};
+
+/**
  * Returns the tier configuration for the given evaluation tier.
  *
- * @param tier - The evaluation tier: `'ci'` for PR gate checks, `'post-merge'` for nightly runs.
+ * @param tier - The evaluation tier name.
  * @returns The corresponding {@link TierConfig}.
  * @throws {Error} If the tier name is not recognized.
  */
-export function getTierConfig(tier: 'ci' | 'post-merge'): TierConfig {
+export function getTierConfig(tier: TierName): TierConfig {
   switch (tier) {
     case 'ci':
       return CI_TIER_CONFIG;
     case 'post-merge':
       return POST_MERGE_TIER_CONFIG;
+    case 'homogeneous-ci':
+      return HOMOGENEOUS_CI_TIER_CONFIG;
+    case 'homogeneous-post-merge':
+      return HOMOGENEOUS_POST_MERGE_TIER_CONFIG;
     default:
       throw new Error(`Unknown tier: "${tier as string}"`);
   }

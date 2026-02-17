@@ -25,11 +25,16 @@ export async function runCouncilEloRanking(
         }
     }
 
-    for (let idx = 0; idx < pairings.length; idx++) {
-        const [branchA, branchB] = pairings[idx]!;
-        const judge = participants[idx % participants.length]!;
+    const judgments = await Promise.all(
+        pairings.map(async (pair, idx) => {
+            const [branchA, branchB] = pair;
+            const judge = participants[idx % participants.length]!;
+            const winnerId = await judgeEloPair(judge, branchA, branchB, prompt, completePrompt);
+            return { winnerId, branchA, branchB };
+        }),
+    );
 
-        const winnerId = await judgeEloPair(judge, branchA, branchB, prompt, completePrompt);
+    for (const { winnerId, branchA, branchB } of judgments) {
         if (winnerId) {
             updateElo(eloScores, branchA.modelId, branchB.modelId, winnerId);
         }

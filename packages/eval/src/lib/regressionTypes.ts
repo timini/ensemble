@@ -1,9 +1,16 @@
 import type { BenchmarkDatasetName, EvaluationResult, ModelSpec, StrategyName } from '../types.js';
 
+/** All supported evaluation tier names. */
+export type TierName =
+  | 'ci'
+  | 'post-merge'
+  | 'homogeneous-ci'
+  | 'homogeneous-post-merge';
+
 /** Configuration for a CI or post-merge evaluation tier. */
 export interface TierConfig {
-  /** The evaluation tier: `'ci'` for fast PR checks, `'post-merge'` for thorough nightly runs. */
-  name: 'ci' | 'post-merge';
+  /** The evaluation tier name. */
+  name: TierName;
   /** Datasets to evaluate with their sample sizes. */
   datasets: Array<{ name: BenchmarkDatasetName; sampleSize: number }>;
   /** Models to include in the evaluation ensemble. */
@@ -22,8 +29,8 @@ export interface TierConfig {
 
 /** Committed baseline file used for paired comparison against new runs. */
 export interface GoldenBaselineFile {
-  /** The evaluation tier this baseline was generated for: `'ci'` or `'post-merge'`. */
-  tier: 'ci' | 'post-merge';
+  /** The evaluation tier this baseline was generated for. */
+  tier: TierName;
   /** ISO 8601 timestamp of when this baseline was created. */
   createdAt: string;
   /** Git commit SHA that produced this baseline. */
@@ -102,10 +109,24 @@ export interface CostMetrics {
   durationMs: number;
 }
 
+/** Measures whether ensemble consensus adds value over individual models. */
+export interface EnsembleDelta {
+  /** Accuracy of the best individual model across all datasets. */
+  bestModelAccuracy: number;
+  /** Name of the best individual model (e.g. "openai:gpt-4o-mini"). */
+  bestModelName: string;
+  /** Accuracy of the best consensus strategy across all datasets. */
+  bestStrategyAccuracy: number;
+  /** Name of the best consensus strategy (e.g. "standard"). */
+  bestStrategyName: StrategyName;
+  /** Difference: bestStrategyAccuracy - bestModelAccuracy. Positive = ensemble adds value. */
+  delta: number;
+}
+
 /** Complete output of a regression evaluation comparing current code against a baseline. */
 export interface RegressionResult {
   /** The evaluation tier that produced this result. */
-  tier: 'ci' | 'post-merge';
+  tier: TierName;
   /** ISO 8601 timestamp of when this evaluation was run. */
   timestamp: string;
   /** Git commit SHA of the code being evaluated. */
@@ -122,4 +143,6 @@ export interface RegressionResult {
   stability: StabilityMetrics | undefined;
   /** Cost and resource usage for this evaluation. */
   cost: CostMetrics;
+  /** Ensemble value: does consensus beat the best individual model? */
+  ensembleDelta?: EnsembleDelta;
 }

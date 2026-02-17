@@ -54,7 +54,7 @@ function makeBaselineQuestion(
 
 function makeBaseline(
   questions: BaselineQuestionResult[],
-  tier: 'ci' | 'post-merge' = 'ci',
+  tier: import('./regressionTypes.js').TierName = 'ci',
 ): GoldenBaselineFile {
   return {
     tier,
@@ -96,6 +96,14 @@ function makeRunResult(
       },
     ],
     consensus,
+    evaluation: {
+      evaluator: 'numeric' as const,
+      groundTruth,
+      accuracy: 1,
+      results: {
+        'openai:gpt-4o-mini': makeEvalResult(true, groundTruth, groundTruth),
+      },
+    },
     consensusEvaluation: {
       evaluator: 'numeric',
       groundTruth,
@@ -570,6 +578,45 @@ describe('RegressionDetector', () => {
     });
   });
 
+  describe('ensemble delta', () => {
+    it('computes ensemble delta comparing best strategy vs best model', async () => {
+      const baselineQuestions = [
+        makeBaselineQuestion('q1', 'gsm8k', '42', {
+          standard: makeEvalResult(true, '42', '42'),
+        }),
+        makeBaselineQuestion('q2', 'gsm8k', '7', {
+          standard: makeEvalResult(true, '7', '7'),
+        }),
+        makeBaselineQuestion('q3', 'gsm8k', '100', {
+          standard: makeEvalResult(false, '99', '100'),
+        }),
+      ];
+
+      const tier = makeTierConfig({
+        strategies: ['standard'],
+        datasets: [{ name: 'gsm8k', sampleSize: 3 }],
+      });
+      const baseline = makeBaseline(baselineQuestions);
+
+      // Individual model: 2/3 correct. Consensus (standard): 3/3 correct.
+      const runner = mockRunner(() => [
+        makeRunResult('q1', '42', { standard: true }),
+        makeRunResult('q2', '7', { standard: true }),
+        makeRunResult('q3', '100', { standard: true }),
+      ]);
+
+      const detector = new RegressionDetector(tier, baseline, runner);
+      const result = await detector.evaluate();
+
+      expect(result.ensembleDelta).toBeDefined();
+      expect(result.ensembleDelta!.bestModelName).toBe('openai:gpt-4o-mini');
+      expect(result.ensembleDelta!.bestStrategyName).toBe('standard');
+      // Model gets 3/3 correct (mock responses contain groundTruth),
+      // strategy also 3/3 => delta = 0
+      expect(result.ensembleDelta!.delta).toBeCloseTo(0);
+    });
+  });
+
   describe('progress callback', () => {
     it('invokes onProgress during evaluation', async () => {
       const baselineQuestions = [
@@ -697,6 +744,7 @@ describe('RegressionDetector', () => {
       expect(result).toHaveProperty('brokenQuestions');
       expect(result).toHaveProperty('stability');
       expect(result).toHaveProperty('cost');
+      expect(result).toHaveProperty('ensembleDelta');
 
       // Verify types
       expect(typeof result.tier).toBe('string');

@@ -58,6 +58,9 @@ test-results/
 playwright-report/
 playwright/.cache/
 
+# Eval cache
+packages/eval/.cache/
+
 # Vitest
 .vitest/
 

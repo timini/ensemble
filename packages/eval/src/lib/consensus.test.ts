@@ -21,8 +21,44 @@ describe('consensus', () => {
       'elo',
     ]);
     expect(() => parseStrategies(['unknown'])).toThrow(
-      'Invalid strategy "unknown". Expected one of: standard, elo, majority.',
+      'Invalid strategy "unknown". Expected one of: standard, elo, majority, council.',
     );
+  });
+
+  it('handles homogeneous ensemble (identical model IDs) gracefully', async () => {
+    let receivedResponses: Array<{ modelId: string; modelName: string }> = [];
+    const provider = buildProvider(async (_prompt, _model, _onChunk, onComplete) => {
+      onComplete('consensus output', 5, 20);
+    });
+
+    const { StandardConsensus } = await import(
+      '@ensemble-ai/shared-utils/consensus/StandardConsensus'
+    );
+    const origFn = StandardConsensus.prototype.generateConsensus;
+    StandardConsensus.prototype.generateConsensus = async function (
+      responses: Array<{ modelId: string; modelName: string; content: string }>,
+      ...rest: unknown[]
+    ) {
+      receivedResponses = responses.map((r) => ({ modelId: r.modelId, modelName: r.modelName }));
+      return origFn.call(this, responses, ...(rest as [number, string]));
+    };
+
+    const responses: ProviderResponse[] = [
+      { provider: 'google', model: 'gemini-2.0-flash', content: 'A', responseTimeMs: 5 },
+      { provider: 'google', model: 'gemini-2.0-flash', content: 'B', responseTimeMs: 6 },
+      { provider: 'google', model: 'gemini-2.0-flash', content: 'C', responseTimeMs: 7 },
+    ];
+
+    await generateConsensus(['standard'], 'Q', responses, provider, 'gemini-2.0-flash');
+
+    expect(receivedResponses).toHaveLength(3);
+    const ids = receivedResponses.map((r) => r.modelId);
+    expect(new Set(ids).size).toBe(3);
+    expect(ids[0]).toBe('gemini-2.0-flash');
+    expect(ids[1]).toBe('gemini-2.0-flash#2');
+    expect(ids[2]).toBe('gemini-2.0-flash#3');
+
+    StandardConsensus.prototype.generateConsensus = origFn;
   });
 
   it('omits ELO key when fewer than 3 responses are available', async () => {

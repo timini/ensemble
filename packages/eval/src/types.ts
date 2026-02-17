@@ -2,7 +2,7 @@ import type { ProviderMode, ProviderName } from '@ensemble-ai/shared-utils/provi
 
 export type EvalProvider = ProviderName;
 export type EvalMode = Extract<ProviderMode, 'mock' | 'free'>;
-export type StrategyName = 'standard' | 'elo' | 'majority';
+export type StrategyName = 'standard' | 'elo' | 'majority' | 'council';
 export type BenchmarkDatasetName = 'gsm8k' | 'truthfulqa' | 'gpqa';
 
 export interface ModelSpec {
@@ -76,6 +76,8 @@ export interface PromptRunResult {
   evaluation?: PromptEvaluation;
   consensusEvaluation?: ConsensusEvaluation;
   selfConsistency?: SelfConsistencyResult;
+  /** Total wall-clock time for this question (model calls + consensus + eval). */
+  durationMs?: number;
 }
 
 export interface BenchmarkResultsFile {

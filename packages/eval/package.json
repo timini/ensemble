@@ -10,7 +10,12 @@
     "build": "tsc --noEmit",
     "typecheck": "tsc --noEmit",
     "test": "vitest run --coverage",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "eval": "node --import tsx bin/ensemble-eval.mjs quick-eval",
+    "eval:standard": "node --import tsx bin/ensemble-eval.mjs quick-eval --strategies standard",
+    "eval:elo": "node --import tsx bin/ensemble-eval.mjs quick-eval --strategies elo",
+    "eval:majority": "node --import tsx bin/ensemble-eval.mjs quick-eval --strategies majority",
+    "eval:mock": "node --import tsx bin/ensemble-eval.mjs quick-eval --mode mock"
   },
   "dependencies": {
     "@ensemble-ai/shared-utils": "*",
