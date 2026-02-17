@@ -1,8 +1,16 @@
+import { readFile, unlink } from 'node:fs/promises';
 import type {
   BenchmarkDatasetName,
   BenchmarkLoader,
   BenchmarkQuestion,
+  DatasetLoadOptions,
 } from '../types.js';
+import {
+  checksumPath,
+  computeSha256,
+  verifyCacheIntegrity,
+  writeChecksumFile,
+} from './datasetChecksum.js';
 import { fileExists, readJsonFile, writeJsonFile } from './io.js';
 import { createCachePath, normalizeSample } from './benchmarkDatasetShared.js';
 
@@ -99,19 +107,89 @@ export class HuggingFaceBenchmarkLoader<TRow> implements BenchmarkLoader {
     this.mapRow = config.mapRow;
   }
 
-  async load(options?: { sample?: number }): Promise<BenchmarkQuestion[]> {
+  async load(options?: DatasetLoadOptions): Promise<BenchmarkQuestion[]> {
     const cachePath = createCachePath(this.name);
-
-    let questions: BenchmarkQuestion[];
-    if (await fileExists(cachePath)) {
-      questions = await readJsonFile<BenchmarkQuestion[]>(cachePath);
-    } else {
-      questions = await this.downloadQuestions();
-      await writeJsonFile(cachePath, questions);
-    }
-
+    const questions = await this.loadWithIntegrity(cachePath, options);
     const sampleSize = normalizeSample(options?.sample, questions.length);
     return questions.slice(0, sampleSize);
+  }
+
+  private async loadWithIntegrity(
+    cachePath: string,
+    options?: DatasetLoadOptions,
+  ): Promise<BenchmarkQuestion[]> {
+    const skipDownload = options?.skipDownload ?? false;
+    const forceDownload = options?.forceDownload ?? false;
+
+    if (skipDownload && forceDownload) {
+      throw new Error('--skip-download and --force-download are mutually exclusive.');
+    }
+
+    if (forceDownload) {
+      return this.downloadAndCache(cachePath);
+    }
+
+    const cacheExists = await fileExists(cachePath);
+
+    if (!cacheExists) {
+      if (skipDownload) {
+        throw new Error(
+          `Dataset "${this.name}" is not cached at ${cachePath} and --skip-download is set. ` +
+            `Download the dataset first without --skip-download.`,
+        );
+      }
+      return this.downloadAndCache(cachePath);
+    }
+
+    // Cache exists - verify integrity
+    const integrity = await verifyCacheIntegrity(cachePath);
+    switch (integrity) {
+      case 'valid':
+        return readJsonFile<BenchmarkQuestion[]>(cachePath);
+      case 'no-checksum': {
+        // Legacy cache without checksum - generate one and return
+        const content = await readFile(cachePath, 'utf-8');
+        await writeChecksumFile(cachePath, computeSha256(content));
+        return JSON.parse(content) as BenchmarkQuestion[];
+      }
+      case 'mismatch': {
+        process.stderr.write(
+          `Warning: checksum mismatch for cached dataset "${this.name}" at ${cachePath}.\n`,
+        );
+        if (skipDownload) {
+          throw new Error(
+            `Dataset "${this.name}" has a checksum mismatch and --skip-download is set. ` +
+              `Re-download the dataset with --force-download.`,
+          );
+        }
+        process.stderr.write('Re-downloading...\n');
+        return this.downloadAndCache(cachePath);
+      }
+      default:
+        // Should not happen, but fall through to download
+        return this.downloadAndCache(cachePath);
+    }
+  }
+
+  private async downloadAndCache(cachePath: string): Promise<BenchmarkQuestion[]> {
+    // Remove existing cache and checksum if present
+    await Promise.all([
+      unlink(cachePath).catch((err: NodeJS.ErrnoException) => {
+        if (err.code !== 'ENOENT') throw err;
+      }),
+      unlink(checksumPath(cachePath)).catch((err: NodeJS.ErrnoException) => {
+        if (err.code !== 'ENOENT') throw err;
+      }),
+    ]);
+
+    const questions = await this.downloadQuestions();
+    await writeJsonFile(cachePath, questions);
+
+    // Compute checksum from what was actually written to disk
+    const content = await readFile(cachePath, 'utf-8');
+    await writeChecksumFile(cachePath, computeSha256(content));
+
+    return questions;
   }
 
   private async downloadQuestions(): Promise<BenchmarkQuestion[]> {
