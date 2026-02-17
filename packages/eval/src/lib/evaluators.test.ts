@@ -39,6 +39,26 @@ describe('extractChoiceLetter', () => {
   it('extracts selected choices from natural phrasing', () => {
     expect(extractChoiceLetter('I choose option d.')).toBe('D');
   });
+
+  it('extracts "The correct answer is A"', () => {
+    expect(extractChoiceLetter('The correct answer is A')).toBe('A');
+  });
+
+  it('extracts "The answer is (B)"', () => {
+    expect(extractChoiceLetter('The answer is (B)')).toBe('B');
+  });
+
+  it('extracts "(A) is correct"', () => {
+    expect(extractChoiceLetter('(A) is correct')).toBe('A');
+  });
+
+  it('extracts "Option C is correct"', () => {
+    expect(extractChoiceLetter('Option C is correct')).toBe('C');
+  });
+
+  it('extracts "The correct answer is (D)"', () => {
+    expect(extractChoiceLetter('The correct answer is (D)')).toBe('D');
+  });
 });
 
 describe('NumericEvaluator', () => {

@@ -65,8 +65,8 @@ export async function generateConsensus(
 
     if (strategy === 'elo') {
       if (consensusResponses.length < MIN_RESPONSES_FOR_ELO) {
-        outputs.elo =
-          `ELO strategy requires at least ${MIN_RESPONSES_FOR_ELO} successful model responses.`;
+        // Omit key entirely — downstream evaluators would otherwise parse the
+        // error string as if it were a model answer.
         continue;
       }
 
@@ -86,8 +86,8 @@ export async function generateConsensus(
 
     if (strategy === 'majority') {
       if (consensusResponses.length < MIN_RESPONSES_FOR_MAJORITY) {
-        outputs.majority =
-          `Majority strategy requires at least ${MIN_RESPONSES_FOR_MAJORITY} successful model responses.`;
+        // Omit key entirely — downstream evaluators would otherwise parse the
+        // error string as if it were a model answer.
         continue;
       }
 

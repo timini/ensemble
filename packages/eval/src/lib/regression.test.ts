@@ -247,6 +247,49 @@ describe('RegressionDetector', () => {
     });
   });
 
+  describe('significant improvement passes', () => {
+    it('returns passed=true when improvement is significant (positive delta)', async () => {
+      // With a one-sided Fisher test (lower tail), improvements yield high
+      // p-values and significant=false.  But if the test were ever switched
+      // to two-sided, we still need passed=true for positive deltas.
+      // This test verifies the "!significant || delta >= 0" guard.
+
+      // Baseline: 10 questions, only 3 correct
+      const baselineQuestions: BaselineQuestionResult[] = [];
+      for (let i = 0; i < 10; i++) {
+        baselineQuestions.push(
+          makeBaselineQuestion(`q${i}`, 'gsm8k', `${i}`, {
+            standard: makeEvalResult(i < 3, i < 3 ? `${i}` : 'wrong', `${i}`),
+          }),
+        );
+      }
+
+      const tier = makeTierConfig({
+        strategies: ['standard'],
+        datasets: [{ name: 'gsm8k', sampleSize: 10 }],
+        significanceThreshold: 0.1,
+      });
+      const baseline = makeBaseline(baselineQuestions);
+
+      // Current: all 10 correct (big improvement)
+      const runner = mockRunner(() =>
+        baselineQuestions.map((bq) =>
+          makeRunResult(bq.questionId, bq.groundTruth, { standard: true }),
+        ),
+      );
+
+      const detector = new RegressionDetector(tier, baseline, runner);
+      const result = await detector.evaluate();
+
+      // Must pass even with a big accuracy swing
+      expect(result.passed).toBe(true);
+      const standardResult = result.perStrategy.find(
+        (s) => s.strategy === 'standard' && s.dataset === 'gsm8k',
+      )!;
+      expect(standardResult.delta).toBeGreaterThan(0);
+    });
+  });
+
   describe('broken question identification', () => {
     it('identifies questions that were correct in baseline but wrong now', async () => {
       const baselineQuestions = [

@@ -55,6 +55,21 @@ export async function evaluateResponses(
   };
 }
 
+/**
+ * Known error message prefixes produced by consensus strategies when there
+ * are too few model responses.  If a consensus output starts with one of
+ * these prefixes it is not a real answer and must be skipped.
+ */
+const CONSENSUS_ERROR_PREFIXES = [
+  'ELO strategy requires',
+  'Majority strategy requires',
+  'Standard strategy requires',
+];
+
+function isConsensusError(value: string): boolean {
+  return CONSENSUS_ERROR_PREFIXES.some((prefix) => value.startsWith(prefix));
+}
+
 export async function evaluateConsensusStrategies(
   evaluator: EvaluatorLike | null,
   consensus: Partial<Record<StrategyName, string>>,
@@ -67,7 +82,7 @@ export async function evaluateConsensusStrategies(
 
   const results: Partial<Record<StrategyName, EvaluationResult>> = {};
   for (const [strategy, answer] of Object.entries(consensus)) {
-    if (!answer) {
+    if (!answer || isConsensusError(answer)) {
       continue;
     }
     const result = await evaluator.evaluate(answer, groundTruth, prompt);
