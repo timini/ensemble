@@ -54,7 +54,7 @@ function makeBaselineQuestion(
 
 function makeBaseline(
   questions: BaselineQuestionResult[],
-  tier: 'ci' | 'post-merge' = 'ci',
+  tier: import('./regressionTypes.js').TierName = 'ci',
 ): GoldenBaselineFile {
   return {
     tier,
