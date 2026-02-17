@@ -38,8 +38,8 @@ describe('CI_TIER_CONFIG', () => {
     expect(byModel['gemini-1.5-flash']).toBe('google');
   });
 
-  it('evaluates all 3 strategies', () => {
-    expect(CI_TIER_CONFIG.strategies).toEqual(['standard', 'elo', 'majority']);
+  it('evaluates all 4 strategies', () => {
+    expect(CI_TIER_CONFIG.strategies).toEqual(['standard', 'elo', 'majority', 'council']);
   });
 
   it('runs 3 times for median stability', () => {
@@ -97,8 +97,8 @@ describe('POST_MERGE_TIER_CONFIG', () => {
     expect(byModel['grok-2']).toBe('xai');
   });
 
-  it('evaluates all 3 strategies', () => {
-    expect(POST_MERGE_TIER_CONFIG.strategies).toEqual(['standard', 'elo', 'majority']);
+  it('evaluates all 4 strategies', () => {
+    expect(POST_MERGE_TIER_CONFIG.strategies).toEqual(['standard', 'elo', 'majority', 'council']);
   });
 
   it('runs once (deterministic with temperature=0)', () => {
@@ -151,8 +151,8 @@ describe('HOMOGENEOUS_CI_TIER_CONFIG', () => {
     expect(total).toBe(30);
   });
 
-  it('evaluates all 3 strategies', () => {
-    expect(HOMOGENEOUS_CI_TIER_CONFIG.strategies).toEqual(['standard', 'elo', 'majority']);
+  it('evaluates all 4 strategies', () => {
+    expect(HOMOGENEOUS_CI_TIER_CONFIG.strategies).toEqual(['standard', 'elo', 'majority', 'council']);
   });
 
   it('has 3 runs for stability', () => {

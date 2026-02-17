@@ -57,7 +57,7 @@ describe('quickEvalBaseline', () => {
       ensembleSize: 3,
       sample: 10,
       datasets: ['gsm8k'],
-      strategies: Object.keys(ensemble) as ('standard' | 'elo' | 'majority')[],
+      strategies: Object.keys(ensemble) as ('standard' | 'elo' | 'majority' | 'council')[],
       updatedAt: new Date().toISOString(),
       single: { accuracy: singleAcc, correct: Math.round(singleAcc * 10), total: 10 },
       ensemble: Object.fromEntries(

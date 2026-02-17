@@ -1,15 +1,18 @@
 import type { AIProvider } from '@ensemble-ai/shared-utils/providers';
+import { CouncilConsensus } from '@ensemble-ai/shared-utils/consensus/CouncilConsensus';
 import { EloRankingConsensus } from '@ensemble-ai/shared-utils/consensus/EloRankingConsensus';
 import { MajorityVotingConsensus } from '@ensemble-ai/shared-utils/consensus/MajorityVotingConsensus';
 import { StandardConsensus } from '@ensemble-ai/shared-utils/consensus/StandardConsensus';
+import type { CouncilParticipant } from '@ensemble-ai/shared-utils/consensus/councilTypes';
 import type { ConsensusModelResponse } from '@ensemble-ai/shared-utils/consensus/types';
 import type { ProviderResponse, StrategyName } from '../types.js';
 import { explodeList } from './modelSpecs.js';
 
-const VALID_STRATEGIES: StrategyName[] = ['standard', 'elo', 'majority'];
+const VALID_STRATEGIES: StrategyName[] = ['standard', 'elo', 'majority', 'council'];
 const VALID_STRATEGY_SET = new Set<StrategyName>(VALID_STRATEGIES);
 const MIN_RESPONSES_FOR_ELO = 3;
 const MIN_RESPONSES_FOR_MAJORITY = 2;
+const MIN_RESPONSES_FOR_COUNCIL = 3;
 
 export function parseStrategies(values: string[]): StrategyName[] {
   const items = explodeList(values).map((value) => value.toLowerCase().trim());
@@ -95,8 +98,6 @@ export async function generateConsensus(
 
     if (strategy === 'majority') {
       if (consensusResponses.length < MIN_RESPONSES_FOR_MAJORITY) {
-        // Omit key entirely — downstream evaluators would otherwise parse the
-        // error string as if it were a model answer.
         continue;
       }
 
@@ -104,6 +105,31 @@ export async function generateConsensus(
       outputs.majority = await majority.generateConsensus(
         consensusResponses,
         consensusResponses.length,
+        prompt,
+      );
+      continue;
+    }
+
+    if (strategy === 'council') {
+      if (consensusResponses.length < MIN_RESPONSES_FOR_COUNCIL) {
+        continue;
+      }
+
+      const participants: CouncilParticipant[] = consensusResponses.map((r) => ({
+        modelId: r.modelId,
+        modelName: r.modelName,
+        provider: summarizerClient,
+        modelApiId: summarizerModel,
+      }));
+
+      const council = new CouncilConsensus({
+        participants,
+        summarizerProvider: summarizerClient,
+        summarizerModelId: summarizerModel,
+      });
+      outputs.council = await council.generateConsensus(
+        consensusResponses,
+        0,
         prompt,
       );
     }

@@ -67,7 +67,7 @@ jobs:
         run: |
           node --import tsx bin/ensemble-eval.mjs quick-eval \
             --model google:gemini-3-flash-preview \
-            --strategies standard,elo,majority \
+            --strategies standard,elo,majority,council \
             --sample 10 \
             --baseline baselines/quick-eval.json \
             > eval-results.txt 2>&1
