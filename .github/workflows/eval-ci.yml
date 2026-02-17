@@ -29,7 +29,8 @@ jobs:
           node-version: 20
           cache: npm
 
-      - run: npm ci --workspace=packages/shared-utils --workspace=packages/eval
+      - run: npm ci --workspace=packages/shared-utils --workspace=packages/eval --ignore-scripts
+      - run: npm rebuild --workspace=packages/shared-utils --workspace=packages/eval
 
       - name: Check Google API key is configured
         id: check-keys
