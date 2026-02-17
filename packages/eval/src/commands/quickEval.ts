@@ -1,23 +1,17 @@
 import { Command } from 'commander';
 import { ProviderRegistry } from '@ensemble-ai/shared-utils/providers';
-import { loadCachedBaseline, saveCachedBaseline } from '../lib/baselineCache.js';
 import { loadBenchmarkQuestions } from '../lib/benchmarkDatasets.js';
 import { resolveBenchmarkDatasetName } from '../lib/benchmarkDatasetShared.js';
 import { parseStrategies } from '../lib/consensus.js';
-import { createEvaluatorForDataset } from '../lib/evaluators.js';
 import { parseModelSpec } from '../lib/modelSpecs.js';
 import { registerProviders } from '../lib/providers.js';
-import { BenchmarkRunner } from '../lib/benchmarkRunner.js';
-import { createBenchmarkFile } from './benchmarkOutput.js';
 import { printResults, type DatasetResult } from './quickEvalOutput.js';
-import type {
-  BenchmarkDatasetName,
-  BenchmarkQuestion,
-  EvalMode,
-  EvalProvider,
-  PromptRunResult,
-  StrategyName,
-} from '../types.js';
+import { runDataset, type RunDatasetArgs } from './quickEvalRunner.js';
+import {
+  buildBaselineFromResults, loadBaseline, saveBaseline,
+  checkRegression, printRegressionReport,
+} from './quickEvalBaseline.js';
+import type { BenchmarkDatasetName, EvalMode, StrategyName } from '../types.js';
 
 const DEFAULT_MODEL = 'google:gemini-3-flash-preview';
 const DEFAULT_ENSEMBLE_SIZE = 3;
@@ -34,86 +28,7 @@ interface QuickEvalOptions {
   mode: string;
   cache: boolean;
   parallel: boolean;
-}
-
-interface RunDatasetArgs {
-  datasetName: BenchmarkDatasetName;
-  questions: BenchmarkQuestion[];
-  model: string;
-  provider: EvalProvider;
-  modelName: string;
-  ensembleSize: number;
-  strategies: StrategyName[];
-  mode: EvalMode;
-  registry: ProviderRegistry;
-  useCache: boolean;
-  sampleCount: number;
-}
-
-async function runSingleBaseline(args: RunDatasetArgs): Promise<PromptRunResult[]> {
-  const { datasetName, questions, model, provider, modelName, mode, registry, useCache, sampleCount } = args;
-
-  const cached = useCache ? await loadCachedBaseline(model, datasetName, sampleCount) : null;
-  if (cached) {
-    process.stderr.write(`  [${datasetName}] Single (1x ${modelName}) — cached\n`);
-    return cached;
-  }
-
-  process.stderr.write(`  [${datasetName}] Single (1x ${modelName})...\n`);
-  const evaluator = createEvaluatorForDataset(datasetName);
-  const singleModels = [{ provider, model: modelName }];
-  const singleOutput = createBenchmarkFile(datasetName, mode, [model], ['standard'], questions.length);
-  const runner = new BenchmarkRunner({
-    mode, registry, models: singleModels, strategies: ['standard'],
-    evaluator, summarizer: null, requestDelayMs: 0, parallelQuestions: true,
-  });
-  const result = await runner.run({
-    questions, outputPath: '/dev/null', output: singleOutput,
-    onProgress: (p) => {
-      process.stderr.write(`  [${datasetName}] single [${p.completed}/${p.total}] ${p.questionId}\n`);
-    },
-  });
-
-  if (useCache) {
-    await saveCachedBaseline(model, datasetName, sampleCount, result.runs);
-  }
-  return result.runs;
-}
-
-async function runEnsemble(args: RunDatasetArgs): Promise<PromptRunResult[]> {
-  const { datasetName, questions, model, provider, modelName, ensembleSize, strategies, mode, registry } = args;
-
-  process.stderr.write(`  [${datasetName}] Ensemble (${ensembleSize}x ${modelName})...\n`);
-  const evaluator = createEvaluatorForDataset(datasetName);
-  const ensembleModels = Array.from({ length: ensembleSize }, () => ({ provider, model: modelName }));
-  const ensembleOutput = createBenchmarkFile(
-    datasetName, mode, Array(ensembleSize).fill(model), strategies, questions.length,
-  );
-  const runner = new BenchmarkRunner({
-    mode, registry, models: ensembleModels, strategies, evaluator,
-    summarizer: { provider, model: modelName },
-    requestDelayMs: 0, parallelQuestions: true,
-  });
-  const result = await runner.run({
-    questions, outputPath: '/dev/null', output: ensembleOutput,
-    onProgress: (p) => {
-      process.stderr.write(`  [${datasetName}] ensemble [${p.completed}/${p.total}] ${p.questionId}\n`);
-    },
-  });
-  return result.runs;
-}
-
-async function runDataset(args: RunDatasetArgs, parallel: boolean): Promise<DatasetResult> {
-  if (parallel) {
-    const [singleRuns, ensembleRuns] = await Promise.all([
-      runSingleBaseline(args),
-      runEnsemble(args),
-    ]);
-    return { dataset: args.datasetName, singleRuns, ensembleRuns };
-  }
-  const singleRuns = await runSingleBaseline(args);
-  const ensembleRuns = await runEnsemble(args);
-  return { dataset: args.datasetName, singleRuns, ensembleRuns };
+  baseline?: string;
 }
 
 function parseDatasets(raw?: string[]): BenchmarkDatasetName[] {
@@ -143,6 +58,7 @@ export function createQuickEvalCommand(): Command {
     .option('--mode <mode>', 'Provider mode (mock or free).', 'free')
     .option('--no-cache', 'Disable single-model baseline caching.')
     .option('--no-parallel', 'Run datasets sequentially instead of in parallel.')
+    .option('--baseline <path>', 'Path to baseline JSON. Saves results and fails on regression.')
     .action(async (options: QuickEvalOptions) => {
       const { provider, model: modelName } = parseModelSpec(options.model);
       const model = options.model;
@@ -193,6 +109,26 @@ export function createQuickEvalCommand(): Command {
             async (acc, a) => [...(await acc), await runDataset(a, false)], Promise.resolve([]),
           );
       printResults(model, ensembleSize, strategies, allDatasetResults, Date.now() - startTime);
+
+      if (options.baseline) {
+        const current = buildBaselineFromResults(
+          model, ensembleSize, sampleCount, datasetNames, strategies, allDatasetResults,
+        );
+        const previous = await loadBaseline(options.baseline);
+        if (previous) {
+          const result = checkRegression(previous, current);
+          printRegressionReport(result);
+          if (!result.passed) {
+            await saveBaseline(options.baseline, current);
+            process.exitCode = 1;
+            return;
+          }
+        } else {
+          process.stdout.write('\n  No previous baseline found. Saving initial baseline.\n');
+        }
+        await saveBaseline(options.baseline, current);
+        process.stdout.write(`  Baseline saved to ${options.baseline}\n`);
+      }
     });
 
   return command;

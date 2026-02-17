@@ -69,6 +69,7 @@ jobs:
             --model google:gemini-3-flash-preview \
             --strategies standard,elo,majority \
             --sample 10 \
+            --baseline baselines/quick-eval.json \
             > eval-results.txt 2>&1
           cat eval-results.txt
 
