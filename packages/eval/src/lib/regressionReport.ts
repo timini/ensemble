@@ -1,4 +1,4 @@
-import type { RegressionResult, StrategyRegressionResult, BrokenQuestion } from './regressionTypes.js';
+import type { EnsembleDelta, RegressionResult, StrategyRegressionResult, BrokenQuestion } from './regressionTypes.js';
 
 /** Options for controlling the regression report output. */
 export interface RegressionReportOptions {
@@ -146,6 +146,24 @@ function renderStability(result: RegressionResult): string[] {
   return lines;
 }
 
+function renderEnsembleValue(delta: EnsembleDelta | undefined): string[] {
+  if (!delta) return [];
+
+  const lines: string[] = [];
+  const icon = delta.delta >= 0 ? ':white_check_mark:' : ':warning:';
+
+  lines.push('## Ensemble Value');
+  lines.push('');
+  lines.push(`| | |`);
+  lines.push(`| --- | ---: |`);
+  lines.push(`| **Best Model** | ${delta.bestModelName} (${toPercent(delta.bestModelAccuracy)}) |`);
+  lines.push(`| **Best Strategy** | ${delta.bestStrategyName} (${toPercent(delta.bestStrategyAccuracy)}) |`);
+  lines.push(`| **Delta** | ${toDelta(delta.delta)} ${icon} |`);
+  lines.push('');
+
+  return lines;
+}
+
 function renderCost(result: RegressionResult): string[] {
   const lines: string[] = [];
   const { cost } = result;
@@ -189,6 +207,7 @@ export function createRegressionReport(
     lines.push(...renderChangedFiles(changedFiles));
   }
 
+  lines.push(...renderEnsembleValue(result.ensembleDelta));
   lines.push(...renderStability(result));
   lines.push(...renderCost(result));
 

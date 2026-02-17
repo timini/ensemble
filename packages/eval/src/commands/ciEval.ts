@@ -7,11 +7,11 @@ import { createEvaluatorForDataset } from '../lib/evaluators.js';
 import { BenchmarkRunner } from '../lib/benchmarkRunner.js';
 import { RegressionDetector } from '../lib/regression.js';
 import { createRegressionReport } from '../lib/regressionReport.js';
-import type { GoldenBaselineFile } from '../lib/regressionTypes.js';
+import type { GoldenBaselineFile, TierName } from '../lib/regressionTypes.js';
 import type { EvalMode, EvalProvider } from '../types.js';
 
 interface CiEvalCommandOptions {
-  tier: 'ci' | 'post-merge';
+  tier: TierName;
   baseline?: string;
   output?: string;
   report: string;

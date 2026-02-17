@@ -18,10 +18,11 @@ import type {
   BaselineQuestionResult,
   GoldenBaselineFile,
   TierConfig,
+  TierName,
 } from '../lib/regressionTypes.js';
 
 interface UpdateBaselineCommandOptions {
-  tier: 'ci' | 'post-merge';
+  tier: TierName;
   output?: string;
   mode: EvalMode;
 }

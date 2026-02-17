@@ -30,13 +30,22 @@ export function parseStrategies(values: string[]): StrategyName[] {
 }
 
 function toConsensusResponses(responses: ProviderResponse[]): ConsensusModelResponse[] {
+  const occurrences: Record<string, number> = {};
   return responses
     .filter((response) => !response.error)
-    .map((response) => ({
-      modelId: response.model,
-      modelName: `${response.provider}:${response.model}`,
-      content: response.content,
-    }));
+    .map((response) => {
+      const baseId = response.model;
+      const count = (occurrences[baseId] ?? 0) + 1;
+      occurrences[baseId] = count;
+      // Append #N suffix for duplicate model IDs so that consensus strategies
+      // (ELO rankings, majority voting) see each instance as distinct.
+      const modelId = count === 1 ? baseId : `${baseId}#${count}`;
+      const modelName =
+        count === 1
+          ? `${response.provider}:${response.model}`
+          : `${response.provider}:${response.model}#${count}`;
+      return { modelId, modelName, content: response.content };
+    });
 }
 
 export async function generateConsensus(

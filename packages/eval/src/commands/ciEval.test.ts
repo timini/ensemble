@@ -1,11 +1,11 @@
 import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
 import type { MockInstance } from 'vitest';
 import { Command } from 'commander';
-import type { GoldenBaselineFile, RegressionResult, TierConfig } from '../lib/regressionTypes.js';
+import type { GoldenBaselineFile, RegressionResult, TierConfig, TierName } from '../lib/regressionTypes.js';
 
 // ── Mocks ────────────────────────────────────────────────────────────────────
 
-const mockGetTierConfig = vi.fn<(tier: 'ci' | 'post-merge') => TierConfig>();
+const mockGetTierConfig = vi.fn<(tier: TierName) => TierConfig>();
 const mockReadJsonFile = vi.fn<(filePath: string) => Promise<unknown>>();
 const mockWriteJsonFile = vi.fn<(filePath: string, data: unknown) => Promise<void>>();
 const mockWriteTextFile = vi.fn<(filePath: string, content: string) => Promise<void>>();
@@ -15,7 +15,7 @@ const mockCreateRegressionReport = vi.fn<(result: RegressionResult) => string>()
 const mockEvaluate = vi.fn<() => Promise<RegressionResult>>();
 
 vi.mock('../lib/tierConfig.js', () => ({
-  getTierConfig: (...args: unknown[]) => mockGetTierConfig(...(args as [tier: 'ci' | 'post-merge'])),
+  getTierConfig: (...args: unknown[]) => mockGetTierConfig(...(args as [tier: TierName])),
 }));
 
 vi.mock('../lib/io.js', () => ({
@@ -68,7 +68,7 @@ function makeTierConfig(overrides?: Partial<TierConfig>): TierConfig {
   };
 }
 
-function makeBaseline(tier: 'ci' | 'post-merge' = 'ci'): GoldenBaselineFile {
+function makeBaseline(tier: TierName = 'ci'): GoldenBaselineFile {
   return {
     tier,
     createdAt: '2025-01-01T00:00:00.000Z',
