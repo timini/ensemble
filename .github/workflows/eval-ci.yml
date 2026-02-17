@@ -72,9 +72,6 @@ jobs:
             > eval-results.txt 2>&1
           cat eval-results.txt
 
-          # Check baseline regression
-          node --import tsx bin/ensemble-eval.mjs ci-eval --tier homogeneous-ci 2>&1 || true
-
       - name: Upload eval results
         if: always() && steps.check-keys.outputs.keys_available == 'true'
         uses: actions/upload-artifact@v4
