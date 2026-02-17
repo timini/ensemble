@@ -2,6 +2,8 @@
 import type { AIProvider } from '../providers/types';
 import type { ConsensusModelResponse, ConsensusStrategy, RankingResult } from './types';
 
+const DEFAULT_TOP_K = 3;
+
 export class EloRankingConsensus implements ConsensusStrategy {
     private static readonly K_FACTOR = 32;
     private static readonly INITIAL_ELO = 1200;
@@ -26,17 +28,14 @@ export class EloRankingConsensus implements ConsensusStrategy {
         const eloScores = new Map<string, number>();
         responses.forEach(r => eloScores.set(r.modelId, EloRankingConsensus.INITIAL_ELO));
 
-        // Generate Pairings (All-vs-All for accuracy, or random subset for speed?)
-        // For < 10 responses, All-vs-All is feasible. 3 models = 3 pairs. 5 models = 10 pairs.
+        // Generate Pairings (All-vs-All for accuracy)
+        // For < 10 responses this is feasible. 3 models = 3 pairs. 5 models = 10 pairs.
         const pairings = this.generatePairings(responses);
 
         // Run comparisons
         for (const pair of pairings) {
             const winnerId = await this.judgePair(pair[0], pair[1], prompt);
-
-            if (winnerId) {
-                this.updateElo(eloScores, pair[0].modelId, pair[1].modelId, winnerId);
-            }
+            this.updateElo(eloScores, pair[0].modelId, pair[1].modelId, winnerId);
         }
 
         // Convert to result
@@ -65,7 +64,9 @@ export class EloRankingConsensus implements ConsensusStrategy {
         const rankings = await this.rankResponses(responses, prompt);
 
         // Take top N
-        const topNRankings = rankings.slice(0, topN);
+        const requestedTopN = topN > 0 ? topN : DEFAULT_TOP_K;
+        const effectiveTopN = Math.max(1, Math.min(requestedTopN, rankings.length));
+        const topNRankings = rankings.slice(0, effectiveTopN);
         const topNModelIds = new Set(topNRankings.map(r => r.modelId));
 
         const topResponses = responses.filter(r => topNModelIds.has(r.modelId));
@@ -74,24 +75,35 @@ export class EloRankingConsensus implements ConsensusStrategy {
     }
 
     private async summarizeResponses(responses: ConsensusModelResponse[], originalPrompt: string): Promise<string> {
-        const responsesText = responses.map(r => `Model: ${r.modelName}\nResponse:\n${r.content}`).join('\n\n---\n\n');
+        const responsesText = responses.map((response, index) =>
+            `Candidate ${index + 1}\nResponse:\n${response.content}`
+        ).join('\n\n---\n\n');
 
         const prompt = `
-You are a helpful assistant tasked with synthesizing multiple AI responses into a single, enhanced answer.
-Original Question: ${originalPrompt}
+You are a consensus resolver. Produce the most accurate final answer to the original question.
 
-Here are the responses from the top-ranked AI models:
+Original Question:
+${originalPrompt}
 
+Top-Ranked Candidate Responses:
 ${responsesText}
 
-Your task is to produce a SINGLE, UNIFIED response that directly answers the original question. 
-Do NOT compare or analyze the responses. Do NOT mention "models agree/disagree" or reference the individual responses.
-Instead, synthesize the best elements from all responses into one coherent, comprehensive answer that a user would receive as the final response to their question.
-Write as if you are directly answering the original question yourself, enhanced by the collective intelligence of the ensemble.
+Instructions:
+1) Extract each candidate's final answer and key supporting facts.
+2) Resolve disagreements by choosing the most defensible answer, prioritizing factual correctness over style.
+3) Prefer stronger reasoning over popularity when they conflict.
+4) Keep only information needed to answer the original question.
+5) Preserve required output constraints from the original question exactly.
+
+Output rules:
+- Return ONLY the final user answer text.
+- No markdown formatting (no bold, italics, code fences, headings).
+- No references to models, ranking, or voting.
+- If the question asks for a constrained format (single letter, number, JSON, etc.), output exactly that format and nothing else.
         `.trim();
 
         return new Promise((resolve) => {
-             
+
             this.summarizerProvider.streamResponse(prompt, this.summarizerModelId,
                 () => { void 0; },
                 (finalText: string) => resolve(finalText),
@@ -115,26 +127,37 @@ Write as if you are directly answering the original question yourself, enhanced 
 
     private async judgePair(modelA: ConsensusModelResponse, modelB: ConsensusModelResponse, originalPrompt: string): Promise<string | null> {
         const prompt = `
-You are an impartial judge evaluating two AI responses.
-Question: ${originalPrompt}
+You are an impartial evaluator selecting the more correct answer.
 
-Response A (from ${modelA.modelName}):
+Original Question:
+${originalPrompt}
+
+Model A:
 ${modelA.content}
 
-Response B (from ${modelB.modelName}):
+Model B:
 ${modelB.content}
 
-Which response is better? Reply EXACTLY with "Winner: ${modelA.modelName}" or "Winner: ${modelB.modelName}". If it is a tie, reply "Winner: Tie".
+Decision rules:
+- Choose the answer that is more factually correct and better follows the question constraints.
+- If both are equally valid, select TIE.
+- Ignore style, verbosity, and confidence wording.
+
+Output exactly one of:
+- WINNER: A
+- WINNER: B
+- WINNER: TIE
         `.trim();
 
         return new Promise((resolve) => {
-             
+
             this.judgeProvider.streamResponse(prompt, this.judgeModelId,
                 () => { void 0; },
                 (finalText: string) => {
-                    if (finalText.includes(`Winner: ${modelA.modelName}`)) {
+                    const normalized = finalText.toUpperCase();
+                    if (normalized.includes('WINNER: A')) {
                         resolve(modelA.modelId);
-                    } else if (finalText.includes(`Winner: ${modelB.modelName}`)) {
+                    } else if (normalized.includes('WINNER: B')) {
                         resolve(modelB.modelId);
                     } else {
                         resolve(null); // Tie or unclear
@@ -148,18 +171,15 @@ Which response is better? Reply EXACTLY with "Winner: ${modelA.modelName}" or "W
         });
     }
 
-    private updateElo(scores: Map<string, number>, playerAId: string, playerBId: string, winnerId: string) {
+    private updateElo(scores: Map<string, number>, playerAId: string, playerBId: string, winnerId: string | null): void {
         const ratingA = scores.get(playerAId)!;
         const ratingB = scores.get(playerBId)!;
 
         const expectedScoreA = 1 / (1 + Math.pow(10, (ratingB - ratingA) / 400));
         const expectedScoreB = 1 / (1 + Math.pow(10, (ratingA - ratingB) / 400));
 
-        const actualScoreA = winnerId === playerAId ? 1 : 0;
-        const actualScoreB = winnerId === playerBId ? 1 : 0;
-
-        // If tie (winnerId is null/neither), expected logic could differ, but here we only call update if there is a winner.
-        // If we want to handle ties, we need '0.5'.
+        const actualScoreA = winnerId === playerAId ? 1 : winnerId === playerBId ? 0 : 0.5;
+        const actualScoreB = winnerId === playerBId ? 1 : winnerId === playerAId ? 0 : 0.5;
 
         const newRatingA = ratingA + EloRankingConsensus.K_FACTOR * (actualScoreA - expectedScoreA);
         const newRatingB = ratingB + EloRankingConsensus.K_FACTOR * (actualScoreB - expectedScoreB);

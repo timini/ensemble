@@ -24,7 +24,7 @@ export class StandardConsensus implements ConsensusStrategy {
     }
 
     async generateConsensus(responses: ConsensusModelResponse[], topN: number, originalPrompt: string): Promise<string> {
-        // Standard consensus uses ALL responses, ignoring topN in principle, 
+        // Standard consensus uses ALL responses, ignoring topN in principle,
         // OR we can say "Standard" implies Top N = All?
         // Usually standard means "Summarize everything".
         void topN; // Unused
@@ -39,14 +39,14 @@ Here are the responses from multiple AI models:
 
 ${responsesText}
 
-Your task is to produce a SINGLE, UNIFIED response that directly answers the original question. 
+Your task is to produce a SINGLE, UNIFIED response that directly answers the original question.
 Do NOT compare or analyze the responses. Do NOT mention "models agree/disagree" or reference the individual responses.
 Instead, synthesize the best elements from all responses into one coherent, comprehensive answer that a user would receive as the final response to their question.
 Write as if you are directly answering the original question yourself, enhanced by the collective intelligence of the ensemble.
         `.trim();
 
         return new Promise((resolve) => {
-             
+
             this.summarizerProvider.streamResponse(prompt, this.summarizerModelId,
                 () => { void 0; },
                 (finalText: string) => resolve(finalText),
