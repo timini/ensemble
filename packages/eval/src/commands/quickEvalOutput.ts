@@ -37,13 +37,12 @@ export function printResults(
     process.stdout.write(`    Single:   ${toPercent(dsSingle.accuracy)} (${dsSingle.correct}/${dsSingle.total})  tokens: ${dsSingleTokens.toLocaleString()}  avg: ${formatMs(dsSingleTime)}/q\n`);
     const dsEnsembleTokens = sumTokens(dr.ensembleRuns);
     const dsEnsembleTime = avgDurationMs(dr.ensembleRuns);
+    const dsTokenDelta = dsEnsembleTokens - dsSingleTokens;
     for (const strategy of strategies) {
       const dsStrat = computeAccuracy(dr.ensembleRuns, strategy);
       const delta = dsStrat.accuracy - dsSingle.accuracy;
-      process.stdout.write(`    ${strategy.padEnd(10)} ${toPercent(dsStrat.accuracy)} (${dsStrat.correct}/${dsStrat.total})  delta: ${toDelta(delta)}\n`);
+      process.stdout.write(`    ${strategy.padEnd(10)} ${toPercent(dsStrat.accuracy)} (${dsStrat.correct}/${dsStrat.total})  delta: ${toDelta(delta)}  tokens: ${dsEnsembleTokens.toLocaleString()} (${dsTokenDelta > 0 ? '+' : ''}${dsTokenDelta.toLocaleString()})  avg: ${formatMs(dsEnsembleTime)}/q\n`);
     }
-    const dsTokenDelta = dsEnsembleTokens - dsSingleTokens;
-    process.stdout.write(`    ${'ensemble'.padEnd(10)} tokens: ${dsEnsembleTokens.toLocaleString()} (${dsTokenDelta > 0 ? '+' : ''}${dsTokenDelta.toLocaleString()})  avg: ${formatMs(dsEnsembleTime)}/q\n`);
     process.stdout.write('\n');
   }
 
@@ -66,9 +65,8 @@ export function printResults(
   const ensembleCostStr = hasCost ? ` $${ensembleCost.toFixed(4)}` : '';
   for (const strategy of strategies) {
     const stratAcc = computeAccuracy(allEnsembleRuns, strategy);
-    process.stdout.write(`  ${`${strategy} (${ensembleSize}x)`.padEnd(16)} ${`${toPercent(stratAcc.accuracy)} (${stratAcc.correct}/${stratAcc.total})`.padEnd(22)}\n`);
+    process.stdout.write(`  ${`${strategy} (${ensembleSize}x)`.padEnd(16)} ${`${toPercent(stratAcc.accuracy)} (${stratAcc.correct}/${stratAcc.total})`.padEnd(22)} ${ensembleTokens.toLocaleString().padEnd(14)} ${`${formatMs(ensembleAvgTime)}/q`.padEnd(12)}${ensembleCostStr}\n`);
   }
-  process.stdout.write(`  ${'Ensemble'.padEnd(16)} ${''.padEnd(22)} ${ensembleTokens.toLocaleString().padEnd(14)} ${`${formatMs(ensembleAvgTime)}/q`.padEnd(12)}${ensembleCostStr}\n`);
 
   process.stdout.write('\n');
 

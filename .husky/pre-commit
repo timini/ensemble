@@ -12,7 +12,8 @@ echo "$STAGED_FILES" | grep -q '^packages/component-library/' && CHANGED_COMPONE
 echo "$STAGED_FILES" | grep -q '^packages/shared-utils/' && CHANGED_SHARED_UTILS=true || true
 echo "$STAGED_FILES" | grep -q '^packages/app/' && CHANGED_APP=true || true
 
-if [ "$CHANGED_COMPONENT_LIB" = true ]; then
+# Component library depends on shared-utils
+if [ "$CHANGED_COMPONENT_LIB" = true ] || [ "$CHANGED_SHARED_UTILS" = true ]; then
   echo "🧪 Component library quick checks..."
   npm run lint --workspace=packages/component-library
   npm run test:unit --workspace=packages/component-library
