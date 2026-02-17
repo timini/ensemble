@@ -76,7 +76,7 @@ export class EloRankingConsensus implements ConsensusStrategy {
 
     private async summarizeResponses(responses: ConsensusModelResponse[], originalPrompt: string): Promise<string> {
         const responsesText = responses.map((response, index) =>
-            `Candidate ${index + 1}\nModel: ${response.modelName}\nModel ID: ${response.modelId}\nResponse:\n${response.content}`
+            `Candidate ${index + 1}\nResponse:\n${response.content}`
         ).join('\n\n---\n\n');
 
         const prompt = `

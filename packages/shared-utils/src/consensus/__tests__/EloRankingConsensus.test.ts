@@ -48,7 +48,7 @@ describe('EloRankingConsensus', () => {
             let winner = 'TIE';
             if (hasResponseA && hasResponseB) winner = 'A';
             else if (hasResponseA && hasResponseC) winner = 'A';
-            else if (hasResponseB && hasResponseC) winner = 'A'; // first candidate (B) wins
+            else if (hasResponseB && hasResponseC) winner = 'A'; // B is first in pair so labelled "A" in anonymous prompt, B wins
 
             onComplete(`WINNER: ${winner}`, 100, 10);
             return Promise.resolve();
@@ -161,9 +161,14 @@ describe('EloRankingConsensus', () => {
 
         // Verify improved synthesis prompt structure
         expect(promptArg).toContain('consensus resolver');
-        expect(promptArg).toContain('Model A');
-        expect(promptArg).toContain('Model B');
-        expect(promptArg).not.toContain('Model C');
+        // Top 2 responses should be included as anonymous candidates
+        expect(promptArg).toContain('Candidate 1');
+        expect(promptArg).toContain('Candidate 2');
+        // Model C was rank 3, should be excluded when topN=2
+        expect(promptArg).not.toContain('Response C content');
+        // Must not leak model identity into synthesis prompt
+        expect(promptArg).not.toContain('model-a');
+        expect(promptArg).not.toContain('model-b');
         expect(promptArg).toContain('Output rules');
         expect(promptArg).toContain('No markdown formatting');
     });
@@ -190,9 +195,9 @@ describe('EloRankingConsensus', () => {
         const calls = (mockJudgeProvider.streamResponse as Mock).mock.calls;
         const promptArg = calls[calls.length - 1][0];
 
-        // With default top-k of 3 and 3 models, all should be included
-        expect(promptArg).toContain('Model A');
-        expect(promptArg).toContain('Model B');
-        expect(promptArg).toContain('Model C');
+        // With default top-k of 3 and 3 models, all should be included as anonymous candidates
+        expect(promptArg).toContain('Candidate 1');
+        expect(promptArg).toContain('Candidate 2');
+        expect(promptArg).toContain('Candidate 3');
     });
 });
