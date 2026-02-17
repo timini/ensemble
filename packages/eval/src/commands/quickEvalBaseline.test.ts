@@ -199,6 +199,23 @@ describe('quickEvalBaseline', () => {
       }
     });
 
+    it('computes lift over single for ensemble strategies', () => {
+      // Baseline: single=15/30=50%, standard=21/30=70% → lift=+20%
+      // Current: single=12/30=40%, standard=19/30≈63.3% → lift≈+23.3%
+      const prev = makeBaseline(15, 30, { standard: { correct: 21, total: 30 } });
+      const curr = makeBaseline(12, 30, { standard: { correct: 19, total: 30 } });
+      const result = checkRegression(prev, curr);
+      const stdResult = result.results.find((r) => r.strategy === 'standard')!;
+      expect(stdResult.baselineLift).toBeCloseTo(0.2); // 70% - 50%
+      expect(stdResult.currentLift).toBeCloseTo(19 / 30 - 12 / 30); // ≈23.3%
+      expect(stdResult.liftChange).toBeCloseTo(stdResult.currentLift! - stdResult.baselineLift!);
+
+      const singleResult = result.results.find((r) => r.strategy === 'single')!;
+      expect(singleResult.baselineLift).toBeUndefined();
+      expect(singleResult.currentLift).toBeUndefined();
+      expect(singleResult.liftChange).toBeUndefined();
+    });
+
     it('includes significanceLevel in result', () => {
       const prev = makeSimple(15, { standard: 18 });
       const curr = makeSimple(15, { standard: 18 });

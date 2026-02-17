@@ -61,7 +61,8 @@ async function runSingleBaseline(args: RunDatasetArgs): Promise<PromptRunResult[
 async function runEnsemble(args: RunDatasetArgs): Promise<PromptRunResult[]> {
   const { datasetName, questions, model, provider, modelName, ensembleSize, strategies, mode, registry } = args;
 
-  process.stderr.write(`  [${datasetName}] Ensemble (${ensembleSize}x ${modelName})...\n`);
+  const stratList = strategies.join(',');
+  process.stderr.write(`  [${datasetName}] Ensemble (${ensembleSize}x ${modelName}, ${stratList})...\n`);
   const evaluator = createEvaluatorForDataset(datasetName);
   const ensembleModels = Array.from({ length: ensembleSize }, () => ({ provider, model: modelName }));
   const ensembleOutput = createBenchmarkFile(
@@ -76,7 +77,7 @@ async function runEnsemble(args: RunDatasetArgs): Promise<PromptRunResult[]> {
   const result = await runner.run({
     questions, outputPath: '/dev/null', output: ensembleOutput,
     onProgress: (p) => {
-      process.stderr.write(`  [${datasetName}] ensemble [${p.completed}/${p.total}] ${p.questionId}\n`);
+      process.stderr.write(`  [${datasetName}] ensemble (${stratList}) [${p.completed}/${p.total}] ${p.questionId}\n`);
     },
   });
   return result.runs;
