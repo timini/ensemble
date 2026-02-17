@@ -133,13 +133,17 @@
         },
         "elo": {
           "title": "Synthèse Classée ELO",
-          "description": "Classement par paires avec synthèse Top N. Nécessite 3+ modèles.",
-          "warning": "La synthèse classée ELO nécessite au moins 3 modèles sélectionnés ({{count}} sélectionnés)"
+          "description": "Classement par paires avec synthèse Top N. Nécessite 3+ modèles."
         },
         "majority": {
           "title": "Vote Majoritaire",
           "description": "Privilégie la position majoritaire parmi les réponses. Fonctionne avec 2+ modèles."
-        }
+        },
+        "council": {
+          "title": "Débat du Conseil",
+          "description": "Débat multi-tours entre modèles avec critique et réfutation. Nécessite 3+ modèles."
+        },
+        "minModelsWarning": "ELO et Conseil nécessitent au moins 3 modèles sélectionnés ({{count}} sélectionnés)"
       }
     },
     "ensembleManagementPanel": {

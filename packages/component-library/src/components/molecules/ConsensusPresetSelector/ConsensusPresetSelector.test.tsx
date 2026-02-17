@@ -17,6 +17,7 @@ describe('ConsensusPresetSelector', () => {
     expect(screen.getByTestId('preset-standard')).toBeInTheDocument();
     expect(screen.getByTestId('preset-elo')).toBeInTheDocument();
     expect(screen.getByTestId('preset-majority')).toBeInTheDocument();
+    expect(screen.getByTestId('preset-council')).toBeInTheDocument();
   });
 
   it('uses Heading atom for preset heading', () => {
@@ -50,7 +51,24 @@ describe('ConsensusPresetSelector', () => {
     expect(onConsensusMethodChange).toHaveBeenCalledWith('majority');
   });
 
-  it('disables ELO option and shows warning when fewer than 3 models are selected', () => {
+  it('calls method change handler when selecting council', async () => {
+    const user = userEvent.setup();
+    const onConsensusMethodChange = vi.fn();
+
+    render(
+      <ConsensusPresetSelector
+        selectedModelCount={4}
+        consensusMethod="standard"
+        onConsensusMethodChange={onConsensusMethodChange}
+      />
+    );
+
+    await user.click(screen.getByTestId('preset-council'));
+
+    expect(onConsensusMethodChange).toHaveBeenCalledWith('council');
+  });
+
+  it('disables ELO and Council options and shows warning when fewer than 3 models are selected', () => {
     render(
       <ConsensusPresetSelector
         selectedModelCount={2}
@@ -60,7 +78,8 @@ describe('ConsensusPresetSelector', () => {
     );
 
     expect(screen.getByTestId('preset-elo')).toBeDisabled();
-    expect(screen.getByTestId('preset-elo-warning')).toBeInTheDocument();
+    expect(screen.getByTestId('preset-council')).toBeDisabled();
+    expect(screen.getByTestId('preset-min-models-warning')).toBeInTheDocument();
   });
 
   it('shows Top N input only when ELO is selected and callback is provided', () => {
@@ -133,5 +152,6 @@ describe('ConsensusPresetSelector', () => {
       screen.getByRole('heading', { name: 'Préréglage de Consensus', level: 4 })
     ).toBeInTheDocument();
     expect(screen.getByText('Vote Majoritaire')).toBeInTheDocument();
+    expect(screen.getByText('Débat du Conseil')).toBeInTheDocument();
   });
 });

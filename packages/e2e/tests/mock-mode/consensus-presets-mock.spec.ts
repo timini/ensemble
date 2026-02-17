@@ -51,15 +51,16 @@ test.describe('Consensus Presets (Mock Mode)', () => {
         // ==========================================
         await expect(page).toHaveURL(/\/prompt/);
 
-        // Check ELO is disabled (only 2 models)
-        const eloRadio = page.getByTestId('preset-elo');
-        await expect(eloRadio).toBeDisabled();
+        // Check ELO and Council are disabled (only 2 models)
+        await expect(page.getByTestId('preset-elo')).toBeDisabled();
+        await expect(page.getByTestId('preset-council')).toBeDisabled();
 
-        // Check ELO warning message is visible
-        await expect(page.getByTestId('preset-elo-warning')).toBeVisible();
+        // Check min-models warning message is visible
+        await expect(page.getByTestId('preset-min-models-warning')).toBeVisible();
 
-        // Standard should be checked
+        // Standard and majority should be enabled
         await expect(page.getByTestId('preset-standard')).toBeChecked();
+        await expect(page.getByTestId('preset-majority')).toBeEnabled();
 
         // Enter Prompt and generate
         await page.getByTestId('prompt-textarea').fill('Test prompt for consensus');
