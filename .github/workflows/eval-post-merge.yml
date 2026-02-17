@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - 'packages/shared-utils/**'
+      - 'packages/eval/**'
 
 concurrency:
   group: eval-post-merge
@@ -29,7 +30,7 @@ jobs:
           node-version: 20
           cache: npm
 
-      - run: npm ci
+      - run: npm ci --workspace=packages/shared-utils --workspace=packages/eval
 
       - name: Check API keys are configured
         id: check-keys
@@ -53,7 +54,8 @@ jobs:
         if: steps.check-keys.outputs.keys_available == 'true'
         id: eval
         continue-on-error: true
-        run: npx ensemble-eval ci-eval --tier post-merge
+        working-directory: packages/eval
+        run: node --import tsx bin/ensemble-eval.mjs ci-eval --tier post-merge
 
       - name: Upload report artifact
         if: always() && steps.check-keys.outputs.keys_available == 'true'

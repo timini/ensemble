@@ -64,76 +64,59 @@ export async function generateConsensus(
   }
 
   const outputs: Partial<Record<StrategyName, string>> = {};
+  const tasks: Promise<void>[] = [];
+
   for (const strategy of strategies) {
     if (strategy === 'standard') {
-      const standard = new StandardConsensus(summarizerClient, summarizerModel);
-      outputs.standard = await standard.generateConsensus(
-        consensusResponses,
-        0,
-        prompt,
+      tasks.push(
+        new StandardConsensus(summarizerClient, summarizerModel)
+          .generateConsensus(consensusResponses, 0, prompt)
+          .then((result) => { outputs.standard = result; }),
       );
-      continue;
-    }
-
-    if (strategy === 'elo') {
-      if (consensusResponses.length < MIN_RESPONSES_FOR_ELO) {
-        // Omit key entirely — downstream evaluators would otherwise parse the
-        // error string as if it were a model answer.
-        continue;
+    } else if (strategy === 'elo') {
+      if (consensusResponses.length >= MIN_RESPONSES_FOR_ELO) {
+        tasks.push(
+          new EloRankingConsensus(
+            summarizerClient, summarizerModel, summarizerClient, summarizerModel,
+          )
+            .generateConsensus(
+              consensusResponses,
+              Math.min(MIN_RESPONSES_FOR_ELO, consensusResponses.length),
+              prompt,
+            )
+            .then((result) => { outputs.elo = result; }),
+        );
       }
-
-      const elo = new EloRankingConsensus(
-        summarizerClient,
-        summarizerModel,
-        summarizerClient,
-        summarizerModel,
-      );
-      outputs.elo = await elo.generateConsensus(
-        consensusResponses,
-        Math.min(MIN_RESPONSES_FOR_ELO, consensusResponses.length),
-        prompt,
-      );
-      continue;
-    }
-
-    if (strategy === 'majority') {
-      if (consensusResponses.length < MIN_RESPONSES_FOR_MAJORITY) {
-        continue;
+    } else if (strategy === 'majority') {
+      if (consensusResponses.length >= MIN_RESPONSES_FOR_MAJORITY) {
+        tasks.push(
+          new MajorityVotingConsensus(summarizerClient, summarizerModel)
+            .generateConsensus(consensusResponses, consensusResponses.length, prompt)
+            .then((result) => { outputs.majority = result; }),
+        );
       }
-
-      const majority = new MajorityVotingConsensus(summarizerClient, summarizerModel);
-      outputs.majority = await majority.generateConsensus(
-        consensusResponses,
-        consensusResponses.length,
-        prompt,
-      );
-      continue;
-    }
-
-    if (strategy === 'council') {
-      if (consensusResponses.length < MIN_RESPONSES_FOR_COUNCIL) {
-        continue;
+    } else if (strategy === 'council') {
+      if (consensusResponses.length >= MIN_RESPONSES_FOR_COUNCIL) {
+        const participants: CouncilParticipant[] = consensusResponses.map((r) => ({
+          modelId: r.modelId,
+          modelName: r.modelName,
+          provider: summarizerClient,
+          modelApiId: summarizerModel,
+        }));
+        tasks.push(
+          new CouncilConsensus({
+            participants,
+            summarizerProvider: summarizerClient,
+            summarizerModelId: summarizerModel,
+          })
+            .generateConsensus(consensusResponses, 0, prompt)
+            .then((result) => { outputs.council = result; }),
+        );
       }
-
-      const participants: CouncilParticipant[] = consensusResponses.map((r) => ({
-        modelId: r.modelId,
-        modelName: r.modelName,
-        provider: summarizerClient,
-        modelApiId: summarizerModel,
-      }));
-
-      const council = new CouncilConsensus({
-        participants,
-        summarizerProvider: summarizerClient,
-        summarizerModelId: summarizerModel,
-      });
-      outputs.council = await council.generateConsensus(
-        consensusResponses,
-        0,
-        prompt,
-      );
     }
   }
+
+  await Promise.all(tasks);
 
   return outputs;
 }

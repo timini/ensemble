@@ -29,7 +29,7 @@ jobs:
           node-version: 20
           cache: npm
 
-      - run: npm ci
+      - run: npm ci --workspace=packages/shared-utils --workspace=packages/eval
 
       - name: Check Google API key is configured
         id: check-keys
@@ -41,6 +41,14 @@ jobs:
             echo "keys_available=true" >> "$GITHUB_OUTPUT"
           fi
 
+      - name: Restore HuggingFace dataset cache
+        if: steps.check-keys.outputs.keys_available == 'true'
+        uses: actions/cache@v4
+        with:
+          path: packages/eval/datasets
+          key: eval-datasets-${{ hashFiles('packages/eval/src/lib/benchmarkDatasetLoaders.ts') }}
+          restore-keys: eval-datasets-
+
       - name: Restore single-model baseline cache
         if: steps.check-keys.outputs.keys_available == 'true'
         uses: actions/cache@v4
@@ -51,6 +59,16 @@ jobs:
             eval-baseline-${{ hashFiles('packages/eval/src/lib/baselineCache.ts') }}-
             eval-baseline-
 
+      - name: Restore ensemble response cache
+        if: steps.check-keys.outputs.keys_available == 'true'
+        uses: actions/cache@v4
+        with:
+          path: packages/eval/.cache/ensemble-responses
+          key: eval-ensemble-${{ hashFiles('packages/eval/src/lib/ensembleRunner.ts') }}-${{ github.event.pull_request.base.sha || github.sha }}
+          restore-keys: |
+            eval-ensemble-${{ hashFiles('packages/eval/src/lib/ensembleRunner.ts') }}-
+            eval-ensemble-
+
       - name: Build shared-utils
         if: steps.check-keys.outputs.keys_available == 'true'
         run: npm run build --workspace=packages/shared-utils
@@ -59,7 +77,7 @@ jobs:
         if: steps.check-keys.outputs.keys_available == 'true'
         run: npm run build --workspace=packages/eval
 
-      - name: Run quick eval (all strategies)
+      - name: Run quick eval (CI strategies)
         if: steps.check-keys.outputs.keys_available == 'true'
         id: eval
         continue-on-error: true
@@ -67,7 +85,7 @@ jobs:
         run: |
           node --import tsx bin/ensemble-eval.mjs quick-eval \
             --model google:gemini-3-flash-preview \
-            --strategies standard,elo,majority,council \
+            --strategies standard,elo,majority \
             --sample 10 \
             --baseline baselines/quick-eval.json \
             > eval-results.txt

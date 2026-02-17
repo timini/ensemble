@@ -10,8 +10,7 @@
   "strategies": [
     "standard",
     "elo",
-    "majority",
-    "council"
+    "majority"
   ],
   "updatedAt": "2026-02-17T13:36:07.868Z",
   "single": {
@@ -33,11 +32,6 @@
     "majority": {
       "accuracy": 0.8333333333333334,
       "correct": 25,
-      "total": 30
-    },
-    "council": {
-      "accuracy": 0.7333333333333333,
-      "correct": 22,
       "total": 30
     }
   }

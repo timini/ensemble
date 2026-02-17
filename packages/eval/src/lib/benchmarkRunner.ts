@@ -3,12 +3,14 @@ import { generateConsensus } from './consensus.js';
 import { evaluateConsensusStrategies, evaluateResponses, type EvaluatorLike } from './evaluation.js';
 import { writeJsonFile } from './io.js';
 import { EnsembleRunner } from './ensembleRunner.js';
+import type { RetryOptions } from './retryable.js';
 import type {
   BenchmarkQuestion,
   BenchmarkResultsFile,
   EvalMode,
   ModelSpec,
   PromptRunResult,
+  ProviderResponse,
   StrategyName,
 } from '../types.js';
 
@@ -28,6 +30,7 @@ interface BenchmarkRunnerConfig {
   summarizer: ModelSpec | null;
   requestDelayMs?: number;
   temperature?: number;
+  retry?: RetryOptions;
   /** Run all questions concurrently instead of sequentially. */
   parallelQuestions?: boolean;
 }
@@ -37,6 +40,8 @@ interface RunBenchmarkOptions {
   outputPath: string;
   output: BenchmarkResultsFile;
   onProgress?: (progress: BenchmarkRunnerProgress) => void;
+  /** Pre-fetched responses keyed by question ID, skips LLM calls when present. */
+  cachedResponses?: Map<string, ProviderResponse[]>;
 }
 
 export class BenchmarkRunner {
@@ -60,13 +65,17 @@ export class BenchmarkRunner {
     this.ensembleRunner = new EnsembleRunner(config.registry, config.mode, {
       requestDelayMs: config.requestDelayMs,
       temperature: config.temperature,
+      retry: config.retry,
     });
   }
 
-  private async runQuestion(question: BenchmarkQuestion): Promise<PromptRunResult> {
+  private async runQuestion(
+    question: BenchmarkQuestion,
+    preloadedResponses?: ProviderResponse[],
+  ): Promise<PromptRunResult> {
     const questionStart = Date.now();
 
-    const responses = await this.ensembleRunner.runPrompt(
+    const responses = preloadedResponses ?? await this.ensembleRunner.runPrompt(
       question.prompt,
       this.models,
     );
@@ -116,7 +125,7 @@ export class BenchmarkRunner {
   }
 
   async run(options: RunBenchmarkOptions): Promise<BenchmarkResultsFile> {
-    const { questions, outputPath, output, onProgress } = options;
+    const { questions, outputPath, output, onProgress, cachedResponses } = options;
     const completedQuestionIds = new Set(
       output.runs
         .map((run) => run.questionId)
@@ -133,7 +142,7 @@ export class BenchmarkRunner {
       let completed = questions.length - pendingQuestions.length;
       const settled = await Promise.allSettled(
         pendingQuestions.map(async (question) => {
-          const run = await this.runQuestion(question);
+          const run = await this.runQuestion(question, cachedResponses?.get(question.id));
           completed += 1;
           onProgress?.({
             completed,
@@ -169,7 +178,7 @@ export class BenchmarkRunner {
           continue;
         }
 
-        const run = await this.runQuestion(question);
+        const run = await this.runQuestion(question, cachedResponses?.get(question.id));
         output.runs.push(run);
         output.updatedAt = new Date().toISOString();
         completedQuestionIds.add(question.id);
