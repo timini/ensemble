@@ -131,7 +131,7 @@ export class BenchmarkRunner {
     if (this.parallelQuestions && pendingQuestions.length > 0) {
       // Parallel mode: fire all questions at once
       let completed = questions.length - pendingQuestions.length;
-      const results = await Promise.all(
+      const settled = await Promise.allSettled(
         pendingQuestions.map(async (question) => {
           const run = await this.runQuestion(question);
           completed += 1;
@@ -144,10 +144,13 @@ export class BenchmarkRunner {
           return run;
         }),
       );
-      for (const run of results) {
-        output.runs.push(run);
-        completedQuestionIds.add(run.questionId ?? '');
-        completedPrompts.add(run.prompt);
+      for (const result of settled) {
+        if (result.status === 'fulfilled') {
+          const run = result.value;
+          output.runs.push(run);
+          completedQuestionIds.add(run.questionId ?? '');
+          completedPrompts.add(run.prompt);
+        }
       }
       output.updatedAt = new Date().toISOString();
       await writeJsonFile(outputPath, output);

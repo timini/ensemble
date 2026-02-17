@@ -70,7 +70,7 @@ jobs:
             --strategies standard,elo,majority,council \
             --sample 10 \
             --baseline baselines/quick-eval.json \
-            > eval-results.txt 2>&1
+            > eval-results.txt
           cat eval-results.txt
 
       - name: Upload eval results
@@ -92,7 +92,7 @@ jobs:
             try {
               body += fs.readFileSync('packages/eval/eval-results.txt', 'utf8');
             } catch {
-              body += 'Eval report was not generated. Check workflow logs.';
+              body += `Eval report was not generated. Check the [workflow logs](${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}) for details.`;
             }
             body += '\n```\n';
 

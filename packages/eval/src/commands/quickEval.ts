@@ -94,7 +94,7 @@ export function createQuickEvalCommand(): Command {
 
       const startTime = Date.now();
       const log = (s: string) => process.stderr.write(s);
-      log(`\n  Model: ${model}  Ensemble: ${ensembleSize}x  Strategies: ${strategies.join(', ')}\n`);
+      log(`\n  Model: ${model}  Ensemble: ${ensembleSize}x  Mode: ${mode}  Strategies: ${strategies.join(', ')}\n`);
       log(`  Datasets: ${datasetNames.join(', ')}  Sample: ${sampleCount}  Parallel: ${parallel ? 'yes' : 'no'}\n\n`);
 
       const datasetQuestions = await Promise.all(

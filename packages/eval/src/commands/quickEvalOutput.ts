@@ -68,20 +68,22 @@ export function printResults(
   // Delta highlights (tokens/cost/time hoisted out of loop since they don't vary by strategy)
   const tokenDelta = ensembleTokens - singleTokens;
   const costDelta = ensembleCost - singleCost;
-  const tokenMultiplier = singleTokens > 0 ? ensembleTokens / singleTokens : 0;
+  const tokenMultiplier = singleTokens > 0 ? ensembleTokens / singleTokens : null;
   const timeDelta = ensembleAvgTime - singleAvgTime;
-  const timeMultiplier = singleAvgTime > 0 ? ensembleAvgTime / singleAvgTime : 0;
+  const timeMultiplier = singleAvgTime > 0 ? ensembleAvgTime / singleAvgTime : null;
 
   for (const strategy of strategies) {
     const stratAcc = computeAccuracy(allEnsembleRuns, strategy);
     const accDelta = stratAcc.accuracy - singleAcc.accuracy;
     const accIcon = accDelta > 0 ? ' ✓' : accDelta < 0 ? ' ✗' : '';
+    const tokenMultiplierStr = tokenMultiplier !== null ? ` (${tokenMultiplier.toFixed(1)}x)` : '';
+    const timeMultiplierStr = timeMultiplier !== null ? ` (${timeMultiplier.toFixed(1)}x)` : '';
 
     process.stdout.write(`  ${strategy} vs single:\n`);
     process.stdout.write(`    Accuracy: ${toDelta(accDelta)}${accIcon}\n`);
-    process.stdout.write(`    Tokens:   ${tokenDelta > 0 ? '+' : ''}${tokenDelta.toLocaleString()} (${tokenMultiplier.toFixed(1)}x)\n`);
-    process.stdout.write(`    Time:     ${timeDelta > 0 ? '+' : ''}${formatMs(timeDelta)}/q (${timeMultiplier.toFixed(1)}x)\n`);
-    process.stdout.write(`    Cost:     ${costDelta >= 0 ? '+' : ''}$${costDelta.toFixed(4)} (${tokenMultiplier.toFixed(1)}x)\n`);
+    process.stdout.write(`    Tokens:   ${tokenDelta > 0 ? '+' : ''}${tokenDelta.toLocaleString()}${tokenMultiplierStr}\n`);
+    process.stdout.write(`    Time:     ${timeDelta > 0 ? '+' : ''}${formatMs(timeDelta)}/q${timeMultiplierStr}\n`);
+    process.stdout.write(`    Cost:     ${costDelta >= 0 ? '+' : ''}$${costDelta.toFixed(4)}${tokenMultiplierStr}\n`);
   }
 
   process.stdout.write(`\n  Wall clock: ${Math.round(durationMs / 1000)}s\n`);

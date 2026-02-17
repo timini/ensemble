@@ -15,6 +15,7 @@ import { dirname } from 'node:path';
 import { fileExists, readJsonFile, writeJsonFile } from './io.js';
 import type { PromptRunResult } from '../types.js';
 
+// ES modules don't provide __dirname; derive it from import.meta.url
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const CACHE_DIR = resolve(__dirname, '../../.cache/baselines');
