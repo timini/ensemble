@@ -64,17 +64,26 @@ export class FreeGoogleClient extends BaseFreeClient {
       );
   }
 
+  /** Strip `additionalProperties` from a schema object (Google's API rejects it). */
+  private static sanitizeSchemaForGoogle(schema: Record<string, unknown>): Record<string, unknown> {
+    const { additionalProperties: _, ...rest } = schema;
+    return rest;
+  }
+
   protected override async generateStructuredWithProvider<T>(
     options: StructuredOptions,
   ): Promise<StructuredResponse<T>> {
     const startTime = Date.now();
 
     const genAI = this.createClient(options.apiKey);
+    const sanitizedSchema = FreeGoogleClient.sanitizeSchemaForGoogle(
+      options.schema.schema as Record<string, unknown>,
+    );
     const model = genAI.getGenerativeModel({
       model: options.model,
       generationConfig: {
         responseMimeType: 'application/json',
-        responseSchema: options.schema.schema as unknown as import('@google/generative-ai').ResponseSchema,
+        responseSchema: sanitizedSchema as unknown as import('@google/generative-ai').ResponseSchema,
         ...(options.options?.temperature !== undefined && {
           temperature: options.options.temperature,
         }),
