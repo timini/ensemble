@@ -21,6 +21,8 @@ const { mocks, MockAPIError } = vi.hoisted(() => {
       openAiChatCreate: vi.fn(),
       axiosGet: vi.fn(),
       anthropicModelsList: vi.fn(),
+      anthropicMessagesCreate: vi.fn(),
+      googleGenerateContent: vi.fn(),
     },
     MockAPIError: _MockAPIError,
   };
@@ -63,12 +65,23 @@ vi.mock('@anthropic-ai/sdk', () => {
   const MockAnthropic = class {
     models = { list: mocks.anthropicModelsList };
     messages = {
-      create: vi.fn(),
+      create: mocks.anthropicMessagesCreate,
     };
   };
   (MockAnthropic as unknown as Record<string, unknown>).APIError = MockAPIError;
   return { default: MockAnthropic };
 });
+
+vi.mock('@google/generative-ai', () => ({
+  GoogleGenerativeAI: class {
+    getGenerativeModel() {
+      return {
+        generateContentStream: vi.fn(),
+        generateContent: mocks.googleGenerateContent,
+      };
+    }
+  },
+}));
 
 class TestFreeClient extends BaseFreeClient {
   constructor(
@@ -97,6 +110,8 @@ describe('Free mode provider clients', () => {
     mocks.openAiChatCreate.mockReset();
     mocks.axiosGet.mockReset();
     mocks.anthropicModelsList.mockReset();
+    mocks.anthropicMessagesCreate.mockReset();
+    mocks.googleGenerateContent.mockReset();
   });
 
   describe('FreeOpenAIClient', () => {
@@ -373,6 +388,161 @@ describe('Free mode provider clients', () => {
     expect(warnSpy).toHaveBeenCalled();
     mockDefault.mockRestore();
     warnSpy.mockRestore();
+  });
+
+  describe('generateStructured', () => {
+    const testSchema = {
+      name: 'mcq_answer',
+      schema: {
+        type: 'object' as const,
+        properties: { answer: { type: 'string', enum: ['A', 'B', 'C', 'D'] } },
+        required: ['answer'],
+        additionalProperties: false,
+      },
+    };
+
+    it('OpenAI: calls chat.completions.create with json_schema response_format', async () => {
+      mocks.openAiChatCreate.mockResolvedValueOnce({
+        choices: [{ message: { content: '{"answer":"B"}' } }],
+        usage: { total_tokens: 42 },
+      });
+
+      const client = new FreeOpenAIClient('openai', () => 'sk-test');
+      const result = await client.generateStructured<{ answer: string }>(
+        'Extract answer', 'gpt-4o-mini', testSchema,
+      );
+
+      expect(result.parsed).toEqual({ answer: 'B' });
+      expect(result.raw).toBe('{"answer":"B"}');
+      expect(result.tokenCount).toBe(42);
+      expect(typeof result.responseTimeMs).toBe('number');
+      expect(mocks.openAiChatCreate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          model: 'gpt-4o-mini',
+          response_format: expect.objectContaining({
+            type: 'json_schema',
+            json_schema: expect.objectContaining({ name: 'mcq_answer', strict: true }),
+          }),
+        }),
+      );
+    });
+
+    it('XAI: calls chat.completions.create with json_schema response_format', async () => {
+      mocks.openAiChatCreate.mockResolvedValueOnce({
+        choices: [{ message: { content: '{"answer":"C"}' } }],
+        usage: { total_tokens: 30 },
+      });
+
+      const client = new FreeXAIClient('xai', () => 'xai-test');
+      const result = await client.generateStructured<{ answer: string }>(
+        'Extract answer', 'grok-2', testSchema,
+      );
+
+      expect(result.parsed).toEqual({ answer: 'C' });
+      expect(result.tokenCount).toBe(30);
+    });
+
+    it('Anthropic: uses tool_use pattern for structured output', async () => {
+      mocks.anthropicMessagesCreate.mockResolvedValueOnce({
+        content: [
+          { type: 'tool_use', name: 'mcq_answer', input: { answer: 'A' } },
+        ],
+        usage: { input_tokens: 10, output_tokens: 5 },
+      });
+
+      const client = new FreeAnthropicClient('anthropic', () => 'sk-ant');
+      const result = await client.generateStructured<{ answer: string }>(
+        'Extract answer', 'claude-3-haiku', testSchema,
+      );
+
+      expect(result.parsed).toEqual({ answer: 'A' });
+      expect(result.tokenCount).toBe(15);
+      expect(mocks.anthropicMessagesCreate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          tools: expect.arrayContaining([
+            expect.objectContaining({ name: 'mcq_answer' }),
+          ]),
+          tool_choice: { type: 'tool', name: 'mcq_answer' },
+        }),
+      );
+    });
+
+    it('Google: uses responseMimeType and responseSchema', async () => {
+      mocks.googleGenerateContent.mockResolvedValueOnce({
+        response: {
+          text: () => '{"answer":"D"}',
+          usageMetadata: { totalTokenCount: 20 },
+        },
+      });
+
+      const client = new FreeGoogleClient('google', () => 'AIza-test');
+      const result = await client.generateStructured<{ answer: string }>(
+        'Extract answer', 'gemini-1.5-flash', testSchema,
+      );
+
+      expect(result.parsed).toEqual({ answer: 'D' });
+      expect(result.tokenCount).toBe(20);
+    });
+
+    it('Mock: returns first enum value deterministically', async () => {
+      const client = new MockProviderClient();
+      const result = await client.generateStructured<{ answer: string }>(
+        'Extract answer', 'gpt-4o', testSchema,
+      );
+
+      expect(result.parsed).toEqual({ answer: 'A' });
+      expect(result.raw).toBe('{"answer":"A"}');
+    });
+
+    it('Anthropic: throws when no tool_use block is returned', async () => {
+      mocks.anthropicMessagesCreate.mockResolvedValueOnce({
+        content: [{ type: 'text', text: 'some text' }],
+        usage: { input_tokens: 10, output_tokens: 5 },
+      });
+
+      const client = new FreeAnthropicClient('anthropic', () => 'sk-ant');
+      await expect(
+        client.generateStructured('Extract answer', 'claude-3-haiku', testSchema),
+      ).rejects.toThrow('did not return a tool_use block');
+    });
+
+    it('OpenAI: handles response without usage info', async () => {
+      mocks.openAiChatCreate.mockResolvedValueOnce({
+        choices: [{ message: { content: '{"answer":"A"}' } }],
+      });
+
+      const client = new FreeOpenAIClient('openai', () => 'sk-test');
+      const result = await client.generateStructured<{ answer: string }>(
+        'Extract answer', 'gpt-4o-mini', testSchema,
+      );
+
+      expect(result.parsed).toEqual({ answer: 'A' });
+      expect(result.tokenCount).toBeUndefined();
+    });
+
+    it('Google: handles response without usage metadata', async () => {
+      mocks.googleGenerateContent.mockResolvedValueOnce({
+        response: {
+          text: () => '{"answer":"B"}',
+          usageMetadata: {},
+        },
+      });
+
+      const client = new FreeGoogleClient('google', () => 'AIza-test');
+      const result = await client.generateStructured<{ answer: string }>(
+        'Extract answer', 'gemini-1.5-flash', testSchema,
+      );
+
+      expect(result.parsed).toEqual({ answer: 'B' });
+      expect(result.tokenCount).toBeUndefined();
+    });
+
+    it('BaseFreeClient: throws when API key is missing', async () => {
+      const client = new TestFreeClient(() => null);
+      await expect(
+        client.generateStructured('prompt', 'model', testSchema),
+      ).rejects.toThrow('Missing API key');
+    });
   });
 
   describe('BaseFreeClient streaming timeout', () => {

@@ -6,7 +6,7 @@ import {
 } from './benchmarkOutput.js';
 import { loadBenchmarkQuestions } from '../lib/benchmarkDatasets.js';
 import { parseStrategies } from '../lib/consensus.js';
-import { createEvaluatorForDataset } from '../lib/evaluators.js';
+import { createEvaluatorForDataset, type JudgeConfig } from '../lib/evaluators.js';
 import { fileExists, readJsonFile } from '../lib/io.js';
 import { parseModelSpec, parseModelSpecs } from '../lib/modelSpecs.js';
 import { registerProviders } from '../lib/providers.js';
@@ -96,8 +96,6 @@ export function createBenchmarkCommand(): Command {
         skipDownload: options.skipDownload,
         forceDownload: options.forceDownload,
       });
-      const evaluator = createEvaluatorForDataset(datasetName);
-
       let output: BenchmarkResultsFile = createBenchmarkFile(
         dataset,
         options.mode,
@@ -127,6 +125,22 @@ export function createBenchmarkCommand(): Command {
         ],
         options.mode,
       );
+
+      let judgeConfig: JudgeConfig | undefined;
+      const judgeSpec = summarizer ?? models[0];
+      if (judgeSpec) {
+        try {
+          judgeConfig = {
+            provider: registry.getProvider(judgeSpec.provider, options.mode),
+            model: judgeSpec.model,
+          };
+        } catch (error) {
+          process.stderr.write(
+            `Warning: judge provider unavailable (${error instanceof Error ? error.message : String(error)})\n`,
+          );
+        }
+      }
+      const evaluator = createEvaluatorForDataset(datasetName, judgeConfig);
 
       const runner = new BenchmarkRunner({
         mode: options.mode,

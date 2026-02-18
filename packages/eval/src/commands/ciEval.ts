@@ -3,7 +3,7 @@ import { ProviderRegistry } from '@ensemble-ai/shared-utils/providers';
 import { getTierConfig } from '../lib/tierConfig.js';
 import { readJsonFile, writeJsonFile, writeTextFile } from '../lib/io.js';
 import { registerProviders } from '../lib/providers.js';
-import { createEvaluatorForDataset } from '../lib/evaluators.js';
+import { createEvaluatorForDataset, type JudgeConfig } from '../lib/evaluators.js';
 import { BenchmarkRunner } from '../lib/benchmarkRunner.js';
 import { RegressionDetector } from '../lib/regression.js';
 import { createRegressionReport } from '../lib/regressionReport.js';
@@ -87,9 +87,13 @@ export function createCiEvalCommand(): Command {
 
       // Step 6: Create RegressionDetector with per-dataset runner factory.
       // Each dataset needs its own evaluator (e.g. NumericEvaluator for gsm8k,
-      // MCQEvaluator for truthfulqa/gpqa).
+      // LLMJudgeMCQEvaluator for truthfulqa/gpqa).
+      const judgeConfig: JudgeConfig = {
+        provider: registry.getProvider(tierConfig.summarizer.provider, options.mode),
+        model: tierConfig.summarizer.model,
+      };
       const runnerFactory = (datasetName: import('../types.js').BenchmarkDatasetName) => {
-        const evaluator = createEvaluatorForDataset(datasetName);
+        const evaluator = createEvaluatorForDataset(datasetName, judgeConfig);
         return new BenchmarkRunner({
           mode: options.mode,
           registry,

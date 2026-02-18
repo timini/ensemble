@@ -1,6 +1,6 @@
 import { ProviderRegistry } from '@ensemble-ai/shared-utils/providers';
 import { loadCachedBaseline, saveCachedBaseline } from '../lib/baselineCache.js';
-import { createEvaluatorForDataset } from '../lib/evaluators.js';
+import { createEvaluatorForDataset, type JudgeConfig } from '../lib/evaluators.js';
 import { BenchmarkRunner } from '../lib/benchmarkRunner.js';
 import { createBenchmarkFile } from './benchmarkOutput.js';
 import type { DatasetResult } from './quickEvalOutput.js';
@@ -27,6 +27,20 @@ export interface RunDatasetArgs {
   sampleCount: number;
 }
 
+function buildJudgeConfig(args: RunDatasetArgs): JudgeConfig | undefined {
+  try {
+    return {
+      provider: args.registry.getProvider(args.provider, args.mode),
+      model: args.modelName,
+    };
+  } catch (error) {
+    process.stderr.write(
+      `Warning: judge provider unavailable (${error instanceof Error ? error.message : String(error)})\n`,
+    );
+    return undefined;
+  }
+}
+
 async function runSingleBaseline(args: RunDatasetArgs): Promise<PromptRunResult[]> {
   const { datasetName, questions, model, provider, modelName, mode, registry, useCache, sampleCount } = args;
 
@@ -37,7 +51,7 @@ async function runSingleBaseline(args: RunDatasetArgs): Promise<PromptRunResult[
   }
 
   process.stderr.write(`  [${datasetName}] Single (1x ${modelName})...\n`);
-  const evaluator = createEvaluatorForDataset(datasetName);
+  const evaluator = createEvaluatorForDataset(datasetName, buildJudgeConfig(args));
   const singleModels = [{ provider, model: modelName }];
   const singleOutput = createBenchmarkFile(datasetName, mode, [model], ['standard'], questions.length);
   const runner = new BenchmarkRunner({
@@ -63,7 +77,7 @@ async function runEnsemble(args: RunDatasetArgs): Promise<PromptRunResult[]> {
 
   const stratList = strategies.join(',');
   process.stderr.write(`  [${datasetName}] Ensemble (${ensembleSize}x ${modelName}, ${stratList})...\n`);
-  const evaluator = createEvaluatorForDataset(datasetName);
+  const evaluator = createEvaluatorForDataset(datasetName, buildJudgeConfig(args));
   const ensembleModels = Array.from({ length: ensembleSize }, () => ({ provider, model: modelName }));
   const ensembleOutput = createBenchmarkFile(
     datasetName, mode, Array(ensembleSize).fill(model), strategies, questions.length,

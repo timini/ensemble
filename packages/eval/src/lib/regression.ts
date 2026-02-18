@@ -268,7 +268,7 @@ export interface RegressionDetectorEvaluateOptions {
 /**
  * Factory function that creates a {@link BenchmarkRunner} configured for a
  * specific dataset.  This allows the regression detector to use the correct
- * evaluator (e.g. `NumericEvaluator` for gsm8k, `MCQEvaluator` for
+ * evaluator (e.g. `NumericEvaluator` for gsm8k, `LLMJudgeMCQEvaluator` for
  * truthfulqa) for each dataset rather than a single evaluator for all
  * datasets.
  */

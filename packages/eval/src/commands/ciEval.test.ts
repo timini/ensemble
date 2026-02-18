@@ -48,8 +48,15 @@ vi.mock('../lib/evaluators.js', () => ({
   createEvaluatorForDataset: vi.fn().mockReturnValue(null),
 }));
 
+const mockGetProvider = vi.fn().mockReturnValue({
+  generateStructured: vi.fn(),
+  streamResponse: vi.fn(),
+});
+
 vi.mock('@ensemble-ai/shared-utils/providers', () => ({
-  ProviderRegistry: vi.fn().mockImplementation(() => ({})),
+  ProviderRegistry: vi.fn().mockImplementation(() => ({
+    getProvider: mockGetProvider,
+  })),
 }));
 
 // ── Helpers ──────────────────────────────────────────────────────────────────

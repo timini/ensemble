@@ -1,7 +1,7 @@
 import OpenAI from 'openai';
 import axios from 'axios';
-import { BaseFreeClient, type StreamOptions } from '../base/BaseFreeClient';
-import type { ValidationResult } from '../../types';
+import { BaseFreeClient, type StreamOptions, type StructuredOptions } from '../base/BaseFreeClient';
+import type { StructuredResponse, ValidationResult } from '../../types';
 import { extractAxiosErrorMessage } from '../../utils/extractAxiosError';
 import { hasNonTextModality } from '../../utils/modelFilters';
 
@@ -59,6 +59,43 @@ export class FreeXAIClient extends BaseFreeClient {
           value.startsWith('grok-') &&
           !hasNonTextModality(value),
       );
+  }
+
+  protected override async generateStructuredWithProvider<T>(
+    options: StructuredOptions,
+  ): Promise<StructuredResponse<T>> {
+    const client = this.createClient(options.apiKey);
+    const startTime = Date.now();
+
+    const response = await client.chat.completions.create({
+      model: options.model,
+      messages: [{ role: 'user', content: options.prompt }],
+      response_format: {
+        type: 'json_schema' as const,
+        json_schema: {
+          name: options.schema.name,
+          strict: true,
+          schema: options.schema.schema,
+        },
+      },
+      ...(options.options?.temperature !== undefined && {
+        temperature: options.options.temperature,
+      }),
+    });
+
+    const raw = response.choices[0]?.message?.content ?? '';
+    if (!raw) {
+      throw new Error('XAI returned empty structured output');
+    }
+    const parsed = JSON.parse(raw) as T;
+    const tokenCount = response.usage?.total_tokens;
+
+    return {
+      parsed,
+      raw,
+      responseTimeMs: Date.now() - startTime,
+      ...(tokenCount ? { tokenCount } : {}),
+    };
   }
 
   protected override async streamWithProvider(options: StreamOptions): Promise<void> {

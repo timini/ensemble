@@ -20,6 +20,7 @@ function buildProvider(args: {
 }): AIProvider {
   return {
     streamResponse: args.onStream,
+    generateStructured: async () => ({ parsed: {} as never, raw: '{}', responseTimeMs: 0 }),
     generateEmbeddings: async () => [],
     validateApiKey: async () => ({ valid: true }),
     listAvailableModels: () =>

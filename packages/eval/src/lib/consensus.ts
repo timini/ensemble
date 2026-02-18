@@ -1,4 +1,4 @@
-import type { AIProvider, StreamResponseOptions } from '@ensemble-ai/shared-utils/providers';
+import type { AIProvider, GenerateStructuredOptions, JsonSchema, StreamResponseOptions, StructuredResponse } from '@ensemble-ai/shared-utils/providers';
 import { CouncilConsensus } from '@ensemble-ai/shared-utils/consensus/CouncilConsensus';
 import { EloRankingConsensus } from '@ensemble-ai/shared-utils/consensus/EloRankingConsensus';
 import { MajorityVotingConsensus } from '@ensemble-ai/shared-utils/consensus/MajorityVotingConsensus';
@@ -39,6 +39,9 @@ class TokenCountingProvider implements AIProvider {
     }, onError, options);
   }
 
+  generateStructured<T>(prompt: string, model: string, schema: JsonSchema, options?: GenerateStructuredOptions): Promise<StructuredResponse<T>> {
+    return this.inner.generateStructured(prompt, model, schema, options);
+  }
   generateEmbeddings(text: string) { return this.inner.generateEmbeddings(text); }
   validateApiKey(apiKey: string) { return this.inner.validateApiKey(apiKey); }
   listAvailableModels() { return this.inner.listAvailableModels(); }
