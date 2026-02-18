@@ -99,7 +99,13 @@ export function buildCouncilSummaryPrompt(
     rankedBranches: CouncilBranch[]
 ): string {
     const branchesText = rankedBranches
-        .map((b) => `Rank #${b.rank} - ${b.modelName}:\n${b.initialAnswer}`)
+        .map((b) => {
+            let text = `Rank #${b.rank} - ${b.modelName}:\n${b.initialAnswer}`;
+            if (b.rebuttal?.content) {
+                text += `\n\nRefined position after critique:\n${b.rebuttal.content}`;
+            }
+            return text;
+        })
         .join('\n\n---\n\n');
 
     return `
@@ -107,14 +113,17 @@ You are a helpful assistant synthesizing the best AI responses after a council d
 
 Original Question: ${originalPrompt}
 
-The following responses survived critical review and are ranked by quality:
+The following responses survived critical review and are ranked by quality.
+Each includes the original answer and, where available, a refined position after debate:
 
 ${branchesText}
 
 Your task:
 Produce a SINGLE, UNIFIED response that directly answers the original question.
+Prefer the refined positions over the originals where they differ — they incorporate corrections from peer critique.
 Synthesize the best elements from all positions into one coherent, comprehensive answer.
 Do NOT compare or reference the individual models. Write as if answering the question yourself.
+If the question asks for a constrained format (single letter, number, JSON, etc.), output exactly that format and nothing else.
     `.trim();
 }
 

@@ -43,6 +43,7 @@ Your task is to produce a SINGLE, UNIFIED response that directly answers the ori
 Do NOT compare or analyze the responses. Do NOT mention "models agree/disagree" or reference the individual responses.
 Instead, synthesize the best elements from all responses into one coherent, comprehensive answer that a user would receive as the final response to their question.
 Write as if you are directly answering the original question yourself, enhanced by the collective intelligence of the ensemble.
+If the question asks for a constrained format (single letter, number, JSON, etc.), output exactly that format and nothing else.
         `.trim();
 
         return new Promise((resolve) => {
