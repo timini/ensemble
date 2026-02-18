@@ -127,17 +127,15 @@ export function createBenchmarkCommand(): Command {
       );
 
       let judgeConfig: JudgeConfig | undefined;
-      if (options.mode !== 'mock') {
-        const judgeSpec = summarizer ?? models[0];
-        if (judgeSpec) {
-          try {
-            judgeConfig = {
-              provider: registry.getProvider(judgeSpec.provider, options.mode),
-              model: judgeSpec.model,
-            };
-          } catch {
-            // Judge unavailable — fall back to regex evaluator
-          }
+      const judgeSpec = summarizer ?? models[0];
+      if (judgeSpec) {
+        try {
+          judgeConfig = {
+            provider: registry.getProvider(judgeSpec.provider, options.mode),
+            model: judgeSpec.model,
+          };
+        } catch {
+          // Judge unavailable
         }
       }
       const evaluator = createEvaluatorForDataset(datasetName, judgeConfig);

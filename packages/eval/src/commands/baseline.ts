@@ -92,15 +92,13 @@ export function createBaselineCommand(): Command {
       registerProviders(registry, [modelSpec.provider], options.mode);
 
       let judgeConfig: JudgeConfig | undefined;
-      if (options.mode !== 'mock') {
-        try {
-          judgeConfig = {
-            provider: registry.getProvider(modelSpec.provider, options.mode),
-            model: modelSpec.model,
-          };
-        } catch {
-          // Judge unavailable — fall back to regex evaluator
-        }
+      try {
+        judgeConfig = {
+          provider: registry.getProvider(modelSpec.provider, options.mode),
+          model: modelSpec.model,
+        };
+      } catch {
+        // Judge unavailable
       }
       const evaluator = createEvaluatorForDataset(datasetName, judgeConfig);
       const ensembleRunner = new EnsembleRunner(registry, options.mode, {

@@ -1,8 +1,8 @@
 import type { EvaluationResult, PromptRunResult } from '../types.js';
-import { MCQEvaluator, NumericEvaluator } from './evaluators.js';
+import { NumericEvaluator } from './evaluators.js';
+import { extractChoiceLetter } from './parsers.js';
 
 const numericEvaluator = new NumericEvaluator();
-const mcqEvaluator = new MCQEvaluator();
 
 function normalizeModelKey(key: string): string {
   return key.replace(/#\d+$/, '');
@@ -21,7 +21,13 @@ export function evaluateConsensusAnswer(
     return numericEvaluator.evaluate(answer, groundTruth);
   }
   if (evaluator === 'mcq') {
-    return mcqEvaluator.evaluate(answer, groundTruth);
+    const expected = (extractChoiceLetter(groundTruth) ?? groundTruth.trim()).toUpperCase();
+    const predicted = extractChoiceLetter(answer);
+    return {
+      correct: predicted !== null && expected.length > 0 ? predicted === expected : false,
+      expected,
+      predicted,
+    };
   }
   return null;
 }

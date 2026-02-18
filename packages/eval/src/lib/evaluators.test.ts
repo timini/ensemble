@@ -4,7 +4,6 @@ import {
   createEvaluatorForDataset,
   GenerativeEvaluator,
   LLMJudgeMCQEvaluator,
-  MCQEvaluator,
   NumericEvaluator,
 } from './evaluators.js';
 import { extractChoiceLetter, extractNumericAnswer } from './parsers.js';
@@ -119,26 +118,6 @@ describe('NumericEvaluator', () => {
   });
 });
 
-describe('MCQEvaluator', () => {
-  it('marks matching choice answers as correct', () => {
-    const evaluator = new MCQEvaluator();
-    const result = evaluator.evaluate('Final answer: \\boxed{C}', 'C');
-
-    expect(result.correct).toBe(true);
-    expect(result.predicted).toBe('C');
-    expect(result.expected).toBe('C');
-  });
-
-  it('marks non-matching choice answers as incorrect', () => {
-    const evaluator = new MCQEvaluator();
-    const result = evaluator.evaluate('Answer: A', 'D');
-
-    expect(result.correct).toBe(false);
-    expect(result.predicted).toBe('A');
-    expect(result.expected).toBe('D');
-  });
-});
-
 describe('GenerativeEvaluator', () => {
   it('delegates correctness to the judge function', async () => {
     const judge = vi.fn().mockResolvedValue(true);
@@ -204,7 +183,7 @@ describe('LLMJudgeMCQEvaluator', () => {
     expect(result.expected).toBe('C');
   });
 
-  it('falls back to regex when judge call fails', async () => {
+  it('returns null predicted when judge call fails', async () => {
     const provider = {
       generateStructured: vi.fn().mockRejectedValue(new Error('API error')),
       streamResponse: vi.fn(),
@@ -217,8 +196,8 @@ describe('LLMJudgeMCQEvaluator', () => {
     const evaluator = new LLMJudgeMCQEvaluator(provider, 'gpt-4o-mini');
     const result = await evaluator.evaluate('Answer: D', 'D');
 
-    expect(result.correct).toBe(true);
-    expect(result.predicted).toBe('D');
+    expect(result.correct).toBe(false);
+    expect(result.predicted).toBeNull();
   });
 
   it('has name "mcq" for compatibility with EvaluatorLike', () => {
@@ -229,24 +208,24 @@ describe('LLMJudgeMCQEvaluator', () => {
 });
 
 describe('createEvaluatorForDataset', () => {
+  const mockProvider = {
+    generateStructured: vi.fn(),
+    streamResponse: vi.fn(),
+    generateEmbeddings: vi.fn(),
+    validateApiKey: vi.fn(),
+    listAvailableModels: vi.fn().mockReturnValue([]),
+    listAvailableTextModels: vi.fn().mockResolvedValue([]),
+  } as unknown as AIProvider;
+  const judge = { provider: mockProvider, model: 'gpt-4o-mini' };
+
   it('returns the expected evaluator types', () => {
     expect(createEvaluatorForDataset('gsm8k')?.name).toBe('numeric');
-    expect(createEvaluatorForDataset('truthfulqa')?.name).toBe('mcq');
-    expect(createEvaluatorForDataset('gpqa')?.name).toBe('mcq');
+    expect(createEvaluatorForDataset('truthfulqa', judge)?.name).toBe('mcq');
+    expect(createEvaluatorForDataset('gpqa', judge)?.name).toBe('mcq');
     expect(createEvaluatorForDataset(null)).toBeNull();
   });
 
   it('returns LLMJudgeMCQEvaluator when judge config is provided for MCQ datasets', () => {
-    const mockProvider = {
-      generateStructured: vi.fn(),
-      streamResponse: vi.fn(),
-      generateEmbeddings: vi.fn(),
-      validateApiKey: vi.fn(),
-      listAvailableModels: vi.fn().mockReturnValue([]),
-      listAvailableTextModels: vi.fn().mockResolvedValue([]),
-    } as unknown as AIProvider;
-
-    const judge = { provider: mockProvider, model: 'gpt-4o-mini' };
     const truthful = createEvaluatorForDataset('truthfulqa', judge);
     const gpqa = createEvaluatorForDataset('gpqa', judge);
     const gsm8k = createEvaluatorForDataset('gsm8k', judge);
@@ -257,11 +236,12 @@ describe('createEvaluatorForDataset', () => {
     expect(gsm8k).toBeInstanceOf(NumericEvaluator);
   });
 
-  it('returns MCQEvaluator when no judge config is provided', () => {
-    const truthful = createEvaluatorForDataset('truthfulqa');
-    const gpqa = createEvaluatorForDataset('gpqa');
-
-    expect(truthful).toBeInstanceOf(MCQEvaluator);
-    expect(gpqa).toBeInstanceOf(MCQEvaluator);
+  it('throws when no judge config is provided for MCQ datasets', () => {
+    expect(() => createEvaluatorForDataset('truthfulqa')).toThrow(
+      'MCQ datasets require a judge config',
+    );
+    expect(() => createEvaluatorForDataset('gpqa')).toThrow(
+      'MCQ datasets require a judge config',
+    );
   });
 });

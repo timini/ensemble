@@ -1,7 +1,7 @@
 import { execSync } from 'node:child_process';
 import { Command } from 'commander';
 import { ProviderRegistry } from '@ensemble-ai/shared-utils/providers';
-import { createEvaluatorForDataset } from '../lib/evaluators.js';
+import { createEvaluatorForDataset, type JudgeConfig } from '../lib/evaluators.js';
 import { writeJsonFile } from '../lib/io.js';
 import { registerProviders } from '../lib/providers.js';
 import { pinQuestionsForBaseline } from '../lib/questionPinning.js';
@@ -58,13 +58,18 @@ export async function buildGoldenBaseline(
   const allQuestionIds: string[] = [];
   const allResults: BaselineQuestionResult[] = [];
 
+  const judgeConfig: JudgeConfig = {
+    provider: registry.getProvider(config.summarizer.provider, mode),
+    model: config.summarizer.model,
+  };
+
   for (const { name: datasetName } of config.datasets) {
     const questions = pinnedQuestions.get(datasetName);
     if (!questions || questions.length === 0) {
       continue;
     }
 
-    const evaluator = createEvaluatorForDataset(datasetName);
+    const evaluator = createEvaluatorForDataset(datasetName, judgeConfig);
     const modelStrings = config.models.map((m) => `${m.provider}:${m.model}`);
 
     const output = createBenchmarkFile(

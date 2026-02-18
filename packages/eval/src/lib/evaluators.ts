@@ -34,21 +34,6 @@ export class NumericEvaluator {
   }
 }
 
-export class MCQEvaluator {
-  readonly name = 'mcq' as const;
-
-  evaluate(response: string, groundTruth: string): EvaluationResult {
-    const expected = (extractChoiceLetter(groundTruth) ?? groundTruth.trim()).toUpperCase();
-    const predicted = extractChoiceLetter(response);
-
-    return {
-      correct: predicted !== null && expected.length > 0 ? predicted === expected : false,
-      expected,
-      predicted,
-    };
-  }
-}
-
 export type JudgeFunction = (args: {
   prompt?: string;
   response: string;
@@ -114,8 +99,8 @@ export class LLMJudgeMCQEvaluator {
       );
       predicted = result.parsed.answer?.toUpperCase() ?? null;
     } catch {
-      // Fall back to regex if judge call fails
-      predicted = extractChoiceLetter(response);
+      // Judge call failed — mark as unanswered (no regex fallback)
+      predicted = null;
     }
 
     return {
@@ -134,7 +119,7 @@ export interface JudgeConfig {
 export function createEvaluatorForDataset(
   datasetName: BenchmarkDatasetName | null,
   judge?: JudgeConfig,
-): NumericEvaluator | MCQEvaluator | LLMJudgeMCQEvaluator | null {
+): NumericEvaluator | LLMJudgeMCQEvaluator | null {
   if (!datasetName) {
     return null;
   }
@@ -144,9 +129,10 @@ export function createEvaluatorForDataset(
       return new NumericEvaluator();
     case 'truthfulqa':
     case 'gpqa':
-      return judge
-        ? new LLMJudgeMCQEvaluator(judge.provider, judge.model)
-        : new MCQEvaluator();
+      if (!judge) {
+        throw new Error('MCQ datasets require a judge config');
+      }
+      return new LLMJudgeMCQEvaluator(judge.provider, judge.model);
     default: {
       const exhaustiveCheck: never = datasetName;
       return exhaustiveCheck;

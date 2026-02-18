@@ -28,7 +28,6 @@ export interface RunDatasetArgs {
 }
 
 function buildJudgeConfig(args: RunDatasetArgs): JudgeConfig | undefined {
-  if (args.mode === 'mock') return undefined;
   try {
     return {
       provider: args.registry.getProvider(args.provider, args.mode),
