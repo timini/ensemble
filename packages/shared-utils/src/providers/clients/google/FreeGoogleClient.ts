@@ -83,6 +83,9 @@ export class FreeGoogleClient extends BaseFreeClient {
 
     const result = await model.generateContent(options.prompt);
     const raw = result.response.text();
+    if (!raw) {
+      throw new Error('Google returned empty structured output');
+    }
     const parsed = JSON.parse(raw) as T;
     const tokenCount = result.response.usageMetadata?.totalTokenCount;
 

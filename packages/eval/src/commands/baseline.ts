@@ -97,8 +97,10 @@ export function createBaselineCommand(): Command {
           provider: registry.getProvider(modelSpec.provider, options.mode),
           model: modelSpec.model,
         };
-      } catch {
-        // Judge unavailable
+      } catch (error) {
+        process.stderr.write(
+          `Warning: judge provider unavailable (${error instanceof Error ? error.message : String(error)})\n`,
+        );
       }
       const evaluator = createEvaluatorForDataset(datasetName, judgeConfig);
       const ensembleRunner = new EnsembleRunner(registry, options.mode, {

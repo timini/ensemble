@@ -84,6 +84,9 @@ export class FreeXAIClient extends BaseFreeClient {
     });
 
     const raw = response.choices[0]?.message?.content ?? '';
+    if (!raw) {
+      throw new Error('XAI returned empty structured output');
+    }
     const parsed = JSON.parse(raw) as T;
     const tokenCount = response.usage?.total_tokens;
 

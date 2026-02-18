@@ -134,8 +134,10 @@ export function createBenchmarkCommand(): Command {
             provider: registry.getProvider(judgeSpec.provider, options.mode),
             model: judgeSpec.model,
           };
-        } catch {
-          // Judge unavailable
+        } catch (error) {
+          process.stderr.write(
+            `Warning: judge provider unavailable (${error instanceof Error ? error.message : String(error)})\n`,
+          );
         }
       }
       const evaluator = createEvaluatorForDataset(datasetName, judgeConfig);

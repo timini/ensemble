@@ -33,7 +33,10 @@ function buildJudgeConfig(args: RunDatasetArgs): JudgeConfig | undefined {
       provider: args.registry.getProvider(args.provider, args.mode),
       model: args.modelName,
     };
-  } catch {
+  } catch (error) {
+    process.stderr.write(
+      `Warning: judge provider unavailable (${error instanceof Error ? error.message : String(error)})\n`,
+    );
     return undefined;
   }
 }

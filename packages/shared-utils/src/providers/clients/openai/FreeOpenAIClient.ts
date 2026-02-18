@@ -77,6 +77,9 @@ export class FreeOpenAIClient extends BaseFreeClient {
     });
 
     const raw = response.choices[0]?.message?.content ?? '';
+    if (!raw) {
+      throw new Error('OpenAI returned empty structured output');
+    }
     const parsed = JSON.parse(raw) as T;
     const tokenCount = response.usage?.total_tokens;
 
