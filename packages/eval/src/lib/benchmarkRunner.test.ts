@@ -14,6 +14,7 @@ function buildProvider(): AIProvider {
     streamResponse: async (prompt, _model, _onChunk, onComplete) => {
       onComplete(`echo:${prompt}`, 10, 100);
     },
+    generateStructured: async () => ({ parsed: {} as never, raw: '{}', responseTimeMs: 0 }),
     generateEmbeddings: async () => [],
     validateApiKey: async () => ({ valid: true }),
     listAvailableModels: () => [

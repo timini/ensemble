@@ -1,4 +1,12 @@
-import type { AIProvider, ProviderName, StreamResponseOptions, ValidationResult } from '../../types';
+import type {
+  AIProvider,
+  GenerateStructuredOptions,
+  JsonSchema,
+  ProviderName,
+  StreamResponseOptions,
+  StructuredResponse,
+  ValidationResult,
+} from '../../types';
 import { MockProviderClient } from '../mock/MockProviderClient';
 
 export interface StreamHandlers {
@@ -12,6 +20,14 @@ export interface StreamOptions extends StreamHandlers {
   prompt: string;
   model: string;
   streamOptions?: StreamResponseOptions;
+}
+
+export interface StructuredOptions {
+  apiKey: string;
+  prompt: string;
+  model: string;
+  schema: JsonSchema;
+  options?: GenerateStructuredOptions;
 }
 
 /**
@@ -125,6 +141,37 @@ export abstract class BaseFreeClient implements AIProvider {
 
   protected async fetchTextModels(_apiKey: string): Promise<string[]> {
     return this.mockClient.listAvailableTextModels();
+  }
+
+  async generateStructured<T>(
+    prompt: string,
+    model: string,
+    schema: JsonSchema,
+    options?: GenerateStructuredOptions,
+  ): Promise<StructuredResponse<T>> {
+    const apiKey = this.resolveApiKey();
+
+    if (!apiKey) {
+      throw new Error(
+        `Missing API key for ${this.provider}. Configure an API key on the configuration page.`,
+      );
+    }
+
+    return this.generateStructuredWithProvider<T>({
+      apiKey,
+      prompt,
+      model,
+      schema,
+      options,
+    });
+  }
+
+  protected async generateStructuredWithProvider<T>(
+    _options: StructuredOptions,
+  ): Promise<StructuredResponse<T>> {
+    throw new Error(
+      `${this.provider} structured output is not yet implemented for Free mode.`,
+    );
   }
 
   protected async streamWithProvider(_options: StreamOptions): Promise<void> {

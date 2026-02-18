@@ -41,6 +41,10 @@ class StubProvider implements AIProvider {
   async listAvailableTextModels(): Promise<string[]> {
     return this.textModels;
   }
+
+  async generateStructured() {
+    return { parsed: {} as never, raw: '{}', responseTimeMs: 0 };
+  }
 }
 
 const registry = ProviderRegistry.getInstance();

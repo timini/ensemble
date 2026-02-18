@@ -12,7 +12,7 @@
     "majority",
     "council"
   ],
-  "updatedAt": "2026-02-17T17:40:43.230Z",
+  "updatedAt": "2026-02-18T00:04:55.605Z",
   "single": {
     "accuracy": 0.59,
     "correct": 59,
@@ -20,23 +20,23 @@
   },
   "ensemble": {
     "standard": {
-      "accuracy": 0.6,
-      "correct": 60,
+      "accuracy": 0.79,
+      "correct": 79,
       "total": 100
     },
     "elo": {
+      "accuracy": 0.91,
+      "correct": 91,
+      "total": 100
+    },
+    "majority": {
       "accuracy": 0.9,
       "correct": 90,
       "total": 100
     },
-    "majority": {
-      "accuracy": 0.82,
-      "correct": 82,
-      "total": 100
-    },
     "council": {
-      "accuracy": 0.59,
-      "correct": 59,
+      "accuracy": 0.77,
+      "correct": 77,
       "total": 100
     }
   }

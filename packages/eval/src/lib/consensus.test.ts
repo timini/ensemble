@@ -6,6 +6,7 @@ import type { ProviderResponse } from '../types.js';
 function buildProvider(onStream: AIProvider['streamResponse']): AIProvider {
   return {
     streamResponse: onStream,
+    generateStructured: async () => ({ parsed: {} as never, raw: '{}', responseTimeMs: 0 }),
     generateEmbeddings: async () => [],
     validateApiKey: async () => ({ valid: true }),
     listAvailableModels: () => [],

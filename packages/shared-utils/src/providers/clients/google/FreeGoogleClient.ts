@@ -1,7 +1,7 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import axios from 'axios';
-import { BaseFreeClient, type StreamOptions } from '../base/BaseFreeClient';
-import type { ValidationResult } from '../../types';
+import { BaseFreeClient, type StreamOptions, type StructuredOptions } from '../base/BaseFreeClient';
+import type { StructuredResponse, ValidationResult } from '../../types';
 import { extractAxiosErrorMessage } from '../../utils/extractAxiosError';
 import { hasNonTextModality } from '../../utils/modelFilters';
 
@@ -62,6 +62,36 @@ export class FreeGoogleClient extends BaseFreeClient {
           value.startsWith('gemini-') &&
           !hasNonTextModality(value),
       );
+  }
+
+  protected override async generateStructuredWithProvider<T>(
+    options: StructuredOptions,
+  ): Promise<StructuredResponse<T>> {
+    const startTime = Date.now();
+
+    const genAI = this.createClient(options.apiKey);
+    const model = genAI.getGenerativeModel({
+      model: options.model,
+      generationConfig: {
+        responseMimeType: 'application/json',
+        responseSchema: options.schema.schema as unknown as import('@google/generative-ai').ResponseSchema,
+        ...(options.options?.temperature !== undefined && {
+          temperature: options.options.temperature,
+        }),
+      },
+    });
+
+    const result = await model.generateContent(options.prompt);
+    const raw = result.response.text();
+    const parsed = JSON.parse(raw) as T;
+    const tokenCount = result.response.usageMetadata?.totalTokenCount;
+
+    return {
+      parsed,
+      raw,
+      responseTimeMs: Date.now() - startTime,
+      ...(tokenCount ? { tokenCount } : {}),
+    };
   }
 
   protected override async streamWithProvider(options: StreamOptions): Promise<void> {

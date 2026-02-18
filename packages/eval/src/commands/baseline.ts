@@ -2,7 +2,7 @@ import { Command } from 'commander';
 import { ProviderRegistry } from '@ensemble-ai/shared-utils/providers';
 import { loadBenchmarkQuestions } from '../lib/benchmarkDatasets.js';
 import { evaluateResponses } from '../lib/evaluation.js';
-import { createEvaluatorForDataset } from '../lib/evaluators.js';
+import { createEvaluatorForDataset, type JudgeConfig } from '../lib/evaluators.js';
 import { writeJsonFile } from '../lib/io.js';
 import { parseModelSpec } from '../lib/modelSpecs.js';
 import { registerProviders } from '../lib/providers.js';
@@ -87,10 +87,22 @@ export function createBaselineCommand(): Command {
         skipDownload: options.skipDownload,
         forceDownload: options.forceDownload,
       });
-      const evaluator = createEvaluatorForDataset(datasetName);
 
       const registry = new ProviderRegistry();
       registerProviders(registry, [modelSpec.provider], options.mode);
+
+      let judgeConfig: JudgeConfig | undefined;
+      if (options.mode !== 'mock') {
+        try {
+          judgeConfig = {
+            provider: registry.getProvider(modelSpec.provider, options.mode),
+            model: modelSpec.model,
+          };
+        } catch {
+          // Judge unavailable — fall back to regex evaluator
+        }
+      }
+      const evaluator = createEvaluatorForDataset(datasetName, judgeConfig);
       const ensembleRunner = new EnsembleRunner(registry, options.mode, {
         requestDelayMs,
         temperature,
