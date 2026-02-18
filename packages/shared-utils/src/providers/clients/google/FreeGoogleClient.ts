@@ -64,7 +64,11 @@ export class FreeGoogleClient extends BaseFreeClient {
       );
   }
 
-  /** Strip `additionalProperties` from a schema object (Google's API rejects it). */
+  /**
+   * Strip `additionalProperties` from a schema object (Google's API rejects it).
+   * Note: only strips the top-level field. Nested object schemas with
+   * `additionalProperties` would need recursive handling if ever used.
+   */
   private static sanitizeSchemaForGoogle(schema: Record<string, unknown>): Record<string, unknown> {
     const { additionalProperties: _, ...rest } = schema;
     return rest;

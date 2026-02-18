@@ -27,10 +27,10 @@ const TEST_CASES = [
     expected: 'C',
   },
   {
-    description: 'multiple letters mentioned, last is answer',
+    description: 'multiple letters mentioned, final choice differs',
     response:
-      'While A and B are tempting, the best answer is A because it directly solves the problem.',
-    expected: 'A',
+      'While A and B are tempting, the best answer is C because it directly solves the problem.',
+    expected: 'C',
   },
   {
     description: 'markdown-formatted answer',

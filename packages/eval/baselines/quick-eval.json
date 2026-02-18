@@ -1,0 +1,43 @@
+{
+  "model": "google:gemini-3-flash-preview",
+  "ensembleSize": 3,
+  "sample": 10,
+  "datasets": [
+    "gsm8k",
+    "truthfulqa"
+  ],
+  "strategies": [
+    "standard",
+    "elo",
+    "majority",
+    "council"
+  ],
+  "updatedAt": "2026-02-18T10:04:23.324Z",
+  "single": {
+    "accuracy": 0.5,
+    "correct": 10,
+    "total": 20
+  },
+  "ensemble": {
+    "standard": {
+      "accuracy": 0.85,
+      "correct": 17,
+      "total": 20
+    },
+    "elo": {
+      "accuracy": 0.8,
+      "correct": 16,
+      "total": 20
+    },
+    "majority": {
+      "accuracy": 0.8,
+      "correct": 16,
+      "total": 20
+    },
+    "council": {
+      "accuracy": 0.85,
+      "correct": 17,
+      "total": 20
+    }
+  }
+}
