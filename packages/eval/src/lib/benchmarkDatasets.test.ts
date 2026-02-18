@@ -162,7 +162,7 @@ describe('benchmark dataset loaders', () => {
       'utf-8',
     );
 
-    const loaded = await loadBenchmarkQuestions(localPath, { sample: 2 });
+    const loaded = await loadBenchmarkQuestions(localPath, { sample: 2, shuffle: false });
     expect(loaded.datasetName).toBeNull();
     expect(loaded.questions).toHaveLength(2);
     expect(loaded.questions[0].prompt).toBe('What is 2 + 2?');

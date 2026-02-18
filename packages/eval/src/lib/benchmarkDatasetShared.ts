@@ -18,6 +18,54 @@ export function resolveBenchmarkDatasetName(
   return DATASET_ALIASES[normalized] ?? null;
 }
 
+/**
+ * Simple seeded pseudo-random number generator (mulberry32).
+ * Returns a function that produces deterministic values in [0, 1).
+ */
+export function seededRandom(seed: number): () => number {
+  let s = seed | 0;
+  return () => {
+    s = (s + 0x6d2b79f5) | 0;
+    let t = Math.imul(s ^ (s >>> 15), 1 | s);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+/**
+ * Fisher-Yates shuffle using a random function.
+ * Returns a new shuffled array without mutating the original.
+ */
+export function shuffleArray<T>(items: readonly T[], rand: () => number = Math.random): T[] {
+  const result = [...items];
+  for (let i = result.length - 1; i > 0; i--) {
+    const j = Math.floor(rand() * (i + 1));
+    [result[i], result[j]] = [result[j], result[i]];
+  }
+  return result;
+}
+
+/**
+ * Shuffle and sample questions according to DatasetLoadOptions.
+ * Shuffling is enabled by default to avoid sampling bias from fixed ordering.
+ */
+export function shuffleAndSample<T>(
+  items: readonly T[],
+  sample: number | undefined,
+  options?: { shuffle?: boolean; seed?: number },
+): T[] {
+  const shouldShuffle = options?.shuffle !== false;
+  const sampleSize = normalizeSample(sample, items.length);
+
+  if (!shouldShuffle) {
+    return items.slice(0, sampleSize) as T[];
+  }
+
+  const rand = options?.seed !== undefined ? seededRandom(options.seed) : Math.random;
+  const shuffled = shuffleArray(items, rand);
+  return shuffled.slice(0, sampleSize);
+}
+
 export function normalizeSample(sample: number | undefined, total: number): number {
   if (sample === undefined) {
     return total;
