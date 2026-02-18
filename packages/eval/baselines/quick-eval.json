@@ -12,21 +12,21 @@
     "majority",
     "council"
   ],
-  "updatedAt": "2026-02-18T10:04:23.324Z",
+  "updatedAt": "2026-02-18T10:45:23.612Z",
   "single": {
-    "accuracy": 0.5,
-    "correct": 10,
+    "accuracy": 0.8,
+    "correct": 16,
     "total": 20
   },
   "ensemble": {
     "standard": {
-      "accuracy": 0.85,
-      "correct": 17,
+      "accuracy": 0.8,
+      "correct": 16,
       "total": 20
     },
     "elo": {
-      "accuracy": 0.8,
-      "correct": 16,
+      "accuracy": 0.85,
+      "correct": 17,
       "total": 20
     },
     "majority": {
