@@ -134,7 +134,11 @@ export async function generateConsensus(
       if (consensusResponses.length >= MIN_RESPONSES_FOR_MAJORITY) {
         tasks.push(runStrategy('majority', (c) =>
           new MajorityVotingConsensus(c, summarizerModel)
-            .generateConsensus(consensusResponses, consensusResponses.length, prompt),
+            .generateConsensus(
+              consensusResponses,
+              Math.min(MIN_RESPONSES_FOR_MAJORITY, consensusResponses.length),
+              prompt,
+            ),
         ));
       }
     } else if (strategy === 'council') {
