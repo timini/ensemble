@@ -115,6 +115,7 @@ Your task:
 Produce a SINGLE, UNIFIED response that directly answers the original question.
 Synthesize the best elements from all positions into one coherent, comprehensive answer.
 Do NOT compare or reference the individual models. Write as if answering the question yourself.
+If the question asks for a constrained format (single letter, number, JSON, etc.), output exactly that format and nothing else.
     `.trim();
 }
 
