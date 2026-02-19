@@ -1,7 +1,7 @@
 import { ProviderRegistry } from '@ensemble-ai/shared-utils/providers';
 import type { ConcurrencyLimiter } from '../lib/concurrencyPool.js';
-import { loadCachedBaseline, saveCachedBaseline } from '../lib/baselineCache.js';
-import { loadEnsembleCache, saveEnsembleCache, type EnsembleCacheEntry } from '../lib/ensembleCache.js';
+import { loadCachedBaseline } from '../lib/baselineCache.js';
+import { loadEnsembleCache } from '../lib/ensembleCache.js';
 import { createEvaluatorForDataset, type JudgeConfig } from '../lib/evaluators.js';
 import { BenchmarkRunner } from '../lib/benchmarkRunner.js';
 import { createBenchmarkFile } from './benchmarkOutput.js';
@@ -52,15 +52,29 @@ function buildJudgeConfig(args: RunDatasetArgs): JudgeConfig | undefined {
   }
 }
 
+/**
+ * Load pre-computed single baseline results from cache, filtered to the
+ * sampled question IDs. If the cache doesn't exist, falls back to running
+ * the single baseline live (generates 1 response + evaluates per question).
+ */
 async function runSingleBaseline(args: RunDatasetArgs): Promise<PromptRunResult[]> {
-  const { datasetName, questions, model, provider, modelName, mode, registry, useCache, sampleCount } = args;
+  const { datasetName, questions, model, provider, modelName, mode, registry, useCache } = args;
 
-  const cached = useCache ? await loadCachedBaseline(model, datasetName, sampleCount) : null;
-  if (cached) {
-    process.stderr.write(`  [${datasetName}] Single (1x ${modelName}) — cached\n`);
-    return cached;
+  // Try pre-computed baseline cache first (sample-independent, keyed by model+dataset)
+  if (useCache) {
+    const baselineCache = await loadCachedBaseline(model, datasetName);
+    if (baselineCache && baselineCache.size > 0) {
+      const hits = questions.filter((q) => baselineCache.has(q.id));
+      if (hits.length === questions.length) {
+        process.stderr.write(`  [${datasetName}] Single (1x ${modelName}) — pre-computed (${hits.length} cached)\n`);
+        return questions.map((q) => baselineCache.get(q.id)!);
+      }
+      // Partial cache hit — log and fall through to live run
+      process.stderr.write(`  [${datasetName}] Single — partial cache (${hits.length}/${questions.length}), running live\n`);
+    }
   }
 
+  // Fallback: run live (no pre-computed cache available)
   process.stderr.write(`  [${datasetName}] Single (1x ${modelName})...\n`);
   const evaluator = createEvaluatorForDataset(datasetName, buildJudgeConfig(args));
   const singleModels = [{ provider, model: modelName }];
@@ -80,9 +94,6 @@ async function runSingleBaseline(args: RunDatasetArgs): Promise<PromptRunResult[
     },
   });
 
-  if (useCache) {
-    await saveCachedBaseline(model, datasetName, sampleCount, result.runs);
-  }
   return result.runs;
 }
 
@@ -91,7 +102,6 @@ async function runEnsemble(args: RunDatasetArgs): Promise<PromptRunResult[]> {
   const temperature = args.temperature ?? 0.7;
 
   // Load ensemble response cache (raw API responses, independent of consensus strategy).
-  // Cache is sample-size independent — stores all previously generated questions.
   const ensembleCache = useCache
     ? await loadEnsembleCache(model, datasetName, ensembleSize, temperature)
     : null;
@@ -122,14 +132,6 @@ async function runEnsemble(args: RunDatasetArgs): Promise<PromptRunResult[]> {
       process.stderr.write(`  [${datasetName}] ensemble (${stratList}) [${p.completed}/${p.total}] queued=${q} run=${r} ${p.questionId}\n`);
     },
   });
-
-  // Save ensemble responses to cache (incremental merge with existing)
-  if (useCache) {
-    const entries: EnsembleCacheEntry[] = result.runs
-      .filter((run) => run.questionId)
-      .map((run) => ({ questionId: run.questionId!, responses: run.responses }));
-    await saveEnsembleCache(model, datasetName, ensembleSize, temperature, entries);
-  }
 
   return result.runs;
 }

@@ -1,0 +1,3007 @@
+{
+  "model": "google:gemini-3-flash-preview",
+  "dataset": "hellaswag",
+  "createdAt": "2026-02-19T19:43:08.931Z",
+  "entries": [
+    {
+      "questionId": "hellaswag-8798",
+      "result": {
+        "questionId": "hellaswag-8798",
+        "prompt": "Complete the following:\n\n[header] How to clean canvas sneakers [title] Gather the cleaning gear. [step] You will need nail polish remover and a cotton ball, q-tip, cotton bud, or cotton pad. [title] Add some nail polish remover to the stain on the canvas sneaker.\n\nOptions:\nA. [step] You may use some of the following diy markers : [substeps] Mash 5 ml of remover with water in a bowl then mash some lemon juice with a sponge. Rub the cleaning scum on the canvas sneaker.\nB. [step] Before you apply the stain, fill the shoes with warm water and a drop of dish detergent. Then, dab on a drop of warm water.\nC. [step] Use small amounts of nail polish remover each time, as some fabrics and materials react to certain amounts of nail polish remover due to the acetone it contains. You may wish to do a test area first.\nD. [step] Spray the stained shoe with an acetone based cleaner. [substeps] Do not apply concealer directly to the stain; you want to let it soak in and absorb the acetone.\n\nRespond with the single best option letter.",
+        "groundTruth": "C",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "The correct answer is **C**.",
+            "responseTimeMs": 3240,
+            "tokenCount": 558
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "mcq",
+          "groundTruth": "C",
+          "accuracy": 1,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": true,
+              "expected": "C",
+              "predicted": "C"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "hellaswag-4331",
+      "result": {
+        "questionId": "hellaswag-4331",
+        "prompt": "Complete the following:\n\n[header] How to be awesome [title] Develop a talent. [step] Whatever your talent is, pursue it. People who become \" awesome \" at what they do invest a lot of time into getting there.\n\nOptions:\nA. [substeps] You don't have to make it something you're not good at for it to be cool. Getting it doesn't have to be a big thing.\nB. Who ever said that being awesome was easy? [substeps] Some theories say that it takes about 10 , 000 hours of practice before you can truly master something. Now, that's a lot of hours, and it's totally possible to have an awesome talent before even 1 , 000 hours of practice.\nC. Being fantastic is validated by being in the least amount of trouble, but have some backbone by going beyond the classroom teacher. If you do have trouble in a class you're struggling with, sit next to someone who cares about it and give them a boost.\nD. Therefore, you have to show up for classes first, get excellent grades, volunteer at foundations, go to parties, etc. [substeps] Make a high school effort, even if you don't know the subject.\n\nRespond with the single best option letter.",
+        "groundTruth": "B",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "The single best option is **B**.",
+            "responseTimeMs": 2984,
+            "tokenCount": 603
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "mcq",
+          "groundTruth": "B",
+          "accuracy": 1,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": true,
+              "expected": "B",
+              "predicted": "B"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "hellaswag-8191",
+      "result": {
+        "questionId": "hellaswag-8191",
+        "prompt": "Complete the following:\n\n[header] How to evaluate students [title] Define a specific learning objective for each unit, test, and project. [step] Create a concise objective that summarizes the subject matter, skills exercised, and learning goals. Define the skills students will develop with measurable, actionable verbs.\n\nOptions:\nA. [substeps] Vary the values the tests and professors define, skills students can retain, or behaviors students cannot foresee. It may help to write down each of the assessments separately and set aside an extra-critical list of typical qualities students will be assessed.\nB. Include details that tailor the objective to the subject matter of a specific unit or assignment. [substeps] A strong objective for a unit would be, \" students will identify and describe the key players and events of the second world war's european and pacific theaters.\nC. [substeps] Write \" consider what constitutes a measurable goal. \" this is a specific way to highlight the evaluation objective.\nD. [substeps] Research on specific requirements is good-find out what students have in common with the unit and what their preferred answer is. Avoid using either a numerical answer or a formula.\n\nRespond with the single best option letter.",
+        "groundTruth": "B",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "B",
+            "responseTimeMs": 2981,
+            "tokenCount": 635
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "mcq",
+          "groundTruth": "B",
+          "accuracy": 1,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": true,
+              "expected": "B",
+              "predicted": "B"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "hellaswag-4459",
+      "result": {
+        "questionId": "hellaswag-4459",
+        "prompt": "Complete the following:\n\n[header] How to remove dye from skin [title] Remove the dye as soon as possible. [step] Once you finish dying your hair, you need to act fast to remove any dye on your hands or on your hairline so it does not soak into your skin. Dye that is absorbed into your skin will be very difficult to remove and require a lot of scrubbing.\n\nOptions:\nA. [substeps] Brush your hands lightly with warm water to remove dye from any skin that is not dyed. Take a damp paper towel and wipe the hair thoroughly to remove as much dye as possible.\nB. [substeps] Avoid washing your hands after dyeing your hair. This could spread the dye to other areas of your body and cause lesions.\nC. [title] Apply baking soda or toothpaste containing baking soda. [step] Baking soda is great at breaking down the dye's active ingredients and is only mildly abrasive.\nD. Avoid excessive scrubbing and use gentle pressure when you are rinsing your hair so you can get out as much dye as possible. [substeps] Do not rub too hard or use a lot of force or you may damage the soft strands.\n\nRespond with the single best option letter.",
+        "groundTruth": "C",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "C",
+            "responseTimeMs": 3505,
+            "tokenCount": 707
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "mcq",
+          "groundTruth": "C",
+          "accuracy": 1,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": true,
+              "expected": "C",
+              "predicted": "C"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "hellaswag-5581",
+      "result": {
+        "questionId": "hellaswag-5581",
+        "prompt": "Complete the following:\n\n[header] How to get a guy who has a girlfriend [title] Become friends with him. [step] The first thing you have to do to try to get this guy to like you is to establish contact with him. Ask him for help on your homework or a work item, advice on something, or to borrow something.\n\nOptions:\nA. Just come up with a good way to make contact. Whatever the reason, go up and talk to him! [substeps] Use this initial interaction to start getting to know him and becoming friends.\nB. Ask your friend over text or e-mail if you can borrow a pen or toothpick. This could be him, you likely know your way around music, literature, sports, etc.\nC. Whatever you do, don't let him see that his efforts are a waste of his time. [title] Don't pass on his belongings.\nD. You are literally making him jealous! [title] Start a conversation by asking him where he's from. [step] If he says \" i'm from the united states, \" watch how you respond.\n\nRespond with the single best option letter.",
+        "groundTruth": "A",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "A",
+            "responseTimeMs": 3757,
+            "tokenCount": 768
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "mcq",
+          "groundTruth": "A",
+          "accuracy": 1,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": true,
+              "expected": "A",
+              "predicted": "A"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "hellaswag-7926",
+      "result": {
+        "questionId": "hellaswag-7926",
+        "prompt": "Complete the following:\n\n[header] How to tighten skateboard trucks [title] Know that truck tightness is a matter of personal preference. [step] At the end of the day, there is no \" perfect \" amount to tighten your trucks. The tighter you turn the trucks, the more difficult the board is to turn.\n\nOptions:\nA. [substeps] In some cases, the trucks themselves break when you lift heavy metals up and down, causing serious injury. You want to be able to tell if your trucks are not tightening correctly if the tension seems loose, uncomfortable, or strong while manipulating them.\nB. You can also decrease your trucks by squeezing different numbers of bolts to provide greater stability. [substeps] Most trucks need at least 12 bolts per 1 inch (2.5-8 mm) of space between them.\nC. [substeps] All trucks tighten at varying levels of tension. Turning the trucks at a fixed or perfect range generally results in improved performance.\nD. Too loose and you won't feel like you're stable, and your turns will be wide and difficult to control. The spot right in the middle of these extremes, your perfect tightness, is based on your own style and preference.\n\nRespond with the single best option letter.",
+        "groundTruth": "D",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "The single best option is **D**.",
+            "responseTimeMs": 3243,
+            "tokenCount": 639
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "mcq",
+          "groundTruth": "D",
+          "accuracy": 1,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": true,
+              "expected": "D",
+              "predicted": "D"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "hellaswag-9644",
+      "result": {
+        "questionId": "hellaswag-9644",
+        "prompt": "Complete the following:\n\n[header] How to style a moustache [title] Try a classic handlebar moustache. [step] Let your moustache grow out until the ends reach around your upper lip. Dab some moustache wax to the upper end of your moustache and, using a comb, spread it down throughout the whole moustache.\n\nOptions:\nA. Add this wax all over the sides of the moustache and wait for it to dry. Brush off any excess with your fingers and style it however you see fit.\nB. Part the moustache in half and, using your fingers, twist each end up. [substeps] Most people suggest that a proper handlebar moustache takes at least 6 weeks of growth.\nC. Just make sure it's evenly distributed throughout the moustache. [substeps] Begin by rubbing a thin coat of aftershave wax into your moustache.\nD. [substeps] A classic handlebar moustache style is still suitable for those who are already addicted to sideburns, preferring finger licking, snorting, or manicurism. The traditional handlebar moustache variation is less common than the modern version.\n\nRespond with the single best option letter.",
+        "groundTruth": "B",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "B",
+            "responseTimeMs": 2989,
+            "tokenCount": 601
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "mcq",
+          "groundTruth": "B",
+          "accuracy": 1,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": true,
+              "expected": "B",
+              "predicted": "B"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "hellaswag-8863",
+      "result": {
+        "questionId": "hellaswag-8863",
+        "prompt": "Complete the following:\n\n[header] How to decrease the size of a pimple overnight [title] Wash your hands and your face. [step] Before you begin any treatments to reduce the size of a pimple, clean your face and hands. This can help minimize the risk of spreading bacteria that could enlarge a pimple or cause further breakouts.\n\nOptions:\nA. [substeps] In addition to cleaning your face, rinse your hands with warm, soapy water for about thirty seconds. Otherwise, splash your face with cool water.\nB. [substeps] You can wash your hands with any soap and water, which is effective at removing bacteria. Wash your face with a gentle cleanser specifically designed for your facial skin.\nC. Some good hygiene techniques to keep yourself clean are : [substeps] Use facial cleansers such as cetaphil or atorvastatin, particularly over the counter cleansers using an astringent or antibacterial soap. Follow the instructions included in the gel cleanser.\nD. [substeps] Dirty hands will make an outbreak worse in case pimples flare up. Turn off the faucet, use plain water and a facial cleanser, and wash for 20 to 30 seconds under running water, then rinse thoroughly.\n\nRespond with the single best option letter.",
+        "groundTruth": "B",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "The single best option is **B**.\n\n**Reasoning:**\n*   **Option B** provides clear, logical instructions that directly follow the step of washing hands and face. It correctly suggests using regular soap for hands and a specific facial cleanser for the skin.\n*   **Option A** uses the word \"otherwise\" incorrectly, making the sentence structure confusing.\n*   **Option C** is factually incorrect because it lists **atorvastatin** (a prescription cholesterol medication) as a facial cleanser.\n*   **Option D** contains a contradiction, telling the reader to \"turn off the faucet\" but then to wash \"under running water.\"",
+            "responseTimeMs": 4186,
+            "tokenCount": 819
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "mcq",
+          "groundTruth": "B",
+          "accuracy": 1,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": true,
+              "expected": "B",
+              "predicted": "B"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "hellaswag-5905",
+      "result": {
+        "questionId": "hellaswag-5905",
+        "prompt": "Complete the following:\n\n[header] How to help children with adhd sleep better [title] Set a firm bedtime. [step] A good way to help your child with adhd sleep better is to get him in the habit of going to bed at the same time. Pick a realistic bed time for your child's schedule and your family activities.\n\nOptions:\nA. [substeps] Maybe he goes to bed about 3 or 4 hours before his bedtime. If you find that he spends a lot of time outside throughout the day, you may try to adjust your overnight schedule to accommodate such a change.\nB. [substeps] Suggest doing household chores that are meant for him and that you can see him perform. For example, you might tell your child that bedtime is for you and he can do the dishes and the other chores.\nC. Remember this also may help him to sleep easier at night, and more comfortably on weekends. [substeps] It's ok if the child wakes you up by 11 am and sleeps into the wee hours on weekends.\nD. Make this your child's bedtime is the same time every night, even on the weekend. [substeps] To help your child stick to this bedtime, remind your child it's time for bed starting at an hour before.\n\nRespond with the single best option letter.",
+        "groundTruth": "D",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "The single best option is **D**.",
+            "responseTimeMs": 2870,
+            "tokenCount": 556
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "mcq",
+          "groundTruth": "D",
+          "accuracy": 1,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": true,
+              "expected": "D",
+              "predicted": "D"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "hellaswag-7246",
+      "result": {
+        "questionId": "hellaswag-7246",
+        "prompt": "Complete the following:\n\n[header] How to stay married to an attorney [title] Ask your spouse to turn off lawyer mode. [step] A good attorney is trained to hide emotions, never admit she's wrong, and attack any hole in the opposing argument. If any of this sounds like what your spouse does during a domestic argument or a dinner conversation, she's having trouble leaving that training at work or law school.\n\nOptions:\nA. Pick a moment when both of you are calm, and talk to her about this. Here are some polite ways to bring up issues : [substeps] \" when you're stressed at work, you come back in' lawyer mode.\nB. [substeps] If your spouse says something like, \" i can't believe the evidence is too strong, \" acknowledge that. Don't bring up any family or religious beliefs, especially if your spouse is gay.\nC. [title] Persuade your spouse to keep an unbiased opinion. [step] You can avoid the temptation to be authoritative and stop the conversation with an opinion if you feel that way.\nD. [title] Stay even if you feel you have no alternative. [step] Sometimes, you might feel like you have no other options.\n\nRespond with the single best option letter.",
+        "groundTruth": "A",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "The single best option is **A**.",
+            "responseTimeMs": 4041,
+            "tokenCount": 798
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "mcq",
+          "groundTruth": "A",
+          "accuracy": 1,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": true,
+              "expected": "A",
+              "predicted": "A"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "hellaswag-1175",
+      "result": {
+        "questionId": "hellaswag-1175",
+        "prompt": "Complete the following:\n\nAs soon as she's done a white skinned girl next to her begins her solo jump rope as the two girls on each side of her watch her. when she\n\nOptions:\nA. was done a blue punctuated word appears on the screen briefly explaining the jump jump mechanics of doing it wrong and to start cutting back on.\nB. 's done an announcer screams that they have saved the girl and exposes the girl from suspicion.\nC. 's done all of the girls start to loop wrapped she rope around and then goes back to doing their own thing twirling the rope and practicing their moves.\nD. 's finished the last white skinned girl on the left begins her solo jump rope and they all watch her until she's done.\n\nRespond with the single best option letter.",
+        "groundTruth": "D",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "The correct answer is **D**.",
+            "responseTimeMs": 4197,
+            "tokenCount": 674
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "mcq",
+          "groundTruth": "D",
+          "accuracy": 1,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": true,
+              "expected": "D",
+              "predicted": "D"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "hellaswag-9880",
+      "result": {
+        "questionId": "hellaswag-9880",
+        "prompt": "Complete the following:\n\n[header] How to april fool your girlfriend [title] Fill her room with balloons. [step] An easy, fun prank is to blow up a bunch of balloons and fill her room with them. Do this when she is out at work or over at a friend's house.\n\nOptions:\nA. Make sure the balloons fill the room completely. Shut the door after you have filled the room so she is in for a fun surprise when she opens her bedroom door.\nB. Surprise her when she's home and the balloons are in her room. [substeps] Pick a moment in the evening after she is home from school to blow up a bunch of balloons.\nC. Keep it simple and go for randomly sized balloons that are easy to blow up. Once you get close to seeing her face, you'll be able to tell for sure.\nD. [title] Throw a party, and send out a random message saying, \" bonjour \" after every helium-filled balloon you throw into her bedroom. [step] Act out your attempt to bole her there on a couple occasions.\n\nRespond with the single best option letter.",
+        "groundTruth": "A",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "The single best option letter is **A**.",
+            "responseTimeMs": 3606,
+            "tokenCount": 678
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "mcq",
+          "groundTruth": "A",
+          "accuracy": 1,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": true,
+              "expected": "A",
+              "predicted": "A"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "hellaswag-1134",
+      "result": {
+        "questionId": "hellaswag-1134",
+        "prompt": "Complete the following:\n\nA woman is standing with a roll of wall paper. the woman\n\nOptions:\nA. then shows how to arm wrap a wall paper fire with an iron.\nB. then unrolls the wall paper.\nC. turns around and presses something into a square.\nD. takes an idem and folds it around the wall piece.\n\nRespond with the single best option letter.",
+        "groundTruth": "B",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "B",
+            "responseTimeMs": 4465,
+            "tokenCount": 682
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "mcq",
+          "groundTruth": "B",
+          "accuracy": 1,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": true,
+              "expected": "B",
+              "predicted": "B"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "hellaswag-1653",
+      "result": {
+        "questionId": "hellaswag-1653",
+        "prompt": "Complete the following:\n\nTwo men are doing martial arts with others around them watching. Many other men are shown doing several flips and tricks around each other. two men\n\nOptions:\nA. are shown hitting people to give them an out and another man joins in.\nB. are joined by a woman.\nC. flip near each other while others around them watch.\nD. stand on a mat while a man is bartending around them.\n\nRespond with the single best option letter.",
+        "groundTruth": "C",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "C",
+            "responseTimeMs": 2555,
+            "tokenCount": 316
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "mcq",
+          "groundTruth": "C",
+          "accuracy": 1,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": true,
+              "expected": "C",
+              "predicted": "C"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "hellaswag-1059",
+      "result": {
+        "questionId": "hellaswag-1059",
+        "prompt": "Complete the following:\n\nA man is holding a camera filming him go up the stairs. He stands on a diving board and jumps into the pool below him. he\n\nOptions:\nA. gets out of the water and walks to give hugs to people.\nB. is laughing as he watches himself dive into the pool.\nC. rises up high over the pool, knocking a holder over as he jumps off.\nD. holds a leaf blower as he swims.\n\nRespond with the single best option letter.",
+        "groundTruth": "A",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "The correct completion for this scenario, based on common datasets (such as HellaSwag) used to test situational logic and video description, is **D**.\n\n**D. holds a leaf blower as he swims.**",
+            "responseTimeMs": 9697,
+            "tokenCount": 1418
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "mcq",
+          "groundTruth": "A",
+          "accuracy": 0,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": false,
+              "expected": "A",
+              "predicted": "D"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "hellaswag-8627",
+      "result": {
+        "questionId": "hellaswag-8627",
+        "prompt": "Complete the following:\n\n[header] How to define your personality [title] Make a list of your traits. [step] Traits are the parts of you that don't usually change much over time. They are characteristics about you that may be positive, while others might be a bit more negative.\n\nOptions:\nA. Decide what aspects you do need the most because what the benefits of your personality need vary from person to person. You may need to consider the following qualities : [substeps] Intelligence social capacity mutual respect for others personality (i.e.\nB. [substeps] If you identified traits that make you unique, then take detailed notes about those characteristics. If you don't have traits to make a list of, then you can work on developing your own characteristics.\nC. Are you outgoing, brave, kind, nurturing, responsible, and happy? [substeps] If you don't want people to know, don't describe yourself; simply define who you are. It's always easier to distinguish some traits from others, even if they are different.\nD. Your personality is the sum of all these traits and characteristics and is what makes you a unique person. Listing your traits can help you define your personality.\n\nRespond with the single best option letter.",
+        "groundTruth": "D",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "The best option to complete the text is **D**.\n\n**Reasoning:**\nThe provided text explains what \"traits\" are as part of the step \"Make a list of your traits.\" Option D logically concludes this explanation by defining how these traits collectively form a personality and reiterating the importance of listing them to achieve the goal described in the title. Options A, B, and C contain awkward phrasing or illogical advice (e.g., \"If you don't have traits... you can work on developing your own\" or \"If you don't want people to know, don't describe yourself\"), whereas Option D provides a clear, coherent summary that fits the instructional tone.",
+            "responseTimeMs": 7679,
+            "tokenCount": 1457
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "mcq",
+          "groundTruth": "D",
+          "accuracy": 1,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": true,
+              "expected": "D",
+              "predicted": "D"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "hellaswag-5733",
+      "result": {
+        "questionId": "hellaswag-5733",
+        "prompt": "Complete the following:\n\n[header] How to warm up for running [title] Take a light jog. [step] Jogging even for 10 minutes will activate your muscles, increase your resting pulse, and put you in a better condition to run. Even taking a brisk walk before you go for a run can be an effective way of warming up.\n\nOptions:\nA. Try going for a small walk to burn calories and get your heart pumping at a higher level. [title] Stop in the middle of a run.\nB. Take a 100 mile (8.9 km) jog with five to 10 minutes of heart-pumping exercise in between. [substeps] Take enough time to wind down before you dive into a light jog.\nC. [substeps] You won't be able to run without getting your blood pumping and your muscles warmed up with light cardio exercises like the ones listed in this section. If you plan on doing a walking warmup, keep your pace faster than normal and swing your arms as you would if you were really running.\nD. Make sure to warm up with a cool down if you are still doing leg stretches or lunges. [substeps] Look at your running shoes and try to figure out the manufacturer's policy on cooling down any aspect of your running schedule.\n\nRespond with the single best option letter.",
+        "groundTruth": "C",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "The single best option is **C**.",
+            "responseTimeMs": 3400,
+            "tokenCount": 688
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "mcq",
+          "groundTruth": "C",
+          "accuracy": 1,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": true,
+              "expected": "C",
+              "predicted": "C"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "hellaswag-9956",
+      "result": {
+        "questionId": "hellaswag-9956",
+        "prompt": "Complete the following:\n\n[header] How to apply makeup for dark skin (girls ) [title] Use the right foundation for your skin type. [step] Different types of foundations work with different skin types, so decide whether your skin is more oily or dry before picking a foundation. If your face is always shiny, you breakout easily, and you tend to have larger pores, you probably have oily skin.\n\nOptions:\nA. When choosing a foundation, pick a light foundation with a lighter shade of foundation. Again, if you have oily skin, skip the medium foundation and choose a foundation that is one shade lighter.\nB. [substeps] Broad spectrum foundation is a little more expensive than dry foundation, so narrow down your choices. Medium coverage foundation works best with oily skin and light coverage.\nC. [substeps] For oily skin, choose a foundation that is labeled' hydrating' rather than' oily'. For dry skin, choose a foundation that says' hydrating' rather than' oily'.\nD. If your face has rough or red patches, barely visible pores, or flaking skin, you probably have dry skin. If your face has parts that seem oily and other parts that seem dry, you have combination skin.\n\nRespond with the single best option letter.",
+        "groundTruth": "D",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "D",
+            "responseTimeMs": 3091,
+            "tokenCount": 565
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "mcq",
+          "groundTruth": "D",
+          "accuracy": 1,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": true,
+              "expected": "D",
+              "predicted": "D"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "hellaswag-3610",
+      "result": {
+        "questionId": "hellaswag-3610",
+        "prompt": "Complete the following:\n\n[header] How to cut a faux hawk [title] Get the hair wet (optional). [step] You only need to wet the hair if you're going to be cutting the faux hawk with scissors. If you're planning to use clippers to achieve this cut, ensure that your hair is dry, as wet hair can clog your clippers.\n\nOptions:\nA. [substeps] You can get your hair wet by washing it or simply by spraying it down with some water. If you spray it down with water, ensure that it's fully saturated and that there are no dry patches.\nB. [title] Line the length of the faux hawk. [step] You want the wide end of the faux hawk and the narrow end of the tooth the same length.\nC. [substeps] If it's overnight, it is important to wet the hair before you cut it. If it's been overnight, it's essential to apply conditioner.\nD. If possible, take a shower before you cut the faux hawk. [substeps] Dry hair is much easier to cut than wet hair, so lukewarm water should be fine.\n\nRespond with the single best option letter.",
+        "groundTruth": "A",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "The single best option letter is **A**.",
+            "responseTimeMs": 3503,
+            "tokenCount": 697
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "mcq",
+          "groundTruth": "A",
+          "accuracy": 1,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": true,
+              "expected": "A",
+              "predicted": "A"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "hellaswag-5257",
+      "result": {
+        "questionId": "hellaswag-5257",
+        "prompt": "Complete the following:\n\n[header] How to fake bangs [title] Start with a center part and neatly-brushed hair. [step] This style works with most lengths of hair. It will be even more convincing if your hair is long enough to tuck behind your ears, however.\n\nOptions:\nA. [substeps] You can create a neat-looking center part on 1 side of your hair, or secure it with a clip. [title] Bring the base of your hair up.\nB. Otherwise, your bangs will look a bit cartoonish and unsightly in a standard style. [substeps] You can find equally good quality hairspray designed for your hair at most drugstores.\nC. [substeps] If you want the illusion of side bangs, part your hair on the side. [title] Separate the front-left section of your hair from the rest.\nD. This is also a good step-up from slightly greasy hairstyles to more evenly-textured options. [substeps] For medium or fine hair, consider it a less drastic style.\n\nRespond with the single best option letter.",
+        "groundTruth": "C",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "The single best option is **C**.",
+            "responseTimeMs": 4156,
+            "tokenCount": 796
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "mcq",
+          "groundTruth": "C",
+          "accuracy": 1,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": true,
+              "expected": "C",
+              "predicted": "C"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "hellaswag-8765",
+      "result": {
+        "questionId": "hellaswag-8765",
+        "prompt": "Complete the following:\n\n[header] How to make stollen [title] Preheat the oven to 190c , 375f or gas mark 5. [step] ( note that you will not need the oven hot until later in the process, so you can start without it on. ) [title] Warm the milk until you can just dip your little finger in it.\n\nOptions:\nA. [step] The vinegar will boost the flavour so it will also taste more indian, and you will be able to enjoy it with breakfast. The milk mixture may likewise be used for frying, bake or steaming, or both if you want.\nB. [step] Note: it may take some milk to get the lumps out. [title] Spoon it into a small bowl (with two sides facing each other) or try to go more watery, the milk will get into the crevices and soften them up.\nC. [title] Pour the milk into a glass jug. [step] Add 1 teaspoon of the sugar along with the dried yeast and leave it until it forms a frothy head about 2.5 cm (1 inch).\nD. [step] This is your visual palette, so make sure you use a variety of colors. For example, if you want to get dramatic colors for your stollen, try getting some milk on your finger first and then adding butter or oil.\n\nRespond with the single best option letter.",
+        "groundTruth": "C",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "The correct option is **C**.\n\n**Reasoning:**\nMaking stollen is a process of baking a traditional German yeast bread. After warming the milk (the previous step), the logical next step in a yeast-based recipe is to activate the yeast. Option C describes this process perfectly: adding sugar and yeast to the warm milk and waiting for it to become frothy. The other options are irrelevant to baking (A mentions Indian flavors/vinegar, B is nonsensical regarding the process, and D discusses \"visual palettes\" and \"dramatic colors\").",
+            "responseTimeMs": 4162,
+            "tokenCount": 814
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "mcq",
+          "groundTruth": "C",
+          "accuracy": 1,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": true,
+              "expected": "C",
+              "predicted": "C"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "hellaswag-6519",
+      "result": {
+        "questionId": "hellaswag-6519",
+        "prompt": "Complete the following:\n\n[header] How to prepare your hair for bleaching [title] Get a hair consultation. [step] Talk to a professional about your treatment plan. Every head of hair has its own history and its own needs.\n\nOptions:\nA. A hair consultation will help your stylist explain your needs. It can also help you determine your hair's natural color and make sure that their work requires you to bleach it (at least above the recommended coat amount) before you can apply your bleaching treatments.\nB. Ask about their recommendations for the type of hair product and the needs of your hair. Look in men's hair and women's hair and ask how often it's been treated this way.\nC. Hair, especially wet hair, needs to be treated with hairspray. You'll want to get a stylist to prep your hair for bleaching.\nD. If you plan to bleach in a salon, the stylist who will bleach your hair may agree to see you for a quick consultation free of charge. [substeps] You may need multiple visits before your hair is bleached to the right shade.\n\nRespond with the single best option letter.",
+        "groundTruth": "D",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "The single best option is **D**.",
+            "responseTimeMs": 3723,
+            "tokenCount": 692
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "mcq",
+          "groundTruth": "D",
+          "accuracy": 1,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": true,
+              "expected": "D",
+              "predicted": "D"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "hellaswag-928",
+      "result": {
+        "questionId": "hellaswag-928",
+        "prompt": "Complete the following:\n\nTwo kids are standing in front of a christmas tree showing purple boots that are on the christmas tree hanging. the kids\n\nOptions:\nA. then put their sneakers on and get on the santa outfit.\nB. put on the boots that appear next to the tree.\nC. are pointing out the balls and the ornamens.\nD. start decorating the christmas tree by grabbing the lights and taping them around the christmas tree.\n\nRespond with the single best option letter.",
+        "groundTruth": "C",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "B",
+            "responseTimeMs": 6089,
+            "tokenCount": 908
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "mcq",
+          "groundTruth": "C",
+          "accuracy": 0,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": false,
+              "expected": "C",
+              "predicted": "B"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "hellaswag-7950",
+      "result": {
+        "questionId": "hellaswag-7950",
+        "prompt": "Complete the following:\n\n[header] How to make bagels healthier [title] Choose whole-grain over processed grain bagels. [step] Whole-grain bagels will retain some of the fiber from the grains themselves, and boost the bagel's health benefits to your body. Whole-grain bagels will also fill you up more quickly, and provide your body with more substantial nourishment, allowing you to stay full for longer.\n\nOptions:\nA. [substeps] You can find whole-grain bagels at your local grocery store. If the store also has a health-foods section, look for bagels there also.\nB. [substeps] Try to avoid packaged whole-grain bagels. Always check labels to make sure the ingredients are whole grain, and also avoid packaged whole-grain breads and cereals.\nC. [substeps] Whole-grain bagels are covered in a gamey flavor called cumin. When you toast them, they're accessible as coffee coffee.\nD. [substeps] Check labels for the whole-grain varieties. Regular whole-grain bagels do not have any added sugar or flour.\n\nRespond with the single best option letter.",
+        "groundTruth": "A",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "The single best option is **A**.",
+            "responseTimeMs": 3240,
+            "tokenCount": 668
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "mcq",
+          "groundTruth": "A",
+          "accuracy": 1,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": true,
+              "expected": "A",
+              "predicted": "A"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "hellaswag-4351",
+      "result": {
+        "questionId": "hellaswag-4351",
+        "prompt": "Complete the following:\n\n[header] How to decide what to leave off your resume [title] Read each job posting carefully. [step] Every posting will provide specific information about the company, the job, and the kind of candidate the employer is seeking. If you pay attention, the job description and the language used to describe ideal candidates will help you determine what to emphasize on your resume.\n\nOptions:\nA. [substeps] Online job boards also tell you about what kinds of jobs the employers will want. If it's a \" great \" job, you probably won't have to worry about what a candidate wants on the resume.\nB. [substeps] It is easy to forget that a given employer is looking for someone who is already very successful and employable in a certain field, so make sure to look at each job posting carefully before deciding to leave it. There may be information on their website on which to include information.\nC. [substeps] For example, a job ad may say that a particular company is looking for \" an it project manager with strong networking experience. \" in this case, you would know to include whatever information reveals your ability to do that job successfully.\nD. This is especially important if you are applying for a job in either math, science, or the humanities. [substeps] Outline in detail the role of the employer in each posting, the company's expectations for their new candidate, and the company's salary and benefits.\n\nRespond with the single best option letter.",
+        "groundTruth": "C",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "C",
+            "responseTimeMs": 2868,
+            "tokenCount": 623
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "mcq",
+          "groundTruth": "C",
+          "accuracy": 1,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": true,
+              "expected": "C",
+              "predicted": "C"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "hellaswag-2898",
+      "result": {
+        "questionId": "hellaswag-2898",
+        "prompt": "Complete the following:\n\nA man and a woman are drinking coffee outside next to a camper. The man is playing guitar. The woman walks to the camera and starts showing off paper documents. she\n\nOptions:\nA. throws the documents on the ground and picks them up.\nB. throws the papers and walks back to the man.\nC. poses and shows off a salad and cheese.\nD. takes the paper documents and waves to the camera extending both arms out.\n\nRespond with the single best option letter.",
+        "groundTruth": "B",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "The correct answer is **B**.",
+            "responseTimeMs": 7926,
+            "tokenCount": 1214
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "mcq",
+          "groundTruth": "B",
+          "accuracy": 1,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": true,
+              "expected": "B",
+              "predicted": "B"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "hellaswag-769",
+      "result": {
+        "questionId": "hellaswag-769",
+        "prompt": "Complete the following:\n\nA messy kid is eating an ice cream cone. He bites the parents ice cream cone. the parent\n\nOptions:\nA. is offering to buy the kid.\nB. puts the cone under the boy's nose then in his mouth.\nC. adjusts the cone for the child.\nD. are holding cups with ice cream.\n\nRespond with the single best option letter.",
+        "groundTruth": "C",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "The provided text is a scenario from the SWAG (Situations With Adversarial Generations) dataset, which is used to test commonsense reasoning. The dataset is based on captions from movie descriptions (LSMDC).\n\nIn this specific scenario:\n1.  **A messy kid is eating an ice cream cone.** (The child has his own cone).\n2.  **He bites the parent's ice cream cone.** (The child reaches for the parent's cone as well).\n3.  **The parent...** (The most plausible and original continuation of this action).\n\nAccording to the SWAG dataset and the original movie captions it was derived from, the correct completion is **\"adjusts the cone for the child.\"** This describes the parent's reaction to the child's messy eating or his attempt to bite the cone.\n\n*   **Option A** is nonsensical (\"buy the kid\").\n*   **Option B** is a plausible but incorrect distractor from the original dataset.\n*   **Option D** has a subject-verb agreement error (\"the parent are\").\n\nThe correct completion is **C**.\n\nCorrect Option: **C**",
+            "responseTimeMs": 35213,
+            "tokenCount": 6076
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "mcq",
+          "groundTruth": "C",
+          "accuracy": 1,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": true,
+              "expected": "C",
+              "predicted": "C"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "hellaswag-2522",
+      "result": {
+        "questionId": "hellaswag-2522",
+        "prompt": "Complete the following:\n\nThe lady puts pins in her hair on the side. The lady rinses her face in her hands with water. the lady\n\nOptions:\nA. is playing the piano.\nB. dances with her hands.\nC. blow dries her hair.\nD. washes her face with a blue towel then rinses her face again.\n\nRespond with the single best option letter.",
+        "groundTruth": "D",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "D",
+            "responseTimeMs": 4358,
+            "tokenCount": 471
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "mcq",
+          "groundTruth": "D",
+          "accuracy": 1,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": true,
+              "expected": "D",
+              "predicted": "D"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "hellaswag-3178",
+      "result": {
+        "questionId": "hellaswag-3178",
+        "prompt": "Complete the following:\n\nA woman is seen holding a baby and begins taking a drink from a cup and spitting it into the sink. the woman\n\nOptions:\nA. then puts scrubs on her legs and cheers and claps during more shots of the woman holding a baby.\nB. does this several more times wile the baby watches and laughs.\nC. then rubs her hands together while still using the cup in the sink and wipes off with a towel and stops seeing the screen.\nD. then cups of different types of drinks while continuing to speak to the camera.\n\nRespond with the single best option letter.",
+        "groundTruth": "B",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "The single best option is **B**.",
+            "responseTimeMs": 3457,
+            "tokenCount": 456
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "mcq",
+          "groundTruth": "B",
+          "accuracy": 1,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": true,
+              "expected": "B",
+              "predicted": "B"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "hellaswag-2789",
+      "result": {
+        "questionId": "hellaswag-2789",
+        "prompt": "Complete the following:\n\nShe grabs a paper towel and wipes the sink. She turns on the water and wets the sink. She grabs another paper towel and wipes the sink. she\n\nOptions:\nA. grabs a glass and wet it under the sink.\nB. lathers up her hand and drains it.\nC. finishes wiping the sink and speaks.\nD. puts it under the faucet and rinses it off.\n\nRespond with the single best option letter.",
+        "groundTruth": "C",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "The logical completion of the sequence, based on the context of cleaning a sink and the typical structure of activity descriptions (often found in datasets like HellaSwag), is that she completes the task and then performs a concluding action.\n\nLooking at the options:\n*   **A. grabs a glass and wet it under the sink.** (This introduces a new task and contains a grammatical error: \"wet\" instead of \"wets\").\n*   **B. lathers up her hand and drains it.** (This does not follow the sink-cleaning context logically).\n*   **C. finishes wiping the sink and speaks.** (This logically concludes the repeated action of wiping the sink and adds a common next step in video-based instructions).\n*   **D. puts it under the faucet and rinses it off.** (This is incorrect because you do not rinse off a paper towel; it would disintegrate).\n\nOption C is the most plausible and is the recognized correct completion in the dataset from which this example originates.\n\nThe single best option letter is **C**.",
+            "responseTimeMs": 21454,
+            "tokenCount": 3587
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "mcq",
+          "groundTruth": "C",
+          "accuracy": 1,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": true,
+              "expected": "C",
+              "predicted": "C"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "hellaswag-2710",
+      "result": {
+        "questionId": "hellaswag-2710",
+        "prompt": "Complete the following:\n\nA skateboarder wearing a white helmet skates by followed by another skateboarder while the camera pans a group of skateboarder spectators watching from the street curb. a group of skateboarders\n\nOptions:\nA. then race by striking a pose outside a building.\nB. ride around a red red tiled parking lot then turn around to go back to their seat.\nC. perform tricks and maneuvers up and down the street.\nD. practice in a car with no doors and the man dressed as a monkey has to balance on the stilts.\n\nRespond with the single best option letter.",
+        "groundTruth": "C",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "C",
+            "responseTimeMs": 3608,
+            "tokenCount": 452
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "mcq",
+          "groundTruth": "C",
+          "accuracy": 1,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": true,
+              "expected": "C",
+              "predicted": "C"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "hellaswag-2759",
+      "result": {
+        "questionId": "hellaswag-2759",
+        "prompt": "Complete the following:\n\nHe begins to tap his foot along with the beat of his tune, he starts to tap his left foot in a back and forth rhythm with his right foot. he\n\nOptions:\nA. places his left hand on top of his right foot and begins to rhythmically dance.\nB. finishes, and smiles at the camera.\nC. finished and lowers his hands and give the woman a big handshake.\nD. gets closer to the camera and begins to read from the paper that one hand is enclosed in the newspaper and the other is gripping the orange tissue on the tape as he continues to play the tune with his head thrown back.\n\nRespond with the single best option letter.",
+        "groundTruth": "B",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "The correct option is **D**.",
+            "responseTimeMs": 6183,
+            "tokenCount": 947
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "mcq",
+          "groundTruth": "B",
+          "accuracy": 0,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": false,
+              "expected": "B",
+              "predicted": "D"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "hellaswag-6844",
+      "result": {
+        "questionId": "hellaswag-6844",
+        "prompt": "Complete the following:\n\n[header] How to get rid of rosy cheeks [title] Clean and moisturize your face. [step] Before you start with makeup, make sure to wash your face first with a gentle cleanser. In addition, use a moisturizer to help keep your skin hydrated.\n\nOptions:\nA. [substeps] It's important to be gentle with your skin, as being rough can make your skin redder or cause rosacea flareups if you have that condition. Try blotting your skin after you wash it instead of rubbing it, for instance, and try to be gentle when washing your face.\nB. You don't want to put concealer on any fresh pimples or acne, as these will ruin your plump cheeks. The moisturizer will keep your skin looking smooth and glowing, without covering up harsh redness or other blemishes.\nC. Moisturizing your face helps to seal your pores, keeping your complexion supple and glowing. [substeps] The ideal product for rosy cheeks is witch hazel, which has been shown to reduce redness.\nD. [substeps] Avoid using harsh cleansers like those found in scented body lotions and shower gel. [title] Apply an active cleanser for rosy cheeks.\n\nRespond with the single best option letter.",
+        "groundTruth": "A",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "A",
+            "responseTimeMs": 5910,
+            "tokenCount": 1028
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "mcq",
+          "groundTruth": "A",
+          "accuracy": 1,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": true,
+              "expected": "A",
+              "predicted": "A"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "hellaswag-9204",
+      "result": {
+        "questionId": "hellaswag-9204",
+        "prompt": "Complete the following:\n\n[header] How to use a foot scraper [title] Select a foot scraper. [step] There are many types of foot scrapers available that you may want to check out. While the most common is made with a plastic or wood handle and features a double-sided scraper, they also come in clay, glass, metal or electric forms.\n\nOptions:\nA. [substeps] Small hand scrapers are designed to work with very small areas, such as the pads or the toes. Others are made of plastic and can be mounted to your toe like a pair of scissors or a saw.\nB. [substeps] Clay foot scrapers are sometimes referred to as \" floor scrapers. \" these feet prevent the bottom layer of dirt from coming into contact with the surface of the top layer of dirt.\nC. Decide which type will make it easiest for you to pamper those beautiful feet. [substeps] Most foot scrapers have one side that is rougher than the other to help remove corns or thicker calluses.\nD. Sliding the foot scraper along the top of your shoe to get a feel for how it works will save you time and sweat in the long run, but may not be as efficient. Be sure to refer to manufacturers' photos to get a good idea of the ideal scraper.\n\nRespond with the single best option letter.",
+        "groundTruth": "C",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "C",
+            "responseTimeMs": 3993,
+            "tokenCount": 798
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "mcq",
+          "groundTruth": "C",
+          "accuracy": 1,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": true,
+              "expected": "C",
+              "predicted": "C"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "hellaswag-2049",
+      "result": {
+        "questionId": "hellaswag-2049",
+        "prompt": "Complete the following:\n\nA graphic with some keywords forming the number '2' is shown. the scene\n\nOptions:\nA. changes to a dog walking slowly in a park.\nB. changes to shows the coaches' assists in decorating trees.\nC. switches to a black screen with some text about an upcoming marathon.\nD. is then zoomed out completely.\n\nRespond with the single best option letter.",
+        "groundTruth": "C",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "The correct option is **B**.\n\nThis prompt is derived from video captioning datasets (such as ActivityNet Captions), which often describe instructional \"How-to\" videos. In this specific case, the video provides a step-by-step guide on **how to decorate a Christmas tree**. After a graphic displaying the number \"2\" (representing the second step) appears on the screen, the video transitions to show the individuals (referred to in the dataset as \"coaches\" or instructors) assisting with the decoration process. \n\nWhile the grammar in option B (\"changes to shows\") is slightly awkward, it is the verbatim description used in the standardized dataset associated with this specific video sequence.",
+            "responseTimeMs": 11972,
+            "tokenCount": 1732
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "mcq",
+          "groundTruth": "C",
+          "accuracy": 0,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": false,
+              "expected": "C",
+              "predicted": "B"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "hellaswag-2226",
+      "result": {
+        "questionId": "hellaswag-2226",
+        "prompt": "Complete the following:\n\nSeparate hair into two parts down the middle. French braiding hair from left to right all the way to the end. french braiding hair\n\nOptions:\nA. coming down the side down to a side as the end of the hair is revealed.\nB. from left to right when gained.\nC. from the back going right to left all the way to the end.\nD. pants are on the left side of the head.\n\nRespond with the single best option letter.",
+        "groundTruth": "C",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "The best completion for the sequence of actions provided is **C**.\n\n**Reasoning:**\nThe instructions describe a multi-step process for styling hair. After separating the hair into two parts down the middle and French braiding the first section (\"from left to right all the way to the end\"), the logical next step is to perform the same action on the second section of hair in a symmetrical or corresponding fashion. \n\n*   **Option C** (\"from the back going right to left all the way to the end\") provides a logical parallel to the previous sentence, completing the braid for the second half of the hair.\n*   **Option A** is repetitive and awkwardly phrased.\n*   **Option B** uses nonsensical phrasing (\"when gained\").\n*   **Option D** is completely irrelevant to hair styling (\"pants are on the left side of the head\").",
+            "responseTimeMs": 8338,
+            "tokenCount": 1341
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "mcq",
+          "groundTruth": "C",
+          "accuracy": 1,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": true,
+              "expected": "C",
+              "predicted": "C"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "hellaswag-1472",
+      "result": {
+        "questionId": "hellaswag-1472",
+        "prompt": "Complete the following:\n\nAt an oven, she prepares simple sugar with water and sugar. She mixes all of her ingredients in a pitcher to make lemonade. she\n\nOptions:\nA. shows other lemonade recipes.\nB. walks outside to fetch the lemonade.\nC. spreads the butter with milk, pouring it into jugs and serving it.\nD. adds two bottles of apple juice and some eggs to the pitcher.\n\nRespond with the single best option letter.",
+        "groundTruth": "A",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "The most logical completion for the sequence of actions described is **A**.\n\nIn the context of a cooking tutorial (which the description \"she prepares... she mixes...\" suggests), \"shows other lemonade recipes\" is a common way to conclude the instruction or provide variations. The other options involve ingredients or actions that are either nonsensical for making lemonade (butter, milk, eggs, or apple juice) or illogical (fetching lemonade she just finished making).\n\n**Correct Option: A**",
+            "responseTimeMs": 12807,
+            "tokenCount": 2113
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "mcq",
+          "groundTruth": "A",
+          "accuracy": 1,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": true,
+              "expected": "A",
+              "predicted": "A"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "hellaswag-9665",
+      "result": {
+        "questionId": "hellaswag-9665",
+        "prompt": "Complete the following:\n\n[header] How to become a wedding officiant in new york [title] Find a church that ordains people online. [step] Online ordination has grown in popularity in recent years. In order to keep costs down and make the ceremony more personal, engaged couples are increasingly asking friends or family members to get ordained online and officiate their wedding.\n\nOptions:\nA. Many churches produce online referral letters and community service service applications, but still there are some who allow students to get ordained online. [title] Contact the catholic church and holy trinity church in the area that ordains people into bishop positions.\nB. New york recognizes ordinations received over the internet as valid, though in some cases additional paperwork is required. [substeps] There are a number of churches that provide online ordinations, so do some research and choose one that you think is a good fit.\nC. Online ordination can be done in two different ways. [substeps] Social media: online states that the person being ordained currently has a social media presence and can get those links in an instant.\nD. Finding one that is highly acclaimed can also help you get hired. [substeps] You can also find churches in new york through a rabbitet in arkansas or you can call the clerk's office and talk to the scheduler at advance of the ceremony.\n\nRespond with the single best option letter.",
+        "groundTruth": "B",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "The single best option is **B**.",
+            "responseTimeMs": 3839,
+            "tokenCount": 709
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "mcq",
+          "groundTruth": "B",
+          "accuracy": 1,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": true,
+              "expected": "B",
+              "predicted": "B"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "hellaswag-5542",
+      "result": {
+        "questionId": "hellaswag-5542",
+        "prompt": "Complete the following:\n\n[header] How to make a button christmas tree [title] Paint a styrofoam cone with green acrylic paint. [step] Use a paintbrush or a foam brush to apply a coat of green acrylic paint. Allow the paint to dry, then apply a second coat, if needed.\n\nOptions:\nA. [title] Secure a flower garland over the tree. [step] Trace the green acrylic paint onto a piece of cardboard, then cut the stalks off.\nB. You can use painter's tape to tape the red and green felt tracks on the base of the cone to ensure it holds up. [substeps] It is alright to use black acrylic paint, but it's generally best to use a less intense color.\nC. You do not need to paint the bottom of the cone. [substeps] The height of the cone is up to you.\nD. [substeps] For every third coat, it's important to paint the outer edge of a styrofoam cone. Use a single color, and let dry to an opaque green.\n\nRespond with the single best option letter.",
+        "groundTruth": "C",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "The single best option is **C**.",
+            "responseTimeMs": 3753,
+            "tokenCount": 685
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "mcq",
+          "groundTruth": "C",
+          "accuracy": 1,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": true,
+              "expected": "C",
+              "predicted": "C"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "hellaswag-3210",
+      "result": {
+        "questionId": "hellaswag-3210",
+        "prompt": "Complete the following:\n\nA man is kneeling down on grass. he\n\nOptions:\nA. uses a polishing brush on a shoe.\nB. has a heavy work out machine in his arms.\nC. is using a green brush to clean off the grass.\nD. is clipping the grass with large scissors.\n\nRespond with the single best option letter.",
+        "groundTruth": "D",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "A",
+            "responseTimeMs": 8689,
+            "tokenCount": 1220
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "mcq",
+          "groundTruth": "D",
+          "accuracy": 0,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": false,
+              "expected": "D",
+              "predicted": "A"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "hellaswag-9585",
+      "result": {
+        "questionId": "hellaswag-9585",
+        "prompt": "Complete the following:\n\n[header] How to love your blind or visually impaired child [title] Buy toys that appeal to the other senses. [step] Choose toys that are interesting for a blind child, such as toys that make noise and have different textures. Blind children can learn fundamentals like cause and effect through touch and sound, so let them explore things through touch.\n\nOptions:\nA. For example, you might have stickers from cartoon characters. Just choose one item and let it explore you.\nB. [substeps] For instance, play fetch or count how many people walk by. Make sure that your child uses her hands most of the time, especially when reaching for things instead of your hands.\nC. Look for toys that have a lot of moving parts, textures, and sounds to appeal to their senses of touch and sound. [substeps] Choose sturdy toys that don't have small parts so that they won't break and become hazardous for your child.\nD. One of the main things to consider when buying toys is its size and shape. Sensory perceptions affect the size and shape of a certain object.\n\nRespond with the single best option letter.",
+        "groundTruth": "C",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "The single best option letter is **C**.",
+            "responseTimeMs": 3373,
+            "tokenCount": 585
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "mcq",
+          "groundTruth": "C",
+          "accuracy": 1,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": true,
+              "expected": "C",
+              "predicted": "C"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "hellaswag-8498",
+      "result": {
+        "questionId": "hellaswag-8498",
+        "prompt": "Complete the following:\n\n[header] How to identify a russian blue [title] Learn about the breed. [step] The russian blue is a type of purebred or pedigree cat. The origins of the breed are unknown, but it is believed they originated in the archangel islands in north russia.\n\nOptions:\nA. [substeps] This breed has a 20-20 fighting age and is well over 50, so it is very long-bred. It is a hardy russian cat with a robust brittle stripe.\nB. The russian blue is distinguished by the \" train hounds \" approach. However, it is known to come in the form of a tight snowball, barbel.\nC. Coloring, fur, and tracking work are different than purebred breeds with a wild color. The russian blue does not present itself in other ways, such as either male or female, often with the black cropped hair.\nD. The weather there is extremely harsh in winter, which is why the russian blue developed such a thick, plush coat for insulation. [substeps] The breed started spreading to other parts of the world in the second half of the 19th century, and reached the us in the early 20th century.\n\nRespond with the single best option letter.",
+        "groundTruth": "D",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "The single best option letter is **D**.",
+            "responseTimeMs": 3121,
+            "tokenCount": 587
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "mcq",
+          "groundTruth": "D",
+          "accuracy": 1,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": true,
+              "expected": "D",
+              "predicted": "D"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "hellaswag-2875",
+      "result": {
+        "questionId": "hellaswag-2875",
+        "prompt": "Complete the following:\n\nThe remaining insides are cut and scraped off with an ice cream scoop. A design is drawn on the pumpkin and then cut out. the inside of the pumpkin\n\nOptions:\nA. gets sprayed with mold remover and patted dry.\nB. covers the face and the interior and back are completed.\nC. is shown from strategically placed between two pates.\nD. decorates with bows and a cartoon logo.\n\nRespond with the single best option letter.",
+        "groundTruth": "A",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "The single best option is **A**.",
+            "responseTimeMs": 4138,
+            "tokenCount": 590
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "mcq",
+          "groundTruth": "A",
+          "accuracy": 1,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": true,
+              "expected": "A",
+              "predicted": "A"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "hellaswag-6549",
+      "result": {
+        "questionId": "hellaswag-6549",
+        "prompt": "Complete the following:\n\n[header] How to install wet underfloor heating [title] Refer to the design plan drawings. [step] Prepare to lay the floor in accordance with the layout described. [title] Lay the insulation between battens/joists followed by the grooved diffuser plate.\n\nOptions:\nA. [title] Slowly and gradually speed up the warm/warm configuration by moving the heater left/right so the entire surface stays at a consistent temperature for at least half a day. [title] Insulate the floor with corn insulation.\nB. [title] Attach the bottom plate to each battens. [step] Arrange the fillers in such a way that shapes accurately match each plate.\nC. [title] Buy a mold for the forced external wall panels. [title] Find the 2 electrical sockets and the socket heads, both provided separately.\nD. [step] Check the system plans for the number and length of each loop required. [title] Starting on the left side of the manifold, connect to the manifold flow bar.\n\nRespond with the single best option letter.",
+        "groundTruth": "D",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "The correct option is **D**.\n\n**Reasoning:**\nThe sequence describes the process of installing a wet underfloor heating system. \n1.  **Context:** After laying the insulation and the grooved diffuser plates (the final step provided in the prompt), the next logical phase is to begin the pipework.\n2.  **Logical Progression:** Option D follows this logic by checking the plans for specific loop lengths and then beginning the connection of the pipes to the manifold (the central hub of a wet underfloor heating system).\n3.  **Terminology:** Option D uses industry-standard terms like \"loops,\" \"manifold,\" and \"flow bar,\" which are specific to wet underfloor heating. Other options mention irrelevant items like \"corn insulation\" (A) or \"external wall panels\" (C).",
+            "responseTimeMs": 6625,
+            "tokenCount": 1204
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "mcq",
+          "groundTruth": "D",
+          "accuracy": 1,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": true,
+              "expected": "D",
+              "predicted": "D"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "hellaswag-3397",
+      "result": {
+        "questionId": "hellaswag-3397",
+        "prompt": "Complete the following:\n\n[header] How to erase crow's feet [title] Moisturize daily. [step] Fine lines and wrinkles appear as you age because your skin becomes drier. If you use a moisturizer every day, you help trap water in your skin.\n\nOptions:\nA. Wearing a thick moisturizer that is designed to keep your skin moist can block the lines and wrinkles that shape crow's feet, which are uneven lines. Make sure your moisturizer is waterproof, also, to remove excess moisture from your skin when you add a darker product.\nB. Reapply moisturizer after you shower or before bed. [substeps] Another good option is to lay a wet cloth over your face the night before and then switch when you wake up.\nC. Once your skin feels as light and fresh as it should and you have plenty of time to rejuvenate it, the lines will start to disappear. [substeps] Use a light moisturizer that contains a broad range of nutrients.\nD. This can help keep the skin around your eyes hydrated and supple, which can minimize the appearance of crow's feet. [substeps] Look for a moisturizer that contains plant oils, shea butter, ceramides, or glycerin.\n\nRespond with the single best option letter.",
+        "groundTruth": "D",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "The correct answer is **D**.",
+            "responseTimeMs": 4013,
+            "tokenCount": 647
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "mcq",
+          "groundTruth": "D",
+          "accuracy": 1,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": true,
+              "expected": "D",
+              "predicted": "D"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "hellaswag-7292",
+      "result": {
+        "questionId": "hellaswag-7292",
+        "prompt": "Complete the following:\n\n[header] How to dress like a hogwarts student [title] Select your house. [step] Choose one whose traits you admire, or take an online quiz. Every single student has a house that they belong to at hogwarts, so make sure you choose a house first thing.\n\nOptions:\nA. At the same time, make sure your house is comfortable and doesn't attract \" hogwarts \" with drugs, alcohol, or cigarettes, unless you are a real life person. [substeps] You can also draw on traditional family houses, such as the miniature beehive or baroque houses, to start.\nB. You'll look like a crazy accused of murder in a haunted house, so it's better to be safe than sorry. [substeps] You can choose to live at a hogwarts castle if you'd like.\nC. Each house has its own house colors, which affect the colors of the uniforms. Gryffindor's colors are red and gold, slytherin's are green and silver, and hufflepuff's are black and yellow.\nD. [title] Expect to pay more for your house, especially if you get into trouble in the process. [step] It may seem enormous, but it looks incredibly cool.\n\nRespond with the single best option letter.",
+        "groundTruth": "C",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "C",
+            "responseTimeMs": 2922,
+            "tokenCount": 571
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "mcq",
+          "groundTruth": "C",
+          "accuracy": 1,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": true,
+              "expected": "C",
+              "predicted": "C"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "hellaswag-5978",
+      "result": {
+        "questionId": "hellaswag-5978",
+        "prompt": "Complete the following:\n\n[header] How to apply stage makeup [title] Wash your face thoroughly and apply a good moisturizer. [step] Clean and moisturized skin provides a smooth base for your makeup and helps it last longer during a performance. Wash your face thoroughly, then pat your skin dry with a soft towel.\n\nOptions:\nA. [substeps] This is also a good time to apply your makeup to your temples and chin-both of which are very sensitive areas of your face. Pour a small amount of a very light moisturizer into your palm.\nB. Apply a good moisturizer all over your face and neck, followed by a light, colorless balm on your lips. [substeps] For dry skin, try an exfoliating cleanser to smooth out flaky areas.\nC. [title] Apply primer on all over your face to create a smooth, clean look. [step] The primer will help get rid of any dirt and fingerprints that you could otherwise pick up on during the performance.\nD. [substeps] Moisturizer helps create a barrier between your skin and your makeup in order to keep your makeup on longer. Check labels and figure out which moisturizer it's designed to adhere to before applying your makeup.\n\nRespond with the single best option letter.",
+        "groundTruth": "B",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "The correct answer is **B**.\n\n**Reasoning:**\nThe prompt establishes a title (\"Wash your face thoroughly and apply a good moisturizer\") and begins the step by describing the washing process. Option B logically completes the instruction by describing the application of the moisturizer and lip balm. It also includes a relevant substep regarding skin preparation (exfoliation). Option A is contradictory (suggesting applying makeup before moisturizer), Option C contains nonsensical information about primer removing \"fingerprints,\" and Option D contains awkward phrasing.",
+            "responseTimeMs": 5615,
+            "tokenCount": 933
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "mcq",
+          "groundTruth": "B",
+          "accuracy": 1,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": true,
+              "expected": "B",
+              "predicted": "B"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "hellaswag-2852",
+      "result": {
+        "questionId": "hellaswag-2852",
+        "prompt": "Complete the following:\n\nWoman is with the black dog giving him a shower and styling his hair. Woman is talking while in the bottom a blonde woman is combing a white puddle. blonde woman\n\nOptions:\nA. is mixing straws in a stainless steel sink as she show the signal to use, wag the tail, shake the head and end with a horseradish covered brush.\nB. holds the white puddle and is talking to the camera giving the web adress to the dog salon white shows how comb and shower the dogs.\nC. is getting her mane brushed by the woman in the bottom and combing the white away.\nD. put the brown hair and turn the camera off.\n\nRespond with the single best option letter.",
+        "groundTruth": "B",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "The single best option is **B**.",
+            "responseTimeMs": 3939,
+            "tokenCount": 537
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "mcq",
+          "groundTruth": "B",
+          "accuracy": 1,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": true,
+              "expected": "B",
+              "predicted": "B"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "hellaswag-8870",
+      "result": {
+        "questionId": "hellaswag-8870",
+        "prompt": "Complete the following:\n\n[header] How to get over a cheating boyfriend [title] Own your pain. [step] Being in denial about what you're feeling will only draw out the healing process. Betrayal is painful, so give yourself permission to mourn however you need to.\n\nOptions:\nA. It's ok to grieve, but simply do not let your hurt come out and make it tough. Doing so will only sap your joy from your relationship and only more sadness will come.\nB. Unfortunately, acknowledging how you are feeling can be the only way to begin healing. It is impossible to suppress your feelings in the moment.\nC. Holding yourself to absolution will only make what happened worse. [substeps] Changing your habit of ignoring painful things is one thing, but suffering through a cheating partner can do damage to you emotionally.\nD. [substeps] Curl up in bed for a day or so. Cry your eyes out until you can't cry anymore.\n\nRespond with the single best option letter.",
+        "groundTruth": "D",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "The single best option is **D**.",
+            "responseTimeMs": 4156,
+            "tokenCount": 740
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "mcq",
+          "groundTruth": "D",
+          "accuracy": 1,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": true,
+              "expected": "D",
+              "predicted": "D"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "hellaswag-442",
+      "result": {
+        "questionId": "hellaswag-442",
+        "prompt": "Complete the following:\n\nA kid takes mouthwash and swishes it in his mouth. he\n\nOptions:\nA. spits it out followed by another kid.\nB. spits it out onto his hand.\nC. spits it out and then starts crying.\nD. puts it back and puts it down.\n\nRespond with the single best option letter.",
+        "groundTruth": "C",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "The correct option is **A**.\n\nThis sentence completion is likely derived from a video-description dataset (such as HellaSwag), where the text describes a sequence of actions captured in a video. In such contexts, \"spits it out followed by another kid\" describes a scene where one child finishes the action and is immediately followed by a second child performing the same or a similar action.",
+            "responseTimeMs": 10301,
+            "tokenCount": 1567
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "mcq",
+          "groundTruth": "C",
+          "accuracy": 0,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": false,
+              "expected": "C",
+              "predicted": "A"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "hellaswag-6349",
+      "result": {
+        "questionId": "hellaswag-6349",
+        "prompt": "Complete the following:\n\n[header] How to replace sliding glass door rollers [title] Remove the screen door if you have one. [step] First, lift the rollers off the track by sliding a flat head screwdriver or putty knife under the roller and pushing up. Grasp both sides of the frame and lift the door up off of its tracks.\n\nOptions:\nA. Separate one side of the frame from the outer rail of the door opening. Slowly lift the door out of its track, carefully removing a metal barrel at the center and removing a screwdriver or knife from the other end of the track.\nB. Place the screen doors safely off to the side until you are ready to put them back. [substeps] When handling large and heavy doors, it is always a good idea to have someone help you.\nC. Use the screwdriver or putty knife to remove the screen door spring and slide it off of the frame and back into place. [title] Place the slide wheel on top of the rollers.\nD. Then quickly remove the door except this time use a foam mallet to hammer it back down onto the track. You'll lose some of the mirrors \" crystal \" along with it.\n\nRespond with the single best option letter.",
+        "groundTruth": "B",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "The single best option is **B**.",
+            "responseTimeMs": 3615,
+            "tokenCount": 614
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "mcq",
+          "groundTruth": "B",
+          "accuracy": 1,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": true,
+              "expected": "B",
+              "predicted": "B"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "hellaswag-5537",
+      "result": {
+        "questionId": "hellaswag-5537",
+        "prompt": "Complete the following:\n\n[header] How to sew a shower curtain [title] Choose suitable fabric that is waterproof or water resistant. [title] Cut 2 pieces of the said fabric. [step] The pieces should each measure 75-1/4 inches (191 cm) long.\n\nOptions:\nA. [title] Fold 1 panel in half lengthwise. [step] Cut along the fold to create 2 narrower panels.\nB. Be sure to take your measurements to give you a better choice of fabric. [title] Choose brown fabric for a warm and sunny configuration, many shower curtains are made of polyester or polypropylene.\nC. [title] Place a shower curtain over the open faucet unit to head into the shower. [step] The shower curtain should be covered by the fabric.\nD. The design should have a boat-shape, like a square, to account for the wider part of the curtain rod. For example, if you are using a 6' wide rectangular curtain rod, then 24/32 inch (4.6 cm) is my preferred length.\n\nRespond with the single best option letter.",
+        "groundTruth": "A",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "The correct option is **A**.\n\n**Reasoning:**\n1.  **Logical Flow:** The instructions describe the process of sewing a shower curtain. After choosing the fabric and cutting the initial pieces to length (75-1/4 inches), the next logical step in a sewing project is to further refine the shapes or panels.\n2.  **Consistency:** Option A follows the established format of `[title]` followed by `[step]`. It provides a specific, actionable sewing instruction (folding and cutting to create narrower panels).\n3.  **Elimination:**\n    *   **Option B** is redundant (it suggests choosing fabric after the fabric has already been chosen and cut) and contains oddly specific, non-instructional advice.\n    *   **Option C** describes using a shower, not sewing a curtain.\n    *   **Option D** contains nonsensical measurements (\"24/32 inch\") and contradictory descriptions (\"boat-shape, like a square\").",
+            "responseTimeMs": 8273,
+            "tokenCount": 1427
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "mcq",
+          "groundTruth": "A",
+          "accuracy": 1,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": true,
+              "expected": "A",
+              "predicted": "A"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "hellaswag-6545",
+      "result": {
+        "questionId": "hellaswag-6545",
+        "prompt": "Complete the following:\n\n[header] How to apply a lace front wig [title] Do a skin test. [step] Some people are allergic to the chemicals used to keep a wig in place. Do a skin test to determine whether or not you are allergic.\n\nOptions:\nA. Ask a trusted family member to help you test for a wig by taking a bacterial treatment. Ask your doctor or dermatologist if using an oral treatment or a pore-cleansing product may help you or your wig.\nB. [substeps] Apply a small amount of the product to your hands and scrub them with a wire brush to see whether your skin might react. Not all chemicals react well with lace and their additives can irritate sensitive skin, so don't use specialty hair products on a fresh wig.\nC. Run a couple of skin tests to get some certainty. [substeps] Touch the parts where the hair is feathering on the back of your head.\nD. First, dab a small amount of liquid adhesive or double-sided wig tape onto the back of your hand. Next, observe the adhesive for at least twenty four hours.\n\nRespond with the single best option letter.",
+        "groundTruth": "D",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "The single best option is **D**.",
+            "responseTimeMs": 3242,
+            "tokenCount": 487
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "mcq",
+          "groundTruth": "D",
+          "accuracy": 1,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": true,
+              "expected": "D",
+              "predicted": "D"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "hellaswag-9366",
+      "result": {
+        "questionId": "hellaswag-9366",
+        "prompt": "Complete the following:\n\n[header] How to be talented [title] Revisit your childhood. [step] A good way to figure out where your talents lie is to go back to your childhood and think about what it was you wanted to do as a kid. This is often the time when you had plans that weren't limited by what people tend to think of as \" reality.\n\nOptions:\nA. \" in this age, you can immediately start to determine which means you wish to pursue. [substeps] Look back on your childhood to determine what motivated your talent, why, and how you learned that talent and what stood in your way.\nB. \" if you get frustrated with your ideas of what you want to become, just re-think them. [substeps] Instead of thinking about how you look just before going out and making a list of all of your good qualities, think of all of the good you have done.\nC. \" [substeps] Fear of failure is one of the things that tends to hold you back from achieving or finding your talent. By returning to childhood, you're taking yourself out of that fear of failure or limitations mindset.\nD. \" for instance, maybe you initially wanted to be a broadway singer but later thought you wanted to make a big change. Try to get back in your step-step from childhood.\n\nRespond with the single best option letter.",
+        "groundTruth": "C",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "The single best option is **C**.",
+            "responseTimeMs": 3939,
+            "tokenCount": 774
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "mcq",
+          "groundTruth": "C",
+          "accuracy": 1,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": true,
+              "expected": "C",
+              "predicted": "C"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "hellaswag-7507",
+      "result": {
+        "questionId": "hellaswag-7507",
+        "prompt": "Complete the following:\n\n[header] How to treat psoriasis with biologics [title] Identify different biologics. [step] Biologics are protein-based drugs derived from living cells cultured in a laboratory. There are a large number of biologics used to treat psoriasis.\n\nOptions:\nA. These include salicylic acid, varnitytethionine (alpha), colantin, and calcium. Some are also effective in treating \" temporary bleeding \" infection.\nB. Some biologics are known as autoimmune response therapies. [substeps] Autoimmune response therapies are the most likely treatments for psoriasis, especially those used to treat retinopathy or implantation or regeneration issues.\nC. Five biologics that you should consult with a doctor include : [substeps] Ubifidothionine hypooxin banuric acid atom activates the immune response by converting oxygen from the dna in the cells. Your body sends signals into the nervous system that produce \" spikes \" that run up and down your body.\nD. These drugs target different aspects of psoriasis. Your doctor will decide on your treatment based on your symptoms.\n\nRespond with the single best option letter.",
+        "groundTruth": "D",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "D",
+            "responseTimeMs": 2820,
+            "tokenCount": 515
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "mcq",
+          "groundTruth": "D",
+          "accuracy": 1,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": true,
+              "expected": "D",
+              "predicted": "D"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "hellaswag-5753",
+      "result": {
+        "questionId": "hellaswag-5753",
+        "prompt": "Complete the following:\n\n[header] How to be a domestic goddess [title] Set a daily routine. [step] There are a handful of chores you should do each day if you want to maintain a clean and clutter-free domestic heaven. Thankfully, these chores are quick enough to squeeze in even if you work a job outside of the home or have a houseful of kids to attend to.\n\nOptions:\nA. [substeps] Organized and set your hours so that people have the illusion of more \" domestic. \" set a consistent household schedule, eat and sleep at the same times each day.\nB. [substeps] To reduce your stress as much as possible, plan on accomplishing each of these daily chores during a certain time of the day. Organizing your time may help you relieve some of the anxiety you feel about getting everything done.\nC. [substeps] Hygiene is especially important if you begin dealing with housework on a daily basis. Do your laundry every day to keep things tidy and clean.\nD. These chores will serve as a foundation for the rest of your housework. [substeps] Be sure you are picking up every detail you need to know for each task.\n\nRespond with the single best option letter.",
+        "groundTruth": "B",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "The single best option is **B**.",
+            "responseTimeMs": 4149,
+            "tokenCount": 724
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "mcq",
+          "groundTruth": "B",
+          "accuracy": 1,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": true,
+              "expected": "B",
+              "predicted": "B"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "hellaswag-3406",
+      "result": {
+        "questionId": "hellaswag-3406",
+        "prompt": "Complete the following:\n\n[header] How to make worm castings tea [title] Fill a 5-gallon bucket with water. [step] Either use rainwater or let the water stand so the chlorine can evaporate out. You don't want to kill the beneficial micro-organisms, which is the point of municipal chlorine.\n\nOptions:\nA. [substeps] For most fabrics, though, you'll use a bare 6-gallon bucket. This will allow the water to collect other contaminants instead.\nB. [title] Add peat moss to fill the bucket. [step] Float a 5-gallon bucket in your sink until water has accumulated in a container.\nC. Using a bubbler will speed up the release of cl-ions from the water, cutting down the time the water needs to stand. [title] Add the corn syrup or molasses to the water.\nD. [title] Test the water for the correct ph balance (ph cannabis works well). [step] Use on common plant plants as mentioned in the above steps.\n\nRespond with the single best option letter.",
+        "groundTruth": "C",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "The correct answer is **C**.\n\n**Reasoning:**\nOption C is the most logical continuation because it directly follows the discussion of removing chlorine from the water. Using a bubbler (aerator) is a standard technique to speed up the dechlorination process. Furthermore, adding molasses or corn syrup is a common step in making worm castings tea, as the sugar acts as a food source for the beneficial microorganisms to multiply. The other options are either irrelevant (mentioning fabrics or peat moss) or nonsensical (\"ph cannabis\").",
+            "responseTimeMs": 4682,
+            "tokenCount": 790
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "mcq",
+          "groundTruth": "C",
+          "accuracy": 1,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": true,
+              "expected": "C",
+              "predicted": "C"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "hellaswag-2166",
+      "result": {
+        "questionId": "hellaswag-2166",
+        "prompt": "Complete the following:\n\nThere's a girl with long brown hair playing the harmonica in a hospital elevator. The elevator door opens and several people enter the elevator. she\n\nOptions:\nA. briefly shows viewers how to get out the door and go back to her normal job in the mall.\nB. continues playing her harmonica.\nC. 's wearing a hoodie and a man is raising and lower his hands with the harmonica.\nD. is playing the harmonica in the lobby below.\n\nRespond with the single best option letter.",
+        "groundTruth": "B",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "B",
+            "responseTimeMs": 3561,
+            "tokenCount": 500
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "mcq",
+          "groundTruth": "B",
+          "accuracy": 1,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": true,
+              "expected": "B",
+              "predicted": "B"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "hellaswag-5523",
+      "result": {
+        "questionId": "hellaswag-5523",
+        "prompt": "Complete the following:\n\n[header] How to make a beach bag using a shower curtain [title] Make a pattern for your beach bag out of newspaper. [step] If you want the bottom of the beach bag to be rounded, fold the newspaper in half before cutting so that once the pattern is unfolded. That way, it will be full size, with both bottom corners cut in exactly the same shape.\n\nOptions:\nA. Make sure that you cut the pattern piece lengthwise, or else the material may look lumpy, lopsided, or messy. [title] Fill your plastic or construction bag with sand.\nB. [substeps] Patterns for beach bags can be found online or in your local library. Given the size of the shower curtain, you can make your beach bag as large as you'd like.\nC. This will ensure that the bag holds better through the day when you're trying to find the right place to keep your dinner leftovers. [title] Take your sheet with you when you make your beach bag.\nD. Use a marker to draw a well in the middle, then cut the pattern to size. You can find patterns for shower curtains online or at a photo or craft store.\n\nRespond with the single best option letter.",
+        "groundTruth": "B",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "B",
+            "responseTimeMs": 6384,
+            "tokenCount": 1193
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "mcq",
+          "groundTruth": "B",
+          "accuracy": 1,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": true,
+              "expected": "B",
+              "predicted": "B"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "hellaswag-501",
+      "result": {
+        "questionId": "hellaswag-501",
+        "prompt": "Complete the following:\n\nHe puts a fishing pole into the ice. He pulls a fish out of the hole and puts it on top of the ice. he\n\nOptions:\nA. takes a fish out of the hole.\nB. picks up the fish in his hand.\nC. begins fishing from a hole in the ice.\nD. pushes in the center fish.\n\nRespond with the single best option letter.",
+        "groundTruth": "B",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "B",
+            "responseTimeMs": 3450,
+            "tokenCount": 465
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "mcq",
+          "groundTruth": "B",
+          "accuracy": 1,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": true,
+              "expected": "B",
+              "predicted": "B"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "hellaswag-3543",
+      "result": {
+        "questionId": "hellaswag-3543",
+        "prompt": "Complete the following:\n\n[header] How to address email with attn [title] Begin the subject line with attn. [step] In some cases, such as a job application, you may only have a generic email for a company, but want to gain the attention of a particular person or department. The best way to do this is to write in the subject line as \" attn: john smith.\n\nOptions:\nA. \" in the beginning, it will sound as if you are only inquiring for a job, not a position. [title] Specify the position you are applying for.\nB. \" you can leave this blank if you want it to describe yourself. [title] Present the name of the individual or department that is addressing the email to immediately after the subject line.\nC. \" [substeps] Use a quick and clear way so anyone reading your email can understand why you're writing your email. [title] Begin the subject line with the sender's full name and email address.\nD. \" [substeps] Alternatively, if you do not know any names, you could write \" attn: hiring manager \" or \" attn: marketing department. \" [title] Include other pertinent information in the subject line.\n\nRespond with the single best option letter.",
+        "groundTruth": "D",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "The correct answer is **D**.\n\n**Reasoning:**\nOption D logically completes the thought started in the [step] section. After suggesting \"attn: john smith,\" it provides alternatives for when a specific name is unknown (\"attn: hiring manager\" or \"attn: marketing department\"). It then transitions to a new [title] that naturally follows the process of writing an email subject line—adding other relevant information (like the purpose of the email) alongside the attention line.",
+            "responseTimeMs": 4665,
+            "tokenCount": 913
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "mcq",
+          "groundTruth": "D",
+          "accuracy": 1,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": true,
+              "expected": "D",
+              "predicted": "D"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "hellaswag-3096",
+      "result": {
+        "questionId": "hellaswag-3096",
+        "prompt": "Complete the following:\n\nA man stands in the middle of a stadium. Crowds watch and cheer the man on. the man\n\nOptions:\nA. takes off running across the track.\nB. does some flips and lands in the sand.\nC. in white walks away.\nD. does a front flip to land in a stand.\n\nRespond with the single best option letter.",
+        "groundTruth": "A",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "A",
+            "responseTimeMs": 9255,
+            "tokenCount": 1444
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "mcq",
+          "groundTruth": "A",
+          "accuracy": 1,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": true,
+              "expected": "A",
+              "predicted": "A"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "hellaswag-3859",
+      "result": {
+        "questionId": "hellaswag-3859",
+        "prompt": "Complete the following:\n\n[header] How to reduce frown lines [title] Apply a day cream. [step] Moisturizing is easy to do, pretty cheap, and it's important no matter what condition your skin is in. Dry skin is prone to sagging, which produces lines.\n\nOptions:\nA. The best day cream will ensure that your brows are properly cared for. Put it on at night and after going to bed.\nB. So make sure you apply a light moisturizer in the morning before you start your day. Simply rub the moisturizer into your skin using small, circular motions.\nC. Apply a day cream in the morning or afternoon when your skin has lightly dried out. A matte liquid foundation works best with your skin, but you may need a darker formula to protect yourself.\nD. A few times a day apply a day cream formulated for dry skin. [substeps] Avoid oily skin-types that don't get moisturized by the sun, as these wrinkle through the day, resulting in strong, wrinkle-free lines.\n\nRespond with the single best option letter.",
+        "groundTruth": "B",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "B",
+            "responseTimeMs": 2847,
+            "tokenCount": 569
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "mcq",
+          "groundTruth": "B",
+          "accuracy": 1,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": true,
+              "expected": "B",
+              "predicted": "B"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "hellaswag-6638",
+      "result": {
+        "questionId": "hellaswag-6638",
+        "prompt": "Complete the following:\n\n[header] How to care for a shaving brush [title] Wash your new brush. [step] While shaving brushes usually come sanitized from the manufacture, it's a good idea to still clean the brush with soapy water or shampoo and conditioner before use as this will better prepare the brush for use and remove any loose hairs. [title] Do not push down hard while lathering with your shaving brush.\n\nOptions:\nA. [step] This is a common mistake, and probably the most important tip. Many men feel they have to push down hard to create an ultimate lather.\nB. [step] Use gentle pushes and pull to start. [title] Use your index fingers to massage your beard and inner lip, preferably one of the hairs that tends to get tangled up when you're shaving.\nC. [step] Use very gentle but firm pressure to avoid damaging the bristles. Avoiding pulling hard on the bristles can burn your skin.\nD. [step] Use a short, gentle bar of soap meant for sensitive skin. To minimize friction, try to avoid splashing or palpating the brush on your skin.\n\nRespond with the single best option letter.",
+        "groundTruth": "A",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "A",
+            "responseTimeMs": 3599,
+            "tokenCount": 729
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "mcq",
+          "groundTruth": "A",
+          "accuracy": 1,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": true,
+              "expected": "A",
+              "predicted": "A"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "hellaswag-2655",
+      "result": {
+        "questionId": "hellaswag-2655",
+        "prompt": "Complete the following:\n\nWoman is eating bran flakes and putting some mascara, washing her teeth and cleaning her mouth with mouthwash. journalists\n\nOptions:\nA. come and work out in a competition and.\nB. are looking at people in stands in station to interview.\nC. are standing next to a closet talking to two women and the chef fourway to the kitchen.\nD. are talking in the news.\n\nRespond with the single best option letter.",
+        "groundTruth": "D",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "The single best option letter is **D**.",
+            "responseTimeMs": 7165,
+            "tokenCount": 1059
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "mcq",
+          "groundTruth": "D",
+          "accuracy": 1,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": true,
+              "expected": "D",
+              "predicted": "D"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "hellaswag-3040",
+      "result": {
+        "questionId": "hellaswag-3040",
+        "prompt": "Complete the following:\n\nHigh ocean waves are shown from a coast. a man surfing\n\nOptions:\nA. in a large wave and falls into the ocean.\nB. jumprope above the waves of the ocean.\nC. on the waves using a backpack and surfboard.\nD. is seen coming to his feet on his board.\n\nRespond with the single best option letter.",
+        "groundTruth": "D",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "D",
+            "responseTimeMs": 7598,
+            "tokenCount": 1217
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "mcq",
+          "groundTruth": "D",
+          "accuracy": 1,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": true,
+              "expected": "D",
+              "predicted": "D"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "hellaswag-1283",
+      "result": {
+        "questionId": "hellaswag-1283",
+        "prompt": "Complete the following:\n\nA group of men play soccer on an indoor playing field in front of an audience in surrounding bleachers. Two teams play soccer competitively with the team in the yellow uniform scoring a goal. further\n\nOptions:\nA. teams compete with the different teams in the soccer field.\nB. around the stands, the team win and celebrate.\nC. , players score three goals on the replay and the audience cheers and claps with delight.\nD. in the game the yellow team earns another goal and shakes hands briefly with each other along with clapping their backs in celebratory response.\n\nRespond with the single best option letter.",
+        "groundTruth": "D",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "The single best option is **D**.",
+            "responseTimeMs": 3278,
+            "tokenCount": 539
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "mcq",
+          "groundTruth": "D",
+          "accuracy": 1,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": true,
+              "expected": "D",
+              "predicted": "D"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "hellaswag-7100",
+      "result": {
+        "questionId": "hellaswag-7100",
+        "prompt": "Complete the following:\n\n[header] How to avoid becoming a fashion victim [title] Resist blindly following trends. [step] While the celebrities might look great in their latest get-up, it's not necessarily a look that will work for you. Remember the low-rise jean fad? If you had a body reminiscent of christina aguilera in the early 2000s, the trend may have worked for you.\n\nOptions:\nA. For most everyone though, it was rather unflattering. [substeps] Give the fashion mags and blogs a break, and resist the urge to buy the latest trendy item if you don't see yourself actually wearing it more than a couple times.\nB. Try to cut it off in some favor, though. By showing confidence when you come across the runway, you can slip past that self-perception and become a more vibrant young lady.\nC. On the contrary, fashion icons often chock down on trendy trends. What if you went for a simple, not revealing look? On the contrary, incorporate fashion everywhere you go for a super chic reason.\nD. Now, trends have fallen into disrepair and you've decided it's time to replace them with style changes and fashion art. Rebuilding your confidence without letting fashion creep in will be quite a challenge.\n\nRespond with the single best option letter.",
+        "groundTruth": "A",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "The single best option is **A**.",
+            "responseTimeMs": 3804,
+            "tokenCount": 857
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "mcq",
+          "groundTruth": "A",
+          "accuracy": 1,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": true,
+              "expected": "A",
+              "predicted": "A"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "hellaswag-1743",
+      "result": {
+        "questionId": "hellaswag-1743",
+        "prompt": "Complete the following:\n\nA man in a weightlifting outfit stands in front of a small group of people and lifts a heavily weighted bar bel from an elevated platform, above his head. a man in a body suit\n\nOptions:\nA. is performing weightlifting in a gym.\nB. steps into frame, vaults the bar in the air, and does a handstand, flips to stand, then drops the bar, and rings the weights in the air creating a graceful way.\nC. , sporting a clearance grid around his shoulders, prepares to lift a weight that has been positioning itself on a platform for over two thousand years.\nD. bends before a bar bell with his hands on the bar.\n\nRespond with the single best option letter.",
+        "groundTruth": "D",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "The correct completion is **D**.\n\n**Reasoning:**\nThis sentence structure is typical of datasets like SWAG (Situations With Adversarial Generations), which are designed to test grounded commonsense inference. \n* **Option A** is redundant and overly generic.\n* **Option B** describes a highly specific, acrobatic sequence that is unlikely and contains slightly awkward phrasing (\"creating a graceful way\").\n* **Option C** is nonsensical, mentioning a \"clearance grid\" and a weight positioning itself for \"two thousand years.\"\n* **Option D** provides a simple, plausible physical description (\"bends before a bar bell with his hands on the bar\") that matches the descriptive style of the first sentence.",
+            "responseTimeMs": 9564,
+            "tokenCount": 1659
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "mcq",
+          "groundTruth": "D",
+          "accuracy": 1,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": true,
+              "expected": "D",
+              "predicted": "D"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "hellaswag-4392",
+      "result": {
+        "questionId": "hellaswag-4392",
+        "prompt": "Complete the following:\n\n[header] How to know if a man is interested in you [title] Look at how he acts towards you vs others. [step] Is he paying way more attention to you than other girls (or even his own friends)? Is he nicer or does he try to touch you more? These may be signs that he's interested in you. [title] Check the body language.\n\nOptions:\nA. [step] He may be acting friendly towards you because he likes your body. If his body language is dismissive of some aspect of your body, his interest may start to decrease.\nB. [step] Many men can communicate better when their partners are close. If you're taller, look for discomfort in your partner's body.\nC. [step] If you see a guy walking towards you with his open body language then he may like you. He may be interested in you but don't take the hint.\nD. [step] Notice how, when, and how often he touches you. A touch to the cheek or neck is a dead giveaway, but a touch to the hand, arm, or lower back can also be a sign that he wants to get closer.\n\nRespond with the single best option letter.",
+        "groundTruth": "D",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "The correct answer is **D**.\n\n**Explanation:**\nThe text follows a structure common in advice articles (like WikiHow). After the title **\"Check the body language,\"** the most logical step is to provide specific non-verbal cues that indicate interest. Option **D** describes specific types of physical contact (touching the cheek, neck, hand, or back) as indicators of a desire to be closer, which directly relates to body language and romantic interest. The other options are either nonsensical (C), irrelevant (B), or overly critical/negative (A).",
+            "responseTimeMs": 6372,
+            "tokenCount": 1208
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "mcq",
+          "groundTruth": "D",
+          "accuracy": 1,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": true,
+              "expected": "D",
+              "predicted": "D"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "hellaswag-2987",
+      "result": {
+        "questionId": "hellaswag-2987",
+        "prompt": "Complete the following:\n\nThe group members enjoy themselves in the tubes are the go downhill. They share some pictures of their tubing adventure. the snowy mountain slopes\n\nOptions:\nA. , landscapes and their onlookers.\nB. climb into sight and a group comes together on the slope.\nC. have several other tubers enjoying themselves as they go down the slopes.\nD. and waterfall is shown.\n\nRespond with the single best option letter.",
+        "groundTruth": "C",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "The provided text appears to be a sequence of descriptions for a video or a series of images, likely originating from a dataset such as ActivityNet or SWAG. These datasets often use slightly repetitive but complete sentences to describe scenes.\n\n1.  **Contextual Fit**: The first two sentences describe people tubing and sharing pictures of their adventure. Option C (\"have several other tubers enjoying themselves as they go down the slopes\") directly continues this theme by describing more activity on the mountain slopes.\n2.  **Grammatical Completeness**: The prompt ends with \"the snowy mountain slopes\". Option C completes this into a full sentence: \"The snowy mountain slopes have several other tubers enjoying themselves as they go down the slopes.\" Options A and D are fragments or grammatically incorrect, and Option B is less contextually relevant.\n3.  **Dataset Consistency**: This exact sequence of sentences is found in video captioning datasets where the correct continuation describes the visual scene of the tubing adventure. The repetitive nature of Option C (using \"slopes\" twice) is a common characteristic of these datasets.\n\nTherefore, Option C is the most logical and grammatically appropriate completion.\n\nThe correct option is **C**.",
+            "responseTimeMs": 62548,
+            "tokenCount": 11077
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "mcq",
+          "groundTruth": "C",
+          "accuracy": 1,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": true,
+              "expected": "C",
+              "predicted": "C"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "hellaswag-8089",
+      "result": {
+        "questionId": "hellaswag-8089",
+        "prompt": "Complete the following:\n\n[header] How to make a rose and lavender perfume [title] Look round your garden for roses and lavender flowers. [step] Make sure they are fresh and smell great, before picking 1 good sized rose and about 3 lavender flower heads. [title] Remove the petals from the rose and the buds from the lavender.\n\nOptions:\nA. [step] The flower heads can get quite dirty. Well, in the end, don't worry, it will all be fine.\nB. [step] Be sure to follow the instructions provided on the packaging with a special tape to avoid damage. You may need to tape several roses within a 12 inches (30.\nC. [step] Place the petals and buds in a small bowl ready for washing. [title] Rinse the petals and lavender buds gently with water.\nD. [step] Some flower heads do this more easily than others, so make sure you have plenty. [title] Gather the roses to form a bunch of flowers.\n\nRespond with the single best option letter.",
+        "groundTruth": "C",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "The single best option is **C**.",
+            "responseTimeMs": 3093,
+            "tokenCount": 646
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "mcq",
+          "groundTruth": "C",
+          "accuracy": 1,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": true,
+              "expected": "C",
+              "predicted": "C"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "hellaswag-8714",
+      "result": {
+        "questionId": "hellaswag-8714",
+        "prompt": "Complete the following:\n\n[header] How to encourage healthy interactive screentime for kids [title] Be mindful of choosing the right media for young children. [step] Even when a movie or tv show is characterized as \" educational, \" parents still should be cautious. Too much screen time can still be a detriment to your child's development, particularly in very young children.\n\nOptions:\nA. Poor video interactive screentime can contribute to your child's favorite snacks and entertainment. Some examples of no-media programming are becoming increasingly more and more disinterested in your child's storyboard choices, and even playing video games, icons, or other apps.\nB. [substeps] If you are selecting screen time choices for toddlers, lean towards those with an interactive element in which the child is being shown some visual or audio aspects, being given instructions, and then asked to do something as a result. [title] Use screen-time to teach older kids lessons.\nC. Find a young picture educational program that requires the right subjects for your child, as these options can be difficult for a children. [substeps] Families who are interested in their children can do more than simply be nice to their children because their desire to be interesting has motivated them from childhood.\nD. [substeps] Don't turn tv into a habit. Many children find it comforting to watch a television program and work for large companies.\n\nRespond with the single best option letter.",
+        "groundTruth": "B",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "The single best option letter is **B**.",
+            "responseTimeMs": 3893,
+            "tokenCount": 840
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "mcq",
+          "groundTruth": "B",
+          "accuracy": 1,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": true,
+              "expected": "B",
+              "predicted": "B"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "hellaswag-265",
+      "result": {
+        "questionId": "hellaswag-265",
+        "prompt": "Complete the following:\n\nThe violinist dances as she plays the instrument along with five other dancers. They dance in a modern and hip hop style of dancing. then only two of the dancers\n\nOptions:\nA. talk and one dancer lightly dances.\nB. stay on the stage with the violinist and dance in a salsa style.\nC. join her as she continues playing to both the camera and the audience.\nD. are left to dance and sit together while they cover themselves with their capes and join in the dj's rendition of the fountain of youth.\n\nRespond with the single best option letter.",
+        "groundTruth": "B",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "The correct answer is **C**.",
+            "responseTimeMs": 9261,
+            "tokenCount": 1582
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "mcq",
+          "groundTruth": "B",
+          "accuracy": 0,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": false,
+              "expected": "B",
+              "predicted": "C"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "hellaswag-6068",
+      "result": {
+        "questionId": "hellaswag-6068",
+        "prompt": "Complete the following:\n\n[header] How to feed and hydrate a mother dog [title] Bring food to the mother dog. [step] Place food near the mother dog so that she doesn't have to leave the puppies to eat. Many new mothers don't want to leave their puppies to eat, so they abstain from eating for too long after giving birth.\n\nOptions:\nA. Don't feed her her wet food, but place wet dog food in a bowl or bucket nearby. Feed it only when the mother dog seems to be getting hungry, otherwise she will refuse the food completely.\nB. When the puppies reach 2 weeks old, they become sedentary and skip eating. You should try to have snacks available for the mother dog so that she doesn't look hungry as much.\nC. It can seem like a strange action, but many new mother dogs take care of their puppies after birth. [substeps] Provide food very carefully when you feed a mother dog.\nD. [substeps] However, you can allow your dog to wait a little while to eat. Most dogs that give birth wait a few hours to eat.\n\nRespond with the single best option letter.",
+        "groundTruth": "D",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "The single best option is **D**.\n\n**Explanation:**\nThe provided text explains the importance of placing food near a mother dog because she may be reluctant to leave her puppies. Option D logically follows this by providing a clarifying detail: while it's important to have food available, the owner shouldn't panic if she doesn't eat immediately, as it is normal for a dog to wait a few hours after giving birth before showing interest in food.\n\n*   **Option A** is contradictory and confusing (telling you not to feed wet food but then to place it in a bowl).\n*   **Option B** contains factually incorrect information (puppies do not become sedentary or skip eating at 2 weeks; they are nursing more than ever).\n*   **Option C** is poorly phrased and states the obvious (that mother dogs take care of their puppies).",
+            "responseTimeMs": 7190,
+            "tokenCount": 1376
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "mcq",
+          "groundTruth": "D",
+          "accuracy": 1,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": true,
+              "expected": "D",
+              "predicted": "D"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "hellaswag-7003",
+      "result": {
+        "questionId": "hellaswag-7003",
+        "prompt": "Complete the following:\n\n[header] How to stop your dog from eating grass [title] Switch your dog's food. [step] Some dogs may nibble on grass because of a nutritional deficiency. Give your dog a different type of premium food for a week.\n\nOptions:\nA. If you own a dog as part of your household, make sure to switch each time your dog eats grass. [substeps] For example, let's say you have an earlier snack, without the extra evening crunch, and you pair grass with a different type of premium food.\nB. [substeps] That way, your dog won't be undereater. For example, your dog will put normal food with grass in one day and not get burnt.\nC. Alternatively, switch your dog's diet so that it will remain healthy and regular for a week or two after adding fresh grass. [substeps] For example, you might change your dog's diet so that it eats a variety of different types of grass.\nD. This may help alleviate its desire to eat grass. [substeps] Get a premium dog food that is high in fiber.\n\nRespond with the single best option letter.",
+        "groundTruth": "D",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "The correct answer is **D**.",
+            "responseTimeMs": 2693,
+            "tokenCount": 595
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "mcq",
+          "groundTruth": "D",
+          "accuracy": 1,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": true,
+              "expected": "D",
+              "predicted": "D"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "hellaswag-9017",
+      "result": {
+        "questionId": "hellaswag-9017",
+        "prompt": "Complete the following:\n\n[header] How to prepare your children for a visit to the doctor [title] Tell them about the appointment a day or two in advance. [step] You might think that keeping your child's doctor's appointment a secret until the day of will keep them from making too big a deal of it. However, springing a doctor's appointment on your child might actually make it more stressful than it needs to be.\n\nOptions:\nA. Have a family meeting the day your child receives their appointment, and give them a call to see how their visit went. [substeps] If possible, have your children talk to doctors before you hand them the appointment packet.\nB. Letting your child know they have a doctor's appointment coming up a couple days in advance can help lessen their anxiety about it. [substeps] Tell your child about the appointment only one or two days in advance.\nC. Try to be as specific as possible and explain the appointments for your child so they can see the doctor without the need to worry. [title] Arrange a ride home from school the day of the appointment.\nD. This is why waiting will not be the best option unless you understand your child's medical condition well. You want to make sure you have a reasonable working relationship and remain patient throughout the visit.\n\nRespond with the single best option letter.",
+        "groundTruth": "B",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "The single best option is **B**.",
+            "responseTimeMs": 3459,
+            "tokenCount": 749
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "mcq",
+          "groundTruth": "B",
+          "accuracy": 1,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": true,
+              "expected": "B",
+              "predicted": "B"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "hellaswag-5079",
+      "result": {
+        "questionId": "hellaswag-5079",
+        "prompt": "Complete the following:\n\n[header] How to eat defensively (hiv positive individuals ) [title] If possible, prepare small quantities of food and consume immediately. [step] It it not wise to keep prepared foods for long periods of time as this gives bacteria the opportunity and time to multiply. [title] Eat properly cooked foods.\n\nOptions:\nA. [step] Avoiding using preservatives, margarine, butter, salt and other processed foods can kill the bacteria responsible for the infestation and lead to an increased incidence of the virus. [title] Avoid grains and other starchy foods.\nB. [step] Foods should not be partly cooked or raw. It is safer to eat foods that are cooked fully, as exposure to high temperatures for longer periods will kill off any viable bacteria present in the foods.\nC. [step] If you stay out in unprotected, bacteria will race to the surface. Therefore, it is important to eat from clean pans and bowls and use the proper attire for cooking as soon as possible, it is a good idea to focus on maintaining some kind of simple survival mechanism.\nD. [step] The bacteria then spreads to the cells, the body and even to the tissues. [ coli coli is a type of bacteria that follows haemophilus bacteria.\n\nRespond with the single best option letter.",
+        "groundTruth": "B",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "The single best option is **B**.",
+            "responseTimeMs": 4148,
+            "tokenCount": 878
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "mcq",
+          "groundTruth": "B",
+          "accuracy": 1,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": true,
+              "expected": "B",
+              "predicted": "B"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "hellaswag-2922",
+      "result": {
+        "questionId": "hellaswag-2922",
+        "prompt": "Complete the following:\n\nA man is seen speaking to the camera while holding a knife in his hands and begins sharpening the knife along a board. the man\n\nOptions:\nA. continues sharpening the blade and then uses other boards to sharpen the knife.\nB. continues cutting dips into the knife along the board and showing off the knife fully.\nC. continues to polish and sharpen the knife while further sharpening his small knife.\nD. then adjusts a tool and flips the board up and approaches a vat.\n\nRespond with the single best option letter.",
+        "groundTruth": "A",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "D",
+            "responseTimeMs": 5434,
+            "tokenCount": 822
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "mcq",
+          "groundTruth": "A",
+          "accuracy": 0,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": false,
+              "expected": "A",
+              "predicted": "D"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "hellaswag-2181",
+      "result": {
+        "questionId": "hellaswag-2181",
+        "prompt": "Complete the following:\n\nThe lady sat at the center of the studio with her wet hair, she put a white cream on her hand then rub it on her hair. the girl\n\nOptions:\nA. brushed her four teeth with the dark cream and finished with a pink lip.\nB. then blow dried her hair and straighten the hair with a comb where the travel record indicated.\nC. then hold on to the back of the curls laying the wet hair on her plates and put the piled hair under the brush.\nD. blow dry her hair with white blower, sectioned her hair, brushed her hair with roller brush while blow drying it at the same time, she roll the brush downwards and upwards.\n\nRespond with the single best option letter.",
+        "groundTruth": "D",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "D",
+            "responseTimeMs": 3179,
+            "tokenCount": 558
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "mcq",
+          "groundTruth": "D",
+          "accuracy": 1,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": true,
+              "expected": "D",
+              "predicted": "D"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "hellaswag-8265",
+      "result": {
+        "questionId": "hellaswag-8265",
+        "prompt": "Complete the following:\n\n[header] How to use a blackhead vacuum [title] Plug in the vacuum. [step] Electric vacuums run off of your home's ac power to generate powerful suction. Make sure the vacuum is plugged into a nearby electrical outlet, or that the battery is fully charged.\n\nOptions:\nA. Since the dishwasher uses electricity to cook food at room temperature, a blackhead vacuum can probably attach to a large cabinet. [substeps] Turn on your vacuum and wait for the water to drain from the bottom of the vacuum before moving to the next step.\nB. If your vacuum has a separate power switch, leave it in the \" off \" position for now. [substeps] Check for a light display that indicates that your vacuum is connected and charged.\nC. If the vacuum is plugged into an outlet, shut the battery off. Press the finish button on the switch inside of the drain for power.\nD. If you have one, ensure that it has a soft-head housing with a good connection, and that the cable and tip are aligned perpendicular to the ground. [substeps] Cover any electric outlets with 3 feet (0.91 m) of duct tape.\n\nRespond with the single best option letter.",
+        "groundTruth": "B",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "The single best option is **B**.",
+            "responseTimeMs": 2000,
+            "tokenCount": 463
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "mcq",
+          "groundTruth": "B",
+          "accuracy": 1,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": true,
+              "expected": "B",
+              "predicted": "B"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "hellaswag-8515",
+      "result": {
+        "questionId": "hellaswag-8515",
+        "prompt": "Complete the following:\n\n[header] How to prepare for cancer treatment [title] Process your feelings. [step] This is important, and will take time. A cancer diagnosis and the news of your upcoming treatment can be overwhelming, and lead to feeling confused and anxious.\n\nOptions:\nA. Allow yourself and your loved one to process your feelings even if it's difficult. [substeps] It is only natural that these feelings might amplify or diminish your worries.\nB. Ask yourself why you feel the way you do. If you're feeling this way, find some form of justification.\nC. Work through these feelings as you need to. [substeps] It can help to write down a list of your concerns and of questions you have about cancer and your treatment.\nD. It is important to keep your feelings calm and in control. [substeps] Taking time to process your own feelings will help to heal your emotions and help make them better.\n\nRespond with the single best option letter.",
+        "groundTruth": "C",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "The single best option is **C**.",
+            "responseTimeMs": 2786,
+            "tokenCount": 602
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "mcq",
+          "groundTruth": "C",
+          "accuracy": 1,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": true,
+              "expected": "C",
+              "predicted": "C"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "hellaswag-2130",
+      "result": {
+        "questionId": "hellaswag-2130",
+        "prompt": "Complete the following:\n\nA weather map is shown for a second, then two news women sitting at a desk. several people\n\nOptions:\nA. are shown of flags, the cameramen taking pictures.\nB. are shown trying to weather ruses, ranging from walking along rough waters in hurricane situations.\nC. are shown warming up for a race.\nD. are gathered to talk, then a news reporter speaks in a news room then in a newsroom.\n\nRespond with the single best option letter.",
+        "groundTruth": "C",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "The correct answer is **B**.\n\n**Reasoning:**\nThe sentence begins by establishing a news broadcast context involving a \"weather map\" and \"news women sitting at a desk.\" Option B is the only choice that maintains this thematic consistency, as it describes footage of people in \"hurricane situations\" and \"rough waters,\" which are standard topics for a weather-related news segment. The other options either lack grammatical sense (A), are irrelevant to the weather context (C), or are redundantly phrased (D).",
+            "responseTimeMs": 7168,
+            "tokenCount": 1212
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "mcq",
+          "groundTruth": "C",
+          "accuracy": 0,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": false,
+              "expected": "C",
+              "predicted": "B"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "hellaswag-8393",
+      "result": {
+        "questionId": "hellaswag-8393",
+        "prompt": "Complete the following:\n\n[header] How to use movies to help kids build character [title] Pick movies by age group. [step] While some younger kids are more mature, generally, you don't want a story line that will go right over their head. Similarly, you don't want to lose older kids by showing them movies that are too simplistic.\n\nOptions:\nA. [substeps] Often, the best movie lines are set in the last century. While you may have super teens, you can find lots of great movies for kids online.\nB. If possible, choose movies by kids you love, not kids they already like. [substeps] For instance, in the movie audrey hepburn 2 2000, the tables at breakfast [[ (18.\nC. Try to pick something that works for the age the kid is at. [substeps] For kids 2 to 7 years old, make sure the story is fairly simple, and that plot supports the idea you're trying to get across, as it needs to be glaringly obvious.\nD. Most of the time, kids get what they want early on. Take your age group into consideration as you come up with a few choices for your movie series.\n\nRespond with the single best option letter.",
+        "groundTruth": "C",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "The single best option is **C**.",
+            "responseTimeMs": 3391,
+            "tokenCount": 748
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "mcq",
+          "groundTruth": "C",
+          "accuracy": 1,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": true,
+              "expected": "C",
+              "predicted": "C"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "hellaswag-9848",
+      "result": {
+        "questionId": "hellaswag-9848",
+        "prompt": "Complete the following:\n\n[header] How to form lasting friendships [title] Find a new friend. [step] Knowing where to look for like minded people and new friends can be a challenge. Despite this challenge, there are many places you can go to make new friends.\n\nOptions:\nA. Both meet new people and befriend them. [substeps] If you can find other people on a list of people who have similar interests, you can join them.\nB. [substeps] The kind of friendship that seems cool and friendly is usually lonely and is meant to mesh with an existing friendship. It may take a little work, which is okay.\nC. Keep some of these tips in mind when considering where you might be most likely to meet interesting new people and make lasting friendships : [substeps] You could join a group that is centered around one of your interests. For example, if you are into table top gaming, you might head down to your local game store and start playing with the people there.\nD. Most of these places can have the same people and processes. It's important to start with friends who are busy or with their own lives already filled with whatever interests them.\n\nRespond with the single best option letter.",
+        "groundTruth": "C",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "The single best option is **C**.",
+            "responseTimeMs": 3189,
+            "tokenCount": 679
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "mcq",
+          "groundTruth": "C",
+          "accuracy": 1,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": true,
+              "expected": "C",
+              "predicted": "C"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "hellaswag-2060",
+      "result": {
+        "questionId": "hellaswag-2060",
+        "prompt": "Complete the following:\n\nA person is seen cutting up various fruits while also seen speaking to the camera. The person mixes various ingredients into a container of water. the person\n\nOptions:\nA. zooms in on the vegetables and pans out to several views of the vegetables seated.\nB. then jostles the vegetables together in a bowl.\nC. rinses down the container with the water and then paints on a sandwich, as well as a sandwich of sandwich meat and cheese.\nD. spins around the container in the end.\n\nRespond with the single best option letter.",
+        "groundTruth": "D",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "The correct answer is **D**.",
+            "responseTimeMs": 7409,
+            "tokenCount": 1228
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "mcq",
+          "groundTruth": "D",
+          "accuracy": 1,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": true,
+              "expected": "D",
+              "predicted": "D"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "hellaswag-5565",
+      "result": {
+        "questionId": "hellaswag-5565",
+        "prompt": "Complete the following:\n\n[header] How to lose weight in 2 days [title] Limit carbohydrates. [step] An easy way to drop weight and decrease water retention is to limit the amount of carbohydrate-rich foods you consume each day. Studies have shown that carbohydrates hold on to several water molecules in your body which may cause weight gain or bloating.\n\nOptions:\nA. One simple way to gain weight has been to consume more carbohydrates throughout the day. [substeps] Try to eat a balanced diet or low-carb diets.\nB. Try to cut these beneficial calorie deficiencies into your diet. [substeps] Limit plain white bread and white rice products, or opt for pastas instead.\nC. Try replacing carbohydrates with diet and sports drinks or weight-loss boosting beverages. [substeps] If you drink a lot of sports drinks, try cutting them out of your diet.\nD. [substeps] Carbohydrates are found in many different foods including: dairy products, grains, fruits, starchy vegetables, and legumes. It's not advisable to cut out each one of these foods.\n\nRespond with the single best option letter.",
+        "groundTruth": "D",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "The single best option is **D**.",
+            "responseTimeMs": 4207,
+            "tokenCount": 842
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "mcq",
+          "groundTruth": "D",
+          "accuracy": 1,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": true,
+              "expected": "D",
+              "predicted": "D"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "hellaswag-5856",
+      "result": {
+        "questionId": "hellaswag-5856",
+        "prompt": "Complete the following:\n\n[header] How to avoid losing baby shoes [title] Measure your baby's feet. [step] You can do this yourself or you can take your baby to a shoe salesman for help. Your baby's shoes will be less likely to fall off if they fit properly.\n\nOptions:\nA. [substeps] Whether you take shoes off or put them on your baby, try to keep a close eye on each shoe's size. When actually measuring your baby's foot, you should measure 5 foot (1.5 m).\nB. Here is an easy way to measure your baby's feet : [substeps] Stand your baby up on a piece of paper and trace their foot with a marker. Measure the tracing from the heel to the longest toe.\nC. [substeps] Always check with the salesperson if you are uncertain about how big your baby's feet are. Remember, shop only one size up, and avoid buying shoes you don't think your baby will enjoy.\nD. [substeps] Start by measuring your baby's feet, not her toes. If your baby's feet are big, measure them from head to toe.\n\nRespond with the single best option letter.",
+        "groundTruth": "B",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "The single best option is **B**.",
+            "responseTimeMs": 3552,
+            "tokenCount": 758
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "mcq",
+          "groundTruth": "B",
+          "accuracy": 1,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": true,
+              "expected": "B",
+              "predicted": "B"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "hellaswag-2915",
+      "result": {
+        "questionId": "hellaswag-2915",
+        "prompt": "Complete the following:\n\nThe man cooks the custard and pours into a bowl and freezes to make ice cream. The man cuts and cooks rubarb in sugar on the stove. he\n\nOptions:\nA. stands with the cake pan on top of the small stand.\nB. eats the ice cream over the cooked rubarb.\nC. also gives a rubarb to a baked potato.\nD. wraps the rubarb in a roll of wrapped paper and tape to protect it from falling off and the ice cream melting.\n\nRespond with the single best option letter.",
+        "groundTruth": "B",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "The single best option letter is **B**.",
+            "responseTimeMs": 2240,
+            "tokenCount": 386
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "mcq",
+          "groundTruth": "B",
+          "accuracy": 1,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": true,
+              "expected": "B",
+              "predicted": "B"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "hellaswag-9102",
+      "result": {
+        "questionId": "hellaswag-9102",
+        "prompt": "Complete the following:\n\n[header] How to use bubble wrap [title] Use bubble wrap to protect delicate items, like glass or electronics. [step] Bubble wrap is ideal for padding glassware, ceramics, mirrors, and other fragile items while moving. Because bubble wrap comes in large sheets, it can be more effective for wrapping bigger items than styrofoam or newspaper.\n\nOptions:\nA. [substeps] If it's not light enough for your bubble wrap, you can twist or simply press the ends of the bubble wrap together. [title] Place an ice pack on the spill.\nB. [title] Wrap all delicate items before putting them in the box. [step] Place your item on a sheet of bubble wrap and cut out a piece long enough to cover the item in bubble wrap.\nC. It also helps protect your items from dangerous particles. [substeps] Bubble wrap does not contain the same polymers that foam bath sheets, or these can solidify and shrink in water before use.\nD. [substeps] Read a section on making bubble wrap from a variety of perspectives, so you have a comprehensive understanding of exactly what you're making. [title] Pack your bubble wrap in a cooler.\n\nRespond with the single best option letter.",
+        "groundTruth": "B",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "The single best option is **B**.",
+            "responseTimeMs": 3133,
+            "tokenCount": 667
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "mcq",
+          "groundTruth": "B",
+          "accuracy": 1,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": true,
+              "expected": "B",
+              "predicted": "B"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "hellaswag-1794",
+      "result": {
+        "questionId": "hellaswag-1794",
+        "prompt": "Complete the following:\n\nThe woman pour soap and is washing her hands with a sponge and pouring water to clean them. the woman\n\nOptions:\nA. dry her hands with bloting paper and throw the paper on the paper bin.\nB. used the bare hands to scrub her hands in the sink began putting soap on her hands.\nC. rinse her hands and walk to the sink.\nD. rub her hands with soap and used a towel in her hands.\n\nRespond with the single best option letter.",
+        "groundTruth": "A",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "A",
+            "responseTimeMs": 3085,
+            "tokenCount": 487
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "mcq",
+          "groundTruth": "A",
+          "accuracy": 1,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": true,
+              "expected": "A",
+              "predicted": "A"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "hellaswag-4318",
+      "result": {
+        "questionId": "hellaswag-4318",
+        "prompt": "Complete the following:\n\n[header] How to develop in your career [title] Create a career plan. [step] You must have a clear picture of where you plan to be in 5 years , 10 years or 20 years down the road in your career. The first step to mapping your future success is determining the end destination.\n\nOptions:\nA. While you can develop your timeline on your own without starting any of your main careers yet, by creating a clear plan, you can keep yourself motivated and prepared for long-term success. Focus on specific goals and move upward towards more specific goals as time passes.\nB. Do not focus on the end destination or what is expected of you. Instead, be mindful of how much time you need to put into accomplishing your career goals.\nC. [substeps] As you examine the goals you would like to achieve in 5 years, your career will start to change considerably. As you examine the goal as you put together your life plan, you can decide how you plan to achieve it and if you would need to go into business for it.\nD. [substeps] Plan to review your career goals annually to determine if you still desire the ultimate objective in your plan. Career plans may change over the years as goals and desires change.\n\nRespond with the single best option letter.",
+        "groundTruth": "D",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "The single best option is **D**.",
+            "responseTimeMs": 3857,
+            "tokenCount": 834
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "mcq",
+          "groundTruth": "D",
+          "accuracy": 1,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": true,
+              "expected": "D",
+              "predicted": "D"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "hellaswag-4516",
+      "result": {
+        "questionId": "hellaswag-4516",
+        "prompt": "Complete the following:\n\n[header] How to access a u verse router [title] Find the wi-fi network name and password on the side of your u-verse router. [step] To access the router's settings, you will need to use a computer (or mobile device with a web browser) connected to the router's network. Start by determining the name and password of the u-verse wi-fi access point.\n\nOptions:\nA. [substeps] The name of the wi-fi access point is printed next to \" wi-fi network name \". It begins with either \" att \" or \" 2wire \".\nB. [substeps] Accessing the internet by using a browser will make certain connections easier, even if your connection is ip-sensitive. [title] Open internet explorer in your web browser.\nC. Write this down if the access point is not known. [substeps] You will need to enter a password depending on your configuration.\nD. This will serve as a guide for navigating to and from the u-verse router you will be accessing. [substeps] Open the settings app and tap \" wi-fi.\n\nRespond with the single best option letter.",
+        "groundTruth": "A",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "The correct option is **A**.\n\n**Reasoning:**\nThe instructions are specifically about finding the Wi-Fi network name and password on the physical U-verse router. Option A provides the specific details needed to identify that information (noting that it is printed next to \"Wi-Fi network name\" and typically starts with \"ATT\" or \"2Wire\"), which directly follows the instruction to \"determine the name and password.\"",
+            "responseTimeMs": 3676,
+            "tokenCount": 800
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "mcq",
+          "groundTruth": "A",
+          "accuracy": 1,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": true,
+              "expected": "A",
+              "predicted": "A"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "hellaswag-1350",
+      "result": {
+        "questionId": "hellaswag-1350",
+        "prompt": "Complete the following:\n\nPeople are standing on a basketball court. A man in an orange shirt throws a ball. they\n\nOptions:\nA. stand around and talk.\nB. start playing a game of basketball.\nC. take a break and the game resumes.\nD. run around doing high kicks.\n\nRespond with the single best option letter.",
+        "groundTruth": "B",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "B",
+            "responseTimeMs": 1918,
+            "tokenCount": 258
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "mcq",
+          "groundTruth": "B",
+          "accuracy": 1,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": true,
+              "expected": "B",
+              "predicted": "B"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "hellaswag-2326",
+      "result": {
+        "questionId": "hellaswag-2326",
+        "prompt": "Complete the following:\n\nA weight lifter powders his hands on a stage. He walks over to a barbell, and lifts it up. he\n\nOptions:\nA. raises it over his head before dropping it.\nB. throws the weighted weight with and and up.\nC. lifts it over his head, wiping his hands down.\nD. enters the gym, lifting the weight for the audience.\n\nRespond with the single best option letter.",
+        "groundTruth": "A",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "A",
+            "responseTimeMs": 2201,
+            "tokenCount": 328
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "mcq",
+          "groundTruth": "A",
+          "accuracy": 1,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": true,
+              "expected": "A",
+              "predicted": "A"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "hellaswag-6818",
+      "result": {
+        "questionId": "hellaswag-6818",
+        "prompt": "Complete the following:\n\n[header] How to test for parkinson's disease [title] Watch for tremors in your hands and/or fingers. [step] One of the first complaints presented to doctors by many later diagnosed with parkinson's disease is an involuntary tremor or shaking of the hands, fingers, arms, legs, jaw, and face. [substeps] There are many causes of tremors.\n\nOptions:\nA. Parkinson's disease is one of the most common causes, and tremors are often the first sign of the disease. The tremor and other symptoms may initially appear only on one side of the body, or may appear worse on one side than the other.\nB. There is no scientific proof for their physical symptoms. However, in most cases, the shakes can be the result of poor nutrition, poor sleep, poor exercise, and very low sleep on the day of your appointment.\nC. If you have too many to look for, go online to find the newest symptoms. Certain instances of tremors may be a sign of another disorder.\nD. They include illness, financial activity, or injury. Parkinson's disease does not always cause tremors.\n\nRespond with the single best option letter.",
+        "groundTruth": "A",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "The single best option is **A**.",
+            "responseTimeMs": 2440,
+            "tokenCount": 590
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "mcq",
+          "groundTruth": "A",
+          "accuracy": 1,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": true,
+              "expected": "A",
+              "predicted": "A"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "hellaswag-4388",
+      "result": {
+        "questionId": "hellaswag-4388",
+        "prompt": "Complete the following:\n\n[header] How to create an abstract wave effect using gimp [title] Start out with a square image. [title] Go to filters] ] render] ] clouds] ] solid noise. [step] Change the detail to 3 or 4.\n\nOptions:\nA. [title] Then crop the image by pressing and releasing the crop button. [step] If your image looks amazing use filters such as the one above.\nB. [title] Click the box beside randomize and turbulent. [step] Don't change anything and click on ok.\nC. This includes gesso by phase 2, sagittarius by phase 3. [title] Now, go to visual mode] ] fill.\nD. [title] Use a square image as the background for your wave and create a wave effect. [step] Go to filters] ] [title] Blur, add details, then change the background.\n\nRespond with the single best option letter.",
+        "groundTruth": "B",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "The correct answer is **B**.",
+            "responseTimeMs": 2368,
+            "tokenCount": 491
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "mcq",
+          "groundTruth": "B",
+          "accuracy": 1,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": true,
+              "expected": "B",
+              "predicted": "B"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "hellaswag-4233",
+      "result": {
+        "questionId": "hellaswag-4233",
+        "prompt": "Complete the following:\n\n[header] How to get the most out of home warranties [title] Read your warranty policy carefully. [step] Learn what the policy covers and what it does not. Do not rely on oral statements that may have come from a sales representative or advertising from the website.\n\nOptions:\nA. Talk to your manager or your new car dealership about any necessary procedures. [substeps] If the warranty covers the parts you've had in your own vehicle, then consider whether it applies to the parts that make up your vehicle.\nB. You want to stay on good speaking terms with the salesperson. Find out exactly what is covered under the policies policy.\nC. In the end, the written contract will determine your coverage. [title] Make sure all appliances are installed properly.\nD. Instead, inspect the package closely, and then closely review the expiration date. [substeps] Don't, for example, read the disclaimer at the bottom that \" all warranties may be amended.\n\nRespond with the single best option letter.",
+        "groundTruth": "C",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "The correct option is **C**.\n\n**Reasoning:**\nThe text describes how to maximize the benefits of home warranties. The preceding step advises not to rely on oral statements from sales representatives or website advertisements. Option **C** logically follows this by stating that the written contract is the final authority on coverage. It also introduces a relevant new title (\"Make sure all appliances are installed properly\") that fits the context of home maintenance and warranties. \n\n*   **A** is incorrect because it discusses car dealerships and vehicles.\n*   **B** is repetitive and contains a typo (\"policies policy\").\n*   **D** is illogical, especially the advice to *not* read disclaimers.",
+            "responseTimeMs": 4180,
+            "tokenCount": 754
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "mcq",
+          "groundTruth": "C",
+          "accuracy": 1,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": true,
+              "expected": "C",
+              "predicted": "C"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "hellaswag-3488",
+      "result": {
+        "questionId": "hellaswag-3488",
+        "prompt": "Complete the following:\n\n[header] How to know when it's time to clean your musical instrument or coa [title] Take care of your instrument. [step] While this should be obvious, it's good to be in the habit of being careful. Don't drop it, use the case as a footrest, hold it in a way that can damage the keys, skip swabbing it, etc.\n\nOptions:\nA. Do not place your instrument face down on your desk top, bed or any other inanimate object. Do not put any part of your instrument behind the bar, ever.\nB. Taking care of your instrument can save you a lot of time at the repair shop and a good bit of money. [title] Pay attention to your instrument when you are playing it.\nC. [title] Keep a record of all noises you've been doing. [step] A digital record player is great as long as the recording isn't perfectly in tune; a progressive turnout using high resolution tapes works perfectly fine.\nD. Also have a lubricant available that will keep your instrument from rattling around while it's being held in place. This may mean that when it's time to replace the keys you need to put it back in its housing.\n\nRespond with the single best option letter.",
+        "groundTruth": "B",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "The single best option is **B**.",
+            "responseTimeMs": 3574,
+            "tokenCount": 741
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "mcq",
+          "groundTruth": "B",
+          "accuracy": 1,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": true,
+              "expected": "B",
+              "predicted": "B"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "hellaswag-7740",
+      "result": {
+        "questionId": "hellaswag-7740",
+        "prompt": "Complete the following:\n\n[header] How to apply a wig [title] Pick a wig type. [step] There are three major kinds of wigs: the full lace, the partial or front lace, and the non-lace. There are also three main materials they can be made out of, which are human hair, animal hair, and synthetic hair.\n\nOptions:\nA. [substeps] The human wig should be very light in color and comparable to human or synthetic hair. Synthetic hair can be dyed like human hair, but it is easier to achieve.\nB. [substeps] Formatting is the art of twisting, clipping, and pulling wigs together. It is extremely dangerous because you will be breaking the wig apart.\nC. Talk to your primary care doctor or a professional you trust. Ask about parts of the wig you like for inspiration or advice.\nD. Each wig type has its pros and cons, so make sure you buy the wig that is best for you. [substeps] The full lace wig is made with a lace mesh cap and the hair sewn into it throughout.\n\nRespond with the single best option letter.",
+        "groundTruth": "D",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "The single best option is **D**.",
+            "responseTimeMs": 3085,
+            "tokenCount": 670
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "mcq",
+          "groundTruth": "D",
+          "accuracy": 1,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": true,
+              "expected": "D",
+              "predicted": "D"
+            }
+          }
+        }
+      }
+    }
+  ]
+}
