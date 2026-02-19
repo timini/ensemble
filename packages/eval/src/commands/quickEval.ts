@@ -152,11 +152,19 @@ export function createQuickEvalCommand(): Command {
         judgeProvider, judgeModelName,
       }));
 
+      limiter.startStatsReporter(10_000);
+
       const allDatasetResults = parallel
         ? await Promise.all(runArgs.map((a) => runDataset(a, true)))
         : await runArgs.reduce<Promise<DatasetResult[]>>(
             async (acc, a) => [...(await acc), await runDataset(a, false)], Promise.resolve([]),
           );
+
+      limiter.stop();
+      const finalStats = limiter.getStats();
+      const wallSec = Math.round((Date.now() - startTime) / 1000);
+      log(`\n  [limiter final] ${finalStats.completed} tasks in ${wallSec}s (${(finalStats.completed / Math.max(wallSec, 1)).toFixed(1)}/s avg) | 429s: ${finalStats.rateLimits}\n`);
+
       printResults(model, ensembleSize, strategies, allDatasetResults, Date.now() - startTime);
 
       if (options.baseline) {

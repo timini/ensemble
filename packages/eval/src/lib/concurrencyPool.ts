@@ -98,6 +98,21 @@ export class SystemMonitor {
  * Optionally integrates with a SystemMonitor to back off when the host is under
  * resource pressure (memory, CPU, or network).
  */
+export interface LimiterStats {
+  /** Current concurrency limit (AIMD-adjusted). */
+  concurrencyLimit: number;
+  /** Number of tasks currently executing. */
+  running: number;
+  /** Number of tasks waiting in queue. */
+  queued: number;
+  /** Total tasks completed since creation. */
+  completed: number;
+  /** Total 429 rate-limit events since creation. */
+  rateLimits: number;
+  /** Tasks completed per second (rolling window). */
+  throughput: number;
+}
+
 export class ConcurrencyLimiter {
   private concurrency: number;
   private running = 0;
@@ -107,6 +122,19 @@ export class ConcurrencyLimiter {
   private lastAdjustTime: number;
   private readonly cooldownMs: number;
   private readonly monitor: SystemMonitor | null;
+
+  /** Total completed tasks since creation. */
+  private completedCount = 0;
+  /** Total 429 rate-limit events since creation. */
+  private rateLimitCount = 0;
+  /** Timestamp when the limiter was created. */
+  private readonly createdAt: number;
+  /** Completed count at the last stats snapshot (for throughput calculation). */
+  private lastSnapshotCompleted = 0;
+  /** Timestamp of the last stats snapshot. */
+  private lastSnapshotTime: number;
+  /** Periodic stats reporter timer (if enabled). */
+  private statsTimer: ReturnType<typeof setInterval> | null = null;
 
   constructor(opts?: {
     initial?: number;
@@ -121,6 +149,8 @@ export class ConcurrencyLimiter {
     this.max = opts?.max ?? 500;
     this.cooldownMs = opts?.cooldownMs ?? 2000;
     this.lastAdjustTime = Date.now();
+    this.createdAt = Date.now();
+    this.lastSnapshotTime = Date.now();
     this.monitor = opts?.monitor ?? null;
   }
 
@@ -156,12 +186,63 @@ export class ConcurrencyLimiter {
     return this.running;
   }
 
-  /** Stop the system monitor if one was provided. */
+  /** Get a snapshot of current limiter statistics. */
+  getStats(): LimiterStats {
+    const now = Date.now();
+    const elapsed = (now - this.lastSnapshotTime) / 1000;
+    const recentCompleted = this.completedCount - this.lastSnapshotCompleted;
+    const throughput = elapsed > 0 ? recentCompleted / elapsed : 0;
+    return {
+      concurrencyLimit: this.concurrency,
+      running: this.running,
+      queued: this.queue.length,
+      completed: this.completedCount,
+      rateLimits: this.rateLimitCount,
+      throughput,
+    };
+  }
+
+  /** Reset the rolling throughput window (call after reading stats). */
+  resetThroughputWindow(): void {
+    this.lastSnapshotCompleted = this.completedCount;
+    this.lastSnapshotTime = Date.now();
+  }
+
+  /**
+   * Start a periodic stats reporter that logs limiter state to stderr.
+   * @param intervalMs - How often to log (default 10s).
+   */
+  startStatsReporter(intervalMs = 10_000): void {
+    this.stopStatsReporter();
+    this.resetThroughputWindow();
+    this.statsTimer = setInterval(() => {
+      const s = this.getStats();
+      const elapsed = Math.round((Date.now() - this.createdAt) / 1000);
+      process.stderr.write(
+        `  [limiter ${elapsed}s] limit=${s.concurrencyLimit} running=${s.running} queued=${s.queued} ` +
+        `done=${s.completed} rate=${s.throughput.toFixed(1)}/s 429s=${s.rateLimits}\n`,
+      );
+      this.resetThroughputWindow();
+    }, intervalMs);
+    this.statsTimer.unref();
+  }
+
+  /** Stop the periodic stats reporter. */
+  stopStatsReporter(): void {
+    if (this.statsTimer) {
+      clearInterval(this.statsTimer);
+      this.statsTimer = null;
+    }
+  }
+
+  /** Stop the system monitor and stats reporter. */
   stop(): void {
     this.monitor?.stop();
+    this.stopStatsReporter();
   }
 
   private onSuccess(): void {
+    this.completedCount++;
     const now = Date.now();
     if (now - this.lastAdjustTime >= this.cooldownMs) {
       this.concurrency = Math.min(this.max, this.concurrency + 1);
@@ -171,10 +252,15 @@ export class ConcurrencyLimiter {
   }
 
   private onRateLimit(): void {
+    this.rateLimitCount++;
     const now = Date.now();
     if (now - this.lastAdjustTime >= this.cooldownMs) {
+      const prev = this.concurrency;
       this.concurrency = Math.max(this.min, Math.floor(this.concurrency * 0.5));
       this.lastAdjustTime = now;
+      process.stderr.write(
+        `  [limiter] 429 rate limit — concurrency ${prev} → ${this.concurrency}\n`,
+      );
     }
   }
 

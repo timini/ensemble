@@ -212,6 +212,77 @@ describe('ConcurrencyLimiter', () => {
     // No monitor → no pressure check → just +1 from success
     expect(limiter.currentConcurrency).toBe(101);
   });
+
+  describe('stats tracking', () => {
+    it('tracks completed count', async () => {
+      const limiter = new ConcurrencyLimiter({ initial: 10, cooldownMs: 60_000 });
+      expect(limiter.getStats().completed).toBe(0);
+
+      await limiter.run(async () => {});
+      await limiter.run(async () => {});
+      await limiter.run(async () => {});
+
+      expect(limiter.getStats().completed).toBe(3);
+    });
+
+    it('tracks rate limit count', () => {
+      const limiter = new ConcurrencyLimiter({ initial: 100, cooldownMs: 0 });
+
+      limiter.notifyRateLimit();
+      limiter.notifyRateLimit();
+
+      expect(limiter.getStats().rateLimits).toBe(2);
+    });
+
+    it('reports running and queued counts', async () => {
+      const limiter = new ConcurrencyLimiter({ initial: 1, cooldownMs: 60_000 });
+      let statsWhileRunning: ReturnType<typeof limiter.getStats> | null = null;
+
+      const p1 = limiter.run(async () => {
+        statsWhileRunning = limiter.getStats();
+        await sleep(20);
+      });
+      // Give p1 time to start, then queue p2
+      await sleep(5);
+      const p2 = limiter.run(async () => { await sleep(5); });
+
+      // While p1 is running, p2 should be queued
+      const midStats = limiter.getStats();
+      expect(midStats.running).toBe(1);
+      expect(midStats.queued).toBe(1);
+
+      await Promise.all([p1, p2]);
+      expect(limiter.getStats().running).toBe(0);
+      expect(limiter.getStats().queued).toBe(0);
+    });
+
+    it('computes throughput over window', async () => {
+      const limiter = new ConcurrencyLimiter({ initial: 10, cooldownMs: 60_000 });
+      limiter.resetThroughputWindow();
+
+      await sleep(10); // ensure measurable elapsed time
+      await limiter.run(async () => {});
+      await limiter.run(async () => {});
+
+      const stats = limiter.getStats();
+      expect(stats.throughput).toBeGreaterThan(0);
+      expect(stats.completed).toBe(2);
+    });
+
+    it('resetThroughputWindow resets the rolling window', async () => {
+      const limiter = new ConcurrencyLimiter({ initial: 10, cooldownMs: 60_000 });
+
+      await limiter.run(async () => {});
+      await limiter.run(async () => {});
+      limiter.resetThroughputWindow();
+
+      // After reset, no new completions yet
+      await sleep(5); // small delay so elapsed > 0
+      const stats = limiter.getStats();
+      expect(stats.throughput).toBe(0);
+      expect(stats.completed).toBe(2); // total still accurate
+    });
+  });
 });
 
 describe('SystemMonitor', () => {
