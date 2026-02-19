@@ -183,6 +183,8 @@ export function createGenerateCacheCommand(): Command {
           for (const result of settled) {
             if (result.status === 'fulfilled') {
               newEntries.push(result.value);
+            } else {
+              log(`  [${datasetName}] Error generating responses: ${result.reason}\n`);
             }
           }
 
@@ -236,6 +238,8 @@ export function createGenerateCacheCommand(): Command {
           for (const r of evalSettled) {
             if (r.status === 'fulfilled' && r.value) {
               baselineResults.push(r.value);
+            } else if (r.status === 'rejected') {
+              log(`  [${datasetName}] Error during baseline evaluation: ${r.reason}\n`);
             }
           }
 
