@@ -22,7 +22,11 @@ export async function loadBenchmarkQuestions(
   if (!datasetName) {
     return {
       datasetName: null,
-      questions: await loadLocalQuestions(dataset, options?.sample),
+      questions: await loadLocalQuestions(dataset, {
+        sample: options?.sample,
+        shuffle: options?.shuffle,
+        seed: options?.seed,
+      }),
     };
   }
 

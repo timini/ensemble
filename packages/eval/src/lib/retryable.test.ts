@@ -34,6 +34,14 @@ describe('isRateLimitOrServerError', () => {
     expect(isRateLimitOrServerError(new Error('HTTP 429 Too Many Requests'))).toBe(true);
   });
 
+  it('detects stream parse failures from Google SDK', () => {
+    expect(isRateLimitOrServerError(new Error('[GoogleGenerativeAI Error]: Failed to parse stream'))).toBe(true);
+  });
+
+  it('detects high demand errors from Google SDK', () => {
+    expect(isRateLimitOrServerError(new Error('This model is currently experiencing high demand'))).toBe(true);
+  });
+
   it('returns false for non-retryable error message', () => {
     expect(isRateLimitOrServerError(new Error('Invalid API key'))).toBe(false);
   });

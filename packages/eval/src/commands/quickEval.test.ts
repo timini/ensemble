@@ -27,12 +27,14 @@ describe('quickEval', () => {
 
   it('has default option values', () => {
     const opts = parseOpts([]);
-    expect(opts.model).toBe('google:gemini-3-flash-preview');
+    expect(opts.model).toBe('google:gemini-2.5-flash-lite');
+    expect(opts.judgeModel).toBe('google:gemini-2.5-flash');
     expect(opts.ensemble).toBe('3');
-    expect(opts.sample).toBe('10');
+    expect(opts.sample).toBe('50');
     expect(opts.mode).toBe('free');
     expect(opts.cache).toBe(true);
     expect(opts.parallel).toBe(true);
+    expect(opts.concurrency).toBe('100');
   });
 
   it('parses custom options', () => {
@@ -70,5 +72,15 @@ describe('quickEval', () => {
   it('accepts custom significance level', () => {
     const opts = parseOpts(['--significance', '0.05']);
     expect(opts.significance).toBe('0.05');
+  });
+
+  it('accepts custom judge model', () => {
+    const opts = parseOpts(['--judge-model', 'openai:gpt-4o']);
+    expect(opts.judgeModel).toBe('openai:gpt-4o');
+  });
+
+  it('accepts custom concurrency', () => {
+    const opts = parseOpts(['--concurrency', '50']);
+    expect(opts.concurrency).toBe('50');
   });
 });
