@@ -16,7 +16,7 @@ import type { BenchmarkDatasetName, EvalMode, StrategyName } from '../types.js';
 const DEFAULT_MODEL = 'google:gemini-3-flash-preview';
 const DEFAULT_ENSEMBLE_SIZE = 3;
 const DEFAULT_SAMPLE = 10;
-const DEFAULT_DATASETS: BenchmarkDatasetName[] = ['gsm8k', 'truthfulqa'];
+const DEFAULT_DATASETS: BenchmarkDatasetName[] = ['gsm8k', 'truthfulqa', 'gpqa'];
 const VALID_MODES: EvalMode[] = ['mock', 'free'];
 
 interface QuickEvalOptions {
@@ -54,7 +54,7 @@ export function createQuickEvalCommand(): Command {
     .option('--model <provider:model>', 'Model to evaluate.', DEFAULT_MODEL)
     .option('--ensemble <count>', 'Number of ensemble instances.', String(DEFAULT_ENSEMBLE_SIZE))
     .option('--strategies <strategies...>', 'Consensus strategies (standard,elo,majority,council). Comma-separated.')
-    .option('--datasets <datasets...>', 'Datasets to evaluate (gsm8k,truthfulqa,gpqa). Comma-separated. Defaults to gsm8k,truthfulqa.')
+    .option('--datasets <datasets...>', 'Datasets to evaluate (gsm8k,truthfulqa,gpqa). Comma-separated. Defaults to all three.')
     .option('--sample <count>', 'Questions per dataset.', String(DEFAULT_SAMPLE))
     .option('--mode <mode>', 'Provider mode (mock or free).', 'free')
     .option('--no-cache', 'Disable single-model baseline caching.')
