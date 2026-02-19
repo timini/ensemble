@@ -31,6 +31,9 @@ export interface RunDatasetArgs {
   limiter?: ConcurrencyLimiter;
   /** Sampling temperature for ensemble diversity. */
   temperature?: number;
+  /** Consensus model (summarizer for strategies — can be cheaper than eval model). */
+  consensusProvider?: EvalProvider;
+  consensusModelName?: string;
   /** Judge model config (separate from evaluated model). */
   judgeProvider?: EvalProvider;
   judgeModelName?: string;
@@ -100,6 +103,8 @@ async function runSingleBaseline(args: RunDatasetArgs): Promise<PromptRunResult[
 async function runEnsemble(args: RunDatasetArgs): Promise<PromptRunResult[]> {
   const { datasetName, questions, model, provider, modelName, ensembleSize, strategies, mode, registry, useCache } = args;
   const temperature = args.temperature ?? 0.7;
+  const summarizerProvider = args.consensusProvider ?? provider;
+  const summarizerModel = args.consensusModelName ?? modelName;
 
   // Load ensemble response cache (raw API responses, independent of consensus strategy).
   const ensembleCache = useCache
@@ -117,7 +122,7 @@ async function runEnsemble(args: RunDatasetArgs): Promise<PromptRunResult[]> {
   );
   const runner = new BenchmarkRunner({
     mode, registry, models: ensembleModels, strategies, evaluator,
-    summarizer: { provider, model: modelName },
+    summarizer: { provider: summarizerProvider, model: summarizerModel },
     temperature: args.temperature,
     requestDelayMs: 0, parallelQuestions: true,
     retry: { maxRetries: 3, baseDelayMs: 2000 },
