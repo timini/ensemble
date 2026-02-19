@@ -38,10 +38,10 @@ describe('quickEvalBaseline', () => {
     it('computes accuracy from dataset results', () => {
       const dr = makeDatasetResult(7, { standard: 8, elo: 6 }, 10);
       const baseline = buildBaselineFromResults(
-        'google:gemini-3-flash-preview', 3, 10, ['gsm8k'], ['standard', 'elo'], [dr],
+        'google:gemini-2.5-flash', 3, 10, ['gsm8k'], ['standard', 'elo'], [dr],
       );
 
-      expect(baseline.model).toBe('google:gemini-3-flash-preview');
+      expect(baseline.model).toBe('google:gemini-2.5-flash');
       expect(baseline.single.accuracy).toBeCloseTo(0.7);
       expect(baseline.single.correct).toBe(7);
       expect(baseline.ensemble.standard.accuracy).toBeCloseTo(0.8);
@@ -55,7 +55,7 @@ describe('quickEvalBaseline', () => {
       singleTotal: number,
       ensemble: Record<string, { correct: number; total: number }>,
     ): QuickEvalBaselineFile => ({
-      model: 'google:gemini-3-flash-preview',
+      model: 'google:gemini-2.5-flash',
       ensembleSize: 3,
       sample: 10,
       datasets: ['gsm8k'],

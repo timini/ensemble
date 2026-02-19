@@ -494,6 +494,23 @@ npm run test:ui --workspace=packages/e2e
 - `E2E_MODE`: 'mock' or 'free' - determines which API mode to use
 - `E2E_BASE_URL`: When set, tests run against this URL instead of starting a local server
 
+## Environment Variables
+
+API keys for local development and eval runs are stored in `.env.local` at the repository root. This file is gitignored.
+
+The eval package expects standard env var names (`GOOGLE_API_KEY`, `OPENAI_API_KEY`, etc.), but `.env.local` uses `TEST_` prefixed names (e.g. `TEST_GOOGLE_API_KEY`). CI workflows map these automatically via secrets. For local eval runs, either export the key directly or map it:
+
+```bash
+# Option 1: Export directly
+export GOOGLE_API_KEY="your-key-here"
+
+# Option 2: Source from .env.local with mapping
+GOOGLE_API_KEY=$(grep TEST_GOOGLE_API_KEY .env.local | cut -d= -f2) \
+  node --import tsx packages/eval/bin/ensemble-eval.mjs quick-eval
+```
+
+The `HF_TOKEN` env var is used to access gated HuggingFace datasets (e.g., HLE). It is stored directly in `.env.local` (not `TEST_` prefixed) and read by the eval loader automatically.
+
 ## Important Notes
 
 - Component files MUST NOT exceed 200 lines

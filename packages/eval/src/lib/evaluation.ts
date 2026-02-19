@@ -25,32 +25,37 @@ export async function evaluateResponses(
     return undefined;
   }
 
-  const results: Record<string, EvaluationResult> = {};
+  // Phase 1: compute deduplication keys (synchronous, preserves order)
   const keyOccurrences: Record<string, number> = {};
-  let evaluatedResponses = 0;
-  let correctResponses = 0;
-
+  const entries: Array<{ key: string; response: ProviderResponse }> = [];
   for (const response of responses) {
-    if (response.error) {
-      continue;
-    }
-
+    if (response.error) continue;
     const baseKey = `${response.provider}:${response.model}`;
     const occurrence = (keyOccurrences[baseKey] ?? 0) + 1;
     keyOccurrences[baseKey] = occurrence;
     const key = occurrence === 1 ? baseKey : `${baseKey}#${occurrence}`;
-    const result = await evaluator.evaluate(response.content, groundTruth, prompt);
-    results[key] = result;
-    evaluatedResponses += 1;
-    if (result.correct) {
-      correctResponses += 1;
-    }
+    entries.push({ key, response });
+  }
+
+  // Phase 2: evaluate all responses in parallel
+  const evalResults = await Promise.all(
+    entries.map(({ response }) =>
+      evaluator.evaluate(response.content, groundTruth, prompt),
+    ),
+  );
+
+  // Phase 3: assemble results
+  const results: Record<string, EvaluationResult> = {};
+  let correctResponses = 0;
+  for (let i = 0; i < entries.length; i++) {
+    results[entries[i].key] = evalResults[i];
+    if (evalResults[i].correct) correctResponses++;
   }
 
   return {
     evaluator: evaluator.name,
     groundTruth,
-    accuracy: evaluatedResponses === 0 ? 0 : correctResponses / evaluatedResponses,
+    accuracy: entries.length === 0 ? 0 : correctResponses / entries.length,
     results,
   };
 }
@@ -80,13 +85,23 @@ export async function evaluateConsensusStrategies(
     return undefined;
   }
 
-  const results: Partial<Record<StrategyName, EvaluationResult>> = {};
+  // Collect valid entries
+  const entries: Array<{ strategy: StrategyName; answer: string }> = [];
   for (const [strategy, answer] of Object.entries(consensus)) {
-    if (!answer || isConsensusError(answer)) {
-      continue;
+    if (answer && !isConsensusError(answer)) {
+      entries.push({ strategy: strategy as StrategyName, answer });
     }
-    const result = await evaluator.evaluate(answer, groundTruth, prompt);
-    results[strategy as StrategyName] = result;
+  }
+
+  // Evaluate all strategies in parallel
+  const evalResults = await Promise.all(
+    entries.map(({ answer }) => evaluator.evaluate(answer, groundTruth, prompt)),
+  );
+
+  // Assemble results
+  const results: Partial<Record<StrategyName, EvaluationResult>> = {};
+  for (let i = 0; i < entries.length; i++) {
+    results[entries[i].strategy] = evalResults[i];
   }
 
   return {

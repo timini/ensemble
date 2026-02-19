@@ -12,12 +12,14 @@ import {
   writeChecksumFile,
 } from './datasetChecksum.js';
 import { fileExists, readJsonFile, writeJsonFile } from './io.js';
-import { createCachePath, normalizeSample } from './benchmarkDatasetShared.js';
+import { createCachePath, shuffleAndSample } from './benchmarkDatasetShared.js';
 
 const HUGGING_FACE_ROWS_ENDPOINT = 'https://datasets-server.huggingface.co/rows';
 const PAGE_SIZE = 100;
-const MAX_ROWS = 5000;
-const FETCH_TIMEOUT_MS = 15_000;
+const MAX_ROWS = 15_000;
+const FETCH_TIMEOUT_MS = 30_000;
+const RATE_LIMIT_MAX_RETRIES = 5;
+const RATE_LIMIT_BASE_DELAY_MS = 5_000;
 
 interface HuggingFaceRowsResponse<TRow> {
   rows: Array<{ row_idx: number; row: TRow }>;
@@ -34,6 +36,7 @@ interface HuggingFaceLoaderConfig<TRow> {
   name: BenchmarkDatasetName;
   sources: HuggingFaceSource[];
   mapRow: (row: TRow, rowIdx: number) => BenchmarkQuestion;
+  filterRow?: (row: TRow) => boolean;
 }
 
 async function fetchRowsPage<TRow>(
@@ -47,17 +50,35 @@ async function fetchRowsPage<TRow>(
   url.searchParams.set('offset', String(offset));
   url.searchParams.set('length', String(PAGE_SIZE));
 
-  const response = await fetch(url, {
-    signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
-  });
-  if (!response.ok) {
-    const body = await response.text();
+  const headers: Record<string, string> = {};
+  const hfToken = process.env.HF_TOKEN;
+  if (hfToken) {
+    headers['Authorization'] = `Bearer ${hfToken}`;
+  }
+
+  let response: Response | undefined;
+  for (let attempt = 0; attempt <= RATE_LIMIT_MAX_RETRIES; attempt++) {
+    response = await fetch(url, {
+      headers,
+      signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
+    });
+    if (response.status !== 429) break;
+    if (attempt < RATE_LIMIT_MAX_RETRIES) {
+      const delay = RATE_LIMIT_BASE_DELAY_MS * 2 ** attempt;
+      process.stderr.write(
+        `Rate limited by HuggingFace, retrying in ${Math.round(delay / 1000)}s (attempt ${attempt + 1}/${RATE_LIMIT_MAX_RETRIES})...\n`,
+      );
+      await new Promise((r) => setTimeout(r, delay));
+    }
+  }
+  if (!response!.ok) {
+    const body = await response!.text();
     throw new Error(
-      `Failed to fetch ${source.dataset}/${source.config}/${source.split} (${response.status}): ${body}`,
+      `Failed to fetch ${source.dataset}/${source.config}/${source.split} (${response!.status}): ${body}`,
     );
   }
 
-  const parsed = (await response.json()) as HuggingFaceRowsResponse<TRow>;
+  const parsed = (await response!.json()) as HuggingFaceRowsResponse<TRow>;
   if (!Array.isArray(parsed.rows)) {
     throw new Error(
       `Unexpected rows response for ${source.dataset}/${source.config}/${source.split}`,
@@ -100,18 +121,22 @@ export class HuggingFaceBenchmarkLoader<TRow> implements BenchmarkLoader {
   readonly name: BenchmarkDatasetName;
   private readonly sources: HuggingFaceSource[];
   private readonly mapRow: (row: TRow, rowIdx: number) => BenchmarkQuestion;
+  private readonly filterRow?: (row: TRow) => boolean;
 
   constructor(config: HuggingFaceLoaderConfig<TRow>) {
     this.name = config.name;
     this.sources = config.sources;
     this.mapRow = config.mapRow;
+    this.filterRow = config.filterRow;
   }
 
   async load(options?: DatasetLoadOptions): Promise<BenchmarkQuestion[]> {
     const cachePath = createCachePath(this.name);
     const questions = await this.loadWithIntegrity(cachePath, options);
-    const sampleSize = normalizeSample(options?.sample, questions.length);
-    return questions.slice(0, sampleSize);
+    return shuffleAndSample(questions, options?.sample, {
+      shuffle: options?.shuffle,
+      seed: options?.seed,
+    });
   }
 
   private async loadWithIntegrity(
@@ -206,7 +231,10 @@ export class HuggingFaceBenchmarkLoader<TRow> implements BenchmarkLoader {
       }
 
       // Mapping failures indicate malformed rows or parser bugs and should fail fast.
-      const questions = rows.map((entry) => this.mapRow(entry.row, entry.row_idx));
+      const filtered = this.filterRow
+        ? rows.filter((entry) => this.filterRow!(entry.row))
+        : rows;
+      const questions = filtered.map((entry) => this.mapRow(entry.row, entry.row_idx));
       if (questions.length === 0) {
         errors.push(
           `Dataset ${source.dataset}/${source.config}/${source.split} returned no rows`,

@@ -1,4 +1,5 @@
 import type { ProviderRegistry } from '@ensemble-ai/shared-utils/providers';
+import type { ConcurrencyLimiter } from './concurrencyPool.js';
 import { generateConsensus } from './consensus.js';
 import { evaluateConsensusStrategies, evaluateResponses, type EvaluatorLike } from './evaluation.js';
 import { writeJsonFile } from './io.js';
@@ -32,6 +33,8 @@ interface BenchmarkRunnerConfig {
   retry?: RetryOptions;
   /** Run all questions concurrently instead of sequentially. */
   parallelQuestions?: boolean;
+  /** Shared adaptive concurrency limiter (AIMD). Gates how many questions run at once. */
+  limiter?: ConcurrencyLimiter;
 }
 
 interface RunBenchmarkOptions {
@@ -50,6 +53,7 @@ export class BenchmarkRunner {
   private readonly summarizer: ModelSpec | null;
   private readonly ensembleRunner: EnsembleRunner;
   private readonly parallelQuestions: boolean;
+  private readonly limiter: ConcurrencyLimiter | undefined;
 
   constructor(config: BenchmarkRunnerConfig) {
     this.mode = config.mode;
@@ -59,10 +63,12 @@ export class BenchmarkRunner {
     this.evaluator = config.evaluator;
     this.summarizer = config.summarizer;
     this.parallelQuestions = config.parallelQuestions ?? false;
+    this.limiter = config.limiter;
     this.ensembleRunner = new EnsembleRunner(config.registry, config.mode, {
       requestDelayMs: config.requestDelayMs,
       temperature: config.temperature,
       retry: config.retry,
+      onRateLimit: config.limiter ? () => config.limiter!.notifyRateLimit() : undefined,
     });
   }
 
@@ -137,11 +143,12 @@ export class BenchmarkRunner {
     });
 
     if (this.parallelQuestions && pendingQuestions.length > 0) {
-      // Parallel mode: fire all questions at once
+      // Parallel mode: dispatch all questions, limiter gates actual execution
       let completed = questions.length - pendingQuestions.length;
       const settled = await Promise.allSettled(
         pendingQuestions.map(async (question) => {
-          const run = await this.runQuestion(question);
+          const runFn = () => this.runQuestion(question);
+          const run = this.limiter ? await this.limiter.run(runFn) : await runFn();
           completed += 1;
           onProgress?.({
             completed,
