@@ -28,6 +28,8 @@ export interface RunDatasetArgs {
   sampleCount: number;
   /** Shared adaptive concurrency limiter. */
   limiter?: ConcurrencyLimiter;
+  /** Sampling temperature for ensemble diversity. */
+  temperature?: number;
   /** Judge model config (separate from evaluated model). */
   judgeProvider?: EvalProvider;
   judgeModelName?: string;
@@ -94,6 +96,7 @@ async function runEnsemble(args: RunDatasetArgs): Promise<PromptRunResult[]> {
   const runner = new BenchmarkRunner({
     mode, registry, models: ensembleModels, strategies, evaluator,
     summarizer: { provider, model: modelName },
+    temperature: args.temperature,
     requestDelayMs: 0, parallelQuestions: true,
     retry: { maxRetries: 3, baseDelayMs: 2000 },
     limiter: args.limiter,

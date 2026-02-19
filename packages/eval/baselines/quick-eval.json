@@ -1,6 +1,6 @@
 {
   "model": "google:gemini-2.5-flash-lite",
-  "ensembleSize": 3,
+  "ensembleSize": 5,
   "sample": 10,
   "datasets": [
     "gsm8k",
@@ -20,21 +20,21 @@
     "majority",
     "council"
   ],
-  "updatedAt": "2026-02-19T14:06:48.689Z",
+  "updatedAt": "2026-02-19T14:21:03.620Z",
   "single": {
-    "accuracy": 0.775,
-    "correct": 62,
+    "accuracy": 0.7375,
+    "correct": 59,
     "total": 80
   },
   "ensemble": {
     "standard": {
-      "accuracy": 0.7125,
-      "correct": 57,
+      "accuracy": 0.675,
+      "correct": 54,
       "total": 80
     },
     "elo": {
-      "accuracy": 0.7625,
-      "correct": 61,
+      "accuracy": 0.7125,
+      "correct": 57,
       "total": 80
     },
     "majority": {
@@ -43,8 +43,8 @@
       "total": 80
     },
     "council": {
-      "accuracy": 0.7,
-      "correct": 56,
+      "accuracy": 0.6375,
+      "correct": 51,
       "total": 80
     }
   }
