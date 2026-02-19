@@ -16,7 +16,7 @@
     "eval:elo": "node --import tsx bin/ensemble-eval.mjs quick-eval --strategies elo",
     "eval:majority": "node --import tsx bin/ensemble-eval.mjs quick-eval --strategies majority",
     "eval:mock": "node --import tsx bin/ensemble-eval.mjs quick-eval --mode mock",
-    "eval:ci": "node --import tsx bin/ensemble-eval.mjs quick-eval --model google:gemini-flash-lite-latest --judge-model google:gemini-3-flash-preview --strategies standard,elo,majority,council --sample 10 --baseline baselines/quick-eval.json",
+    "eval:ci": "node --import tsx bin/ensemble-eval.mjs quick-eval --strategies standard,elo,majority,council --sample 10 --baseline baselines/quick-eval.json",
     "eval:regenerate-baseline": "node --import tsx bin/ensemble-eval.mjs quick-eval --no-cache --baseline baselines/quick-eval.json"
   },
   "dependencies": {

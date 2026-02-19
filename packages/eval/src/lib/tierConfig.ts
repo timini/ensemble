@@ -95,15 +95,15 @@ export const HOMOGENEOUS_CI_TIER_CONFIG: TierConfig = {
     { name: 'hallumix', sampleSize: 10 },
   ],
   models: [
-    { provider: 'google', model: 'gemini-3-flash-preview' },
-    { provider: 'google', model: 'gemini-3-flash-preview' },
-    { provider: 'google', model: 'gemini-3-flash-preview' },
+    { provider: 'google', model: 'gemini-2.5-flash' },
+    { provider: 'google', model: 'gemini-2.5-flash' },
+    { provider: 'google', model: 'gemini-2.5-flash' },
   ],
   strategies: ['standard', 'elo', 'majority', 'council'],
   runs: 3,
   requestDelayMs: 200,
   significanceThreshold: 0.1,
-  summarizer: { provider: 'google', model: 'gemini-3-flash-preview' },
+  summarizer: { provider: 'google', model: 'gemini-2.5-flash' },
 };
 
 /**
@@ -130,15 +130,15 @@ export const HOMOGENEOUS_POST_MERGE_TIER_CONFIG: TierConfig = {
     { name: 'hallumix', sampleSize: 50 },
   ],
   models: [
-    { provider: 'google', model: 'gemini-3-flash-preview' },
-    { provider: 'google', model: 'gemini-3-flash-preview' },
-    { provider: 'google', model: 'gemini-3-flash-preview' },
+    { provider: 'google', model: 'gemini-2.5-flash' },
+    { provider: 'google', model: 'gemini-2.5-flash' },
+    { provider: 'google', model: 'gemini-2.5-flash' },
   ],
   strategies: ['standard', 'elo', 'majority', 'council'],
   runs: 1,
   requestDelayMs: 500,
   significanceThreshold: 0.05,
-  summarizer: { provider: 'google', model: 'gemini-3-flash-preview' },
+  summarizer: { provider: 'google', model: 'gemini-2.5-flash' },
 };
 
 /**

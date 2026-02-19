@@ -14,8 +14,8 @@ import {
 } from './quickEvalBaseline.js';
 import type { BenchmarkDatasetName, EvalMode, StrategyName } from '../types.js';
 
-const DEFAULT_MODEL = 'google:gemini-flash-lite-latest';
-const DEFAULT_JUDGE_MODEL = 'google:gemini-3-flash-preview';
+const DEFAULT_MODEL = 'google:gemini-2.5-flash-lite';
+const DEFAULT_JUDGE_MODEL = 'google:gemini-2.5-flash';
 const DEFAULT_ENSEMBLE_SIZE = 3;
 const DEFAULT_SAMPLE = 50;
 const DEFAULT_DATASETS: BenchmarkDatasetName[] = [
@@ -59,7 +59,7 @@ export function createQuickEvalCommand(): Command {
       'a self-ensemble to measure whether consensus strategies add value.',
     )
     .option('--model <provider:model>', 'Model to evaluate.', DEFAULT_MODEL)
-    .option('--judge-model <provider:model>', 'Model for LLM judge evaluation (defaults to gemini-3-flash-preview).', DEFAULT_JUDGE_MODEL)
+    .option('--judge-model <provider:model>', 'Model for LLM judge evaluation (defaults to gemini-2.5-flash).', DEFAULT_JUDGE_MODEL)
     .option('--ensemble <count>', 'Number of ensemble instances.', String(DEFAULT_ENSEMBLE_SIZE))
     .option('--strategies <strategies...>', 'Consensus strategies (standard,elo,majority,council). Comma-separated.')
     .option('--datasets <datasets...>', 'Datasets to evaluate. Comma-separated. Defaults to all.')

@@ -27,8 +27,8 @@ describe('quickEval', () => {
 
   it('has default option values', () => {
     const opts = parseOpts([]);
-    expect(opts.model).toBe('google:gemini-flash-lite-latest');
-    expect(opts.judgeModel).toBe('google:gemini-3-flash-preview');
+    expect(opts.model).toBe('google:gemini-2.5-flash-lite');
+    expect(opts.judgeModel).toBe('google:gemini-2.5-flash');
     expect(opts.ensemble).toBe('3');
     expect(opts.sample).toBe('50');
     expect(opts.mode).toBe('free');

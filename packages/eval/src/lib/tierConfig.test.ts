@@ -146,14 +146,14 @@ describe('HOMOGENEOUS_CI_TIER_CONFIG', () => {
     expect(HOMOGENEOUS_CI_TIER_CONFIG.models).toHaveLength(3);
     for (const model of HOMOGENEOUS_CI_TIER_CONFIG.models) {
       expect(model.provider).toBe('google');
-      expect(model.model).toBe('gemini-3-flash-preview');
+      expect(model.model).toBe('gemini-2.5-flash');
     }
   });
 
   it('uses the same model as summarizer', () => {
     expect(HOMOGENEOUS_CI_TIER_CONFIG.summarizer).toEqual({
       provider: 'google',
-      model: 'gemini-3-flash-preview',
+      model: 'gemini-2.5-flash',
     });
   });
 
@@ -188,7 +188,7 @@ describe('HOMOGENEOUS_POST_MERGE_TIER_CONFIG', () => {
     expect(HOMOGENEOUS_POST_MERGE_TIER_CONFIG.models).toHaveLength(3);
     for (const model of HOMOGENEOUS_POST_MERGE_TIER_CONFIG.models) {
       expect(model.provider).toBe('google');
-      expect(model.model).toBe('gemini-3-flash-preview');
+      expect(model.model).toBe('gemini-2.5-flash');
     }
   });
 
