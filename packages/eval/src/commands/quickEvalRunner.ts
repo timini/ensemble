@@ -73,7 +73,9 @@ async function runSingleBaseline(args: RunDatasetArgs): Promise<PromptRunResult[
   const result = await runner.run({
     questions, outputPath: '/dev/null', output: singleOutput,
     onProgress: (p) => {
-      process.stderr.write(`  [${datasetName}] single [${p.completed}/${p.total}] ${p.questionId}\n`);
+      const q = p.queuedMs !== undefined ? `${(p.queuedMs / 1000).toFixed(1)}s` : '?';
+      const r = p.runMs !== undefined ? `${(p.runMs / 1000).toFixed(1)}s` : '?';
+      process.stderr.write(`  [${datasetName}] single [${p.completed}/${p.total}] queued=${q} run=${r} ${p.questionId}\n`);
     },
   });
 
@@ -104,7 +106,9 @@ async function runEnsemble(args: RunDatasetArgs): Promise<PromptRunResult[]> {
   const result = await runner.run({
     questions, outputPath: '/dev/null', output: ensembleOutput,
     onProgress: (p) => {
-      process.stderr.write(`  [${datasetName}] ensemble (${stratList}) [${p.completed}/${p.total}] ${p.questionId}\n`);
+      const q = p.queuedMs !== undefined ? `${(p.queuedMs / 1000).toFixed(1)}s` : '?';
+      const r = p.runMs !== undefined ? `${(p.runMs / 1000).toFixed(1)}s` : '?';
+      process.stderr.write(`  [${datasetName}] ensemble (${stratList}) [${p.completed}/${p.total}] queued=${q} run=${r} ${p.questionId}\n`);
     },
   });
   return result.runs;

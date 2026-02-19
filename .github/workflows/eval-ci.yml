@@ -17,7 +17,7 @@ jobs:
   eval-ci:
     name: Eval Quick Check
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 30
     env:
       GOOGLE_API_KEY: ${{ secrets.TEST_GOOGLE_API_KEY }}
       HF_TOKEN: ${{ secrets.HF_TOKEN }}
@@ -48,7 +48,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: packages/eval/datasets
-          key: eval-datasets-${{ hashFiles('packages/eval/src/lib/benchmarkDatasetLoaders.ts') }}
+          key: eval-datasets-v1
           restore-keys: eval-datasets-
 
       - name: Restore single-model baseline cache

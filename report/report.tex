@@ -33,9 +33,9 @@
 
 \begin{abstract}
 We present an empirical study of multi-model LLM ensembles, investigating whether data-driven model selection can produce ensembles that reliably outperform the best individual model.
-Through a four-phase experiment---model census (20 models, 3 datasets), strength-band analysis, candidate ensemble formation, and full benchmarking (n=40)---we find that ensembles consistently beat the best individual on knowledge/reasoning tasks (TruthfulQA: 5/5 configurations, +2.5 to +7.5 percentage points) but fail on mathematical tasks (GSM8K: 0/5 wins) due to consensus mechanism limitations rather than lack of complementary signal.
-Oracle ceiling analysis (85--100\% across configurations) confirms that complementary information exists; the bottleneck is extracting it through effective consensus.
-We provide concrete recommendations for production ensemble systems.
+Through a four-phase experiment---model census (20 models, 3 datasets), strength-band analysis, candidate ensemble formation, and full benchmarking (n=40)---we observe that ensembles appear to beat the best individual on knowledge/reasoning tasks (TruthfulQA: 5/5 configurations, +2.5 to +7.5 percentage points) but fail on mathematical tasks (GSM8K: 0/5 wins).
+\textbf{Important caveat}: at our sample sizes ($n=10$--$40$ per dataset), confidence intervals exceed $\pm$14pp, meaning none of these differences are statistically significant. All findings should be treated as directional hypotheses requiring validation at $n \geq 200$.
+Oracle ceiling analysis suggests complementary information exists; the bottleneck appears to be extracting it through effective consensus.
 \end{abstract}
 
 % ================================================================
@@ -345,6 +345,73 @@ Worst case & $-10.0$pp & $0.0$pp & $-2.5$pp \\
 Self-consistency \textbf{hurts} GSM8K performance (first answer is usually correct for math) but provides modest gains on knowledge tasks.
 The best self-consistency result (+10.0pp for gpt-5-nano K=5 on TruthfulQA) exceeds most ensemble gains, but is less consistent across models.
 
+\subsection{Self-Consistency: Literature Review}
+\label{sec:sc_literature}
+
+Our empirical self-consistency results above are consistent with a substantial body of research establishing self-consistency as one of the most effective inference-time techniques for improving LLM accuracy.
+
+\paragraph{The Foundational Result.}
+Wang et al.\ (2023, ICLR) introduced self-consistency in ``Self-Consistency Improves Chain of Thought Reasoning in Language Models.''
+The core idea: sample multiple diverse reasoning paths from a single model using temperature $> 0$, then select the most frequent answer via majority vote.
+This marginalizes over reasoning chains, exploiting the fact that correct reasoning paths converge on the same answer while incorrect paths scatter across different wrong answers.
+
+Results on PaLM-540B showed dramatic improvements over chain-of-thought (CoT) baselines:
+
+\begin{table}[htbp]
+\centering
+\caption{Self-consistency gains over CoT baseline (Wang et al., PaLM-540B, 40 paths).}
+\label{tab:sc_wang}
+\begin{tabular}{lrrr}
+\toprule
+\textbf{Benchmark} & \textbf{CoT Baseline} & \textbf{+ Self-Consistency} & \textbf{Gain} \\
+\midrule
+GSM8K & 56.5\% & 74.4\% & +17.9pp \\
+SVAMP & 79.0\% & 86.6\% & +7.6pp \\
+AQuA & 35.8\% & 48.3\% & +12.5pp \\
+StrategyQA & 75.3\% & 81.6\% & +6.3pp \\
+ARC-Challenge & 85.2\% & 88.7\% & +3.5pp \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Gains scaled with model size: UL2-20B saw 3--6pp improvements, while PaLM-540B achieved 4--18pp gains.
+The optimal temperature range was $T=0.5$--$0.7$ with top-$k=40$.
+
+\paragraph{Diminishing Returns and Sample Efficiency.}
+The original paper evaluated 1, 5, 10, 20, and 40 sampled paths.
+Performance improves monotonically but with strongly diminishing returns: the largest jump is from 1 to 5 samples, with smaller incremental gains beyond 10--20.
+
+Recent work has focused on achieving equivalent accuracy with fewer samples:
+
+\begin{itemize}
+    \item \textbf{Confidence-Informed Self-Consistency (CISC)} (Taubenfeld et al., ACL 2025 Findings): Uses the model's own confidence scores ($P(\text{True})$) for weighted majority voting. On 9 models across GSM8K, MATH, MMLU-Pro, and Big-Bench-Hard, CISC with 10 samples matched standard SC requiring 15--21 samples---a 34--53\% cost reduction.
+
+    \item \textbf{Reasoning-Aware Self-Consistency (RASC)} (NAACL 2025): Assesses reasoning path quality (not just final answers) for early stopping. Reduces sample usage by $\sim$70\% while maintaining accuracy.
+
+    \item \textbf{Difficulty-Adaptive Self-Consistency} (NAACL 2025): Adaptively allocates samples based on query difficulty, reducing budget by up to 6$\times$ with $<$0.1\% accuracy loss across 13 datasets.
+\end{itemize}
+
+\paragraph{Universal Self-Consistency (USC).}
+Chen et al.\ (2023, Google DeepMind) extended self-consistency to free-form text tasks where exact answer matching is impossible.
+USC concatenates all sampled responses and asks the LLM itself to select the most consistent answer---performing semantic comparison rather than string matching.
+USC matched standard SC on math/code tasks and enabled self-consistency on summarization, open QA, and TruthfulQA (achieving the highest truthfulness and informativeness over baselines).
+
+\paragraph{When Self-Consistency Fails.}
+Self-consistency is not universally beneficial.
+A 2025 study on reasoning faithfulness found that Claude Opus 4.5 showed an \textbf{inverse relationship}: accuracy \emph{dropped} 3.7pp with $K=5$ while faithfulness surged (+230\%), breaking 23\% of previously-correct easy problems through ``overthinking.''
+Models near ceiling accuracy (e.g., DeepSeek-v3.2 at 98--99\% on GSM8K) see negligible gains.
+The technique works best when models are good-but-not-perfect and when errors are stochastic rather than systematic.
+
+\paragraph{Self-Consistency vs.\ Heterogeneous Ensembles.}
+Wang et al.\ found that a typical model-ensemble approach (averaging predictions from multiple models) performs \emph{much worse} than self-consistency, because lower-capacity models drag down the stronger model's signal.
+LLM-TOPLA (EMNLP 2024) confirmed this but showed that \textbf{optimized subsets} of 2--4 diverse models can outperform both naive ensembles and single-model SC.
+The ICLR 2024 paper ``Large Language Models Cannot Self-Correct Reasoning Yet'' found that multi-agent debate provides \textbf{no additional benefit} over simple self-consistency when controlling for the same number of model calls.
+
+\paragraph{Implications for Our System.}
+Our empirical results (Table~\ref{tab:sc_summary}) showing SC hurts GSM8K but helps TruthfulQA are consistent with the literature: SC works best on knowledge/reasoning tasks with diverse answer spaces and is less effective on math where greedy decoding often finds the correct answer on the first try.
+The key parameters validated by the literature---$T=0.5$--$0.7$, $K=5$ as the minimum useful ensemble, and majority vote as the aggregation method---align with our current implementation defaults ($T=0.7$, $K=5$, majority vote).
+The research strongly supports continuing with self-consistency as a baseline, while pursuing heterogeneous ensembles with diverse providers for complementary error patterns.
+
 % ================================================================
 \section{Related Work and External Critique}
 \label{sec:related}
@@ -420,14 +487,72 @@ The 3-model ensembles performed as well as 4-model ensembles (Band-A (3) and Ban
 Adding a fourth model increases cost and latency without improving accuracy.
 This is consistent with the diminishing-returns property of ensemble methods.
 
-\subsection{Limitations}
+\subsection{Statistical Soundness}
+\label{sec:stats}
+
+\textbf{The results in this report are not statistically significant.}
+We present them as directional observations, not as evidence of real effects.
+All headline findings should be treated as hypotheses requiring validation at larger sample sizes.
+
+\paragraph{Confidence Intervals.}
+For a binomial proportion $\hat{p}$ with $n$ trials, the standard error is $\text{SE} = \sqrt{\hat{p}(1-\hat{p})/n}$ and the approximate 95\% confidence interval is $\hat{p} \pm 1.96 \cdot \text{SE}$.
+
+\begin{table}[htbp]
+\centering
+\caption{95\% confidence interval widths at various sample sizes (assuming $p = 0.7$).}
+\label{tab:ci_widths}
+\begin{tabular}{rrrl}
+\toprule
+$n$ & SE & 95\% CI width & Interpretation \\
+\midrule
+10 & 14.5\% & $\pm$28.4pp & Cannot distinguish 42\% from 98\% \\
+40 & 7.2\% & $\pm$14.2pp & Cannot detect $<$15pp differences \\
+50 & 6.5\% & $\pm$12.7pp & Marginal; only large effects visible \\
+100 & 4.6\% & $\pm$9.0pp & Minimum for meaningful comparison \\
+500 & 2.0\% & $\pm$4.0pp & Good precision \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+At our current sample sizes ($n=10$--$40$ per dataset), the confidence intervals are so wide that observed differences of 2--8 percentage points are \textbf{entirely consistent with random chance}.
+The +7.5pp TruthfulQA gain (our strongest result) falls within the 95\% CI noise floor at $n=40$.
+
+\paragraph{Required Sample Sizes.}
+Using a two-proportion $z$-test for comparing single vs.\ ensemble accuracy (both at $\sim$70\%) with 80\% power at $\alpha = 0.05$:
+
+\begin{itemize}
+    \item To detect a \textbf{5pp} difference: $n \geq 783$ per condition
+    \item To detect a \textbf{10pp} difference: $n \geq 199$ per condition
+    \item To detect a \textbf{15pp} difference: $n \geq 90$ per condition
+\end{itemize}
+
+Even the most optimistic ensemble gain we report (+7.5pp) would require $n \approx 350$ per condition to confirm as real with statistical confidence.
+
+\paragraph{Variance Sources.}
+Multiple sources of variance compound the problem:
+\begin{enumerate}
+    \item \textbf{Question sampling}: Different random subsets yield different accuracy estimates. With $n=10$, a single hard or easy question shifts accuracy by 10pp.
+    \item \textbf{Model non-determinism}: Even at temperature~0, API responses vary across calls due to batching, quantization, and infrastructure changes.
+    \item \textbf{LLM judge variance}: The judge model's extraction/grading introduces additional noise, particularly for free-form answers.
+    \item \textbf{Dataset bias}: TruthfulQA places the correct answer at index~0 for all 817 questions (ground truth always ``A''). Without choice shuffling, any positional bias inflates accuracy.
+\end{enumerate}
+
+\paragraph{Path Forward.}
+To produce statistically meaningful results, future evaluations should:
+\begin{enumerate}
+    \item Increase sample size to $n \geq 200$ per dataset (detects 10pp effects).
+    \item Report Wilson confidence intervals alongside point estimates.
+    \item Use paired tests (McNemar's test) to compare single vs.\ ensemble on the same questions, which increases statistical power by controlling for question difficulty.
+    \item Run multiple independent trials to estimate run-to-run variance.
+    \item Shuffle answer choices for MCQ datasets to eliminate positional bias.
+\end{enumerate}
+
+\subsection{Other Limitations}
 
 \begin{enumerate}
-    \item \textbf{Sample size}: At $n=40$, each question represents 2.5 percentage points. Gains of +2.5pp are within noise.
     \item \textbf{GPQA coverage}: Only 2/5 GPQA configurations completed cleanly due to API reliability issues. GPQA conclusions are tentative.
-    \item \textbf{No statistical testing}: The small sample size makes McNemar's test and bootstrap confidence intervals underpowered.
     \item \textbf{Consensus implementation}: Standard/ELO strategies generate free text. A structured extraction pipeline could change results significantly.
-    \item \textbf{API variability}: Model accuracy varied between census ($n=20$) and benchmark ($n=40$) runs, indicating non-trivial sampling variance.
+    \item \textbf{Homogeneous ensembles}: Current quick-eval uses 5 copies of the same model. The literature and our earlier heterogeneous results both suggest that cross-provider ensembles with diverse error patterns are necessary for meaningful gains.
 \end{enumerate}
 
 % ================================================================
@@ -446,7 +571,7 @@ For production ensemble systems:
 
 For future research:
 \begin{enumerate}
-    \item Increase sample size to $n \geq 100$ for statistically meaningful comparisons.
+    \item Increase sample size to $n \geq 200$ per dataset for statistically meaningful comparisons (see Section~\ref{sec:stats}).
     \item Implement structured answer extraction before consensus for numeric tasks.
     \item Test adaptive (embedding-based) per-question model selection.
     \item Investigate weighted voting based on measured per-model accuracy.
@@ -456,13 +581,18 @@ For future research:
 \section{Conclusion}
 \label{sec:conclusion}
 
-Data-driven ensemble selection produces LLM ensembles that reliably beat the best individual model on knowledge/reasoning tasks.
-On TruthfulQA, all five tested configurations outperformed the best individual (up to +7.5pp), with the cross-provider ensemble achieving 92.5\%---matching the theoretical oracle ceiling.
+Our experiments suggest that data-driven ensemble selection \emph{may} produce LLM ensembles that outperform the best individual model on knowledge/reasoning tasks.
+On TruthfulQA, all five tested configurations outperformed the best individual (up to +7.5pp), with the cross-provider ensemble achieving 92.5\%.
 
-The primary barrier to broader ensemble value is not lack of complementary signal (oracle ceilings reach 85--100\%) but the consensus mechanism's ability to extract it.
-Simple mechanical majority vote performs as well as LLM-synthesized consensus on MCQ tasks and avoids the catastrophic failures seen on numeric tasks.
+However, as discussed in Section~\ref{sec:stats}, \textbf{none of these results are statistically significant} at our current sample sizes.
+The observed gains of 2.5--7.5pp fall well within the $\pm$14pp confidence interval at $n=40$.
+The high variance in our results---particularly the complete divergence between task types---may reflect noise rather than genuine effects.
 
-These results support deploying multi-model ensembles in production for knowledge-intensive tasks, using cross-provider model selection, majority vote consensus, and 3-model configurations as sensible defaults.
+Two findings we have higher confidence in, because they are directional and consistent across configurations:
+(1) majority vote is at least as good as LLM-synthesized consensus on MCQ tasks and avoids catastrophic failures on numeric tasks;
+(2) oracle ceiling analysis confirms complementary signal exists between diverse models, even if our consensus mechanisms cannot yet reliably extract it.
+
+The path to meaningful results requires larger sample sizes ($n \geq 200$), paired statistical tests, multiple independent trials, and heterogeneous cross-provider ensembles.
 
 % ================================================================
 \appendix

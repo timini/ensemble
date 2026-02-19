@@ -72,7 +72,7 @@ export function createQuickEvalCommand(): Command {
     .option('--no-parallel', 'Run datasets sequentially instead of in parallel.')
     .option('--baseline <path>', 'Path to baseline JSON. Saves results and fails on regression.')
     .option('--significance <alpha>', 'Significance level for regression detection (0 < alpha < 1).', '0.10')
-    .option('--concurrency <count>', 'Initial max concurrent questions (auto-adapts via AIMD).', '100')
+    .option('--concurrency <count>', 'Initial max concurrent questions (auto-adapts via AIMD).', '50')
     .action(async (options: QuickEvalOptions) => {
       const { provider, model: modelName } = parseModelSpec(options.model);
       const model = options.model;
@@ -117,7 +117,7 @@ export function createQuickEvalCommand(): Command {
       registerProviders(registry, [...providers], mode);
 
       const monitor = new SystemMonitor();
-      const limiter = new ConcurrencyLimiter({ initial: initialConcurrency, min: 5, max: 500, monitor });
+      const limiter = new ConcurrencyLimiter({ initial: initialConcurrency, min: 1, max: 500, monitor });
 
       const startTime = Date.now();
       const log = (s: string) => process.stderr.write(s);
@@ -152,11 +152,19 @@ export function createQuickEvalCommand(): Command {
         judgeProvider, judgeModelName,
       }));
 
+      limiter.startStatsReporter(1_000);
+
       const allDatasetResults = parallel
         ? await Promise.all(runArgs.map((a) => runDataset(a, true)))
         : await runArgs.reduce<Promise<DatasetResult[]>>(
             async (acc, a) => [...(await acc), await runDataset(a, false)], Promise.resolve([]),
           );
+
+      limiter.stop();
+      const finalStats = limiter.getStats();
+      const wallSec = Math.round((Date.now() - startTime) / 1000);
+      log(`\n  [limiter final] ${finalStats.completed} tasks in ${wallSec}s (${(finalStats.completed / Math.max(wallSec, 1)).toFixed(1)}/s avg) | 429s: ${finalStats.rateLimits}\n`);
+
       printResults(model, ensembleSize, strategies, allDatasetResults, Date.now() - startTime);
 
       if (options.baseline) {
@@ -168,7 +176,7 @@ export function createQuickEvalCommand(): Command {
           const result = checkRegression(previous, current, significanceLevel);
           printRegressionReport(result);
           if (!result.passed) {
-            await saveBaseline(options.baseline, current);
+            process.stdout.write('  Baseline NOT updated (regression detected).\n');
             process.exitCode = 1;
             return;
           }

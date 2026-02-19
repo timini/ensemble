@@ -19,6 +19,10 @@ export interface BenchmarkRunnerProgress {
   total: number;
   questionId: string;
   skipped: boolean;
+  /** Time spent waiting in the concurrency queue (ms). */
+  queuedMs?: number;
+  /** Time spent actually executing the question (ms). */
+  runMs?: number;
 }
 
 interface BenchmarkRunnerConfig {
@@ -147,14 +151,20 @@ export class BenchmarkRunner {
       let completed = questions.length - pendingQuestions.length;
       const settled = await Promise.allSettled(
         pendingQuestions.map(async (question) => {
+          const dispatchTime = Date.now();
           const runFn = () => this.runQuestion(question);
           const run = this.limiter ? await this.limiter.run(runFn) : await runFn();
+          const totalMs = Date.now() - dispatchTime;
+          const runMs = run.durationMs ?? totalMs;
+          const queuedMs = totalMs - runMs;
           completed += 1;
           onProgress?.({
             completed,
             total: questions.length,
             questionId: question.id,
             skipped: false,
+            queuedMs,
+            runMs,
           });
           return run;
         }),
