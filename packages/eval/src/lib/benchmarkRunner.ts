@@ -11,6 +11,7 @@ import type {
   EvalMode,
   ModelSpec,
   PromptRunResult,
+  ProviderResponse,
   StrategyName,
 } from '../types.js';
 
@@ -39,6 +40,8 @@ interface BenchmarkRunnerConfig {
   parallelQuestions?: boolean;
   /** Shared adaptive concurrency limiter (AIMD). Gates how many questions run at once. */
   limiter?: ConcurrencyLimiter;
+  /** Pre-loaded ensemble response cache (questionId → responses). Skips API calls for cached questions. */
+  ensembleResponseCache?: Map<string, ProviderResponse[]>;
 }
 
 interface RunBenchmarkOptions {
@@ -58,6 +61,7 @@ export class BenchmarkRunner {
   private readonly ensembleRunner: EnsembleRunner;
   private readonly parallelQuestions: boolean;
   private readonly limiter: ConcurrencyLimiter | undefined;
+  private readonly ensembleResponseCache: Map<string, ProviderResponse[]> | undefined;
 
   constructor(config: BenchmarkRunnerConfig) {
     this.mode = config.mode;
@@ -68,6 +72,7 @@ export class BenchmarkRunner {
     this.summarizer = config.summarizer;
     this.parallelQuestions = config.parallelQuestions ?? false;
     this.limiter = config.limiter;
+    this.ensembleResponseCache = config.ensembleResponseCache;
     this.ensembleRunner = new EnsembleRunner(config.registry, config.mode, {
       requestDelayMs: config.requestDelayMs,
       temperature: config.temperature,
@@ -79,7 +84,8 @@ export class BenchmarkRunner {
   private async runQuestion(question: BenchmarkQuestion): Promise<PromptRunResult> {
     const questionStart = Date.now();
 
-    const responses = await this.ensembleRunner.runPrompt(
+    const cachedResponses = this.ensembleResponseCache?.get(question.id);
+    const responses = cachedResponses ?? await this.ensembleRunner.runPrompt(
       question.prompt,
       this.models,
     );

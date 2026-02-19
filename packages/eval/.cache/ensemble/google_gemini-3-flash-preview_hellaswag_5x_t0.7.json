@@ -1,0 +1,4010 @@
+{
+  "model": "google:gemini-3-flash-preview",
+  "dataset": "hellaswag",
+  "ensembleSize": 5,
+  "temperature": 0.7,
+  "createdAt": "2026-02-19T18:30:44.227Z",
+  "updatedAt": "2026-02-19T18:30:44.227Z",
+  "entries": [
+    {
+      "questionId": "hellaswag-8798",
+      "responses": [
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The correct answer is **C**.",
+          "responseTimeMs": 3240,
+          "tokenCount": 558
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The correct answer is **C**.\n\n**Reasoning:** \nOption C provides logical and practical advice following the instruction to apply nail polish remover. Since nail polish remover contains acetone, which can be harsh or damaging to certain fabrics and glues, it is standard procedure in cleaning guides to suggest using small amounts and performing a test area first to ensure the material isn't ruined. The other options contain illogical steps (like \"applying the stain\" in B) or irrelevant information (like \"concealer\" in D).",
+          "responseTimeMs": 4151,
+          "tokenCount": 772
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **C**.",
+          "responseTimeMs": 2682,
+          "tokenCount": 549
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The correct answer is **C**.\n\n**Reasoning:**\nOption C provides logical and practical advice that directly follows the title \"Add some nail polish remover to the stain.\" It warns the user to use small amounts and perform a test area, which is a standard safety precaution when using acetone (nail polish remover) on fabrics. The other options contain nonsensical instructions, such as applying a stain (Option B), using \"concealer\" (Option D), or creating \"cleaning scum\" (Option A).",
+          "responseTimeMs": 3714,
+          "tokenCount": 745
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **C**.",
+          "responseTimeMs": 3835,
+          "tokenCount": 725
+        }
+      ]
+    },
+    {
+      "questionId": "hellaswag-4331",
+      "responses": [
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **B**.",
+          "responseTimeMs": 2984,
+          "tokenCount": 603
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **B**.",
+          "responseTimeMs": 3509,
+          "tokenCount": 732
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The correct answer is **B**.\n\n**Reasoning:**\nThe step emphasizes that becoming \"awesome\" requires investing a lot of time. Option B directly follows this thought by addressing the difficulty of the process (\"Who ever said that being awesome was easy?\") and providing specific details about the time investment required for mastery (the 10,000-hour rule), making it the most logical and thematic continuation.",
+          "responseTimeMs": 3755,
+          "tokenCount": 801
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **B**.",
+          "responseTimeMs": 3245,
+          "tokenCount": 659
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **B**.",
+          "responseTimeMs": 2682,
+          "tokenCount": 590
+        }
+      ]
+    },
+    {
+      "questionId": "hellaswag-8191",
+      "responses": [
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "B",
+          "responseTimeMs": 2981,
+          "tokenCount": 635
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **B**.",
+          "responseTimeMs": 3717,
+          "tokenCount": 668
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "B",
+          "responseTimeMs": 3369,
+          "tokenCount": 589
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "B",
+          "responseTimeMs": 3291,
+          "tokenCount": 623
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **B**.",
+          "responseTimeMs": 3716,
+          "tokenCount": 714
+        }
+      ]
+    },
+    {
+      "questionId": "hellaswag-4459",
+      "responses": [
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "C",
+          "responseTimeMs": 3505,
+          "tokenCount": 707
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The correct answer is **C**.\n\n**Reasoning:**\nThe prompt describes a guide on how to remove dye from skin. After the initial advice to act fast (Step 1), the most logical next part of the guide is to suggest a specific method for removal. Option C provides a new title and step introducing baking soda or toothpaste as a cleaning agent, which is a common and effective method for removing dye from skin. Options A and D focus more on the hair itself, and Option B provides incorrect advice that contradicts the goal of the guide.",
+          "responseTimeMs": 3820,
+          "tokenCount": 728
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The correct answer is **C**.",
+          "responseTimeMs": 3366,
+          "tokenCount": 652
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **C**.",
+          "responseTimeMs": 2978,
+          "tokenCount": 621
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **C**.",
+          "responseTimeMs": 3841,
+          "tokenCount": 764
+        }
+      ]
+    },
+    {
+      "questionId": "hellaswag-5581",
+      "responses": [
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "A",
+          "responseTimeMs": 3757,
+          "tokenCount": 768
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **A**.",
+          "responseTimeMs": 3607,
+          "tokenCount": 688
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **A**.",
+          "responseTimeMs": 3401,
+          "tokenCount": 683
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **A**.",
+          "responseTimeMs": 3662,
+          "tokenCount": 748
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **A**.",
+          "responseTimeMs": 3838,
+          "tokenCount": 768
+        }
+      ]
+    },
+    {
+      "questionId": "hellaswag-7926",
+      "responses": [
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **D**.",
+          "responseTimeMs": 3243,
+          "tokenCount": 639
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **D**.",
+          "responseTimeMs": 2930,
+          "tokenCount": 623
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **D**.",
+          "responseTimeMs": 2665,
+          "tokenCount": 582
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **D**.",
+          "responseTimeMs": 3036,
+          "tokenCount": 552
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **D**.",
+          "responseTimeMs": 3371,
+          "tokenCount": 644
+        }
+      ]
+    },
+    {
+      "questionId": "hellaswag-9644",
+      "responses": [
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "B",
+          "responseTimeMs": 2989,
+          "tokenCount": 601
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **B**.",
+          "responseTimeMs": 3400,
+          "tokenCount": 707
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **B**.",
+          "responseTimeMs": 3834,
+          "tokenCount": 682
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **B**.",
+          "responseTimeMs": 4146,
+          "tokenCount": 727
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The correct answer is **B**.",
+          "responseTimeMs": 3190,
+          "tokenCount": 641
+        }
+      ]
+    },
+    {
+      "questionId": "hellaswag-8863",
+      "responses": [
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **B**.\n\n**Reasoning:**\n*   **Option B** provides clear, logical instructions that directly follow the step of washing hands and face. It correctly suggests using regular soap for hands and a specific facial cleanser for the skin.\n*   **Option A** uses the word \"otherwise\" incorrectly, making the sentence structure confusing.\n*   **Option C** is factually incorrect because it lists **atorvastatin** (a prescription cholesterol medication) as a facial cleanser.\n*   **Option D** contains a contradiction, telling the reader to \"turn off the faucet\" but then to wash \"under running water.\"",
+          "responseTimeMs": 4186,
+          "tokenCount": 819
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **B**.",
+          "responseTimeMs": 3756,
+          "tokenCount": 747
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **B**.",
+          "responseTimeMs": 3401,
+          "tokenCount": 756
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **B**.",
+          "responseTimeMs": 3510,
+          "tokenCount": 711
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **B**.",
+          "responseTimeMs": 3765,
+          "tokenCount": 749
+        }
+      ]
+    },
+    {
+      "questionId": "hellaswag-5905",
+      "responses": [
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **D**.",
+          "responseTimeMs": 2870,
+          "tokenCount": 556
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The best option is **D**.\n\n**Reasoning:**\nOption D directly supports the goal of setting a \"firm bedtime\" by emphasizing consistency (even on weekends) and providing a practical strategy for children with ADHD, who often struggle with transitions. Reminding the child an hour before bedtime helps them prepare mentally for the change in activity. The other options are either nonsensical (A), counterproductive to sleep hygiene (B), or contradict the principle of a firm, consistent schedule (C).",
+          "responseTimeMs": 3426,
+          "tokenCount": 678
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **D**.",
+          "responseTimeMs": 3123,
+          "tokenCount": 632
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "D",
+          "responseTimeMs": 2683,
+          "tokenCount": 561
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The correct answer is **D**.",
+          "responseTimeMs": 3034,
+          "tokenCount": 622
+        }
+      ]
+    },
+    {
+      "questionId": "hellaswag-7246",
+      "responses": [
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **A**.",
+          "responseTimeMs": 4041,
+          "tokenCount": 798
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **A**.",
+          "responseTimeMs": 3561,
+          "tokenCount": 691
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The best option is **A**.\n\n**Reasoning:** The text describes the problem of a spouse staying in \"lawyer mode\" (hiding emotions, attacking arguments, etc.). Option A provides a logical next step by suggesting a constructive way to address this behavior—talking about it when both parties are calm—and offers specific, polite language to use. Options B, C, and D either introduce unrelated topics or shift the tone away from the specific advice being given.",
+          "responseTimeMs": 3909,
+          "tokenCount": 723
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **A**.",
+          "responseTimeMs": 4096,
+          "tokenCount": 776
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option letter is **A**.",
+          "responseTimeMs": 3885,
+          "tokenCount": 713
+        }
+      ]
+    },
+    {
+      "questionId": "hellaswag-1175",
+      "responses": [
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The correct answer is **D**.",
+          "responseTimeMs": 4197,
+          "tokenCount": 674
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "D",
+          "responseTimeMs": 6172,
+          "tokenCount": 1050
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "D",
+          "responseTimeMs": 3661,
+          "tokenCount": 628
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "D",
+          "responseTimeMs": 4095,
+          "tokenCount": 645
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "D",
+          "responseTimeMs": 3993,
+          "tokenCount": 621
+        }
+      ]
+    },
+    {
+      "questionId": "hellaswag-9880",
+      "responses": [
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option letter is **A**.",
+          "responseTimeMs": 3606,
+          "tokenCount": 678
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **A**.",
+          "responseTimeMs": 2933,
+          "tokenCount": 620
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **A**.",
+          "responseTimeMs": 3562,
+          "tokenCount": 687
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **A**.",
+          "responseTimeMs": 3460,
+          "tokenCount": 656
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **A**.",
+          "responseTimeMs": 3191,
+          "tokenCount": 670
+        }
+      ]
+    },
+    {
+      "questionId": "hellaswag-1134",
+      "responses": [
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "B",
+          "responseTimeMs": 4465,
+          "tokenCount": 682
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **B**.",
+          "responseTimeMs": 4834,
+          "tokenCount": 701
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "B",
+          "responseTimeMs": 3401,
+          "tokenCount": 381
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "B",
+          "responseTimeMs": 3188,
+          "tokenCount": 370
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "B",
+          "responseTimeMs": 3034,
+          "tokenCount": 392
+        }
+      ]
+    },
+    {
+      "questionId": "hellaswag-1653",
+      "responses": [
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "C",
+          "responseTimeMs": 2555,
+          "tokenCount": 316
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "C",
+          "responseTimeMs": 2381,
+          "tokenCount": 339
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "C",
+          "responseTimeMs": 3056,
+          "tokenCount": 452
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "C",
+          "responseTimeMs": 3055,
+          "tokenCount": 410
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "C",
+          "responseTimeMs": 3604,
+          "tokenCount": 567
+        }
+      ]
+    },
+    {
+      "questionId": "hellaswag-1059",
+      "responses": [
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The correct completion for this scenario, based on common datasets (such as HellaSwag) used to test situational logic and video description, is **D**.\n\n**D. holds a leaf blower as he swims.**",
+          "responseTimeMs": 9697,
+          "tokenCount": 1418
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option letter is **A**.",
+          "responseTimeMs": 7133,
+          "tokenCount": 1102
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option letter is **A**.",
+          "responseTimeMs": 7983,
+          "tokenCount": 1255
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The correct completion is **A**.",
+          "responseTimeMs": 9654,
+          "tokenCount": 1585
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The most logical completion for the sequence of actions described is:\n\n**A. gets out of the water and walks to give hugs to people.**\n\n**Reasoning:**\nThe prompt describes a sequence of physical actions (climbing stairs, standing on a board, jumping into a pool) typically found in a home video or vlog. \n- **Option A** follows the natural chronological order of events: after jumping into a pool, the person would eventually get out and interact with others nearby.\n- **Option B** is logically impossible because he cannot watch the footage of himself jumping while he is currently in the process of the jump/swimming.\n- **Option C** describes the jump itself, which was already mentioned in the prompt (\"jumps into the pool\").\n- **Option D** is nonsensical and unrelated to the established context.",
+          "responseTimeMs": 10230,
+          "tokenCount": 1685
+        }
+      ]
+    },
+    {
+      "questionId": "hellaswag-8627",
+      "responses": [
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The best option to complete the text is **D**.\n\n**Reasoning:**\nThe provided text explains what \"traits\" are as part of the step \"Make a list of your traits.\" Option D logically concludes this explanation by defining how these traits collectively form a personality and reiterating the importance of listing them to achieve the goal described in the title. Options A, B, and C contain awkward phrasing or illogical advice (e.g., \"If you don't have traits... you can work on developing your own\" or \"If you don't want people to know, don't describe yourself\"), whereas Option D provides a clear, coherent summary that fits the instructional tone.",
+          "responseTimeMs": 7679,
+          "tokenCount": 1457
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "D",
+          "responseTimeMs": 6498,
+          "tokenCount": 1251
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The correct option is **D**.\n\n**Reasoning:**\nThe text provided follows the structure of an instructional guide (specifically, a WikiHow-style format). The step \"Make a list of your traits\" begins by defining what traits are (stable characteristics that can be positive or negative). Option **D** logically completes this explanation by connecting the concept of individual traits back to the overall goal of the header (\"How to define your personality\"). It explains that personality is the \"sum of all these traits\" and reinforces why listing them is a useful action to take. \n\nOther options are less suitable:\n*   **A** is grammatically incomplete and ends abruptly.\n*   **B** suggests that someone might not have any traits to list, which is logically impossible in the context of personality.\n*   **C** contains contradictory advice (\"don't describe yourself; simply define who you are\") that doesn't clarify the process of listing traits.",
+          "responseTimeMs": 8371,
+          "tokenCount": 1559
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The correct answer is **D**.\n\n**Reasoning:**\nThe text follows the structure of a \"how-to\" guide (similar to WikiHow). The title \"Make a list of your traits\" is followed by a definition of what traits are. Option **D** logically completes this definition by explaining how these traits relate to your overall personality (\"Your personality is the sum of all these traits\") and reinforces the purpose of the step (\"Listing your traits can help you define your personality\"). Options A, B, and C contain grammatical errors, nonsensical advice, or irrelevant information.",
+          "responseTimeMs": 8791,
+          "tokenCount": 1586
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **D**.",
+          "responseTimeMs": 4463,
+          "tokenCount": 815
+        }
+      ]
+    },
+    {
+      "questionId": "hellaswag-5733",
+      "responses": [
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **C**.",
+          "responseTimeMs": 3400,
+          "tokenCount": 688
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The correct answer is **C**.\n\n**Reasoning:**\n*   **Logical Flow:** Option C provides relevant \"[substeps]\" that elaborate on the previously mentioned \"[step]\" regarding jogging and walking as a warm-up. It explains *why* the cardio is necessary and *how* to perform the walking warm-up effectively (keeping the pace fast and swinging arms).\n*   **Inconsistency in other options:**\n    *   **A** introduces a title (\"Stop in the middle of a run\") that contradicts the goal of warming up.\n    *   **B** contains factual errors (100 miles is not 8.9 km) and nonsensical advice for a warm-up.\n    *   **D** is contradictory (\"warm up with a cool down\") and includes irrelevant information about shoe manufacturer policies.",
+          "responseTimeMs": 5347,
+          "tokenCount": 1079
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **C**.",
+          "responseTimeMs": 3370,
+          "tokenCount": 725
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The best option is **C**.\n\n**Reasoning:**\nOption C provides logical substeps that expand upon the initial step (taking a light jog or brisk walk). It explains the necessity of getting the blood pumping and provides specific, practical advice on how to perform a walking warmup effectively (keeping a fast pace and swinging your arms). The other options contain nonsensical information (like a 100-mile jog being 8.9 km in Option B) or irrelevant instructions (like checking a shoe manufacturer's policy in Option D).",
+          "responseTimeMs": 4982,
+          "tokenCount": 1020
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **C**.",
+          "responseTimeMs": 4303,
+          "tokenCount": 851
+        }
+      ]
+    },
+    {
+      "questionId": "hellaswag-9956",
+      "responses": [
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "D",
+          "responseTimeMs": 3091,
+          "tokenCount": 565
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **D**.",
+          "responseTimeMs": 3055,
+          "tokenCount": 613
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The correct answer is **D**.",
+          "responseTimeMs": 3243,
+          "tokenCount": 640
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The correct answer is **D**.\n\n**Reasoning:** The step begins by explaining how to identify oily skin as part of the process of choosing the right foundation for your skin type. Option D logically completes this identification process by describing the characteristics of dry skin and combination skin.",
+          "responseTimeMs": 3056,
+          "tokenCount": 560
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **D**.",
+          "responseTimeMs": 3242,
+          "tokenCount": 698
+        }
+      ]
+    },
+    {
+      "questionId": "hellaswag-3610",
+      "responses": [
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option letter is **A**.",
+          "responseTimeMs": 3503,
+          "tokenCount": 697
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **A**.",
+          "responseTimeMs": 3456,
+          "tokenCount": 623
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The correct answer is **A**.\n\n**Reasoning:**\nOption A follows logically from the previous title (\"Get the hair wet\") and the step explaining when to wet the hair. It provides practical \"substeps\" on how to actually wet the hair (washing or spraying), which complements the instruction. Options B, C, and D are either irrelevant, nonsensical, or contradictory to the established context.",
+          "responseTimeMs": 5469,
+          "tokenCount": 992
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **A**.",
+          "responseTimeMs": 3929,
+          "tokenCount": 737
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "A",
+          "responseTimeMs": 3364,
+          "tokenCount": 627
+        }
+      ]
+    },
+    {
+      "questionId": "hellaswag-5257",
+      "responses": [
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **C**.",
+          "responseTimeMs": 4156,
+          "tokenCount": 796
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The correct answer is **C**.\n\n**Reasoning:**\nOption C provides a logical continuation of the initial step. After mentioning a center part, it offers a variation (side part) as a substep, which fits perfectly with the context of hair styling. It then introduces the next chronological action in the process: \"Separate the front-left section of your hair from the rest.\" The other options contain contradictions (like a \"center part on 1 side\" in A) or irrelevant information (like hairspray in B or greasy hair in D).",
+          "responseTimeMs": 5474,
+          "tokenCount": 976
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **C**.",
+          "responseTimeMs": 4681,
+          "tokenCount": 911
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The correct answer is **C**.\n\n**Explanation:**\nThe sequence follows a logical instructional flow for styling hair. After the initial instruction to start with a center part, Option C provides a helpful alternative (a side part for side bangs) as a substep. It then transitions to the next logical action in the process: separating sections of hair to begin creating the \"fake bangs\" look. Other options contain contradictory information (\"center part on 1 side\") or irrelevant details about hairspray or greasy hair.",
+          "responseTimeMs": 4804,
+          "tokenCount": 939
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The best option is **C**.\n\n**Reasoning:**\nOption C logically follows the initial instruction about parting and brushing the hair. It provides a relevant substep (offering an alternative for side bangs) and then introduces the next logical step in the process (separating a section of hair). Option A contains contradictory language (\"center part on 1 side\"), while options B and D introduce irrelevant information about hairspray or greasy hair that doesn't fit the sequence of the tutorial.",
+          "responseTimeMs": 5391,
+          "tokenCount": 1032
+        }
+      ]
+    },
+    {
+      "questionId": "hellaswag-8765",
+      "responses": [
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The correct option is **C**.\n\n**Reasoning:**\nMaking stollen is a process of baking a traditional German yeast bread. After warming the milk (the previous step), the logical next step in a yeast-based recipe is to activate the yeast. Option C describes this process perfectly: adding sugar and yeast to the warm milk and waiting for it to become frothy. The other options are irrelevant to baking (A mentions Indian flavors/vinegar, B is nonsensical regarding the process, and D discusses \"visual palettes\" and \"dramatic colors\").",
+          "responseTimeMs": 4162,
+          "tokenCount": 814
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The correct answer is **C**.\n\n**Reasoning:** Stollen is a traditional German yeast bread. After warming the milk (the previous step), the logical next step in a bread-making recipe is to activate the yeast. Option C describes this process perfectly: adding sugar and yeast to the warm milk and waiting for it to become frothy. The other options are irrelevant to baking stollen (A mentions Indian flavors, B is nonsensical in this context, and D discusses \"visual palettes\" and colors).",
+          "responseTimeMs": 3867,
+          "tokenCount": 777
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **C**.",
+          "responseTimeMs": 4139,
+          "tokenCount": 781
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The correct answer is **C**.\n\n**Reasoning:** Stollen is a traditional German yeast bread. The instructions describe the typical process of activating yeast: warming milk, adding sugar and yeast, and letting it sit until it becomes frothy. Option C follows the logic of bread-making perfectly, whereas the other options mention irrelevant topics like \"Indian flavor\" (A), \"visual palettes\" (D), or nonsensical bowl descriptions (B).",
+          "responseTimeMs": 4376,
+          "tokenCount": 844
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **C**.",
+          "responseTimeMs": 4141,
+          "tokenCount": 763
+        }
+      ]
+    },
+    {
+      "questionId": "hellaswag-6519",
+      "responses": [
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **D**.",
+          "responseTimeMs": 3723,
+          "tokenCount": 692
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **D**.",
+          "responseTimeMs": 3719,
+          "tokenCount": 706
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **D**.",
+          "responseTimeMs": 3661,
+          "tokenCount": 716
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **D**.",
+          "responseTimeMs": 3272,
+          "tokenCount": 625
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **D**.",
+          "responseTimeMs": 4008,
+          "tokenCount": 784
+        }
+      ]
+    },
+    {
+      "questionId": "hellaswag-928",
+      "responses": [
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "B",
+          "responseTimeMs": 6089,
+          "tokenCount": 908
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "C",
+          "responseTimeMs": 7093,
+          "tokenCount": 1083
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "C",
+          "responseTimeMs": 9214,
+          "tokenCount": 1358
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "C",
+          "responseTimeMs": 6500,
+          "tokenCount": 981
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "C",
+          "responseTimeMs": 7030,
+          "tokenCount": 998
+        }
+      ]
+    },
+    {
+      "questionId": "hellaswag-7950",
+      "responses": [
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **A**.",
+          "responseTimeMs": 3240,
+          "tokenCount": 668
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option letter is A.",
+          "responseTimeMs": 3573,
+          "tokenCount": 668
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option letter is **A**.",
+          "responseTimeMs": 3458,
+          "tokenCount": 663
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The correct answer is **A**.",
+          "responseTimeMs": 3372,
+          "tokenCount": 528
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **A**.",
+          "responseTimeMs": 4041,
+          "tokenCount": 664
+        }
+      ]
+    },
+    {
+      "questionId": "hellaswag-4351",
+      "responses": [
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "C",
+          "responseTimeMs": 2868,
+          "tokenCount": 623
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **C**.",
+          "responseTimeMs": 4519,
+          "tokenCount": 906
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "C",
+          "responseTimeMs": 4493,
+          "tokenCount": 914
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The correct option is **C**.\n\n**Reasoning:**\nThe step discusses how job descriptions and specific language help you determine what to emphasize on your resume. Option C provides a concrete example of this (\"an it project manager with strong networking experience\") and explains how that specific information guides you on what to include or exclude to show you are a fit for the role. This follows the logical flow of the instructions.",
+          "responseTimeMs": 4791,
+          "tokenCount": 963
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **C**.",
+          "responseTimeMs": 4681,
+          "tokenCount": 892
+        }
+      ]
+    },
+    {
+      "questionId": "hellaswag-2898",
+      "responses": [
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The correct answer is **B**.",
+          "responseTimeMs": 7926,
+          "tokenCount": 1214
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The correct completion is **B**.",
+          "responseTimeMs": 6980,
+          "tokenCount": 1037
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "B",
+          "responseTimeMs": 6715,
+          "tokenCount": 1037
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The correct answer is **B**.",
+          "responseTimeMs": 8104,
+          "tokenCount": 1210
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "B",
+          "responseTimeMs": 6344,
+          "tokenCount": 996
+        }
+      ]
+    },
+    {
+      "questionId": "hellaswag-769",
+      "responses": [
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The provided text is a scenario from the SWAG (Situations With Adversarial Generations) dataset, which is used to test commonsense reasoning. The dataset is based on captions from movie descriptions (LSMDC).\n\nIn this specific scenario:\n1.  **A messy kid is eating an ice cream cone.** (The child has his own cone).\n2.  **He bites the parent's ice cream cone.** (The child reaches for the parent's cone as well).\n3.  **The parent...** (The most plausible and original continuation of this action).\n\nAccording to the SWAG dataset and the original movie captions it was derived from, the correct completion is **\"adjusts the cone for the child.\"** This describes the parent's reaction to the child's messy eating or his attempt to bite the cone.\n\n*   **Option A** is nonsensical (\"buy the kid\").\n*   **Option B** is a plausible but incorrect distractor from the original dataset.\n*   **Option D** has a subject-verb agreement error (\"the parent are\").\n\nThe correct completion is **C**.\n\nCorrect Option: **C**",
+          "responseTimeMs": 35213,
+          "tokenCount": 6076
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "B",
+          "responseTimeMs": 4792,
+          "tokenCount": 654
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The context provided is a common example from the HellaSwag dataset, which is used to evaluate common sense reasoning in AI models. The dataset is based on video captions from ActivityNet.\n\nIn the original video and the ground truth caption for this scenario:\n1.  A messy kid is eating an ice cream cone.\n2.  He bites the parent's ice cream cone.\n3.  The parent then **adjusts the cone for the child** to help them eat it more easily.\n\nLooking at the options provided:\n-   **A** is nonsensical.\n-   **B** is a plausible but overly specific distractor.\n-   **C** is the correct ground truth completion from the dataset.\n-   **D** is grammatically incorrect (\"parent are\") and contradicts the context of having a \"cone.\"\n\nC",
+          "responseTimeMs": 43086,
+          "tokenCount": 7327
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "B",
+          "responseTimeMs": 3120,
+          "tokenCount": 418
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **B**.",
+          "responseTimeMs": 4144,
+          "tokenCount": 587
+        }
+      ]
+    },
+    {
+      "questionId": "hellaswag-2522",
+      "responses": [
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "D",
+          "responseTimeMs": 4358,
+          "tokenCount": 471
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "D",
+          "responseTimeMs": 3839,
+          "tokenCount": 549
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "D",
+          "responseTimeMs": 4682,
+          "tokenCount": 538
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "D",
+          "responseTimeMs": 4465,
+          "tokenCount": 629
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "D",
+          "responseTimeMs": 4254,
+          "tokenCount": 533
+        }
+      ]
+    },
+    {
+      "questionId": "hellaswag-3178",
+      "responses": [
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **B**.",
+          "responseTimeMs": 3457,
+          "tokenCount": 456
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "B",
+          "responseTimeMs": 3176,
+          "tokenCount": 428
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "B",
+          "responseTimeMs": 3456,
+          "tokenCount": 513
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The best option is **B**.",
+          "responseTimeMs": 2928,
+          "tokenCount": 441
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option letter is **B**.",
+          "responseTimeMs": 3243,
+          "tokenCount": 431
+        }
+      ]
+    },
+    {
+      "questionId": "hellaswag-2789",
+      "responses": [
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The logical completion of the sequence, based on the context of cleaning a sink and the typical structure of activity descriptions (often found in datasets like HellaSwag), is that she completes the task and then performs a concluding action.\n\nLooking at the options:\n*   **A. grabs a glass and wet it under the sink.** (This introduces a new task and contains a grammatical error: \"wet\" instead of \"wets\").\n*   **B. lathers up her hand and drains it.** (This does not follow the sink-cleaning context logically).\n*   **C. finishes wiping the sink and speaks.** (This logically concludes the repeated action of wiping the sink and adds a common next step in video-based instructions).\n*   **D. puts it under the faucet and rinses it off.** (This is incorrect because you do not rinse off a paper towel; it would disintegrate).\n\nOption C is the most plausible and is the recognized correct completion in the dataset from which this example originates.\n\nThe single best option letter is **C**.",
+          "responseTimeMs": 21454,
+          "tokenCount": 3587
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The sequence describes a person cleaning a sink using paper towels and water. After wiping the sink, wetting it, and wiping it again with another paper towel, the most logical conclusion in the context of a demonstration or a typical activity (often found in datasets like HellaSwag which are based on video descriptions) is that she completes the task and then addresses the viewer or finishes the action.\n\n- **Option A** is irrelevant as it introduces a new task (getting a glass) without completing the current one.\n- **Option B** is nonsensical (\"drains\" her hand).\n- **Option D** is illogical because you do not typically \"rinse off\" a paper towel, especially after using it to wipe a sink.\n- **Option C** provides a natural conclusion to the sequence, where she finishes the cleaning process and speaks (likely to a camera or another person, common in instructional videos).\n\nThe single best option is **C**.",
+          "responseTimeMs": 24016,
+          "tokenCount": 3905
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The correct completion for the sequence of actions is **C**.\n\n**Reasoning:**\nThe sequence describes a person cleaning a sink: first wiping it dry, then wetting it, and then wiping it again. Option **C** (\"finishes wiping the sink and speaks\") is the most logical continuation, as it completes the action already in progress. In datasets like HellaSwag (where this prompt originates), descriptions often conclude with the person finishing the task and then addressing the camera or someone nearby. \n\nOptions A and B introduce new, unrelated tasks (grabbing a glass or lathering hands). Option D is physically illogical because it suggests putting the object being wiped (\"it,\" referring to the sink) under the faucet, which is impossible.\n\nThe single best option letter is **C**.",
+          "responseTimeMs": 24175,
+          "tokenCount": 4128
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The correct answer is **C**.\n\n**Analysis:**\nThe sequence describes a person cleaning a sink using paper towels and water.\n*   **Option A** contains a tense error (\"wet\" instead of \"wets\") and introduces an unrelated action (grabbing a glass) that doesn't follow the cleaning flow.\n*   **Option B** is nonsensical (\"drains it\" in relation to a hand).\n*   **Option D** uses the pronoun \"it,\" but there is no logical antecedent that can be \"put under the faucet\" (you cannot put a sink under its own faucet, and you typically do not rinse a paper towel).\n*   **Option C** (\"finishes wiping the sink and speaks\") provides a logically sound conclusion to the sequence, common in instructional or descriptive video datasets (like SWAG/HellaSwag) where a person completes a task and then addresses the camera.",
+          "responseTimeMs": 11560,
+          "tokenCount": 1877
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The best option is **D**.\n\n**Reasoning:**\nThe sequence describes a person cleaning or interacting with a sink using paper towels.\n1. She wipes the sink (dry).\n2. She wets the sink.\n3. She wipes the sink again with a new paper towel.\n4. The most logical continuation of this physical task in the context of common language modeling datasets (like HellaSwag) is **Option D**, where she continues the action by putting the towel under the faucet. While rinsing a paper towel is less common than rinsing a cloth, it follows the established pattern of physical interaction with the sink and the towel better than the other options, which introduce unrelated objects (a glass), unrelated actions (lathering hands), or dialogue (speaking).",
+          "responseTimeMs": 11075,
+          "tokenCount": 1715
+        }
+      ]
+    },
+    {
+      "questionId": "hellaswag-2710",
+      "responses": [
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "C",
+          "responseTimeMs": 3608,
+          "tokenCount": 452
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "C",
+          "responseTimeMs": 2930,
+          "tokenCount": 419
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "C",
+          "responseTimeMs": 5799,
+          "tokenCount": 910
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option letter is **C**.",
+          "responseTimeMs": 4356,
+          "tokenCount": 599
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "C",
+          "responseTimeMs": 2979,
+          "tokenCount": 413
+        }
+      ]
+    },
+    {
+      "questionId": "hellaswag-2759",
+      "responses": [
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The correct option is **D**.",
+          "responseTimeMs": 6183,
+          "tokenCount": 947
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "D",
+          "responseTimeMs": 6123,
+          "tokenCount": 921
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "D",
+          "responseTimeMs": 5917,
+          "tokenCount": 917
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The correct option is **D**.",
+          "responseTimeMs": 6142,
+          "tokenCount": 968
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The correct answer is **D**.",
+          "responseTimeMs": 6107,
+          "tokenCount": 994
+        }
+      ]
+    },
+    {
+      "questionId": "hellaswag-6844",
+      "responses": [
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "A",
+          "responseTimeMs": 5910,
+          "tokenCount": 1028
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **A**.",
+          "responseTimeMs": 4681,
+          "tokenCount": 840
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "A",
+          "responseTimeMs": 4098,
+          "tokenCount": 751
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **A**.",
+          "responseTimeMs": 3719,
+          "tokenCount": 620
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **A**.",
+          "responseTimeMs": 4093,
+          "tokenCount": 714
+        }
+      ]
+    },
+    {
+      "questionId": "hellaswag-9204",
+      "responses": [
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "C",
+          "responseTimeMs": 3993,
+          "tokenCount": 798
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **C**.",
+          "responseTimeMs": 3506,
+          "tokenCount": 652
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option letter is **C**.",
+          "responseTimeMs": 2931,
+          "tokenCount": 614
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **C**.",
+          "responseTimeMs": 3032,
+          "tokenCount": 631
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **C**.",
+          "responseTimeMs": 3665,
+          "tokenCount": 694
+        }
+      ]
+    },
+    {
+      "questionId": "hellaswag-2049",
+      "responses": [
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The correct option is **B**.\n\nThis prompt is derived from video captioning datasets (such as ActivityNet Captions), which often describe instructional \"How-to\" videos. In this specific case, the video provides a step-by-step guide on **how to decorate a Christmas tree**. After a graphic displaying the number \"2\" (representing the second step) appears on the screen, the video transitions to show the individuals (referred to in the dataset as \"coaches\" or instructors) assisting with the decoration process. \n\nWhile the grammar in option B (\"changes to shows\") is slightly awkward, it is the verbatim description used in the standardized dataset associated with this specific video sequence.",
+          "responseTimeMs": 11972,
+          "tokenCount": 1732
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **B**.",
+          "responseTimeMs": 6278,
+          "tokenCount": 897
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "D",
+          "responseTimeMs": 6012,
+          "tokenCount": 817
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "D",
+          "responseTimeMs": 9218,
+          "tokenCount": 1327
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The correct answer is **D**.\n\nThis description is commonly found in video-to-text and video understanding datasets (such as those used for training and evaluating AI models like ActivityNet or MSR-VTT). In these standardized descriptions, a graphic forming a number is typically followed by a camera movement like a zoom to reveal the full context of the graphic or the transition to the next segment. Option D (\"is then zoomed out completely\") follows the grammatical structure of the sentence fragment provided and describes a standard cinematic transition.",
+          "responseTimeMs": 13951,
+          "tokenCount": 2075
+        }
+      ]
+    },
+    {
+      "questionId": "hellaswag-2226",
+      "responses": [
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The best completion for the sequence of actions provided is **C**.\n\n**Reasoning:**\nThe instructions describe a multi-step process for styling hair. After separating the hair into two parts down the middle and French braiding the first section (\"from left to right all the way to the end\"), the logical next step is to perform the same action on the second section of hair in a symmetrical or corresponding fashion. \n\n*   **Option C** (\"from the back going right to left all the way to the end\") provides a logical parallel to the previous sentence, completing the braid for the second half of the hair.\n*   **Option A** is repetitive and awkwardly phrased.\n*   **Option B** uses nonsensical phrasing (\"when gained\").\n*   **Option D** is completely irrelevant to hair styling (\"pants are on the left side of the head\").",
+          "responseTimeMs": 8338,
+          "tokenCount": 1341
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The most logical continuation of the instructions provided is **C**. \n\nThe passage describes a step-by-step process for styling hair. After separating the hair down the middle and braiding one section from \"left to right,\" the next logical step to complete the hairstyle is to braid the other section in the opposite direction (\"right to left\") to achieve symmetry or a continuous pattern. Options A, B, and D contain nonsensical phrasing or irrelevant information (such as \"pants\").\n\nCorrect Option: **C**",
+          "responseTimeMs": 8627,
+          "tokenCount": 1312
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The correct option is **C**.",
+          "responseTimeMs": 7024,
+          "tokenCount": 1017
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The best option is **C**.\n\n**Explanation:**\nThe instructions describe a process for styling hair that has been separated into two parts. After French braiding the first part from left to right, the logical next step for the second part is to braid it in the opposite direction (from right to left) to complete the style symmetrically. Option C provides this parallel structure, while the other options are either nonsensical (D), grammatically poor (A), or irrelevant (B).",
+          "responseTimeMs": 6003,
+          "tokenCount": 946
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The most logical completion for the description of braiding hair that has been separated into two parts is to describe the second part of the process in a way that parallels the first.\n\n1.  **Analyze the context:** The instructions begin by separating the hair into two parts down the middle. \n2.  **Identify the pattern:** The first part of the braiding is described as \"French braiding hair from left to right all the way to the end.\"\n3.  **Evaluate the options:** \n    *   **Option A** is awkwardly phrased and does not clearly describe a second section of hair.\n    *   **Option B** is nonsensical (\"when gained\").\n    *   **Option D** is completely irrelevant (\"pants are on the left side of the head\").\n    *   **Option C** (\"from the back going right to left all the way to the end\") provides a symmetrical action to the first braid, which fits the initial step of splitting the hair into two parts.\n\nThe correct completion follows the symmetry of the task.\n\nThe single best option letter is **C**.",
+          "responseTimeMs": 14443,
+          "tokenCount": 2610
+        }
+      ]
+    },
+    {
+      "questionId": "hellaswag-1472",
+      "responses": [
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The most logical completion for the sequence of actions described is **A**.\n\nIn the context of a cooking tutorial (which the description \"she prepares... she mixes...\" suggests), \"shows other lemonade recipes\" is a common way to conclude the instruction or provide variations. The other options involve ingredients or actions that are either nonsensical for making lemonade (butter, milk, eggs, or apple juice) or illogical (fetching lemonade she just finished making).\n\n**Correct Option: A**",
+          "responseTimeMs": 12807,
+          "tokenCount": 2113
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The most logical completion for the sequence of events described is **A**.\n\nHere’s a breakdown of why:\n*   **A (shows other lemonade recipes):** This is a common conclusion to a cooking or \"how-to\" demonstration, making it a plausible next step in the narrative.\n*   **B (walks outside to fetch the lemonade):** This is illogical because the text states she has just prepared the lemonade in a pitcher right there at the oven/kitchen.\n*   **C (spreads the butter with milk...):** This introduces ingredients (butter and milk) that are not part of a lemonade recipe, making it nonsensical.\n*   **D (adds two bottles of apple juice and some eggs...):** Eggs are not an ingredient in lemonade, and adding them would be inconsistent with the recipe she is making.\n\nOption A is the most coherent and likely conclusion.",
+          "responseTimeMs": 13569,
+          "tokenCount": 2231
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The most logical completion for the given sequence of actions, which describes the process of making lemonade (likely in a tutorial or cooking video), is Option A.\n\nHere is a breakdown of the options:\n*   **A. shows other lemonade recipes:** This is a common way for cooking tutorials to conclude, by showing variations or related recipes. It is the most plausible and fits the context of a video description.\n*   **B. walks outside to fetch the lemonade:** This is illogical because she has just finished making the lemonade in the pitcher at the oven/kitchen.\n*   **C. spreads the butter with milk, pouring it into jugs and serving it:** This is nonsensical because lemonade does not contain butter or milk, and one does not \"spread\" those ingredients when making a drink.\n*   **D. adds two bottles of apple juice and some eggs to the pitcher:** This is also nonsensical as eggs are not an ingredient in a standard lemonade recipe.\n\nIn many standardized datasets (such as HellaSwag), Option A is the verified correct completion based on the original source video.\n\nA",
+          "responseTimeMs": 40249,
+          "tokenCount": 6873
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The most logical completion for the sequence, based on the context of a cooking or instructional video, is **A**.\n\nIn datasets like HellaSwag (which this question appears to be drawn from), the objective is to identify the most coherent and plausible human-written conclusion. Looking at the options:\n\n*   **A. shows other lemonade recipes:** This is a common way to conclude a \"how-to\" video after the primary recipe is finished.\n*   **B. walks outside to fetch the lemonade:** This is illogical because she has just finished mixing the lemonade in the kitchen.\n*   **C. spreads the butter with milk, pouring it into jugs and serving it:** The mention of butter and milk is nonsensical in the context of making lemonade.\n*   **D. adds two bottles of apple juice and some eggs to the pitcher:** Eggs are not a standard ingredient for lemonade, making this option an unlikely continuation.\n\nOption A provides a coherent and typical ending to the activity described.\n\nThe correct option is **A**.",
+          "responseTimeMs": 32836,
+          "tokenCount": 5440
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The most logical completion for the sequence of actions described is **A**.\n\n**Reasoning:**\n*   The context describes a person following a process to make lemonade (preparing simple syrup, mixing ingredients in a pitcher).\n*   **Option A** fits the structure of an instructional or \"how-to\" video, where after completing a recipe, the host often shows variations or other related recipes.\n*   **Option B** is illogical because she has just finished making the lemonade in the kitchen; there would be no reason to \"fetch\" it from outside.\n*   **Option C** contains nonsensical ingredients for lemonade (butter and milk).\n*   **Option D** contains nonsensical ingredients for lemonade (eggs).\n\nTherefore, Option A is the most plausible continuation.\n\nCorrect Option: **A**",
+          "responseTimeMs": 17693,
+          "tokenCount": 2949
+        }
+      ]
+    },
+    {
+      "questionId": "hellaswag-9665",
+      "responses": [
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **B**.",
+          "responseTimeMs": 3839,
+          "tokenCount": 709
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **B**.",
+          "responseTimeMs": 3940,
+          "tokenCount": 710
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **B**.",
+          "responseTimeMs": 2815,
+          "tokenCount": 513
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "B",
+          "responseTimeMs": 4303,
+          "tokenCount": 743
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **B**.",
+          "responseTimeMs": 3510,
+          "tokenCount": 681
+        }
+      ]
+    },
+    {
+      "questionId": "hellaswag-5542",
+      "responses": [
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **C**.",
+          "responseTimeMs": 3753,
+          "tokenCount": 685
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The best option is **C**.\n\n**Reasoning:**\nOption C logically follows the initial step of painting the styrofoam cone. It provides practical advice relevant to that specific task (not needing to paint the bottom) and general information about the material being used (the height of the cone). The other options are either nonsensical (A), introduce irrelevant materials (B), or provide unnecessary and repetitive instructions (D).",
+          "responseTimeMs": 4536,
+          "tokenCount": 861
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The best option is **C**.\n\n**Reasoning:**\nOption C logically follows the instruction to paint the styrofoam cone. It provides a practical tip (you don't need to paint the bottom since it won't be seen) and mentions the height of the cone, which is a relevant detail for the project. The other options are either nonsensical (A), introduce unrelated materials like felt tracks and black paint (B), or suggest unnecessary steps like a third coat (D).",
+          "responseTimeMs": 8718,
+          "tokenCount": 1601
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **C**.",
+          "responseTimeMs": 3928,
+          "tokenCount": 751
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **C**.",
+          "responseTimeMs": 6451,
+          "tokenCount": 1181
+        }
+      ]
+    },
+    {
+      "questionId": "hellaswag-3210",
+      "responses": [
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "A",
+          "responseTimeMs": 8689,
+          "tokenCount": 1220
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "A.",
+          "responseTimeMs": 9494,
+          "tokenCount": 1357
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "D",
+          "responseTimeMs": 3833,
+          "tokenCount": 470
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "D",
+          "responseTimeMs": 5367,
+          "tokenCount": 690
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "D",
+          "responseTimeMs": 4302,
+          "tokenCount": 602
+        }
+      ]
+    },
+    {
+      "questionId": "hellaswag-9585",
+      "responses": [
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option letter is **C**.",
+          "responseTimeMs": 3373,
+          "tokenCount": 585
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The correct answer is **C**.\n\n**Reasoning:** Option C logically follows the previous sentence by elaborating on the types of toys to look for (moving parts, textures, and sounds) and provides a practical safety tip (sturdy toys without small parts) as a substep. Options A, B, and D are less relevant or contain nonsensical phrasing (e.g., \"let it explore you\" in A or the confusing logic in D).",
+          "responseTimeMs": 5008,
+          "tokenCount": 872
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **C**.",
+          "responseTimeMs": 3763,
+          "tokenCount": 700
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The best option is **C**.",
+          "responseTimeMs": 3664,
+          "tokenCount": 676
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **C**.",
+          "responseTimeMs": 5478,
+          "tokenCount": 693
+        }
+      ]
+    },
+    {
+      "questionId": "hellaswag-8498",
+      "responses": [
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option letter is **D**.",
+          "responseTimeMs": 3121,
+          "tokenCount": 587
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **D**.",
+          "responseTimeMs": 2989,
+          "tokenCount": 558
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **D**.",
+          "responseTimeMs": 3173,
+          "tokenCount": 572
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The correct answer is **D**.",
+          "responseTimeMs": 3453,
+          "tokenCount": 564
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **D**.",
+          "responseTimeMs": 3266,
+          "tokenCount": 532
+        }
+      ]
+    },
+    {
+      "questionId": "hellaswag-2875",
+      "responses": [
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **A**.",
+          "responseTimeMs": 4138,
+          "tokenCount": 590
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **A**.",
+          "responseTimeMs": 3556,
+          "tokenCount": 494
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **A**.",
+          "responseTimeMs": 2981,
+          "tokenCount": 411
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **A**.",
+          "responseTimeMs": 3265,
+          "tokenCount": 445
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **A**.",
+          "responseTimeMs": 5638,
+          "tokenCount": 726
+        }
+      ]
+    },
+    {
+      "questionId": "hellaswag-6549",
+      "responses": [
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The correct option is **D**.\n\n**Reasoning:**\nThe sequence describes the process of installing a wet underfloor heating system. \n1.  **Context:** After laying the insulation and the grooved diffuser plates (the final step provided in the prompt), the next logical phase is to begin the pipework.\n2.  **Logical Progression:** Option D follows this logic by checking the plans for specific loop lengths and then beginning the connection of the pipes to the manifold (the central hub of a wet underfloor heating system).\n3.  **Terminology:** Option D uses industry-standard terms like \"loops,\" \"manifold,\" and \"flow bar,\" which are specific to wet underfloor heating. Other options mention irrelevant items like \"corn insulation\" (A) or \"external wall panels\" (C).",
+          "responseTimeMs": 6625,
+          "tokenCount": 1204
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The correct option is **D**.\n\n**Reasoning:**\nThe instructions describe the process of installing wet underfloor heating. After laying the insulation and the grooved diffuser plates (which hold the pipes), the next logical steps involve preparing the heating loops and connecting them to the system's manifold. Option D correctly identifies these technical steps: checking the plan for loop lengths and connecting the pipe to the manifold flow bar.\n\n*   **Option A** mentions \"corn insulation\" and an unusual heating configuration, which is not standard.\n*   **Option B** discusses fillers and bottom plates in a way that doesn't follow the specific sequence of pipe installation.\n*   **Option C** refers to external wall panels and electrical sockets, which are irrelevant to the installation of wet underfloor heating pipes.",
+          "responseTimeMs": 5062,
+          "tokenCount": 879
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **D**.",
+          "responseTimeMs": 3174,
+          "tokenCount": 584
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The correct answer is **D**.\n\n**Reasoning:**\nThe instructions describe the process of installing wet underfloor heating. After laying the insulation and grooved diffuser plates (which hold the heating pipes), the next logical steps involve managing the heating pipes themselves. Option D correctly identifies the next stages: checking the loop requirements (pipe lengths) and beginning the connection to the manifold (the central distribution point for the water). The other options are either irrelevant to underfloor heating (C), describe incorrect materials/methods (A), or focus on general floor construction rather than the heating system (B).",
+          "responseTimeMs": 5284,
+          "tokenCount": 896
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **D**.",
+          "responseTimeMs": 3983,
+          "tokenCount": 683
+        }
+      ]
+    },
+    {
+      "questionId": "hellaswag-3397",
+      "responses": [
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The correct answer is **D**.",
+          "responseTimeMs": 4013,
+          "tokenCount": 647
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **D**.",
+          "responseTimeMs": 3505,
+          "tokenCount": 645
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **D**.",
+          "responseTimeMs": 3609,
+          "tokenCount": 685
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **D**.",
+          "responseTimeMs": 3756,
+          "tokenCount": 680
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The correct answer is **D**.\n\n**Reasoning:**\nOption D provides a logical conclusion to the step by explaining the benefit of moisturizing (keeping the skin hydrated and supple to minimize crow's feet). It also includes practical, relevant substeps by listing specific ingredients (plant oils, shea butter, ceramides, or glycerin) that are commonly recommended for effective hydration. \n\n*   Option A is nonsensical (waterproof moisturizer to remove moisture).\n*   Option B is impractical and poorly phrased (switching a wet cloth when you wake up).\n*   Option C is vague and less informative than D.",
+          "responseTimeMs": 4714,
+          "tokenCount": 786
+        }
+      ]
+    },
+    {
+      "questionId": "hellaswag-7292",
+      "responses": [
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "C",
+          "responseTimeMs": 2922,
+          "tokenCount": 571
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "C",
+          "responseTimeMs": 3191,
+          "tokenCount": 620
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "C",
+          "responseTimeMs": 3241,
+          "tokenCount": 607
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "C",
+          "responseTimeMs": 2605,
+          "tokenCount": 510
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "C",
+          "responseTimeMs": 3191,
+          "tokenCount": 563
+        }
+      ]
+    },
+    {
+      "questionId": "hellaswag-5978",
+      "responses": [
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The correct answer is **B**.\n\n**Reasoning:**\nThe prompt establishes a title (\"Wash your face thoroughly and apply a good moisturizer\") and begins the step by describing the washing process. Option B logically completes the instruction by describing the application of the moisturizer and lip balm. It also includes a relevant substep regarding skin preparation (exfoliation). Option A is contradictory (suggesting applying makeup before moisturizer), Option C contains nonsensical information about primer removing \"fingerprints,\" and Option D contains awkward phrasing.",
+          "responseTimeMs": 5615,
+          "tokenCount": 933
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The best option is **B**.\n\n**Reasoning:**\nThe title of the section is \"Wash your face thoroughly and apply a good moisturizer.\" The provided text describes washing and drying the face but stops before the moisturizing part. Option B directly completes this instruction by saying, \"Apply a good moisturizer all over your face and neck,\" and adds a relevant substep about cleansing for dry skin.",
+          "responseTimeMs": 4878,
+          "tokenCount": 872
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The correct answer is **B**.\n\n**Reasoning:**\nThe text describes the initial step of preparing the face for stage makeup (washing and moisturizing). Option B logically completes the instruction by describing the application of the moisturizer and lip balm, followed by a helpful substep regarding skin type. \n\n*   **Option A** is incorrect because it mentions applying makeup to the temples and chin before the moisturizing step is even finished.\n*   **Option C** introduces a new title/step prematurely and includes a nonsensical claim that primer \"gets rid of fingerprints.\"\n*   **Option D** uses awkward phrasing (\"which moisturizer it's designed to adhere to\") that does not flow as naturally as the instructions in Option B.",
+          "responseTimeMs": 5101,
+          "tokenCount": 974
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **B**.",
+          "responseTimeMs": 4794,
+          "tokenCount": 814
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The correct answer is **B**.\n\n**Reasoning:**\nThe title of the section is \"Wash your face thoroughly and apply a good moisturizer.\" The initial step describes washing and drying the face. Option B logically completes the instruction by describing how to apply the moisturizer and lip balm, while the substep provides additional relevant advice for skin preparation (using an exfoliating cleanser for dry skin).\n\n*   **Option A** is incorrect because it suggests applying makeup to the temples and chin before the moisturizing/prep stage is complete.\n*   **Option C** jumps to a new title (primer) before finishing the current section and contains nonsensical advice about primer removing \"fingerprints.\"\n*   **Option D** is awkwardly phrased and less descriptive of the actual application process than Option B.",
+          "responseTimeMs": 6119,
+          "tokenCount": 1043
+        }
+      ]
+    },
+    {
+      "questionId": "hellaswag-2852",
+      "responses": [
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **B**.",
+          "responseTimeMs": 3939,
+          "tokenCount": 537
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The correct answer is **B**.",
+          "responseTimeMs": 4794,
+          "tokenCount": 752
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **B**.",
+          "responseTimeMs": 2921,
+          "tokenCount": 441
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The correct answer is **B**.",
+          "responseTimeMs": 3855,
+          "tokenCount": 577
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The correct option is **B**.",
+          "responseTimeMs": 3764,
+          "tokenCount": 557
+        }
+      ]
+    },
+    {
+      "questionId": "hellaswag-8870",
+      "responses": [
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **D**.",
+          "responseTimeMs": 4156,
+          "tokenCount": 740
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **D**.\n\n**Reasoning:**\nThe text follows a structure common in instructional guides (like WikiHow). The step \"Own your pain\" encourages the reader to give themselves permission to mourn. Option D provides concrete, actionable **substeps** that illustrate exactly how one might begin that mourning process (\"Curl up in bed,\" \"Cry your eyes out\"), which logically completes the instruction. The other options are either repetitive (B), contradictory (A), or lack actionable advice (C).",
+          "responseTimeMs": 5236,
+          "tokenCount": 935
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **D**.",
+          "responseTimeMs": 3884,
+          "tokenCount": 719
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The best option is **D**.\n\n**Reasoning:**\nThe initial text encourages the reader to \"own your pain\" and \"mourn however you need to.\" Option D follows this logically by providing specific, practical examples of how to do that (curling up in bed and crying). It also uses the \"[substeps]\" tag, which is the standard format for breaking down a general step into specific actions in this context (likely a WikiHow-style guide).",
+          "responseTimeMs": 5233,
+          "tokenCount": 925
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **D**.\n\n**Reasoning:**\nThe text follows a structure common in instructional guides (like wikiHow). After a [step] that gives general advice (\"give yourself permission to mourn however you need to\"), it is logical to follow up with [substeps] that provide specific, actionable examples of how to carry out that advice. Option D provides these concrete examples (curling up in bed, crying) while maintaining the supportive tone of the step.",
+          "responseTimeMs": 4392,
+          "tokenCount": 804
+        }
+      ]
+    },
+    {
+      "questionId": "hellaswag-442",
+      "responses": [
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The correct option is **A**.\n\nThis sentence completion is likely derived from a video-description dataset (such as HellaSwag), where the text describes a sequence of actions captured in a video. In such contexts, \"spits it out followed by another kid\" describes a scene where one child finishes the action and is immediately followed by a second child performing the same or a similar action.",
+          "responseTimeMs": 10301,
+          "tokenCount": 1567
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "A",
+          "responseTimeMs": 6925,
+          "tokenCount": 952
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "C",
+          "responseTimeMs": 8093,
+          "tokenCount": 1195
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "C",
+          "responseTimeMs": 7871,
+          "tokenCount": 1156
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The best option to complete the sentence is **A**.\n\nThis sentence structure is typical of video description datasets (like HellaSwag), where it describes a sequence of actions performed by multiple people in a scene. Option A logically follows the action of swishing mouthwash by describing the next step (spitting it out) and the subsequent action of another person in the video.",
+          "responseTimeMs": 9435,
+          "tokenCount": 1391
+        }
+      ]
+    },
+    {
+      "questionId": "hellaswag-6349",
+      "responses": [
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **B**.",
+          "responseTimeMs": 3615,
+          "tokenCount": 614
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **B**.",
+          "responseTimeMs": 3459,
+          "tokenCount": 634
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **B**.",
+          "responseTimeMs": 3996,
+          "tokenCount": 685
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **B**.",
+          "responseTimeMs": 3190,
+          "tokenCount": 595
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **B**.",
+          "responseTimeMs": 3372,
+          "tokenCount": 677
+        }
+      ]
+    },
+    {
+      "questionId": "hellaswag-5537",
+      "responses": [
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The correct option is **A**.\n\n**Reasoning:**\n1.  **Logical Flow:** The instructions describe the process of sewing a shower curtain. After choosing the fabric and cutting the initial pieces to length (75-1/4 inches), the next logical step in a sewing project is to further refine the shapes or panels.\n2.  **Consistency:** Option A follows the established format of `[title]` followed by `[step]`. It provides a specific, actionable sewing instruction (folding and cutting to create narrower panels).\n3.  **Elimination:**\n    *   **Option B** is redundant (it suggests choosing fabric after the fabric has already been chosen and cut) and contains oddly specific, non-instructional advice.\n    *   **Option C** describes using a shower, not sewing a curtain.\n    *   **Option D** contains nonsensical measurements (\"24/32 inch\") and contradictory descriptions (\"boat-shape, like a square\").",
+          "responseTimeMs": 8273,
+          "tokenCount": 1427
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The best option is **A**.\n\n**Analysis:**\nThe tutorial describes the process of sewing a shower curtain. \n*   **Option A** follows the logical progression of preparing fabric. After cutting the fabric to the correct length, the next step in many sewing patterns is to adjust the width of the panels to ensure they fit the curtain rod or create a specific design (like a center panel with two side panels).\n*   **Option B** is redundant (mentioning fabric choice again) and contains subjective, oddly specific advice about brown fabric.\n*   **Option C** describes using a shower, not sewing a curtain.\n*   **Option D** contains nonsensical geometry (\"boat-shape, like a square\") and measurements that do not apply to a standard shower curtain.",
+          "responseTimeMs": 6924,
+          "tokenCount": 1222
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The correct answer is **A**.\n\n**Reasoning:**\nIn sewing a shower curtain, fabric is often not wide enough to cover the entire span of a shower in a single bolt width (standard widths are usually 45 or 54 inches, while a curtain is typically 70–72 inches wide). The standard sewing technique involves cutting two long pieces of fabric, then cutting one of those pieces in half lengthwise to create two narrower panels. These narrow panels are then sewn to either side of the full-width panel to reach the desired total width without having a seam directly down the middle. Option A correctly identifies this step in the process.",
+          "responseTimeMs": 6823,
+          "tokenCount": 1149
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The correct answer is **A**.\n\n**Reasoning:**\nOption A follows the logical sequence of a sewing tutorial. After cutting the initial pieces of fabric to the correct length (75-1/4 inches), the next step involves further shaping the panels to achieve the desired width. Options B, C, and D contain illogical instructions, nonsensical descriptions (such as \"boat-shape, like a square\"), or are out of order with the established steps.",
+          "responseTimeMs": 6402,
+          "tokenCount": 1143
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The best option is **A**.\n\n**Analysis:**\nThe instructions are detailing the process of sewing a shower curtain. \n1. The first title and step establish choosing the fabric and cutting the initial length (75-1/4 inches).\n2. **Option A** logically follows the construction process. When making a shower curtain from standard fabric widths (which are often narrower than the required 72-inch width of a shower), a common technique is to use one full-width panel and two half-width panels sewn to either side. Option A describes the step of creating those narrower side panels.\n3. **Option B** is redundant because fabric choice was already addressed in the first title.\n4. **Option C** is nonsensical and describes using the shower rather than sewing the curtain.\n5. **Option D** contains contradictory geometry (\"boat-shape, like a square\") and measurements that do not make sense for a sewing project of this scale.",
+          "responseTimeMs": 7367,
+          "tokenCount": 1278
+        }
+      ]
+    },
+    {
+      "questionId": "hellaswag-6545",
+      "responses": [
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **D**.",
+          "responseTimeMs": 3242,
+          "tokenCount": 487
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **D**.",
+          "responseTimeMs": 3835,
+          "tokenCount": 725
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The correct option is **D**.",
+          "responseTimeMs": 3458,
+          "tokenCount": 649
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The correct answer is **D**.",
+          "responseTimeMs": 3240,
+          "tokenCount": 664
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The correct option is **D**.",
+          "responseTimeMs": 2989,
+          "tokenCount": 561
+        }
+      ]
+    },
+    {
+      "questionId": "hellaswag-9366",
+      "responses": [
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **C**.",
+          "responseTimeMs": 3939,
+          "tokenCount": 774
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The correct answer is **C**.\n\n**Reasoning:**\nThe text discusses how childhood plans are often \"not limited by what people tend to think of as 'reality.'\" Option C directly follows this logic by explaining that the \"fear of failure\" is one of those limitations that adults face. It connects the concept of \"reality\" to the \"limitations mindset\" and explains how revisiting childhood helps one bypass those mental barriers to find their talent.",
+          "responseTimeMs": 3664,
+          "tokenCount": 736
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The correct answer is **C**.\n\n**Analysis:**\nThe text discusses how revisiting childhood dreams can help identify talents because children are not yet constrained by the \"reality\" or limitations perceived by adults. \n\n*   **Option C** provides a logical continuation by closing the quotation around the word \"reality\" and introducing **substeps** that explain *why* returning to a childhood mindset is effective (it removes the \"fear of failure\" and \"limitations mindset\"). This aligns perfectly with the preceding sentence's mention of plans not being limited by reality.\n*   **Option A** is awkwardly phrased (\"which means you wish to pursue\") and doesn't connect as smoothly to the concept of reality.\n*   **Option B** shifts the focus to \"how you look\" and \"good qualities,\" which deviates from the specific theme of childhood dreams and talents.\n*   **Option D** uses repetitive and informal phrasing (\"step-step\") and lacks the structural clarity of the substeps provided in C.",
+          "responseTimeMs": 10820,
+          "tokenCount": 1942
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The best option to complete the text is **C**.\n\n**Reasoning:**\nThe text discusses how childhood plans are often free from the constraints of what adults perceive as \"reality.\" Option C logically follows this by explaining that the \"fear of failure\" and a \"limitations mindset\" are what hold people back as they get older. By returning to a childhood perspective, one can bypass these mental barriers. Options A and B contain awkward phrasing or irrelevant advice, and Option D uses the nonsensical phrase \"step-step.\"",
+          "responseTimeMs": 8023,
+          "tokenCount": 1381
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **C**.",
+          "responseTimeMs": 4203,
+          "tokenCount": 891
+        }
+      ]
+    },
+    {
+      "questionId": "hellaswag-7507",
+      "responses": [
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "D",
+          "responseTimeMs": 2820,
+          "tokenCount": 515
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option letter is **D**.",
+          "responseTimeMs": 4153,
+          "tokenCount": 683
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **D**.",
+          "responseTimeMs": 3369,
+          "tokenCount": 517
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option letter is D.",
+          "responseTimeMs": 2740,
+          "tokenCount": 503
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **D**.",
+          "responseTimeMs": 3998,
+          "tokenCount": 710
+        }
+      ]
+    },
+    {
+      "questionId": "hellaswag-5753",
+      "responses": [
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **B**.",
+          "responseTimeMs": 4149,
+          "tokenCount": 724
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **B**.",
+          "responseTimeMs": 5212,
+          "tokenCount": 881
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The best option is **B**.\n\n**Reasoning:** The title of the section is \"Set a daily routine,\" and the preceding step mentions that there are chores to do each day. Option B directly addresses how to manage those chores within a routine (planning them for certain times of the day) to reduce stress and anxiety, which logically follows the introduction.",
+          "responseTimeMs": 4493,
+          "tokenCount": 830
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "B",
+          "responseTimeMs": 4415,
+          "tokenCount": 830
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **B**.",
+          "responseTimeMs": 3998,
+          "tokenCount": 719
+        }
+      ]
+    },
+    {
+      "questionId": "hellaswag-3406",
+      "responses": [
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The correct answer is **C**.\n\n**Reasoning:**\nOption C is the most logical continuation because it directly follows the discussion of removing chlorine from the water. Using a bubbler (aerator) is a standard technique to speed up the dechlorination process. Furthermore, adding molasses or corn syrup is a common step in making worm castings tea, as the sugar acts as a food source for the beneficial microorganisms to multiply. The other options are either irrelevant (mentioning fabrics or peat moss) or nonsensical (\"ph cannabis\").",
+          "responseTimeMs": 4682,
+          "tokenCount": 790
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The best option is **C**.\n\n**Reasoning:**\nMaking worm castings tea involves dechlorinating water (as mentioned in the prompt), adding a food source for the beneficial microbes (typically molasses or corn syrup), and then adding the worm castings and aerating the mixture. \n- **Option C** directly follows the prompt's discussion of removing chlorine by suggesting a bubbler to speed up the process, and then moves to the logical next step: adding the molasses.\n- **Option A** is irrelevant (mentions fabrics and collecting contaminants).\n- **Option B** suggests peat moss, which is not the primary ingredient for worm tea.\n- **Option D** uses nonsensical phrasing (\"ph cannabis\") and skips to using the tea before it has been brewed.",
+          "responseTimeMs": 5655,
+          "tokenCount": 964
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **C**.",
+          "responseTimeMs": 3607,
+          "tokenCount": 672
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The correct option is **C**.\n\n**Reasoning:**\n*   **Logical Flow:** The previous step discussed removing chlorine from the water to protect beneficial microorganisms. Option C continues this thought by mentioning that a bubbler speeds up the release of chlorine. \n*   **Relevance:** Adding corn syrup or molasses is a standard step in brewing worm castings tea, as the sugar provides food for the microorganisms to multiply.\n*   **Consistency:** Options A and B contain irrelevant information (fabrics, peat moss, or floating buckets in sinks), and Option D uses awkward phrasing (\"ph cannabis,\" \"plant plants\") and jumps to the final application step before the tea has even been brewed.",
+          "responseTimeMs": 5398,
+          "tokenCount": 958
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The correct answer is **C**.\n\n**Reasoning:**\nThe previous step discusses removing chlorine from the water to protect beneficial microorganisms. Option C directly follows this thought by explaining how to speed up the chlorine removal process (using a bubbler). It then moves logically to the next step of the process: adding a sugar source (corn syrup or molasses) to feed and multiply those microorganisms, which is a standard practice in brewing worm castings tea.",
+          "responseTimeMs": 4900,
+          "tokenCount": 861
+        }
+      ]
+    },
+    {
+      "questionId": "hellaswag-2166",
+      "responses": [
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "B",
+          "responseTimeMs": 3561,
+          "tokenCount": 500
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "B",
+          "responseTimeMs": 6158,
+          "tokenCount": 882
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **B**.",
+          "responseTimeMs": 6333,
+          "tokenCount": 902
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "B",
+          "responseTimeMs": 6229,
+          "tokenCount": 967
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **B**.",
+          "responseTimeMs": 5794,
+          "tokenCount": 841
+        }
+      ]
+    },
+    {
+      "questionId": "hellaswag-5523",
+      "responses": [
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "B",
+          "responseTimeMs": 6384,
+          "tokenCount": 1193
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **B**.",
+          "responseTimeMs": 3400,
+          "tokenCount": 600
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The correct answer is **B**.",
+          "responseTimeMs": 5103,
+          "tokenCount": 994
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **B**.",
+          "responseTimeMs": 3829,
+          "tokenCount": 662
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The best option is **B**.\n\n**Reasoning:**\nThe text is describing how to create a pattern for a beach bag using newspaper and a shower curtain. Option B follows this logic by providing additional information about where to find patterns and noting that the large size of a shower curtain allows for a large bag. The other options introduce irrelevant or nonsensical topics, such as filling a bag with sand (A), storing dinner leftovers (C), or finding patterns for shower curtains themselves (D).",
+          "responseTimeMs": 6510,
+          "tokenCount": 1196
+        }
+      ]
+    },
+    {
+      "questionId": "hellaswag-501",
+      "responses": [
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "B",
+          "responseTimeMs": 3450,
+          "tokenCount": 465
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The most logical continuation of the sequence of actions described is **B**.\n\n**Reasoning:**\n1.  **Context:** The person is ice fishing.\n2.  **Sequence of Events:** First, he prepares the pole; second, he catches a fish and places it on the ice.\n3.  **Evaluating Options:**\n    *   **A:** \"takes a fish out of the hole\" is redundant because the previous sentence already stated he pulled the fish out.\n    *   **B:** \"picks up the fish in his hand\" is a natural subsequent action to handle the fish he just caught and placed on the ice (e.g., to unhook it or inspect it).\n    *   **C:** \"begins fishing from a hole in the ice\" describes the overall activity he has already been doing, rather than the next specific step in the sequence.\n    *   **D:** \"pushes in the center fish\" does not make sense in the context of the actions described.\n\nOption B provides the most plausible and descriptive next step in the narrative.\n\nConclusion: B",
+          "responseTimeMs": 10679,
+          "tokenCount": 1707
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "B",
+          "responseTimeMs": 2661,
+          "tokenCount": 340
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "B",
+          "responseTimeMs": 3173,
+          "tokenCount": 398
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **B**.",
+          "responseTimeMs": 4837,
+          "tokenCount": 750
+        }
+      ]
+    },
+    {
+      "questionId": "hellaswag-3543",
+      "responses": [
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The correct answer is **D**.\n\n**Reasoning:**\nOption D logically completes the thought started in the [step] section. After suggesting \"attn: john smith,\" it provides alternatives for when a specific name is unknown (\"attn: hiring manager\" or \"attn: marketing department\"). It then transitions to a new [title] that naturally follows the process of writing an email subject line—adding other relevant information (like the purpose of the email) alongside the attention line.",
+          "responseTimeMs": 4665,
+          "tokenCount": 913
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **D**.",
+          "responseTimeMs": 3088,
+          "tokenCount": 682
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The best option is **D**.\n\n**Reasoning:**\nThe text discusses how to use \"attn\" in an email subject line when you have a specific recipient in mind but are using a generic email address. Option D provides a logical alternative (using a department or job title if the name is unknown) and then transitions to the next logical step (including other pertinent information like a job title or reference number).",
+          "responseTimeMs": 4438,
+          "tokenCount": 914
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The correct answer is **D**.\n\n**Reasoning:**\nOption D provides a logical continuation of the step by offering alternatives (like \"hiring manager\" or \"marketing department\") if a specific person's name is unknown. It then transitions logically to the next step, which is to include other pertinent information in the subject line to ensure the email is clear and professional.",
+          "responseTimeMs": 4069,
+          "tokenCount": 822
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The correct answer is **D**.\n\n**Reasoning:**\nThe text discusses using \"attn:\" in an email subject line to reach a specific person. Option D logically follows the example \"attn: john smith\" by providing alternatives if the specific name is unknown (\"attn: hiring manager\" or \"attn: marketing department\"). It then transitions naturally to the next step of the process: including other pertinent information in the subject line.",
+          "responseTimeMs": 3802,
+          "tokenCount": 796
+        }
+      ]
+    },
+    {
+      "questionId": "hellaswag-3096",
+      "responses": [
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "A",
+          "responseTimeMs": 9255,
+          "tokenCount": 1444
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "A",
+          "responseTimeMs": 6458,
+          "tokenCount": 1003
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "A\n\nThe most logical and common continuation of a narrative where a man is in a stadium being cheered on by a crowd is that he begins an athletic activity, such as running. Option A follows the context and sentence structure most naturally.",
+          "responseTimeMs": 7494,
+          "tokenCount": 1217
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "A",
+          "responseTimeMs": 3724,
+          "tokenCount": 509
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "A",
+          "responseTimeMs": 4943,
+          "tokenCount": 748
+        }
+      ]
+    },
+    {
+      "questionId": "hellaswag-3859",
+      "responses": [
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "B",
+          "responseTimeMs": 2847,
+          "tokenCount": 569
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **B**.",
+          "responseTimeMs": 2797,
+          "tokenCount": 624
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **B**.",
+          "responseTimeMs": 3066,
+          "tokenCount": 630
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **B**.",
+          "responseTimeMs": 3283,
+          "tokenCount": 658
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **B**.",
+          "responseTimeMs": 2981,
+          "tokenCount": 599
+        }
+      ]
+    },
+    {
+      "questionId": "hellaswag-6638",
+      "responses": [
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "A",
+          "responseTimeMs": 3599,
+          "tokenCount": 729
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **A**.",
+          "responseTimeMs": 4604,
+          "tokenCount": 892
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **A**.",
+          "responseTimeMs": 4029,
+          "tokenCount": 781
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The best option is **A**.\n\n**Reasoning:** Option A directly follows the instruction in the title (\"Do not push down hard while lathering\") by explaining why this is a common mistake and why users might be tempted to do it. It maintains the focus on brush care and proper technique, whereas the other options either introduce irrelevant information (massaging the beard with fingers in B), nonsensical consequences (pulling bristles burning skin in C), or contradictory advice (avoiding putting the brush on the skin in D).",
+          "responseTimeMs": 4256,
+          "tokenCount": 897
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **A**.",
+          "responseTimeMs": 4499,
+          "tokenCount": 795
+        }
+      ]
+    },
+    {
+      "questionId": "hellaswag-2655",
+      "responses": [
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option letter is **D**.",
+          "responseTimeMs": 7165,
+          "tokenCount": 1059
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "D",
+          "responseTimeMs": 6679,
+          "tokenCount": 1073
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **D**.",
+          "responseTimeMs": 4052,
+          "tokenCount": 634
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The correct completion for the sentence is **D**.\n\nThis sentence structure is characteristic of datasets like SWAG (Situations With Adversarial Generations), which are used to test grounded commonsense inference. The prompt describes a woman performing a morning routine (eating, applying makeup, brushing teeth), and the most logical transition in a video or narrative sequence is that **journalists are talking in the news** (likely on a television in the background or as the next segment of the video).\n\n**Correct Option: D**",
+          "responseTimeMs": 8924,
+          "tokenCount": 1479
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "D",
+          "responseTimeMs": 6352,
+          "tokenCount": 981
+        }
+      ]
+    },
+    {
+      "questionId": "hellaswag-3040",
+      "responses": [
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "D",
+          "responseTimeMs": 7598,
+          "tokenCount": 1217
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "D",
+          "responseTimeMs": 6297,
+          "tokenCount": 977
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "D",
+          "responseTimeMs": 6944,
+          "tokenCount": 1082
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "D",
+          "responseTimeMs": 4958,
+          "tokenCount": 777
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "D",
+          "responseTimeMs": 3634,
+          "tokenCount": 550
+        }
+      ]
+    },
+    {
+      "questionId": "hellaswag-1283",
+      "responses": [
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **D**.",
+          "responseTimeMs": 3278,
+          "tokenCount": 539
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "D",
+          "responseTimeMs": 2828,
+          "tokenCount": 459
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "D",
+          "responseTimeMs": 3366,
+          "tokenCount": 506
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The correct option is **D**.",
+          "responseTimeMs": 3638,
+          "tokenCount": 588
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **D**.",
+          "responseTimeMs": 2895,
+          "tokenCount": 495
+        }
+      ]
+    },
+    {
+      "questionId": "hellaswag-7100",
+      "responses": [
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **A**.",
+          "responseTimeMs": 3804,
+          "tokenCount": 857
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **A**.",
+          "responseTimeMs": 4164,
+          "tokenCount": 827
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **A**.",
+          "responseTimeMs": 3894,
+          "tokenCount": 782
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The correct answer is **A**.\n\n**Reasoning:**\nOption A logically completes the thought about the low-rise jean trend by noting it was unflattering for most people. It then provides practical advice (substeps) that directly supports the section title \"Resist blindly following trends\" by suggesting the reader ignore fashion media and avoid buying items they won't wear frequently.",
+          "responseTimeMs": 3550,
+          "tokenCount": 812
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **A**.",
+          "responseTimeMs": 3307,
+          "tokenCount": 765
+        }
+      ]
+    },
+    {
+      "questionId": "hellaswag-1743",
+      "responses": [
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The correct completion is **D**.\n\n**Reasoning:**\nThis sentence structure is typical of datasets like SWAG (Situations With Adversarial Generations), which are designed to test grounded commonsense inference. \n* **Option A** is redundant and overly generic.\n* **Option B** describes a highly specific, acrobatic sequence that is unlikely and contains slightly awkward phrasing (\"creating a graceful way\").\n* **Option C** is nonsensical, mentioning a \"clearance grid\" and a weight positioning itself for \"two thousand years.\"\n* **Option D** provides a simple, plausible physical description (\"bends before a bar bell with his hands on the bar\") that matches the descriptive style of the first sentence.",
+          "responseTimeMs": 9564,
+          "tokenCount": 1659
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The provided text is a typical example from the **SWAG (Situations With Adversarial Questioning)** dataset, which is used to evaluate grounded common-sense inference. These prompts are often derived from video captions (like those from the ActivityNet dataset) and describe a sequence of actions.\n\nIn this context:\n1.  The first sentence describes a completed action: a man lifting a barbell above his head.\n2.  The second sentence begins a description of a subsequent action or a different person in the same scene.\n3.  **Option D** (\"bends before a bar bell with his hands on the bar\") is the most standard and logical continuation for a video description, representing the start of a new lift or a new segment of the activity.\n\nOptions B and C contain nonsensical or overly complex details that are characteristic of \"distractors\" in these datasets, while Option A is a general statement rather than a specific sequential action.\n\nThe single best option is **D**.",
+          "responseTimeMs": 12000,
+          "tokenCount": 1984
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The correct answer is **D**.\n\n**Reasoning:**\nThis prompt is a common example from the HellaSwag dataset, which tests common sense inference by asking for the most plausible continuation of a scene. \n*   **Option A** is redundant and adds no new descriptive action.\n*   **Option B** describes a series of physically improbable or nonsensical actions (vaulting a heavily weighted bar, doing a handstand while holding it, and \"ringing the weights\").\n*   **Option C** contains nonsensical elements (\"clearance grid,\" \"two thousand years\").\n*   **Option D** provides a realistic and logical continuation: after the first man completes his lift, a second man (in a body suit) prepares for his own lift by bending down and placing his hands on the bar.",
+          "responseTimeMs": 10012,
+          "tokenCount": 1744
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The most logical and plausible continuation of the scene described is **Option D**.\n\nIn the context of a weightlifting demonstration or competition, after one person completes a lift, it is common for another person (the \"man in a body suit\") to prepare for their own attempt. Option D (\"bends before a bar bell with his hands on the bar\") describes the standard preparatory movement for a lift, which follows the established setting naturally. \n\n*   **Option A** is redundant and less descriptive of a specific action.\n*   **Option B** describes a highly improbable and physically confusing sequence of acrobatic feats.\n*   **Option C** contains nonsensical and surreal elements (\"clearance grid,\" \"two thousand years\").\n\n**Correct Option: D**",
+          "responseTimeMs": 11188,
+          "tokenCount": 1870
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The correct completion for the sentence is **Option D**.\n\nIn the context of video captioning datasets (like SWAG or ActivityNet), the goal is to identify the most plausible and grounded continuation of a sequence of actions. \n\n*   **Option A** is a general summary rather than a specific next action.\n*   **Option B** describes a highly specific and unlikely acrobatic sequence that does not typically follow a standard heavy weightlift.\n*   **Option C** contains nonsensical and unrealistic elements (\"clearance grid,\" \"two thousand years\").\n*   **Option D** provides a realistic and logical continuation, describing another person (or the same person in a different segment) preparing for a lift by bending down and placing their hands on the bar. This fits the pattern of describing sequential actions in a weightlifting setting.\n\nFinal Answer: **D**",
+          "responseTimeMs": 10614,
+          "tokenCount": 1786
+        }
+      ]
+    },
+    {
+      "questionId": "hellaswag-4392",
+      "responses": [
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The correct answer is **D**.\n\n**Explanation:**\nThe text follows a structure common in advice articles (like WikiHow). After the title **\"Check the body language,\"** the most logical step is to provide specific non-verbal cues that indicate interest. Option **D** describes specific types of physical contact (touching the cheek, neck, hand, or back) as indicators of a desire to be closer, which directly relates to body language and romantic interest. The other options are either nonsensical (C), irrelevant (B), or overly critical/negative (A).",
+          "responseTimeMs": 6372,
+          "tokenCount": 1208
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The correct answer is **D**.\n\n**Reasoning:**\nThe header and titles follow a standard format for advice on interpreting social signals. The current title is \"Check the body language.\" Option D fits this context perfectly by providing specific examples of physical cues (touching the cheek, neck, hand, or back) that indicate romantic interest. Options A, B, and C are either awkwardly phrased, overly specific, or focus on negative aspects that don't align with identifying signs of interest.",
+          "responseTimeMs": 6646,
+          "tokenCount": 1262
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The best option to complete the text is **D**.\n\n**Analysis:**\n*   **Context:** The text is a guide on interpreting a man's interest. The first section compares his behavior toward the reader versus others. The second section, titled \"Check the body language,\" requires a step that describes specific physical cues.\n*   **Option A** is cynical and suggests his interest might decrease, which doesn't fit the helpful tone of a \"how-to\" guide.\n*   **Option B** is too specific (focusing on height) and doesn't provide a general sign of interest.\n*   **Option C** is poorly phrased and concludes with \"don't take the hint,\" which contradicts the purpose of the guide.\n*   **Option D** provides specific, actionable details about physical contact (touching the cheek, neck, hand, or back). In the context of \"body language,\" physical touch is a primary indicator of interest and follows the title logically by expanding on the brief mention of touch in the previous step.",
+          "responseTimeMs": 8817,
+          "tokenCount": 1666
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **D**.",
+          "responseTimeMs": 3486,
+          "tokenCount": 763
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The correct option is **D**.\n\n**Reasoning:**\nThe text follows a structure common in advice articles (like WikiHow). After the title \"Check the body language,\" the most logical next step is to describe specific physical cues that indicate interest. Option D provides concrete examples of physical contact (touching the cheek, neck, hand, arm, or lower back) and explains what those signs mean in the context of attraction. Options A, B, and C are either poorly phrased, overly specific, or grammatically awkward.",
+          "responseTimeMs": 5122,
+          "tokenCount": 1015
+        }
+      ]
+    },
+    {
+      "questionId": "hellaswag-2987",
+      "responses": [
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The provided text appears to be a sequence of descriptions for a video or a series of images, likely originating from a dataset such as ActivityNet or SWAG. These datasets often use slightly repetitive but complete sentences to describe scenes.\n\n1.  **Contextual Fit**: The first two sentences describe people tubing and sharing pictures of their adventure. Option C (\"have several other tubers enjoying themselves as they go down the slopes\") directly continues this theme by describing more activity on the mountain slopes.\n2.  **Grammatical Completeness**: The prompt ends with \"the snowy mountain slopes\". Option C completes this into a full sentence: \"The snowy mountain slopes have several other tubers enjoying themselves as they go down the slopes.\" Options A and D are fragments or grammatically incorrect, and Option B is less contextually relevant.\n3.  **Dataset Consistency**: This exact sequence of sentences is found in video captioning datasets where the correct continuation describes the visual scene of the tubing adventure. The repetitive nature of Option C (using \"slopes\" twice) is a common characteristic of these datasets.\n\nTherefore, Option C is the most logical and grammatically appropriate completion.\n\nThe correct option is **C**.",
+          "responseTimeMs": 62548,
+          "tokenCount": 11077
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The correct option is **A**.",
+          "responseTimeMs": 3932,
+          "tokenCount": 671
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The provided text is an excerpt from the HellaSwag dataset, which is a benchmark for common sense natural language inference. The task is to choose the most plausible continuation of a given scenario based on original video descriptions (from the ActivityNet dataset).\n\n1.  **Context Analysis:** The first two sentences describe a group of people tubing down a snowy mountain and sharing pictures of their adventure.\n2.  **Sentence Completion:** The third sentence begins with \"the snowy mountain slopes,\" and we need to find the most logical continuation.\n    *   **Option A:** \", landscapes and their onlookers.\" creates a list fragment: \"the snowy mountain slopes, landscapes and their onlookers.\" This lacks a verb and is less likely as a standalone sentence.\n    *   **Option B:** \"climb into sight and a group comes together on the slope.\" is a complete sentence but is a common distractor in this dataset, typically describing a different type of camera movement or scene.\n    *   **Option C:** \"have several other tubers enjoying themselves as they go down the slopes.\" provides a verb (\"have\") and completes the sentence logically by describing more of the scene mentioned in the previous sentences. This is the original caption for the video this text describes.\n    *   **Option D:** \"and waterfall is shown.\" is grammatically incorrect (the plural \"slopes\" does not agree with the singular \"is shown\") and is contextually unlikely for a snowy mountain tubing scene.\n\nIn the HellaSwag dataset, the correct continuation for this specific context is Option C.\n\nThe single best option letter is C.",
+          "responseTimeMs": 50322,
+          "tokenCount": 9010
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The best option to complete the passage is **B**.\n\n**Reasoning:**\nThe text appears to be a sequence of descriptions from a video or a narrative. \n1. **Sentence structure:** The prompt ends with \"the snowy mountain slopes,\" which serves as the subject of the final sentence. Options B and C provide verbs to complete the sentence, while A is a fragment and D contains a grammatical error (\"slopes and waterfall is shown\" should be \"are shown\").\n2. **Context and Flow:** Option B (\"climb into sight and a group comes together on the slope\") describes a dynamic scene typical of video descriptions (like those found in the HellaSwag dataset). \n3. **Avoiding Redundancy:** Option C is highly repetitive, using the phrases \"enjoying themselves\" and \"go down the slopes,\" both of which appeared in the very first sentence. In standardized tests and linguistic datasets, the correct completion usually avoids such direct repetition in favor of progressing the narrative or description.\n\nTherefore, **B** is the most coherent and grammatically correct completion.",
+          "responseTimeMs": 13843,
+          "tokenCount": 2326
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The most logical continuation of the sentence based on the context of a \"tubing adventure\" and the description of \"pictures\" is **Option C**.\n\nThe sentence fragment \"the snowy mountain slopes\" needs a verb to become a complete sentence that describes the content of the pictures mentioned previously. Option C provides this: \"...the snowy mountain slopes **have several other tubers enjoying themselves as they go down the slopes.**\"\n\nHere is why the other options are less suitable:\n*   **A** is a list fragment without a verb, making the sentence grammatically incomplete.\n*   **B** (\"climb into sight\") is a less natural description for mountain slopes in the context of sharing photos of an ongoing activity.\n*   **D** contains a subject-verb agreement error (\"the snowy mountain slopes and waterfall **is** shown\" should be \"are shown\").\n\n**Correct Option: C**",
+          "responseTimeMs": 13835,
+          "tokenCount": 2344
+        }
+      ]
+    },
+    {
+      "questionId": "hellaswag-8089",
+      "responses": [
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **C**.",
+          "responseTimeMs": 3093,
+          "tokenCount": 646
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The correct answer is **C**.",
+          "responseTimeMs": 3075,
+          "tokenCount": 603
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **C**.",
+          "responseTimeMs": 2956,
+          "tokenCount": 623
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **C**.",
+          "responseTimeMs": 2913,
+          "tokenCount": 585
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **C**.",
+          "responseTimeMs": 2757,
+          "tokenCount": 625
+        }
+      ]
+    },
+    {
+      "questionId": "hellaswag-8714",
+      "responses": [
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option letter is **B**.",
+          "responseTimeMs": 3893,
+          "tokenCount": 840
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **B**.",
+          "responseTimeMs": 2964,
+          "tokenCount": 675
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **B**.",
+          "responseTimeMs": 3708,
+          "tokenCount": 809
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **B**.",
+          "responseTimeMs": 3929,
+          "tokenCount": 876
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **B**.",
+          "responseTimeMs": 2814,
+          "tokenCount": 651
+        }
+      ]
+    },
+    {
+      "questionId": "hellaswag-265",
+      "responses": [
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The correct answer is **C**.",
+          "responseTimeMs": 9261,
+          "tokenCount": 1582
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **C**.",
+          "responseTimeMs": 5270,
+          "tokenCount": 891
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "C",
+          "responseTimeMs": 5866,
+          "tokenCount": 896
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The correct option is **C**.",
+          "responseTimeMs": 6787,
+          "tokenCount": 1104
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The correct answer is **C**.",
+          "responseTimeMs": 6359,
+          "tokenCount": 952
+        }
+      ]
+    },
+    {
+      "questionId": "hellaswag-6068",
+      "responses": [
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **D**.\n\n**Explanation:**\nThe provided text explains the importance of placing food near a mother dog because she may be reluctant to leave her puppies. Option D logically follows this by providing a clarifying detail: while it's important to have food available, the owner shouldn't panic if she doesn't eat immediately, as it is normal for a dog to wait a few hours after giving birth before showing interest in food.\n\n*   **Option A** is contradictory and confusing (telling you not to feed wet food but then to place it in a bowl).\n*   **Option B** contains factually incorrect information (puppies do not become sedentary or skip eating at 2 weeks; they are nursing more than ever).\n*   **Option C** is poorly phrased and states the obvious (that mother dogs take care of their puppies).",
+          "responseTimeMs": 7190,
+          "tokenCount": 1376
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **D**.",
+          "responseTimeMs": 4631,
+          "tokenCount": 996
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **D**.",
+          "responseTimeMs": 5265,
+          "tokenCount": 1013
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **D**.",
+          "responseTimeMs": 4515,
+          "tokenCount": 919
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **D**.",
+          "responseTimeMs": 4130,
+          "tokenCount": 827
+        }
+      ]
+    },
+    {
+      "questionId": "hellaswag-7003",
+      "responses": [
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The correct answer is **D**.",
+          "responseTimeMs": 2693,
+          "tokenCount": 595
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **D**.",
+          "responseTimeMs": 2586,
+          "tokenCount": 626
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **D**.",
+          "responseTimeMs": 2957,
+          "tokenCount": 643
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The correct answer is **D**.\n\n**Reasoning:**\nOption D provides a logical conclusion to the step. Since the step mentions a nutritional deficiency as a potential cause for grass-eating, explaining that switching food may \"alleviate its desire\" and suggesting \"high in fiber\" food (a common reason dogs seek out grass) offers practical, relevant advice. The other options are either nonsensical (A and B) or suggest eating more grass (C), which contradicts the goal of the guide.",
+          "responseTimeMs": 3731,
+          "tokenCount": 728
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **D**.",
+          "responseTimeMs": 2701,
+          "tokenCount": 648
+        }
+      ]
+    },
+    {
+      "questionId": "hellaswag-9017",
+      "responses": [
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **B**.",
+          "responseTimeMs": 3459,
+          "tokenCount": 749
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **B**.",
+          "responseTimeMs": 3291,
+          "tokenCount": 722
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **B**.",
+          "responseTimeMs": 3981,
+          "tokenCount": 826
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The correct option is **B**.",
+          "responseTimeMs": 3462,
+          "tokenCount": 741
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The best option is **B**.\n\n**Reasoning:**\nOption B directly follows the logic of the title (\"Tell them about the appointment a day or two in advance\") and the preceding text. The text argues against keeping the appointment a secret or springing it on them last minute; Option B reinforces this by explaining that giving them a couple of days' notice helps lessen anxiety. It maintains a consistent focus on the timing of the announcement.",
+          "responseTimeMs": 4052,
+          "tokenCount": 787
+        }
+      ]
+    },
+    {
+      "questionId": "hellaswag-5079",
+      "responses": [
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **B**.",
+          "responseTimeMs": 4148,
+          "tokenCount": 878
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "B",
+          "responseTimeMs": 4267,
+          "tokenCount": 832
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **B**.",
+          "responseTimeMs": 3509,
+          "tokenCount": 798
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "B",
+          "responseTimeMs": 3828,
+          "tokenCount": 838
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **B**.",
+          "responseTimeMs": 4031,
+          "tokenCount": 784
+        }
+      ]
+    },
+    {
+      "questionId": "hellaswag-2922",
+      "responses": [
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "D",
+          "responseTimeMs": 5434,
+          "tokenCount": 822
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The best option is **D**.",
+          "responseTimeMs": 6254,
+          "tokenCount": 989
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The correct answer is **B**.\n\nThis question is based on video-captioning datasets (such as HellaSwag or ActivityNet) where the goal is to predict the most likely continuation of a scene. In this context, the man is demonstrating a process (sharpening a knife). After the sharpening action, it is common for the person to demonstrate the results of their work. Option B, despite its slightly awkward phrasing (\"cutting dips into the knife\" likely being a mistranscription of cutting into the board or using the knife to cut strips), describes the man continuing the action and then \"showing off the knife fully,\" which is the logical conclusion to a demonstration video.",
+          "responseTimeMs": 13106,
+          "tokenCount": 2147
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "D",
+          "responseTimeMs": 4366,
+          "tokenCount": 682
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "D",
+          "responseTimeMs": 4641,
+          "tokenCount": 799
+        }
+      ]
+    },
+    {
+      "questionId": "hellaswag-2181",
+      "responses": [
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "D",
+          "responseTimeMs": 3179,
+          "tokenCount": 558
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "D",
+          "responseTimeMs": 3714,
+          "tokenCount": 669
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "D",
+          "responseTimeMs": 3181,
+          "tokenCount": 575
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "D",
+          "responseTimeMs": 2816,
+          "tokenCount": 512
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "D",
+          "responseTimeMs": 3134,
+          "tokenCount": 536
+        }
+      ]
+    },
+    {
+      "questionId": "hellaswag-8265",
+      "responses": [
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **B**.",
+          "responseTimeMs": 2000,
+          "tokenCount": 463
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option letter is B.",
+          "responseTimeMs": 2724,
+          "tokenCount": 644
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **B**.",
+          "responseTimeMs": 3661,
+          "tokenCount": 711
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option letter is B.",
+          "responseTimeMs": 2545,
+          "tokenCount": 602
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The correct answer is **B**.",
+          "responseTimeMs": 3065,
+          "tokenCount": 703
+        }
+      ]
+    },
+    {
+      "questionId": "hellaswag-8515",
+      "responses": [
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **C**.",
+          "responseTimeMs": 2786,
+          "tokenCount": 602
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **C**.",
+          "responseTimeMs": 3526,
+          "tokenCount": 710
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **C**.",
+          "responseTimeMs": 3736,
+          "tokenCount": 692
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "C",
+          "responseTimeMs": 3267,
+          "tokenCount": 625
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "C",
+          "responseTimeMs": 3783,
+          "tokenCount": 666
+        }
+      ]
+    },
+    {
+      "questionId": "hellaswag-2130",
+      "responses": [
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The correct answer is **B**.\n\n**Reasoning:**\nThe sentence begins by establishing a news broadcast context involving a \"weather map\" and \"news women sitting at a desk.\" Option B is the only choice that maintains this thematic consistency, as it describes footage of people in \"hurricane situations\" and \"rough waters,\" which are standard topics for a weather-related news segment. The other options either lack grammatical sense (A), are irrelevant to the weather context (C), or are redundantly phrased (D).",
+          "responseTimeMs": 7168,
+          "tokenCount": 1212
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "B",
+          "responseTimeMs": 7660,
+          "tokenCount": 1233
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The best completion for the sentence is **B**.\n\n**Reasoning:**\nThe scene begins with a \"weather map\" and \"two news women sitting at a desk,\" which establishes a news broadcast context specifically related to weather. Option B is the only choice that maintains this thematic consistency by mentioning \"hurricane situations\" and \"rough waters.\" While the phrase \"weather ruses\" in the option is slightly unusual, the overall context of reporting on people in extreme weather conditions directly follows the visual of a weather map and news anchors.",
+          "responseTimeMs": 9187,
+          "tokenCount": 1509
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option letter is **B**.",
+          "responseTimeMs": 7659,
+          "tokenCount": 1324
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The best option is **B**.\n\n**Reasoning:**\nThe sentence begins by describing a news broadcast setting, specifically mentioning a \"weather map\" and \"news women sitting at a desk.\" Option **B** is the most logically consistent choice because it continues the theme of weather, mentioning \"hurricane situations\" and \"rough waters.\" While the phrase \"weather ruses\" in the option appears to be a transcription error (likely meant to be \"weathering the elements\" or similar), it remains the only option that relates the introductory weather map to the subsequent footage. Option D is redundant (\"in a news room then in a newsroom\"), and options A and C introduce unrelated subjects (flags/cameramen or a race) without a clear thematic link.",
+          "responseTimeMs": 10010,
+          "tokenCount": 1628
+        }
+      ]
+    },
+    {
+      "questionId": "hellaswag-8393",
+      "responses": [
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **C**.",
+          "responseTimeMs": 3391,
+          "tokenCount": 748
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The correct answer is **C**.",
+          "responseTimeMs": 2955,
+          "tokenCount": 615
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **C**.",
+          "responseTimeMs": 3078,
+          "tokenCount": 662
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option letter is **C**.",
+          "responseTimeMs": 2716,
+          "tokenCount": 602
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The correct answer is **C**.\n\n**Reasoning:**\nOption C directly follows the logic of the title \"Pick movies by age group\" and the step description. It provides specific, practical advice for a particular age range (2 to 7 years old) that aligns with the goal of ensuring the story isn't too complex or too simple, making it the most coherent and relevant continuation.",
+          "responseTimeMs": 3303,
+          "tokenCount": 678
+        }
+      ]
+    },
+    {
+      "questionId": "hellaswag-9848",
+      "responses": [
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **C**.",
+          "responseTimeMs": 3189,
+          "tokenCount": 679
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option letter is **C**.",
+          "responseTimeMs": 3086,
+          "tokenCount": 659
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **C**.",
+          "responseTimeMs": 3301,
+          "tokenCount": 739
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "C",
+          "responseTimeMs": 2868,
+          "tokenCount": 649
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option letter is **C**.",
+          "responseTimeMs": 2836,
+          "tokenCount": 673
+        }
+      ]
+    },
+    {
+      "questionId": "hellaswag-2060",
+      "responses": [
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The correct answer is **D**.",
+          "responseTimeMs": 7409,
+          "tokenCount": 1228
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option letter is **D**.",
+          "responseTimeMs": 5308,
+          "tokenCount": 872
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The correct option is **D**.",
+          "responseTimeMs": 5626,
+          "tokenCount": 929
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The correct option is **D**.",
+          "responseTimeMs": 6005,
+          "tokenCount": 964
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The correct answer is **D**.\n\n**Reasoning:**\nThe prompt describes a person preparing a mixture (cutting fruit and adding ingredients to water). \n*   **Option A and B** introduce \"vegetables,\" which contradicts the initial mention of \"fruits.\" \n*   **Option C** is nonsensical, mentioning \"paints on a sandwich.\" \n*   **Option D** (\"spins around the container in the end\") is the most plausible conclusion, as it describes a common action in a demonstration video (either mixing the contents or showing the finished product to the camera).",
+          "responseTimeMs": 9169,
+          "tokenCount": 1509
+        }
+      ]
+    },
+    {
+      "questionId": "hellaswag-5565",
+      "responses": [
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **D**.",
+          "responseTimeMs": 4207,
+          "tokenCount": 842
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **D**.",
+          "responseTimeMs": 3626,
+          "tokenCount": 646
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **D**.",
+          "responseTimeMs": 4799,
+          "tokenCount": 929
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **D**.",
+          "responseTimeMs": 3835,
+          "tokenCount": 777
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **D**.",
+          "responseTimeMs": 3555,
+          "tokenCount": 725
+        }
+      ]
+    },
+    {
+      "questionId": "hellaswag-5856",
+      "responses": [
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **B**.",
+          "responseTimeMs": 3552,
+          "tokenCount": 758
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **B**.",
+          "responseTimeMs": 3177,
+          "tokenCount": 701
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **B**.",
+          "responseTimeMs": 3332,
+          "tokenCount": 711
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **B**.",
+          "responseTimeMs": 2424,
+          "tokenCount": 544
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **B**.",
+          "responseTimeMs": 2920,
+          "tokenCount": 697
+        }
+      ]
+    },
+    {
+      "questionId": "hellaswag-2915",
+      "responses": [
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option letter is **B**.",
+          "responseTimeMs": 2240,
+          "tokenCount": 386
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option letter is **B**.",
+          "responseTimeMs": 2382,
+          "tokenCount": 359
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "B",
+          "responseTimeMs": 2130,
+          "tokenCount": 362
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "B",
+          "responseTimeMs": 2497,
+          "tokenCount": 370
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "B",
+          "responseTimeMs": 2190,
+          "tokenCount": 339
+        }
+      ]
+    },
+    {
+      "questionId": "hellaswag-9102",
+      "responses": [
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **B**.",
+          "responseTimeMs": 3133,
+          "tokenCount": 667
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The correct answer is **B**.",
+          "responseTimeMs": 3355,
+          "tokenCount": 723
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **B**.",
+          "responseTimeMs": 2760,
+          "tokenCount": 597
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The correct answer is **B**.",
+          "responseTimeMs": 3204,
+          "tokenCount": 674
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **B**.",
+          "responseTimeMs": 3027,
+          "tokenCount": 644
+        }
+      ]
+    },
+    {
+      "questionId": "hellaswag-1794",
+      "responses": [
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "A",
+          "responseTimeMs": 3085,
+          "tokenCount": 487
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "A",
+          "responseTimeMs": 5046,
+          "tokenCount": 796
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "A",
+          "responseTimeMs": 2686,
+          "tokenCount": 422
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "A",
+          "responseTimeMs": 4670,
+          "tokenCount": 723
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "A",
+          "responseTimeMs": 4403,
+          "tokenCount": 681
+        }
+      ]
+    },
+    {
+      "questionId": "hellaswag-4318",
+      "responses": [
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **D**.",
+          "responseTimeMs": 3857,
+          "tokenCount": 834
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The correct answer is **D**.\n\n**Reasoning:**\nThe provided text outlines the importance of setting long-term goals (5, 10, and 20 years) to map out a career path. Option D follows this logically by introducing [substeps] that explain how to maintain and adjust that plan over time, acknowledging that goals and desires may change. Option B contradicts the initial step, while Options A and C are less cohesive and contain repetitive or overly specific phrasing.",
+          "responseTimeMs": 4318,
+          "tokenCount": 879
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The correct answer is **D**.\n\n**Reasoning:**\nThe text follows a structured format (Header, Title, Step). Option D continues this format by introducing **[substeps]** and provides a logical follow-up to the idea of creating a long-term plan. It emphasizes the importance of reviewing and adjusting that plan annually, which is a standard and practical piece of advice in career development to account for changing goals and desires. Option B contradicts the previous step, and Options A and C are less structurally consistent or logically sound.",
+          "responseTimeMs": 4233,
+          "tokenCount": 851
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The correct answer is **D**.\n\n**Reasoning:**\nThe text follows a structured format ([header], [title], [step]). Option D continues this structure with **[substeps]** and provides a logical follow-up to the step of creating a long-term career plan. It offers practical advice—reviewing goals annually—which acknowledges that while one should have a long-term destination, career plans must remain flexible as circumstances and desires change. Option B contradicts the preceding text, and Option C is overly specific about \"going into business.\"",
+          "responseTimeMs": 4566,
+          "tokenCount": 901
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The correct answer is **D**.\n\n**Reasoning:** \nThe provided text establishes the importance of setting long-term goals (5, 10, or 20 years). Option D follows this logically by providing a practical substep: reviewing those goals annually to ensure they still align with your desires, acknowledging that career plans are dynamic and can change over time. Option B contradicts the initial step, while Option C is repetitive and overly specific about \"going into business.\" Option A is more of a summary than a direct continuation of the specific step provided.",
+          "responseTimeMs": 4210,
+          "tokenCount": 837
+        }
+      ]
+    },
+    {
+      "questionId": "hellaswag-4516",
+      "responses": [
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The correct option is **A**.\n\n**Reasoning:**\nThe instructions are specifically about finding the Wi-Fi network name and password on the physical U-verse router. Option A provides the specific details needed to identify that information (noting that it is printed next to \"Wi-Fi network name\" and typically starts with \"ATT\" or \"2Wire\"), which directly follows the instruction to \"determine the name and password.\"",
+          "responseTimeMs": 3676,
+          "tokenCount": 800
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The best option is **A**.\n\n**Explanation:**\nThe step focuses on determining the Wi-Fi network name and password from the router itself. Option A provides specific, relevant details on how to identify that information (looking for the label \"wi-fi network name\" and noting that it typically starts with \"att\" or \"2wire\"), which directly follows the instruction provided in the prompt.",
+          "responseTimeMs": 3748,
+          "tokenCount": 774
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "A",
+          "responseTimeMs": 4438,
+          "tokenCount": 894
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **A**.",
+          "responseTimeMs": 3499,
+          "tokenCount": 730
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "A",
+          "responseTimeMs": 4230,
+          "tokenCount": 864
+        }
+      ]
+    },
+    {
+      "questionId": "hellaswag-1350",
+      "responses": [
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "B",
+          "responseTimeMs": 1918,
+          "tokenCount": 258
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "B",
+          "responseTimeMs": 2240,
+          "tokenCount": 286
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "B",
+          "responseTimeMs": 2240,
+          "tokenCount": 263
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "B",
+          "responseTimeMs": 2077,
+          "tokenCount": 302
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "B",
+          "responseTimeMs": 1919,
+          "tokenCount": 268
+        }
+      ]
+    },
+    {
+      "questionId": "hellaswag-2326",
+      "responses": [
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "A",
+          "responseTimeMs": 2201,
+          "tokenCount": 328
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "A",
+          "responseTimeMs": 2072,
+          "tokenCount": 289
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "A",
+          "responseTimeMs": 2390,
+          "tokenCount": 300
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "A",
+          "responseTimeMs": 2445,
+          "tokenCount": 311
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "A",
+          "responseTimeMs": 1852,
+          "tokenCount": 282
+        }
+      ]
+    },
+    {
+      "questionId": "hellaswag-6818",
+      "responses": [
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **A**.",
+          "responseTimeMs": 2440,
+          "tokenCount": 590
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **A**.",
+          "responseTimeMs": 3845,
+          "tokenCount": 733
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "A",
+          "responseTimeMs": 3472,
+          "tokenCount": 695
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **A**.",
+          "responseTimeMs": 3413,
+          "tokenCount": 728
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "A",
+          "responseTimeMs": 3037,
+          "tokenCount": 566
+        }
+      ]
+    },
+    {
+      "questionId": "hellaswag-4388",
+      "responses": [
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The correct answer is **B**.",
+          "responseTimeMs": 2368,
+          "tokenCount": 491
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **B**.",
+          "responseTimeMs": 4907,
+          "tokenCount": 871
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "B",
+          "responseTimeMs": 3178,
+          "tokenCount": 596
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **B**.",
+          "responseTimeMs": 2909,
+          "tokenCount": 597
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **B**.",
+          "responseTimeMs": 3177,
+          "tokenCount": 632
+        }
+      ]
+    },
+    {
+      "questionId": "hellaswag-4233",
+      "responses": [
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The correct option is **C**.\n\n**Reasoning:**\nThe text describes how to maximize the benefits of home warranties. The preceding step advises not to rely on oral statements from sales representatives or website advertisements. Option **C** logically follows this by stating that the written contract is the final authority on coverage. It also introduces a relevant new title (\"Make sure all appliances are installed properly\") that fits the context of home maintenance and warranties. \n\n*   **A** is incorrect because it discusses car dealerships and vehicles.\n*   **B** is repetitive and contains a typo (\"policies policy\").\n*   **D** is illogical, especially the advice to *not* read disclaimers.",
+          "responseTimeMs": 4180,
+          "tokenCount": 754
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The correct answer is **C**.\n\n**Reasoning:**\nThe text discusses how to maximize the benefits of home warranties. The preceding sentence warns not to rely on oral statements or website advertisements. Option C logically follows this by stating that the written contract is the final authority on coverage. It then transitions correctly into a new section relevant to home warranties (\"Make sure all appliances are installed properly\"). Options A and D are incorrect because they refer to vehicles or product packaging, which are irrelevant to home warranties. Option B is repetitive and lacks a logical transition.",
+          "responseTimeMs": 3564,
+          "tokenCount": 684
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The correct answer is **C**.\n\n**Reasoning:**\nThe text discusses home warranties and emphasizes reading the policy carefully rather than relying on oral statements. Option C logically concludes this thought by stating that the written contract is the final authority on coverage (\"In the end, the written contract will determine your coverage\"). It then introduces a new, relevant title for the next section of the guide (\"Make sure all appliances are installed properly\"). Options A and D are irrelevant (mentioning car dealerships or physical product packaging), and Option B is repetitive and less structured.",
+          "responseTimeMs": 3761,
+          "tokenCount": 747
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **C**.",
+          "responseTimeMs": 3566,
+          "tokenCount": 681
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **C**.",
+          "responseTimeMs": 2660,
+          "tokenCount": 534
+        }
+      ]
+    },
+    {
+      "questionId": "hellaswag-3488",
+      "responses": [
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **B**.",
+          "responseTimeMs": 3574,
+          "tokenCount": 741
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **B**.",
+          "responseTimeMs": 5144,
+          "tokenCount": 950
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The correct answer is **B**.\n\n**Reasoning:**\nOption B provides a logical conclusion to the first step by explaining the benefits of being careful with the instrument (saving time and money at the repair shop). It then introduces a new, relevant title (\"Pay attention to your instrument when you are playing it\") that transitions into the next phase of identifying when an instrument needs cleaning or maintenance. Options A and D are too specific or awkwardly phrased, and Option C is nonsensical in the context of instrument care.",
+          "responseTimeMs": 5182,
+          "tokenCount": 1016
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The best option is **B**.\n\n**Reasoning:**\nOption B provides a logical conclusion to the current point (explaining that care saves time and money) and introduces a new, relevant subsection with the appropriate formatting (`[title]`). Options A, C, and D contain nonsensical or irrelevant advice (e.g., \"behind the bar,\" \"digital record player,\" or using lubricant to stop an instrument from \"rattling around\").",
+          "responseTimeMs": 5432,
+          "tokenCount": 1032
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **B**.",
+          "responseTimeMs": 3617,
+          "tokenCount": 775
+        }
+      ]
+    },
+    {
+      "questionId": "hellaswag-7740",
+      "responses": [
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **D**.",
+          "responseTimeMs": 3085,
+          "tokenCount": 670
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **D**.",
+          "responseTimeMs": 3580,
+          "tokenCount": 677
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The correct answer is **D**.",
+          "responseTimeMs": 3143,
+          "tokenCount": 590
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "D",
+          "responseTimeMs": 2773,
+          "tokenCount": 497
+        },
+        {
+          "provider": "google",
+          "model": "gemini-3-flash-preview",
+          "content": "The single best option is **D**.",
+          "responseTimeMs": 3578,
+          "tokenCount": 713
+        }
+      ]
+    }
+  ]
+}
