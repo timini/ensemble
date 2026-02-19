@@ -143,8 +143,8 @@ export function createQuickEvalCommand(): Command {
 
           if (ensembleCache && ensembleCache.size > 0) {
             // Cache exists: load ALL questions (unsampled) then filter to cached IDs.
-            // Sample from the cached subset to respect --sample flag.
-            const all = (await loadBenchmarkQuestions(name, { shuffle: true })).questions;
+            // Use seed=42 for deterministic sampling — same questions every run.
+            const all = (await loadBenchmarkQuestions(name, { shuffle: true, seed: 42 })).questions;
             const cachedIds = new Set(ensembleCache.keys());
             const cachedQuestions = all.filter((q) => cachedIds.has(q.id));
             const sampled = cachedQuestions.slice(0, Math.min(sampleCount, cachedQuestions.length));

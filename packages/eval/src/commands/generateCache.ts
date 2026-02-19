@@ -203,30 +203,33 @@ export function createGenerateCacheCommand(): Command {
 
           const evalSettled = await Promise.allSettled(
             selectedQuestions.map(async (question) => {
-              const responses = fullCache.get(question.id);
-              if (!responses || responses.length === 0) return null;
+              const evaluate = async () => {
+                const responses = fullCache.get(question.id);
+                if (!responses || responses.length === 0) return null;
 
-              const singleResponse = responses[0];
-              const evaluation = await evaluateResponses(
-                evaluator, [singleResponse], question.groundTruth ?? '', question.prompt,
-              );
+                const singleResponse = responses[0];
+                const evaluation = await evaluateResponses(
+                  evaluator, [singleResponse], question.groundTruth ?? '', question.prompt,
+                );
 
-              evalCompleted += 1;
-              if (evalCompleted % 50 === 0 || evalCompleted === selectedQuestions.length) {
-                log(`  [${datasetName}] evaluated ${evalCompleted}/${selectedQuestions.length}\n`);
-              }
+                evalCompleted += 1;
+                if (evalCompleted % 50 === 0 || evalCompleted === selectedQuestions.length) {
+                  log(`  [${datasetName}] evaluated ${evalCompleted}/${selectedQuestions.length}\n`);
+                }
 
-              const result: PromptRunResult = {
-                questionId: question.id,
-                prompt: question.prompt,
-                groundTruth: question.groundTruth,
-                category: question.category,
-                difficulty: question.difficulty,
-                responses: [singleResponse],
-                consensus: {},
-                evaluation,
+                const result: PromptRunResult = {
+                  questionId: question.id,
+                  prompt: question.prompt,
+                  groundTruth: question.groundTruth,
+                  category: question.category,
+                  difficulty: question.difficulty,
+                  responses: [singleResponse],
+                  consensus: {},
+                  evaluation,
+                };
+                return { questionId: question.id, result };
               };
-              return { questionId: question.id, result };
+              return limiter.run(evaluate);
             }),
           );
 

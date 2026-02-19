@@ -20,32 +20,32 @@
     "majority",
     "council"
   ],
-  "updatedAt": "2026-02-19T20:28:57.210Z",
+  "updatedAt": "2026-02-19T20:48:40.370Z",
   "single": {
-    "accuracy": 0.807843137254902,
-    "correct": 206,
-    "total": 255
+    "accuracy": 0.8515625,
+    "correct": 218,
+    "total": 256
   },
   "ensemble": {
     "standard": {
-      "accuracy": 0.7769230769230769,
-      "correct": 202,
-      "total": 260
-    },
-    "elo": {
-      "accuracy": 0.7803921568627451,
-      "correct": 199,
-      "total": 255
-    },
-    "majority": {
-      "accuracy": 0.7722007722007722,
-      "correct": 200,
+      "accuracy": 0.861003861003861,
+      "correct": 223,
       "total": 259
     },
+    "elo": {
+      "accuracy": 0.8671875,
+      "correct": 222,
+      "total": 256
+    },
+    "majority": {
+      "accuracy": 0.8372093023255814,
+      "correct": 216,
+      "total": 258
+    },
     "council": {
-      "accuracy": 0.6549019607843137,
-      "correct": 167,
-      "total": 255
+      "accuracy": 0.7890625,
+      "correct": 202,
+      "total": 256
     }
   }
 }
