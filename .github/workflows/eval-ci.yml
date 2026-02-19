@@ -3,6 +3,11 @@ name: Eval CI Gate
 on:
   pull_request:
     paths:
+      - 'packages/consensus-core/**'
+      - 'packages/consensus-standard/**'
+      - 'packages/consensus-elo/**'
+      - 'packages/consensus-majority/**'
+      - 'packages/consensus-council/**'
       - 'packages/shared-utils/**'
       - 'packages/eval/**'
 
@@ -14,14 +19,72 @@ permissions:
   pull-requests: write
 
 jobs:
+  detect-changes:
+    name: Detect Eval Changes
+    runs-on: ubuntu-latest
+    outputs:
+      strategies: ${{ steps.build-matrix.outputs.strategies }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Detect changed paths
+        uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            standard:
+              - 'packages/consensus-core/**'
+              - 'packages/consensus-standard/**'
+              - 'packages/shared-utils/**'
+              - 'packages/eval/**'
+            elo:
+              - 'packages/consensus-core/**'
+              - 'packages/consensus-elo/**'
+              - 'packages/shared-utils/**'
+              - 'packages/eval/**'
+            majority:
+              - 'packages/consensus-core/**'
+              - 'packages/consensus-majority/**'
+              - 'packages/shared-utils/**'
+              - 'packages/eval/**'
+            council:
+              - 'packages/consensus-core/**'
+              - 'packages/consensus-council/**'
+              - 'packages/shared-utils/**'
+              - 'packages/eval/**'
+
+      - name: Build strategy matrix
+        id: build-matrix
+        run: |
+          strategies="["
+          first=true
+          for s in standard elo majority council; do
+            case "$s" in
+              standard) changed="${{ steps.filter.outputs.standard }}" ;;
+              elo)      changed="${{ steps.filter.outputs.elo }}" ;;
+              majority) changed="${{ steps.filter.outputs.majority }}" ;;
+              council)  changed="${{ steps.filter.outputs.council }}" ;;
+            esac
+            if [ "$changed" = "true" ]; then
+              [ "$first" = "false" ] && strategies="${strategies},"
+              strategies="${strategies}\"${s}\""
+              first=false
+            fi
+          done
+          strategies="${strategies}]"
+          echo "strategies=${strategies}" >> "$GITHUB_OUTPUT"
+          echo "Affected strategies: ${strategies}"
+
   eval-strategy:
     name: Eval (${{ matrix.strategy }})
+    needs: detect-changes
+    if: needs.detect-changes.outputs.strategies != '[]'
     runs-on: ubuntu-latest
     timeout-minutes: 20
     strategy:
       fail-fast: false
       matrix:
-        strategy: [standard, elo, majority, council]
+        strategy: ${{ fromJSON(needs.detect-changes.outputs.strategies) }}
     env:
       GOOGLE_API_KEY: ${{ secrets.TEST_GOOGLE_API_KEY }}
       HF_TOKEN: ${{ secrets.HF_TOKEN }}
@@ -54,6 +117,15 @@ jobs:
           path: packages/eval/datasets
           key: eval-datasets-v1
           restore-keys: eval-datasets-
+
+      - name: Build consensus packages
+        if: steps.check-keys.outputs.keys_available == 'true'
+        run: |
+          npm run build --workspace=packages/consensus-core
+          npm run build --workspace=packages/consensus-standard
+          npm run build --workspace=packages/consensus-elo
+          npm run build --workspace=packages/consensus-majority
+          npm run build --workspace=packages/consensus-council
 
       - name: Build shared-utils
         if: steps.check-keys.outputs.keys_available == 'true'
@@ -93,7 +165,7 @@ jobs:
 
   eval-report:
     name: Eval Report
-    needs: eval-strategy
+    needs: [detect-changes, eval-strategy]
     if: always() && github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     permissions:
@@ -112,16 +184,21 @@ jobs:
             const fs = require('fs');
             const marker = '<!-- eval-ci-report -->';
             const strategies = ['standard', 'elo', 'majority', 'council'];
+            const affected = ${{ needs.detect-changes.outputs.strategies }};
             let body = marker + '\n## Eval CI Results\n\n';
 
             for (const strategy of strategies) {
-              const dir = `eval-${strategy}-results`;
-              const file = `${dir}/eval-results.txt`;
               body += `### ${strategy}\n\n\`\`\`\n`;
-              try {
-                body += fs.readFileSync(file, 'utf8');
-              } catch {
-                body += `No results available. Check the [workflow logs](${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}) for details.`;
+              if (!affected.includes(strategy)) {
+                body += 'Skipped (no relevant changes detected).';
+              } else {
+                const dir = `eval-${strategy}-results`;
+                const file = `${dir}/eval-results.txt`;
+                try {
+                  body += fs.readFileSync(file, 'utf8');
+                } catch {
+                  body += `No results available. Check the [workflow logs](${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}) for details.`;
+                }
               }
               body += '\n```\n\n';
             }

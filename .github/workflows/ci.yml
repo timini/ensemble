@@ -45,6 +45,11 @@ jobs:
           filters: |
             shared_utils:
               - 'packages/shared-utils/**'
+              - 'packages/consensus-core/**'
+              - 'packages/consensus-standard/**'
+              - 'packages/consensus-elo/**'
+              - 'packages/consensus-majority/**'
+              - 'packages/consensus-council/**'
               - 'package.json'
               - 'package-lock.json'
               - 'tsconfig*.json'
@@ -129,6 +134,13 @@ jobs:
           node-version: 20
           cache: npm
       - run: npm ci
+      - name: Test consensus packages
+        run: |
+          npm run test --workspace=packages/consensus-core
+          npm run test --workspace=packages/consensus-standard
+          npm run test --workspace=packages/consensus-elo
+          npm run test --workspace=packages/consensus-majority
+          npm run test --workspace=packages/consensus-council
       - run: npm run test --workspace=packages/shared-utils
         env:
           OPENAI_API_KEY: ${{ secrets.TEST_OPENAI_API_KEY }}
@@ -153,6 +165,13 @@ jobs:
         with:
           path: packages/shared-utils/dist
           key: shared-utils-build-${{ hashFiles('packages/shared-utils/src/**', 'packages/shared-utils/tsconfig*.json') }}
+      - name: Build consensus packages
+        run: |
+          npm run build --workspace=packages/consensus-core
+          npm run build --workspace=packages/consensus-standard
+          npm run build --workspace=packages/consensus-elo
+          npm run build --workspace=packages/consensus-majority
+          npm run build --workspace=packages/consensus-council
       - run: npm run build --workspace=packages/shared-utils
       - run: npm run lint --workspace=packages/app
       - run: npm run typecheck --workspace=packages/app
@@ -177,6 +196,13 @@ jobs:
         with:
           path: packages/shared-utils/dist
           key: shared-utils-build-${{ hashFiles('packages/shared-utils/src/**', 'packages/shared-utils/tsconfig*.json') }}
+      - name: Build consensus packages
+        run: |
+          npm run build --workspace=packages/consensus-core
+          npm run build --workspace=packages/consensus-standard
+          npm run build --workspace=packages/consensus-elo
+          npm run build --workspace=packages/consensus-majority
+          npm run build --workspace=packages/consensus-council
       - run: npm run build --workspace=packages/shared-utils
       - run: npm run build --workspace=packages/app
       - name: Get Playwright version

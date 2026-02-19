@@ -1,0 +1,2995 @@
+{
+  "model": "google:gemini-3-flash-preview",
+  "dataset": "simpleqa",
+  "createdAt": "2026-02-19T19:43:06.315Z",
+  "entries": [
+    {
+      "questionId": "simpleqa-3169",
+      "result": {
+        "questionId": "simpleqa-3169",
+        "prompt": "What position did the album \"Different World\" by Alan Walker land in the year-end 2019 US Top Dance/Electronic Albums (Billboard)?",
+        "groundTruth": "7",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "Alan Walker's album *Different World* landed at **No. 2** on the year-end 2019 US Top Dance/Electronic Albums chart by Billboard.",
+            "responseTimeMs": 3024,
+            "tokenCount": 351
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "exact-match",
+          "groundTruth": "7",
+          "accuracy": 0,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": false,
+              "expected": "7",
+              "predicted": "No. 2"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "simpleqa-3416",
+      "result": {
+        "questionId": "simpleqa-3416",
+        "prompt": "With what other mathematician did Emil Klaus Julius Fuchs publish \"The Statistical Mechanics of Condensing Systems\"?",
+        "groundTruth": "Max Born",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "Emil Klaus Julius Fuchs (Klaus Fuchs) published \"The Statistical Mechanics of Condensing Systems\" with the physicist and mathematician **Max Born**.\n\nThe work was published as a series of papers in the *Proceedings of the Royal Society of London* (Series A) in the late 1930s (specifically 1938 and 1939). At the time, Fuchs was working as a research assistant to Max Born at the University of Edinburgh after fleeing Nazi Germany.",
+            "responseTimeMs": 3366,
+            "tokenCount": 406
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "exact-match",
+          "groundTruth": "Max Born",
+          "accuracy": 1,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": true,
+              "expected": "Max Born",
+              "predicted": "Max Born"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "simpleqa-1912",
+      "result": {
+        "questionId": "simpleqa-1912",
+        "prompt": "In what year did King John II of Portugal commission Diogo de Azambuja to build Elmina Castle?",
+        "groundTruth": "1481",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "King John II of Portugal commissioned Diogo de Azambuja to build Elmina Castle (São Jorge da Mina) in **1481**, and the construction began in **1482**.\n\nThe fleet, consisting of nine caravels and two ships carrying building materials and 600 men, departed Lisbon in December 1481 and arrived at the coast of present-day Ghana in January 1482.",
+            "responseTimeMs": 3481,
+            "tokenCount": 296
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "exact-match",
+          "groundTruth": "1481",
+          "accuracy": 1,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": true,
+              "expected": "1481",
+              "predicted": "1481"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "simpleqa-4231",
+      "result": {
+        "questionId": "simpleqa-4231",
+        "prompt": "How many performances did “Tristan and Isolde” receive at the Metropolitan Opera House in the 1889-1890 season?",
+        "groundTruth": "5",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "During the 1889–1890 season, Richard Wagner’s **\"Tristan und Isolde\"** received **5 performances** at the Metropolitan Opera House.\n\nAll five performances were conducted by **Anton Seidl** and featured **Lilli Lehmann** as Isolde and **Paul Kalisch** as Tristan.\n\nThe specific dates for these performances at the Met were:\n1.  December 4, 1889\n2.  December 13, 1889\n3.  December 21, 1889\n4.  January 3, 1890\n5.  January 11, 1890 (Matinee)\n\nWhile the company performed the opera twice more during their spring tour in Chicago that season, there were only five stagings held within the Metropolitan Opera House itself.",
+            "responseTimeMs": 6572,
+            "tokenCount": 984
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "exact-match",
+          "groundTruth": "5",
+          "accuracy": 1,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": true,
+              "expected": "5",
+              "predicted": "5"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "simpleqa-268",
+      "result": {
+        "questionId": "simpleqa-268",
+        "prompt": "Who else did Jessica Hahn accuse of rape besides Jim Bakker?",
+        "groundTruth": "John Wesley Fletcher.",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "In addition to Jim Bakker, Jessica Hahn accused evangelist **John Wesley Fletcher** of rape.\n\nAccording to Hahn’s account of the December 1980 incident in a Clearwater Beach, Florida, hotel room, Fletcher (who was a friend of Bakker and the one who arranged the meeting) drugged her and participated in the assault. Hahn alleged that after Jim Bakker raped her, Fletcher also raped her.\n\nJohn Wesley Fletcher initially denied the allegations but later admitted to having sexual relations with Hahn, though he maintained it was consensual. The scandal involving the hush money paid to Hahn to keep these allegations quiet eventually led to the collapse of Jim Bakker’s PTL (Praise The Lord) ministry and Bakker's subsequent imprisonment for fraud.",
+            "responseTimeMs": 4724,
+            "tokenCount": 602
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "exact-match",
+          "groundTruth": "John Wesley Fletcher.",
+          "accuracy": 1,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": true,
+              "expected": "John Wesley Fletcher.",
+              "predicted": "John Wesley Fletcher"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "simpleqa-2842",
+      "result": {
+        "questionId": "simpleqa-2842",
+        "prompt": "What scholarship did Adil Hussain use to study at the Drama Studio London?",
+        "groundTruth": "Charles Wallace India Trust",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "Adil Hussain studied at the Drama Studio London using a **Charles Wallace India Trust Scholarship**.\n\nHe received this prestigious scholarship in 1998, which allowed him to pursue a one-year professional acting course at the London-based drama school after he had already completed his studies at the National School of Drama (NSD) in New Delhi.",
+            "responseTimeMs": 2919,
+            "tokenCount": 341
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "exact-match",
+          "groundTruth": "Charles Wallace India Trust",
+          "accuracy": 1,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": true,
+              "expected": "Charles Wallace India Trust",
+              "predicted": "Charles Wallace India Trust Scholarship"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "simpleqa-3054",
+      "result": {
+        "questionId": "simpleqa-3054",
+        "prompt": "What award did Janice Burgess win at the 2008 Daytime Emmy Awards?",
+        "groundTruth": "Outstanding Special Class Animated Program ",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "At the 2008 Daytime Emmy Awards, Janice Burgess won the award for **Outstanding Special Class Animated Program** for her work as the creator and executive producer of ***The Backyardigans***.",
+            "responseTimeMs": 2770,
+            "tokenCount": 313
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "exact-match",
+          "groundTruth": "Outstanding Special Class Animated Program ",
+          "accuracy": 1,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": true,
+              "expected": "Outstanding Special Class Animated Program",
+              "predicted": "Outstanding Special Class Animated Program"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "simpleqa-2872",
+      "result": {
+        "questionId": "simpleqa-2872",
+        "prompt": "On the first episode of the BBC show Dragon's Den in Series 19, Steven Bartlett invested in a company. What is the name of this company?",
+        "groundTruth": "Cheesegeek",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "In the first episode of Series 19 of *Dragon's Den* (which was Steven Bartlett's debut episode), he actually invested in **two** companies:\n\n1.  **The Little Loop**: A children’s clothing rental subscription service founded by Charlotte Morley. Steven Bartlett and Deborah Meaden both invested, marking Steven's first-ever investment in the Den.\n2.  **CheeseGeek**: An online cheese subscription business founded by Edward Hancock and Richard Schrieber. Steven Bartlett and Peter Jones both invested in this company later in the same episode.\n\nIf you are looking for the very first company he invested in, it was **The Little Loop**.",
+            "responseTimeMs": 5366,
+            "tokenCount": 726
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "exact-match",
+          "groundTruth": "Cheesegeek",
+          "accuracy": 1,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": true,
+              "expected": "Cheesegeek",
+              "predicted": "CheeseGeek"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "simpleqa-1326",
+      "result": {
+        "questionId": "simpleqa-1326",
+        "prompt": "Mathematician Alexander Aitken graduated in 1920 with First Class Honors in what subject?",
+        "groundTruth": "French and Latin",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "Alexander Aitken graduated from the University of Otago in 1920 with First Class Honors in **Languages and Literature** (specifically Latin and French).\n\nAlthough he is remembered as one of the greatest mathematicians and mental calculators of the 20th century, his initial academic honors were in languages. He did not focus exclusively on mathematics until he moved to the University of Edinburgh for his postgraduate studies in 1923.",
+            "responseTimeMs": 4724,
+            "tokenCount": 632
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "exact-match",
+          "groundTruth": "French and Latin",
+          "accuracy": 1,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": true,
+              "expected": "French and Latin",
+              "predicted": "Latin and French"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "simpleqa-3744",
+      "result": {
+        "questionId": "simpleqa-3744",
+        "prompt": "Which patch reduced the cost of the Leather Whip from 15 gold to 10 gold in Terraria?",
+        "groundTruth": "1.4.4",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "The cost of the Leather Whip was reduced from 15 gold to 10 gold in **Patch 1.4.1**.",
+            "responseTimeMs": 2369,
+            "tokenCount": 312
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "exact-match",
+          "groundTruth": "1.4.4",
+          "accuracy": 0,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": false,
+              "expected": "1.4.4",
+              "predicted": "1.4.1"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "simpleqa-2148",
+      "result": {
+        "questionId": "simpleqa-2148",
+        "prompt": "In what year was Glipodes bordoni described by Franciscolo?",
+        "groundTruth": "1990",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "*Glipodes bordoni* was described by Franciscolo in **1990**.\n\nIt was described in the following publication:\n**Franciscolo, M. E. (1990).** Mordellidae (Coleoptera Heteromera) from the West Indies and South America. *Annali del Museo Civico di Storia Naturale \"Giacomo Doria\"*, 88: 205–218.",
+            "responseTimeMs": 3069,
+            "tokenCount": 409
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "exact-match",
+          "groundTruth": "1990",
+          "accuracy": 1,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": true,
+              "expected": "1990",
+              "predicted": "1990"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "simpleqa-2916",
+      "result": {
+        "questionId": "simpleqa-2916",
+        "prompt": "How many children did Admiral Charles Philip Snyder and Cornelia Lee Wolcott have?",
+        "groundTruth": "3",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "Admiral Charles Philip Snyder and Cornelia Lee Wolcott had **two** children:\n\n1.  **Charles Philip Snyder Jr. (1907–1994):** He followed in his father's footsteps, graduating from the U.S. Naval Academy and eventually reaching the rank of Rear Admiral in the United States Navy.\n2.  **Elizabeth Snyder (1910–1991):** She was their only daughter (often referred to in records as Elizabeth Snyder Halm).\n\nAdmiral Snyder and Cornelia Wolcott were married in 1904. He served a long and distinguished career, most notably as the President of the Naval War College and as the Inspector General of the Navy during World War II.",
+            "responseTimeMs": 5063,
+            "tokenCount": 671
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "exact-match",
+          "groundTruth": "3",
+          "accuracy": 0,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": false,
+              "expected": "3",
+              "predicted": "two"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "simpleqa-2141",
+      "result": {
+        "questionId": "simpleqa-2141",
+        "prompt": "What did Robert Southey state was the singular diagnosis for Horatio Lord Nelson's illness and subsequent evacuation during the San Juan expedition in 1780?",
+        "groundTruth": "Dysentery",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "According to Robert Southey in his biography *The Life of Nelson* (1813), the singular cause or \"diagnosis\" for Horatio Nelson’s severe illness during the San Juan expedition was **poisoning by the manchineel tree.**\n\nSouthey states that Nelson’s health was critically compromised after he drank from a pool of water into which **boughs of the manchineel** had been thrown. \n\nThe manchineel (*Hippomane mancinella*) is a notoriously toxic Caribbean tree; its sap is highly caustic, and its fruit is often called the \"little apple of death.\" Southey wrote:\n\n> *\"Nelson had been poisoned by drinking from a pool into which some boughs of the manchineel had been thrown: the sickness which it brought on, and the constant fatigue of the service, had so far weakened him, that he was actually dying.\"*\n\nWhile modern historians generally attribute Nelson’s illness during the 1780 Nicaragua campaign to a combination of **malaria, dysentery, and yellow fever** (which decimated the British forces), Southey highlighted the manchineel poisoning as the specific event that initiated his physical decline and necessitated his evacuation back to Jamaica and eventually to England.",
+            "responseTimeMs": 6746,
+            "tokenCount": 898
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "exact-match",
+          "groundTruth": "Dysentery",
+          "accuracy": 0,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": false,
+              "expected": "Dysentery",
+              "predicted": "poisoning by the manchineel tree"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "simpleqa-1849",
+      "result": {
+        "questionId": "simpleqa-1849",
+        "prompt": "Within plus or minus one minute, when was Marquinhos given a yellow card in the 2022 World Cup quarterfinals?",
+        "groundTruth": "77",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "Marquinhos was given a yellow card in the **77th minute** of the 2022 World Cup quarterfinal match between Brazil and Croatia.",
+            "responseTimeMs": 2947,
+            "tokenCount": 356
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "exact-match",
+          "groundTruth": "77",
+          "accuracy": 1,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": true,
+              "expected": "77",
+              "predicted": "77"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "simpleqa-4165",
+      "result": {
+        "questionId": "simpleqa-4165",
+        "prompt": "What is the name of the Welsh nurse who specializes in palliative care and was elected Fellow of the Learned Society of Wales in 2011?",
+        "groundTruth": "Mari Lloyd-Williams",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "The Welsh professional who matches your description is **Professor Baroness Ilora Finlay** (Ilora Finlay, Baroness Finlay of Llandaff).\n\nWhile she is a **palliative medicine consultant (doctor)** rather than a nurse, she is the most prominent figure in Welsh palliative care who fits the specific criteria of being elected a **Fellow of the Learned Society of Wales (FLSW) in 2011**.\n\nHere are the details that align with your query:\n*   **Name:** Baroness Ilora Finlay.\n*   **Specialization:** She is a world-renowned specialist in **palliative care** and was the first Professor of Palliative Medicine in the UK (at Cardiff University).\n*   **Election to FLSW:** she was elected as a Fellow of the Learned Society of Wales in **2011**, part of the society's first-ever elected cohort following its foundation.\n*   **Welsh Connection:** She is a life peer in the House of Lords as **Baroness Finlay of Llandaff** and has been a central figure in developing palliative care policy for the Welsh Government.\n\n**Note on the \"Nurse\" description:**\nThere is often a slight confusion regarding her profession in general trivia because she is an **Honorary Fellow of the Royal College of Nursing (RCN)** and works extremely closely with the nursing profession in her advocacy for end-of-life care. \n\nIf the person must strictly be a nurse by background, the only nurse elected to the Learned Society of Wales in 2011 was **Professor Dame June Clark**. However, Dame June Clark’s primary specialization is in **community nursing and nursing informatics**, whereas Baroness Finlay is the definitive specialist in **palliative care** elected that year.",
+            "responseTimeMs": 78259,
+            "tokenCount": 14212
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "exact-match",
+          "groundTruth": "Mari Lloyd-Williams",
+          "accuracy": 0,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": false,
+              "expected": "Mari Lloyd-Williams",
+              "predicted": "Professor Baroness Ilora Finlay"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "simpleqa-356",
+      "result": {
+        "questionId": "simpleqa-356",
+        "prompt": "In what year was the Chinese survey conducted that obtained the figure of 29,029.24 feet (8,848.11 meters) for Mount Everest's height?",
+        "groundTruth": "1975",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "",
+            "responseTimeMs": 0,
+            "error": "Streaming timeout for google after 120s. The API may be unresponsive."
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "exact-match",
+          "groundTruth": "1975",
+          "accuracy": 0,
+          "results": {}
+        }
+      }
+    },
+    {
+      "questionId": "simpleqa-3559",
+      "result": {
+        "questionId": "simpleqa-3559",
+        "prompt": "What engraver did Thomas Ryder apprentice under?",
+        "groundTruth": "James Basire.",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "Thomas Ryder (1746–1810), the well-known English engraver, apprenticed under **James Basire** (specifically James Basire the Elder). \n\nBasire was a prominent engraver to the Society of Antiquaries and is also famous for having been the master of William Blake. Ryder went on to become one of the most skilled stipple engravers of his time, frequently working for the publisher John Boydell.",
+            "responseTimeMs": 2456,
+            "tokenCount": 285
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "exact-match",
+          "groundTruth": "James Basire.",
+          "accuracy": 1,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": true,
+              "expected": "James Basire.",
+              "predicted": "James Basire"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "simpleqa-247",
+      "result": {
+        "questionId": "simpleqa-247",
+        "prompt": "What was the name of the first elephant born in Valencia Bioparc?",
+        "groundTruth": "Makena",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "The name of the first elephant born in Bioparc Valencia is **Makena**.\n\nShe was born on November 9, 2022. Her birth was considered a major milestone for the park and the European Endangered Species Programme (EEP), as African elephants are an endangered species. \n\nRecently, in March 2024, a second elephant (a male named Malik) was born at the same park.",
+            "responseTimeMs": 3686,
+            "tokenCount": 404
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "exact-match",
+          "groundTruth": "Makena",
+          "accuracy": 1,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": true,
+              "expected": "Makena",
+              "predicted": "Makena"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "simpleqa-3154",
+      "result": {
+        "questionId": "simpleqa-3154",
+        "prompt": "During which years did Richard H.G. Parry serve as Secretary-General of the International Society for Soil Mechanics and Geotechnical Engineering?",
+        "groundTruth": "1981-1999",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "Richard H.G. Parry (often referred to as Dick Parry) served as the Secretary-General of the International Society for Soil Mechanics and Geotechnical Engineering (ISSMGE) from **1981 to 1999**.\n\nHe took over the position following the sudden death of the previous Secretary-General, Kevin Nash, and held the post for 18 years until he was succeeded by Professor Neil Taylor in 1999. During his tenure, the organization was known as the International Society for Soil Mechanics and Foundation Engineering (ISSMFE) for the majority of the time, before changing its name to include \"Geotechnical Engineering\" in 1997.",
+            "responseTimeMs": 3966,
+            "tokenCount": 510
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "exact-match",
+          "groundTruth": "1981-1999",
+          "accuracy": 1,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": true,
+              "expected": "1981-1999",
+              "predicted": "1981 to 1999"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "simpleqa-2477",
+      "result": {
+        "questionId": "simpleqa-2477",
+        "prompt": "What opportunity did Cab Calloway refuse while at Crane College?",
+        "groundTruth": "Playing basketball.",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "While attending Crane College in Chicago, Cab Calloway refused an offer to play **professional basketball with the Harlem Globetrotters** (who were then known as the Savoy Big Five).\n\nCalloway was a standout athlete and a star player for Crane College's basketball team. However, he turned down the professional sports contract because he was already earning a significant income performing as a singer and drummer at the Sunset Cafe in Chicago. He ultimately decided that his future and his passion lay in show business rather than athletics.",
+            "responseTimeMs": 4094,
+            "tokenCount": 483
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "exact-match",
+          "groundTruth": "Playing basketball.",
+          "accuracy": 1,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": true,
+              "expected": "Playing basketball.",
+              "predicted": "professional basketball with the Harlem Globetrotters"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "simpleqa-4253",
+      "result": {
+        "questionId": "simpleqa-4253",
+        "prompt": "Who was the 2007 torch lighter for the Special Olympics World Summer Games in Shanghai, China?",
+        "groundTruth": "Liu Xiang",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "The final torch lighter who lit the cauldron for the 2007 Special Olympics World Summer Games in Shanghai was **Zhao Zengzeng**, a 21-year-old Chinese Special Olympics athlete.\n\nShe was accompanied during the final lighting ceremony by NBA star **Yao Ming** and then-Governor of California **Arnold Schwarzenegger**, both of whom were global ambassadors for the Special Olympics.",
+            "responseTimeMs": 3177,
+            "tokenCount": 423
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "exact-match",
+          "groundTruth": "Liu Xiang",
+          "accuracy": 0,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": false,
+              "expected": "Liu Xiang",
+              "predicted": "Zhao Zengzeng"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "simpleqa-3259",
+      "result": {
+        "questionId": "simpleqa-3259",
+        "prompt": "In the women's singles 2022 Madrid Open, how many Romanian players played in the second round?",
+        "groundTruth": "1",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "In the women's singles at the 2022 Madrid Open, **one** Romanian player reached the second round.\n\nThat player was **Simona Halep**.\n\nHere is a breakdown of how the Romanian players fared in the tournament:\n*   **Simona Halep:** Defeated Zhang Shuai in the first round (6–2, 6–3) to advance to the second round, where she eventually defeated Paula Badosa.\n*   **Sorana Cîrstea:** Lost in the first round to Nuria Párrizas Díaz.\n*   **Irina-Camelia Begu:** Lost in the first round to Belinda Bencic.\n*   **Elena-Gabriela Ruse:** Lost in the first round to Shelby Rogers.",
+            "responseTimeMs": 6523,
+            "tokenCount": 1026
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "exact-match",
+          "groundTruth": "1",
+          "accuracy": 1,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": true,
+              "expected": "1",
+              "predicted": "one"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "simpleqa-1561",
+      "result": {
+        "questionId": "simpleqa-1561",
+        "prompt": "Who won the 2006 SIGPLAN Doctoral Dissertation Award?",
+        "groundTruth": "Xiangyu Zhang",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "The winner of the 2006 SIGPLAN Doctoral Dissertation Award was **Xiangyu Zhang**.\n\nHe received the award for his dissertation titled **\"Fault Location via Precise Dynamic Slicing,\"** completed at the **University of Arizona** under the supervision of Professor Rajiv Gupta. \n\nHis research focused on developing efficient techniques for dynamic program slicing to help automate the process of locating software bugs. He is currently a professor at Purdue University.",
+            "responseTimeMs": 3601,
+            "tokenCount": 479
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "exact-match",
+          "groundTruth": "Xiangyu Zhang",
+          "accuracy": 1,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": true,
+              "expected": "Xiangyu Zhang",
+              "predicted": "Xiangyu Zhang"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "simpleqa-1798",
+      "result": {
+        "questionId": "simpleqa-1798",
+        "prompt": "In the match between Spain and the Netherlands, which was played on February 5, 2022, as part of the 2022 Rugby Europe Championship, how many points did the Netherlands score?",
+        "groundTruth": "0.",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "In the match played on February 5, 2022, as part of the 2022 Rugby Europe Championship, the Netherlands scored **0** points.\n\nSpain won the match with a final score of **43–0**.",
+            "responseTimeMs": 2482,
+            "tokenCount": 264
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "exact-match",
+          "groundTruth": "0.",
+          "accuracy": 1,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": true,
+              "expected": "0.",
+              "predicted": "0"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "simpleqa-2922",
+      "result": {
+        "questionId": "simpleqa-2922",
+        "prompt": "In which journal was the paper \"Multidimensional Scaling and Other Techniques for Uncovering Universals\" published?",
+        "groundTruth": "Theoretical Linguistics",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "The paper (or article) titled **\"Multidimensional Scaling and Other Techniques for Uncovering Universals\"** (often cited with the subtitle **\"in the Structure of Values\"**) was written by the psychologist **Shalom H. Schwartz**.\n\nIt was published in **1990** in the journal:\n\n*   ***Bulletin de Méthodologie Sociologique*** (**BMS**)\n    *(Issue 29, October 1990, pp. 36–36)*\n\nHowever, it is most frequently cited as a book chapter from the same year in:\n*   ***Operationalization and Research Strategy*** (Eds. J. J. Hox and J. de Jong-Gierveld), published by Swets & Zeitlinger.\n\n### Context and Related Journal Articles\nIf you are looking for the major journal articles where Schwartz published his groundbreaking research on the \"universals\" of human values using Multidimensional Scaling (MDS), they are:\n\n1.  **\"Toward a Universal Psychological Structure of Human Values\"** (1987) – Published in the ***Journal of Personality and Social Psychology***.\n2.  **\"Toward a Theory of the Universal Content and Structure of Values: Extensions and Cross-Cultural Replications\"** (1990) – Published in the ***Journal of Personality and Social Psychology***.\n3.  **\"Universals in the Content and Structure of Values: Theoretical Advances and Empirical Tests in 20 Countries\"** (1992) – Published in the serial/journal ***Advances in Experimental Social Psychology*** (Vol. 25). This is the most widely cited version of his work on universals and MDS.\n4.  **\"Are There Universal Aspects in the Structure and Content of Human Values?\"** (1994) – Published in the ***Journal of Social Issues***.",
+            "responseTimeMs": 55807,
+            "tokenCount": 9768
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "exact-match",
+          "groundTruth": "Theoretical Linguistics",
+          "accuracy": 0,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": false,
+              "expected": "Theoretical Linguistics",
+              "predicted": "The paper (or article) titled \"Multidimensional Scaling and Other Techniques for Uncovering Universals\" (often cited with the subtitle \"in the Structure of Values\") was written by the psychologist Shalom H. Schwartz. It was published in 1990 in the journal: Bulletin de Méthodologie Sociologique (BMS) (Issue 29, October 1990, pp. 36–36) However, it is most frequently cited as a book chapter from the same year in: Operationalization and Research Strategy (Eds. J. J. Hox and J. de Jong-Gierveld), published by Swets & Zeitlinger. Context and Related Journal Articles If you are looking for the major journal articles where Schwartz published his groundbreaking research on the \"universals\" of human values using Multidimensional Scaling (MDS), they are: 1. \"Toward a Universal Psychological Structure of Human Values\" (1987) – Published in the Journal of Personality and Social Psychology. 2. \"Toward a Theory of the Universal Content and Structure of Values: Extensions and Cross-Cultural Replications\" (1990) – Published in the Journal of Personality and Social Psychology. 3. \"Universals in the Content and Structure of Values: Theoretical Advances and Empirical Tests in 20 Countries\" (1992) – Published in the serial/journal Advances in Experimental Social Psychology (Vol. 25). This is the most widely cited version of his work on universals and MDS. 4. \"Are There Universal Aspects in the Structure and Content of Human Values?\" (1994) – Published in the Journal of Social Issues."
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "simpleqa-887",
+      "result": {
+        "questionId": "simpleqa-887",
+        "prompt": "What date (day, month, and year) was Robert McKee, the Maryland politician who resigned from the House of Delegates in 2008, born?",
+        "groundTruth": "7th May 1949.",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "Robert McKee (Robert A. McKee), the Maryland politician who represented District 2A in the House of Delegates and resigned in 2008, was born on **April 13, 1949**.",
+            "responseTimeMs": 3489,
+            "tokenCount": 411
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "exact-match",
+          "groundTruth": "7th May 1949.",
+          "accuracy": 0,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": false,
+              "expected": "7th May 1949.",
+              "predicted": "April 13, 1949"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "simpleqa-166",
+      "result": {
+        "questionId": "simpleqa-166",
+        "prompt": "What were the names of the two presenters of the 16th edition of the Miss World pageant?",
+        "groundTruth": "Peter West, Michael Aspel",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "The two presenters of the 16th edition of the Miss World pageant, which took place on November 17, 1966, were **Simon Dee** and **Peter West**.",
+            "responseTimeMs": 3987,
+            "tokenCount": 465
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "exact-match",
+          "groundTruth": "Peter West, Michael Aspel",
+          "accuracy": 0,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": false,
+              "expected": "Peter West, Michael Aspel",
+              "predicted": "Simon Dee and Peter West"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "simpleqa-190",
+      "result": {
+        "questionId": "simpleqa-190",
+        "prompt": "Who received the Farrer Medal in 2014?",
+        "groundTruth": "Dr. Elizabeth Dennis",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "The Farrer Memorial Medal for 2014 was awarded to **Professor Robert Park** (often referred to as Bob Park).\n\nProfessor Park is a renowned plant pathologist from the University of Sydney. He received the award for his significant contributions to agricultural science, specifically his research on the genetics of rust resistance in cereals and his leadership in the Australian Cereal Rust Control Program.",
+            "responseTimeMs": 2991,
+            "tokenCount": 291
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "exact-match",
+          "groundTruth": "Dr. Elizabeth Dennis",
+          "accuracy": 0,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": false,
+              "expected": "Dr. Elizabeth Dennis",
+              "predicted": "Professor Robert Park"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "simpleqa-1867",
+      "result": {
+        "questionId": "simpleqa-1867",
+        "prompt": "What is the name of track 7 on Disc 1 of the Super Mario Galaxy Original Soundtrack Platinum Version?",
+        "groundTruth": "Egg Planet",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "The name of track 7 on Disc 1 of the *Super Mario Galaxy Original Soundtrack Platinum Version* is **\"Rosalina in the Observatory 1\"** (Japanese title: ロゼッタの彗星天文台 1).",
+            "responseTimeMs": 3555,
+            "tokenCount": 421
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "exact-match",
+          "groundTruth": "Egg Planet",
+          "accuracy": 0,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": false,
+              "expected": "Egg Planet",
+              "predicted": "Rosalina in the Observatory 1"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "simpleqa-1668",
+      "result": {
+        "questionId": "simpleqa-1668",
+        "prompt": "In which year was the municipality of Uramita, Antioquia, Colombia, founded?",
+        "groundTruth": "1875",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "The municipality of Uramita, Antioquia, was founded in **1875**.\n\nSpecifically, it was founded on **September 22, 1875**, by José María Ortiz and a group of settlers. It was later officially established as a municipality (separated from Cañasgordas) in **1915**.",
+            "responseTimeMs": 3555,
+            "tokenCount": 456
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "exact-match",
+          "groundTruth": "1875",
+          "accuracy": 1,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": true,
+              "expected": "1875",
+              "predicted": "1875"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "simpleqa-2124",
+      "result": {
+        "questionId": "simpleqa-2124",
+        "prompt": "Which family does Sabella spallanzanii, a species of marine polychaete worms, belong to?",
+        "groundTruth": "Sabellidae",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "*Sabella spallanzanii* belongs to the family **Sabellidae**.\n\nCommonly known as the Mediterranean fanworm or European fanworm, it is a member of the \"feather duster worm\" group, characterized by the prominent crown of feeding tentacles (radioles) used for filter feeding.",
+            "responseTimeMs": 2583,
+            "tokenCount": 245
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "exact-match",
+          "groundTruth": "Sabellidae",
+          "accuracy": 1,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": true,
+              "expected": "Sabellidae",
+              "predicted": "Sabellidae"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "simpleqa-3848",
+      "result": {
+        "questionId": "simpleqa-3848",
+        "prompt": "On what day, month, and year was Takashi Masuzaki born?",
+        "groundTruth": "Dec 8th, 1962",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "Takashi Masuzaki (the renowned Japanese guitarist and member of the fusion band DIMENSION) was born on **December 8, 1962**.",
+            "responseTimeMs": 2234,
+            "tokenCount": 231
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "exact-match",
+          "groundTruth": "Dec 8th, 1962",
+          "accuracy": 1,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": true,
+              "expected": "Dec 8th, 1962",
+              "predicted": "December 8, 1962"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "simpleqa-400",
+      "result": {
+        "questionId": "simpleqa-400",
+        "prompt": "Who received an honorable mention at the 1999 Frank and Brennie Morgan Prize for Outstanding Research in Mathematics by an Undergraduate Student?",
+        "groundTruth": "Samit Dasgupta",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "The honorable mention for the 1999 Frank and Brennie Morgan Prize for Outstanding Research in Mathematics by an Undergraduate Student was awarded to **Samit Dasgupta**, who was a student at Harvard University at the time.\n\nThe winner of the prize that year was Sean McLaughlin (University of Michigan).",
+            "responseTimeMs": 3238,
+            "tokenCount": 330
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "exact-match",
+          "groundTruth": "Samit Dasgupta",
+          "accuracy": 1,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": true,
+              "expected": "Samit Dasgupta",
+              "predicted": "Samit Dasgupta"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "simpleqa-3097",
+      "result": {
+        "questionId": "simpleqa-3097",
+        "prompt": "What is the first name of the individual who won the Polanyi Medal for outstanding contributions to the field of gas kinetics in 1998?",
+        "groundTruth": "Akkihebbal",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "The first name of the individual who won the Polanyi Medal in 1998 is **Michael** (Michael J. Pilling).",
+            "responseTimeMs": 2454,
+            "tokenCount": 277
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "exact-match",
+          "groundTruth": "Akkihebbal",
+          "accuracy": 0,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": false,
+              "expected": "Akkihebbal",
+              "predicted": "Michael"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "simpleqa-2594",
+      "result": {
+        "questionId": "simpleqa-2594",
+        "prompt": "In the late 1950s, Lygia Pape created a new type of performance named what?",
+        "groundTruth": "Ballet Neoconcreto",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "In the late 1950s, Lygia Pape created a new type of performance called the **Neo-Concrete Ballet** (*Balé Neoconcreto*).\n\nFirst performed in 1958 (*Balé Neoconcreto I*) and 1959 (*Balé Neoconcreto II*), these works were a collaboration with the poet Reynaldo Jardim. They were revolutionary because they moved away from traditional figurative dance. Instead of visible dancers, the performance featured large, colored geometric wooden shapes that moved across the stage. The dancers were hidden inside these cylinders and cubes, making it appear as though the abstract forms themselves were the performers. \n\nThis work was a foundational moment for the **Neo-Concrete movement** in Brazil, seeking to integrate art into the physical space of the viewer and move beyond the rigid rationalism of earlier Concrete art.",
+            "responseTimeMs": 3629,
+            "tokenCount": 525
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "exact-match",
+          "groundTruth": "Ballet Neoconcreto",
+          "accuracy": 1,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": true,
+              "expected": "Ballet Neoconcreto",
+              "predicted": "Neo-Concrete Ballet"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "simpleqa-2150",
+      "result": {
+        "questionId": "simpleqa-2150",
+        "prompt": "In which year did a mouse eradication program first commence on the volcanic island called Gough Island in the South Atlantic Ocean?",
+        "groundTruth": "2021",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "The mouse eradication program on Gough Island first commenced its operational phase in **2021**.\n\nWhile the **Gough Island Restoration Programme** had been in the planning and research stages for many years, the actual attempt to eradicate the invasive house mice (which were preying on the chicks of endangered seabirds) was originally scheduled to begin in 2020. However, the COVID-19 pandemic forced a delay, and the baiting operation finally began in **June 2021**.\n\nThe program involved using helicopters to drop cereal pellets containing rodenticide across the island. Unfortunately, in December 2021, it was reported that a single mouse had been spotted on a monitoring camera, indicating that the eradication attempt was not successful.",
+            "responseTimeMs": 5311,
+            "tokenCount": 735
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "exact-match",
+          "groundTruth": "2021",
+          "accuracy": 1,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": true,
+              "expected": "2021",
+              "predicted": "2021"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "simpleqa-3245",
+      "result": {
+        "questionId": "simpleqa-3245",
+        "prompt": "What college did Anna Moriah Wilson graduate from in 2014?",
+        "groundTruth": "Burke Mountain Academy",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "Anna Moriah Wilson did not graduate from college in 2014; that was the year she graduated from **high school**.\n\nIn 2014, she graduated from **Burke Mountain Academy**, a specialized ski racing high school in East Burke, Vermont.\n\nShe went on to attend **Dartmouth College**, where she graduated in **2019** with a degree in Engineering. While at Dartmouth, she was a member of the alpine ski team.",
+            "responseTimeMs": 3571,
+            "tokenCount": 472
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "exact-match",
+          "groundTruth": "Burke Mountain Academy",
+          "accuracy": 1,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": true,
+              "expected": "Burke Mountain Academy",
+              "predicted": "Burke Mountain Academy"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "simpleqa-2405",
+      "result": {
+        "questionId": "simpleqa-2405",
+        "prompt": "In the Legends continuity of Star Wars, how many grandchildren did Anakin Skywalker have?",
+        "groundTruth": "4",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "In the Star Wars Legends continuity (formerly the Expanded Universe), Anakin Skywalker had **four** grandchildren.\n\nThey are:\n\n### 1. Anakin Solo\nThe youngest child of Han Solo and Leia Organa Solo. He was named after his grandfather and was a powerful Jedi Knight. He died a heroic death at the age of 17 during the mission to Myrkr during the Yuuzhan Vong War.\n\n### 2. Jacen Solo\nThe elder son of Han and Leia (and twin brother to Jaina). He was a hero of the Yuuzhan Vong War but eventually fell to the dark side, becoming the Sith Lord **Darth Caedus**. He was eventually killed by his twin sister, Jaina, to end his reign of terror. (He also had a daughter, Allana, who was Anakin Skywalker's great-grandchild).\n\n### 3. Jaina Solo\nThe daughter of Han and Leia and the twin sister of Jacen. Known as the \"Sword of the Jedi,\" she was a master pilot and a powerful Jedi Master. She survived the events of the various galactic wars and eventually married Jagged Fel.\n\n### 4. Ben Skywalker\nThe only son of Luke Skywalker and Mara Jade Skywalker. Named after Obi-Wan \"Ben\" Kenobi, he was born during the Yuuzhan Vong War. He became a highly skilled Jedi and worked closely with his father to uncover the truth behind Jacen Solo’s fall to the dark side.\n\n***\n\n**Note on \"Legacy\":** While the *Star Wars: Legacy* comic series features characters like **Cade Skywalker**, they are distant descendants (great-great-grandchildren or further) rather than immediate grandchildren.",
+            "responseTimeMs": 5564,
+            "tokenCount": 781
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "exact-match",
+          "groundTruth": "4",
+          "accuracy": 1,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": true,
+              "expected": "4",
+              "predicted": "four"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "simpleqa-1564",
+      "result": {
+        "questionId": "simpleqa-1564",
+        "prompt": "What university awarded the statistician Adrian Smith an honorary Doctorate of Science in 2011?",
+        "groundTruth": "Plymouth University",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "The statistician Sir Adrian Smith was awarded an honorary Doctorate of Science by **City University London** (now known as City, University of London) in 2011.",
+            "responseTimeMs": 3009,
+            "tokenCount": 343
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "exact-match",
+          "groundTruth": "Plymouth University",
+          "accuracy": 0,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": false,
+              "expected": "Plymouth University",
+              "predicted": "City University London"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "simpleqa-3569",
+      "result": {
+        "questionId": "simpleqa-3569",
+        "prompt": "What's the DOI of the paper \"On Two Mathematical Representations for Semantic Maps\"?",
+        "groundTruth": "10.1515/zfs-2021-2040",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "The DOI for the paper **\"On Two Mathematical Representations for Semantic Maps\"** by **Joost Zwarts** is:\n\n**10.1515/thli.2010.003**\n\n### Publication Details:\n*   **Author:** Joost Zwarts\n*   **Journal:** *Theoretical Linguistics*\n*   **Volume:** 36\n*   **Issue:** 1\n*   **Pages:** 53–63\n*   **Year:** 2010",
+            "responseTimeMs": 6543,
+            "tokenCount": 905
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "exact-match",
+          "groundTruth": "10.1515/zfs-2021-2040",
+          "accuracy": 0,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": false,
+              "expected": "10.1515/zfs-2021-2040",
+              "predicted": "10.1515/thli.2010.003"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "simpleqa-1835",
+      "result": {
+        "questionId": "simpleqa-1835",
+        "prompt": "At what university was Kuo Tsai Chen appointed as an instructor after having been awarded his doctorate?",
+        "groundTruth": " Princeton University",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "Kuo Tsai Chen (K. T. Chen) was appointed as an instructor at **Princeton University** after receiving his doctorate from Columbia University in 1950. He served as an instructor there from 1950 to 1952.",
+            "responseTimeMs": 3668,
+            "tokenCount": 354
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "exact-match",
+          "groundTruth": " Princeton University",
+          "accuracy": 1,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": true,
+              "expected": "Princeton University",
+              "predicted": "Princeton University"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "simpleqa-4014",
+      "result": {
+        "questionId": "simpleqa-4014",
+        "prompt": "How much money in dollars was Cab Calloway making at the age of 23?",
+        "groundTruth": "$50,000",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "At the age of 23, Cab Calloway experienced his massive career breakthrough, and his income reflected his sudden status as a superstar.\n\nCab Calloway turned 23 on December 25, 1930. In early 1931 (while still 23), his orchestra replaced Duke Ellington’s as the house band at the famous **Cotton Club** in Harlem. That same year, he released his signature song, \"Minnie the Moocher,\" which became the first jazz record to sell a million copies.\n\n### His Estimated Earnings\nAccording to historical accounts and Calloway’s own autobiography, *Of Minnie the Moocher and Me*, his earnings during this period were approximately:\n\n*   **Weekly Salary:** Between **$1,000 and $1,500 per week** at the Cotton Club. \n*   **Annual Income:** Roughly **$50,000 to $75,000 per year** (equivalent to about **$1 million to $1.5 million today** when adjusted for inflation).\n\n### Important Context\n1.  **The Great Depression:** Calloway was making this amount of money in 1931, at the height of the Great Depression, when the average American family was lucky to earn $1,500 *per year*. This made him one of the wealthiest African American entertainers in the country at the time.\n2.  **Payroll:** It is important to note that as the \"leader,\" Calloway received the bulk payment from the club and was responsible for paying his musicians' salaries out of that total. However, even after paying his band, his personal take-home pay was enormous for the era.\n3.  **Radio and Tours:** His income was supplemented by national NBC radio broadcasts from the Cotton Club, which made him a household name and allowed him to command even higher fees for \"one-nighter\" performances on the road.\n\nBy the time he was 23, Cab Calloway was a wealthy man, famously known for his \"Hi-De-Ho\" catchphrase, his eccentric \"zoot suits,\" and his custom-built, high-end cars.",
+            "responseTimeMs": 8018,
+            "tokenCount": 1146
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "exact-match",
+          "groundTruth": "$50,000",
+          "accuracy": 1,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": true,
+              "expected": "$50,000",
+              "predicted": "$50,000 to $75,000 per year"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "simpleqa-3197",
+      "result": {
+        "questionId": "simpleqa-3197",
+        "prompt": "What year was the municipality of Ciudad Bolívar, Antioquia, Colombia, founded?",
+        "groundTruth": "1839",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "The municipality of Ciudad Bolívar, Antioquia, was founded on **August 25, 1839**.\n\nIt was founded by **Antonio de Jesús Uribe**, and it was later officially established as a municipality in 1869. Before receiving its current name, the settlement was known as *San Juan* and later simply as *Bolívar*.",
+            "responseTimeMs": 3319,
+            "tokenCount": 375
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "exact-match",
+          "groundTruth": "1839",
+          "accuracy": 1,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": true,
+              "expected": "1839",
+              "predicted": "1839"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "simpleqa-2690",
+      "result": {
+        "questionId": "simpleqa-2690",
+        "prompt": "What is the name of Vivienne Westwood's Autumn-Winter 1984/1985 collection?",
+        "groundTruth": "\"Clint Eastwood.\"",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "The name of Vivienne Westwood's Autumn-Winter 1984/1985 collection is **Clint Eastwood**.\n\nThis collection was notable for being the final collaboration between Westwood and her long-time partner Malcolm McLaren. It featured oversized silhouettes, fluorescent colors, and references to urban sportswear and Italian \"Spaghetti Westerns\" (specifically the film *A Fistful of Dollars*). \n\nThe collection is often remembered for its massive, padded shoulders and its use of logos and branding, reflecting the shift from the \"New Romantic\" aesthetic toward a more street-style and cinematic influence.",
+            "responseTimeMs": 6746,
+            "tokenCount": 822
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "exact-match",
+          "groundTruth": "\"Clint Eastwood.\"",
+          "accuracy": 1,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": true,
+              "expected": "\"Clint Eastwood.\"",
+              "predicted": "Clint Eastwood"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "simpleqa-817",
+      "result": {
+        "questionId": "simpleqa-817",
+        "prompt": "Name the mission director of the Rohini Technology Payload (RTP) satellite launch in 1979.",
+        "groundTruth": "Dr. Abdul Kalam",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "The Mission Director for the Rohini Technology Payload (RTP) launch onboard the SLV-3 in 1979 was **V. P. Sandlas** (Ved Prakash Sandlas).\n\nWhile **Dr. A.P.J. Abdul Kalam** was the Project Director for the SLV-3 program, V.P. Sandlas served as the Mission Director for that specific experimental flight (SLV-3 E1) on August 10, 1979.",
+            "responseTimeMs": 3673,
+            "tokenCount": 370
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "exact-match",
+          "groundTruth": "Dr. Abdul Kalam",
+          "accuracy": 0,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": false,
+              "expected": "Dr. Abdul Kalam",
+              "predicted": "The Mission Director for the Rohini Technology Payload (RTP) launch onboard the SLV-3 in 1979 was V. P. Sandlas (Ved Prakash Sandlas). While Dr. A.P.J. Abdul Kalam was the Project Director for the SLV-3 program, V.P. Sandlas served as the Mission Director for that specific experimental flight (SLV-3 E1) on August 10, 1979."
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "simpleqa-3425",
+      "result": {
+        "questionId": "simpleqa-3425",
+        "prompt": "What year did William Kentridge's second film of his '9 Drawings for Projection' project release?",
+        "groundTruth": "1990",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "The second film in William Kentridge's *Drawings for Projection* series is titled **Monument**, and it was released in **1990**.\n\nThe series follows the characters Soho Eckstein and Felix Teitlebaum; *Monument* specifically focuses on Soho Eckstein as a civic benefactor who unveils a monument to his own workers.",
+            "responseTimeMs": 4335,
+            "tokenCount": 469
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "exact-match",
+          "groundTruth": "1990",
+          "accuracy": 1,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": true,
+              "expected": "1990",
+              "predicted": "1990"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "simpleqa-2197",
+      "result": {
+        "questionId": "simpleqa-2197",
+        "prompt": "According to \"Astronomical Phenomena During 1898\" by H.C. Wilson, how many eclipses (both solar and lunar) were predicted to occur that year?",
+        "groundTruth": "6",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "According to the article \"Astronomical Phenomena During 1898\" by H.C. Wilson (published in *Popular Astronomy*, Vol. V, No. 9, January 1898), there were **six** eclipses predicted to occur that year.\n\nWilson breaks them down as follows:\n*   **Three of the Sun**\n*   **Three of the Moon**\n\nThe specific eclipses listed in the article are:\n1.  **January 7–8:** A partial eclipse of the Moon.\n2.  **January 22:** A total eclipse of the Sun.\n3.  **July 3:** A partial eclipse of the Moon.\n4.  **July 18:** An annular eclipse of the Sun.\n5.  **December 13:** A partial eclipse of the Sun.\n6.  **December 27:** A total eclipse of the Moon.",
+            "responseTimeMs": 6109,
+            "tokenCount": 882
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "exact-match",
+          "groundTruth": "6",
+          "accuracy": 1,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": true,
+              "expected": "6",
+              "predicted": "six"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "simpleqa-2913",
+      "result": {
+        "questionId": "simpleqa-2913",
+        "prompt": "In what year did Celal Şengör win the TÜBİTAK Science Award?",
+        "groundTruth": "1986",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "Celal Şengör won the **TÜBİTAK Science Award** (TÜBİTAK Bilim Ödülü) in **1986**.\n\nEarlier in his career, he also received the TÜBİTAK Incentive Award (Teşvik Ödülü) in 1982.",
+            "responseTimeMs": 3344,
+            "tokenCount": 315
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "exact-match",
+          "groundTruth": "1986",
+          "accuracy": 1,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": true,
+              "expected": "1986",
+              "predicted": "1986"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "simpleqa-3667",
+      "result": {
+        "questionId": "simpleqa-3667",
+        "prompt": "What Little League did Johnny Damon play baseball in as a child before junior high school?",
+        "groundTruth": "South Orange Little League",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "Johnny Damon played in the **Pine Hills Little League** in Orlando, Florida.",
+            "responseTimeMs": 2564,
+            "tokenCount": 230
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "exact-match",
+          "groundTruth": "South Orange Little League",
+          "accuracy": 0,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": false,
+              "expected": "South Orange Little League",
+              "predicted": "Pine Hills Little League"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "simpleqa-3794",
+      "result": {
+        "questionId": "simpleqa-3794",
+        "prompt": "On which day, month, and year did Otto Georg Thierack become the Reich Minister of Justice?",
+        "groundTruth": "24 August 1942 ",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "Otto Georg Thierack became the Reich Minister of Justice on **August 20, 1942**.",
+            "responseTimeMs": 2489,
+            "tokenCount": 254
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "exact-match",
+          "groundTruth": "24 August 1942 ",
+          "accuracy": 0,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": false,
+              "expected": "24 August 1942",
+              "predicted": "August 20, 1942"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "simpleqa-494",
+      "result": {
+        "questionId": "simpleqa-494",
+        "prompt": "Which is the largest saltwater lake in India?",
+        "groundTruth": "Chilika Lake",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "The largest saltwater lake in India is **Chilika Lake**.\n\nHere are a few key facts about it:\n*   **Location:** It is located in the state of **Odisha**, spanning across the Puri, Khurda, and Ganjam districts.\n*   **Type:** It is a brackish water lagoon (a mix of salt and fresh water).\n*   **Significance:** It is the largest coastal lagoon in India and the second-largest in the world. It is also a major wintering ground for migratory birds and home to the endangered Irrawaddy dolphins.\n\n**Note on Inland Lakes:**\nIf you are looking for the largest **inland** (landlocked) saltwater lake in India, it is **Sambhar Salt Lake** in Rajasthan.",
+            "responseTimeMs": 4233,
+            "tokenCount": 487
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "exact-match",
+          "groundTruth": "Chilika Lake",
+          "accuracy": 1,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": true,
+              "expected": "Chilika Lake",
+              "predicted": "Chilika Lake"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "simpleqa-1914",
+      "result": {
+        "questionId": "simpleqa-1914",
+        "prompt": "What key signature was \"God is Good\" by Don Moen composed in?",
+        "groundTruth": "D",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "Don Moen’s \"God is Good All the Time\" was originally composed and performed in the key of **D Major**.\n\nHowever, like many of Don Moen's arrangements, the song features a **modulation** (a key change) toward the end to increase the energy:\n\n1.  **Start:** D Major (2 sharps: F#, C#)\n2.  **After the Bridge:** It modulates up a whole step to **E Major** (4 sharps: F#, C#, G#, D#) for the final choruses and the outro.\n\nIf you are looking for sheet music or chords to play along with the original recording from the 1995 album *God is Good*, you should start in **D Major**.",
+            "responseTimeMs": 3645,
+            "tokenCount": 463
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "exact-match",
+          "groundTruth": "D",
+          "accuracy": 1,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": true,
+              "expected": "D",
+              "predicted": "D Major"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "simpleqa-529",
+      "result": {
+        "questionId": "simpleqa-529",
+        "prompt": "On what date, month, and year was Jean Benoît Guillaume Robert Antoine Louis Marie Adolphe Marc d'Aviano named Lieutenant-Representative of the Grand Duchess?",
+        "groundTruth": "28 April 1961.",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "Jean Benoît Guillaume Robert Antoine Louis Marie Adolphe Marc d'Aviano (better known as Grand Duke Jean of Luxembourg) was named Lieutenant-Representative of the Grand Duchess on **April 28, 1961**.\n\nHe was appointed to this role by his mother, Grand Duchess Charlotte, to exercise the constitutional powers of the monarch on her behalf, serving in this capacity until her abdication and his subsequent accession to the throne on November 12, 1964.",
+            "responseTimeMs": 3687,
+            "tokenCount": 399
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "exact-match",
+          "groundTruth": "28 April 1961.",
+          "accuracy": 1,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": true,
+              "expected": "28 April 1961.",
+              "predicted": "April 28, 1961"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "simpleqa-2428",
+      "result": {
+        "questionId": "simpleqa-2428",
+        "prompt": "Who was Carlos Menem's first and only Minister of Public Service?",
+        "groundTruth": "Roberto Dromi\n",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "The first and only Minister of Public Works and Services (Ministro de Obras y Servicios Públicos) under Carlos Menem was **Roberto Dromi** (Roberto José Dromi).\n\nHe served from the beginning of Menem’s presidency in July 1989 until early 1991.\n\n**Context on why he was the \"only\" one:**\nDromi is a significant figure in Argentine history because he was the architect of the massive privatization process of state-owned enterprises (such as Aerolíneas Argentinas and Entel). \n\nIn January 1991, as part of a cabinet restructuring and a push toward further economic reform, Menem dissolved the Ministry of Public Works and Services. Its functions were absorbed into the Ministry of Economy, which was then taken over by **Domingo Cavallo**. From that point forward, the portfolio became the \"Ministry of Economy and Public Works and Services,\" meaning Dromi was the only person to hold the independent title of Minister of Public Works and Services during Menem's tenure.",
+            "responseTimeMs": 5898,
+            "tokenCount": 799
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "exact-match",
+          "groundTruth": "Roberto Dromi\n",
+          "accuracy": 1,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": true,
+              "expected": "Roberto Dromi",
+              "predicted": "Roberto Dromi"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "simpleqa-1941",
+      "result": {
+        "questionId": "simpleqa-1941",
+        "prompt": "What month, day, and year did the New York City Department of Parks and Recreation rename Railroad Park in Queens for Gwen Ifill?",
+        "groundTruth": "June 17, 2021",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "The New York City Department of Parks and Recreation officially renamed Railroad Park in Queens for Gwen Ifill on **June 16, 2020**.\n\nThe renaming was announced by Parks Commissioner Mitchell J. Silver as part of a citywide initiative to honor the Black experience by renaming 10 park sites across the five boroughs in solidarity with the Black Lives Matter movement. \n\nThe park, located in the Jamaica neighborhood of Queens, was chosen to honor Ifill, the groundbreaking journalist and author who was the first African American woman to anchor a nationally televised weeknight news program.",
+            "responseTimeMs": 7202,
+            "tokenCount": 982
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "exact-match",
+          "groundTruth": "June 17, 2021",
+          "accuracy": 0,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": false,
+              "expected": "June 17, 2021",
+              "predicted": "June 16, 2020"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "simpleqa-2925",
+      "result": {
+        "questionId": "simpleqa-2925",
+        "prompt": "What year was the third edition of the Yale Bright Star Catalogue published?",
+        "groundTruth": "1964",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "The third edition of the Yale Bright Star Catalogue was published in **1964**.\n\nIt was edited by the American astronomer **Dorrit Hoffleit**. This edition was a significant update to the previous versions (published in 1930 and 1940) and is one of the most widely used references for the brightest stars in the sky.",
+            "responseTimeMs": 3790,
+            "tokenCount": 401
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "exact-match",
+          "groundTruth": "1964",
+          "accuracy": 1,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": true,
+              "expected": "1964",
+              "predicted": "1964"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "simpleqa-4183",
+      "result": {
+        "questionId": "simpleqa-4183",
+        "prompt": "According to Walter Sichel's book *Emma Lady Hamilton*, Dr. James Graham's specialties in 1780 were \"the then derided but now accepted electricity,\" and what other specialty?",
+        "groundTruth": "Mud baths.",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "According to Walter Sichel’s book *Emma Lady Hamilton*, Dr. James Graham's other specialty in 1780, alongside electricity, was **mud-baths**.\n\nIn the text, Sichel describes Graham’s \"Temple of Health\" and notes:\n> \"His specialities in 1780 were the then derided but now accepted electricity, and **mud-baths**.\"",
+            "responseTimeMs": 4021,
+            "tokenCount": 510
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "exact-match",
+          "groundTruth": "Mud baths.",
+          "accuracy": 1,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": true,
+              "expected": "Mud baths.",
+              "predicted": "mud-baths"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "simpleqa-3332",
+      "result": {
+        "questionId": "simpleqa-3332",
+        "prompt": "Norman Rockwell was hired as the art director of what publication while in his teens?",
+        "groundTruth": "Boys' Life",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "Norman Rockwell was hired as the art director of **Boys' Life**, the official publication of the Boy Scouts of America, in 1913 when he was 19 years old.",
+            "responseTimeMs": 2450,
+            "tokenCount": 259
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "exact-match",
+          "groundTruth": "Boys' Life",
+          "accuracy": 1,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": true,
+              "expected": "Boys' Life",
+              "predicted": "Boys' Life"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "simpleqa-3262",
+      "result": {
+        "questionId": "simpleqa-3262",
+        "prompt": "In Season 2, Episode 22 of Airwolf, what is the name and surname of the archaeologist who accompanied Caitlin and four students on a trip to explore Maya temples?",
+        "groundTruth": "Ozzie Hathaway",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "",
+            "responseTimeMs": 0,
+            "error": "Streaming timeout for google after 120s. The API may be unresponsive."
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "exact-match",
+          "groundTruth": "Ozzie Hathaway",
+          "accuracy": 0,
+          "results": {}
+        }
+      }
+    },
+    {
+      "questionId": "simpleqa-2533",
+      "result": {
+        "questionId": "simpleqa-2533",
+        "prompt": "In July 2021, how much rainfall (in millimeters) was recorded in Al Ain due to cloud-seeding efforts?",
+        "groundTruth": "6.9 millimetres",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "In July 2021, the highest amount of rainfall recorded in Al Ain (specifically at the **Khatm Al Shakla** station) was **69.8 millimeters**.\n\nThis rainfall occurred during a period of intense cloud-seeding operations conducted by the UAE's National Center of Meteorology (NCM). Between July 15 and July 21, 2021, the NCM carried out numerous seeding flights to enhance convective cloud formations that had developed over the eastern and southern parts of the country.\n\nWhile the NCM confirmed that cloud seeding contributed to the intensity of the rainfall, it is important to note that the **69.8 mm** figure represents the **total rainfall recorded** at that station during the event, as meteorologists cannot currently isolate the exact percentage of water produced solely by seeding versus natural precipitation.\n\nThis event was particularly notable because it occurred during the height of the summer, a time when the UAE typically sees very little rain, leading to localized flooding in parts of Al Ain and the surrounding areas.",
+            "responseTimeMs": 5245,
+            "tokenCount": 669
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "exact-match",
+          "groundTruth": "6.9 millimetres",
+          "accuracy": 0,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": false,
+              "expected": "6.9 millimetres",
+              "predicted": "69.8 millimeters"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "simpleqa-1037",
+      "result": {
+        "questionId": "simpleqa-1037",
+        "prompt": "What's the full name of the MS Ramaiah Medical College founder?",
+        "groundTruth": "Mathikere Sampige Ramaiah",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "The full name of the founder of MS Ramaiah Medical College is **Mathikere Sampangiramiah Ramaiah** (commonly known as **Dr. M. S. Ramaiah**).",
+            "responseTimeMs": 1491,
+            "tokenCount": 178
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "exact-match",
+          "groundTruth": "Mathikere Sampige Ramaiah",
+          "accuracy": 0,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": false,
+              "expected": "Mathikere Sampige Ramaiah",
+              "predicted": "Mathikere Sampangiramiah Ramaiah"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "simpleqa-2785",
+      "result": {
+        "questionId": "simpleqa-2785",
+        "prompt": "What day, month, and year did David Spence Thomson (New Zealand politician) pass away?",
+        "groundTruth": "25 October, 1999",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "David Spence Thomson passed away on **25 October 1999**.",
+            "responseTimeMs": 1739,
+            "tokenCount": 204
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "exact-match",
+          "groundTruth": "25 October, 1999",
+          "accuracy": 1,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": true,
+              "expected": "25 October, 1999",
+              "predicted": "25 October 1999"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "simpleqa-2775",
+      "result": {
+        "questionId": "simpleqa-2775",
+        "prompt": "What two colors was Jasmine Jolene's corpse's dress in the original BioShock from 2007?",
+        "groundTruth": "white & black",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "In the original 2007 *BioShock*, Jasmine Jolene’s corpse is wearing a **black and white** dress (specifically, a black dress with white polka dots).\n\nYou find her body in the back room of **Eve's Garden** in Fort Frolic, where a \"ghost\" memory plays out showing her final moments with Andrew Ryan.",
+            "responseTimeMs": 2843,
+            "tokenCount": 360
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "exact-match",
+          "groundTruth": "white & black",
+          "accuracy": 1,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": true,
+              "expected": "white & black",
+              "predicted": "black and white"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "simpleqa-2736",
+      "result": {
+        "questionId": "simpleqa-2736",
+        "prompt": "On what day, month, and year was the case of Arthur J. Lomax v. Christina Ortiz-Marquez decided in the Supreme Court of the United States?",
+        "groundTruth": "8 June 2020",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "The Supreme Court of the United States decided the case of *Arthur J. Lomax v. Christina Ortiz-Marquez* on **June 8, 2020**.",
+            "responseTimeMs": 2010,
+            "tokenCount": 280
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "exact-match",
+          "groundTruth": "8 June 2020",
+          "accuracy": 1,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": true,
+              "expected": "8 June 2020",
+              "predicted": "June 8, 2020"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "simpleqa-2309",
+      "result": {
+        "questionId": "simpleqa-2309",
+        "prompt": "Who replaced band member Carl Martin of the group Shai?",
+        "groundTruth": "Erik Willis",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "Carl Martin was replaced by **Erik George**.\n\nCarl Martin, a founding member and the primary songwriter/producer for Shai, left the group in the early 2000s to pursue a solo career and production work. Erik George joined the remaining members—Garfield A. Bright, Marc Gay, and Darnell Van Rensalier—and appeared on their 2001 album *Back from the Future*.\n\nSince then, the group has gone through several lineup changes, with various members (including Dwayne Jones and George Spencer) performing as part of the group alongside the remaining original members.",
+            "responseTimeMs": 3084,
+            "tokenCount": 378
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "exact-match",
+          "groundTruth": "Erik Willis",
+          "accuracy": 0,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": false,
+              "expected": "Erik Willis",
+              "predicted": "Erik George"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "simpleqa-318",
+      "result": {
+        "questionId": "simpleqa-318",
+        "prompt": "What is the full title of Zanele Muholi's first publication?",
+        "groundTruth": "Zanele Muholi: Only Half The Picture",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "The full title of Zanele Muholi’s first publication is **Only Half the Picture**.\n\nIt was published in 2006 by Stevenson in Cape Town, South Africa. The book focuses on the realities of the LGBTQ+ community in South Africa, documenting both the trauma of hate crimes and the intimacy and daily lives of the community.",
+            "responseTimeMs": 2597,
+            "tokenCount": 309
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "exact-match",
+          "groundTruth": "Zanele Muholi: Only Half The Picture",
+          "accuracy": 0,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": false,
+              "expected": "Zanele Muholi: Only Half The Picture",
+              "predicted": "Only Half the Picture"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "simpleqa-3122",
+      "result": {
+        "questionId": "simpleqa-3122",
+        "prompt": "Which newspaper said the following quote about John Lewis? \"Only former major civil rights leader who extended his fight for human rights and racial reconciliation to the halls of Congress.\"",
+        "groundTruth": "Atlanta Journal-Constitution",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "That quote appeared in **The Atlanta Journal-Constitution (AJC)**.\n\nIt was included in the newspaper's coverage and tributes following John Lewis’s death on July 17, 2020. As the primary newspaper of the city Lewis represented in Congress for over 30 years, the *AJC* published extensive reflections on his legacy, describing him as the only major figure from the \"Big Six\" civil rights leaders to translate his activism into a long-term, influential career in the U.S. House of Representatives.",
+            "responseTimeMs": 3873,
+            "tokenCount": 571
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "exact-match",
+          "groundTruth": "Atlanta Journal-Constitution",
+          "accuracy": 1,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": true,
+              "expected": "Atlanta Journal-Constitution",
+              "predicted": "The Atlanta Journal-Constitution"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "simpleqa-982",
+      "result": {
+        "questionId": "simpleqa-982",
+        "prompt": "Who directed S1E8 of Abstract: The Art of Design?",
+        "groundTruth": "Sarina Roma",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "Season 1, Episode 8 of *Abstract: The Art of Design* (which profiles interior designer Ilse Crawford) was directed by **Orlando von Einsiedel**.",
+            "responseTimeMs": 1810,
+            "tokenCount": 200
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "exact-match",
+          "groundTruth": "Sarina Roma",
+          "accuracy": 0,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": false,
+              "expected": "Sarina Roma",
+              "predicted": "Orlando von Einsiedel"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "simpleqa-4153",
+      "result": {
+        "questionId": "simpleqa-4153",
+        "prompt": "Who was Max Hastings's first wife?",
+        "groundTruth": "Patricia Mary Edmondson",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "Max Hastings's first wife was **Patricia \"Patty\" Penny**. They were married in 1972 and divorced in 1994. Together, they had three children.",
+            "responseTimeMs": 1973,
+            "tokenCount": 237
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "exact-match",
+          "groundTruth": "Patricia Mary Edmondson",
+          "accuracy": 0,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": false,
+              "expected": "Patricia Mary Edmondson",
+              "predicted": "Patricia \"Patty\" Penny"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "simpleqa-4262",
+      "result": {
+        "questionId": "simpleqa-4262",
+        "prompt": "What is the counter strength value for the Fume Sword in Dark Souls II?",
+        "groundTruth": "120",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "The counter strength value for the **Fume Sword** in Dark Souls II is **140**.\n\nThis is exceptionally high for the Straight Sword category (where most weapons have a value of 110 or 120), making it very effective for players who time their attacks to hit enemies mid-animation.",
+            "responseTimeMs": 3384,
+            "tokenCount": 365
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "exact-match",
+          "groundTruth": "120",
+          "accuracy": 0,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": false,
+              "expected": "120",
+              "predicted": "140"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "simpleqa-314",
+      "result": {
+        "questionId": "simpleqa-314",
+        "prompt": "What is the name of the entomologist who described the species Acanthops bidens in 1922?",
+        "groundTruth": "Morgan Hebard",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "The entomologist who described the species *Acanthops bidens* in 1922 was **Morgan Hebard**.\n\nHe published the description in the journal *Transactions of the American Entomological Society* (specifically volume 48) as part of his extensive work on the Orthoptera and Mantodea of Colombia and surrounding regions.",
+            "responseTimeMs": 5136,
+            "tokenCount": 666
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "exact-match",
+          "groundTruth": "Morgan Hebard",
+          "accuracy": 1,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": true,
+              "expected": "Morgan Hebard",
+              "predicted": "Morgan Hebard"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "simpleqa-2228",
+      "result": {
+        "questionId": "simpleqa-2228",
+        "prompt": "On what day, month, and year was Michiya Haruhata born?",
+        "groundTruth": "November 5, 1966.",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "Michiya Haruhata was born on **November 5, 1966**.",
+            "responseTimeMs": 1629,
+            "tokenCount": 163
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "exact-match",
+          "groundTruth": "November 5, 1966.",
+          "accuracy": 1,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": true,
+              "expected": "November 5, 1966.",
+              "predicted": "November 5, 1966"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "simpleqa-1830",
+      "result": {
+        "questionId": "simpleqa-1830",
+        "prompt": "What was the name of Aftab Ghulam Nabi Kazi's (12th Deputy Chairman of the Planning Commission of Pakistan) wife?",
+        "groundTruth": "Zakia Nabi Kazi",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "The name of Aftab Ghulam Nabi Kazi’s (A. G. N. Kazi) wife was **Zakia Kazi**.",
+            "responseTimeMs": 2444,
+            "tokenCount": 306
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "exact-match",
+          "groundTruth": "Zakia Nabi Kazi",
+          "accuracy": 0,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": false,
+              "expected": "Zakia Nabi Kazi",
+              "predicted": "Zakia Kazi"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "simpleqa-3431",
+      "result": {
+        "questionId": "simpleqa-3431",
+        "prompt": "How many miles from the Indo-Nepal border was Amit Kumar hiding from the police on February 7, 2008?",
+        "groundTruth": "35",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "On February 7, 2008, Amit Kumar (the kingpin of the Gurgaon kidney scandal) was arrested in Nepal at a guest house in the Sauraha area of the Chitwan district.\n\nHe was hiding approximately **37 miles (60 kilometers)** from the Indo-Nepal border.\n\nSpecifically, he was apprehended at the Bramharupa Guest House (some reports also refer to it as the Hotel Wildlife Camp), which is located near the border town of Birgunj/Raxaul. At the time of his arrest, he was found with a large amount of foreign currency and was reportedly attempting to flee further into the interior of Nepal or to a third country.",
+            "responseTimeMs": 5652,
+            "tokenCount": 771
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "exact-match",
+          "groundTruth": "35",
+          "accuracy": 0,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": false,
+              "expected": "35",
+              "predicted": "37 miles (60 kilometers)"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "simpleqa-1129",
+      "result": {
+        "questionId": "simpleqa-1129",
+        "prompt": "What is the length in meters of the TCG Yavuz (F240) ship of the Turkish Navy?",
+        "groundTruth": "110.50 m",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "The length of the **TCG Yavuz (F240)**, the lead ship of the Yavuz-class frigates in the Turkish Navy, is **110.73 meters** (approximately 363 feet).",
+            "responseTimeMs": 2346,
+            "tokenCount": 295
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "exact-match",
+          "groundTruth": "110.50 m",
+          "accuracy": 0,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": false,
+              "expected": "110.50 m",
+              "predicted": "110.73 meters"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "simpleqa-1272",
+      "result": {
+        "questionId": "simpleqa-1272",
+        "prompt": "Which character did Van Dyke Parks play in \"Twin Peaks\"?",
+        "groundTruth": "Jack Racine",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "Van Dyke Parks played the character **Jack Renault** in *Twin Peaks*.\n\nHe appeared in Season 2, Episode 8 (titled \"Drive with a Dead Girl\"). Jack Renault was the cousin of the other Renault brothers—Jean, Jacques, and Bernard. In his brief appearance, he is seen meeting with Jean Renault at One Eyed Jacks.",
+            "responseTimeMs": 2071,
+            "tokenCount": 246
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "exact-match",
+          "groundTruth": "Jack Racine",
+          "accuracy": 0,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": false,
+              "expected": "Jack Racine",
+              "predicted": "Jack Renault"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "simpleqa-1445",
+      "result": {
+        "questionId": "simpleqa-1445",
+        "prompt": "At what age did Enzo Ferrari (founder of Ferrari) decide to pursue racing?",
+        "groundTruth": "10",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "Enzo Ferrari decided he wanted to become a racing driver at the age of **10**.\n\nThe pivotal moment occurred in **1908**, when his father, Alfredo, took Enzo and his older brother, Dino, to see a car race at the Circuito di Bologna. They watched the great Italian driver Felice Nazzaro win the race. Enzo was so captivated by the speed and the spectacle that he decided then and there that he wanted to be a racing driver.\n\nHowever, his path to the cockpit wasn't immediate. Here is a brief timeline of his early racing career:\n\n*   **Childhood Dreams:** Along with racing, the young Enzo also considered becoming an opera singer or a sports journalist.\n*   **Post-WWI:** After serving in World War I and surviving the 1918 flu pandemic, he applied for a job at FIAT but was rejected.\n*   **Professional Start:** He finally began his racing career at the age of **21** in **1919**. He joined a small company called CMN (*Costruzioni Meccaniche Nazionali*) as a test driver and made his competitive debut in the Parma-Poggio di Berceto hillclimb race, finishing fourth in his category.\n*   **Alfa Romeo:** In 1920, he joined the Alfa Romeo racing team, which eventually led to him founding *Scuderia Ferrari* in 1929 as a racing stable for Alfa Romeo cars.\n\nWhile he started racing professionally at 21, the \"decision\" and the passion were sparked at that race in Bologna when he was just 10 years old.",
+            "responseTimeMs": 5759,
+            "tokenCount": 763
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "exact-match",
+          "groundTruth": "10",
+          "accuracy": 1,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": true,
+              "expected": "10",
+              "predicted": "10"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "simpleqa-881",
+      "result": {
+        "questionId": "simpleqa-881",
+        "prompt": "Who was the first visual artist to be awarded the Peace Prize of the German Book Trade?",
+        "groundTruth": "Anselm Kiefer",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "The first visual artist to be awarded the Peace Prize of the German Book Trade was **Anselm Kiefer**.\n\nHe received the prestigious award in **2008**. \n\nWhile the prize is traditionally given to writers, philosophers, and scientists, the board chose Kiefer to honor his work as a painter and sculptor. They cited his ability to confront the \"dark side\" of German history and his use of art to explore human existence, memory, and the responsibility of the artist in the face of historical trauma. \n\nSince Kiefer's win, other visual artists have been honored, most notably the photographer **Sebastião Salgado** in 2019.",
+            "responseTimeMs": 8610,
+            "tokenCount": 1504
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "exact-match",
+          "groundTruth": "Anselm Kiefer",
+          "accuracy": 1,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": true,
+              "expected": "Anselm Kiefer",
+              "predicted": "Anselm Kiefer"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "simpleqa-2628",
+      "result": {
+        "questionId": "simpleqa-2628",
+        "prompt": "Who launched the logo for the GI (Geographical Indication) Tag?",
+        "groundTruth": "Minister Suresh Prabhu",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "The logo and tagline for the Geographical Indication (GI) tag of India were launched by **Suresh Prabhu**, who was the Union Minister of Commerce and Industry at the time.\n\nThe launch took place on **August 1, 2018**, in New Delhi.\n\n**Key details of the launch:**\n*   **Logo:** The logo features the letters 'G' and 'I' and symbolizes the unique identity of products originating from a specific geographical territory.\n*   **Tagline:** The selected tagline is **\"Invaluable Treasures of Incredible India\"** (in Hindi: *Atulya Bharat ki Amulya Nidhi*).\n*   **Purpose:** The logo and tagline were created to increase awareness about GI products and to help in the promotion and marketing of authentic Indian regional specialties.",
+            "responseTimeMs": 2846,
+            "tokenCount": 367
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "exact-match",
+          "groundTruth": "Minister Suresh Prabhu",
+          "accuracy": 1,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": true,
+              "expected": "Minister Suresh Prabhu",
+              "predicted": "Suresh Prabhu"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "simpleqa-4269",
+      "result": {
+        "questionId": "simpleqa-4269",
+        "prompt": "In *River Monsters* Season 9, episode \"Ice Cold Killer,\" approximately how old is the 250-pound, 7-foot-long \"adolescent\" Greenland shark that Jeremy Wade reels in?",
+        "groundTruth": "40",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "In the *River Monsters* episode \"Ice Cold Killer,\" the 7-foot-long, 250-pound Greenland shark that Jeremy Wade catches is estimated to be approximately **50 years old**.\n\nDespite its significant size and age, the shark is considered an \"adolescent\" because Greenland sharks are among the longest-living vertebrates on Earth. Scientists estimate that they do not reach sexual maturity until they are roughly 150 years old (at a length of about 13 feet) and can live for as long as 400 to 500 years. \n\nBecause they grow at an incredibly slow rate—roughly 1 centimeter (about 0.4 inches) per year—a 7-foot specimen is still effectively a \"juvenile\" in the context of its total lifespan.",
+            "responseTimeMs": 5094,
+            "tokenCount": 753
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "exact-match",
+          "groundTruth": "40",
+          "accuracy": 0,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": false,
+              "expected": "40",
+              "predicted": "50 years old"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "simpleqa-696",
+      "result": {
+        "questionId": "simpleqa-696",
+        "prompt": "Who won the first National Kho Kho Championship in England in 2015?",
+        "groundTruth": "The Finchley Shakha Kho Kho Team",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "The **Greenford Kho Kho Club** won the first National Kho Kho Championship in England, which was held in 2015.\n\nThe tournament took place in August 2015 at Canons High School in Stanmore, London. It was organized by the Kho Kho Federation of England (KKFE). In the final, Greenford defeated the Leicester Kho Kho Club to become the inaugural champions.",
+            "responseTimeMs": 2773,
+            "tokenCount": 335
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "exact-match",
+          "groundTruth": "The Finchley Shakha Kho Kho Team",
+          "accuracy": 0,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": false,
+              "expected": "The Finchley Shakha Kho Kho Team",
+              "predicted": "The Greenford Kho Kho Club"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "simpleqa-2233",
+      "result": {
+        "questionId": "simpleqa-2233",
+        "prompt": "Who was the coach of Eintracht Frankfurt in 1970?",
+        "groundTruth": "Erich Ribbeck",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "The coach of Eintracht Frankfurt in 1970 was **Erich Ribbeck**.\n\nHe managed the team from July 1968 until June 1973. Ribbeck later went on to become the head coach of the German national team (1998–2000).",
+            "responseTimeMs": 1675,
+            "tokenCount": 217
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "exact-match",
+          "groundTruth": "Erich Ribbeck",
+          "accuracy": 1,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": true,
+              "expected": "Erich Ribbeck",
+              "predicted": "Erich Ribbeck"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "simpleqa-2989",
+      "result": {
+        "questionId": "simpleqa-2989",
+        "prompt": "What was the surname of the recipient of the Nyholm Prize for Education in 1973-74?",
+        "groundTruth": "Halliwell ",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "The surname of the recipient of the Nyholm Prize for Education (now known as the Nyholm Prize for Education) for the period 1973–74 was **Halliwell**.\n\nThe award was given to **Herbert Frank Halliwell** (often cited as H. F. Halliwell), who was the first-ever recipient of the prize.",
+            "responseTimeMs": 3080,
+            "tokenCount": 397
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "exact-match",
+          "groundTruth": "Halliwell ",
+          "accuracy": 1,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": true,
+              "expected": "Halliwell",
+              "predicted": "Halliwell"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "simpleqa-2113",
+      "result": {
+        "questionId": "simpleqa-2113",
+        "prompt": "What actor did Burt Reynolds replace on Gunsmoke?",
+        "groundTruth": "Dennis Weaver",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "Burt Reynolds did not replace another actor in a specific role; instead, he was brought onto *Gunsmoke* to fill the void left by **Dennis Weaver**, who played the iconic character **Chester Goode**.\n\nHere are the details of the transition:\n\n*   **The Departure:** Dennis Weaver had decided to leave the series to pursue other acting opportunities. He began phasing out his appearances around 1962 and officially left the show in 1964.\n*   **The New Character:** Rather than recasting the role of Chester, the producers created a new character named **Quint Asper**, a half-Comanche blacksmith. \n*   **Burt Reynolds' Tenure:** Reynolds played Quint Asper from 1962 to 1965 (Seasons 8 through 10). He appeared in 50 episodes before leaving the show to pursue a career in film.\n\nWhile Burt Reynolds filled the \"sidekick\" or secondary lead role for a few years, the person most often associated as the long-term replacement for Dennis Weaver's \"deputy\" archetype was **Ken Curtis**, who played **Festus Haggen**. Curtis became a series regular shortly after Reynolds joined the cast.",
+            "responseTimeMs": 6142,
+            "tokenCount": 858
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "exact-match",
+          "groundTruth": "Dennis Weaver",
+          "accuracy": 1,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": true,
+              "expected": "Dennis Weaver",
+              "predicted": "Dennis Weaver"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "simpleqa-3872",
+      "result": {
+        "questionId": "simpleqa-3872",
+        "prompt": "What year were the Burlington Sock Puppets founded?",
+        "groundTruth": "2021",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "The Burlington Sock Puppets were founded in **2021**.\n\nThe team was established as part of a major rebranding following the reorganization of Minor League Baseball. Before 2021, the team was known as the **Burlington Royals** (a rookie-level affiliate of the Kansas City Royals). \n\nWhen the Appalachian League transitioned from a professional minor league to a collegiate summer wood-bat league in 2021, the team adopted the \"Sock Puppets\" identity to honor Burlington’s history as a \"hosiery center of the south.\"",
+            "responseTimeMs": 3000,
+            "tokenCount": 404
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "exact-match",
+          "groundTruth": "2021",
+          "accuracy": 1,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": true,
+              "expected": "2021",
+              "predicted": "2021"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "simpleqa-3891",
+      "result": {
+        "questionId": "simpleqa-3891",
+        "prompt": "What is a bridge called in the Kashmiri language?",
+        "groundTruth": "Kadal",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "In the Kashmiri language, a bridge is called a **Kadal** (کَدَل).\n\nThis word is widely known because the historic city of Srinagar is famous for its seven original wooden bridges across the Jhelum River. Some well-known examples include:\n\n*   **Habba Kadal**\n*   **Amira Kadal**\n*   **Zaina Kadal**\n*   **Fateh Kadal**",
+            "responseTimeMs": 1807,
+            "tokenCount": 214
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "exact-match",
+          "groundTruth": "Kadal",
+          "accuracy": 1,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": true,
+              "expected": "Kadal",
+              "predicted": "Kadal"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "simpleqa-3313",
+      "result": {
+        "questionId": "simpleqa-3313",
+        "prompt": "Who founded the municipality of San Roque, Antioquia, Colombia?",
+        "groundTruth": "Francisco Martinez de Ospina",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "The municipality of San Roque, Antioquia, was founded by **Francisco Martínez de Ospina** on **February 8, 1880**.\n\nHere are a few additional historical details about its founding:\n\n*   **Origins:** Before its official foundation, the area was inhabited by miners and settlers looking for gold. It was originally part of the territory of **Yolombó**.\n*   **Legal Status:** While it was settled earlier, it was officially recognized as a \"corregimiento\" (a small subdivision) in 1880. It was later elevated to the status of a municipality in **1885**.\n*   **Naming:** The town was named in honor of **Saint Roch** (San Roque), the patron saint of the plague-stricken and the sick, reflecting the religious traditions of the Spanish-descended settlers.\n\nFrancisco Martínez de Ospina is credited with leading the group of settlers who organized the layout of the town and petitioned for its official recognition.",
+            "responseTimeMs": 4565,
+            "tokenCount": 643
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "exact-match",
+          "groundTruth": "Francisco Martinez de Ospina",
+          "accuracy": 1,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": true,
+              "expected": "Francisco Martinez de Ospina",
+              "predicted": "Francisco Martínez de Ospina"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "simpleqa-4020",
+      "result": {
+        "questionId": "simpleqa-4020",
+        "prompt": "What were the month and year when Barcelona was announced as the UNESCO-UIA World Capital of Architecture for the 2024–2026 term?",
+        "groundTruth": "July 2023",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "Barcelona was officially announced as the UNESCO-UIA World Capital of Architecture for 2026 in **July 2021**.\n\nThe announcement was made following a vote by the General Assembly of the International Union of Architects (UIA) in Rio de Janeiro, where Barcelona’s bid defeated that of Beijing. Following the vote, UNESCO Director-General Audrey Azoulay officially designated the city for the 2026 term.",
+            "responseTimeMs": 4922,
+            "tokenCount": 697
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "exact-match",
+          "groundTruth": "July 2023",
+          "accuracy": 0,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": false,
+              "expected": "July 2023",
+              "predicted": "July 2021"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "simpleqa-3912",
+      "result": {
+        "questionId": "simpleqa-3912",
+        "prompt": "What is the name of the town in England where Clifford Cunnel was born?",
+        "groundTruth": "Ipswich",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "Clifford Cunnell (specifically the professional footballer Clifford George Cunnell) was born in **Sutton-in-Ashfield**, Nottinghamshire, England.",
+            "responseTimeMs": 1918,
+            "tokenCount": 253
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "exact-match",
+          "groundTruth": "Ipswich",
+          "accuracy": 0,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": false,
+              "expected": "Ipswich",
+              "predicted": "Sutton-in-Ashfield"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "simpleqa-4155",
+      "result": {
+        "questionId": "simpleqa-4155",
+        "prompt": "Where did Johann Ignaz Ludwig Fischer die?",
+        "groundTruth": "In Berlin.",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "Johann Ignaz Ludwig Fischer died in **Berlin**, Germany, on July 10, 1825.",
+            "responseTimeMs": 2002,
+            "tokenCount": 239
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "exact-match",
+          "groundTruth": "In Berlin.",
+          "accuracy": 1,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": true,
+              "expected": "In Berlin.",
+              "predicted": "Berlin"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "simpleqa-3653",
+      "result": {
+        "questionId": "simpleqa-3653",
+        "prompt": "In the game Bloodstained: Ritual of the Night, how much gold does the Lance item cost to buy?",
+        "groundTruth": "2,700G",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "In the game *Bloodstained: Ritual of the Night*, the **Lance** can be purchased from Dominique’s shop for **4,000 G**.\n\nIf you are looking to sell it, the shop will buy it from you for **400 G**. \n\nAlternatively, you can craft the Lance using the following materials:\n*   1x Iron\n*   1x Elm\n*   1x Bronze",
+            "responseTimeMs": 3232,
+            "tokenCount": 376
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "exact-match",
+          "groundTruth": "2,700G",
+          "accuracy": 0,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": false,
+              "expected": "2,700G",
+              "predicted": "4,000 G"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "simpleqa-27",
+      "result": {
+        "questionId": "simpleqa-27",
+        "prompt": "In the lore of Dungeons and Dragons, what is the name of the fortress in the Astral Plane used as a lair by the red great wyrm Ashardalon?",
+        "groundTruth": "Bastion of Unborn Souls",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "In the lore of Dungeons & Dragons, the fortress in the Astral Plane used as a lair by the red great wyrm Ashardalon is known as the **Bastion of Ashardalon**.\n\nWhile Ashardalon is a major figure across several editions of the game, the specific details of his Astral fortress are most prominently detailed in the 4th Edition supplement ***Draconomicon: Chromatic Dragons***.\n\n### Key Details of the Lair:\n*   **Location:** The **Astral Sea** (the 4th Edition equivalent of the Astral Plane).\n*   **Description:** It is described as a massive fortress of iron and stone built upon a floating island. The fortress serves as a monument to Ashardalon's ego and power, housing his vast wealth and numerous servants.\n*   **Purpose:** Ashardalon retreated to the Astral Plane to escape death after being mortally wounded by the druid Dydd. Because time does not pass normally in the Astral Plane, he was able to stave off death for centuries while he plotted his return and sought a way to achieve true immortality.\n\n### Distinctions in Lore (3rd Edition vs. 4th Edition):\nIt is worth noting that there is a similar location often associated with Ashardalon in 3rd Edition lore:\n*   **The Bastion of Unborn Souls:** This is the location featured in the high-level 3rd Edition adventure *Bastion of Broken Souls*. However, this fortress is located on the **Positive Energy Plane**, not the Astral Plane. In this version of the lore, Ashardalon inhabited the Bastion of Unborn Souls to consume the \"soul-stuff\" of yet-to-be-born creatures to sustain his own failing life (having replaced his heart with a balor named Ammet).\n\nIn summary, if you are looking for the name of the fortress specifically located in the **Astral Plane**, it is the **Bastion of Ashardalon**.",
+            "responseTimeMs": 25682,
+            "tokenCount": 4206
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "exact-match",
+          "groundTruth": "Bastion of Unborn Souls",
+          "accuracy": 0,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": false,
+              "expected": "Bastion of Unborn Souls",
+              "predicted": "Bastion of Ashardalon"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "simpleqa-2636",
+      "result": {
+        "questionId": "simpleqa-2636",
+        "prompt": "Between 1981 and 1983, where was Christopher Nolan enrolled?",
+        "groundTruth": "Barrow Hills",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "Between 1981 and 1983, Christopher Nolan was enrolled at **Haileybury and Imperial Service College**, an independent boarding school in Hertford Heath, Hertfordshire, England.\n\nHe attended the school throughout his teenage years before moving on to study English Literature at University College London (UCL) in the early 1990s.",
+            "responseTimeMs": 3360,
+            "tokenCount": 522
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "exact-match",
+          "groundTruth": "Barrow Hills",
+          "accuracy": 0,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": false,
+              "expected": "Barrow Hills",
+              "predicted": "Haileybury and Imperial Service College"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "simpleqa-4276",
+      "result": {
+        "questionId": "simpleqa-4276",
+        "prompt": "How many countries border Nigeria?",
+        "groundTruth": "4",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "Nigeria is bordered by **four** countries:\n\n1.  **Benin** to the west\n2.  **Niger** to the north\n3.  **Chad** to the northeast\n4.  **Cameroon** to the east\n\nTo the south, Nigeria borders the Atlantic Ocean (specifically the Gulf of Guinea).",
+            "responseTimeMs": 1725,
+            "tokenCount": 197
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "exact-match",
+          "groundTruth": "4",
+          "accuracy": 1,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": true,
+              "expected": "4",
+              "predicted": "four"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "simpleqa-463",
+      "result": {
+        "questionId": "simpleqa-463",
+        "prompt": "Who did Latrice Royale lip-sync against on Episode 9 of Season 4 of RPDR?",
+        "groundTruth": "Dida Ritz",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "On Episode 9 of Season 4 of *RuPaul's Drag Race* (titled \"Frock the Vote!\"), Latrice Royale lip-synced against **Dida Ritz**.\n\nThey performed to the song \"I've Got to Use My Imagination\" by Gladys Knight & the Pips. Latrice Royale won the lip-sync, and Dida Ritz was eliminated.",
+            "responseTimeMs": 2125,
+            "tokenCount": 307
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "exact-match",
+          "groundTruth": "Dida Ritz",
+          "accuracy": 1,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": true,
+              "expected": "Dida Ritz",
+              "predicted": "Dida Ritz"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "simpleqa-2242",
+      "result": {
+        "questionId": "simpleqa-2242",
+        "prompt": "According to Medland, Sarah E.; Loesch, Danuta Z.; Mdzewski, Bogdan; Zhu, Gu; Montgomery, Grant W.; Martin, Nicholas G. (September 28, 2007), what chromosome location was identified as linked to the finger ridge counts of the ring, index, and middle fingers through multivariate linkage analysis?",
+        "groundTruth": "5q14.1",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "According to the study by Medland et al. (2007), titled *\"Linkage analysis of finger ridge counts in a large sample of Australian twins,\"* the multivariate linkage analysis of the finger ridge counts for the ring, index, and middle fingers identified a significant locus on chromosome **1q42.2**.\n\nThe researchers reported a maximum LOD (logarithm of the odds) score of **4.5** at this location, suggesting it is a major quantitative trait locus (QTL) influencing the development of dermal ridges on these specific fingers.",
+            "responseTimeMs": 4787,
+            "tokenCount": 794
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "exact-match",
+          "groundTruth": "5q14.1",
+          "accuracy": 0,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": false,
+              "expected": "5q14.1",
+              "predicted": "1q42.2"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "simpleqa-3444",
+      "result": {
+        "questionId": "simpleqa-3444",
+        "prompt": "What is the name of the magic stick that Haumea, the goddess of fertility in Hawaiian mythology, uses to change herself from an old woman to a young girl?",
+        "groundTruth": "Makalei",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "The name of the magic stick used by the goddess Haumea is **Makalei** (often referred to as the **Mākālei** branch or stick).\n\nIn Hawaiian mythology, the Makalei is a legendary branch that has two primary powers:\n1. **Rejuvenation:** It allows Haumea to transform herself from an old woman into a beautiful young girl. By doing this, she was able to return to her people in different generations and marry her own children and grandchildren to ensure the continuation of the human race.\n2. **Attracting Fish:** It is also famous as a \"fish-attracting\" stick. When dipped into the water, it would draw schools of fish to it, ensuring a bountiful food supply.",
+            "responseTimeMs": 3770,
+            "tokenCount": 469
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "exact-match",
+          "groundTruth": "Makalei",
+          "accuracy": 1,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": true,
+              "expected": "Makalei",
+              "predicted": "Makalei"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "simpleqa-3536",
+      "result": {
+        "questionId": "simpleqa-3536",
+        "prompt": "What's the first and last name of the person who sings Alastor's voice in the song \"Alastor's Game\"?",
+        "groundTruth": "Sam Haft",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "The person who sings Alastor’s voice in the song \"Alastor's Game\" (by The Living Tombstone) is **Gabriel Brown**, who is also widely known by his online alias, **Black Gryph0n**.",
+            "responseTimeMs": 2094,
+            "tokenCount": 241
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "exact-match",
+          "groundTruth": "Sam Haft",
+          "accuracy": 0,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": false,
+              "expected": "Sam Haft",
+              "predicted": "Gabriel Brown"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "simpleqa-249",
+      "result": {
+        "questionId": "simpleqa-249",
+        "prompt": "Who did the musical composition for the play Helen as presented in the 2022 Athens Epidaurus Festival?",
+        "groundTruth": "Angelos Triantafyllou",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "The musical composition for the production of Euripides' **\"Helen\"** presented at the 2022 Athens Epidaurus Festival was by **Aggelos Triantafyllou** (also spelled Angelos Triantafyllou).\n\nThis specific production was staged by the **National Theatre of Northern Greece (NTNG)** and directed by **Vassilis Papavassiliou**. It performed at the Ancient Theatre of Epidaurus on August 12 and 13, 2022.",
+            "responseTimeMs": 3309,
+            "tokenCount": 459
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "exact-match",
+          "groundTruth": "Angelos Triantafyllou",
+          "accuracy": 1,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": true,
+              "expected": "Angelos Triantafyllou",
+              "predicted": "Aggelos Triantafyllou"
+            }
+          }
+        }
+      }
+    },
+    {
+      "questionId": "simpleqa-23",
+      "result": {
+        "questionId": "simpleqa-23",
+        "prompt": "On which U.S. TV station did the Canadian reality series *To Serve and Protect* debut?",
+        "groundTruth": "KVOS-TV",
+        "responses": [
+          {
+            "provider": "google",
+            "model": "gemini-3-flash-preview",
+            "content": "The Canadian reality series *To Serve and Protect* debuted in the United States on **TLC** (The Learning Channel).",
+            "responseTimeMs": 2440,
+            "tokenCount": 289
+          }
+        ],
+        "consensus": {},
+        "evaluation": {
+          "evaluator": "exact-match",
+          "groundTruth": "KVOS-TV",
+          "accuracy": 0,
+          "results": {
+            "google:gemini-3-flash-preview": {
+              "correct": false,
+              "expected": "KVOS-TV",
+              "predicted": "TLC"
+            }
+          }
+        }
+      }
+    }
+  ]
+}

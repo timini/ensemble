@@ -42,6 +42,8 @@ interface BenchmarkRunnerConfig {
   limiter?: ConcurrencyLimiter;
   /** Pre-loaded ensemble response cache (questionId → responses). Skips API calls for cached questions. */
   ensembleResponseCache?: Map<string, ProviderResponse[]>;
+  /** Max time (ms) for a single question before it's skipped. Default: no timeout. */
+  questionTimeoutMs?: number;
 }
 
 interface RunBenchmarkOptions {
@@ -62,6 +64,7 @@ export class BenchmarkRunner {
   private readonly parallelQuestions: boolean;
   private readonly limiter: ConcurrencyLimiter | undefined;
   private readonly ensembleResponseCache: Map<string, ProviderResponse[]> | undefined;
+  private readonly questionTimeoutMs: number | undefined;
 
   constructor(config: BenchmarkRunnerConfig) {
     this.mode = config.mode;
@@ -73,6 +76,7 @@ export class BenchmarkRunner {
     this.parallelQuestions = config.parallelQuestions ?? false;
     this.limiter = config.limiter;
     this.ensembleResponseCache = config.ensembleResponseCache;
+    this.questionTimeoutMs = config.questionTimeoutMs;
     this.ensembleRunner = new EnsembleRunner(config.registry, config.mode, {
       requestDelayMs: config.requestDelayMs,
       temperature: config.temperature,
@@ -155,11 +159,24 @@ export class BenchmarkRunner {
     if (this.parallelQuestions && pendingQuestions.length > 0) {
       // Parallel mode: dispatch all questions, limiter gates actual execution
       let completed = questions.length - pendingQuestions.length;
+      let timedOut = 0;
       const settled = await Promise.allSettled(
         pendingQuestions.map(async (question) => {
           const dispatchTime = Date.now();
-          const runFn = () => this.runQuestion(question);
-          const run = this.limiter ? await this.limiter.run(runFn) : await runFn();
+          const runFn = async () => {
+            const result = await this.runQuestion(question);
+            return result;
+          };
+          const executeWithOptionalTimeout = async (): Promise<PromptRunResult> => {
+            const executeFn = this.limiter ? () => this.limiter!.run(runFn) : runFn;
+            if (!this.questionTimeoutMs) return executeFn();
+            // Race execution against a timeout
+            const timeoutPromise = new Promise<never>((_, reject) => {
+              setTimeout(() => reject(new Error(`Question ${question.id} timed out after ${this.questionTimeoutMs}ms`)), this.questionTimeoutMs);
+            });
+            return Promise.race([executeFn(), timeoutPromise]);
+          };
+          const run = await executeWithOptionalTimeout();
           const totalMs = Date.now() - dispatchTime;
           const runMs = run.durationMs ?? totalMs;
           const queuedMs = totalMs - runMs;
@@ -181,7 +198,13 @@ export class BenchmarkRunner {
           output.runs.push(run);
           completedQuestionIds.add(run.questionId ?? '');
           completedPrompts.add(run.prompt);
+        } else if (result.reason instanceof Error && result.reason.message.includes('timed out')) {
+          timedOut += 1;
+          process.stderr.write(`  [timeout] ${result.reason.message}\n`);
         }
+      }
+      if (timedOut > 0) {
+        process.stderr.write(`  [timeout] ${timedOut} question(s) skipped due to timeout\n`);
       }
       output.updatedAt = new Date().toISOString();
       await writeJsonFile(outputPath, output);

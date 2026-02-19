@@ -16,6 +16,7 @@ import {
 import type { BenchmarkDatasetName, BenchmarkQuestion, EvalMode, StrategyName } from '../types.js';
 
 const DEFAULT_MODEL = 'google:gemini-2.5-flash-lite';
+const DEFAULT_CONSENSUS_MODEL = 'google:gemini-2.5-flash-lite';
 const DEFAULT_JUDGE_MODEL = 'google:gemini-2.5-flash';
 const DEFAULT_ENSEMBLE_SIZE = 5;
 const DEFAULT_TEMPERATURE = 0.7;
@@ -28,6 +29,7 @@ const VALID_MODES: EvalMode[] = ['mock', 'free'];
 
 interface QuickEvalOptions {
   model: string;
+  consensusModel: string;
   judgeModel: string;
   ensemble: string;
   temperature: string;
@@ -40,6 +42,7 @@ interface QuickEvalOptions {
   baseline?: string;
   significance?: string;
   concurrency: string;
+  questionTimeout: string;
 }
 
 function parseDatasets(raw?: string[]): BenchmarkDatasetName[] {
@@ -61,8 +64,9 @@ export function createQuickEvalCommand(): Command {
       'Quick single-vs-ensemble comparison. Runs a single model instance against ' +
       'a self-ensemble to measure whether consensus strategies add value.',
     )
-    .option('--model <provider:model>', 'Model to evaluate.', DEFAULT_MODEL)
-    .option('--judge-model <provider:model>', 'Model for LLM judge evaluation (defaults to gemini-2.5-flash).', DEFAULT_JUDGE_MODEL)
+    .option('--model <provider:model>', 'Model to evaluate (used for cache lookup).', DEFAULT_MODEL)
+    .option('--consensus-model <provider:model>', 'Model for consensus strategy execution (summarizer, elo, council).', DEFAULT_CONSENSUS_MODEL)
+    .option('--judge-model <provider:model>', 'Model for LLM judge evaluation.', DEFAULT_JUDGE_MODEL)
     .option('--ensemble <count>', 'Number of ensemble instances.', String(DEFAULT_ENSEMBLE_SIZE))
     .option('--temperature <value>', 'Sampling temperature for ensemble diversity (0 = deterministic).', String(DEFAULT_TEMPERATURE))
     .option('--strategies <strategies...>', 'Consensus strategies (standard,elo,majority,council). Comma-separated.')
@@ -74,9 +78,11 @@ export function createQuickEvalCommand(): Command {
     .option('--baseline <path>', 'Path to baseline JSON. Saves results and fails on regression.')
     .option('--significance <alpha>', 'Significance level for regression detection (0 < alpha < 1).', '0.10')
     .option('--concurrency <count>', 'Initial max concurrent questions (auto-adapts via AIMD).', '40')
+    .option('--question-timeout <seconds>', 'Max seconds per question before skipping (0 = no timeout).', '0')
     .action(async (options: QuickEvalOptions) => {
       const { provider, model: modelName } = parseModelSpec(options.model);
       const model = options.model;
+      const { provider: consensusProvider, model: consensusModelName } = parseModelSpec(options.consensusModel);
       const { provider: judgeProvider, model: judgeModelName } = parseModelSpec(options.judgeModel);
 
       const ensembleSize = Number.parseInt(options.ensemble, 10);
@@ -109,12 +115,15 @@ export function createQuickEvalCommand(): Command {
         throw new Error(`Invalid concurrency "${options.concurrency}".`);
       }
 
+      const questionTimeoutSec = Number.parseInt(options.questionTimeout, 10);
+      const questionTimeoutMs = questionTimeoutSec > 0 ? questionTimeoutSec * 1000 : undefined;
+
       const strategies = parseStrategies(options.strategies ?? ['standard', 'elo', 'majority', 'council']);
       const datasetNames = parseDatasets(options.datasets);
       const parallel = options.parallel;
       const useCache = options.cache && mode !== 'mock';
       const registry = new ProviderRegistry();
-      const providers = new Set([provider, judgeProvider]);
+      const providers = new Set([provider, consensusProvider, judgeProvider]);
       registerProviders(registry, [...providers], mode);
 
       const monitor = new SystemMonitor();
@@ -122,9 +131,10 @@ export function createQuickEvalCommand(): Command {
 
       const startTime = Date.now();
       const log = (s: string) => process.stderr.write(s);
-      log(`\n  Model: ${model}  Judge: ${options.judgeModel}  Ensemble: ${ensembleSize}x  Temp: ${temperature}  Mode: ${mode}\n`);
+      log(`\n  Model: ${model}  Consensus: ${options.consensusModel}  Judge: ${options.judgeModel}\n`);
+      log(`  Ensemble: ${ensembleSize}x  Temp: ${temperature}  Mode: ${mode}\n`);
       log(`  Strategies: ${strategies.join(', ')}  Concurrency: ${initialConcurrency} (AIMD)\n`);
-      log(`  Datasets: ${datasetNames.join(', ')}  Sample: ${sampleCount}  Parallel: ${parallel ? 'yes' : 'no'}\n\n`);
+      log(`  Datasets: ${datasetNames.join(', ')}  Sample: ${sampleCount}  Parallel: ${parallel ? 'yes' : 'no'}${questionTimeoutMs ? `  Timeout: ${questionTimeoutSec}s/q` : ''}\n\n`);
 
       // Load questions, filtering to cached IDs when ensemble cache exists.
       // This ensures 100% cache hit rate when using pre-generated responses.
@@ -138,8 +148,8 @@ export function createQuickEvalCommand(): Command {
 
           if (ensembleCache && ensembleCache.size > 0) {
             // Cache exists: load ALL questions (unsampled) then filter to cached IDs.
-            // Sample from the cached subset to respect --sample flag.
-            const all = (await loadBenchmarkQuestions(name, { shuffle: true })).questions;
+            // Use seed=42 for deterministic sampling — same questions every run.
+            const all = (await loadBenchmarkQuestions(name, { shuffle: true, seed: 42 })).questions;
             const cachedIds = new Set(ensembleCache.keys());
             const cachedQuestions = all.filter((q) => cachedIds.has(q.id));
             const sampled = cachedQuestions.slice(0, Math.min(sampleCount, cachedQuestions.length));
@@ -171,7 +181,9 @@ export function createQuickEvalCommand(): Command {
         model, provider, modelName, ensembleSize, strategies,
         mode, registry, useCache, sampleCount,
         limiter, temperature,
+        consensusProvider, consensusModelName,
         judgeProvider, judgeModelName,
+        questionTimeoutMs,
       }));
 
       limiter.startStatsReporter(1_000);

@@ -1,7 +1,7 @@
 {
-  "model": "google:gemini-2.5-flash-lite",
+  "model": "google:gemini-3-flash-preview",
   "ensembleSize": 5,
-  "sample": 10,
+  "sample": 30,
   "datasets": [
     "gsm8k",
     "truthfulqa",
@@ -20,32 +20,32 @@
     "majority",
     "council"
   ],
-  "updatedAt": "2026-02-19T14:21:03.620Z",
+  "updatedAt": "2026-02-19T20:48:40.370Z",
   "single": {
-    "accuracy": 0.7375,
-    "correct": 59,
-    "total": 80
+    "accuracy": 0.8515625,
+    "correct": 218,
+    "total": 256
   },
   "ensemble": {
     "standard": {
-      "accuracy": 0.675,
-      "correct": 54,
-      "total": 80
+      "accuracy": 0.861003861003861,
+      "correct": 223,
+      "total": 259
     },
     "elo": {
-      "accuracy": 0.7125,
-      "correct": 57,
-      "total": 80
+      "accuracy": 0.8671875,
+      "correct": 222,
+      "total": 256
     },
     "majority": {
-      "accuracy": 0.725,
-      "correct": 58,
-      "total": 80
+      "accuracy": 0.8372093023255814,
+      "correct": 216,
+      "total": 258
     },
     "council": {
-      "accuracy": 0.6375,
-      "correct": 51,
-      "total": 80
+      "accuracy": 0.7890625,
+      "correct": 202,
+      "total": 256
     }
   }
 }

@@ -1,4 +1,4 @@
-import type { AIProvider } from '@ensemble-ai/shared-utils/providers';
+import type { AIProvider } from '@ensemble-ai/consensus-core';
 import { describe, expect, it } from 'vitest';
 import { generateConsensus, parseStrategies } from './consensus.js';
 import type { ProviderResponse } from '../types.js';
@@ -33,7 +33,7 @@ describe('consensus', () => {
     });
 
     const { StandardConsensus } = await import(
-      '@ensemble-ai/shared-utils/consensus/StandardConsensus'
+      '@ensemble-ai/consensus-standard'
     );
     const origFn = StandardConsensus.prototype.generateConsensus;
     StandardConsensus.prototype.generateConsensus = async function (

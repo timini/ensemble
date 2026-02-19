@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import * as React from 'react';
-import type { ConsensusMethod } from '@ensemble-ai/shared-utils/consensus/types';
+import type { ConsensusMethod } from '@ensemble-ai/shared-utils/consensus';
 import { ConsensusPresetSelector } from './ConsensusPresetSelector';
 
 const meta = {

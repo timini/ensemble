@@ -1,4 +1,4 @@
-import type { ConsensusMethod } from '@ensemble-ai/shared-utils/consensus/types';
+import type { ConsensusMethod } from '@ensemble-ai/shared-utils/consensus';
 import { useTranslation } from 'react-i18next';
 import { Heading } from '../../atoms/Heading';
 
