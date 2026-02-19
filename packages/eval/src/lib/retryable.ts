@@ -40,7 +40,7 @@ function getStatusFromError(error: unknown): number | undefined {
 }
 
 const RETRYABLE_MESSAGE_PATTERN =
-  /rate limit|too many requests|\b429\b|server error|internal server error|\b502\b|\b503\b|\b504\b/i;
+  /rate limit|too many requests|\b429\b|server error|internal server error|\b502\b|\b503\b|\b504\b|failed to parse stream|high demand/i;
 
 export function isRateLimitOrServerError(error: unknown): boolean {
   const status = getStatusFromError(error);
