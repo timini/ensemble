@@ -16,7 +16,8 @@ import type { BenchmarkDatasetName, EvalMode, StrategyName } from '../types.js';
 
 const DEFAULT_MODEL = 'google:gemini-2.5-flash-lite';
 const DEFAULT_JUDGE_MODEL = 'google:gemini-2.5-flash';
-const DEFAULT_ENSEMBLE_SIZE = 3;
+const DEFAULT_ENSEMBLE_SIZE = 5;
+const DEFAULT_TEMPERATURE = 0.7;
 const DEFAULT_SAMPLE = 50;
 const DEFAULT_DATASETS: BenchmarkDatasetName[] = [
   'gsm8k', 'truthfulqa', 'gpqa', 'hle', 'math500',
@@ -28,6 +29,7 @@ interface QuickEvalOptions {
   model: string;
   judgeModel: string;
   ensemble: string;
+  temperature: string;
   strategies?: string[];
   datasets?: string[];
   sample: string;
@@ -61,6 +63,7 @@ export function createQuickEvalCommand(): Command {
     .option('--model <provider:model>', 'Model to evaluate.', DEFAULT_MODEL)
     .option('--judge-model <provider:model>', 'Model for LLM judge evaluation (defaults to gemini-2.5-flash).', DEFAULT_JUDGE_MODEL)
     .option('--ensemble <count>', 'Number of ensemble instances.', String(DEFAULT_ENSEMBLE_SIZE))
+    .option('--temperature <value>', 'Sampling temperature for ensemble diversity (0 = deterministic).', String(DEFAULT_TEMPERATURE))
     .option('--strategies <strategies...>', 'Consensus strategies (standard,elo,majority,council). Comma-separated.')
     .option('--datasets <datasets...>', 'Datasets to evaluate. Comma-separated. Defaults to all.')
     .option('--sample <count>', 'Questions per dataset.', String(DEFAULT_SAMPLE))
@@ -78,6 +81,11 @@ export function createQuickEvalCommand(): Command {
       const ensembleSize = Number.parseInt(options.ensemble, 10);
       if (!Number.isInteger(ensembleSize) || ensembleSize < 2) {
         throw new Error(`Ensemble size must be >= 2, got "${options.ensemble}".`);
+      }
+
+      const temperature = Number.parseFloat(options.temperature);
+      if (Number.isNaN(temperature) || temperature < 0 || temperature > 2) {
+        throw new Error(`Temperature must be between 0 and 2, got "${options.temperature}".`);
       }
 
       const sampleCount = Number.parseInt(options.sample, 10);
@@ -113,7 +121,7 @@ export function createQuickEvalCommand(): Command {
 
       const startTime = Date.now();
       const log = (s: string) => process.stderr.write(s);
-      log(`\n  Model: ${model}  Judge: ${options.judgeModel}  Ensemble: ${ensembleSize}x  Mode: ${mode}\n`);
+      log(`\n  Model: ${model}  Judge: ${options.judgeModel}  Ensemble: ${ensembleSize}x  Temp: ${temperature}  Mode: ${mode}\n`);
       log(`  Strategies: ${strategies.join(', ')}  Concurrency: ${initialConcurrency} (AIMD)\n`);
       log(`  Datasets: ${datasetNames.join(', ')}  Sample: ${sampleCount}  Parallel: ${parallel ? 'yes' : 'no'}\n\n`);
 
@@ -140,7 +148,7 @@ export function createQuickEvalCommand(): Command {
         datasetName: name, questions,
         model, provider, modelName, ensembleSize, strategies,
         mode, registry, useCache, sampleCount,
-        limiter,
+        limiter, temperature,
         judgeProvider, judgeModelName,
       }));
 
