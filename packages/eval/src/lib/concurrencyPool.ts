@@ -189,9 +189,8 @@ export class ConcurrencyLimiter {
   /** Get a snapshot of current limiter statistics. */
   getStats(): LimiterStats {
     const now = Date.now();
-    const elapsed = (now - this.lastSnapshotTime) / 1000;
-    const recentCompleted = this.completedCount - this.lastSnapshotCompleted;
-    const throughput = elapsed > 0 ? recentCompleted / elapsed : 0;
+    const totalElapsed = (now - this.createdAt) / 1000;
+    const throughput = totalElapsed > 0 ? this.completedCount / totalElapsed : 0;
     return {
       concurrencyLimit: this.concurrency,
       running: this.running,
@@ -202,7 +201,7 @@ export class ConcurrencyLimiter {
     };
   }
 
-  /** Reset the rolling throughput window (call after reading stats). */
+  /** Reset the rolling throughput window (kept for test compatibility). */
   resetThroughputWindow(): void {
     this.lastSnapshotCompleted = this.completedCount;
     this.lastSnapshotTime = Date.now();
@@ -217,24 +216,26 @@ export class ConcurrencyLimiter {
   startStatsReporter(intervalMs = 1_000): void {
     this.stopStatsReporter();
     this.resetThroughputWindow();
-    let lastLogLine = '';
+    let lastDedupKey = '';
     let suppressedCount = 0;
     this.statsTimer = setInterval(() => {
       const s = this.getStats();
       const elapsed = Math.round((Date.now() - this.createdAt) / 1000);
-      const line = `limit=${s.concurrencyLimit} running=${s.running} queued=${s.queued} ` +
-        `done=${s.completed} rate=${s.throughput.toFixed(1)}/s 429s=${s.rateLimits}`;
-      if (line === lastLogLine) {
+      // Dedup on state that matters (exclude rate since it changes every tick)
+      const dedupKey = `${s.concurrencyLimit}:${s.running}:${s.queued}:${s.completed}:${s.rateLimits}`;
+      if (dedupKey === lastDedupKey) {
         suppressedCount++;
         return;
       }
       if (suppressedCount > 0) {
         process.stderr.write(`  [limiter] ... ${suppressedCount}s unchanged\n`);
       }
-      process.stderr.write(`  [limiter ${elapsed}s] ${line}\n`);
-      lastLogLine = line;
+      process.stderr.write(
+        `  [limiter ${elapsed}s] limit=${s.concurrencyLimit} running=${s.running} queued=${s.queued} ` +
+        `done=${s.completed} rate=${s.throughput.toFixed(2)}/s 429s=${s.rateLimits}\n`,
+      );
+      lastDedupKey = dedupKey;
       suppressedCount = 0;
-      this.resetThroughputWindow();
     }, intervalMs);
     this.statsTimer.unref();
   }

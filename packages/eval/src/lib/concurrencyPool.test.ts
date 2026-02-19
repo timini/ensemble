@@ -269,18 +269,17 @@ describe('ConcurrencyLimiter', () => {
       expect(stats.completed).toBe(2);
     });
 
-    it('resetThroughputWindow resets the rolling window', async () => {
+    it('throughput is cumulative average since creation', async () => {
       const limiter = new ConcurrencyLimiter({ initial: 10, cooldownMs: 60_000 });
 
+      await sleep(10); // ensure measurable elapsed time
       await limiter.run(async () => {});
       await limiter.run(async () => {});
-      limiter.resetThroughputWindow();
 
-      // After reset, no new completions yet
-      await sleep(5); // small delay so elapsed > 0
       const stats = limiter.getStats();
-      expect(stats.throughput).toBe(0);
-      expect(stats.completed).toBe(2); // total still accurate
+      // Throughput = completed / total_elapsed, should be > 0
+      expect(stats.throughput).toBeGreaterThan(0);
+      expect(stats.completed).toBe(2);
     });
   });
 });

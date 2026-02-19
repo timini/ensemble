@@ -72,7 +72,7 @@ export function createQuickEvalCommand(): Command {
     .option('--no-parallel', 'Run datasets sequentially instead of in parallel.')
     .option('--baseline <path>', 'Path to baseline JSON. Saves results and fails on regression.')
     .option('--significance <alpha>', 'Significance level for regression detection (0 < alpha < 1).', '0.10')
-    .option('--concurrency <count>', 'Initial max concurrent questions (auto-adapts via AIMD).', '10')
+    .option('--concurrency <count>', 'Initial max concurrent questions (auto-adapts via AIMD).', '50')
     .action(async (options: QuickEvalOptions) => {
       const { provider, model: modelName } = parseModelSpec(options.model);
       const model = options.model;

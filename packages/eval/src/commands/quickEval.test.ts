@@ -35,7 +35,7 @@ describe('quickEval', () => {
     expect(opts.mode).toBe('free');
     expect(opts.cache).toBe(true);
     expect(opts.parallel).toBe(true);
-    expect(opts.concurrency).toBe('10');
+    expect(opts.concurrency).toBe('50');
   });
 
   it('parses custom options', () => {
