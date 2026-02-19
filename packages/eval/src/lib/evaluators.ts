@@ -63,6 +63,56 @@ export class GenerativeEvaluator {
   }
 }
 
+const NUMERIC_JUDGE_PROMPT =
+  'You are a math answer extraction assistant. A student solved a math problem. Extract the final numeric answer from their response. Return only the number, without units, commas, or extra text.\n\nStudent response:\n';
+
+const NUMERIC_ANSWER_SCHEMA = {
+  name: 'numeric_answer',
+  schema: {
+    type: 'object' as const,
+    properties: {
+      answer: { type: 'string' as const },
+    },
+    required: ['answer'],
+    additionalProperties: false,
+  },
+};
+
+export class LLMJudgeNumericEvaluator {
+  readonly name = 'numeric' as const;
+
+  constructor(
+    private readonly provider: AIProvider,
+    private readonly model: string,
+  ) {}
+
+  async evaluate(response: string, groundTruth: string): Promise<EvaluationResult> {
+    const expected = extractNumericAnswer(groundTruth) ?? groundTruth.trim();
+
+    let predicted: string | null;
+    try {
+      const result = await this.provider.generateStructured<{ answer: string }>(
+        NUMERIC_JUDGE_PROMPT + response,
+        this.model,
+        NUMERIC_ANSWER_SCHEMA,
+        { temperature: 0 },
+      );
+      predicted = result.parsed.answer ?? null;
+    } catch {
+      predicted = null;
+    }
+
+    return {
+      correct:
+        predicted !== null && expected.length > 0
+          ? numericValuesMatch(predicted, expected)
+          : false,
+      expected,
+      predicted,
+    };
+  }
+}
+
 const MCQ_JUDGE_PROMPT =
   'You are an answer extraction assistant. A student was asked a multiple-choice question with options A, B, C, D. Below is their response. Extract which single option letter (A, B, C, or D) the student selected.\n\nStudent response:\n';
 
@@ -119,14 +169,16 @@ export interface JudgeConfig {
 export function createEvaluatorForDataset(
   datasetName: BenchmarkDatasetName | null,
   judge?: JudgeConfig,
-): NumericEvaluator | LLMJudgeMCQEvaluator | null {
+): NumericEvaluator | LLMJudgeNumericEvaluator | LLMJudgeMCQEvaluator | null {
   if (!datasetName) {
     return null;
   }
 
   switch (datasetName) {
     case 'gsm8k':
-      return new NumericEvaluator();
+      return judge
+        ? new LLMJudgeNumericEvaluator(judge.provider, judge.model)
+        : new NumericEvaluator();
     case 'truthfulqa':
     case 'gpqa':
       if (!judge) {
