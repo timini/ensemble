@@ -72,7 +72,7 @@ export function createQuickEvalCommand(): Command {
     .option('--no-parallel', 'Run datasets sequentially instead of in parallel.')
     .option('--baseline <path>', 'Path to baseline JSON. Saves results and fails on regression.')
     .option('--significance <alpha>', 'Significance level for regression detection (0 < alpha < 1).', '0.10')
-    .option('--concurrency <count>', 'Initial max concurrent questions (auto-adapts via AIMD).', '100')
+    .option('--concurrency <count>', 'Initial max concurrent questions (auto-adapts via AIMD).', '10')
     .action(async (options: QuickEvalOptions) => {
       const { provider, model: modelName } = parseModelSpec(options.model);
       const model = options.model;
@@ -117,7 +117,7 @@ export function createQuickEvalCommand(): Command {
       registerProviders(registry, [...providers], mode);
 
       const monitor = new SystemMonitor();
-      const limiter = new ConcurrencyLimiter({ initial: initialConcurrency, min: 5, max: 500, monitor });
+      const limiter = new ConcurrencyLimiter({ initial: initialConcurrency, min: 1, max: 500, monitor });
 
       const startTime = Date.now();
       const log = (s: string) => process.stderr.write(s);
@@ -152,7 +152,7 @@ export function createQuickEvalCommand(): Command {
         judgeProvider, judgeModelName,
       }));
 
-      limiter.startStatsReporter(10_000);
+      limiter.startStatsReporter(1_000);
 
       const allDatasetResults = parallel
         ? await Promise.all(runArgs.map((a) => runDataset(a, true)))
