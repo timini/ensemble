@@ -492,7 +492,7 @@ describe('HuggingFaceBenchmarkLoader', () => {
         filterRow: (row) => row.question !== 'skip',
       });
 
-      const questions = await loader.load();
+      const questions = await loader.load({ shuffle: false });
       expect(questions).toHaveLength(2);
       expect(questions[0].prompt).toBe('Q1');
       expect(questions[1].prompt).toBe('Q3');

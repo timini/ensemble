@@ -190,7 +190,7 @@ describe('benchmark dataset loaders', () => {
       }),
     );
 
-    const loaded = await loadBenchmarkQuestions('hle', { sample: 10 });
+    const loaded = await loadBenchmarkQuestions('hle', { sample: 10, shuffle: false });
     expect(loaded.datasetName).toBe('hle');
     // Should filter out the row with image data
     expect(loaded.questions).toHaveLength(2);
@@ -230,7 +230,7 @@ describe('benchmark dataset loaders', () => {
       }),
     );
 
-    const loaded = await loadBenchmarkQuestions('math500', { sample: 10 });
+    const loaded = await loadBenchmarkQuestions('math500', { sample: 10, shuffle: false });
     expect(loaded.datasetName).toBe('math500');
     expect(loaded.questions).toHaveLength(2);
     expect(loaded.questions[0].id).toBe('math500-0');
@@ -275,7 +275,7 @@ describe('benchmark dataset loaders', () => {
       }),
     );
 
-    const loaded = await loadBenchmarkQuestions('mmlu_pro', { sample: 10 });
+    const loaded = await loadBenchmarkQuestions('mmlu_pro', { sample: 10, shuffle: false });
     expect(loaded.datasetName).toBe('mmlu_pro');
     expect(loaded.questions).toHaveLength(1);
     expect(loaded.questions[0].id).toBe('mmlu_pro-0');
@@ -311,7 +311,7 @@ describe('benchmark dataset loaders', () => {
       }),
     );
 
-    const loaded = await loadBenchmarkQuestions('simpleqa', { sample: 10 });
+    const loaded = await loadBenchmarkQuestions('simpleqa', { sample: 10, shuffle: false });
     expect(loaded.datasetName).toBe('simpleqa');
     expect(loaded.questions).toHaveLength(2);
     expect(loaded.questions[0].id).toBe('simpleqa-0');
@@ -347,7 +347,7 @@ describe('benchmark dataset loaders', () => {
       }),
     );
 
-    const loaded = await loadBenchmarkQuestions('arc', { sample: 10 });
+    const loaded = await loadBenchmarkQuestions('arc', { sample: 10, shuffle: false });
     expect(loaded.datasetName).toBe('arc');
     expect(loaded.questions).toHaveLength(1);
     expect(loaded.questions[0].id).toBe('arc-0');
@@ -378,7 +378,7 @@ describe('benchmark dataset loaders', () => {
       }),
     );
 
-    const loaded = await loadBenchmarkQuestions('arc', { sample: 10 });
+    const loaded = await loadBenchmarkQuestions('arc', { sample: 10, shuffle: false });
     expect(loaded.questions).toHaveLength(1);
     expect(loaded.questions[0].groundTruth).toBe('B');
     expect(loaded.questions[0].prompt).toContain('A. It bends');
@@ -407,7 +407,7 @@ describe('benchmark dataset loaders', () => {
       }),
     );
 
-    const loaded = await loadBenchmarkQuestions('hellaswag', { sample: 10 });
+    const loaded = await loadBenchmarkQuestions('hellaswag', { sample: 10, shuffle: false });
     expect(loaded.datasetName).toBe('hellaswag');
     expect(loaded.questions).toHaveLength(1);
     expect(loaded.questions[0].id).toBe('hellaswag-0');
@@ -444,7 +444,7 @@ describe('benchmark dataset loaders', () => {
       }),
     );
 
-    const loaded = await loadBenchmarkQuestions('hallumix', { sample: 10 });
+    const loaded = await loadBenchmarkQuestions('hallumix', { sample: 10, shuffle: false });
     expect(loaded.datasetName).toBe('hallumix');
     expect(loaded.questions).toHaveLength(2);
     expect(loaded.questions[0].id).toBe('hallumix-0');
