@@ -210,18 +210,30 @@ export class ConcurrencyLimiter {
 
   /**
    * Start a periodic stats reporter that logs limiter state to stderr.
-   * @param intervalMs - How often to log (default 10s).
+   * Suppresses duplicate lines when nothing has changed (no completions,
+   * no rate-limit events, same running/queued counts).
+   * @param intervalMs - How often to check (default 1s).
    */
-  startStatsReporter(intervalMs = 10_000): void {
+  startStatsReporter(intervalMs = 1_000): void {
     this.stopStatsReporter();
     this.resetThroughputWindow();
+    let lastLogLine = '';
+    let suppressedCount = 0;
     this.statsTimer = setInterval(() => {
       const s = this.getStats();
       const elapsed = Math.round((Date.now() - this.createdAt) / 1000);
-      process.stderr.write(
-        `  [limiter ${elapsed}s] limit=${s.concurrencyLimit} running=${s.running} queued=${s.queued} ` +
-        `done=${s.completed} rate=${s.throughput.toFixed(1)}/s 429s=${s.rateLimits}\n`,
-      );
+      const line = `limit=${s.concurrencyLimit} running=${s.running} queued=${s.queued} ` +
+        `done=${s.completed} rate=${s.throughput.toFixed(1)}/s 429s=${s.rateLimits}`;
+      if (line === lastLogLine) {
+        suppressedCount++;
+        return;
+      }
+      if (suppressedCount > 0) {
+        process.stderr.write(`  [limiter] ... ${suppressedCount}s unchanged\n`);
+      }
+      process.stderr.write(`  [limiter ${elapsed}s] ${line}\n`);
+      lastLogLine = line;
+      suppressedCount = 0;
       this.resetThroughputWindow();
     }, intervalMs);
     this.statsTimer.unref();
