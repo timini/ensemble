@@ -5,7 +5,7 @@
  */
 
 import type { StateCreator } from 'zustand';
-import type { ConsensusMethod } from '@ensemble-ai/shared-utils/consensus/types';
+import type { ConsensusMethod } from '@ensemble-ai/shared-utils';
 
 export type ProviderType = 'openai' | 'anthropic' | 'google' | 'xai';
 

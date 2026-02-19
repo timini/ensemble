@@ -1,13 +1,16 @@
 
 import { useState } from 'react';
 import { useStore } from '~/store';
-import { EloRankingConsensus } from '@ensemble-ai/shared-utils/consensus/EloRankingConsensus';
-import { MajorityVotingConsensus } from '@ensemble-ai/shared-utils/consensus/MajorityVotingConsensus';
-import { StandardConsensus } from '@ensemble-ai/shared-utils/consensus/StandardConsensus';
-import { CouncilConsensus } from '@ensemble-ai/shared-utils/consensus/CouncilConsensus';
-import { ProviderRegistry, type ProviderName } from '@ensemble-ai/shared-utils/providers';
-import type { ConsensusModelResponse } from '@ensemble-ai/shared-utils/consensus/types';
-import type { CouncilParticipant } from '@ensemble-ai/shared-utils/consensus/councilTypes';
+import {
+  EloRankingConsensus,
+  MajorityVotingConsensus,
+  StandardConsensus,
+  CouncilConsensus,
+  ProviderRegistry,
+  type ProviderName,
+  type ConsensusModelResponse,
+  type CouncilParticipant,
+} from '@ensemble-ai/shared-utils';
 import { FALLBACK_MODELS } from '~/lib/models';
 import { logger } from '~/lib/logger';
 

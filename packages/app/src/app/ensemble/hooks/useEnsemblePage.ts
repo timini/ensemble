@@ -1,7 +1,7 @@
 import { useRef, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslation } from 'react-i18next';
-import type { ConsensusMethod } from '@ensemble-ai/shared-utils/consensus/types';
+import type { ConsensusMethod } from '@ensemble-ai/shared-utils';
 import { useStore } from '~/store';
 import { useStepNavigation } from '~/hooks/useStepNavigation';
 import type { ProviderType } from '~/store/slices/ensembleSlice';
