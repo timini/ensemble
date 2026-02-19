@@ -1,10 +1,10 @@
 import type { AIProvider, GenerateStructuredOptions, JsonSchema, StreamResponseOptions, StructuredResponse } from '@ensemble-ai/shared-utils/providers';
-import { CouncilConsensus } from '@ensemble-ai/shared-utils/consensus/CouncilConsensus';
-import { EloRankingConsensus } from '@ensemble-ai/shared-utils/consensus/EloRankingConsensus';
-import { MajorityVotingConsensus } from '@ensemble-ai/shared-utils/consensus/MajorityVotingConsensus';
-import { StandardConsensus } from '@ensemble-ai/shared-utils/consensus/StandardConsensus';
-import type { CouncilParticipant } from '@ensemble-ai/shared-utils/consensus/councilTypes';
-import type { ConsensusModelResponse } from '@ensemble-ai/shared-utils/consensus/types';
+import type { ConsensusModelResponse } from '@ensemble-ai/consensus-core';
+import { StandardConsensus } from '@ensemble-ai/consensus-standard';
+import { EloRankingConsensus } from '@ensemble-ai/consensus-elo';
+import { MajorityVotingConsensus } from '@ensemble-ai/consensus-majority';
+import { CouncilConsensus } from '@ensemble-ai/consensus-council';
+import type { CouncilParticipant } from '@ensemble-ai/consensus-council';
 import type { ConsensusStrategyMetrics, ProviderResponse, StrategyName } from '../types.js';
 import { explodeList } from './modelSpecs.js';
 

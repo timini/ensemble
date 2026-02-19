@@ -25,6 +25,11 @@
     "eval:regenerate-baseline": "node --import tsx bin/ensemble-eval.mjs quick-eval --no-cache --baseline baselines/quick-eval.json"
   },
   "dependencies": {
+    "@ensemble-ai/consensus-core": "*",
+    "@ensemble-ai/consensus-council": "*",
+    "@ensemble-ai/consensus-elo": "*",
+    "@ensemble-ai/consensus-majority": "*",
+    "@ensemble-ai/consensus-standard": "*",
     "@ensemble-ai/shared-utils": "*",
     "commander": "^13.1.0",
     "systeminformation": "^5.31.1",
