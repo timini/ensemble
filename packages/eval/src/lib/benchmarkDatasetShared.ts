@@ -9,6 +9,15 @@ const DATASET_ALIASES: Record<string, BenchmarkDatasetName> = {
   gpqa: 'gpqa',
   'gpqa-diamond': 'gpqa',
   gpqa_diamond: 'gpqa',
+  hle: 'hle',
+  'humanitys-last-exam': 'hle',
+  math500: 'math500',
+  'math-500': 'math500',
+  mmlu_pro: 'mmlu_pro',
+  'mmlu-pro': 'mmlu_pro',
+  mmlupro: 'mmlu_pro',
+  simpleqa: 'simpleqa',
+  'simple-qa': 'simpleqa',
 };
 
 export function resolveBenchmarkDatasetName(

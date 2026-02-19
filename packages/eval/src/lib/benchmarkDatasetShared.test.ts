@@ -9,6 +9,15 @@ describe('benchmarkDatasetShared', () => {
     expect(resolveBenchmarkDatasetName('gsm8k')).toBe('gsm8k');
     expect(resolveBenchmarkDatasetName('truthful_qa')).toBe('truthfulqa');
     expect(resolveBenchmarkDatasetName('gpqa-diamond')).toBe('gpqa');
+    expect(resolveBenchmarkDatasetName('hle')).toBe('hle');
+    expect(resolveBenchmarkDatasetName('humanitys-last-exam')).toBe('hle');
+    expect(resolveBenchmarkDatasetName('math500')).toBe('math500');
+    expect(resolveBenchmarkDatasetName('math-500')).toBe('math500');
+    expect(resolveBenchmarkDatasetName('mmlu_pro')).toBe('mmlu_pro');
+    expect(resolveBenchmarkDatasetName('mmlu-pro')).toBe('mmlu_pro');
+    expect(resolveBenchmarkDatasetName('mmlupro')).toBe('mmlu_pro');
+    expect(resolveBenchmarkDatasetName('simpleqa')).toBe('simpleqa');
+    expect(resolveBenchmarkDatasetName('simple-qa')).toBe('simpleqa');
     expect(resolveBenchmarkDatasetName('custom-dataset')).toBeNull();
   });
 

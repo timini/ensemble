@@ -3,6 +3,7 @@ import type { AIProvider } from '@ensemble-ai/shared-utils/providers';
 import {
   createEvaluatorForDataset,
   GenerativeEvaluator,
+  LLMJudgeExactMatchEvaluator,
   LLMJudgeMCQEvaluator,
   LLMJudgeNumericEvaluator,
   NumericEvaluator,
@@ -279,6 +280,74 @@ describe('LLMJudgeNumericEvaluator', () => {
   });
 });
 
+describe('LLMJudgeExactMatchEvaluator', () => {
+  function createMockProvider(equivalent: boolean, extractedAnswer: string): AIProvider {
+    return {
+      generateStructured: vi.fn().mockResolvedValue({
+        parsed: { equivalent, extracted_answer: extractedAnswer },
+        raw: JSON.stringify({ equivalent, extracted_answer: extractedAnswer }),
+        responseTimeMs: 50,
+      }),
+      streamResponse: vi.fn(),
+      generateEmbeddings: vi.fn(),
+      validateApiKey: vi.fn(),
+      listAvailableModels: vi.fn().mockReturnValue([]),
+      listAvailableTextModels: vi.fn().mockResolvedValue([]),
+    } as unknown as AIProvider;
+  }
+
+  it('uses judge LLM to compare answers and marks equivalent as correct', async () => {
+    const provider = createMockProvider(true, 'Paris');
+    const evaluator = new LLMJudgeExactMatchEvaluator(provider, 'gpt-4o-mini');
+
+    const result = await evaluator.evaluate('The answer is Paris.', 'Paris');
+
+    expect(result.correct).toBe(true);
+    expect(result.predicted).toBe('Paris');
+    expect(result.expected).toBe('Paris');
+    expect(provider.generateStructured).toHaveBeenCalledWith(
+      expect.stringContaining('Paris'),
+      'gpt-4o-mini',
+      expect.objectContaining({ name: 'exact_match_answer' }),
+      { temperature: 0 },
+    );
+  });
+
+  it('marks non-equivalent answers as incorrect', async () => {
+    const provider = createMockProvider(false, 'London');
+    const evaluator = new LLMJudgeExactMatchEvaluator(provider, 'gpt-4o-mini');
+
+    const result = await evaluator.evaluate('The answer is London.', 'Paris');
+
+    expect(result.correct).toBe(false);
+    expect(result.predicted).toBe('London');
+    expect(result.expected).toBe('Paris');
+  });
+
+  it('returns null predicted when judge call fails', async () => {
+    const provider = {
+      generateStructured: vi.fn().mockRejectedValue(new Error('API error')),
+      streamResponse: vi.fn(),
+      generateEmbeddings: vi.fn(),
+      validateApiKey: vi.fn(),
+      listAvailableModels: vi.fn().mockReturnValue([]),
+      listAvailableTextModels: vi.fn().mockResolvedValue([]),
+    } as unknown as AIProvider;
+
+    const evaluator = new LLMJudgeExactMatchEvaluator(provider, 'gpt-4o-mini');
+    const result = await evaluator.evaluate('Some answer', 'Expected');
+
+    expect(result.correct).toBe(false);
+    expect(result.predicted).toBeNull();
+  });
+
+  it('has name "exact-match" for compatibility with EvaluatorLike', () => {
+    const provider = createMockProvider(true, 'test');
+    const evaluator = new LLMJudgeExactMatchEvaluator(provider, 'gpt-4o-mini');
+    expect(evaluator.name).toBe('exact-match');
+  });
+});
+
 describe('createEvaluatorForDataset', () => {
   const mockProvider = {
     generateStructured: vi.fn(),
@@ -292,8 +361,12 @@ describe('createEvaluatorForDataset', () => {
 
   it('returns the expected evaluator types', () => {
     expect(createEvaluatorForDataset('gsm8k')?.name).toBe('numeric');
+    expect(createEvaluatorForDataset('math500')?.name).toBe('numeric');
     expect(createEvaluatorForDataset('truthfulqa', judge)?.name).toBe('mcq');
     expect(createEvaluatorForDataset('gpqa', judge)?.name).toBe('mcq');
+    expect(createEvaluatorForDataset('mmlu_pro', judge)?.name).toBe('mcq');
+    expect(createEvaluatorForDataset('hle', judge)?.name).toBe('exact-match');
+    expect(createEvaluatorForDataset('simpleqa', judge)?.name).toBe('exact-match');
     expect(createEvaluatorForDataset(null)).toBeNull();
   });
 
@@ -301,15 +374,23 @@ describe('createEvaluatorForDataset', () => {
     const truthful = createEvaluatorForDataset('truthfulqa', judge);
     const gpqa = createEvaluatorForDataset('gpqa', judge);
     const gsm8k = createEvaluatorForDataset('gsm8k', judge);
+    const math500 = createEvaluatorForDataset('math500', judge);
+    const hle = createEvaluatorForDataset('hle', judge);
+    const mmluPro = createEvaluatorForDataset('mmlu_pro', judge);
+    const simpleqa = createEvaluatorForDataset('simpleqa', judge);
 
     expect(truthful).toBeInstanceOf(LLMJudgeMCQEvaluator);
     expect(gpqa).toBeInstanceOf(LLMJudgeMCQEvaluator);
+    expect(mmluPro).toBeInstanceOf(LLMJudgeMCQEvaluator);
     expect(gsm8k).toBeInstanceOf(LLMJudgeNumericEvaluator);
+    expect(math500).toBeInstanceOf(LLMJudgeNumericEvaluator);
+    expect(hle).toBeInstanceOf(LLMJudgeExactMatchEvaluator);
+    expect(simpleqa).toBeInstanceOf(LLMJudgeExactMatchEvaluator);
   });
 
-  it('returns regex NumericEvaluator for gsm8k when no judge config', () => {
-    const gsm8k = createEvaluatorForDataset('gsm8k');
-    expect(gsm8k).toBeInstanceOf(NumericEvaluator);
+  it('returns regex NumericEvaluator for gsm8k/math500 when no judge config', () => {
+    expect(createEvaluatorForDataset('gsm8k')).toBeInstanceOf(NumericEvaluator);
+    expect(createEvaluatorForDataset('math500')).toBeInstanceOf(NumericEvaluator);
   });
 
   it('throws when no judge config is provided for MCQ datasets', () => {
@@ -318,6 +399,18 @@ describe('createEvaluatorForDataset', () => {
     );
     expect(() => createEvaluatorForDataset('gpqa')).toThrow(
       'MCQ datasets require a judge config',
+    );
+    expect(() => createEvaluatorForDataset('mmlu_pro')).toThrow(
+      'MCQ datasets require a judge config',
+    );
+  });
+
+  it('throws when no judge config is provided for exact-match datasets', () => {
+    expect(() => createEvaluatorForDataset('hle')).toThrow(
+      'hle dataset requires a judge config',
+    );
+    expect(() => createEvaluatorForDataset('simpleqa')).toThrow(
+      'simpleqa dataset requires a judge config',
     );
   });
 });

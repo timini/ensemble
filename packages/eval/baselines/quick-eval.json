@@ -1,11 +1,14 @@
 {
   "model": "google:gemini-3-flash-preview",
   "ensembleSize": 3,
-  "sample": 10,
+  "sample": 25,
   "datasets": [
     "gsm8k",
     "truthfulqa",
-    "gpqa"
+    "gpqa",
+    "math500",
+    "mmlu_pro",
+    "simpleqa"
   ],
   "strategies": [
     "standard",
@@ -13,32 +16,32 @@
     "majority",
     "council"
   ],
-  "updatedAt": "2026-02-19T09:28:11.190Z",
+  "updatedAt": "2026-02-19T11:36:09.863Z",
   "single": {
-    "accuracy": 0.6666666666666666,
-    "correct": 20,
-    "total": 30
+    "accuracy": 0.8356164383561644,
+    "correct": 122,
+    "total": 146
   },
   "ensemble": {
     "standard": {
-      "accuracy": 0.9666666666666667,
-      "correct": 29,
-      "total": 30
+      "accuracy": 0.8561643835616438,
+      "correct": 125,
+      "total": 146
     },
     "elo": {
-      "accuracy": 0.9642857142857143,
-      "correct": 27,
-      "total": 28
+      "accuracy": 0.8413793103448276,
+      "correct": 122,
+      "total": 145
     },
     "majority": {
-      "accuracy": 0.9655172413793104,
-      "correct": 28,
-      "total": 29
+      "accuracy": 0.8493150684931506,
+      "correct": 124,
+      "total": 146
     },
     "council": {
-      "accuracy": 0.9642857142857143,
-      "correct": 27,
-      "total": 28
+      "accuracy": 0.8551724137931035,
+      "correct": 124,
+      "total": 145
     }
   }
 }

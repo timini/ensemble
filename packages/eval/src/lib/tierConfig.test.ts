@@ -14,11 +14,15 @@ describe('CI_TIER_CONFIG', () => {
     expect(CI_TIER_CONFIG.name).toBe('ci');
   });
 
-  it('includes 30 questions across 3 datasets (10 GSM8K + 10 TruthfulQA + 10 GPQA)', () => {
+  it('includes 70 questions across 7 datasets', () => {
     expect(CI_TIER_CONFIG.datasets).toEqual([
       { name: 'gsm8k', sampleSize: 10 },
       { name: 'truthfulqa', sampleSize: 10 },
       { name: 'gpqa', sampleSize: 10 },
+      { name: 'hle', sampleSize: 10 },
+      { name: 'math500', sampleSize: 10 },
+      { name: 'mmlu_pro', sampleSize: 10 },
+      { name: 'simpleqa', sampleSize: 10 },
     ]);
   });
 
@@ -69,11 +73,15 @@ describe('POST_MERGE_TIER_CONFIG', () => {
     expect(POST_MERGE_TIER_CONFIG.name).toBe('post-merge');
   });
 
-  it('includes 250 questions across 3 datasets (100 GSM8K + 100 TruthfulQA + 50 GPQA)', () => {
+  it('includes 450 questions across 7 datasets', () => {
     expect(POST_MERGE_TIER_CONFIG.datasets).toEqual([
       { name: 'gsm8k', sampleSize: 100 },
       { name: 'truthfulqa', sampleSize: 100 },
       { name: 'gpqa', sampleSize: 50 },
+      { name: 'hle', sampleSize: 50 },
+      { name: 'math500', sampleSize: 50 },
+      { name: 'mmlu_pro', sampleSize: 50 },
+      { name: 'simpleqa', sampleSize: 50 },
     ]);
   });
 
@@ -143,12 +151,12 @@ describe('HOMOGENEOUS_CI_TIER_CONFIG', () => {
     });
   });
 
-  it('includes 30 questions across 3 datasets', () => {
+  it('includes 70 questions across 7 datasets', () => {
     const total = HOMOGENEOUS_CI_TIER_CONFIG.datasets.reduce(
       (sum, d) => sum + d.sampleSize,
       0,
     );
-    expect(total).toBe(30);
+    expect(total).toBe(70);
   });
 
   it('evaluates all 4 strategies', () => {
@@ -178,12 +186,12 @@ describe('HOMOGENEOUS_POST_MERGE_TIER_CONFIG', () => {
     }
   });
 
-  it('includes 150 questions across 3 datasets', () => {
+  it('includes 350 questions across 7 datasets', () => {
     const total = HOMOGENEOUS_POST_MERGE_TIER_CONFIG.datasets.reduce(
       (sum, d) => sum + d.sampleSize,
       0,
     );
-    expect(total).toBe(150);
+    expect(total).toBe(350);
   });
 
   it('runs once (deterministic)', () => {

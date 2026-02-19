@@ -509,6 +509,8 @@ GOOGLE_API_KEY=$(grep TEST_GOOGLE_API_KEY .env.local | cut -d= -f2) \
   node --import tsx packages/eval/bin/ensemble-eval.mjs quick-eval
 ```
 
+The `HF_TOKEN` env var is used to access gated HuggingFace datasets (e.g., HLE). It is stored directly in `.env.local` (not `TEST_` prefixed) and read by the eval loader automatically.
+
 ## Important Notes
 
 - Component files MUST NOT exceed 200 lines

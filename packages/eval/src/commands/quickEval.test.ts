@@ -29,7 +29,7 @@ describe('quickEval', () => {
     const opts = parseOpts([]);
     expect(opts.model).toBe('google:gemini-3-flash-preview');
     expect(opts.ensemble).toBe('3');
-    expect(opts.sample).toBe('10');
+    expect(opts.sample).toBe('25');
     expect(opts.mode).toBe('free');
     expect(opts.cache).toBe(true);
     expect(opts.parallel).toBe(true);

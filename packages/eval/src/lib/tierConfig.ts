@@ -15,6 +15,10 @@ export const CI_TIER_CONFIG: TierConfig = {
     { name: 'gsm8k', sampleSize: 10 },
     { name: 'truthfulqa', sampleSize: 10 },
     { name: 'gpqa', sampleSize: 10 },
+    { name: 'hle', sampleSize: 10 },
+    { name: 'math500', sampleSize: 10 },
+    { name: 'mmlu_pro', sampleSize: 10 },
+    { name: 'simpleqa', sampleSize: 10 },
   ],
   models: [
     { provider: 'openai', model: 'gpt-4o-mini' },
@@ -43,6 +47,10 @@ export const POST_MERGE_TIER_CONFIG: TierConfig = {
     { name: 'gsm8k', sampleSize: 100 },
     { name: 'truthfulqa', sampleSize: 100 },
     { name: 'gpqa', sampleSize: 50 },
+    { name: 'hle', sampleSize: 50 },
+    { name: 'math500', sampleSize: 50 },
+    { name: 'mmlu_pro', sampleSize: 50 },
+    { name: 'simpleqa', sampleSize: 50 },
   ],
   models: [
     { provider: 'openai', model: 'gpt-4o' },
@@ -72,6 +80,10 @@ export const HOMOGENEOUS_CI_TIER_CONFIG: TierConfig = {
     { name: 'gsm8k', sampleSize: 10 },
     { name: 'truthfulqa', sampleSize: 10 },
     { name: 'gpqa', sampleSize: 10 },
+    { name: 'hle', sampleSize: 10 },
+    { name: 'math500', sampleSize: 10 },
+    { name: 'mmlu_pro', sampleSize: 10 },
+    { name: 'simpleqa', sampleSize: 10 },
   ],
   models: [
     { provider: 'google', model: 'gemini-3-flash-preview' },
@@ -100,6 +112,10 @@ export const HOMOGENEOUS_POST_MERGE_TIER_CONFIG: TierConfig = {
     { name: 'gsm8k', sampleSize: 50 },
     { name: 'truthfulqa', sampleSize: 50 },
     { name: 'gpqa', sampleSize: 50 },
+    { name: 'hle', sampleSize: 50 },
+    { name: 'math500', sampleSize: 50 },
+    { name: 'mmlu_pro', sampleSize: 50 },
+    { name: 'simpleqa', sampleSize: 50 },
   ],
   models: [
     { provider: 'google', model: 'gemini-3-flash-preview' },

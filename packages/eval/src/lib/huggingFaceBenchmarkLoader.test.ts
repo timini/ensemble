@@ -208,18 +208,22 @@ describe('HuggingFaceBenchmarkLoader', () => {
       await expect(loader.load()).rejects.toThrow('Unable to download dataset');
     });
 
-    it('includes HTTP status in error message from fetchRowsPage', async () => {
-      fetchMock.mockResolvedValueOnce(textResponse('Rate limited', 429));
+    it('retries on 429 and succeeds', async () => {
+      fetchMock
+        .mockResolvedValueOnce(textResponse('Rate limited', 429))
+        .mockResolvedValueOnce(
+          jsonResponse({
+            rows: [{ row_idx: 0, row: { question: 'Q1', answer: 'A1' } }],
+            num_rows_total: 1,
+          }),
+        );
 
       const loader = makeLoader();
+      const questions = await loader.load();
 
-      try {
-        await loader.load();
-        expect.unreachable('Should have thrown');
-      } catch (error) {
-        expect((error as Error).message).toContain('429');
-      }
-    });
+      expect(questions).toHaveLength(1);
+      expect(fetchMock).toHaveBeenCalledTimes(2);
+    }, 15_000);
   });
 
   describe('network error handling', () => {
@@ -407,6 +411,91 @@ describe('HuggingFaceBenchmarkLoader', () => {
 
       const questions = await loader.load();
       expect(questions).toHaveLength(1);
+    });
+  });
+
+  describe('authentication', () => {
+    let previousHfToken: string | undefined;
+
+    beforeEach(() => {
+      previousHfToken = process.env.HF_TOKEN;
+    });
+
+    afterEach(() => {
+      if (previousHfToken === undefined) {
+        delete process.env.HF_TOKEN;
+      } else {
+        process.env.HF_TOKEN = previousHfToken;
+      }
+    });
+
+    it('sends Authorization header when HF_TOKEN is set', async () => {
+      process.env.HF_TOKEN = 'hf_test_token_123';
+
+      fetchMock.mockResolvedValueOnce(
+        jsonResponse({
+          rows: [{ row_idx: 0, row: { question: 'Q1', answer: 'A1' } }],
+          num_rows_total: 1,
+        }),
+      );
+
+      const loader = makeLoader();
+      await loader.load();
+
+      expect(fetchMock).toHaveBeenCalledTimes(1);
+      const callArgs = fetchMock.mock.calls[0];
+      expect(callArgs[1].headers).toEqual(
+        expect.objectContaining({ Authorization: 'Bearer hf_test_token_123' }),
+      );
+    });
+
+    it('does not send Authorization header when HF_TOKEN is not set', async () => {
+      delete process.env.HF_TOKEN;
+
+      fetchMock.mockResolvedValueOnce(
+        jsonResponse({
+          rows: [{ row_idx: 0, row: { question: 'Q1', answer: 'A1' } }],
+          num_rows_total: 1,
+        }),
+      );
+
+      const loader = makeLoader();
+      await loader.load();
+
+      expect(fetchMock).toHaveBeenCalledTimes(1);
+      const callArgs = fetchMock.mock.calls[0];
+      expect(callArgs[1].headers).toEqual({});
+    });
+  });
+
+  describe('filterRow', () => {
+    it('excludes rows where filterRow returns false', async () => {
+      fetchMock.mockResolvedValueOnce(
+        jsonResponse({
+          rows: [
+            { row_idx: 0, row: { question: 'Q1', answer: 'A1' } },
+            { row_idx: 1, row: { question: 'skip', answer: 'A2' } },
+            { row_idx: 2, row: { question: 'Q3', answer: 'A3' } },
+          ],
+          num_rows_total: 3,
+        }),
+      );
+
+      const loader = new HuggingFaceBenchmarkLoader<{ question: string; answer: string }>({
+        name: 'gsm8k',
+        sources: [{ dataset: 'openai/gsm8k', config: 'main', split: 'test' }],
+        mapRow: (row, rowIdx) => ({
+          id: `test-${rowIdx}`,
+          prompt: row.question,
+          groundTruth: row.answer,
+        }),
+        filterRow: (row) => row.question !== 'skip',
+      });
+
+      const questions = await loader.load();
+      expect(questions).toHaveLength(2);
+      expect(questions[0].prompt).toBe('Q1');
+      expect(questions[1].prompt).toBe('Q3');
     });
   });
 
