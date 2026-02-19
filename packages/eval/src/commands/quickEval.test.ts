@@ -31,11 +31,11 @@ describe('quickEval', () => {
     expect(opts.judgeModel).toBe('google:gemini-2.5-flash');
     expect(opts.ensemble).toBe('5');
     expect(opts.temperature).toBe('0.7');
-    expect(opts.sample).toBe('50');
+    expect(opts.sample).toBe('30');
     expect(opts.mode).toBe('free');
     expect(opts.cache).toBe(true);
     expect(opts.parallel).toBe(true);
-    expect(opts.concurrency).toBe('50');
+    expect(opts.concurrency).toBe('40');
   });
 
   it('parses custom options', () => {
