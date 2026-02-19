@@ -1,5 +1,5 @@
 import { describe, expect, it, beforeEach, afterEach } from 'vitest';
-import { mkdtemp, rm, mkdir } from 'node:fs/promises';
+import { mkdtemp, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { writeJsonFile, readJsonFile, fileExists } from './io.js';
@@ -9,35 +9,37 @@ import type { EnsembleCacheEntry } from './ensembleCache.js';
 // Re-implement the cacheKey logic to test sanitization independently
 function cacheKey(
   model: string, dataset: string, ensembleSize: number,
-  temperature: number, sampleCount: number,
+  temperature: number,
 ): string {
   const safeModel = model.replace(/[/:]/g, '_');
-  return `${safeModel}_${dataset}_${ensembleSize}x_t${temperature}_n${sampleCount}.json`;
+  return `${safeModel}_${dataset}_${ensembleSize}x_t${temperature}.json`;
 }
 
 const MOCK_RESPONSES: ProviderResponse[] = [
   { provider: 'google', model: 'gemini-flash', content: 'Answer A', responseTimeMs: 100 },
   { provider: 'google', model: 'gemini-flash', content: 'Answer B', responseTimeMs: 120 },
-  { provider: 'google', model: 'gemini-flash', content: 'Answer A', responseTimeMs: 90 },
+  { provider: 'google', model: 'gemini-flash', content: 'Answer C', responseTimeMs: 90 },
+  { provider: 'google', model: 'gemini-flash', content: 'Answer D', responseTimeMs: 110 },
+  { provider: 'google', model: 'gemini-flash', content: 'Answer A', responseTimeMs: 95 },
 ];
 
 describe('ensembleCache', () => {
   describe('cacheKey format', () => {
-    it('includes ensemble size and temperature', () => {
-      expect(cacheKey('google:gemini-flash', 'gsm8k', 5, 0.7, 30)).toBe(
-        'google_gemini-flash_gsm8k_5x_t0.7_n30.json',
+    it('includes ensemble size and temperature but NOT sample count', () => {
+      expect(cacheKey('google:gemini-flash', 'gsm8k', 5, 0.7)).toBe(
+        'google_gemini-flash_gsm8k_5x_t0.7.json',
       );
     });
 
     it('replaces colons and slashes in model names', () => {
-      expect(cacheKey('provider:org/model', 'truthfulqa', 3, 1.0, 10)).toBe(
-        'provider_org_model_truthfulqa_3x_t1_n10.json',
+      expect(cacheKey('provider:org/model', 'truthfulqa', 3, 1.0)).toBe(
+        'provider_org_model_truthfulqa_3x_t1.json',
       );
     });
 
     it('preserves plain model names', () => {
-      expect(cacheKey('gpt-4o', 'gpqa', 5, 0.5, 50)).toBe(
-        'gpt-4o_gpqa_5x_t0.5_n50.json',
+      expect(cacheKey('gpt-4o', 'gpqa', 5, 0.5)).toBe(
+        'gpt-4o_gpqa_5x_t0.5.json',
       );
     });
   });
@@ -62,17 +64,34 @@ describe('ensembleCache', () => {
       const filePath = join(tempDir, 'test_ensemble.json');
       const cacheFile = {
         model: 'google:gemini-flash', dataset: 'gsm8k',
-        ensembleSize: 3, temperature: 0.7, sampleCount: 30,
-        createdAt: new Date().toISOString(), entries,
+        ensembleSize: 5, temperature: 0.7,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        entries,
       };
       await writeJsonFile(filePath, cacheFile);
 
       const loaded = await readJsonFile<typeof cacheFile>(filePath);
       expect(loaded.entries).toHaveLength(2);
       expect(loaded.entries[0].questionId).toBe('q1');
-      expect(loaded.entries[0].responses).toHaveLength(3);
+      expect(loaded.entries[0].responses).toHaveLength(5);
       expect(loaded.entries[1].questionId).toBe('q2');
       expect(loaded.entries[1].responses).toHaveLength(1);
+    });
+
+    it('stores 5 DIFFERENT responses per question (not duplicates)', async () => {
+      const entries: EnsembleCacheEntry[] = [
+        { questionId: 'q1', responses: MOCK_RESPONSES },
+      ];
+
+      const filePath = join(tempDir, 'diversity_test.json');
+      await writeJsonFile(filePath, { entries });
+      const loaded = await readJsonFile<{ entries: EnsembleCacheEntry[] }>(filePath);
+      const contents = loaded.entries[0].responses.map((r) => r.content);
+
+      // At least 3 unique answers from 5 responses (temperature=0.7 creates diversity)
+      const unique = new Set(contents);
+      expect(unique.size).toBeGreaterThanOrEqual(3);
     });
 
     it('creates parent directories when saving', async () => {

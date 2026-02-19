@@ -21,6 +21,7 @@
     "eval:ci:elo": "node --import tsx bin/ensemble-eval.mjs quick-eval --strategies elo --baseline baselines/quick-eval.json",
     "eval:ci:majority": "node --import tsx bin/ensemble-eval.mjs quick-eval --strategies majority --baseline baselines/quick-eval.json",
     "eval:ci:council": "node --import tsx bin/ensemble-eval.mjs quick-eval --strategies council --baseline baselines/quick-eval.json",
+    "eval:generate-cache": "node --import tsx bin/ensemble-eval.mjs generate-cache",
     "eval:regenerate-baseline": "node --import tsx bin/ensemble-eval.mjs quick-eval --no-cache --baseline baselines/quick-eval.json"
   },
   "dependencies": {

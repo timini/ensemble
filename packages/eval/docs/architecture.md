@@ -96,11 +96,12 @@ There are three cache layers. The first two are committed to the repository so t
   │   └── google_gemini-2.5-flash-lite_truthfulqa_n30.json
   │
   ├── ensemble/           ← Raw ensemble API responses (committed)
-  │   │                     Key: {model}_{dataset}_{N}x_t{temp}_n{sample}.json
+  │   │                     Key: {model}_{dataset}_{N}x_t{temp}.json
   │   │                     Contains: questionId → ProviderResponse[]
+  │   │                     Sample-size INDEPENDENT (stores ALL questions)
   │   │                     Eliminates: ALL ensemble API calls
-  │   ├── google_gemini-2.5-flash-lite_gsm8k_5x_t0.7_n30.json
-  │   └── google_gemini-2.5-flash-lite_truthfulqa_5x_t0.7_n30.json
+  │   ├── google_gemini-2.5-flash-lite_gsm8k_5x_t0.7.json
+  │   └── google_gemini-2.5-flash-lite_truthfulqa_5x_t0.7.json
   │
   └── datasets/           ← HuggingFace dataset downloads (gitignored)
                             Cached in CI via actions/cache
@@ -114,27 +115,81 @@ Cache keys encode all parameters that affect the output:
 | Cache | Key Format | Invalidated When |
 |-------|-----------|-----------------|
 | Baseline | `{model}_{dataset}_n{sample}` | Model or sample size changes |
-| Ensemble | `{model}_{dataset}_{N}x_t{temp}_n{sample}` | Model, ensemble size, temperature, or sample changes |
+| Ensemble | `{model}_{dataset}_{N}x_t{temp}` | Model, ensemble size, or temperature changes |
 | Dataset | `eval-datasets-v1` | Manual bump (HF data rarely changes) |
+
+**Important**: The ensemble cache is sample-size independent. It stores responses for
+ALL questions that have ever been generated. This means `quick-eval --sample 30` can
+randomly pick any 30 questions and still get cache hits, as long as those questions
+were previously generated via `generate-cache`.
+
+### Two-Phase Workflow: Generate Then Evaluate
+
+Cache generation and evaluation are **separate commands** with different lifecycles:
+
+```
+  ┌─────────────────────────────────────────────────────────┐
+  │  Phase 1: generate-cache (run ONCE, commit to repo)     │
+  │                                                         │
+  │  For EVERY question in each dataset:                    │
+  │    → Generate 5 diverse responses (temperature=0.7)     │
+  │    → Save to .cache/ensemble/                           │
+  │    → No consensus, no evaluation                        │
+  │                                                         │
+  │  Can use an expensive pro model — you only pay once.    │
+  └─────────────────────────────────────────────────────────┘
+                          │
+                          │  git add + commit
+                          ▼
+  ┌─────────────────────────────────────────────────────────┐
+  │  Phase 2: quick-eval (run MANY times, iterate freely)   │
+  │                                                         │
+  │  Sample 30 random questions per dataset                 │
+  │    → Load 5 cached responses per question (FREE)        │
+  │    → Run consensus strategy (cheap API calls)           │
+  │    → Evaluate against ground truth (cheap API calls)    │
+  │    → Check regression against baseline                  │
+  │                                                         │
+  │  Different random sample each run = different questions  │
+  │  but ALL get cache hits because we pre-generated ALL.   │
+  └─────────────────────────────────────────────────────────┘
+```
 
 ### Using a Pro Model for Ensemble Responses
 
-Since ensemble responses are cached and committed to the repo, you only pay for API generation once. This means you can use a more capable (expensive) model for the initial generation:
+Since ensemble responses are cached and committed to the repo, you only pay for generation once. This means you can use a more capable (expensive) model:
 
 ```bash
-# One-time: generate ensemble responses with a pro model
-npm run eval -- --model google:gemini-2.5-pro --ensemble 5 --sample 30 --no-cache
+# One-time: generate responses for ALL questions with a pro model
+npm run eval:generate-cache -- --model google:gemini-2.5-pro
 
-# The responses are now in .cache/ensemble/
-# Commit them:
-git add .cache/ensemble/
-git commit -m "chore: cache ensemble responses (gemini-2.5-pro)"
+# Commit the cache
+git add packages/eval/.cache/ensemble/
+git commit -m "chore: generate ensemble cache (gemini-2.5-pro)"
 
-# All subsequent runs (local + CI) load from cache:
-npm run eval:ci:standard    # no ensemble API calls, only consensus + eval
+# Now iterate on consensus strategies for free:
+npm run eval:ci:standard    # loads cached pro responses, only runs consensus + eval
+npm run eval:ci:council     # same cached responses, different strategy
 ```
 
 The cache key includes the model name, so switching models naturally invalidates the cache. You can have caches for multiple models simultaneously.
+
+### Why 5 Different Responses Matter
+
+Each cached entry stores 5 **distinct** responses generated with `temperature=0.7`. The ensemble's value comes from response diversity — if all 5 responses were identical, consensus would add nothing. The temperature creates variation in reasoning paths, which consensus strategies exploit.
+
+```
+  Question: "What is 15% of 240?"
+
+  Response 1: "15% of 240 = 0.15 × 240 = 36"         ← correct
+  Response 2: "240 × 15 / 100 = 3600 / 100 = 36"     ← correct (different path)
+  Response 3: "10% is 24, 5% is 12, total = 36"       ← correct (mental math)
+  Response 4: "15/100 × 240 = 15 × 2.4 = 34"         ← WRONG (arithmetic error)
+  Response 5: "0.15 × 240 = 36.0"                     ← correct
+
+  Majority vote: 36 (4/5 agree) → correct!
+  The wrong response is outvoted by the diverse correct ones.
+```
 
 ## CI Pipeline: 4 Parallel Strategy Jobs
 
@@ -278,6 +333,19 @@ At n=30 questions per dataset (300 total), the test can detect ~15pp regressions
 ## CLI Reference
 
 ```bash
+# --- Cache Generation (run once, commit results) ---
+
+# Generate ensemble responses for ALL questions in ALL datasets
+npm run eval:generate-cache
+
+# Generate with a pro model (one-time cost, cached forever)
+npm run eval:generate-cache -- --model google:gemini-2.5-pro
+
+# Generate for specific datasets only
+npm run eval:generate-cache -- --datasets gsm8k,truthfulqa
+
+# --- Evaluation (run many times, iterates on strategies) ---
+
 # Run all strategies locally
 npm run eval
 
@@ -288,13 +356,10 @@ npm run eval:elo
 # Run with custom model and sample size
 npm run eval -- --model google:gemini-2.5-pro --sample 50
 
-# Regenerate ensemble cache with a different model
-npm run eval -- --model google:gemini-2.5-pro --no-cache
-
-# Regenerate baseline (clears all caches)
+# Regenerate baseline (clears all caches, runs fresh)
 npm run eval:regenerate-baseline
 
-# CI commands (per-strategy, with regression check)
+# --- CI commands (per-strategy, with regression check) ---
 npm run eval:ci:standard
 npm run eval:ci:elo
 npm run eval:ci:majority
@@ -305,31 +370,32 @@ npm run eval:ci:council
 
 ### When to Regenerate
 
-- **Ensemble cache**: When changing `--model`, `--ensemble`, `--temperature`, or `--sample`
-- **Baseline cache**: When changing `--model` or `--sample`
+- **Ensemble cache**: When changing model, ensemble size, or temperature
+- **Baseline cache**: When changing model or sample size
 - **Baseline file**: When intentionally changing expected accuracy thresholds
 
 ### How to Regenerate
 
 ```bash
-# 1. Regenerate everything (clears caches, runs fresh, saves new baseline)
+# 1. Generate fresh ensemble responses for all questions
+npm run eval:generate-cache -- --model google:gemini-2.5-pro
+
+# 2. Run a fresh eval to update baselines
 npm run eval:regenerate-baseline
 
-# 2. Commit the updated caches and baseline
-git add .cache/ baselines/
+# 3. Commit everything
+git add packages/eval/.cache/ packages/eval/baselines/
 git commit -m "chore: regenerate eval caches and baseline"
 ```
 
 ### Upgrading the Ensemble Model
 
-Since ensemble responses are cached, you can invest in a stronger model:
-
 ```bash
 # Generate responses with pro model (one-time cost)
-npm run eval -- --model google:gemini-2.5-pro --no-cache
+npm run eval:generate-cache -- --model google:gemini-2.5-pro
 
 # Commit the cache
-git add .cache/ensemble/
+git add packages/eval/.cache/ensemble/
 git commit -m "chore: upgrade ensemble cache to gemini-2.5-pro"
 
 # Now all CI runs use pro-quality responses at zero API cost

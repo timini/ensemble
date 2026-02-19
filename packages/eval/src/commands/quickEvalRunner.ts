@@ -87,12 +87,13 @@ async function runSingleBaseline(args: RunDatasetArgs): Promise<PromptRunResult[
 }
 
 async function runEnsemble(args: RunDatasetArgs): Promise<PromptRunResult[]> {
-  const { datasetName, questions, model, provider, modelName, ensembleSize, strategies, mode, registry, useCache, sampleCount } = args;
+  const { datasetName, questions, model, provider, modelName, ensembleSize, strategies, mode, registry, useCache } = args;
   const temperature = args.temperature ?? 0.7;
 
-  // Load ensemble response cache (raw API responses, independent of consensus strategy)
+  // Load ensemble response cache (raw API responses, independent of consensus strategy).
+  // Cache is sample-size independent — stores all previously generated questions.
   const ensembleCache = useCache
-    ? await loadEnsembleCache(model, datasetName, ensembleSize, temperature, sampleCount)
+    ? await loadEnsembleCache(model, datasetName, ensembleSize, temperature)
     : null;
   const cacheHits = ensembleCache ? questions.filter((q) => ensembleCache.has(q.id)).length : 0;
 
@@ -122,12 +123,12 @@ async function runEnsemble(args: RunDatasetArgs): Promise<PromptRunResult[]> {
     },
   });
 
-  // Save ensemble responses to cache (includes both cached + new responses)
+  // Save ensemble responses to cache (incremental merge with existing)
   if (useCache) {
     const entries: EnsembleCacheEntry[] = result.runs
       .filter((run) => run.questionId)
       .map((run) => ({ questionId: run.questionId!, responses: run.responses }));
-    await saveEnsembleCache(model, datasetName, ensembleSize, temperature, sampleCount, entries);
+    await saveEnsembleCache(model, datasetName, ensembleSize, temperature, entries);
   }
 
   return result.runs;
