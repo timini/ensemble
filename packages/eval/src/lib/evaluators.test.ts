@@ -4,6 +4,7 @@ import {
   createEvaluatorForDataset,
   GenerativeEvaluator,
   LLMJudgeMCQEvaluator,
+  LLMJudgeNumericEvaluator,
   NumericEvaluator,
 } from './evaluators.js';
 import { extractChoiceLetter, extractNumericAnswer } from './parsers.js';
@@ -207,6 +208,77 @@ describe('LLMJudgeMCQEvaluator', () => {
   });
 });
 
+describe('LLMJudgeNumericEvaluator', () => {
+  function createMockProvider(answer: string): AIProvider {
+    return {
+      generateStructured: vi.fn().mockResolvedValue({
+        parsed: { answer },
+        raw: JSON.stringify({ answer }),
+        responseTimeMs: 50,
+      }),
+      streamResponse: vi.fn(),
+      generateEmbeddings: vi.fn(),
+      validateApiKey: vi.fn(),
+      listAvailableModels: vi.fn().mockReturnValue([]),
+      listAvailableTextModels: vi.fn().mockResolvedValue([]),
+    } as unknown as AIProvider;
+  }
+
+  it('uses judge LLM to extract the numeric answer', async () => {
+    const provider = createMockProvider('42');
+    const evaluator = new LLMJudgeNumericEvaluator(provider, 'gpt-4o-mini');
+
+    const result = await evaluator.evaluate(
+      'First I calculated 10 + 32 = 42. So the answer is 42.',
+      '#### 42',
+    );
+
+    expect(result.correct).toBe(true);
+    expect(result.predicted).toBe('42');
+    expect(result.expected).toBe('42');
+    expect(provider.generateStructured).toHaveBeenCalledWith(
+      expect.stringContaining('First I calculated 10 + 32 = 42'),
+      'gpt-4o-mini',
+      expect.objectContaining({ name: 'numeric_answer' }),
+      { temperature: 0 },
+    );
+  });
+
+  it('marks incorrect when judge extracts wrong number', async () => {
+    const provider = createMockProvider('10');
+    const evaluator = new LLMJudgeNumericEvaluator(provider, 'gpt-4o-mini');
+
+    const result = await evaluator.evaluate('The answer is 10', '#### 42');
+
+    expect(result.correct).toBe(false);
+    expect(result.predicted).toBe('10');
+    expect(result.expected).toBe('42');
+  });
+
+  it('returns null predicted when judge call fails', async () => {
+    const provider = {
+      generateStructured: vi.fn().mockRejectedValue(new Error('API error')),
+      streamResponse: vi.fn(),
+      generateEmbeddings: vi.fn(),
+      validateApiKey: vi.fn(),
+      listAvailableModels: vi.fn().mockReturnValue([]),
+      listAvailableTextModels: vi.fn().mockResolvedValue([]),
+    } as unknown as AIProvider;
+
+    const evaluator = new LLMJudgeNumericEvaluator(provider, 'gpt-4o-mini');
+    const result = await evaluator.evaluate('The answer is 42', '#### 42');
+
+    expect(result.correct).toBe(false);
+    expect(result.predicted).toBeNull();
+  });
+
+  it('has name "numeric" for compatibility with EvaluatorLike', () => {
+    const provider = createMockProvider('1');
+    const evaluator = new LLMJudgeNumericEvaluator(provider, 'gpt-4o-mini');
+    expect(evaluator.name).toBe('numeric');
+  });
+});
+
 describe('createEvaluatorForDataset', () => {
   const mockProvider = {
     generateStructured: vi.fn(),
@@ -225,14 +297,18 @@ describe('createEvaluatorForDataset', () => {
     expect(createEvaluatorForDataset(null)).toBeNull();
   });
 
-  it('returns LLMJudgeMCQEvaluator when judge config is provided for MCQ datasets', () => {
+  it('returns LLM judge evaluators when judge config is provided', () => {
     const truthful = createEvaluatorForDataset('truthfulqa', judge);
     const gpqa = createEvaluatorForDataset('gpqa', judge);
     const gsm8k = createEvaluatorForDataset('gsm8k', judge);
 
     expect(truthful).toBeInstanceOf(LLMJudgeMCQEvaluator);
     expect(gpqa).toBeInstanceOf(LLMJudgeMCQEvaluator);
-    // gsm8k always returns NumericEvaluator regardless of judge
+    expect(gsm8k).toBeInstanceOf(LLMJudgeNumericEvaluator);
+  });
+
+  it('returns regex NumericEvaluator for gsm8k when no judge config', () => {
+    const gsm8k = createEvaluatorForDataset('gsm8k');
     expect(gsm8k).toBeInstanceOf(NumericEvaluator);
   });
 
