@@ -18,7 +18,7 @@ const DEFAULT_MODEL = 'google:gemini-2.5-flash-lite';
 const DEFAULT_JUDGE_MODEL = 'google:gemini-2.5-flash';
 const DEFAULT_ENSEMBLE_SIZE = 5;
 const DEFAULT_TEMPERATURE = 0.7;
-const DEFAULT_SAMPLE = 50;
+const DEFAULT_SAMPLE = 30;
 const DEFAULT_DATASETS: BenchmarkDatasetName[] = [
   'gsm8k', 'truthfulqa', 'gpqa', 'hle', 'math500',
   'mmlu_pro', 'simpleqa', 'arc', 'hellaswag', 'hallumix',
@@ -72,7 +72,7 @@ export function createQuickEvalCommand(): Command {
     .option('--no-parallel', 'Run datasets sequentially instead of in parallel.')
     .option('--baseline <path>', 'Path to baseline JSON. Saves results and fails on regression.')
     .option('--significance <alpha>', 'Significance level for regression detection (0 < alpha < 1).', '0.10')
-    .option('--concurrency <count>', 'Initial max concurrent questions (auto-adapts via AIMD).', '50')
+    .option('--concurrency <count>', 'Initial max concurrent questions (auto-adapts via AIMD).', '40')
     .action(async (options: QuickEvalOptions) => {
       const { provider, model: modelName } = parseModelSpec(options.model);
       const model = options.model;
@@ -117,7 +117,7 @@ export function createQuickEvalCommand(): Command {
       registerProviders(registry, [...providers], mode);
 
       const monitor = new SystemMonitor();
-      const limiter = new ConcurrencyLimiter({ initial: initialConcurrency, min: 1, max: 500, monitor });
+      const limiter = new ConcurrencyLimiter({ initial: initialConcurrency, min: 1, max: 60, monitor });
 
       const startTime = Date.now();
       const log = (s: string) => process.stderr.write(s);
