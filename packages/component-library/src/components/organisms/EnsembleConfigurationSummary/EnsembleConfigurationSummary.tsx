@@ -1,5 +1,5 @@
 import * as React from 'react';
-import type { ConsensusMethod } from '@ensemble-ai/shared-utils';
+import type { ConsensusMethod } from '@ensemble-ai/shared-utils/consensus';
 import { useTranslation } from 'react-i18next';
 import { Card, CardContent } from '../../atoms/Card';
 import { Badge } from '../../atoms/Badge';

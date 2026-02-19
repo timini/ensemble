@@ -6,11 +6,10 @@ import {
   MajorityVotingConsensus,
   StandardConsensus,
   CouncilConsensus,
-  ProviderRegistry,
-  type ProviderName,
   type ConsensusModelResponse,
   type CouncilParticipant,
-} from '@ensemble-ai/shared-utils';
+} from '@ensemble-ai/shared-utils/consensus';
+import { ProviderRegistry, type ProviderName } from '@ensemble-ai/shared-utils/providers';
 import { FALLBACK_MODELS } from '~/lib/models';
 import { logger } from '~/lib/logger';
 
