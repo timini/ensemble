@@ -53,6 +53,20 @@ export function isRateLimitOrServerError(error: unknown): boolean {
   return false;
 }
 
+const RATE_LIMIT_ONLY_PATTERN = /rate.?limit|too many requests|\b429\b/i;
+
+/** Returns true only for 429/rate-limit errors (not 5xx server errors). */
+function isRateLimitOnly(error: unknown): boolean {
+  const status = getStatusFromError(error);
+  if (status !== undefined) {
+    return status === 429;
+  }
+  if (error instanceof Error) {
+    return RATE_LIMIT_ONLY_PATTERN.test(error.message);
+  }
+  return false;
+}
+
 function resolveOptions(options?: RetryOptions): ResolvedRetryOptions {
   return {
     maxRetries: options?.maxRetries ?? 4,
@@ -109,7 +123,9 @@ export async function retryable<T>(
         if (i === opts.maxRetries || !opts.isRetryable(error)) {
           throw error;
         }
-        opts.onRateLimit?.();
+        if (isRateLimitOnly(error)) {
+          opts.onRateLimit?.();
+        }
         opts.onRetry?.(error, i + 1);
         const delay = opts.baseDelayMs * Math.pow(2, i) + Math.random() * opts.maxJitterMs;
         await sleep(delay);

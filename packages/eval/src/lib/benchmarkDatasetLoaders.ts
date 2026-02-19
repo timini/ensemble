@@ -165,14 +165,22 @@ function mapArcRow(row: ArcRow, rowIdx: number): BenchmarkQuestion {
   const labels = row.choices?.label ?? [];
   const texts = row.choices?.text ?? [];
 
+  // ARC uses either letter keys (A/B/C/D) or numeric keys (1/2/3/4).
+  // Normalize to letters so evaluation always compares A/B/C/D.
+  const labelToLetter = new Map(
+    labels.map((label, index) => [label, toChoiceLetter(index)]),
+  );
+
   const options = labels
-    .map((label, index) => `${label}. ${texts[index]}`)
+    .map((_label, index) => `${toChoiceLetter(index)}. ${texts[index]}`)
     .join('\n');
+
+  const normalizedKey = labelToLetter.get(row.answerKey) ?? row.answerKey;
 
   return {
     id: `arc-${rowIdx}`,
     prompt: `${row.question.trim()}\n\nOptions:\n${options}\n\nRespond with the single best option letter.`,
-    groundTruth: row.answerKey,
+    groundTruth: normalizedKey,
   };
 }
 

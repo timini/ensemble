@@ -357,6 +357,34 @@ describe('benchmark dataset loaders', () => {
     expect(loaded.questions[0].prompt).toContain('D.');
   });
 
+  it('normalizes ARC numeric answer keys to letters', async () => {
+    fetchMock.mockResolvedValueOnce(
+      jsonResponse({
+        rows: [
+          {
+            row_idx: 0,
+            row: {
+              id: 'NYSEDREGENTS_2015_8_16',
+              question: 'What is a property of light?',
+              choices: {
+                label: ['1', '2', '3', '4'],
+                text: ['It bends', 'It reflects', 'It absorbs', 'It emits'],
+              },
+              answerKey: '2',
+            },
+          },
+        ],
+        num_rows_total: 1,
+      }),
+    );
+
+    const loaded = await loadBenchmarkQuestions('arc', { sample: 10 });
+    expect(loaded.questions).toHaveLength(1);
+    expect(loaded.questions[0].groundTruth).toBe('B');
+    expect(loaded.questions[0].prompt).toContain('A. It bends');
+    expect(loaded.questions[0].prompt).toContain('D. It emits');
+  });
+
   it('loads HellaSwag from HuggingFace with sentence completion', async () => {
     fetchMock.mockResolvedValueOnce(
       jsonResponse({
