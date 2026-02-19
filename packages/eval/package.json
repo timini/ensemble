@@ -22,6 +22,7 @@
   "dependencies": {
     "@ensemble-ai/shared-utils": "*",
     "commander": "^13.1.0",
+    "systeminformation": "^5.31.1",
     "tsx": "^4.20.6"
   },
   "devDependencies": {

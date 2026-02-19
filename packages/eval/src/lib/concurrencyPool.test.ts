@@ -1,18 +1,15 @@
-import { describe, expect, it } from 'vitest';
-import { ConcurrencyLimiter } from './concurrencyPool.js';
+import { describe, expect, it, vi, afterEach } from 'vitest';
+import { ConcurrencyLimiter, SystemMonitor } from './concurrencyPool.js';
 import { isRateLimitOnly } from './retryable.js';
 
 function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-/** Disable system pressure detection so tests aren't affected by host load */
-const noPressure = { memoryThreshold: 1.0, cpuLoadThreshold: Infinity };
-
 describe('ConcurrencyLimiter', () => {
   it('limits concurrent executions to configured initial value', async () => {
     // Use a long cooldown so AIMD doesn't change the limit during the test
-    const limiter = new ConcurrencyLimiter({ initial: 2, cooldownMs: 60_000, ...noPressure });
+    const limiter = new ConcurrencyLimiter({ initial: 2, cooldownMs: 60_000 });
     let maxConcurrent = 0;
     let current = 0;
 
@@ -34,7 +31,7 @@ describe('ConcurrencyLimiter', () => {
   });
 
   it('all tasks eventually complete', async () => {
-    const limiter = new ConcurrencyLimiter({ initial: 1, cooldownMs: 60_000, ...noPressure });
+    const limiter = new ConcurrencyLimiter({ initial: 1, cooldownMs: 60_000 });
     const results: number[] = [];
 
     await Promise.all(
@@ -53,7 +50,7 @@ describe('ConcurrencyLimiter', () => {
   });
 
   it('increases concurrency on success (additive increase)', async () => {
-    const limiter = new ConcurrencyLimiter({ initial: 5, cooldownMs: 0, ...noPressure });
+    const limiter = new ConcurrencyLimiter({ initial: 5, cooldownMs: 0 });
 
     await limiter.run(async () => {});
     expect(limiter.currentConcurrency).toBe(6);
@@ -66,7 +63,7 @@ describe('ConcurrencyLimiter', () => {
   });
 
   it('halves concurrency on rate limit (multiplicative decrease)', async () => {
-    const limiter = new ConcurrencyLimiter({ initial: 100, cooldownMs: 0, ...noPressure });
+    const limiter = new ConcurrencyLimiter({ initial: 100, cooldownMs: 0 });
 
     try {
       await limiter.run(async () => {
@@ -102,7 +99,6 @@ describe('ConcurrencyLimiter', () => {
       initial: 499,
       max: 500,
       cooldownMs: 0,
-      ...noPressure,
     });
 
     await limiter.run(async () => {});
@@ -140,7 +136,7 @@ describe('ConcurrencyLimiter', () => {
   });
 
   it('reports currentRunning accurately', async () => {
-    const limiter = new ConcurrencyLimiter({ initial: 10, cooldownMs: 60_000, ...noPressure });
+    const limiter = new ConcurrencyLimiter({ initial: 10, cooldownMs: 60_000 });
     expect(limiter.currentRunning).toBe(0);
 
     let observedRunning = 0;
@@ -158,7 +154,7 @@ describe('ConcurrencyLimiter', () => {
   });
 
   it('propagates errors from the wrapped function', async () => {
-    const limiter = new ConcurrencyLimiter({ initial: 10, cooldownMs: 0, ...noPressure });
+    const limiter = new ConcurrencyLimiter({ initial: 10, cooldownMs: 0 });
 
     await expect(
       limiter.run(async () => {
@@ -169,7 +165,7 @@ describe('ConcurrencyLimiter', () => {
 
   it('shared instance across multiple callers gates total concurrency', async () => {
     // Use a long cooldown so AIMD doesn't change the limit during the test
-    const limiter = new ConcurrencyLimiter({ initial: 3, cooldownMs: 60_000, ...noPressure });
+    const limiter = new ConcurrencyLimiter({ initial: 3, cooldownMs: 60_000 });
     let maxConcurrent = 0;
     let current = 0;
 
@@ -186,6 +182,53 @@ describe('ConcurrencyLimiter', () => {
 
     await Promise.all([callerA, callerB]);
     expect(maxConcurrent).toBeLessThanOrEqual(3);
+  });
+
+  it('backs off when system monitor reports pressure', async () => {
+    const monitor = new SystemMonitor({ intervalMs: 100_000 }); // won't auto-sample
+    // Force the monitor into a pressure state by overwriting its internal state
+    Object.defineProperty(monitor, 'isUnderPressure', { get: () => true });
+
+    const limiter = new ConcurrencyLimiter({
+      initial: 100,
+      cooldownMs: 0,
+      monitor,
+    });
+
+    // Run should trigger back-off due to system pressure
+    await limiter.run(async () => {});
+
+    // Concurrency should have been halved by the pressure check, then +1 from success
+    // 100 → 50 (pressure) → 51 (success)
+    expect(limiter.currentConcurrency).toBe(51);
+
+    monitor.stop();
+  });
+
+  it('does not back off without a monitor', async () => {
+    const limiter = new ConcurrencyLimiter({ initial: 100, cooldownMs: 0 });
+
+    await limiter.run(async () => {});
+    // No monitor → no pressure check → just +1 from success
+    expect(limiter.currentConcurrency).toBe(101);
+  });
+});
+
+describe('SystemMonitor', () => {
+  it('starts with zero pressure state', () => {
+    const monitor = new SystemMonitor({ intervalMs: 100_000 });
+    expect(monitor.current.underPressure).toBe(false);
+    expect(monitor.current.memoryUsage).toBe(0);
+    expect(monitor.current.cpuLoad).toBe(0);
+    expect(monitor.current.networkTxSec).toBe(0);
+    monitor.stop();
+  });
+
+  it('can be stopped without error', () => {
+    const monitor = new SystemMonitor({ intervalMs: 100_000 });
+    monitor.stop();
+    // Calling stop again should be safe
+    monitor.stop();
   });
 });
 

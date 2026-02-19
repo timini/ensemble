@@ -1,5 +1,89 @@
-import { freemem, totalmem, loadavg, cpus } from 'node:os';
+import si from 'systeminformation';
 import { isRateLimitOnly } from './retryable.js';
+
+export interface SystemPressureState {
+  memoryUsage: number;  // fraction 0-1
+  cpuLoad: number;      // percentage 0-100
+  networkTxSec: number; // bytes/sec transmit
+  underPressure: boolean;
+}
+
+/**
+ * Monitors system resources (memory, CPU, network) via the systeminformation package.
+ * Samples periodically and caches the latest state so checks are synchronous.
+ */
+export class SystemMonitor {
+  private state: SystemPressureState = {
+    memoryUsage: 0, cpuLoad: 0, networkTxSec: 0, underPressure: false,
+  };
+  private timer: ReturnType<typeof setInterval> | null = null;
+  private readonly memoryThreshold: number;
+  private readonly cpuLoadThreshold: number;
+  private readonly networkTxThreshold: number;
+
+  constructor(opts?: {
+    /** Memory usage fraction (0-1) that triggers pressure. Default 0.9 (90%). */
+    memoryThreshold?: number;
+    /** CPU load percentage (0-100) that triggers pressure. Default 90. */
+    cpuLoadThreshold?: number;
+    /** Network TX bytes/sec that triggers pressure. Default Infinity (disabled). */
+    networkTxThreshold?: number;
+    /** Sampling interval in ms. Default 3000 (3s). */
+    intervalMs?: number;
+  }) {
+    this.memoryThreshold = opts?.memoryThreshold ?? 0.9;
+    this.cpuLoadThreshold = opts?.cpuLoadThreshold ?? 90;
+    this.networkTxThreshold = opts?.networkTxThreshold ?? Infinity;
+    const intervalMs = opts?.intervalMs ?? 3000;
+    this.timer = setInterval(() => { void this.sample(); }, intervalMs);
+    this.timer.unref(); // Don't keep process alive
+  }
+
+  /** Get the latest cached system pressure state. */
+  get current(): SystemPressureState {
+    return this.state;
+  }
+
+  /** Returns true if any resource exceeds its threshold. */
+  get isUnderPressure(): boolean {
+    return this.state.underPressure;
+  }
+
+  /** Stop the background sampling timer. */
+  stop(): void {
+    if (this.timer) {
+      clearInterval(this.timer);
+      this.timer = null;
+    }
+  }
+
+  private async sample(): Promise<void> {
+    try {
+      const [memData, loadData, netData] = await Promise.all([
+        si.mem(),
+        si.currentLoad(),
+        si.networkStats(),
+      ]);
+
+      const memoryUsage = memData.total > 0
+        ? 1 - (memData.available / memData.total)
+        : 0;
+      const cpuLoad = loadData.currentLoad;
+      const networkTxSec = Array.isArray(netData)
+        ? netData.reduce((sum, n) => sum + (n.tx_sec ?? 0), 0)
+        : (netData as { tx_sec?: number }).tx_sec ?? 0;
+
+      const underPressure =
+        memoryUsage > this.memoryThreshold ||
+        cpuLoad > this.cpuLoadThreshold ||
+        networkTxSec > this.networkTxThreshold;
+
+      this.state = { memoryUsage, cpuLoad, networkTxSec, underPressure };
+    } catch {
+      // Sampling failure is non-fatal; keep the previous state
+    }
+  }
+}
 
 /**
  * Adaptive concurrency limiter using AIMD (Additive Increase, Multiplicative Decrease).
@@ -11,8 +95,8 @@ import { isRateLimitOnly } from './retryable.js';
  * A single instance is shared across all BenchmarkRunners so that total API concurrency
  * is globally bounded.
  *
- * In addition to rate-limit detection, the limiter monitors system resources (memory
- * and CPU load) and backs off when the host is under pressure.
+ * Optionally integrates with a SystemMonitor to back off when the host is under
+ * resource pressure (memory, CPU, or network).
  */
 export class ConcurrencyLimiter {
   private concurrency: number;
@@ -22,31 +106,27 @@ export class ConcurrencyLimiter {
   private readonly max: number;
   private lastAdjustTime: number;
   private readonly cooldownMs: number;
-  private readonly memoryThreshold: number;
-  private readonly cpuLoadThreshold: number;
+  private readonly monitor: SystemMonitor | null;
 
   constructor(opts?: {
     initial?: number;
     min?: number;
     max?: number;
     cooldownMs?: number;
-    /** Fraction of total memory that triggers back-off (0-1). Default 0.9 (90%). */
-    memoryThreshold?: number;
-    /** 1-minute load average that triggers back-off. Default: number of CPUs. */
-    cpuLoadThreshold?: number;
+    /** SystemMonitor instance for resource-based back-off. */
+    monitor?: SystemMonitor;
   }) {
     this.concurrency = opts?.initial ?? 100;
     this.min = opts?.min ?? 5;
     this.max = opts?.max ?? 500;
     this.cooldownMs = opts?.cooldownMs ?? 2000;
     this.lastAdjustTime = Date.now();
-    this.memoryThreshold = opts?.memoryThreshold ?? 0.9;
-    this.cpuLoadThreshold = opts?.cpuLoadThreshold ?? cpus().length;
+    this.monitor = opts?.monitor ?? null;
   }
 
   /** Execute fn with adaptive concurrency. Auto-scales based on 429 errors and system load. */
   async run<T>(fn: () => Promise<T>): Promise<T> {
-    if (this.isSystemUnderPressure()) {
+    if (this.monitor?.isUnderPressure) {
       this.onRateLimit();
       await new Promise((r) => setTimeout(r, 500));
     }
@@ -76,19 +156,9 @@ export class ConcurrencyLimiter {
     return this.running;
   }
 
-  /**
-   * Checks system memory and CPU load. Returns true if either:
-   * - Memory usage exceeds memoryThreshold (default 90%)
-   * - 1-minute CPU load average exceeds cpuLoadThreshold (default = num CPUs)
-   */
-  private isSystemUnderPressure(): boolean {
-    const free = freemem();
-    const total = totalmem();
-    if (total > 0 && (1 - free / total) > this.memoryThreshold) {
-      return true;
-    }
-    const [load1min] = loadavg();
-    return load1min > this.cpuLoadThreshold;
+  /** Stop the system monitor if one was provided. */
+  stop(): void {
+    this.monitor?.stop();
   }
 
   private onSuccess(): void {

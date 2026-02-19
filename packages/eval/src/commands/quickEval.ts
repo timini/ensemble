@@ -1,6 +1,6 @@
 import { Command } from 'commander';
 import { ProviderRegistry } from '@ensemble-ai/shared-utils/providers';
-import { ConcurrencyLimiter } from '../lib/concurrencyPool.js';
+import { ConcurrencyLimiter, SystemMonitor } from '../lib/concurrencyPool.js';
 import { loadBenchmarkQuestions } from '../lib/benchmarkDatasets.js';
 import { resolveBenchmarkDatasetName } from '../lib/benchmarkDatasetShared.js';
 import { parseStrategies } from '../lib/consensus.js';
@@ -108,7 +108,8 @@ export function createQuickEvalCommand(): Command {
       const providers = new Set([provider, judgeProvider]);
       registerProviders(registry, [...providers], mode);
 
-      const limiter = new ConcurrencyLimiter({ initial: initialConcurrency, min: 5, max: 500 });
+      const monitor = new SystemMonitor();
+      const limiter = new ConcurrencyLimiter({ initial: initialConcurrency, min: 5, max: 500, monitor });
 
       const startTime = Date.now();
       const log = (s: string) => process.stderr.write(s);
