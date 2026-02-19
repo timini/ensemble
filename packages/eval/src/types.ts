@@ -20,6 +20,10 @@ export interface BenchmarkQuestion {
 
 export interface DatasetLoadOptions {
   sample?: number;
+  /** Seed for deterministic shuffling. When omitted, uses Math.random(). */
+  seed?: number;
+  /** Shuffle questions before sampling. Defaults to true. */
+  shuffle?: boolean;
   skipDownload?: boolean;
   forceDownload?: boolean;
 }

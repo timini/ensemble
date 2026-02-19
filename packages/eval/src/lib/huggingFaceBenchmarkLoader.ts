@@ -12,7 +12,7 @@ import {
   writeChecksumFile,
 } from './datasetChecksum.js';
 import { fileExists, readJsonFile, writeJsonFile } from './io.js';
-import { createCachePath, normalizeSample } from './benchmarkDatasetShared.js';
+import { createCachePath, shuffleAndSample } from './benchmarkDatasetShared.js';
 
 const HUGGING_FACE_ROWS_ENDPOINT = 'https://datasets-server.huggingface.co/rows';
 const PAGE_SIZE = 100;
@@ -133,8 +133,10 @@ export class HuggingFaceBenchmarkLoader<TRow> implements BenchmarkLoader {
   async load(options?: DatasetLoadOptions): Promise<BenchmarkQuestion[]> {
     const cachePath = createCachePath(this.name);
     const questions = await this.loadWithIntegrity(cachePath, options);
-    const sampleSize = normalizeSample(options?.sample, questions.length);
-    return questions.slice(0, sampleSize);
+    return shuffleAndSample(questions, options?.sample, {
+      shuffle: options?.shuffle,
+      seed: options?.seed,
+    });
   }
 
   private async loadWithIntegrity(

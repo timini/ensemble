@@ -70,7 +70,7 @@ describe('HuggingFaceBenchmarkLoader', () => {
       );
 
       const loader = makeLoader();
-      const questions = await loader.load();
+      const questions = await loader.load({ shuffle: false });
 
       expect(questions).toHaveLength(2);
       expect(questions[0]).toEqual({

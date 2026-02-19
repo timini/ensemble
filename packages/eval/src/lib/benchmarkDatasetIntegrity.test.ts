@@ -65,7 +65,7 @@ describe('HuggingFaceBenchmarkLoader integrity checks', () => {
       await writeFile(checksumPath(cachePath), computeSha256(content), 'utf-8');
 
       const loader = createLoader();
-      const questions = await loader.load({ skipDownload: true });
+      const questions = await loader.load({ skipDownload: true, shuffle: false });
       expect(questions).toEqual(mockQuestions);
     });
 
@@ -100,7 +100,7 @@ describe('HuggingFaceBenchmarkLoader integrity checks', () => {
       });
       vi.stubGlobal('fetch', mockFetch);
 
-      const questions = await loader.load({ forceDownload: true });
+      const questions = await loader.load({ forceDownload: true, shuffle: false });
       expect(questions).toHaveLength(2);
       expect(questions[0]!.id).toBe('gsm8k-0');
 
@@ -150,7 +150,7 @@ describe('HuggingFaceBenchmarkLoader integrity checks', () => {
       vi.stubGlobal('fetch', mockFetch);
 
       const loader = createLoader();
-      const questions = await loader.load();
+      const questions = await loader.load({ shuffle: false });
 
       expect(questions).toEqual(mockQuestions);
       expect(mockFetch).not.toHaveBeenCalled();
@@ -174,7 +174,7 @@ describe('HuggingFaceBenchmarkLoader integrity checks', () => {
       vi.stubGlobal('fetch', mockFetch);
 
       const loader = createLoader();
-      const questions = await loader.load();
+      const questions = await loader.load({ shuffle: false });
 
       expect(mockFetch).toHaveBeenCalled();
       expect(questions).toHaveLength(2);
@@ -192,7 +192,7 @@ describe('HuggingFaceBenchmarkLoader integrity checks', () => {
       vi.stubGlobal('fetch', mockFetch);
 
       const loader = createLoader();
-      const questions = await loader.load();
+      const questions = await loader.load({ shuffle: false });
 
       expect(questions).toEqual(mockQuestions);
       expect(mockFetch).not.toHaveBeenCalled();
@@ -213,7 +213,7 @@ describe('HuggingFaceBenchmarkLoader integrity checks', () => {
       await writeFile(checksumPath(cachePath), computeSha256(content), 'utf-8');
 
       const loader = createLoader();
-      const questions = await loader.load({ sample: 1 });
+      const questions = await loader.load({ sample: 1, shuffle: false });
       expect(questions).toHaveLength(1);
       expect(questions[0]!.id).toBe('q-0');
     });
