@@ -42,6 +42,7 @@ interface QuickEvalOptions {
   baseline?: string;
   significance?: string;
   concurrency: string;
+  questionTimeout: string;
 }
 
 function parseDatasets(raw?: string[]): BenchmarkDatasetName[] {
@@ -77,6 +78,7 @@ export function createQuickEvalCommand(): Command {
     .option('--baseline <path>', 'Path to baseline JSON. Saves results and fails on regression.')
     .option('--significance <alpha>', 'Significance level for regression detection (0 < alpha < 1).', '0.10')
     .option('--concurrency <count>', 'Initial max concurrent questions (auto-adapts via AIMD).', '40')
+    .option('--question-timeout <seconds>', 'Max seconds per question before skipping (0 = no timeout).', '0')
     .action(async (options: QuickEvalOptions) => {
       const { provider, model: modelName } = parseModelSpec(options.model);
       const model = options.model;
@@ -113,6 +115,9 @@ export function createQuickEvalCommand(): Command {
         throw new Error(`Invalid concurrency "${options.concurrency}".`);
       }
 
+      const questionTimeoutSec = Number.parseInt(options.questionTimeout, 10);
+      const questionTimeoutMs = questionTimeoutSec > 0 ? questionTimeoutSec * 1000 : undefined;
+
       const strategies = parseStrategies(options.strategies ?? ['standard', 'elo', 'majority', 'council']);
       const datasetNames = parseDatasets(options.datasets);
       const parallel = options.parallel;
@@ -129,7 +134,7 @@ export function createQuickEvalCommand(): Command {
       log(`\n  Model: ${model}  Consensus: ${options.consensusModel}  Judge: ${options.judgeModel}\n`);
       log(`  Ensemble: ${ensembleSize}x  Temp: ${temperature}  Mode: ${mode}\n`);
       log(`  Strategies: ${strategies.join(', ')}  Concurrency: ${initialConcurrency} (AIMD)\n`);
-      log(`  Datasets: ${datasetNames.join(', ')}  Sample: ${sampleCount}  Parallel: ${parallel ? 'yes' : 'no'}\n\n`);
+      log(`  Datasets: ${datasetNames.join(', ')}  Sample: ${sampleCount}  Parallel: ${parallel ? 'yes' : 'no'}${questionTimeoutMs ? `  Timeout: ${questionTimeoutSec}s/q` : ''}\n\n`);
 
       // Load questions, filtering to cached IDs when ensemble cache exists.
       // This ensures 100% cache hit rate when using pre-generated responses.
@@ -178,6 +183,7 @@ export function createQuickEvalCommand(): Command {
         limiter, temperature,
         consensusProvider, consensusModelName,
         judgeProvider, judgeModelName,
+        questionTimeoutMs,
       }));
 
       limiter.startStatsReporter(1_000);

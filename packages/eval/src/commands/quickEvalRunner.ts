@@ -37,6 +37,8 @@ export interface RunDatasetArgs {
   /** Judge model config (separate from evaluated model). */
   judgeProvider?: EvalProvider;
   judgeModelName?: string;
+  /** Max time (ms) per question before skipping. */
+  questionTimeoutMs?: number;
 }
 
 function buildJudgeConfig(args: RunDatasetArgs): JudgeConfig | undefined {
@@ -87,6 +89,7 @@ async function runSingleBaseline(args: RunDatasetArgs): Promise<PromptRunResult[
     evaluator, summarizer: null, requestDelayMs: 0, parallelQuestions: true,
     retry: { maxRetries: 3, baseDelayMs: 2000 },
     limiter: args.limiter,
+    questionTimeoutMs: args.questionTimeoutMs,
   });
   const result = await runner.run({
     questions, outputPath: '/dev/null', output: singleOutput,
@@ -128,6 +131,7 @@ async function runEnsemble(args: RunDatasetArgs): Promise<PromptRunResult[]> {
     retry: { maxRetries: 3, baseDelayMs: 2000 },
     limiter: args.limiter,
     ensembleResponseCache: ensembleCache ?? undefined,
+    questionTimeoutMs: args.questionTimeoutMs,
   });
   const result = await runner.run({
     questions, outputPath: '/dev/null', output: ensembleOutput,
