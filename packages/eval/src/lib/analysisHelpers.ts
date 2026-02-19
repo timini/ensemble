@@ -9,7 +9,7 @@ function normalizeModelKey(key: string): string {
 }
 
 export function evaluateConsensusAnswer(
-  evaluator: 'numeric' | 'mcq' | 'generative' | undefined,
+  evaluator: 'numeric' | 'mcq' | 'generative' | 'exact-match' | undefined,
   answer: string,
   groundTruth: string,
 ): EvaluationResult | null {
@@ -25,6 +25,15 @@ export function evaluateConsensusAnswer(
     const predicted = extractChoiceLetter(answer);
     return {
       correct: predicted !== null && expected.length > 0 ? predicted === expected : false,
+      expected,
+      predicted,
+    };
+  }
+  if (evaluator === 'exact-match') {
+    const predicted = answer.trim();
+    const expected = groundTruth.trim();
+    return {
+      correct: predicted.toLowerCase() === expected.toLowerCase(),
       expected,
       predicted,
     };

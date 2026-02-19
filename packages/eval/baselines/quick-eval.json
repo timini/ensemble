@@ -1,10 +1,18 @@
 {
-  "model": "google:gemini-3-flash-preview",
-  "ensembleSize": 3,
+  "model": "google:gemini-2.5-flash-lite",
+  "ensembleSize": 5,
   "sample": 10,
   "datasets": [
     "gsm8k",
-    "truthfulqa"
+    "truthfulqa",
+    "gpqa",
+    "hle",
+    "math500",
+    "mmlu_pro",
+    "simpleqa",
+    "arc",
+    "hellaswag",
+    "hallumix"
   ],
   "strategies": [
     "standard",
@@ -12,22 +20,27 @@
     "majority",
     "council"
   ],
-  "updatedAt": "2026-02-18T11:00:44.082Z",
+  "updatedAt": "2026-02-19T14:21:03.620Z",
   "single": {
-    "accuracy": 0.8,
-    "correct": 16,
-    "total": 20
+    "accuracy": 0.7375,
+    "correct": 59,
+    "total": 80
   },
   "ensemble": {
     "standard": {
-      "accuracy": 0.85,
-      "correct": 17,
-      "total": 20
+      "accuracy": 0.675,
+      "correct": 54,
+      "total": 80
     },
     "elo": {
-      "accuracy": 0.8,
-      "correct": 16,
-      "total": 20
+      "accuracy": 0.7125,
+      "correct": 57,
+      "total": 80
+    },
+    "majority": {
+      "accuracy": 0.725,
+      "correct": 58,
+      "total": 80
     },
     "majority": {
       "accuracy": 0.85,
@@ -35,9 +48,9 @@
       "total": 20
     },
     "council": {
-      "accuracy": 0.85,
-      "correct": 17,
-      "total": 20
+      "accuracy": 0.6375,
+      "correct": 51,
+      "total": 80
     }
   }
 }
