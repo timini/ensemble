@@ -48,7 +48,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: packages/eval/datasets
-          key: eval-datasets-${{ hashFiles('packages/eval/src/lib/benchmarkDatasetLoaders.ts') }}
+          key: eval-datasets-v1
           restore-keys: eval-datasets-
 
       - name: Restore single-model baseline cache
