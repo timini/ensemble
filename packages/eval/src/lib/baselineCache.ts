@@ -2,9 +2,9 @@
  * Cache for single-model baseline results.
  *
  * The single-model baseline runs the raw model against benchmark questions
- * without any consensus code. Since the questions are deterministic (sliced,
- * not shuffled) and the model isn't going through our production code, the
- * results are stable and can be cached across runs.
+ * without any consensus code. Note: since questions are now shuffled by
+ * default, the cache is only valid when shuffle is disabled or the same
+ * seed is used. Use --no-cache to ensure fresh results with random sampling.
  *
  * Cache key: `{model}_{dataset}_{sample}.json`
  * Cache dir: `packages/eval/.cache/baselines/`

@@ -1,6 +1,6 @@
-import type { BenchmarkQuestion } from '../types.js';
+import type { BenchmarkQuestion, DatasetLoadOptions } from '../types.js';
 import { readJsonFile } from './io.js';
-import { normalizeSample } from './benchmarkDatasetShared.js';
+import { shuffleAndSample } from './benchmarkDatasetShared.js';
 
 interface PromptObject {
   prompt: string;
@@ -19,7 +19,7 @@ function isPromptObject(value: unknown): value is PromptObject {
 
 export async function loadLocalQuestions(
   datasetPath: string,
-  sample?: number,
+  options?: Pick<DatasetLoadOptions, 'sample' | 'shuffle' | 'seed'>,
 ): Promise<BenchmarkQuestion[]> {
   const parsed = await readJsonFile<unknown>(datasetPath);
   if (!Array.isArray(parsed)) {
@@ -58,6 +58,8 @@ export async function loadLocalQuestions(
     throw new Error(`Dataset did not contain any prompts: ${datasetPath}`);
   }
 
-  const sampleSize = normalizeSample(sample, questions.length);
-  return questions.slice(0, sampleSize);
+  return shuffleAndSample(questions, options?.sample, {
+    shuffle: options?.shuffle,
+    seed: options?.seed,
+  });
 }

@@ -5,6 +5,8 @@ export interface RetryOptions {
   timeoutMs?: number;
   isRetryable?: (error: unknown) => boolean;
   onRetry?: (error: unknown, attempt: number) => void;
+  /** Called when a rate-limit error is detected, even before the internal retry. */
+  onRateLimit?: () => void;
 }
 
 interface ResolvedRetryOptions {
@@ -14,6 +16,7 @@ interface ResolvedRetryOptions {
   timeoutMs: number | undefined;
   isRetryable: (error: unknown) => boolean;
   onRetry: ((error: unknown, attempt: number) => void) | undefined;
+  onRateLimit: (() => void) | undefined;
 }
 
 function getStatusFromError(error: unknown): number | undefined {
@@ -37,7 +40,7 @@ function getStatusFromError(error: unknown): number | undefined {
 }
 
 const RETRYABLE_MESSAGE_PATTERN =
-  /rate limit|too many requests|\b429\b|server error|internal server error|\b502\b|\b503\b|\b504\b/i;
+  /rate limit|too many requests|\b429\b|server error|internal server error|\b502\b|\b503\b|\b504\b|failed to parse stream|high demand/i;
 
 export function isRateLimitOrServerError(error: unknown): boolean {
   const status = getStatusFromError(error);
@@ -50,6 +53,20 @@ export function isRateLimitOrServerError(error: unknown): boolean {
   return false;
 }
 
+const RATE_LIMIT_ONLY_PATTERN = /rate.?limit|too many requests|\b429\b/i;
+
+/** Returns true only for 429/rate-limit errors (not 5xx server errors). */
+export function isRateLimitOnly(error: unknown): boolean {
+  const status = getStatusFromError(error);
+  if (status !== undefined) {
+    return status === 429;
+  }
+  if (error instanceof Error) {
+    return RATE_LIMIT_ONLY_PATTERN.test(error.message);
+  }
+  return false;
+}
+
 function resolveOptions(options?: RetryOptions): ResolvedRetryOptions {
   return {
     maxRetries: options?.maxRetries ?? 4,
@@ -58,6 +75,7 @@ function resolveOptions(options?: RetryOptions): ResolvedRetryOptions {
     timeoutMs: options?.timeoutMs,
     isRetryable: options?.isRetryable ?? isRateLimitOrServerError,
     onRetry: options?.onRetry,
+    onRateLimit: options?.onRateLimit,
   };
 }
 
@@ -104,6 +122,9 @@ export async function retryable<T>(
         }
         if (i === opts.maxRetries || !opts.isRetryable(error)) {
           throw error;
+        }
+        if (isRateLimitOnly(error)) {
+          opts.onRateLimit?.();
         }
         opts.onRetry?.(error, i + 1);
         const delay = opts.baseDelayMs * Math.pow(2, i) + Math.random() * opts.maxJitterMs;

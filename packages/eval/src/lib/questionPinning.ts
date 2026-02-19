@@ -1,33 +1,7 @@
 import type { BenchmarkDatasetName, BenchmarkQuestion } from '../types.js';
 import type { GoldenBaselineFile, TierConfig } from './regressionTypes.js';
 import { benchmarkLoaders } from './benchmarkDatasetLoaders.js';
-
-/**
- * Simple seeded pseudo-random number generator (mulberry32).
- * Returns a function that produces deterministic values in [0, 1).
- */
-function seededRandom(seed: number): () => number {
-  let s = seed | 0;
-  return () => {
-    s = (s + 0x6d2b79f5) | 0;
-    let t = Math.imul(s ^ (s >>> 15), 1 | s);
-    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
-    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-  };
-}
-
-/**
- * Fisher-Yates shuffle using a seeded random function.
- * Returns a new shuffled array without mutating the original.
- */
-function seededShuffle<T>(items: readonly T[], rand: () => number): T[] {
-  const result = [...items];
-  for (let i = result.length - 1; i > 0; i--) {
-    const j = Math.floor(rand() * (i + 1));
-    [result[i], result[j]] = [result[j], result[i]];
-  }
-  return result;
-}
+import { seededRandom, shuffleArray } from './benchmarkDatasetShared.js';
 
 /**
  * Load questions matching the pinned IDs from a golden baseline.
@@ -125,7 +99,7 @@ export async function pinQuestionsForBaseline(
     const actualSize = Math.min(sampleSize, allQuestions.length);
 
     // Shuffle and take the first `actualSize` questions
-    const shuffled = seededShuffle(allQuestions, rand);
+    const shuffled = shuffleArray(allQuestions, rand);
     output.set(dataset, shuffled.slice(0, actualSize));
   }
 
