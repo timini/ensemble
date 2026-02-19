@@ -6,10 +6,13 @@ function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
+/** Disable system pressure detection so tests aren't affected by host load */
+const noPressure = { memoryThreshold: 1.0, cpuLoadThreshold: Infinity };
+
 describe('ConcurrencyLimiter', () => {
   it('limits concurrent executions to configured initial value', async () => {
     // Use a long cooldown so AIMD doesn't change the limit during the test
-    const limiter = new ConcurrencyLimiter({ initial: 2, cooldownMs: 60_000 });
+    const limiter = new ConcurrencyLimiter({ initial: 2, cooldownMs: 60_000, ...noPressure });
     let maxConcurrent = 0;
     let current = 0;
 
@@ -31,7 +34,7 @@ describe('ConcurrencyLimiter', () => {
   });
 
   it('all tasks eventually complete', async () => {
-    const limiter = new ConcurrencyLimiter({ initial: 1, cooldownMs: 60_000 });
+    const limiter = new ConcurrencyLimiter({ initial: 1, cooldownMs: 60_000, ...noPressure });
     const results: number[] = [];
 
     await Promise.all(
@@ -50,7 +53,7 @@ describe('ConcurrencyLimiter', () => {
   });
 
   it('increases concurrency on success (additive increase)', async () => {
-    const limiter = new ConcurrencyLimiter({ initial: 5, cooldownMs: 0 });
+    const limiter = new ConcurrencyLimiter({ initial: 5, cooldownMs: 0, ...noPressure });
 
     await limiter.run(async () => {});
     expect(limiter.currentConcurrency).toBe(6);
@@ -63,7 +66,7 @@ describe('ConcurrencyLimiter', () => {
   });
 
   it('halves concurrency on rate limit (multiplicative decrease)', async () => {
-    const limiter = new ConcurrencyLimiter({ initial: 100, cooldownMs: 0 });
+    const limiter = new ConcurrencyLimiter({ initial: 100, cooldownMs: 0, ...noPressure });
 
     try {
       await limiter.run(async () => {
@@ -99,6 +102,7 @@ describe('ConcurrencyLimiter', () => {
       initial: 499,
       max: 500,
       cooldownMs: 0,
+      ...noPressure,
     });
 
     await limiter.run(async () => {});
@@ -136,7 +140,7 @@ describe('ConcurrencyLimiter', () => {
   });
 
   it('reports currentRunning accurately', async () => {
-    const limiter = new ConcurrencyLimiter({ initial: 10, cooldownMs: 60_000 });
+    const limiter = new ConcurrencyLimiter({ initial: 10, cooldownMs: 60_000, ...noPressure });
     expect(limiter.currentRunning).toBe(0);
 
     let observedRunning = 0;
@@ -154,7 +158,7 @@ describe('ConcurrencyLimiter', () => {
   });
 
   it('propagates errors from the wrapped function', async () => {
-    const limiter = new ConcurrencyLimiter({ initial: 10, cooldownMs: 0 });
+    const limiter = new ConcurrencyLimiter({ initial: 10, cooldownMs: 0, ...noPressure });
 
     await expect(
       limiter.run(async () => {
@@ -165,7 +169,7 @@ describe('ConcurrencyLimiter', () => {
 
   it('shared instance across multiple callers gates total concurrency', async () => {
     // Use a long cooldown so AIMD doesn't change the limit during the test
-    const limiter = new ConcurrencyLimiter({ initial: 3, cooldownMs: 60_000 });
+    const limiter = new ConcurrencyLimiter({ initial: 3, cooldownMs: 60_000, ...noPressure });
     let maxConcurrent = 0;
     let current = 0;
 

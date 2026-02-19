@@ -1,3 +1,4 @@
+import { freemem, totalmem, loadavg, cpus } from 'node:os';
 import { isRateLimitOnly } from './retryable.js';
 
 /**
@@ -10,9 +11,8 @@ import { isRateLimitOnly } from './retryable.js';
  * A single instance is shared across all BenchmarkRunners so that total API concurrency
  * is globally bounded.
  *
- * The limiter can optionally accept a `shouldBackoff` callback for custom back-pressure
- * signals (e.g. system memory, CPU, or network health checks). When provided, it is
- * checked before acquiring a slot — if it returns true, the limiter pauses briefly.
+ * In addition to rate-limit detection, the limiter monitors system resources (memory
+ * and CPU load) and backs off when the host is under pressure.
  */
 export class ConcurrencyLimiter {
   private concurrency: number;
@@ -22,32 +22,31 @@ export class ConcurrencyLimiter {
   private readonly max: number;
   private lastAdjustTime: number;
   private readonly cooldownMs: number;
-  private readonly shouldBackoff?: () => boolean;
+  private readonly memoryThreshold: number;
+  private readonly cpuLoadThreshold: number;
 
   constructor(opts?: {
     initial?: number;
     min?: number;
     max?: number;
     cooldownMs?: number;
-    /**
-     * Optional callback checked before acquiring a slot. Return `true` to
-     * signal back-pressure (e.g. high memory or CPU usage). When triggered,
-     * the limiter halves concurrency and pauses briefly before retrying.
-     */
-    shouldBackoff?: () => boolean;
+    /** Fraction of total memory that triggers back-off (0-1). Default 0.9 (90%). */
+    memoryThreshold?: number;
+    /** 1-minute load average that triggers back-off. Default: number of CPUs. */
+    cpuLoadThreshold?: number;
   }) {
     this.concurrency = opts?.initial ?? 100;
     this.min = opts?.min ?? 5;
     this.max = opts?.max ?? 500;
     this.cooldownMs = opts?.cooldownMs ?? 2000;
     this.lastAdjustTime = Date.now();
-    this.shouldBackoff = opts?.shouldBackoff;
+    this.memoryThreshold = opts?.memoryThreshold ?? 0.9;
+    this.cpuLoadThreshold = opts?.cpuLoadThreshold ?? cpus().length;
   }
 
-  /** Execute fn with adaptive concurrency. Auto-scales based on 429 errors. */
+  /** Execute fn with adaptive concurrency. Auto-scales based on 429 errors and system load. */
   async run<T>(fn: () => Promise<T>): Promise<T> {
-    // Check custom back-pressure before acquiring
-    if (this.shouldBackoff?.()) {
+    if (this.isSystemUnderPressure()) {
       this.onRateLimit();
       await new Promise((r) => setTimeout(r, 500));
     }
@@ -75,6 +74,21 @@ export class ConcurrencyLimiter {
 
   get currentRunning(): number {
     return this.running;
+  }
+
+  /**
+   * Checks system memory and CPU load. Returns true if either:
+   * - Memory usage exceeds memoryThreshold (default 90%)
+   * - 1-minute CPU load average exceeds cpuLoadThreshold (default = num CPUs)
+   */
+  private isSystemUnderPressure(): boolean {
+    const free = freemem();
+    const total = totalmem();
+    if (total > 0 && (1 - free / total) > this.memoryThreshold) {
+      return true;
+    }
+    const [load1min] = loadavg();
+    return load1min > this.cpuLoadThreshold;
   }
 
   private onSuccess(): void {

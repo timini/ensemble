@@ -75,13 +75,7 @@ jobs:
         continue-on-error: true
         working-directory: packages/eval
         run: |
-          node --import tsx bin/ensemble-eval.mjs quick-eval \
-            --model google:gemini-flash-lite-latest \
-            --judge-model google:gemini-3-flash-preview \
-            --strategies standard,elo,majority,council \
-            --sample 10 \
-            --baseline baselines/quick-eval.json \
-            > eval-results.txt
+          npm run eval:ci > eval-results.txt
           cat eval-results.txt
 
       - name: Upload eval results
