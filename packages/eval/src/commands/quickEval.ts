@@ -168,7 +168,7 @@ export function createQuickEvalCommand(): Command {
           const result = checkRegression(previous, current, significanceLevel);
           printRegressionReport(result);
           if (!result.passed) {
-            await saveBaseline(options.baseline, current);
+            process.stdout.write('  Baseline NOT updated (regression detected).\n');
             process.exitCode = 1;
             return;
           }

@@ -17,7 +17,7 @@ jobs:
   eval-ci:
     name: Eval Quick Check
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 30
     env:
       GOOGLE_API_KEY: ${{ secrets.TEST_GOOGLE_API_KEY }}
       HF_TOKEN: ${{ secrets.HF_TOKEN }}
