@@ -365,8 +365,11 @@ describe('createEvaluatorForDataset', () => {
     expect(createEvaluatorForDataset('truthfulqa', judge)?.name).toBe('mcq');
     expect(createEvaluatorForDataset('gpqa', judge)?.name).toBe('mcq');
     expect(createEvaluatorForDataset('mmlu_pro', judge)?.name).toBe('mcq');
+    expect(createEvaluatorForDataset('arc', judge)?.name).toBe('mcq');
+    expect(createEvaluatorForDataset('hellaswag', judge)?.name).toBe('mcq');
     expect(createEvaluatorForDataset('hle', judge)?.name).toBe('exact-match');
     expect(createEvaluatorForDataset('simpleqa', judge)?.name).toBe('exact-match');
+    expect(createEvaluatorForDataset('hallumix', judge)?.name).toBe('exact-match');
     expect(createEvaluatorForDataset(null)).toBeNull();
   });
 
@@ -378,14 +381,20 @@ describe('createEvaluatorForDataset', () => {
     const hle = createEvaluatorForDataset('hle', judge);
     const mmluPro = createEvaluatorForDataset('mmlu_pro', judge);
     const simpleqa = createEvaluatorForDataset('simpleqa', judge);
+    const arc = createEvaluatorForDataset('arc', judge);
+    const hellaswag = createEvaluatorForDataset('hellaswag', judge);
+    const hallumix = createEvaluatorForDataset('hallumix', judge);
 
     expect(truthful).toBeInstanceOf(LLMJudgeMCQEvaluator);
     expect(gpqa).toBeInstanceOf(LLMJudgeMCQEvaluator);
     expect(mmluPro).toBeInstanceOf(LLMJudgeMCQEvaluator);
+    expect(arc).toBeInstanceOf(LLMJudgeMCQEvaluator);
+    expect(hellaswag).toBeInstanceOf(LLMJudgeMCQEvaluator);
     expect(gsm8k).toBeInstanceOf(LLMJudgeNumericEvaluator);
     expect(math500).toBeInstanceOf(LLMJudgeNumericEvaluator);
     expect(hle).toBeInstanceOf(LLMJudgeExactMatchEvaluator);
     expect(simpleqa).toBeInstanceOf(LLMJudgeExactMatchEvaluator);
+    expect(hallumix).toBeInstanceOf(LLMJudgeExactMatchEvaluator);
   });
 
   it('returns regex NumericEvaluator for gsm8k/math500 when no judge config', () => {
@@ -403,6 +412,12 @@ describe('createEvaluatorForDataset', () => {
     expect(() => createEvaluatorForDataset('mmlu_pro')).toThrow(
       'MCQ datasets require a judge config',
     );
+    expect(() => createEvaluatorForDataset('arc')).toThrow(
+      'MCQ datasets require a judge config',
+    );
+    expect(() => createEvaluatorForDataset('hellaswag')).toThrow(
+      'MCQ datasets require a judge config',
+    );
   });
 
   it('throws when no judge config is provided for exact-match datasets', () => {
@@ -411,6 +426,9 @@ describe('createEvaluatorForDataset', () => {
     );
     expect(() => createEvaluatorForDataset('simpleqa')).toThrow(
       'simpleqa dataset requires a judge config',
+    );
+    expect(() => createEvaluatorForDataset('hallumix')).toThrow(
+      'hallumix dataset requires a judge config',
     );
   });
 });

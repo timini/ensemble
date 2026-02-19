@@ -18,6 +18,15 @@ const DATASET_ALIASES: Record<string, BenchmarkDatasetName> = {
   mmlupro: 'mmlu_pro',
   simpleqa: 'simpleqa',
   'simple-qa': 'simpleqa',
+  arc: 'arc',
+  'arc-challenge': 'arc',
+  arc_challenge: 'arc',
+  hellaswag: 'hellaswag',
+  'hella-swag': 'hellaswag',
+  hella_swag: 'hellaswag',
+  hallumix: 'hallumix',
+  'hallu-mix': 'hallumix',
+  hallu_mix: 'hallumix',
 };
 
 export function resolveBenchmarkDatasetName(

@@ -321,6 +321,112 @@ describe('benchmark dataset loaders', () => {
     expect(loaded.questions[1].category).toBe('Geography');
   });
 
+  it('loads ARC-Challenge from HuggingFace with MCQ', async () => {
+    fetchMock.mockResolvedValueOnce(
+      jsonResponse({
+        rows: [
+          {
+            row_idx: 0,
+            row: {
+              id: 'Mercury_7220990',
+              question: 'Which factor will most likely cause a person to develop a fever?',
+              choices: {
+                label: ['A', 'B', 'C', 'D'],
+                text: [
+                  'a]viral infection',
+                  'a]muscle__(injury',
+                  'a][severe(bruise',
+                  'a_broken)bone',
+                ],
+              },
+              answerKey: 'A',
+            },
+          },
+        ],
+        num_rows_total: 1,
+      }),
+    );
+
+    const loaded = await loadBenchmarkQuestions('arc', { sample: 10 });
+    expect(loaded.datasetName).toBe('arc');
+    expect(loaded.questions).toHaveLength(1);
+    expect(loaded.questions[0].id).toBe('arc-0');
+    expect(loaded.questions[0].groundTruth).toBe('A');
+    expect(loaded.questions[0].prompt).toContain('Options:');
+    expect(loaded.questions[0].prompt).toContain('A.');
+    expect(loaded.questions[0].prompt).toContain('D.');
+  });
+
+  it('loads HellaSwag from HuggingFace with sentence completion', async () => {
+    fetchMock.mockResolvedValueOnce(
+      jsonResponse({
+        rows: [
+          {
+            row_idx: 0,
+            row: {
+              ctx: 'A woman is outside with a bucket and a dog.',
+              endings: [
+                'She puts the bucket on the ground.',
+                'She washes the dog.',
+                'She climbs a tree.',
+                'She eats the bucket.',
+              ],
+              label: '1',
+            },
+          },
+        ],
+        num_rows_total: 1,
+      }),
+    );
+
+    const loaded = await loadBenchmarkQuestions('hellaswag', { sample: 10 });
+    expect(loaded.datasetName).toBe('hellaswag');
+    expect(loaded.questions).toHaveLength(1);
+    expect(loaded.questions[0].id).toBe('hellaswag-0');
+    expect(loaded.questions[0].groundTruth).toBe('B');
+    expect(loaded.questions[0].prompt).toContain('A woman is outside');
+    expect(loaded.questions[0].prompt).toContain('A. She puts');
+    expect(loaded.questions[0].prompt).toContain('D. She eats');
+  });
+
+  it('loads HalluMix from HuggingFace with hallucination detection', async () => {
+    fetchMock.mockResolvedValueOnce(
+      jsonResponse({
+        rows: [
+          {
+            row_idx: 0,
+            row: {
+              documents: ['The capital of France is Paris.', 'Paris has the Eiffel Tower.'],
+              answer: 'The capital of France is London.',
+              hallucination_label: 1,
+              src: 'geography',
+            },
+          },
+          {
+            row_idx: 1,
+            row: {
+              documents: ['Water boils at 100 degrees Celsius.'],
+              answer: 'Water boils at 100 degrees Celsius.',
+              hallucination_label: 0,
+              src: 'science',
+            },
+          },
+        ],
+        num_rows_total: 2,
+      }),
+    );
+
+    const loaded = await loadBenchmarkQuestions('hallumix', { sample: 10 });
+    expect(loaded.datasetName).toBe('hallumix');
+    expect(loaded.questions).toHaveLength(2);
+    expect(loaded.questions[0].id).toBe('hallumix-0');
+    expect(loaded.questions[0].groundTruth).toBe('yes');
+    expect(loaded.questions[0].category).toBe('geography');
+    expect(loaded.questions[0].prompt).toContain('hallucination');
+    expect(loaded.questions[1].groundTruth).toBe('no');
+    expect(loaded.questions[1].category).toBe('science');
+  });
+
   it('loads local dataset files when alias is not provided', async () => {
     const localPath = join(datasetsDir, 'local.json');
     await writeFile(

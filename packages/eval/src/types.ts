@@ -3,7 +3,7 @@ import type { ProviderMode, ProviderName } from '@ensemble-ai/shared-utils/provi
 export type EvalProvider = ProviderName;
 export type EvalMode = Extract<ProviderMode, 'mock' | 'free'>;
 export type StrategyName = 'standard' | 'elo' | 'majority' | 'council';
-export type BenchmarkDatasetName = 'gsm8k' | 'truthfulqa' | 'gpqa' | 'hle' | 'math500' | 'mmlu_pro' | 'simpleqa';
+export type BenchmarkDatasetName = 'gsm8k' | 'truthfulqa' | 'gpqa' | 'hle' | 'math500' | 'mmlu_pro' | 'simpleqa' | 'arc' | 'hellaswag' | 'hallumix';
 
 export interface ModelSpec {
   provider: EvalProvider;

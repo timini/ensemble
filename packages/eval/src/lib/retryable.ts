@@ -5,6 +5,8 @@ export interface RetryOptions {
   timeoutMs?: number;
   isRetryable?: (error: unknown) => boolean;
   onRetry?: (error: unknown, attempt: number) => void;
+  /** Called when a rate-limit error is detected, even before the internal retry. */
+  onRateLimit?: () => void;
 }
 
 interface ResolvedRetryOptions {
@@ -14,6 +16,7 @@ interface ResolvedRetryOptions {
   timeoutMs: number | undefined;
   isRetryable: (error: unknown) => boolean;
   onRetry: ((error: unknown, attempt: number) => void) | undefined;
+  onRateLimit: (() => void) | undefined;
 }
 
 function getStatusFromError(error: unknown): number | undefined {
@@ -58,6 +61,7 @@ function resolveOptions(options?: RetryOptions): ResolvedRetryOptions {
     timeoutMs: options?.timeoutMs,
     isRetryable: options?.isRetryable ?? isRateLimitOrServerError,
     onRetry: options?.onRetry,
+    onRateLimit: options?.onRateLimit,
   };
 }
 
@@ -105,6 +109,7 @@ export async function retryable<T>(
         if (i === opts.maxRetries || !opts.isRetryable(error)) {
           throw error;
         }
+        opts.onRateLimit?.();
         opts.onRetry?.(error, i + 1);
         const delay = opts.baseDelayMs * Math.pow(2, i) + Math.random() * opts.maxJitterMs;
         await sleep(delay);

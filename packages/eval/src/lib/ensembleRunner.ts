@@ -11,6 +11,8 @@ export interface EnsembleRunnerOptions {
   requestDelayMs?: number;
   retry?: RetryOptions;
   temperature?: number;
+  /** Called when any API call encounters a rate-limit error (even if retried). */
+  onRateLimit?: () => void;
 }
 
 function sleep(ms: number): Promise<void> {
@@ -86,6 +88,7 @@ export class EnsembleRunner {
   private readonly requestDelayMs: number;
   private readonly retryOptions: RetryOptions | undefined;
   private readonly streamOptions: StreamResponseOptions | undefined;
+  private readonly onRateLimit: (() => void) | undefined;
 
   constructor(
     private readonly registry: ProviderRegistry,
@@ -93,7 +96,12 @@ export class EnsembleRunner {
     options?: EnsembleRunnerOptions,
   ) {
     this.requestDelayMs = Math.max(0, options?.requestDelayMs ?? 0);
-    this.retryOptions = options?.retry;
+    this.retryOptions = options?.retry
+      ? { ...options.retry, onRateLimit: options.onRateLimit }
+      : options?.onRateLimit
+        ? { onRateLimit: options.onRateLimit }
+        : undefined;
+    this.onRateLimit = options?.onRateLimit;
     this.streamOptions =
       options?.temperature !== undefined ? { temperature: options.temperature } : undefined;
   }

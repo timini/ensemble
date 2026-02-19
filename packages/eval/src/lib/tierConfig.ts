@@ -19,6 +19,9 @@ export const CI_TIER_CONFIG: TierConfig = {
     { name: 'math500', sampleSize: 10 },
     { name: 'mmlu_pro', sampleSize: 10 },
     { name: 'simpleqa', sampleSize: 10 },
+    { name: 'arc', sampleSize: 10 },
+    { name: 'hellaswag', sampleSize: 10 },
+    { name: 'hallumix', sampleSize: 10 },
   ],
   models: [
     { provider: 'openai', model: 'gpt-4o-mini' },
@@ -51,6 +54,9 @@ export const POST_MERGE_TIER_CONFIG: TierConfig = {
     { name: 'math500', sampleSize: 50 },
     { name: 'mmlu_pro', sampleSize: 50 },
     { name: 'simpleqa', sampleSize: 50 },
+    { name: 'arc', sampleSize: 50 },
+    { name: 'hellaswag', sampleSize: 50 },
+    { name: 'hallumix', sampleSize: 50 },
   ],
   models: [
     { provider: 'openai', model: 'gpt-4o' },
@@ -84,6 +90,9 @@ export const HOMOGENEOUS_CI_TIER_CONFIG: TierConfig = {
     { name: 'math500', sampleSize: 10 },
     { name: 'mmlu_pro', sampleSize: 10 },
     { name: 'simpleqa', sampleSize: 10 },
+    { name: 'arc', sampleSize: 10 },
+    { name: 'hellaswag', sampleSize: 10 },
+    { name: 'hallumix', sampleSize: 10 },
   ],
   models: [
     { provider: 'google', model: 'gemini-3-flash-preview' },
@@ -116,6 +125,9 @@ export const HOMOGENEOUS_POST_MERGE_TIER_CONFIG: TierConfig = {
     { name: 'math500', sampleSize: 50 },
     { name: 'mmlu_pro', sampleSize: 50 },
     { name: 'simpleqa', sampleSize: 50 },
+    { name: 'arc', sampleSize: 50 },
+    { name: 'hellaswag', sampleSize: 50 },
+    { name: 'hallumix', sampleSize: 50 },
   ],
   models: [
     { provider: 'google', model: 'gemini-3-flash-preview' },

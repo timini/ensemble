@@ -60,6 +60,26 @@ interface SimpleQaRow {
   answer: string;
 }
 
+interface ArcRow {
+  id: string;
+  question: string;
+  choices: { label: string[]; text: string[] };
+  answerKey: string;
+}
+
+interface HellaSwagRow {
+  ctx: string;
+  endings: string[];
+  label: string;
+}
+
+interface HalluMixRow {
+  documents: string[];
+  answer: string;
+  hallucination_label: number;
+  src: string;
+}
+
 function mapGsm8kRow(row: Gsm8kRow, rowIdx: number): BenchmarkQuestion {
   const groundTruth = extractNumericAnswer(row.answer ?? '');
   if (!groundTruth) {
@@ -141,6 +161,54 @@ function mapSimpleQaRow(row: SimpleQaRow, rowIdx: number): BenchmarkQuestion {
   };
 }
 
+function mapArcRow(row: ArcRow, rowIdx: number): BenchmarkQuestion {
+  const labels = row.choices?.label ?? [];
+  const texts = row.choices?.text ?? [];
+
+  const options = labels
+    .map((label, index) => `${label}. ${texts[index]}`)
+    .join('\n');
+
+  return {
+    id: `arc-${rowIdx}`,
+    prompt: `${row.question.trim()}\n\nOptions:\n${options}\n\nRespond with the single best option letter.`,
+    groundTruth: row.answerKey,
+  };
+}
+
+function mapHellaSwagRow(row: HellaSwagRow, rowIdx: number): BenchmarkQuestion {
+  const endings = row.endings ?? [];
+  const options = endings
+    .map((ending, index) => `${toChoiceLetter(index)}. ${ending}`)
+    .join('\n');
+
+  const correctIndex = Number.parseInt(row.label, 10);
+  if (Number.isNaN(correctIndex) || correctIndex < 0 || correctIndex >= endings.length) {
+    throw new Error(`Failed to parse HellaSwag label at row ${rowIdx}`);
+  }
+
+  return {
+    id: `hellaswag-${rowIdx}`,
+    prompt: `Complete the following:\n\n${row.ctx.trim()}\n\nOptions:\n${options}\n\nRespond with the single best option letter.`,
+    groundTruth: toChoiceLetter(correctIndex),
+  };
+}
+
+function mapHalluMixRow(row: HalluMixRow, rowIdx: number): BenchmarkQuestion {
+  const docs = (row.documents ?? [])
+    .map((doc, i) => `[Document ${i + 1}]\n${doc}`)
+    .join('\n\n');
+
+  const isHallucinated = row.hallucination_label === 1;
+
+  return {
+    id: `hallumix-${rowIdx}`,
+    prompt: `Given the following documents and a proposed answer, determine if the answer is supported by the documents or is a hallucination.\n\nDocuments:\n${docs}\n\nProposed answer: ${row.answer}\n\nIs this answer a hallucination? Respond with only "yes" or "no".`,
+    groundTruth: isHallucinated ? 'yes' : 'no',
+    category: row.src?.trim() || undefined,
+  };
+}
+
 function mapGpqaRow(row: GpqaRow, rowIdx: number): BenchmarkQuestion {
   const groundTruth = extractChoiceLetter(row.solution ?? '');
   if (!groundTruth) {
@@ -200,5 +268,20 @@ export const benchmarkLoaders: Record<BenchmarkDatasetName, BenchmarkLoader> = {
     name: 'simpleqa',
     sources: [{ dataset: 'basicv8vc/SimpleQA', config: 'default', split: 'test' }],
     mapRow: mapSimpleQaRow,
+  }),
+  arc: new HuggingFaceBenchmarkLoader<ArcRow>({
+    name: 'arc',
+    sources: [{ dataset: 'allenai/ai2_arc', config: 'ARC-Challenge', split: 'test' }],
+    mapRow: mapArcRow,
+  }),
+  hellaswag: new HuggingFaceBenchmarkLoader<HellaSwagRow>({
+    name: 'hellaswag',
+    sources: [{ dataset: 'Rowan/hellaswag', config: 'default', split: 'validation' }],
+    mapRow: mapHellaSwagRow,
+  }),
+  hallumix: new HuggingFaceBenchmarkLoader<HalluMixRow>({
+    name: 'hallumix',
+    sources: [{ dataset: 'quotientai/HalluMix', config: 'default', split: 'test' }],
+    mapRow: mapHalluMixRow,
   }),
 };

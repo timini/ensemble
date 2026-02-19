@@ -14,7 +14,7 @@ describe('CI_TIER_CONFIG', () => {
     expect(CI_TIER_CONFIG.name).toBe('ci');
   });
 
-  it('includes 70 questions across 7 datasets', () => {
+  it('includes 100 questions across 10 datasets', () => {
     expect(CI_TIER_CONFIG.datasets).toEqual([
       { name: 'gsm8k', sampleSize: 10 },
       { name: 'truthfulqa', sampleSize: 10 },
@@ -23,6 +23,9 @@ describe('CI_TIER_CONFIG', () => {
       { name: 'math500', sampleSize: 10 },
       { name: 'mmlu_pro', sampleSize: 10 },
       { name: 'simpleqa', sampleSize: 10 },
+      { name: 'arc', sampleSize: 10 },
+      { name: 'hellaswag', sampleSize: 10 },
+      { name: 'hallumix', sampleSize: 10 },
     ]);
   });
 
@@ -73,7 +76,7 @@ describe('POST_MERGE_TIER_CONFIG', () => {
     expect(POST_MERGE_TIER_CONFIG.name).toBe('post-merge');
   });
 
-  it('includes 450 questions across 7 datasets', () => {
+  it('includes 600 questions across 10 datasets', () => {
     expect(POST_MERGE_TIER_CONFIG.datasets).toEqual([
       { name: 'gsm8k', sampleSize: 100 },
       { name: 'truthfulqa', sampleSize: 100 },
@@ -82,6 +85,9 @@ describe('POST_MERGE_TIER_CONFIG', () => {
       { name: 'math500', sampleSize: 50 },
       { name: 'mmlu_pro', sampleSize: 50 },
       { name: 'simpleqa', sampleSize: 50 },
+      { name: 'arc', sampleSize: 50 },
+      { name: 'hellaswag', sampleSize: 50 },
+      { name: 'hallumix', sampleSize: 50 },
     ]);
   });
 
@@ -151,12 +157,12 @@ describe('HOMOGENEOUS_CI_TIER_CONFIG', () => {
     });
   });
 
-  it('includes 70 questions across 7 datasets', () => {
+  it('includes 100 questions across 10 datasets', () => {
     const total = HOMOGENEOUS_CI_TIER_CONFIG.datasets.reduce(
       (sum, d) => sum + d.sampleSize,
       0,
     );
-    expect(total).toBe(70);
+    expect(total).toBe(100);
   });
 
   it('evaluates all 4 strategies', () => {
@@ -186,12 +192,12 @@ describe('HOMOGENEOUS_POST_MERGE_TIER_CONFIG', () => {
     }
   });
 
-  it('includes 350 questions across 7 datasets', () => {
+  it('includes 500 questions across 10 datasets', () => {
     const total = HOMOGENEOUS_POST_MERGE_TIER_CONFIG.datasets.reduce(
       (sum, d) => sum + d.sampleSize,
       0,
     );
-    expect(total).toBe(350);
+    expect(total).toBe(500);
   });
 
   it('runs once (deterministic)', () => {

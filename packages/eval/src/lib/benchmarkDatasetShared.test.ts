@@ -18,6 +18,12 @@ describe('benchmarkDatasetShared', () => {
     expect(resolveBenchmarkDatasetName('mmlupro')).toBe('mmlu_pro');
     expect(resolveBenchmarkDatasetName('simpleqa')).toBe('simpleqa');
     expect(resolveBenchmarkDatasetName('simple-qa')).toBe('simpleqa');
+    expect(resolveBenchmarkDatasetName('arc')).toBe('arc');
+    expect(resolveBenchmarkDatasetName('arc-challenge')).toBe('arc');
+    expect(resolveBenchmarkDatasetName('hellaswag')).toBe('hellaswag');
+    expect(resolveBenchmarkDatasetName('hella-swag')).toBe('hellaswag');
+    expect(resolveBenchmarkDatasetName('hallumix')).toBe('hallumix');
+    expect(resolveBenchmarkDatasetName('hallu-mix')).toBe('hallumix');
     expect(resolveBenchmarkDatasetName('custom-dataset')).toBeNull();
   });
 

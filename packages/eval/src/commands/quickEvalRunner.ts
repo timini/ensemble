@@ -1,4 +1,5 @@
 import { ProviderRegistry } from '@ensemble-ai/shared-utils/providers';
+import type { ConcurrencyLimiter } from '../lib/concurrencyPool.js';
 import { loadCachedBaseline, saveCachedBaseline } from '../lib/baselineCache.js';
 import { createEvaluatorForDataset, type JudgeConfig } from '../lib/evaluators.js';
 import { BenchmarkRunner } from '../lib/benchmarkRunner.js';
@@ -25,13 +26,20 @@ export interface RunDatasetArgs {
   registry: ProviderRegistry;
   useCache: boolean;
   sampleCount: number;
+  /** Shared adaptive concurrency limiter. */
+  limiter?: ConcurrencyLimiter;
+  /** Judge model config (separate from evaluated model). */
+  judgeProvider?: EvalProvider;
+  judgeModelName?: string;
 }
 
 function buildJudgeConfig(args: RunDatasetArgs): JudgeConfig | undefined {
+  const judgeProvider = args.judgeProvider ?? args.provider;
+  const judgeModel = args.judgeModelName ?? args.modelName;
   try {
     return {
-      provider: args.registry.getProvider(args.provider, args.mode),
-      model: args.modelName,
+      provider: args.registry.getProvider(judgeProvider, args.mode),
+      model: judgeModel,
     };
   } catch (error) {
     process.stderr.write(
@@ -58,6 +66,7 @@ async function runSingleBaseline(args: RunDatasetArgs): Promise<PromptRunResult[
     mode, registry, models: singleModels, strategies: ['standard'],
     evaluator, summarizer: null, requestDelayMs: 0, parallelQuestions: true,
     retry: { maxRetries: 3, baseDelayMs: 2000 },
+    limiter: args.limiter,
   });
   const result = await runner.run({
     questions, outputPath: '/dev/null', output: singleOutput,
@@ -87,6 +96,7 @@ async function runEnsemble(args: RunDatasetArgs): Promise<PromptRunResult[]> {
     summarizer: { provider, model: modelName },
     requestDelayMs: 0, parallelQuestions: true,
     retry: { maxRetries: 3, baseDelayMs: 2000 },
+    limiter: args.limiter,
   });
   const result = await runner.run({
     questions, outputPath: '/dev/null', output: ensembleOutput,

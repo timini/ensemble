@@ -242,12 +242,15 @@ export function createEvaluatorForDataset(
     case 'truthfulqa':
     case 'gpqa':
     case 'mmlu_pro':
+    case 'arc':
+    case 'hellaswag':
       if (!judge) {
         throw new Error('MCQ datasets require a judge config');
       }
       return new LLMJudgeMCQEvaluator(judge.provider, judge.model);
     case 'hle':
     case 'simpleqa':
+    case 'hallumix':
       if (!judge) {
         throw new Error(`${datasetName} dataset requires a judge config`);
       }
