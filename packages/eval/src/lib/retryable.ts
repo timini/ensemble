@@ -56,7 +56,7 @@ export function isRateLimitOrServerError(error: unknown): boolean {
 const RATE_LIMIT_ONLY_PATTERN = /rate.?limit|too many requests|\b429\b/i;
 
 /** Returns true only for 429/rate-limit errors (not 5xx server errors). */
-function isRateLimitOnly(error: unknown): boolean {
+export function isRateLimitOnly(error: unknown): boolean {
   const status = getStatusFromError(error);
   if (status !== undefined) {
     return status === 429;

@@ -1,3 +1,5 @@
+import { isRateLimitOnly } from './retryable.js';
+
 /**
  * Adaptive concurrency limiter using AIMD (Additive Increase, Multiplicative Decrease).
  *
@@ -7,6 +9,10 @@
  *
  * A single instance is shared across all BenchmarkRunners so that total API concurrency
  * is globally bounded.
+ *
+ * The limiter can optionally accept a `shouldBackoff` callback for custom back-pressure
+ * signals (e.g. system memory, CPU, or network health checks). When provided, it is
+ * checked before acquiring a slot — if it returns true, the limiter pauses briefly.
  */
 export class ConcurrencyLimiter {
   private concurrency: number;
@@ -16,29 +22,42 @@ export class ConcurrencyLimiter {
   private readonly max: number;
   private lastAdjustTime: number;
   private readonly cooldownMs: number;
+  private readonly shouldBackoff?: () => boolean;
 
   constructor(opts?: {
     initial?: number;
     min?: number;
     max?: number;
     cooldownMs?: number;
+    /**
+     * Optional callback checked before acquiring a slot. Return `true` to
+     * signal back-pressure (e.g. high memory or CPU usage). When triggered,
+     * the limiter halves concurrency and pauses briefly before retrying.
+     */
+    shouldBackoff?: () => boolean;
   }) {
     this.concurrency = opts?.initial ?? 100;
     this.min = opts?.min ?? 5;
     this.max = opts?.max ?? 500;
     this.cooldownMs = opts?.cooldownMs ?? 2000;
     this.lastAdjustTime = Date.now();
+    this.shouldBackoff = opts?.shouldBackoff;
   }
 
   /** Execute fn with adaptive concurrency. Auto-scales based on 429 errors. */
   async run<T>(fn: () => Promise<T>): Promise<T> {
+    // Check custom back-pressure before acquiring
+    if (this.shouldBackoff?.()) {
+      this.onRateLimit();
+      await new Promise((r) => setTimeout(r, 500));
+    }
     await this.acquire();
     try {
       const result = await fn();
       this.onSuccess();
       return result;
     } catch (error) {
-      if (isRateLimitError(error)) this.onRateLimit();
+      if (isRateLimitOnly(error)) this.onRateLimit();
       throw error;
     } finally {
       this.release();
@@ -99,17 +118,4 @@ export class ConcurrencyLimiter {
       next();
     }
   }
-}
-
-export function isRateLimitError(error: unknown): boolean {
-  if (error == null || typeof error !== 'object') return false;
-  const record = error as Record<string, unknown>;
-
-  if (typeof record.status === 'number' && record.status === 429) return true;
-  if (typeof record.statusCode === 'number' && record.statusCode === 429) return true;
-
-  if (error instanceof Error) {
-    return /\b429\b|rate.?limit|too many requests/i.test(error.message);
-  }
-  return false;
 }

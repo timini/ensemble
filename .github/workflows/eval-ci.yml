@@ -20,6 +20,7 @@ jobs:
     timeout-minutes: 15
     env:
       GOOGLE_API_KEY: ${{ secrets.TEST_GOOGLE_API_KEY }}
+      HF_TOKEN: ${{ secrets.HF_TOKEN }}
 
     steps:
       - uses: actions/checkout@v4
@@ -75,7 +76,8 @@ jobs:
         working-directory: packages/eval
         run: |
           node --import tsx bin/ensemble-eval.mjs quick-eval \
-            --model google:gemini-3-flash-preview \
+            --model google:gemini-flash-lite-latest \
+            --judge-model google:gemini-3-flash-preview \
             --strategies standard,elo,majority,council \
             --sample 10 \
             --baseline baselines/quick-eval.json \

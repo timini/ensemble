@@ -116,12 +116,24 @@ export function createQuickEvalCommand(): Command {
       log(`  Strategies: ${strategies.join(', ')}  Concurrency: ${initialConcurrency} (AIMD)\n`);
       log(`  Datasets: ${datasetNames.join(', ')}  Sample: ${sampleCount}  Parallel: ${parallel ? 'yes' : 'no'}\n\n`);
 
-      const datasetQuestions = await Promise.all(
+      const datasetQuestions: Array<{ name: BenchmarkDatasetName; questions: import('../types.js').BenchmarkQuestion[] }> = [];
+      const loadResults = await Promise.allSettled(
         datasetNames.map(async (name) => ({
           name,
           questions: (await loadBenchmarkQuestions(name, { sample: sampleCount })).questions,
         })),
       );
+      for (const [i, result] of loadResults.entries()) {
+        if (result.status === 'fulfilled') {
+          datasetQuestions.push(result.value);
+        } else {
+          const reason = result.reason instanceof Error ? result.reason.message : String(result.reason);
+          log(`  Warning: skipping ${datasetNames[i]} — ${reason}\n`);
+        }
+      }
+      if (datasetQuestions.length === 0) {
+        throw new Error('All datasets failed to load. Cannot proceed.');
+      }
 
       const runArgs: RunDatasetArgs[] = datasetQuestions.map(({ name, questions }) => ({
         datasetName: name, questions,

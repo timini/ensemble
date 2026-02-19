@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { ConcurrencyLimiter, isRateLimitError } from './concurrencyPool.js';
+import { ConcurrencyLimiter } from './concurrencyPool.js';
+import { isRateLimitOnly } from './retryable.js';
 
 function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -184,34 +185,34 @@ describe('ConcurrencyLimiter', () => {
   });
 });
 
-describe('isRateLimitError', () => {
+describe('isRateLimitOnly', () => {
   it('detects errors with status 429', () => {
     const error = new Error('Rate limited');
     (error as unknown as Record<string, unknown>).status = 429;
-    expect(isRateLimitError(error)).toBe(true);
+    expect(isRateLimitOnly(error)).toBe(true);
   });
 
   it('detects errors with statusCode 429', () => {
     const error = new Error('Rate limited');
     (error as unknown as Record<string, unknown>).statusCode = 429;
-    expect(isRateLimitError(error)).toBe(true);
+    expect(isRateLimitOnly(error)).toBe(true);
   });
 
   it('detects errors mentioning 429 in message', () => {
-    expect(isRateLimitError(new Error('429 Too Many Requests'))).toBe(true);
+    expect(isRateLimitOnly(new Error('429 Too Many Requests'))).toBe(true);
   });
 
   it('detects errors mentioning rate limit in message', () => {
-    expect(isRateLimitError(new Error('Rate limit exceeded'))).toBe(true);
+    expect(isRateLimitOnly(new Error('Rate limit exceeded'))).toBe(true);
   });
 
   it('returns false for non-rate-limit errors', () => {
-    expect(isRateLimitError(new Error('Internal server error'))).toBe(false);
-    expect(isRateLimitError(null)).toBe(false);
-    expect(isRateLimitError(undefined)).toBe(false);
+    expect(isRateLimitOnly(new Error('Internal server error'))).toBe(false);
+    expect(isRateLimitOnly(null)).toBe(false);
+    expect(isRateLimitOnly(undefined)).toBe(false);
   });
 
   it('detects "too many requests" message', () => {
-    expect(isRateLimitError(new Error('Too many requests'))).toBe(true);
+    expect(isRateLimitOnly(new Error('Too many requests'))).toBe(true);
   });
 });
