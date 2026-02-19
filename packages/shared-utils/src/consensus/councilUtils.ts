@@ -7,7 +7,7 @@ export function buildCritiquePrompt(
     targetAnswer: string
 ): string {
     return `
-You are a critical reviewer evaluating an AI model's response.
+You are a strict logical critic. Your job is to find errors in reasoning.
 
 Original Question: ${originalPrompt}
 
@@ -15,11 +15,12 @@ Response from ${targetModelName}:
 ${targetAnswer}
 
 Your task:
-1. Identify any flaws, inaccuracies, or weakness in this response.
-2. Note any strengths or particularly good points.
-3. Be specific and constructive in your critique.
+1. Check each step of the reasoning for logical validity.
+2. Identify any factual errors, unsupported claims, or incorrect calculations.
+3. Point out any gaps where the reasoning skips steps or makes unjustified leaps.
+4. If the reasoning is sound, say so briefly.
 
-Provide your critique concisely.
+Focus on ERRORS in logic and facts. Be specific about what is wrong and why.
     `.trim();
 }
 
@@ -69,7 +70,7 @@ export function buildJudgmentPrompt(
     const rebuttalText = rebuttal ?? 'No rebuttal provided.';
 
     return `
-You are a judge evaluating whether an AI model's position is valid after debate.
+You are a strict logical judge evaluating whether an AI model's reasoning is correct.
 
 Original Question: ${originalPrompt}
 
@@ -82,13 +83,20 @@ ${critiquesText}
 Rebuttal:
 ${rebuttalText}
 
-Evaluate whether this position remains valid after considering the critiques and rebuttal.
+Your task: Actively try to DISPROVE the reasoning in this answer. Check for:
+1. Logical errors or invalid inferences
+2. Factual mistakes or unsupported claims
+3. Mathematical or computational errors
+4. Contradictions within the reasoning chain
+5. Whether the critiques identified real errors that the rebuttal failed to address
+
 Output ONLY valid JSON in this exact format:
-{"isValid": true/false, "reasoning": "brief explanation"}
+{"isValid": true/false, "reasoning": "brief explanation of errors found or why reasoning holds"}
 
 Rules:
-- isValid should be true if the position is fundamentally sound despite flaws.
-- isValid should be false only if the position is substantially incorrect or misleading.
+- isValid should be true ONLY if the reasoning is logically sound and you cannot find errors.
+- isValid should be false if there are ANY reasoning errors, logical gaps, or factual mistakes.
+- Be strict: an answer that reaches the right conclusion through flawed reasoning is INVALID.
 - No prose outside the JSON object.
     `.trim();
 }
@@ -99,7 +107,12 @@ export function buildCouncilSummaryPrompt(
     rankedBranches: CouncilBranch[]
 ): string {
     const branchesText = rankedBranches
-        .map((b) => `Rank #${b.rank} - ${b.modelName}:\n${b.initialAnswer}`)
+        .map((b) => {
+            const rebuttalText = b.rebuttal?.content
+                ? `\n\nRefined position after critique:\n${b.rebuttal.content}`
+                : '';
+            return `Rank #${b.rank} - ${b.modelName}:\n${b.initialAnswer}${rebuttalText}`;
+        })
         .join('\n\n---\n\n');
 
     return `
@@ -107,14 +120,17 @@ You are a helpful assistant synthesizing the best AI responses after a council d
 
 Original Question: ${originalPrompt}
 
-The following responses survived critical review and are ranked by quality:
+The following responses survived critical review and are ranked by quality.
+Each includes the original answer and, where available, a refined position after debate:
 
 ${branchesText}
 
 Your task:
 Produce a SINGLE, UNIFIED response that directly answers the original question.
+Prefer the refined positions over the originals where they differ — they incorporate corrections from peer critique.
 Synthesize the best elements from all positions into one coherent, comprehensive answer.
 Do NOT compare or reference the individual models. Write as if answering the question yourself.
+If the question asks for a constrained format (single letter, number, JSON, etc.), output exactly that format and nothing else.
     `.trim();
 }
 

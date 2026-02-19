@@ -61,6 +61,7 @@ ${params.rankedResponseText}
 
 Return a SINGLE final answer that directly addresses the original question.
 Do not mention model names, ranking, or voting. Write only the final answer text.
+If the question asks for a constrained format (single letter, number, JSON, etc.), output exactly that format and nothing else.
     `.trim();
 }
 
