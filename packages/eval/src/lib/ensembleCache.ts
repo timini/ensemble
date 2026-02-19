@@ -7,10 +7,10 @@
  * Cache key: `{model}_{dataset}_{ensemble}x_t{temp}.json`
  * Cache dir: `packages/eval/.cache/ensemble/`
  *
- * The cache is sample-size independent — it stores responses for ALL
- * questions that have ever been generated. This means eval runs can
- * shuffle/sample freely and still get cache hits, as long as the
- * questions were previously generated via `generate-cache`.
+ * The cache stores responses for a fixed set of 100 questions per
+ * dataset (selected via deterministic shuffle in `generate-cache`).
+ * When `quick-eval` detects an ensemble cache, it filters loaded
+ * questions to only include cached IDs, ensuring 100% cache hit rate.
  *
  * Save is incremental: new entries are merged with existing ones.
  * Existing entries are never overwritten (responses are deterministic

@@ -1,23 +1,30 @@
 /**
- * `generate-cache` command — pre-generates ensemble responses for ALL
- * questions in specified datasets and saves them to the ensemble cache.
+ * `generate-cache` command — pre-generates ensemble responses for a fixed
+ * subset of questions per dataset and saves them to the ensemble cache.
  *
  * This is a separate workflow from `quick-eval`. It does NOT run
  * consensus strategies or evaluation — it ONLY generates the raw
  * model responses (5 per question at temperature=0.7) so that
  * subsequent `quick-eval` runs can load them from cache.
  *
+ * Key design: generates responses for a FIXED set of N questions per
+ * dataset (default 100). These questions are chosen by shuffling the
+ * full dataset with a deterministic seed, then taking the first N.
+ * Future `quick-eval` runs automatically filter to only these cached
+ * question IDs, ensuring 100% cache hit rate.
+ *
  * Why separate:
- * - Eval runs sample 30 questions randomly. Cache needs ALL questions
- *   so that any random sample gets cache hits.
  * - Generating responses is expensive (5 API calls per question).
  *   Consensus + evaluation is cheap. They have different lifecycles.
  * - You might want to use a pro model for generation (one-time cost)
  *   but a cheaper model for consensus/judging.
+ * - 100 questions per dataset provides good statistical significance
+ *   while keeping generation costs manageable.
  *
  * Usage:
  *   ensemble-eval generate-cache --model google:gemini-2.5-pro
  *   ensemble-eval generate-cache --datasets gsm8k,truthfulqa
+ *   ensemble-eval generate-cache --sample 200  # more questions
  *
  * After generating, commit the cache:
  *   git add packages/eval/.cache/ensemble/
@@ -37,6 +44,8 @@ import type { BenchmarkDatasetName, BenchmarkQuestion, EvalMode, ProviderRespons
 const DEFAULT_MODEL = 'google:gemini-2.5-flash-lite';
 const DEFAULT_ENSEMBLE_SIZE = 5;
 const DEFAULT_TEMPERATURE = 0.7;
+const DEFAULT_SAMPLE = 100;
+const DEFAULT_SEED = 42; // Deterministic shuffle for reproducibility
 const DEFAULT_DATASETS: BenchmarkDatasetName[] = [
   'gsm8k', 'truthfulqa', 'gpqa', 'hle', 'math500',
   'mmlu_pro', 'simpleqa', 'arc', 'hellaswag', 'hallumix',
@@ -46,6 +55,8 @@ interface GenerateCacheOptions {
   model: string;
   ensemble: string;
   temperature: string;
+  sample: string;
+  seed: string;
   datasets?: string[];
   mode: string;
   concurrency: string;
@@ -75,6 +86,8 @@ export function createGenerateCacheCommand(): Command {
     .option('--model <provider:model>', 'Model to generate responses with.', DEFAULT_MODEL)
     .option('--ensemble <count>', 'Number of ensemble instances (responses per question).', String(DEFAULT_ENSEMBLE_SIZE))
     .option('--temperature <value>', 'Sampling temperature for diversity.', String(DEFAULT_TEMPERATURE))
+    .option('--sample <count>', 'Questions per dataset to generate responses for.', String(DEFAULT_SAMPLE))
+    .option('--seed <value>', 'Seed for deterministic shuffle (same seed = same questions).', String(DEFAULT_SEED))
     .option('--datasets <datasets...>', 'Datasets to generate for. Comma-separated. Defaults to all.')
     .option('--mode <mode>', 'Provider mode (mock or free).', 'free')
     .option('--concurrency <count>', 'Initial max concurrent questions (auto-adapts via AIMD).', '40')
@@ -83,6 +96,8 @@ export function createGenerateCacheCommand(): Command {
       const model = options.model;
       const ensembleSize = Number.parseInt(options.ensemble, 10);
       const temperature = Number.parseFloat(options.temperature);
+      const sampleCount = Number.parseInt(options.sample, 10);
+      const seed = Number.parseInt(options.seed, 10);
       const mode = options.mode as EvalMode;
       const initialConcurrency = Number.parseInt(options.concurrency, 10);
       const datasetNames = parseDatasets(options.datasets);
@@ -95,7 +110,7 @@ export function createGenerateCacheCommand(): Command {
 
       const log = (s: string) => process.stderr.write(s);
       log(`\n  generate-cache: ${model} ${ensembleSize}x t=${temperature}\n`);
-      log(`  Datasets: ${datasetNames.join(', ')}\n\n`);
+      log(`  Datasets: ${datasetNames.join(', ')}  Sample: ${sampleCount}  Seed: ${seed}\n\n`);
 
       const ensembleRunner = new EnsembleRunner(registry, mode, {
         temperature,
@@ -108,11 +123,17 @@ export function createGenerateCacheCommand(): Command {
       limiter.startStatsReporter(2_000);
 
       for (const datasetName of datasetNames) {
-        // Load ALL questions (no sampling)
-        let allQuestions: BenchmarkQuestion[];
+        // Load a fixed subset of questions using deterministic shuffle.
+        // The seed ensures the same questions are selected every time,
+        // so re-running generate-cache picks up where it left off.
+        let selectedQuestions: BenchmarkQuestion[];
         try {
-          const result = await loadBenchmarkQuestions(datasetName, { shuffle: false });
-          allQuestions = result.questions;
+          const result = await loadBenchmarkQuestions(datasetName, {
+            sample: sampleCount,
+            shuffle: true,
+            seed,
+          });
+          selectedQuestions = result.questions;
         } catch (error) {
           const msg = error instanceof Error ? error.message : String(error);
           log(`  [${datasetName}] SKIP — ${msg}\n`);
@@ -122,9 +143,9 @@ export function createGenerateCacheCommand(): Command {
         // Load existing cache to skip already-generated questions
         const existingCache = await loadEnsembleCache(model, datasetName, ensembleSize, temperature);
         const cachedIds = existingCache ? new Set(existingCache.keys()) : new Set<string>();
-        const uncached = allQuestions.filter((q) => !cachedIds.has(q.id));
+        const uncached = selectedQuestions.filter((q) => !cachedIds.has(q.id));
 
-        log(`  [${datasetName}] ${allQuestions.length} total, ${cachedIds.size} cached, ${uncached.length} to generate\n`);
+        log(`  [${datasetName}] ${selectedQuestions.length} selected, ${cachedIds.size} cached, ${uncached.length} to generate\n`);
 
         if (uncached.length === 0) {
           log(`  [${datasetName}] fully cached — skipping\n\n`);

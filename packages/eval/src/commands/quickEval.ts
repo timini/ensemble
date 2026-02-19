@@ -3,6 +3,7 @@ import { ProviderRegistry } from '@ensemble-ai/shared-utils/providers';
 import { ConcurrencyLimiter, SystemMonitor } from '../lib/concurrencyPool.js';
 import { loadBenchmarkQuestions } from '../lib/benchmarkDatasets.js';
 import { resolveBenchmarkDatasetName } from '../lib/benchmarkDatasetShared.js';
+import { loadEnsembleCache } from '../lib/ensembleCache.js';
 import { parseStrategies } from '../lib/consensus.js';
 import { parseModelSpec } from '../lib/modelSpecs.js';
 import { registerProviders } from '../lib/providers.js';
@@ -12,7 +13,7 @@ import {
   buildBaselineFromResults, loadBaseline, saveBaseline,
   checkRegression, printRegressionReport,
 } from './quickEvalBaseline.js';
-import type { BenchmarkDatasetName, EvalMode, StrategyName } from '../types.js';
+import type { BenchmarkDatasetName, BenchmarkQuestion, EvalMode, StrategyName } from '../types.js';
 
 const DEFAULT_MODEL = 'google:gemini-2.5-flash-lite';
 const DEFAULT_JUDGE_MODEL = 'google:gemini-2.5-flash';
@@ -125,12 +126,33 @@ export function createQuickEvalCommand(): Command {
       log(`  Strategies: ${strategies.join(', ')}  Concurrency: ${initialConcurrency} (AIMD)\n`);
       log(`  Datasets: ${datasetNames.join(', ')}  Sample: ${sampleCount}  Parallel: ${parallel ? 'yes' : 'no'}\n\n`);
 
-      const datasetQuestions: Array<{ name: BenchmarkDatasetName; questions: import('../types.js').BenchmarkQuestion[] }> = [];
+      // Load questions, filtering to cached IDs when ensemble cache exists.
+      // This ensures 100% cache hit rate when using pre-generated responses.
+      const datasetQuestions: Array<{ name: BenchmarkDatasetName; questions: BenchmarkQuestion[] }> = [];
       const loadResults = await Promise.allSettled(
-        datasetNames.map(async (name) => ({
-          name,
-          questions: (await loadBenchmarkQuestions(name, { sample: sampleCount })).questions,
-        })),
+        datasetNames.map(async (name) => {
+          // Check for ensemble cache first
+          const ensembleCache = useCache
+            ? await loadEnsembleCache(model, name, ensembleSize, temperature)
+            : null;
+
+          if (ensembleCache && ensembleCache.size > 0) {
+            // Cache exists: load ALL questions (unsampled) then filter to cached IDs.
+            // Sample from the cached subset to respect --sample flag.
+            const all = (await loadBenchmarkQuestions(name, { shuffle: true })).questions;
+            const cachedIds = new Set(ensembleCache.keys());
+            const cachedQuestions = all.filter((q) => cachedIds.has(q.id));
+            const sampled = cachedQuestions.slice(0, Math.min(sampleCount, cachedQuestions.length));
+            log(`  [${name}] ${cachedIds.size} cached questions, using ${sampled.length}\n`);
+            return { name, questions: sampled };
+          }
+
+          // No cache: load with standard sampling
+          return {
+            name,
+            questions: (await loadBenchmarkQuestions(name, { sample: sampleCount })).questions,
+          };
+        }),
       );
       for (const [i, result] of loadResults.entries()) {
         if (result.status === 'fulfilled') {

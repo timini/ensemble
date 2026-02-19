@@ -98,7 +98,7 @@ There are three cache layers. The first two are committed to the repository so t
   ├── ensemble/           ← Raw ensemble API responses (committed)
   │   │                     Key: {model}_{dataset}_{N}x_t{temp}.json
   │   │                     Contains: questionId → ProviderResponse[]
-  │   │                     Sample-size INDEPENDENT (stores ALL questions)
+  │   │                     Fixed 100 questions per dataset (seed=42)
   │   │                     Eliminates: ALL ensemble API calls
   │   ├── google_gemini-2.5-flash-lite_gsm8k_5x_t0.7.json
   │   └── google_gemini-2.5-flash-lite_truthfulqa_5x_t0.7.json
@@ -118,10 +118,12 @@ Cache keys encode all parameters that affect the output:
 | Ensemble | `{model}_{dataset}_{N}x_t{temp}` | Model, ensemble size, or temperature changes |
 | Dataset | `eval-datasets-v1` | Manual bump (HF data rarely changes) |
 
-**Important**: The ensemble cache is sample-size independent. It stores responses for
-ALL questions that have ever been generated. This means `quick-eval --sample 30` can
-randomly pick any 30 questions and still get cache hits, as long as those questions
-were previously generated via `generate-cache`.
+**Important**: The ensemble cache stores responses for a FIXED set of 100 questions
+per dataset (configurable via `--sample`). The questions are selected by shuffling
+each dataset with a deterministic seed (default 42), then taking the first N.
+When `quick-eval` detects an ensemble cache, it automatically filters to only
+cached question IDs, ensuring 100% cache hit rate. This keeps generation costs
+manageable while providing good statistical significance.
 
 ### Two-Phase Workflow: Generate Then Evaluate
 
@@ -131,12 +133,16 @@ Cache generation and evaluation are **separate commands** with different lifecyc
   ┌─────────────────────────────────────────────────────────┐
   │  Phase 1: generate-cache (run ONCE, commit to repo)     │
   │                                                         │
-  │  For EVERY question in each dataset:                    │
-  │    → Generate 5 diverse responses (temperature=0.7)     │
+  │  For each dataset:                                      │
+  │    → Shuffle with deterministic seed (default 42)       │
+  │    → Pick first 100 questions (configurable)            │
+  │    → Generate 5 diverse responses per question (t=0.7)  │
   │    → Save to .cache/ensemble/                           │
   │    → No consensus, no evaluation                        │
   │                                                         │
   │  Can use an expensive pro model — you only pay once.    │
+  │  100 questions × 5 responses × 10 datasets = 5,000     │
+  │  API calls total. Manageable even with pro models.      │
   └─────────────────────────────────────────────────────────┘
                           │
                           │  git add + commit
@@ -144,23 +150,25 @@ Cache generation and evaluation are **separate commands** with different lifecyc
   ┌─────────────────────────────────────────────────────────┐
   │  Phase 2: quick-eval (run MANY times, iterate freely)   │
   │                                                         │
-  │  Sample 30 random questions per dataset                 │
+  │  For each dataset:                                      │
+  │    → Detect ensemble cache → filter to cached IDs       │
+  │    → Sample up to N questions from cached set            │
   │    → Load 5 cached responses per question (FREE)        │
   │    → Run consensus strategy (cheap API calls)           │
   │    → Evaluate against ground truth (cheap API calls)    │
   │    → Check regression against baseline                  │
   │                                                         │
-  │  Different random sample each run = different questions  │
-  │  but ALL get cache hits because we pre-generated ALL.   │
+  │  100% cache hit rate guaranteed because quick-eval      │
+  │  only uses questions that were pre-generated.           │
   └─────────────────────────────────────────────────────────┘
 ```
 
 ### Using a Pro Model for Ensemble Responses
 
-Since ensemble responses are cached and committed to the repo, you only pay for generation once. This means you can use a more capable (expensive) model:
+Since ensemble responses are cached and committed to the repo, you only pay for generation once. With only 100 questions per dataset (1,000 total across 10 datasets), even pro models are affordable:
 
 ```bash
-# One-time: generate responses for ALL questions with a pro model
+# One-time: generate 100 questions per dataset with a pro model
 npm run eval:generate-cache -- --model google:gemini-2.5-pro
 
 # Commit the cache
@@ -227,7 +235,7 @@ With ensemble responses cached in the repo:
   ┌────────────────────────────────────────────────────────┐
   │                    Per Job                              │
   │                                                        │
-  │  For each of 10 datasets × 30 questions:               │
+  │  For each of 10 datasets × 30 sampled questions:        │
   │                                                        │
   │  ┌─ Single baseline ──────────────────────────────┐    │
   │  │  Load from .cache/baselines/ (committed)       │    │
@@ -318,7 +326,7 @@ The limiter is shared across ALL datasets within a job. Fast-completing datasets
 | HellaSwag | 10,042 | Commonsense reasoning | MCQ (A-D) | `Rowan/hellaswag` |
 | HalluMix | ~6,500 | Hallucination detection | LLM judge | `quotientai/HalluMix` |
 
-Each CI run samples 30 questions per dataset (configurable via `--sample`).
+Each CI run samples 30 questions per dataset (configurable via `--sample`) from the 100 pre-generated cached questions.
 
 ## Regression Detection
 
@@ -328,18 +336,21 @@ Each CI job compares its strategy accuracy against the committed baseline using:
 2. **Holm-Bonferroni correction** — controls family-wise error rate across multiple comparisons
 3. **Significance level** α = 0.10 (configurable via `--significance`)
 
-At n=30 questions per dataset (300 total), the test can detect ~15pp regressions. Smaller deltas are noise.
+At n=30 questions per dataset (300 total from 100 cached per dataset), the test can detect ~15pp regressions. Smaller deltas are noise.
 
 ## CLI Reference
 
 ```bash
 # --- Cache Generation (run once, commit results) ---
 
-# Generate ensemble responses for ALL questions in ALL datasets
+# Generate 100 questions per dataset (default) for all datasets
 npm run eval:generate-cache
 
 # Generate with a pro model (one-time cost, cached forever)
 npm run eval:generate-cache -- --model google:gemini-2.5-pro
+
+# Generate more questions per dataset
+npm run eval:generate-cache -- --sample 200
 
 # Generate for specific datasets only
 npm run eval:generate-cache -- --datasets gsm8k,truthfulqa
