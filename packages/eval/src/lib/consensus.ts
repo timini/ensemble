@@ -136,7 +136,7 @@ export async function generateConsensus(
           new MajorityVotingConsensus(c, summarizerModel)
             .generateConsensus(
               consensusResponses,
-              Math.min(MIN_RESPONSES_FOR_MAJORITY, consensusResponses.length),
+              MIN_RESPONSES_FOR_MAJORITY,
               prompt,
             ),
         ));

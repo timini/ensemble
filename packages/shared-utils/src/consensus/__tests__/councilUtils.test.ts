@@ -26,9 +26,9 @@ describe('councilUtils', () => {
             expect(result).toContain('AI is machine intelligence.');
         });
 
-        it('should instruct the model to identify flaws and strengths', () => {
+        it('should instruct the model to find errors in reasoning', () => {
             const result = buildCritiquePrompt('What is AI?', 'GPT-4o', 'AI is machine intelligence.');
-            expect(result.toLowerCase()).toMatch(/flaw|weakness|strength/);
+            expect(result.toLowerCase()).toMatch(/error|logic|fact/);
         });
     });
 
