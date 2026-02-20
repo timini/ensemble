@@ -62,11 +62,13 @@ async function fetchRowsPage<TRow>(
       headers,
       signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
     });
-    if (response.status !== 429) break;
+    const isRetryable = response.status === 429 || (response.status >= 500 && response.status < 600);
+    if (!isRetryable) break;
     if (attempt < RATE_LIMIT_MAX_RETRIES) {
       const delay = RATE_LIMIT_BASE_DELAY_MS * 2 ** attempt;
+      const reason = response.status === 429 ? 'Rate limited' : `Server error ${response.status}`;
       process.stderr.write(
-        `Rate limited by HuggingFace, retrying in ${Math.round(delay / 1000)}s (attempt ${attempt + 1}/${RATE_LIMIT_MAX_RETRIES})...\n`,
+        `${reason} by HuggingFace, retrying in ${Math.round(delay / 1000)}s (attempt ${attempt + 1}/${RATE_LIMIT_MAX_RETRIES})...\n`,
       );
       await new Promise((r) => setTimeout(r, delay));
     }

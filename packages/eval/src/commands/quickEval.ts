@@ -23,7 +23,7 @@ const DEFAULT_TEMPERATURE = 0.7;
 const DEFAULT_SAMPLE = 30;
 const DEFAULT_DATASETS: BenchmarkDatasetName[] = [
   'gsm8k', 'truthfulqa', 'gpqa', 'hle', 'math500',
-  'mmlu_pro', 'simpleqa', 'arc', 'hellaswag', 'hallumix',
+  'mmlu_pro', 'simpleqa', 'arc', 'hellaswag',
 ];
 const VALID_MODES: EvalMode[] = ['mock', 'free'];
 
