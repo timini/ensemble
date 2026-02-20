@@ -4,6 +4,7 @@ import { FreeOpenAIClient } from '../clients/openai/FreeOpenAIClient';
 import { FreeAnthropicClient } from '../clients/anthropic/FreeAnthropicClient';
 import { FreeGoogleClient } from '../clients/google/FreeGoogleClient';
 import { FreeXAIClient } from '../clients/xai/FreeXAIClient';
+import { FreeDeepSeekClient } from '../clients/deepseek/FreeDeepSeekClient';
 
 interface CreateProviderClientOptions {
   provider: ProviderName;
@@ -34,6 +35,8 @@ export function createProviderClient({
         return new FreeGoogleClient(provider, getApiKey);
       case 'xai':
         return new FreeXAIClient(provider, getApiKey);
+      case 'deepseek':
+        return new FreeDeepSeekClient(provider, getApiKey);
       default:
         throw new Error(`Unsupported provider: ${provider}`);
     }

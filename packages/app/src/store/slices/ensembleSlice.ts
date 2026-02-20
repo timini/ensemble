@@ -7,7 +7,7 @@
 import type { StateCreator } from 'zustand';
 import type { ConsensusMethod } from '@ensemble-ai/shared-utils/consensus';
 
-export type ProviderType = 'openai' | 'anthropic' | 'google' | 'xai';
+export type ProviderType = 'openai' | 'anthropic' | 'google' | 'xai' | 'deepseek';
 
 export interface ModelSelection {
   id: string;

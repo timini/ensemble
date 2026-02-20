@@ -87,6 +87,7 @@ describe('createDebouncedValidator', () => {
       anthropic: null,
       google: null,
       xai: null,
+      deepseek: null,
     } as Record<Provider, NodeJS.Timeout | null>,
   };
 
@@ -97,6 +98,7 @@ describe('createDebouncedValidator', () => {
       anthropic: null,
       google: null,
       xai: null,
+      deepseek: null,
     };
   });
 

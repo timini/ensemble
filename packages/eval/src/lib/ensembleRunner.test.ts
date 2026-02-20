@@ -62,6 +62,7 @@ describe('EnsembleRunner', () => {
         anthropic: anthropicProvider,
         google: openaiProvider,
         xai: openaiProvider,
+        deepseek: openaiProvider,
       }),
       'mock',
     );
@@ -106,6 +107,7 @@ describe('EnsembleRunner', () => {
         anthropic: provider,
         google: provider,
         xai: provider,
+        deepseek: provider,
       }),
       'mock',
       { requestDelayMs: 25 },
@@ -135,6 +137,7 @@ describe('EnsembleRunner', () => {
         anthropic: provider,
         google: provider,
         xai: provider,
+        deepseek: provider,
       }),
       'mock',
       { temperature: 0 },
@@ -160,6 +163,7 @@ describe('EnsembleRunner', () => {
         anthropic: provider,
         google: provider,
         xai: provider,
+        deepseek: provider,
       }),
       'mock',
     );
@@ -188,6 +192,7 @@ describe('EnsembleRunner', () => {
         anthropic: provider,
         google: provider,
         xai: provider,
+        deepseek: provider,
       }),
       'mock',
       { retry: { maxRetries: 3, baseDelayMs: 1, maxJitterMs: 0 } },
@@ -218,6 +223,7 @@ describe('EnsembleRunner', () => {
         anthropic: provider,
         google: provider,
         xai: provider,
+        deepseek: provider,
       }),
       'mock',
       { retry: { maxRetries: 3, baseDelayMs: 1, maxJitterMs: 0 } },
@@ -263,6 +269,7 @@ describe('EnsembleRunner', () => {
         anthropic: provider,
         google: provider,
         xai: provider,
+        deepseek: provider,
       }),
       'mock',
       {
@@ -305,6 +312,7 @@ describe('EnsembleRunner', () => {
         anthropic: provider,
         google: provider,
         xai: provider,
+        deepseek: provider,
       }),
       'mock',
     );

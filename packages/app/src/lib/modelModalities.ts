@@ -55,6 +55,8 @@ function supportsImage(provider: ProviderName, identifier: string): boolean {
       return identifier.startsWith('gemini-');
     case 'xai':
       return identifier.includes('vision') || identifier.includes('image');
+    case 'deepseek':
+      return false;
     default:
       return false;
   }

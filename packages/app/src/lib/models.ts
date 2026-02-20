@@ -87,4 +87,18 @@ export const FALLBACK_MODELS: Model[] = [
     name: 'Claude 3 Opus',
     modalities: ['text', 'image'],
   },
+
+  // DeepSeek
+  {
+    id: 'deepseek-chat',
+    provider: 'deepseek',
+    name: 'DeepSeek Chat',
+    modalities: ['text'],
+  },
+  {
+    id: 'deepseek-reasoner',
+    provider: 'deepseek',
+    name: 'DeepSeek Reasoner',
+    modalities: ['text'],
+  },
 ];

@@ -65,6 +65,7 @@ export function useEnsemblePage() {
             anthropic: safeApiKeys.anthropic?.status ?? 'idle',
             google: safeApiKeys.google?.status ?? 'idle',
             xai: safeApiKeys.xai?.status ?? 'idle',
+            deepseek: safeApiKeys.deepseek?.status ?? 'idle',
         }),
         [safeApiKeys],
     );
@@ -100,6 +101,7 @@ export function useEnsemblePage() {
         anthropic: null,
         google: null,
         xai: null,
+        deepseek: null,
     });
 
     // Handler for validation status changes

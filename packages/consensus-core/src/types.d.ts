@@ -23,7 +23,7 @@ export interface StructuredResponse<T> {
     tokenCount?: number;
 }
 export type ModelModality = 'text' | 'image' | 'audio' | 'video';
-export type ProviderName = 'openai' | 'anthropic' | 'google' | 'xai';
+export type ProviderName = 'openai' | 'anthropic' | 'google' | 'xai' | 'deepseek';
 export interface ModelMetadata {
     id: string;
     name: string;

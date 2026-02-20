@@ -7,7 +7,7 @@ import { LoadingSpinner } from '../../atoms/LoadingSpinner';
 import { InlineAlert } from '../../atoms/InlineAlert';
 import { cn } from '@/lib/utils';
 
-export type Provider = 'openai' | 'anthropic' | 'google' | 'xai';
+export type Provider = 'openai' | 'anthropic' | 'google' | 'xai' | 'deepseek';
 export type ValidationStatus = 'idle' | 'validating' | 'valid' | 'invalid';
 
 export interface ApiKeyInputProps {

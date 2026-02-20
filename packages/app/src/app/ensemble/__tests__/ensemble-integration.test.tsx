@@ -33,6 +33,7 @@ describe('Ensemble Page - Model Selection Integration', () => {
         anthropic: { key: '', encrypted: null, visible: false, status: 'idle' },
         google: { key: '', encrypted: null, visible: false, status: 'idle' },
         xai: { key: '', encrypted: null, visible: false, status: 'idle' },
+        deepseek: { key: '', encrypted: null, visible: false, status: 'idle' },
       },
       encryptionInitialized: true,
       selectedModels: [],

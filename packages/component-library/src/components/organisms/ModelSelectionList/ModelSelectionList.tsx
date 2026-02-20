@@ -36,6 +36,7 @@ const PROVIDER_LABELS: Record<Provider, string> = {
   anthropic: 'Anthropic',
   google: 'Google',
   xai: 'XAI',
+  deepseek: 'DeepSeek',
 };
 
 /**
@@ -82,6 +83,7 @@ export const ModelSelectionList = React.forwardRef<HTMLDivElement, ModelSelectio
         anthropic: [],
         google: [],
         xai: [],
+        deepseek: [],
       };
 
       models.forEach((model) => {

@@ -138,7 +138,7 @@ export function useConsensusGeneration() {
     };
 }
 
-const VALID_PROVIDERS: ProviderName[] = ['openai', 'anthropic', 'google', 'xai'];
+const VALID_PROVIDERS: ProviderName[] = ['openai', 'anthropic', 'google', 'xai', 'deepseek'];
 
 function validateProviderName(provider: string): ProviderName {
     if (VALID_PROVIDERS.includes(provider as ProviderName)) {

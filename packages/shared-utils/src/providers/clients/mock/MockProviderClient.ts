@@ -215,6 +215,22 @@ export class MockProviderClient implements AIProvider {
         costPer1kTokens: 0.0002,
         modalities: ['text'],
       },
+      {
+        id: 'deepseek-chat',
+        name: 'DeepSeek Chat',
+        provider: 'deepseek',
+        contextWindow: 128000,
+        costPer1kTokens: 0.00014,
+        modalities: ['text'],
+      },
+      {
+        id: 'deepseek-reasoner',
+        name: 'DeepSeek Reasoner',
+        provider: 'deepseek',
+        contextWindow: 128000,
+        costPer1kTokens: 0.00055,
+        modalities: ['text'],
+      },
     ];
 
     if (this.config.providerFilter) {

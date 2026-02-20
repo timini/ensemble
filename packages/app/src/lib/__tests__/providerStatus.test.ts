@@ -7,6 +7,7 @@ const statuses: Record<Provider, ValidationStatus> = {
   anthropic: 'invalid',
   google: 'validating',
   xai: 'idle',
+  deepseek: 'idle',
 };
 
 describe('provider status utilities', () => {
@@ -17,6 +18,7 @@ describe('provider status utilities', () => {
       anthropic: 'idle',
       google: 'idle',
       xai: 'idle',
+      deepseek: 'idle',
     });
   });
 
