@@ -93,20 +93,74 @@ jobs:
 
       - name: Verify deployment
         run: |
+          set -euo pipefail
+
+          PROJECT_ID="${{ vars.FIREBASE_PROJECT_ID }}"
+          BACKEND_ID="ensemble-app"
+          TARGET_SHA="${GITHUB_SHA}"
           DEPLOY_URL="https://ensemble-app--${{ vars.FIREBASE_PROJECT_ID }}.us-central1.hosted.app"
-          echo "Waiting for deployment to be ready..."
-          # Wait up to 5 minutes for deployment, checking every 30 seconds
-          for i in {1..10}; do
-            if curl -sf --max-time 10 "$DEPLOY_URL" > /dev/null 2>&1; then
-              echo "Deployment verified successfully!"
-              exit 0
+          API_BASE="https://firebaseapphosting.googleapis.com/v1beta/projects/${PROJECT_ID}/locations/us-central1/backends/${BACKEND_ID}"
+
+          echo "Waiting for Firebase App Hosting rollout for commit ${TARGET_SHA}..."
+          for i in {1..20}; do
+            ACCESS_TOKEN="$(gcloud auth print-access-token)"
+            ROLLOUTS_JSON="$(curl -sS -H "Authorization: Bearer ${ACCESS_TOKEN}" "${API_BASE}/rollouts?pageSize=50")"
+
+            LATEST_ROLLOUT="$(echo "${ROLLOUTS_JSON}" | jq -c '(.rollouts // []) | sort_by(.createTime) | reverse | .[0]')"
+            if [[ -z "${LATEST_ROLLOUT}" || "${LATEST_ROLLOUT}" == "null" ]]; then
+              echo "Attempt ${i}/20: no rollouts found yet; waiting 30s..."
+              sleep 30
+              continue
             fi
-            echo "Attempt $i/10: Deployment not ready yet, waiting 30s..."
+
+            ROLLOUT_NAME="$(echo "${LATEST_ROLLOUT}" | jq -r '.name')"
+            ROLLOUT_STATE="$(echo "${LATEST_ROLLOUT}" | jq -r '.state')"
+            BUILD_RESOURCE="$(echo "${LATEST_ROLLOUT}" | jq -r '.build // empty')"
+
+            if [[ -z "${BUILD_RESOURCE}" ]]; then
+              echo "Attempt ${i}/20: latest rollout has no build resource yet (${ROLLOUT_NAME}); waiting 30s..."
+              sleep 30
+              continue
+            fi
+
+            BUILD_JSON="$(curl -sS -H "Authorization: Bearer ${ACCESS_TOKEN}" "https://firebaseapphosting.googleapis.com/v1beta/${BUILD_RESOURCE}")"
+            BUILD_SHA="$(echo "${BUILD_JSON}" | jq -r '.source.codebase.hash // empty')"
+            BUILD_STATE="$(echo "${BUILD_JSON}" | jq -r '.state // empty')"
+            BUILD_ERROR="$(echo "${BUILD_JSON}" | jq -r '.error.message // empty')"
+
+            echo "Attempt ${i}/20: rollout=${ROLLOUT_NAME} rolloutState=${ROLLOUT_STATE} buildState=${BUILD_STATE} commit=${BUILD_SHA}"
+
+            if [[ "${BUILD_SHA}" != "${TARGET_SHA}" ]]; then
+              echo "Latest rollout is for a different commit; waiting 30s..."
+              sleep 30
+              continue
+            fi
+
+            if [[ "${ROLLOUT_STATE}" == "FAILED" || "${BUILD_STATE}" == "FAILED" ]]; then
+              echo "Firebase App Hosting rollout failed for commit ${TARGET_SHA}."
+              if [[ -n "${BUILD_ERROR}" ]]; then
+                echo "Build error: ${BUILD_ERROR}"
+              fi
+              exit 1
+            fi
+
+            if [[ "${ROLLOUT_STATE}" == "SUCCEEDED" ]]; then
+              echo "Rollout succeeded for commit ${TARGET_SHA}. Verifying deployed URL..."
+              if curl -sf --max-time 10 "${DEPLOY_URL}" > /dev/null 2>&1; then
+                echo "Deployment verified successfully!"
+                exit 0
+              fi
+              echo "Rollout succeeded but URL check failed. Waiting 30s..."
+              sleep 30
+              continue
+            fi
+
+            echo "Rollout still in progress; waiting 30s..."
             sleep 30
           done
-          echo "Warning: Could not verify deployment within timeout"
-          # Don't fail the workflow - App Hosting may take longer to propagate
-          exit 0
+
+          echo "Timed out waiting for Firebase App Hosting rollout for commit ${TARGET_SHA}."
+          exit 1
 
       - name: Output deployment URL
         run: |
