@@ -48,7 +48,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: packages/eval/datasets
-          key: eval-datasets-${{ github.run_id }}
+          key: eval-datasets-v2
           restore-keys: eval-datasets-
 
       - name: Restore single-model baseline cache
