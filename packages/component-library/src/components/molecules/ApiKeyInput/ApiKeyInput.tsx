@@ -3,12 +3,12 @@ import { Eye, EyeOff, CheckCircle, XCircle } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Input } from '../../atoms/Input';
 import { Label } from '../../atoms/Label';
-import { ProviderLogo } from '../../atoms/ProviderLogo';
+import { ProviderLogo, type ProviderLogoProvider } from '../../atoms/ProviderLogo';
 import { LoadingSpinner } from '../../atoms/LoadingSpinner';
 import { InlineAlert } from '../../atoms/InlineAlert';
 import { cn } from '@/lib/utils';
 
-export type Provider = 'openai' | 'anthropic' | 'google' | 'xai' | 'deepseek' | 'perplexity';
+export type Provider = ProviderLogoProvider;
 export type ValidationStatus = 'idle' | 'validating' | 'valid' | 'invalid';
 
 export interface ApiKeyInputProps {

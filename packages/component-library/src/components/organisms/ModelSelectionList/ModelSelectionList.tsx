@@ -31,14 +31,6 @@ export interface ModelSelectionListProps {
   isMockMode?: boolean;
 }
 
-const PROVIDER_LABELS: Record<Provider, string> = {
-  openai: 'OpenAI',
-  anthropic: 'Anthropic',
-  google: 'Google',
-  xai: 'XAI',
-  deepseek: 'DeepSeek',
-  perplexity: 'Perplexity',
-};
 
 /**
  * ModelSelectionList organism for selecting AI models.
@@ -123,7 +115,7 @@ export const ModelSelectionList = React.forwardRef<HTMLDivElement, ModelSelectio
             <div key={provider} data-testid="provider-section" className="mb-8">
               {/* Provider Header */}
               <div className="flex items-center justify-between mb-4">
-                <Heading level={4} size="lg" className="text-foreground">{PROVIDER_LABELS[provider]}</Heading>
+                <Heading level={4} size="lg" className="text-foreground">{t(`providers.${provider}`)}</Heading>
                 {providerStatus?.[provider] && (
                   <div className="flex items-center gap-2">
                     {providerStatus[provider] === 'Ready' ? (

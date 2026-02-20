@@ -114,7 +114,7 @@ export function ResponsesSection({
             <ResponseCardSkeleton
               key={model.id}
               modelName={formatModelLabelFromId(model.model)}
-              provider={model.provider}
+              provider={model.provider as Provider}
               testId={`response-skeleton-${model.id}`}
             />
           ))}

@@ -2,7 +2,7 @@ import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Card, CardHeader, CardContent } from '../../atoms/Card';
 import { Badge } from '../../atoms/Badge';
-import { ProviderLogo } from '../../atoms/ProviderLogo';
+import { ProviderLogo, type ProviderLogoProvider } from '../../atoms/ProviderLogo';
 import { LoadingSpinner } from '../../atoms/LoadingSpinner';
 import { InlineAlert } from '../../atoms/InlineAlert';
 import { Rating } from '../../atoms/Rating';
@@ -11,7 +11,7 @@ import { cn } from '@/lib/utils';
 import { ChevronDown, ChevronUp, Copy } from 'lucide-react';
 import { Markdown } from '../../atoms/Markdown';
 
-export type Provider = 'openai' | 'anthropic' | 'google' | 'xai' | 'deepseek' | 'perplexity';
+export type Provider = ProviderLogoProvider;
 export type ResponseStatus = 'streaming' | 'complete' | 'error';
 export type ResponseType = 'ai' | 'manual';
 
