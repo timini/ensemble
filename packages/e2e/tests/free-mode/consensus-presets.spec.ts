@@ -84,7 +84,7 @@ test.describe('Consensus Presets (Free Mode)', () => {
       // ELO should be disabled (requires 3+ models)
       const eloRadio = page.getByTestId('preset-elo');
       await expect(eloRadio).toBeDisabled();
-      await expect(page.getByText(/requires at least 3 models/i)).toBeVisible();
+      await expect(page.getByTestId('preset-min-models-warning')).toBeVisible();
     });
 
     // ==========================================

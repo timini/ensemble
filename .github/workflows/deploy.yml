@@ -46,6 +46,14 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Build consensus packages
+        run: |
+          npm run build --workspace=packages/consensus-core
+          npm run build --workspace=packages/consensus-standard
+          npm run build --workspace=packages/consensus-elo
+          npm run build --workspace=packages/consensus-majority
+          npm run build --workspace=packages/consensus-council
+
       - name: Build shared-utils
         run: npm run build --workspace=packages/shared-utils
 
