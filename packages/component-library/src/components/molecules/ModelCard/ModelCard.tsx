@@ -3,10 +3,10 @@ import { useTranslation } from 'react-i18next';
 import type { ModelModality } from '@ensemble-ai/shared-utils/providers';
 import { Card, CardContent } from '../../atoms/Card';
 import { Badge } from '../../atoms/Badge';
-import { ProviderLogo } from '../../atoms/ProviderLogo';
+import { ProviderLogo, type ProviderLogoProvider } from '../../atoms/ProviderLogo';
 import { cn } from '@/lib/utils';
 
-export type Provider = 'openai' | 'anthropic' | 'google' | 'xai' | 'deepseek' | 'perplexity';
+export type Provider = ProviderLogoProvider;
 export type { ModelModality };
 
 export interface ModelCardProps {

@@ -16,13 +16,13 @@ import { ResponseCardSkeleton } from "./ResponseCardSkeleton";
 interface SelectedModel {
   id: string;
   model: string;
-  provider: string;
+  provider: Provider;
 }
 
 interface StreamingResponse {
   modelId: string;
   model: string;
-  provider: string;
+  provider: Provider;
   response: string;
   error?: string | null;
   isStreaming: boolean;
@@ -88,7 +88,7 @@ export function ResponsesSection({
             <ResponseCard
               key={response.modelId}
               modelName={response.model}
-              provider={response.provider as Provider}
+              provider={response.provider}
               status={
                 response.error
                   ? "error"

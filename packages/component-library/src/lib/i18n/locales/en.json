@@ -241,7 +241,9 @@
     "openai": "OpenAI",
     "anthropic": "Anthropic",
     "google": "Google",
-    "xai": "XAI"
+    "xai": "XAI",
+    "deepseek": "DeepSeek",
+    "perplexity": "Perplexity"
   },
   "pages": {
     "prompt": {

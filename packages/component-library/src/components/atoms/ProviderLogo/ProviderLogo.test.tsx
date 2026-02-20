@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { ProviderLogo } from './ProviderLogo';
 
-const PROVIDERS = ['openai', 'anthropic', 'google', 'xai', 'deepseek'] as const;
+const PROVIDERS = ['openai', 'anthropic', 'google', 'xai', 'deepseek', 'perplexity'] as const;
 
 describe('ProviderLogo', () => {
   describe('rendering', () => {

@@ -29,13 +29,6 @@ describe('ResponseCardSkeleton', () => {
     expect(screen.getByText('Google')).toBeInTheDocument();
   });
 
-  it('falls back to raw provider string for unknown providers', () => {
-    render(
-      <ResponseCardSkeleton modelName="Test" provider="unknown-provider" />
-    );
-    expect(screen.getByText('unknown-provider')).toBeInTheDocument();
-  });
-
   it('renders aria-busy for loading state', () => {
     render(
       <ResponseCardSkeleton
