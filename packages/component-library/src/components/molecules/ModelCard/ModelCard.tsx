@@ -6,7 +6,7 @@ import { Badge } from '../../atoms/Badge';
 import { ProviderLogo } from '../../atoms/ProviderLogo';
 import { cn } from '@/lib/utils';
 
-export type Provider = 'openai' | 'anthropic' | 'google' | 'xai' | 'deepseek';
+export type Provider = 'openai' | 'anthropic' | 'google' | 'xai' | 'deepseek' | 'perplexity';
 export type { ModelModality };
 
 export interface ModelCardProps {

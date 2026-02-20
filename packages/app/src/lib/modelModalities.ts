@@ -56,6 +56,7 @@ function supportsImage(provider: ProviderName, identifier: string): boolean {
     case 'xai':
       return identifier.includes('vision') || identifier.includes('image');
     case 'deepseek':
+    case 'perplexity':
       return false;
     default:
       return false;

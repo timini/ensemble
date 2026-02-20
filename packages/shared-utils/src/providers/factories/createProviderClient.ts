@@ -5,6 +5,7 @@ import { FreeAnthropicClient } from '../clients/anthropic/FreeAnthropicClient';
 import { FreeGoogleClient } from '../clients/google/FreeGoogleClient';
 import { FreeXAIClient } from '../clients/xai/FreeXAIClient';
 import { FreeDeepSeekClient } from '../clients/deepseek/FreeDeepSeekClient';
+import { FreePerplexityClient } from '../clients/perplexity/FreePerplexityClient';
 
 interface CreateProviderClientOptions {
   provider: ProviderName;
@@ -37,6 +38,8 @@ export function createProviderClient({
         return new FreeXAIClient(provider, getApiKey);
       case 'deepseek':
         return new FreeDeepSeekClient(provider, getApiKey);
+      case 'perplexity':
+        return new FreePerplexityClient(provider, getApiKey);
       default:
         throw new Error(`Unsupported provider: ${provider}`);
     }

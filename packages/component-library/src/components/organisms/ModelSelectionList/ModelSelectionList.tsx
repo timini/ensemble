@@ -37,6 +37,7 @@ const PROVIDER_LABELS: Record<Provider, string> = {
   google: 'Google',
   xai: 'XAI',
   deepseek: 'DeepSeek',
+  perplexity: 'Perplexity',
 };
 
 /**
@@ -84,6 +85,7 @@ export const ModelSelectionList = React.forwardRef<HTMLDivElement, ModelSelectio
         google: [],
         xai: [],
         deepseek: [],
+        perplexity: [],
       };
 
       models.forEach((model) => {

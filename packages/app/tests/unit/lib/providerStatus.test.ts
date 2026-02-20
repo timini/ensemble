@@ -8,6 +8,7 @@ const baseStatuses: Record<Provider, 'idle' | 'invalid' | 'valid' | 'validating'
   google: 'validating',
   xai: 'idle',
   deepseek: 'idle',
+  perplexity: 'idle',
 };
 
 describe('createProviderStatusLabels', () => {
@@ -24,6 +25,7 @@ describe('createProviderStatusLabels', () => {
       google: 'Ready',
       xai: 'Ready',
       deepseek: 'Ready',
+      perplexity: 'Ready',
     });
   });
 

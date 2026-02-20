@@ -6,6 +6,7 @@ import AnthropicMono from '@lobehub/icons/es/Anthropic/components/Mono';
 import GeminiMono from '@lobehub/icons/es/Gemini/components/Mono';
 import XAIMono from '@lobehub/icons/es/XAI/components/Mono';
 import DeepSeekMono from '@lobehub/icons/es/DeepSeek/components/Mono';
+import PerplexityMono from '@lobehub/icons/es/Perplexity/components/Mono';
 
 const SIZE_MAP = {
   sm: 20,
@@ -28,7 +29,7 @@ const providerLogoVariants = cva('inline-flex shrink-0 items-center justify-cent
   },
 });
 
-export type ProviderLogoProvider = 'openai' | 'anthropic' | 'google' | 'xai' | 'deepseek';
+export type ProviderLogoProvider = 'openai' | 'anthropic' | 'google' | 'xai' | 'deepseek' | 'perplexity';
 
 export interface ProviderLogoProps
   extends Omit<React.HTMLAttributes<HTMLSpanElement>, 'children'>,
@@ -43,6 +44,7 @@ const PROVIDER_ICONS: Record<ProviderLogoProvider, typeof OpenAIMono> = {
   google: GeminiMono,
   xai: XAIMono,
   deepseek: DeepSeekMono,
+  perplexity: PerplexityMono,
 };
 
 /**

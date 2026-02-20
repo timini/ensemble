@@ -8,7 +8,7 @@ import { LoadingSpinner } from '../../atoms/LoadingSpinner';
 import { InlineAlert } from '../../atoms/InlineAlert';
 import { cn } from '@/lib/utils';
 
-export type Provider = 'openai' | 'anthropic' | 'google' | 'xai' | 'deepseek';
+export type Provider = 'openai' | 'anthropic' | 'google' | 'xai' | 'deepseek' | 'perplexity';
 export type ValidationStatus = 'idle' | 'validating' | 'valid' | 'invalid';
 
 export interface ApiKeyInputProps {
@@ -134,6 +134,7 @@ export const ApiKeyInput = React.forwardRef<HTMLInputElement, ApiKeyInputProps>(
             placeholder={placeholder}
             onChange={handleChange}
             disabled={disabled}
+            data-validation-status={validationStatus}
             aria-invalid={validationStatus === 'invalid' ? 'true' : undefined}
             aria-describedby={
               error

@@ -60,14 +60,14 @@ test.describe('Features Page', () => {
     expect(count).toBeGreaterThanOrEqual(10);
   });
 
-  test('displays Model Ecosystem section with 4 providers', async ({ page }) => {
+  test('displays Model Ecosystem section with 5 providers', async ({ page }) => {
     const section = page.getByTestId('features-models-section');
     await expect(section).toBeVisible();
     await expect(section.getByRole('heading', { level: 2 })).toBeVisible();
 
-    // Verify 4 provider cards
+    // Verify 5 provider cards
     const providerHeadings = section.getByRole('heading', { level: 3 });
-    await expect(providerHeadings).toHaveCount(4);
+    await expect(providerHeadings).toHaveCount(5);
   });
 
   test('displays Security & Privacy section with feature list', async ({ page }) => {

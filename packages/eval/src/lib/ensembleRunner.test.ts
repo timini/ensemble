@@ -63,6 +63,7 @@ describe('EnsembleRunner', () => {
         google: openaiProvider,
         xai: openaiProvider,
         deepseek: openaiProvider,
+        perplexity: openaiProvider,
       }),
       'mock',
     );
@@ -108,6 +109,7 @@ describe('EnsembleRunner', () => {
         google: provider,
         xai: provider,
         deepseek: provider,
+        perplexity: provider,
       }),
       'mock',
       { requestDelayMs: 25 },
@@ -138,6 +140,7 @@ describe('EnsembleRunner', () => {
         google: provider,
         xai: provider,
         deepseek: provider,
+        perplexity: provider,
       }),
       'mock',
       { temperature: 0 },
@@ -164,6 +167,7 @@ describe('EnsembleRunner', () => {
         google: provider,
         xai: provider,
         deepseek: provider,
+        perplexity: provider,
       }),
       'mock',
     );
@@ -193,6 +197,7 @@ describe('EnsembleRunner', () => {
         google: provider,
         xai: provider,
         deepseek: provider,
+        perplexity: provider,
       }),
       'mock',
       { retry: { maxRetries: 3, baseDelayMs: 1, maxJitterMs: 0 } },
@@ -224,6 +229,7 @@ describe('EnsembleRunner', () => {
         google: provider,
         xai: provider,
         deepseek: provider,
+        perplexity: provider,
       }),
       'mock',
       { retry: { maxRetries: 3, baseDelayMs: 1, maxJitterMs: 0 } },
@@ -270,6 +276,7 @@ describe('EnsembleRunner', () => {
         google: provider,
         xai: provider,
         deepseek: provider,
+        perplexity: provider,
       }),
       'mock',
       {
@@ -313,6 +320,7 @@ describe('EnsembleRunner', () => {
         google: provider,
         xai: provider,
         deepseek: provider,
+        perplexity: provider,
       }),
       'mock',
     );

@@ -8,6 +8,7 @@ const statuses: Record<Provider, ValidationStatus> = {
   google: 'validating',
   xai: 'idle',
   deepseek: 'idle',
+  perplexity: 'idle',
 };
 
 describe('provider status utilities', () => {
@@ -19,6 +20,7 @@ describe('provider status utilities', () => {
       google: 'idle',
       xai: 'idle',
       deepseek: 'idle',
+      perplexity: 'idle',
     });
   });
 

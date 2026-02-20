@@ -88,6 +88,7 @@ describe('createDebouncedValidator', () => {
       google: null,
       xai: null,
       deepseek: null,
+      perplexity: null,
     } as Record<Provider, NodeJS.Timeout | null>,
   };
 
@@ -99,6 +100,7 @@ describe('createDebouncedValidator', () => {
       google: null,
       xai: null,
       deepseek: null,
+      perplexity: null,
     };
   });
 

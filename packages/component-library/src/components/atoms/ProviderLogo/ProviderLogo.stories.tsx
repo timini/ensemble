@@ -11,7 +11,7 @@ const meta = {
   argTypes: {
     provider: {
       control: 'select',
-      options: ['openai', 'anthropic', 'google', 'xai', 'deepseek'],
+      options: ['openai', 'anthropic', 'google', 'xai', 'deepseek', 'perplexity'],
     },
     size: {
       control: 'select',
@@ -43,6 +43,10 @@ export const DeepSeek: Story = {
   args: { provider: 'deepseek', size: 'lg' },
 };
 
+export const Perplexity: Story = {
+  args: { provider: 'perplexity', size: 'lg' },
+};
+
 export const AllProviders: Story = {
   args: { provider: 'openai' },
   render: () => (
@@ -66,6 +70,10 @@ export const AllProviders: Story = {
       <div className="flex flex-col items-center gap-2">
         <ProviderLogo provider="deepseek" size="xl" />
         <span className="text-xs text-muted-foreground">DeepSeek</span>
+      </div>
+      <div className="flex flex-col items-center gap-2">
+        <ProviderLogo provider="perplexity" size="xl" />
+        <span className="text-xs text-muted-foreground">Perplexity</span>
       </div>
     </div>
   ),

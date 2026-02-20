@@ -5,7 +5,7 @@ import {
 } from '@ensemble-ai/shared-utils/providers';
 import { useStore } from '~/store';
 
-const PROVIDERS: ProviderName[] = ['openai', 'anthropic', 'google', 'xai', 'deepseek'];
+const PROVIDERS: ProviderName[] = ['openai', 'anthropic', 'google', 'xai', 'deepseek', 'perplexity'];
 
 export function initializeProviders(): void {
   const registry = ProviderRegistry.getInstance();

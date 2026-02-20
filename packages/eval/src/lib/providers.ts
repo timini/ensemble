@@ -11,6 +11,7 @@ const API_KEY_ENV: Record<EvalProvider, string> = {
   google: 'GOOGLE_API_KEY',
   xai: 'XAI_API_KEY',
   deepseek: 'DEEPSEEK_API_KEY',
+  perplexity: 'PERPLEXITY_API_KEY',
 };
 
 export function getApiKeyForProvider(provider: EvalProvider): string | null {

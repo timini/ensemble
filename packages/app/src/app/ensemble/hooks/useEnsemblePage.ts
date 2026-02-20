@@ -66,6 +66,7 @@ export function useEnsemblePage() {
             google: safeApiKeys.google?.status ?? 'idle',
             xai: safeApiKeys.xai?.status ?? 'idle',
             deepseek: safeApiKeys.deepseek?.status ?? 'idle',
+            perplexity: safeApiKeys.perplexity?.status ?? 'idle',
         }),
         [safeApiKeys],
     );
@@ -102,6 +103,7 @@ export function useEnsemblePage() {
         google: null,
         xai: null,
         deepseek: null,
+        perplexity: null,
     });
 
     // Handler for validation status changes
