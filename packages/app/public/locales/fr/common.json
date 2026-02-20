@@ -15,6 +15,13 @@
   "accessibility": {
     "skipToMainContent": "Aller au contenu principal"
   },
+  "errors": {
+    "routeError": {
+      "title": "Une erreur est survenue",
+      "description": "Une erreur inattendue s'est produite. Veuillez réessayer.",
+      "tryAgain": "Réessayer"
+    }
+  },
   "common": {
     "loading": "Chargement...",
     "error": "Erreur",

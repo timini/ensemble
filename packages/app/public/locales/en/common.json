@@ -15,6 +15,13 @@
   "accessibility": {
     "skipToMainContent": "Skip to main content"
   },
+  "errors": {
+    "routeError": {
+      "title": "Something went wrong",
+      "description": "An unexpected error occurred. Please try again.",
+      "tryAgain": "Try Again"
+    }
+  },
   "common": {
     "loading": "Loading...",
     "error": "Error",

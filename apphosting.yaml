@@ -27,3 +27,9 @@ env:
     value: "true"
     availability:
       - BUILD
+
+  - variable: NEXT_PUBLIC_SENTRY_DSN
+    value: ""
+    availability:
+      - BUILD
+      - RUNTIME
