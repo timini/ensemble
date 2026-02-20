@@ -1,12 +1,27 @@
+/**
+ * @module consensus-elo/EloRankingConsensus
+ *
+ * ELO-based consensus strategy that ranks LLM responses using pairwise
+ * comparisons judged by an LLM, then synthesizes the top-ranked responses.
+ *
+ * Key features:
+ * - **Position-swap debiasing**: Each pair is judged twice (forward + reversed)
+ *   to detect and mitigate position bias in the judge LLM.
+ * - **Confidence-weighted K-factor**: Consistent judgments (HIGH confidence)
+ *   produce full ELO updates; inconsistent ones (LOW) get half weight.
+ * - **Chain-of-thought judging**: The judge prompt requests brief reasoning
+ *   before the verdict, improving judgment accuracy.
+ * - **Proper tie handling**: Ties correctly produce 0.5/0.5 ELO updates
+ *   (pushing unequal ratings toward each other). Only double-errors are skipped.
+ */
 
 import type { AIProvider, ConsensusModelResponse, ConsensusStrategy, RankingResult } from '@ensemble-ai/consensus-core';
+import { INITIAL_ELO, updateElo } from './eloScoring';
+import { judgePairWithSwap } from './eloJudge';
 
 const DEFAULT_TOP_K = 3;
 
 export class EloRankingConsensus implements ConsensusStrategy {
-    private static readonly K_FACTOR = 32;
-    private static readonly INITIAL_ELO = 1200;
-
     constructor(
         private judgeProvider: AIProvider,
         private judgeModelId: string,
@@ -15,8 +30,12 @@ export class EloRankingConsensus implements ConsensusStrategy {
     ) { }
 
     /**
-     * Ranks responses using an ELO rating system based on pairwise comparisons judged by an LLM.
-     * Requires at least 3 responses.
+     * Ranks responses using an ELO rating system with position-swap debiased
+     * pairwise comparisons. Requires at least 3 responses.
+     *
+     * Each pair of responses is judged twice (forward and reversed position)
+     * in parallel. Consistent judgments receive full K-factor weight;
+     * inconsistent ones receive half. Double-errors are skipped entirely.
      */
     async rankResponses(responses: ConsensusModelResponse[], prompt: string): Promise<RankingResult[]> {
         if (responses.length < 3) {
@@ -25,41 +44,41 @@ export class EloRankingConsensus implements ConsensusStrategy {
 
         // Initialize ELO scores
         const eloScores = new Map<string, number>();
-        responses.forEach(r => eloScores.set(r.modelId, EloRankingConsensus.INITIAL_ELO));
+        responses.forEach(r => eloScores.set(r.modelId, INITIAL_ELO));
 
-        // Generate Pairings (All-vs-All for accuracy)
-        // For < 10 responses this is feasible. 3 models = 3 pairs. 5 models = 10 pairs.
+        // Generate all-vs-all pairings (3 models = 3 pairs, 5 models = 10 pairs)
         const pairings = this.generatePairings(responses);
 
         // Run all pairwise comparisons in parallel
+        // Each pair internally runs 2 judge calls (forward + reversed)
         const judgments = await Promise.all(
             pairings.map(async (pair) => ({
                 pair,
-                winnerId: await this.judgePair(pair[0], pair[1], prompt),
+                judgment: await judgePairWithSwap(
+                    this.judgeProvider, this.judgeModelId,
+                    pair[0], pair[1], prompt,
+                ),
             })),
         );
 
-        // Apply ELO updates in original pairing order
-        for (const { pair, winnerId } of judgments) {
-            if (winnerId) {
-                this.updateElo(eloScores, pair[0].modelId, pair[1].modelId, winnerId);
+        // Apply ELO updates — skip only double-errors (confidence === undefined)
+        // Bug fix: previously `if (winnerId)` skipped ties (null) AND errors.
+        // Now ties correctly produce 0.5/0.5 ELO updates.
+        for (const { pair, judgment } of judgments) {
+            if (judgment.confidence !== undefined) {
+                updateElo(eloScores, pair[0].modelId, pair[1].modelId, judgment.winnerId, judgment.confidence);
             }
         }
 
-        // Convert to result
+        // Convert to sorted result array
         const results: RankingResult[] = Array.from(eloScores.entries()).map(([modelId, score]) => ({
             modelId,
             eloScore: score,
-            rank: 0, // Assigned after sorting
+            rank: 0,
         }));
 
-        // Sort descending
         results.sort((a, b) => b.eloScore - a.eloScore);
-
-        // Assign rank
-        results.forEach((r, index) => {
-            r.rank = index + 1;
-        });
+        results.forEach((r, index) => { r.rank = index + 1; });
 
         return results;
     }
@@ -71,7 +90,6 @@ export class EloRankingConsensus implements ConsensusStrategy {
 
         const rankings = await this.rankResponses(responses, prompt);
 
-        // Take top N
         const requestedTopN = topN > 0 ? topN : DEFAULT_TOP_K;
         const effectiveTopN = Math.max(1, Math.min(requestedTopN, rankings.length));
         const topNRankings = rankings.slice(0, effectiveTopN);
@@ -111,7 +129,6 @@ Output rules:
         `.trim();
 
         return new Promise((resolve) => {
-
             this.summarizerProvider.streamResponse(prompt, this.summarizerModelId,
                 () => { void 0; },
                 (finalText: string) => resolve(finalText),
@@ -131,68 +148,5 @@ Output rules:
             }
         }
         return pairs;
-    }
-
-    private async judgePair(modelA: ConsensusModelResponse, modelB: ConsensusModelResponse, originalPrompt: string): Promise<string | null> {
-        const prompt = `
-You are an impartial evaluator selecting the more correct answer.
-
-Original Question:
-${originalPrompt}
-
-Model A:
-${modelA.content}
-
-Model B:
-${modelB.content}
-
-Decision rules:
-- Choose the answer that is more factually correct and better follows the question constraints.
-- If both are equally valid, select TIE.
-- Ignore style, verbosity, and confidence wording.
-
-Output exactly one of:
-- WINNER: A
-- WINNER: B
-- WINNER: TIE
-        `.trim();
-
-        return new Promise((resolve) => {
-
-            this.judgeProvider.streamResponse(prompt, this.judgeModelId,
-                () => { void 0; },
-                (finalText: string) => {
-                    const normalized = finalText.toUpperCase();
-                    if (normalized.includes('WINNER: A')) {
-                        resolve(modelA.modelId);
-                    } else if (normalized.includes('WINNER: B')) {
-                        resolve(modelB.modelId);
-                    } else {
-                        resolve(null); // Tie or unclear
-                    }
-                },
-                (err: Error) => {
-                    console.error('Judge error:', err);
-                    resolve(null);
-                }
-            );
-        });
-    }
-
-    private updateElo(scores: Map<string, number>, playerAId: string, playerBId: string, winnerId: string | null): void {
-        const ratingA = scores.get(playerAId)!;
-        const ratingB = scores.get(playerBId)!;
-
-        const expectedScoreA = 1 / (1 + Math.pow(10, (ratingB - ratingA) / 400));
-        const expectedScoreB = 1 / (1 + Math.pow(10, (ratingA - ratingB) / 400));
-
-        const actualScoreA = winnerId === playerAId ? 1 : winnerId === playerBId ? 0 : 0.5;
-        const actualScoreB = winnerId === playerBId ? 1 : winnerId === playerAId ? 0 : 0.5;
-
-        const newRatingA = ratingA + EloRankingConsensus.K_FACTOR * (actualScoreA - expectedScoreA);
-        const newRatingB = ratingB + EloRankingConsensus.K_FACTOR * (actualScoreB - expectedScoreB);
-
-        scores.set(playerAId, newRatingA);
-        scores.set(playerBId, newRatingB);
     }
 }
