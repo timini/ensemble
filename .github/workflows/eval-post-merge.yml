@@ -64,6 +64,15 @@ jobs:
             eval-baseline-${{ hashFiles('packages/eval/src/lib/baselineCache.ts') }}-
             eval-baseline-
 
+      - name: Build consensus packages
+        if: steps.check-keys.outputs.keys_available == 'true'
+        run: |
+          npm run build --workspace=packages/consensus-core
+          npm run build --workspace=packages/consensus-standard
+          npm run build --workspace=packages/consensus-elo
+          npm run build --workspace=packages/consensus-majority
+          npm run build --workspace=packages/consensus-council
+
       - name: Build shared-utils
         if: steps.check-keys.outputs.keys_available == 'true'
         run: npm run build --workspace=packages/shared-utils
