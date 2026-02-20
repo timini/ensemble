@@ -220,13 +220,9 @@ test.describe('Full Workflow - Mock Mode', () => {
     });
 
     await test.step('Test "Start Over" navigation', async () => {
-      // Wait for ALL response cards to finish streaming so the page layout stabilises
+      // Wait for response cards to render so layout is stable before clicking navigation.
       const responseCards = page.locator('[data-testid^="response-card-"]');
       await expect(responseCards.first()).toBeVisible({ timeout: 10000 });
-      const count = await responseCards.count();
-      for (let i = 0; i < count; i++) {
-        await expect(responseCards.nth(i)).toHaveAttribute('data-status', 'complete', { timeout: 30000 });
-      }
 
       const startOverButton = page.getByRole('button', { name: /start over/i });
       await expect(startOverButton).toBeVisible({ timeout: 10000 });

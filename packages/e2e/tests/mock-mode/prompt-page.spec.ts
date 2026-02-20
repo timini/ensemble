@@ -16,8 +16,21 @@ import { test, expect, type Page } from '@playwright/test';
 const enabledModels = (page: Page) =>
   page.locator('[data-testid^="model-card-"][data-disabled="false"]');
 
+const openManualResponseModal = async (page: Page) => {
+  const addButton = page.getByTestId('add-manual-response');
+  await expect(addButton).toBeVisible();
+  await expect(addButton).toBeEnabled();
+  await addButton.click();
+
+  const modal = page.getByTestId('manual-response-modal');
+  if (!(await modal.isVisible())) {
+    await addButton.click();
+  }
+  await expect(modal).toBeVisible({ timeout: 10000 });
+};
+
 const addManualResponse = async (page: Page) => {
-  await page.getByTestId('add-manual-response').click();
+  await openManualResponseModal(page);
   await page.getByTestId('model-name-input').fill('Manual Test');
   await page.getByTestId('model-provider-input').fill('Provider');
   await page.getByTestId('response-textarea').fill('Manual preview content');
@@ -201,8 +214,8 @@ test.describe('Prompt Page', () => {
 
   test('displays manual responses preview when manual responses exist', async ({ page }) => {
     await page.goto('/ensemble');
-    await addManualResponse(page);
     await expect(page.getByRole('button', { name: 'Next', exact: true })).toBeEnabled();
+    await addManualResponse(page);
     await page.getByRole('button', { name: 'Next', exact: true }).click();
 
     await expect(page.getByTestId('manual-responses-preview')).toContainText('Manual Test');
