@@ -28,19 +28,20 @@ describe('EnsembleFlowDiagram', () => {
     expect(screen.getByText('Consensus')).toBeInTheDocument();
   });
 
-  it('renders all four model labels', () => {
+  it('renders all five model labels', () => {
     render(<EnsembleFlowDiagram />);
     expect(screen.getByText('OpenAI')).toBeInTheDocument();
     expect(screen.getByText('Anthropic')).toBeInTheDocument();
     expect(screen.getByText('Google')).toBeInTheDocument();
     expect(screen.getByText('xAI')).toBeInTheDocument();
+    expect(screen.getByText('Perplexity')).toBeInTheDocument();
   });
 
   it('uses semantic color tokens instead of hardcoded colors', () => {
     render(<EnsembleFlowDiagram />);
     const modelChips = screen.getAllByTestId('model-chip');
 
-    expect(modelChips).toHaveLength(4);
+    expect(modelChips).toHaveLength(5);
 
     modelChips.forEach((chip) => {
       expect(chip.className).not.toMatch(/green-\d+/);

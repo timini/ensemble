@@ -2,6 +2,7 @@ import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Card, CardHeader, CardContent } from '../../atoms/Card';
 import { Badge } from '../../atoms/Badge';
+import { ProviderLogo } from '../../atoms/ProviderLogo';
 import { LoadingSpinner } from '../../atoms/LoadingSpinner';
 import { InlineAlert } from '../../atoms/InlineAlert';
 import { Rating } from '../../atoms/Rating';
@@ -10,7 +11,7 @@ import { cn } from '@/lib/utils';
 import { ChevronDown, ChevronUp, Copy } from 'lucide-react';
 import { Markdown } from '../../atoms/Markdown';
 
-export type Provider = 'openai' | 'anthropic' | 'google' | 'xai' | 'deepseek';
+export type Provider = 'openai' | 'anthropic' | 'google' | 'xai' | 'deepseek' | 'perplexity';
 export type ResponseStatus = 'streaming' | 'complete' | 'error';
 export type ResponseType = 'ai' | 'manual';
 
@@ -51,6 +52,7 @@ export const PROVIDER_NAMES = {
   google: 'Google',
   xai: 'XAI',
   deepseek: 'DeepSeek',
+  perplexity: 'Perplexity',
 } as const;
 
 /**
@@ -134,7 +136,12 @@ export const ResponseCard = React.forwardRef<HTMLDivElement, ResponseCardProps>(
                 </div>
               ) : (
                 <>
-                  {provider && <Badge variant="outline">{PROVIDER_NAMES[provider]}</Badge>}
+                  {provider && (
+                    <Badge variant="outline" className="gap-1.5">
+                      <ProviderLogo provider={provider} size="sm" />
+                      {PROVIDER_NAMES[provider]}
+                    </Badge>
+                  )}
                   {modelName && <span className="font-semibold text-base">{modelName}</span>}
                 </>
               )}

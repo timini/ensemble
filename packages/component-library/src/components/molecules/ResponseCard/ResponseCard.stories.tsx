@@ -22,7 +22,7 @@ const meta = {
     },
     provider: {
       control: 'select',
-      options: ['openai', 'anthropic', 'google', 'xai'],
+      options: ['openai', 'anthropic', 'google', 'xai', 'perplexity'],
       description: 'AI provider (for AI responses)',
     },
     rating: {

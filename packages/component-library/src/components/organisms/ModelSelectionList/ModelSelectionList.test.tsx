@@ -540,14 +540,14 @@ describe('ModelSelectionList', () => {
         />
       );
 
-      // OpenAI models should be disabled
-      const openaiCards = container.querySelectorAll('[data-provider="openai"]');
+      // OpenAI models should be disabled (select only card elements, not nested provider logos)
+      const openaiCards = container.querySelectorAll('[data-testid^="model-card"][data-provider="openai"]');
       openaiCards.forEach((card) => {
         expect(card).toHaveAttribute('data-disabled', 'true');
       });
 
       // Anthropic models should not be disabled
-      const anthropicCards = container.querySelectorAll('[data-provider="anthropic"]');
+      const anthropicCards = container.querySelectorAll('[data-testid^="model-card"][data-provider="anthropic"]');
       anthropicCards.forEach((card) => {
         expect(card).toHaveAttribute('data-disabled', 'false');
       });

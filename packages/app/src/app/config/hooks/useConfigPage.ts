@@ -13,7 +13,7 @@ import { toError } from '~/lib/errors';
 import { getHydratedStatus } from '~/lib/providerStatus';
 import { logger } from '~/lib/logger';
 
-const PROVIDERS: Provider[] = ['openai', 'anthropic', 'google', 'xai', 'deepseek'];
+const PROVIDERS: Provider[] = ['openai', 'anthropic', 'google', 'xai', 'deepseek', 'perplexity'];
 
 export function useConfigPage() {
     const { t } = useTranslation('common');
@@ -41,6 +41,7 @@ export function useConfigPage() {
         google: null,
         xai: null,
         deepseek: null,
+        perplexity: null,
     });
     const { resetAutoHideTimer } = useApiKeyAutoHide();
     const [webCryptoSupported, setWebCryptoSupported] = useState(true);
@@ -65,6 +66,7 @@ export function useConfigPage() {
             google: apiKeys.google?.status ?? 'idle',
             xai: apiKeys.xai?.status ?? 'idle',
             deepseek: apiKeys.deepseek?.status ?? 'idle',
+            perplexity: apiKeys.perplexity?.status ?? 'idle',
         }),
         [apiKeys],
     );
@@ -185,6 +187,16 @@ export function useConfigPage() {
                 error: apiKeys.xai?.error,
                 validationStatus: hydratedStatuses.xai,
                 showKey: apiKeys.xai?.visible ?? false,
+            },
+            {
+                provider: 'perplexity' as Provider,
+                label: 'Perplexity API Key',
+                value: apiKeys.perplexity?.key ?? '',
+                placeholder: 'pplx-...',
+                helperText: hydratedStatuses.perplexity === 'valid' ? 'API key configured' : hydratedStatuses.perplexity === 'validating' ? 'Validating...' : hydratedStatuses.perplexity === 'invalid' ? 'Invalid API key' : 'Enter your Perplexity API key',
+                error: apiKeys.perplexity?.error,
+                validationStatus: hydratedStatuses.perplexity,
+                showKey: apiKeys.perplexity?.visible ?? false,
             },
         ];
     }, [apiKeys, hydratedStatuses, isFreeModeActive]);

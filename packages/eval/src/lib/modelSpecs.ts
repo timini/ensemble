@@ -1,6 +1,6 @@
 import type { EvalProvider, ModelSpec } from '../types.js';
 
-const VALID_PROVIDERS: EvalProvider[] = ['openai', 'anthropic', 'google', 'xai', 'deepseek'];
+const VALID_PROVIDERS: EvalProvider[] = ['openai', 'anthropic', 'google', 'xai', 'deepseek', 'perplexity'];
 const VALID_PROVIDER_SET = new Set<EvalProvider>(VALID_PROVIDERS);
 
 export function explodeList(values: string[]): string[] {

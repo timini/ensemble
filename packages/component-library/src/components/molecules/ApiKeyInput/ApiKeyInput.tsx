@@ -3,11 +3,12 @@ import { Eye, EyeOff, CheckCircle, XCircle } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Input } from '../../atoms/Input';
 import { Label } from '../../atoms/Label';
+import { ProviderLogo } from '../../atoms/ProviderLogo';
 import { LoadingSpinner } from '../../atoms/LoadingSpinner';
 import { InlineAlert } from '../../atoms/InlineAlert';
 import { cn } from '@/lib/utils';
 
-export type Provider = 'openai' | 'anthropic' | 'google' | 'xai' | 'deepseek';
+export type Provider = 'openai' | 'anthropic' | 'google' | 'xai' | 'deepseek' | 'perplexity';
 export type ValidationStatus = 'idle' | 'validating' | 'valid' | 'invalid';
 
 export interface ApiKeyInputProps {
@@ -119,7 +120,10 @@ export const ApiKeyInput = React.forwardRef<HTMLInputElement, ApiKeyInputProps>(
 
     return (
       <div className="w-full space-y-2" data-provider={provider} data-validation-status={validationStatus}>
-        <Label htmlFor={inputId}>{label}</Label>
+        <div className="inline-flex items-center gap-1.5">
+          <ProviderLogo provider={provider} size="sm" aria-hidden="true" />
+          <Label htmlFor={inputId}>{label}</Label>
+        </div>
 
         <div className="relative">
           <Input
@@ -130,6 +134,7 @@ export const ApiKeyInput = React.forwardRef<HTMLInputElement, ApiKeyInputProps>(
             placeholder={placeholder}
             onChange={handleChange}
             disabled={disabled}
+            data-validation-status={validationStatus}
             aria-invalid={validationStatus === 'invalid' ? 'true' : undefined}
             aria-describedby={
               error

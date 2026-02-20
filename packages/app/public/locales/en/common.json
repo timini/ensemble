@@ -74,7 +74,7 @@
     "modeSelectionCard": {
       "free": {
         "title": "Free Mode",
-        "description": "Bring your own API keys from OpenAI, Anthropic, Google, and xAI. Keys are stored securely in your browser.",
+        "description": "Bring your own API keys from OpenAI, Anthropic, Google, xAI, and Perplexity. Keys are stored securely in your browser.",
         "buttonText": "Use Free Mode"
       },
       "pro": {
@@ -181,7 +181,7 @@
       "description": "The science behind better decisions with AI ensembles",
       "whatIsEnsemble": {
         "heading": "What is Ensemble AI?",
-        "body": "Ensemble AI lets you query multiple large language models simultaneously and compare their responses side by side. Instead of relying on a single model's perspective, you get diverse viewpoints from OpenAI, Anthropic, Google, and xAI — then synthesise them into a consensus answer."
+        "body": "Ensemble AI lets you query multiple large language models simultaneously and compare their responses side by side. Instead of relying on a single model's perspective, you get diverse viewpoints from OpenAI, Anthropic, Google, xAI, and Perplexity — then synthesise them into a consensus answer."
       },
       "whyEnsemble": {
         "heading": "Why an Ensemble?",
@@ -239,7 +239,7 @@
     },
     "features": {
       "title": "Features",
-      "description": "Query 12+ AI models simultaneously, analyse their agreement, and synthesise the best answer",
+      "description": "Query 15+ AI models simultaneously, analyse their agreement, and synthesise the best answer",
       "differentiators": {
         "heading": "What Makes Ensemble AI Different",
         "items": [
@@ -263,7 +263,7 @@
       "capabilities": {
         "heading": "Built for Performance",
         "items": [
-          { "number": "12+", "label": "AI Models", "description": "Across OpenAI, Anthropic, Google, and xAI" },
+          { "number": "15+", "label": "AI Models", "description": "Across OpenAI, Anthropic, Google, xAI, and Perplexity" },
           { "number": "<100ms", "label": "Streaming", "description": "Buffered chunks with parallel responses" },
           { "number": "AES-256", "label": "Encryption", "description": "GCM mode with random 96-bit IVs" },
           { "number": "Zero", "label": "Lock-in", "description": "Direct browser-to-API in Free Mode" }
@@ -273,7 +273,7 @@
         "heading": "From Question to Consensus in 4 Steps",
         "steps": [
           { "name": "Configure", "description": "Choose Free Mode with AES-256 encrypted API keys or Pro Mode with managed credits." },
-          { "name": "Select Ensemble", "description": "Pick 2\u20136 models across 4 providers. Choose your summariser and consensus method." },
+          { "name": "Select Ensemble", "description": "Pick 2\u20136 models across 5 providers. Choose your summariser and consensus method." },
           { "name": "Enter Prompt", "description": "Write your question. Optionally add manual responses from experts or external tools." },
           { "name": "Review & Analyse", "description": "Watch responses stream in parallel. See agreement analysis and synthesised consensus in real-time." }
         ]
@@ -306,13 +306,14 @@
         }
       },
       "models": {
-        "heading": "12+ Models Across 4 Providers",
+        "heading": "15+ Models Across 5 Providers",
         "body": "Access the best models from every leading AI provider. New models appear automatically via dynamic discovery.",
         "providers": [
           { "name": "OpenAI", "models": "GPT-4o, GPT-4o Mini, o1-preview, o1-mini" },
           { "name": "Anthropic", "models": "Claude 3.5 Sonnet, Claude 3 Opus, Claude 3 Haiku" },
           { "name": "Google", "models": "Gemini 1.5 Pro, Gemini 1.5 Flash, Gemini 2.5 Flash" },
-          { "name": "xAI", "models": "Grok 2, Grok 2 Mini" }
+          { "name": "xAI", "models": "Grok 2, Grok 2 Mini" },
+          { "name": "Perplexity", "models": "Sonar, Sonar Pro, Sonar Deep Research, Sonar Reasoning, Sonar Reasoning Pro" }
         ]
       },
       "security": {

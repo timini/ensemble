@@ -1,14 +1,14 @@
 /**
  * Free Mode Happy Path E2E Test
  *
- * The complete sunny-day journey with all 4 providers:
- * 1. Config: Select Free mode, enter all 4 API keys
- * 2. Ensemble: Select one model per provider (4 total)
+ * The complete sunny-day journey with all 5 providers:
+ * 1. Config: Select Free mode, enter all 5 API keys
+ * 2. Ensemble: Select one model per provider (5 total)
  * 3. Prompt: Verify Standard summarisation is selected, enter prompt, submit
- * 4. Review: Verify all 4 responses complete, agreement analysis loads,
+ * 4. Review: Verify all 5 responses complete, agreement analysis loads,
  *    and consensus card loads with meaningful content
  *
- * Requires all 4 TEST_*_API_KEY env vars to be set.
+ * Requires all 5 TEST_*_API_KEY env vars to be set.
  * Skips gracefully when any key is missing.
  */
 
@@ -19,8 +19,9 @@ const OPENAI_API_KEY = process.env.TEST_OPENAI_API_KEY;
 const ANTHROPIC_API_KEY = process.env.TEST_ANTHROPIC_API_KEY;
 const GOOGLE_API_KEY = process.env.TEST_GOOGLE_API_KEY;
 const XAI_API_KEY = process.env.TEST_XAI_API_KEY;
+const PERPLEXITY_API_KEY = process.env.TEST_PERPLEXITY_API_KEY;
 
-const hasAllKeys = OPENAI_API_KEY && ANTHROPIC_API_KEY && GOOGLE_API_KEY && XAI_API_KEY;
+const hasAllKeys = OPENAI_API_KEY && ANTHROPIC_API_KEY && GOOGLE_API_KEY && XAI_API_KEY && PERPLEXITY_API_KEY;
 
 /** Timeouts for real API calls. */
 const TIMEOUT = {
@@ -39,6 +40,7 @@ const API_KEYS: Record<string, string | undefined> = {
   anthropic: ANTHROPIC_API_KEY,
   google: GOOGLE_API_KEY,
   xai: XAI_API_KEY,
+  perplexity: PERPLEXITY_API_KEY,
 };
 
 /** Provider prefixes used for model selection and response card matching. */
@@ -47,10 +49,11 @@ const PROVIDERS = [
   { modelPrefix: 'claude', responsePrefix: 'response-card-anthropic-', label: 'Anthropic' },
   { modelPrefix: 'gemini', responsePrefix: 'response-card-google-', label: 'Google' },
   { modelPrefix: 'grok', responsePrefix: 'response-card-xai-', label: 'XAI' },
+  { modelPrefix: 'sonar', responsePrefix: 'response-card-perplexity-', label: 'Perplexity' },
 ];
 
 test.describe('Free Mode — Happy Path', () => {
-  test.skip(!hasAllKeys, 'Skipping — one or more TEST_*_API_KEY env vars not set');
+  test.skip(!hasAllKeys, 'Skipping — one or more TEST_*_API_KEY env vars not set (need all 5 providers)');
 
   test.beforeEach(async ({ page }) => {
     await page.goto('/');
@@ -58,15 +61,15 @@ test.describe('Free Mode — Happy Path', () => {
     await page.reload();
   });
 
-  test('4 providers → Standard summarisation → all responses, agreement analysis, and consensus load', async ({
+  test('5 providers → Standard summarisation → all responses, agreement analysis, and consensus load', async ({
     page,
   }) => {
     test.setTimeout(TIMEOUT.TEST);
 
     // ==========================================
-    // STEP 1: Config Page — enter all 4 API keys
+    // STEP 1: Config Page — enter all 5 API keys
     // ==========================================
-    await test.step('Configure Free mode with all 4 API keys', async () => {
+    await test.step('Configure Free mode with all 5 API keys', async () => {
       await page.goto('/config');
 
       await page.locator('[data-mode="free"]').click();
@@ -89,7 +92,7 @@ test.describe('Free Mode — Happy Path', () => {
     });
 
     // ==========================================
-    // STEP 2: Ensemble Page — select 4 models
+    // STEP 2: Ensemble Page — select 5 models
     // ==========================================
     await test.step('Select one model per provider', async () => {
       await expect(page).toHaveURL('/ensemble');
@@ -102,7 +105,7 @@ test.describe('Free Mode — Happy Path', () => {
       const selectedCards = page.locator(
         '[data-testid^="model-card-"][data-selected="true"]',
       );
-      await expect(selectedCards).toHaveCount(4);
+      await expect(selectedCards).toHaveCount(5);
 
       await page.getByRole('button', { name: 'Next', exact: true }).click();
     });
@@ -127,7 +130,7 @@ test.describe('Free Mode — Happy Path', () => {
     // ==========================================
     // STEP 4: Review Page — verify everything loads
     // ==========================================
-    await test.step('Verify all 4 provider responses complete', async () => {
+    await test.step('Verify all 5 provider responses complete', async () => {
       for (const { responsePrefix, label } of PROVIDERS) {
         const card = page.locator(`[data-testid^="${responsePrefix}"]`).first();
         await expect(card).toBeVisible({ timeout: TIMEOUT.RESPONSE_VISIBLE });

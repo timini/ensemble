@@ -167,6 +167,7 @@ jobs:
           TEST_ANTHROPIC_API_KEY: ${{ secrets.TEST_ANTHROPIC_API_KEY }}
           TEST_GOOGLE_API_KEY: ${{ secrets.TEST_GOOGLE_API_KEY }}
           TEST_XAI_API_KEY: ${{ secrets.TEST_XAI_API_KEY }}
+          TEST_PERPLEXITY_API_KEY: ${{ secrets.TEST_PERPLEXITY_API_KEY }}
 
       - name: Upload test results
         uses: actions/upload-artifact@v4

@@ -17,9 +17,9 @@ describe('ModelCard', () => {
       expect(card).toBeInTheDocument();
     });
 
-    it('renders provider icon emoji', () => {
+    it('renders provider logo', () => {
       render(<ModelCard provider="openai" modelName="GPT-4" selected={false} isSummarizer={false} />);
-      expect(screen.getByText('🤖')).toBeInTheDocument();
+      expect(screen.getByTestId('provider-logo-openai')).toBeInTheDocument();
     });
 
     it('renders card content', () => {
@@ -98,24 +98,24 @@ describe('ModelCard', () => {
   });
 
   describe('provider-specific behavior', () => {
-    it('renders OpenAI provider icon correctly', () => {
+    it('renders OpenAI provider logo correctly', () => {
       render(<ModelCard provider="openai" modelName="GPT-4" selected={false} isSummarizer={false} />);
-      expect(screen.getByText('🤖')).toBeInTheDocument();
+      expect(screen.getByTestId('provider-logo-openai')).toBeInTheDocument();
     });
 
-    it('renders Anthropic provider icon correctly', () => {
+    it('renders Anthropic provider logo correctly', () => {
       render(<ModelCard provider="anthropic" modelName="Claude 3.5 Sonnet" selected={false} isSummarizer={false} />);
-      expect(screen.getByText('🧠')).toBeInTheDocument();
+      expect(screen.getByTestId('provider-logo-anthropic')).toBeInTheDocument();
     });
 
-    it('renders Google provider icon correctly', () => {
+    it('renders Google provider logo correctly', () => {
       render(<ModelCard provider="google" modelName="Gemini Pro" selected={false} isSummarizer={false} />);
-      expect(screen.getByText('🔍')).toBeInTheDocument();
+      expect(screen.getByTestId('provider-logo-google')).toBeInTheDocument();
     });
 
-    it('renders XAI provider icon correctly', () => {
+    it('renders XAI provider logo correctly', () => {
       render(<ModelCard provider="xai" modelName="Grok" selected={false} isSummarizer={false} />);
-      expect(screen.getByText('🚀')).toBeInTheDocument();
+      expect(screen.getByTestId('provider-logo-xai')).toBeInTheDocument();
     });
 
     it('applies correct provider data attribute', () => {

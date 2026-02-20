@@ -53,6 +53,7 @@ const sanitizeStateForPersist = (state: StoreState): StoreState => {
     'google',
     'xai',
     'deepseek',
+    'perplexity',
   ];
 
   sanitized.apiKeys = {
@@ -61,6 +62,7 @@ const sanitizeStateForPersist = (state: StoreState): StoreState => {
     google: null,
     xai: null,
     deepseek: null,
+    perplexity: null,
   };
 
   providers.forEach((provider) => {

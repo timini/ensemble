@@ -11,7 +11,7 @@ const meta = {
   argTypes: {
     provider: {
       control: 'select',
-      options: ['openai', 'anthropic', 'google', 'xai'],
+      options: ['openai', 'anthropic', 'google', 'xai', 'perplexity'],
       description: 'AI provider for the API key',
     },
     validationStatus: {

@@ -101,4 +101,36 @@ export const FALLBACK_MODELS: Model[] = [
     name: 'DeepSeek Reasoner',
     modalities: ['text'],
   },
+
+  // Perplexity (Sonar)
+  {
+    id: 'sonar',
+    provider: 'perplexity',
+    name: 'Sonar',
+    modalities: ['text'],
+  },
+  {
+    id: 'sonar-pro',
+    provider: 'perplexity',
+    name: 'Sonar Pro',
+    modalities: ['text'],
+  },
+  {
+    id: 'sonar-deep-research',
+    provider: 'perplexity',
+    name: 'Sonar Deep Research',
+    modalities: ['text'],
+  },
+  {
+    id: 'sonar-reasoning',
+    provider: 'perplexity',
+    name: 'Sonar Reasoning',
+    modalities: ['text'],
+  },
+  {
+    id: 'sonar-reasoning-pro',
+    provider: 'perplexity',
+    name: 'Sonar Reasoning Pro',
+    modalities: ['text'],
+  },
 ];

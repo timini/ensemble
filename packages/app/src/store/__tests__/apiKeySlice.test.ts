@@ -86,6 +86,7 @@ describe('apiKeySlice', () => {
         google: null,
         xai: null,
         deepseek: null,
+        perplexity: null,
       },
       encryptionInitialized: true,
     });

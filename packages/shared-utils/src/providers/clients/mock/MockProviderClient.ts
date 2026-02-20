@@ -231,6 +231,30 @@ export class MockProviderClient implements AIProvider {
         costPer1kTokens: 0.00055,
         modalities: ['text'],
       },
+      {
+        id: 'sonar',
+        name: 'Sonar',
+        provider: 'perplexity',
+        contextWindow: 128000,
+        costPer1kTokens: 0.001,
+        modalities: ['text'],
+      },
+      {
+        id: 'sonar-pro',
+        name: 'Sonar Pro',
+        provider: 'perplexity',
+        contextWindow: 200000,
+        costPer1kTokens: 0.003,
+        modalities: ['text'],
+      },
+      {
+        id: 'sonar-reasoning',
+        name: 'Sonar Reasoning',
+        provider: 'perplexity',
+        contextWindow: 128000,
+        costPer1kTokens: 0.005,
+        modalities: ['text'],
+      },
     ];
 
     if (this.config.providerFilter) {
@@ -256,6 +280,9 @@ export class MockProviderClient implements AIProvider {
       'gemini-1.5-flash': [600, 800],
       'grok-2': [700, 900],
       'grok-2-mini': [550, 750],
+      'sonar': [600, 800],
+      'sonar-pro': [700, 900],
+      'sonar-reasoning': [650, 850],
     };
 
     const [min, max] = ranges[model] ?? [600, 800];
