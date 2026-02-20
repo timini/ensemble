@@ -4,6 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "apphosting:build": "cd ../.. && npm run build --workspace=packages/consensus-core && npm run build --workspace=packages/consensus-standard && npm run build --workspace=packages/consensus-elo && npm run build --workspace=packages/consensus-majority && npm run build --workspace=packages/consensus-council && npm run build --workspace=packages/shared-utils && cd packages/app && next build && node scripts/flatten-standalone.mjs",
     "build": "next build && node scripts/flatten-standalone.mjs",
     "check": "next lint && tsc --noEmit",
     "dev": "npm run dev:free",
