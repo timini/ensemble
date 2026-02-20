@@ -130,14 +130,14 @@ export function createQuickEvalCommand(): Command {
       const limiter = new ConcurrencyLimiter({ initial: initialConcurrency, min: 1, max: 60, monitor });
 
       const startTime = Date.now();
+      const elapsed = () => `${((Date.now() - startTime) / 1000).toFixed(1)}s`;
       const log = (s: string) => process.stderr.write(s);
-      log(`\n  Model: ${model}  Consensus: ${options.consensusModel}  Judge: ${options.judgeModel}\n`);
+      log(`\n  [${elapsed()}] Model: ${model}  Consensus: ${options.consensusModel}  Judge: ${options.judgeModel}\n`);
       log(`  Ensemble: ${ensembleSize}x  Temp: ${temperature}  Mode: ${mode}\n`);
       log(`  Strategies: ${strategies.join(', ')}  Concurrency: ${initialConcurrency} (AIMD)\n`);
       log(`  Datasets: ${datasetNames.join(', ')}  Sample: ${sampleCount}  Parallel: ${parallel ? 'yes' : 'no'}${questionTimeoutMs ? `  Timeout: ${questionTimeoutSec}s/q` : ''}\n\n`);
 
-      // Load questions, filtering to cached IDs when ensemble cache exists.
-      // This ensures 100% cache hit rate when using pre-generated responses.
+      log(`  [${elapsed()}] Loading datasets...\n`);
       const datasetQuestions: Array<{ name: BenchmarkDatasetName; questions: BenchmarkQuestion[] }> = [];
       const loadResults = await Promise.allSettled(
         datasetNames.map(async (name) => {
@@ -175,6 +175,7 @@ export function createQuickEvalCommand(): Command {
       if (datasetQuestions.length === 0) {
         throw new Error('All datasets failed to load. Cannot proceed.');
       }
+      log(`  [${elapsed()}] Datasets loaded: ${datasetQuestions.map(d => `${d.name}(${d.questions.length})`).join(', ')}\n`);
 
       const runArgs: RunDatasetArgs[] = datasetQuestions.map(({ name, questions }) => ({
         datasetName: name, questions,
@@ -187,6 +188,7 @@ export function createQuickEvalCommand(): Command {
       }));
 
       limiter.startStatsReporter(1_000);
+      log(`  [${elapsed()}] Starting eval runs...\n`);
 
       const allDatasetResults = parallel
         ? await Promise.all(runArgs.map((a) => runDataset(a, true)))
@@ -197,16 +199,21 @@ export function createQuickEvalCommand(): Command {
       limiter.stop();
       const finalStats = limiter.getStats();
       const wallSec = Math.round((Date.now() - startTime) / 1000);
-      log(`\n  [limiter final] ${finalStats.completed} tasks in ${wallSec}s (${(finalStats.completed / Math.max(wallSec, 1)).toFixed(1)}/s avg) | 429s: ${finalStats.rateLimits}\n`);
+      log(`\n  [${elapsed()}] [limiter final] ${finalStats.completed} tasks in ${wallSec}s (${(finalStats.completed / Math.max(wallSec, 1)).toFixed(1)}/s avg) | 429s: ${finalStats.rateLimits}\n`);
 
+      log(`  [${elapsed()}] Printing results...\n`);
       printResults(model, ensembleSize, strategies, allDatasetResults, Date.now() - startTime);
+      log(`  [${elapsed()}] Results printed.\n`);
 
       if (options.baseline) {
+        log(`  [${elapsed()}] Building baseline...\n`);
         const current = buildBaselineFromResults(
           model, ensembleSize, sampleCount, datasetNames, strategies, allDatasetResults,
         );
+        log(`  [${elapsed()}] Loading previous baseline...\n`);
         const previous = await loadBaseline(options.baseline);
         if (previous) {
+          log(`  [${elapsed()}] Running regression check...\n`);
           const result = checkRegression(previous, current, significanceLevel);
           printRegressionReport(result);
           if (!result.passed) {
@@ -217,9 +224,11 @@ export function createQuickEvalCommand(): Command {
         } else {
           process.stdout.write('\n  No previous baseline found. Saving initial baseline.\n');
         }
+        log(`  [${elapsed()}] Saving baseline...\n`);
         await saveBaseline(options.baseline, current);
         process.stdout.write(`  Baseline saved to ${options.baseline}\n`);
       }
+      log(`  [${elapsed()}] Done.\n`);
     });
 
   return command;

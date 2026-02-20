@@ -146,14 +146,21 @@ async function runEnsemble(args: RunDatasetArgs): Promise<PromptRunResult[]> {
 }
 
 export async function runDataset(args: RunDatasetArgs, parallel: boolean): Promise<DatasetResult> {
+  const dsStart = Date.now();
+  const dsElapsed = () => `${((Date.now() - dsStart) / 1000).toFixed(1)}s`;
+  process.stderr.write(`  [${args.datasetName}] runDataset start (parallel=${parallel})\n`);
+
   if (parallel) {
     const [singleRuns, ensembleRuns] = await Promise.all([
       runSingleBaseline(args),
       runEnsemble(args),
     ]);
+    process.stderr.write(`  [${args.datasetName}] runDataset done in ${dsElapsed()} (single=${singleRuns.length} ensemble=${ensembleRuns.length})\n`);
     return { dataset: args.datasetName, singleRuns, ensembleRuns };
   }
   const singleRuns = await runSingleBaseline(args);
+  process.stderr.write(`  [${args.datasetName}] single baseline done in ${dsElapsed()}\n`);
   const ensembleRuns = await runEnsemble(args);
+  process.stderr.write(`  [${args.datasetName}] runDataset done in ${dsElapsed()} (single=${singleRuns.length} ensemble=${ensembleRuns.length})\n`);
   return { dataset: args.datasetName, singleRuns, ensembleRuns };
 }

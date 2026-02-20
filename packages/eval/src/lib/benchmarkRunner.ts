@@ -87,12 +87,14 @@ export class BenchmarkRunner {
 
   private async runQuestion(question: BenchmarkQuestion): Promise<PromptRunResult> {
     const questionStart = Date.now();
+    const qElapsed = () => ((Date.now() - questionStart) / 1000).toFixed(1);
 
     const cachedResponses = this.ensembleResponseCache?.get(question.id);
     const responses = cachedResponses ?? await this.ensembleRunner.runPrompt(
       question.prompt,
       this.models,
     );
+    const responsesMs = Date.now() - questionStart;
 
     const firstSuccessful = responses.find((response) => !response.error);
     const summarizerTarget = this.summarizer
@@ -100,6 +102,7 @@ export class BenchmarkRunner {
       : firstSuccessful
         ? { provider: firstSuccessful.provider, model: firstSuccessful.model }
         : null;
+    const consensusStart = Date.now();
     const consensusResult = summarizerTarget
       ? await generateConsensus(
           this.strategies,
@@ -109,24 +112,36 @@ export class BenchmarkRunner {
           summarizerTarget.model,
         )
       : { outputs: {}, metrics: {} };
+    const consensusMs = Date.now() - consensusStart;
     const consensus = consensusResult.outputs;
     const consensusMetrics = Object.keys(consensusResult.metrics).length > 0
       ? consensusResult.metrics
       : undefined;
 
+    const evalStart = Date.now();
     const evaluation = await evaluateResponses(
       this.evaluator,
       responses,
       question.groundTruth,
       question.prompt,
     );
+    const evalMs = Date.now() - evalStart;
 
+    const consEvalStart = Date.now();
     const consensusEvaluation = await evaluateConsensusStrategies(
       this.evaluator,
       consensus,
       question.groundTruth,
       question.prompt,
     );
+    const consEvalMs = Date.now() - consEvalStart;
+
+    const totalMs = Date.now() - questionStart;
+    if (totalMs > 10_000) {
+      process.stderr.write(
+        `  [slow-q] ${question.id} ${qElapsed()}s total: responses=${(responsesMs / 1000).toFixed(1)}s consensus=${(consensusMs / 1000).toFixed(1)}s eval=${(evalMs / 1000).toFixed(1)}s consEval=${(consEvalMs / 1000).toFixed(1)}s\n`,
+      );
+    }
 
     return {
       questionId: question.id,
@@ -139,7 +154,7 @@ export class BenchmarkRunner {
       consensusMetrics,
       evaluation,
       consensusEvaluation,
-      durationMs: Date.now() - questionStart,
+      durationMs: totalMs,
     };
   }
 
@@ -204,7 +219,7 @@ export class BenchmarkRunner {
         }
       }
       if (timedOut > 0) {
-        process.stderr.write(`  [timeout] ${timedOut} question(s) skipped due to timeout\n`);
+        process.stderr.write(`  [timeout] ${timedOut} question(s) skipped due to timeout (note: zombie tasks may still hold limiter slots)\n`);
       }
       output.updatedAt = new Date().toISOString();
       await writeJsonFile(outputPath, output);
