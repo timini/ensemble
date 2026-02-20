@@ -17,7 +17,7 @@ import type { BenchmarkDatasetName, BenchmarkQuestion, EvalMode, StrategyName } 
 
 const DEFAULT_MODEL = 'google:gemini-2.5-flash-lite';
 const DEFAULT_CONSENSUS_MODEL = 'google:gemini-2.5-flash-lite';
-const DEFAULT_JUDGE_MODEL = 'google:gemini-2.5-flash';
+const DEFAULT_JUDGE_MODEL = 'google:gemini-2.5-flash-lite';
 const DEFAULT_ENSEMBLE_SIZE = 5;
 const DEFAULT_TEMPERATURE = 0.7;
 const DEFAULT_SAMPLE = 30;

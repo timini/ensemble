@@ -29,7 +29,7 @@ describe('quickEval', () => {
     const opts = parseOpts([]);
     expect(opts.model).toBe('google:gemini-2.5-flash-lite');
     expect(opts.consensusModel).toBe('google:gemini-2.5-flash-lite');
-    expect(opts.judgeModel).toBe('google:gemini-2.5-flash');
+    expect(opts.judgeModel).toBe('google:gemini-2.5-flash-lite');
     expect(opts.ensemble).toBe('5');
     expect(opts.temperature).toBe('0.7');
     expect(opts.sample).toBe('30');
