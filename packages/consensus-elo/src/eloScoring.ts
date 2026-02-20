@@ -39,12 +39,16 @@ export function effectiveKFactor(confidence: JudgmentConfidence): number {
  * Computes the expected score for player A given both ratings.
  * Uses the standard ELO formula: E_A = 1 / (1 + 10^((R_B - R_A) / 400))
  *
+ * Clamps the exponent to [-10, 10] to prevent overflow for extreme rating
+ * differences (>4000 points apart). The result is always in (0, 1).
+ *
  * @param ratingA - Current rating of player A
  * @param ratingB - Current rating of player B
  * @returns Expected score for player A (between 0 and 1)
  */
 export function expectedScore(ratingA: number, ratingB: number): number {
-    return 1 / (1 + Math.pow(10, (ratingB - ratingA) / 400));
+    const exponent = Math.max(-10, Math.min(10, (ratingB - ratingA) / 400));
+    return 1 / (1 + Math.pow(10, exponent));
 }
 
 /**
@@ -66,8 +70,11 @@ export function updateElo(
     winnerId: string | null,
     confidence: JudgmentConfidence,
 ): void {
-    const ratingA = scores.get(playerAId)!;
-    const ratingB = scores.get(playerBId)!;
+    const ratingA = scores.get(playerAId);
+    const ratingB = scores.get(playerBId);
+    if (ratingA === undefined || ratingB === undefined) {
+        throw new Error(`Missing ELO score for player: ${ratingA === undefined ? playerAId : playerBId}`);
+    }
 
     const expA = expectedScore(ratingA, ratingB);
     const expB = expectedScore(ratingB, ratingA);

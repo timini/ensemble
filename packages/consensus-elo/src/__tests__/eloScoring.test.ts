@@ -47,6 +47,20 @@ describe('eloScoring', () => {
             const expB = expectedScore(1100, 1300);
             expect(expA + expB).toBeCloseTo(1, 10);
         });
+
+        it('should handle extreme rating differences without overflow', () => {
+            // 10000 point difference — without clamping, 10^(10000/400) = 10^25 = Infinity
+            const exp = expectedScore(0, 10000);
+            expect(exp).toBeGreaterThan(0);
+            expect(exp).toBeLessThan(1);
+            expect(Number.isFinite(exp)).toBe(true);
+        });
+
+        it('should return near-1 for massively favored player', () => {
+            const exp = expectedScore(10000, 0);
+            expect(exp).toBeGreaterThan(0.99);
+            expect(Number.isFinite(exp)).toBe(true);
+        });
     });
 
     describe('updateElo', () => {
@@ -103,6 +117,12 @@ describe('eloScoring', () => {
 
         it('should use INITIAL_ELO constant value of 1200', () => {
             expect(INITIAL_ELO).toBe(1200);
+        });
+
+        it('should throw when player ID is not in the scores map', () => {
+            const scores = new Map([['a', 1200]]);
+            expect(() => updateElo(scores, 'a', 'missing', 'a', 'HIGH'))
+                .toThrow('Missing ELO score for player: missing');
         });
     });
 });

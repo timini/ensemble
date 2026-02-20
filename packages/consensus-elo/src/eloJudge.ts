@@ -10,19 +10,12 @@
  * This detects and mitigates position bias (research shows 18-43% of
  * LLM judge verdicts flip when response order is reversed).
  *
- * Resolution table:
- * | Forward | Reversed (mapped back) | Result         | Confidence |
- * |---------|------------------------|----------------|------------|
- * | A wins  | A wins (consistent)    | A wins         | HIGH       |
- * | A wins  | B wins (contradictory) | TIE            | LOW        |
- * | A wins  | TIE                    | A wins         | LOW        |
- * | TIE     | TIE                    | TIE            | HIGH       |
- * | Error   | Valid                  | Use valid      | LOW        |
- * | Error   | Error                  | null (skip)    | -          |
+ * Resolution logic is in {@link eloTypes.resolveSwappedOutcomes}.
  */
 
 import type { AIProvider, ConsensusModelResponse } from '@ensemble-ai/consensus-core';
-import type { SingleJudgmentOutcome, PairJudgment, JudgmentConfidence } from './eloTypes';
+import type { SingleJudgmentOutcome, PairJudgment } from './eloTypes';
+import { mapReversedOutcome, resolveSwappedOutcomes } from './eloTypes';
 
 /**
  * Builds the judge prompt for a pairwise comparison.
@@ -63,7 +56,8 @@ WINNER: TIE`;
 
 /**
  * Parses a judge response to extract the outcome and optional reasoning.
- * Reasoning is everything before the last `WINNER:` line.
+ * Uses the **last** `WINNER:` occurrence to avoid false matches in
+ * chain-of-thought reasoning text that may reference the verdict format.
  *
  * @param responseText - Raw text from the judge LLM
  * @returns The parsed outcome ('A', 'B', 'TIE', or 'ERROR') and any reasoning text
@@ -74,18 +68,25 @@ export function parseJudgeResponse(responseText: string): {
 } {
     const normalized = responseText.toUpperCase();
 
-    // Extract reasoning: everything before the last WINNER: line
-    const lastWinnerIdx = responseText.toUpperCase().lastIndexOf('WINNER:');
+    // Find the last WINNER: line — the actual verdict (not a mention in reasoning)
+    const lastWinnerIdx = normalized.lastIndexOf('WINNER:');
+    if (lastWinnerIdx === -1) {
+        return { outcome: 'ERROR', reasoning: '' };
+    }
+
     const reasoning = lastWinnerIdx > 0
         ? responseText.slice(0, lastWinnerIdx).trim()
         : '';
 
-    if (normalized.includes('WINNER: A')) {
-        return { outcome: 'A', reasoning };
-    } else if (normalized.includes('WINNER: B')) {
-        return { outcome: 'B', reasoning };
-    } else if (normalized.includes('WINNER: TIE')) {
+    // Parse only the text after the last WINNER:
+    const verdictText = normalized.slice(lastWinnerIdx);
+
+    if (verdictText.startsWith('WINNER: TIE')) {
         return { outcome: 'TIE', reasoning };
+    } else if (verdictText.startsWith('WINNER: A')) {
+        return { outcome: 'A', reasoning };
+    } else if (verdictText.startsWith('WINNER: B')) {
+        return { outcome: 'B', reasoning };
     }
 
     return { outcome: 'ERROR', reasoning: '' };
@@ -93,6 +94,8 @@ export function parseJudgeResponse(responseText: string): {
 
 /**
  * Executes a single judge call via the provider's streamResponse API.
+ * Uses a double-resolve guard to handle providers that may call both
+ * onComplete and onError.
  *
  * @param provider - The AI provider to use for the judge call
  * @param modelId - The model ID to use for judging
@@ -105,73 +108,26 @@ async function executeSingleJudgment(
     prompt: string,
 ): Promise<{ outcome: SingleJudgmentOutcome; reasoning: string }> {
     return new Promise((resolve) => {
+        let settled = false;
         provider.streamResponse(
             prompt,
             modelId,
             () => { void 0; },
-            (finalText: string) => resolve(parseJudgeResponse(finalText)),
+            (finalText: string) => {
+                if (!settled) {
+                    settled = true;
+                    resolve(parseJudgeResponse(finalText));
+                }
+            },
             (err: Error) => {
-                console.error('Judge error:', err);
-                resolve({ outcome: 'ERROR', reasoning: '' });
+                if (!settled) {
+                    settled = true;
+                    console.error('Judge error:', err);
+                    resolve({ outcome: 'ERROR', reasoning: '' });
+                }
             },
         );
     });
-}
-
-/**
- * Maps a reversed-order outcome back to the original order.
- * When positions are swapped, "A wins" in the reversed prompt means
- * the model originally in position B actually won.
- */
-export function mapReversedOutcome(outcome: SingleJudgmentOutcome): SingleJudgmentOutcome {
-    if (outcome === 'A') return 'B';
-    if (outcome === 'B') return 'A';
-    return outcome; // TIE and ERROR are symmetric
-}
-
-/**
- * Resolves forward and reversed outcomes into a final judgment.
- *
- * Both outcomes should be in the same frame of reference (original pair order)
- * — the reversed outcome must be mapped via {@link mapReversedOutcome} first.
- *
- * @param forward - Outcome from the forward (original order) judge call
- * @param reversed - Outcome from the reversed judge call (already mapped back)
- * @returns Winner label and confidence, or `null` for double-error (skip pair)
- */
-export function resolveSwappedOutcomes(
-    forward: SingleJudgmentOutcome,
-    reversed: SingleJudgmentOutcome,
-): { winner: 'A' | 'B' | 'TIE'; confidence: JudgmentConfidence } | null {
-    // Double error -> skip
-    if (forward === 'ERROR' && reversed === 'ERROR') return null;
-
-    // Single error -> use the valid one at LOW confidence
-    if (forward === 'ERROR') {
-        const w: 'A' | 'B' | 'TIE' = reversed === 'TIE' ? 'TIE' : reversed as 'A' | 'B';
-        return { winner: w, confidence: 'LOW' };
-    }
-    if (reversed === 'ERROR') {
-        const w: 'A' | 'B' | 'TIE' = forward === 'TIE' ? 'TIE' : forward as 'A' | 'B';
-        return { winner: w, confidence: 'LOW' };
-    }
-
-    // Both valid — check consistency
-    if (forward === reversed) {
-        // Consistent: both agree on same winner or both TIE
-        const w: 'A' | 'B' | 'TIE' = forward === 'TIE' ? 'TIE' : forward as 'A' | 'B';
-        return { winner: w, confidence: 'HIGH' };
-    }
-
-    // Both valid but disagree
-    if (forward === 'TIE' || reversed === 'TIE') {
-        // One says winner, other says TIE -> use the winner at LOW confidence
-        const nonTie = forward === 'TIE' ? reversed : forward;
-        return { winner: nonTie as 'A' | 'B', confidence: 'LOW' };
-    }
-
-    // Contradictory: one says A, other says B -> TIE at LOW confidence
-    return { winner: 'TIE', confidence: 'LOW' };
 }
 
 /**
@@ -182,7 +138,7 @@ export function resolveSwappedOutcomes(
  * - Reversed: modelB content in "Model A" position, modelA in "Model B"
  *
  * The two outcomes are resolved into a single judgment with confidence,
- * using the resolution table documented in the module header.
+ * using the resolution table documented in {@link eloTypes.resolveSwappedOutcomes}.
  *
  * @param provider - The AI provider for judge calls
  * @param modelId - The judge model ID

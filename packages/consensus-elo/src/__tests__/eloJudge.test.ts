@@ -3,10 +3,9 @@ import type { AIProvider, ConsensusModelResponse } from '@ensemble-ai/consensus-
 import {
     buildJudgePrompt,
     parseJudgeResponse,
-    mapReversedOutcome,
-    resolveSwappedOutcomes,
     judgePairWithSwap,
 } from '../eloJudge';
+import { mapReversedOutcome, resolveSwappedOutcomes } from '../eloTypes';
 
 describe('eloJudge', () => {
     describe('buildJudgePrompt', () => {
@@ -76,6 +75,20 @@ describe('eloJudge', () => {
             expect(result.outcome).toBe('B');
             expect(result.reasoning).toContain('First line of reasoning.');
             expect(result.reasoning).toContain('Second line.');
+        });
+
+        it('should use the LAST WINNER: line when reasoning mentions the verdict format', () => {
+            // Chain-of-thought may reference "WINNER: A" as part of reasoning
+            const response = 'I initially thought WINNER: A but on reflection B is better.\nWINNER: B';
+            const result = parseJudgeResponse(response);
+            expect(result.outcome).toBe('B');
+            expect(result.reasoning).toContain('I initially thought WINNER: A');
+        });
+
+        it('should return ERROR when no WINNER: line exists at all', () => {
+            const result = parseJudgeResponse('Both responses are good but I cannot decide.');
+            expect(result.outcome).toBe('ERROR');
+            expect(result.reasoning).toBe('');
         });
     });
 
