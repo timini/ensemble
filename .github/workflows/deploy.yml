@@ -61,6 +61,12 @@ jobs:
         run: npm run build --workspace=packages/app
         env:
           SKIP_ENV_VALIDATION: 'true'
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          SENTRY_ORG: ${{ vars.SENTRY_ORG }}
+          SENTRY_PROJECT: ${{ vars.SENTRY_PROJECT }}
+          SENTRY_RELEASE: ${{ github.sha }}
+          NEXT_PUBLIC_SENTRY_RELEASE: ${{ github.sha }}
+          NEXT_PUBLIC_SENTRY_DSN: ${{ vars.NEXT_PUBLIC_SENTRY_DSN }}
 
       - name: Authenticate to Google Cloud
         id: auth

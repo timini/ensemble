@@ -15,6 +15,19 @@ test.describe('Ensemble Page', () => {
   const enabledModels = (page: Page) =>
     page.locator('[data-testid^="model-card-"][data-disabled="false"]');
 
+  const openManualResponseModal = async (page: Page) => {
+    const addButton = page.getByTestId('add-manual-response');
+    await expect(addButton).toBeVisible();
+    await expect(addButton).toBeEnabled();
+    await addButton.click();
+
+    const modal = page.getByTestId('manual-response-modal');
+    if (!(await modal.isVisible())) {
+      await addButton.click();
+    }
+    await expect(modal).toBeVisible({ timeout: 10000 });
+  };
+
   test.beforeEach(async ({ page }) => {
     // Navigate through config first
     await page.goto('/config');
@@ -222,7 +235,7 @@ test.describe('Ensemble Page', () => {
   });
 
   test('shows manual responses in sidebar after creation', async ({ page }) => {
-    await page.getByTestId('add-manual-response').click();
+    await openManualResponseModal(page);
     await page.getByTestId('model-name-input').fill('Manual Test');
     await page.getByTestId('model-provider-input').fill('Provider');
     await page.getByTestId('response-textarea').fill('Manual content');

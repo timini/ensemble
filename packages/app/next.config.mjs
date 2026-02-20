@@ -3,6 +3,7 @@
  * for Docker builds.
  */
 import "./src/env.js";
+import { withSentryConfig } from "@sentry/nextjs";
 
 /** @type {import("next").NextConfig} */
 const config = {
@@ -17,4 +18,14 @@ const config = {
     },
 };
 
-export default config;
+export default withSentryConfig(config, {
+    org: process.env.SENTRY_ORG,
+    project: process.env.SENTRY_PROJECT,
+    authToken: process.env.SENTRY_AUTH_TOKEN,
+    silent: !process.env.SENTRY_AUTH_TOKEN,
+    sourcemaps: { deleteSourcemapsAfterUpload: true },
+    telemetry: false,
+    hideSourceMaps: true,
+    widenClientFileUpload: true,
+    release: { name: process.env.SENTRY_RELEASE },
+});

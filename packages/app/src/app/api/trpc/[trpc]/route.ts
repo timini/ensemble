@@ -1,4 +1,5 @@
 import { fetchRequestHandler } from "@trpc/server/adapters/fetch";
+import * as Sentry from "@sentry/nextjs";
 import { type NextRequest } from "next/server";
 
 import { env } from "~/env";
@@ -15,20 +16,40 @@ const createContext = async (req: NextRequest) => {
   });
 };
 
+const captureHandledTrpcErrors =
+  process.env.SENTRY_CAPTURE_HANDLED_TRPC_ERRORS === "true";
+
 const handler = (req: NextRequest) =>
   fetchRequestHandler({
     endpoint: "/api/trpc",
     req,
     router: appRouter,
     createContext: () => createContext(req),
-    onError:
-      env.NODE_ENV === "development"
-        ? ({ path, error }) => {
-            console.error(
-              `❌ tRPC failed on ${path ?? "<no-path>"}: ${error.message}`,
-            );
-          }
-        : undefined,
+    onError: ({ path, error }) => {
+      const safePath = path ?? "<no-path>";
+
+      if (env.NODE_ENV === "development") {
+        console.error(
+          `❌ tRPC failed on ${safePath}: ${error.message}`,
+        );
+      }
+
+      const context = {
+        extra: { path: safePath, code: error.code },
+        tags: { trpcCode: error.code, trpcPath: safePath },
+      };
+
+      if (error.code === "INTERNAL_SERVER_ERROR" || captureHandledTrpcErrors) {
+        Sentry.captureException(error, context);
+        return;
+      }
+
+      Sentry.captureMessage(`Handled tRPC error on ${safePath}: ${error.code}`, {
+        ...context,
+        level: "warning",
+        fingerprint: ["trpc-handled", error.code, safePath],
+      });
+    },
   });
 
 export { handler as GET, handler as POST };
