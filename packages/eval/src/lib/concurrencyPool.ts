@@ -216,26 +216,13 @@ export class ConcurrencyLimiter {
   startStatsReporter(intervalMs = 1_000): void {
     this.stopStatsReporter();
     this.resetThroughputWindow();
-    let lastDedupKey = '';
-    let suppressedCount = 0;
     this.statsTimer = setInterval(() => {
       const s = this.getStats();
       const elapsed = Math.round((Date.now() - this.createdAt) / 1000);
-      // Dedup on state that matters (exclude rate since it changes every tick)
-      const dedupKey = `${s.concurrencyLimit}:${s.running}:${s.queued}:${s.completed}:${s.rateLimits}`;
-      if (dedupKey === lastDedupKey) {
-        suppressedCount++;
-        return;
-      }
-      if (suppressedCount > 0) {
-        process.stderr.write(`  [limiter] ... ${suppressedCount}s unchanged\n`);
-      }
       process.stderr.write(
         `  [limiter ${elapsed}s] limit=${s.concurrencyLimit} running=${s.running} queued=${s.queued} ` +
         `done=${s.completed} rate=${s.throughput.toFixed(2)}/s 429s=${s.rateLimits}\n`,
       );
-      lastDedupKey = dedupKey;
-      suppressedCount = 0;
     }, intervalMs);
     this.statsTimer.unref();
   }
