@@ -3,6 +3,7 @@ import { Eye, EyeOff, CheckCircle, XCircle } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Input } from '../../atoms/Input';
 import { Label } from '../../atoms/Label';
+import { ProviderLogo } from '../../atoms/ProviderLogo';
 import { LoadingSpinner } from '../../atoms/LoadingSpinner';
 import { InlineAlert } from '../../atoms/InlineAlert';
 import { cn } from '@/lib/utils';
@@ -119,7 +120,10 @@ export const ApiKeyInput = React.forwardRef<HTMLInputElement, ApiKeyInputProps>(
 
     return (
       <div className="w-full space-y-2" data-provider={provider} data-validation-status={validationStatus}>
-        <Label htmlFor={inputId}>{label}</Label>
+        <Label htmlFor={inputId} className="inline-flex items-center gap-1.5">
+          <ProviderLogo provider={provider} size="sm" aria-hidden="true" />
+          {label}
+        </Label>
 
         <div className="relative">
           <Input

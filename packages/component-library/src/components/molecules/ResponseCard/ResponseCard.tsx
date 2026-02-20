@@ -2,6 +2,7 @@ import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Card, CardHeader, CardContent } from '../../atoms/Card';
 import { Badge } from '../../atoms/Badge';
+import { ProviderLogo } from '../../atoms/ProviderLogo';
 import { LoadingSpinner } from '../../atoms/LoadingSpinner';
 import { InlineAlert } from '../../atoms/InlineAlert';
 import { Rating } from '../../atoms/Rating';
@@ -134,7 +135,12 @@ export const ResponseCard = React.forwardRef<HTMLDivElement, ResponseCardProps>(
                 </div>
               ) : (
                 <>
-                  {provider && <Badge variant="outline">{PROVIDER_NAMES[provider]}</Badge>}
+                  {provider && (
+                    <Badge variant="outline" className="gap-1.5">
+                      <ProviderLogo provider={provider} size="sm" />
+                      {PROVIDER_NAMES[provider]}
+                    </Badge>
+                  )}
                   {modelName && <span className="font-semibold text-base">{modelName}</span>}
                 </>
               )}

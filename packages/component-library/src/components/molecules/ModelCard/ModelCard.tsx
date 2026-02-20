@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import type { ModelModality } from '@ensemble-ai/shared-utils/providers';
 import { Card, CardContent } from '../../atoms/Card';
 import { Badge } from '../../atoms/Badge';
+import { ProviderLogo } from '../../atoms/ProviderLogo';
 import { cn } from '@/lib/utils';
 
 export type Provider = 'openai' | 'anthropic' | 'google' | 'xai' | 'deepseek';
@@ -28,29 +29,6 @@ export interface ModelCardProps {
   /** Supported modalities for the model */
   modalities?: ModelModality[];
 }
-
-const PROVIDER_CONFIG = {
-  openai: {
-    name: 'OpenAI',
-    icon: '🤖',
-  },
-  anthropic: {
-    name: 'Anthropic',
-    icon: '🧠',
-  },
-  google: {
-    name: 'Google',
-    icon: '🔍',
-  },
-  xai: {
-    name: 'XAI',
-    icon: '🚀',
-  },
-  deepseek: {
-    name: 'DeepSeek',
-    icon: '🐋',
-  },
-} as const;
 
 /**
  * ModelCard molecule for selecting AI models in an ensemble.
@@ -85,7 +63,6 @@ export const ModelCard = React.forwardRef<HTMLDivElement, ModelCardProps>(
     ref
   ) => {
     const { t } = useTranslation();
-    const config = PROVIDER_CONFIG[provider];
 
     const handleClick = () => {
       if (!disabled && onClick) {
@@ -138,7 +115,9 @@ export const ModelCard = React.forwardRef<HTMLDivElement, ModelCardProps>(
         )}
       >
         <CardContent className="p-4 text-center">
-          <div className="text-2xl mb-2">{config.icon}</div>
+          <div className="mb-2 flex justify-center">
+            <ProviderLogo provider={provider} size="lg" />
+          </div>
           <div className="font-medium text-sm">{modelName}</div>
           {modalities.length > 0 && (
             <div className="mt-2 flex flex-wrap items-center justify-center gap-1">
