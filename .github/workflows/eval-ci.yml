@@ -145,7 +145,7 @@ jobs:
           cat eval-results.txt
 
       - name: Upload eval results
-        if: always() && steps.check-keys.outputs.keys_available == 'true'
+        if: "!cancelled() && steps.check-keys.outputs.keys_available == 'true'"
         uses: actions/upload-artifact@v4
         with:
           name: eval-${{ matrix.strategy }}-results
@@ -166,7 +166,7 @@ jobs:
   eval-report:
     name: Eval Report
     needs: [detect-changes, eval-strategy]
-    if: always() && github.event_name == 'pull_request'
+    if: "!cancelled() && github.event_name == 'pull_request'"
     runs-on: ubuntu-latest
     permissions:
       pull-requests: write
