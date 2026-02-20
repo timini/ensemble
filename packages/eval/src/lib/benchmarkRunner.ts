@@ -185,11 +185,22 @@ export class BenchmarkRunner {
           const executeWithOptionalTimeout = async (): Promise<PromptRunResult> => {
             const executeFn = this.limiter ? () => this.limiter!.run(runFn) : runFn;
             if (!this.questionTimeoutMs) return executeFn();
-            // Race execution against a timeout
+            // Race execution against a timeout.
+            // Use .unref() so the timer doesn't prevent Node from exiting,
+            // and clear it on completion to avoid dangling handles.
+            let timer: ReturnType<typeof setTimeout>;
             const timeoutPromise = new Promise<never>((_, reject) => {
-              setTimeout(() => reject(new Error(`Question ${question.id} timed out after ${this.questionTimeoutMs}ms`)), this.questionTimeoutMs);
+              timer = setTimeout(() => reject(new Error(`Question ${question.id} timed out after ${this.questionTimeoutMs}ms`)), this.questionTimeoutMs);
+              timer.unref();
             });
-            return Promise.race([executeFn(), timeoutPromise]);
+            try {
+              const result = await Promise.race([executeFn(), timeoutPromise]);
+              clearTimeout(timer!);
+              return result;
+            } catch (err) {
+              clearTimeout(timer!);
+              throw err;
+            }
           };
           const run = await executeWithOptionalTimeout();
           const totalMs = Date.now() - dispatchTime;
