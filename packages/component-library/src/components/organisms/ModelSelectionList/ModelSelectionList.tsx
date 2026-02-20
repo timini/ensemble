@@ -31,7 +31,6 @@ export interface ModelSelectionListProps {
   isMockMode?: boolean;
 }
 
-
 /**
  * ModelSelectionList organism for selecting AI models.
  *

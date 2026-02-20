@@ -6,10 +6,11 @@
  */
 
 import type { StateCreator } from 'zustand';
+import type { ProviderType } from './ensembleSlice';
 
 export interface ModelResponse {
   modelId: string;
-  provider: string;
+  provider: ProviderType;
   model: string;
   response: string;
   isStreaming: boolean;
@@ -43,7 +44,7 @@ export interface ResponseSlice {
   metaAnalysis: string | null;
 
   setPrompt: (prompt: string) => void;
-  startStreaming: (modelId: string, provider: string, model: string) => void;
+  startStreaming: (modelId: string, provider: ProviderType, model: string) => void;
   appendStreamChunk: (modelId: string, chunk: string) => void;
   completeResponse: (modelId: string, responseTime: number, tokenCount?: number) => void;
   setError: (modelId: string, error: string) => void;

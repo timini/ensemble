@@ -67,7 +67,7 @@
     "modeSelectionCard": {
       "free": {
         "title": "Mode Gratuit",
-        "description": "Apportez vos propres clés API d'OpenAI, Anthropic, Google, xAI et Perplexity. Les clés sont stockées en toute sécurité dans votre navigateur.",
+        "description": "Apportez vos propres clés API d'OpenAI, Anthropic, Google, xAI, DeepSeek et Perplexity. Les clés sont stockées en toute sécurité dans votre navigateur.",
         "buttonText": "Utiliser le mode gratuit"
       },
       "pro": {
@@ -166,7 +166,7 @@
       "description": "La science derrière de meilleures décisions avec les ensembles d'IA",
       "whatIsEnsemble": {
         "heading": "Qu'est-ce qu'Ensemble AI ?",
-        "body": "Ensemble AI vous permet d'interroger simultanément plusieurs grands modèles de langage et de comparer leurs réponses côte à côte. Au lieu de vous fier à la perspective d'un seul modèle, vous obtenez des points de vue diversifiés d'OpenAI, Anthropic, Google, xAI et Perplexity, puis les synthétisez en une réponse consensuelle."
+        "body": "Ensemble AI vous permet d'interroger simultanément plusieurs grands modèles de langage et de comparer leurs réponses côte à côte. Au lieu de vous fier à la perspective d'un seul modèle, vous obtenez des points de vue diversifiés d'OpenAI, Anthropic, Google, xAI, DeepSeek et Perplexity, puis les synthétisez en une réponse consensuelle."
       },
       "whyEnsemble": {
         "heading": "Pourquoi un ensemble ?",
@@ -224,7 +224,7 @@
     },
     "features": {
       "title": "Fonctionnalités",
-      "description": "Interrogez plus de 15 modèles d'IA simultanément, analysez leur concordance et synthétisez la meilleure réponse",
+      "description": "Interrogez plus de 20 modèles d'IA simultanément, analysez leur concordance et synthétisez la meilleure réponse",
       "differentiators": {
         "heading": "Ce qui rend Ensemble AI unique",
         "items": [
@@ -248,7 +248,7 @@
       "capabilities": {
         "heading": "Conçu pour la performance",
         "items": [
-          { "number": "15+", "label": "Modèles d'IA", "description": "OpenAI, Anthropic, Google, xAI et Perplexity" },
+          { "number": "20+", "label": "Modèles d'IA", "description": "OpenAI, Anthropic, Google, xAI, DeepSeek et Perplexity" },
           { "number": "<100ms", "label": "Streaming", "description": "Chunks tamponnés avec réponses parallèles" },
           { "number": "AES-256", "label": "Chiffrement", "description": "Mode GCM avec IV 96 bits aléatoires" },
           { "number": "Zéro", "label": "Verrouillage", "description": "Communication navigateur-API directe en Mode Gratuit" }
@@ -258,7 +258,7 @@
         "heading": "De la question au consensus en 4 étapes",
         "steps": [
           { "name": "Configurer", "description": "Choisissez le Mode Gratuit avec clés API chiffrées AES-256 ou le Mode Pro avec crédits gérés." },
-          { "name": "Sélectionner l'ensemble", "description": "Choisissez 2 à 6 modèles parmi 5 fournisseurs. Sélectionnez votre synthétiseur et méthode de consensus." },
+          { "name": "Sélectionner l'ensemble", "description": "Choisissez 2 à 6 modèles parmi 6 fournisseurs. Sélectionnez votre synthétiseur et méthode de consensus." },
           { "name": "Entrer l'invite", "description": "Rédigez votre question. Ajoutez optionnellement des réponses manuelles d'experts ou d'outils externes." },
           { "name": "Examiner et analyser", "description": "Regardez les réponses en streaming parallèle. Consultez l'analyse de concordance et le consensus synthétisé en temps réel." }
         ]
@@ -291,14 +291,15 @@
         }
       },
       "models": {
-        "heading": "Plus de 15 modèles chez 5 fournisseurs",
+        "heading": "Plus de 20 modèles chez 6 fournisseurs",
         "body": "Accédez aux meilleurs modèles de chaque fournisseur d'IA. Les nouveaux modèles apparaissent automatiquement grâce à la découverte dynamique.",
         "providers": [
           { "name": "OpenAI", "models": "GPT-4o, GPT-4o Mini, o1-preview, o1-mini" },
           { "name": "Anthropic", "models": "Claude 3.5 Sonnet, Claude 3 Opus, Claude 3 Haiku" },
           { "name": "Google", "models": "Gemini 1.5 Pro, Gemini 1.5 Flash, Gemini 2.5 Flash" },
           { "name": "xAI", "models": "Grok 2, Grok 2 Mini" },
-          { "name": "Perplexity", "models": "Sonar, Sonar Pro, Sonar Deep Research, Sonar Reasoning, Sonar Reasoning Pro" }
+          { "name": "Perplexity", "models": "Sonar, Sonar Pro, Sonar Deep Research, Sonar Reasoning, Sonar Reasoning Pro" },
+          { "name": "DeepSeek", "models": "DeepSeek Chat, DeepSeek Reasoner" }
         ]
       },
       "security": {
