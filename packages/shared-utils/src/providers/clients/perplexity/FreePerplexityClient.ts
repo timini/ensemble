@@ -59,38 +59,23 @@ export class FreePerplexityClient extends BaseFreeClient {
       const stream = await client.chat.completions.create({
         model: options.model,
         stream: true,
+        stream_options: { include_usage: true },
         messages: [{ role: 'user', content: options.prompt }],
       });
 
       for await (const chunk of stream as AsyncIterable<{
-        choices?: { delta?: { content?: unknown }; finish_reason?: string | null }[];
+        choices?: { delta?: { content?: unknown } }[];
         usage?: { total_tokens?: number };
       }>) {
         if (chunk.usage?.total_tokens) {
           tokenCount = chunk.usage.total_tokens;
         }
 
-        const choice = chunk.choices?.[0];
-        const deltaContent = choice?.delta?.content;
+        const deltaContent = chunk.choices?.[0]?.delta?.content;
 
         if (typeof deltaContent === 'string') {
           fullResponse += deltaContent;
           options.onChunk(deltaContent);
-        } else if (Array.isArray(deltaContent)) {
-          for (const piece of deltaContent) {
-            if (typeof piece === 'string') {
-              fullResponse += piece;
-              options.onChunk(piece);
-            } else if (piece && typeof (piece as { text?: string }).text === 'string') {
-              const text = (piece as { text?: string }).text as string;
-              fullResponse += text;
-              options.onChunk(text);
-            }
-          }
-        }
-
-        if (choice?.finish_reason) {
-          // Stream complete
         }
       }
 
