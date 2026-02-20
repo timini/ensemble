@@ -1,0 +1,50 @@
+{
+  "model": "google:gemini-2.5-flash-lite",
+  "ensembleSize": 5,
+  "sample": 30,
+  "datasets": [
+    "gsm8k",
+    "truthfulqa",
+    "gpqa",
+    "hle",
+    "math500",
+    "mmlu_pro",
+    "simpleqa",
+    "arc",
+    "hellaswag"
+  ],
+  "strategies": [
+    "standard",
+    "elo",
+    "majority",
+    "council"
+  ],
+  "updatedAt": "2026-02-20T11:33:50.844Z",
+  "single": {
+    "accuracy": 0.6185185185185185,
+    "correct": 167,
+    "total": 270
+  },
+  "ensemble": {
+    "standard": {
+      "accuracy": 0.6166666666666667,
+      "correct": 148,
+      "total": 240
+    },
+    "elo": {
+      "accuracy": 0.6212765957446809,
+      "correct": 146,
+      "total": 235
+    },
+    "majority": {
+      "accuracy": 0.5907172995780591,
+      "correct": 140,
+      "total": 237
+    },
+    "council": {
+      "accuracy": 0.5957446808510638,
+      "correct": 140,
+      "total": 235
+    }
+  }
+}
