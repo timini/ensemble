@@ -97,6 +97,8 @@ export async function generateConsensus(
     return { outputs: {}, metrics: {} };
   }
 
+  process.stderr.write(`  [consensus] start: strategies=[${strategies.join(',')}] responses=${consensusResponses.length}\n`);
+
   const outputs: Partial<Record<StrategyName, string>> = {};
   const metrics: Partial<Record<StrategyName, ConsensusStrategyMetrics>> = {};
   const tasks: Promise<void>[] = [];
@@ -107,13 +109,16 @@ export async function generateConsensus(
   ): Promise<void> => {
     const counter = new TokenCountingProvider(summarizerClient);
     const start = Date.now();
+    process.stderr.write(`  [consensus] ${name} start\n`);
     return fn(counter).then((result) => {
       const durationMs = Date.now() - start;
       outputs[name] = result;
       metrics[name] = { tokenCount: counter.totalTokens, durationMs };
-      if (durationMs > 10_000) {
-        process.stderr.write(`  [consensus-slow] ${name} took ${(durationMs / 1000).toFixed(1)}s (${counter.totalTokens} tokens)\n`);
-      }
+      process.stderr.write(`  [consensus] ${name} done in ${(durationMs / 1000).toFixed(1)}s (${counter.totalTokens} tokens)\n`);
+    }).catch((err) => {
+      const durationMs = Date.now() - start;
+      process.stderr.write(`  [consensus] ${name} error in ${(durationMs / 1000).toFixed(1)}s: ${err instanceof Error ? err.message : String(err)}\n`);
+      throw err;
     });
   };
 
@@ -166,5 +171,6 @@ export async function generateConsensus(
 
   await Promise.all(tasks);
 
+  process.stderr.write(`  [consensus] all strategies complete\n`);
   return { outputs, metrics };
 }

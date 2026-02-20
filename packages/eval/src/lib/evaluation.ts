@@ -61,6 +61,8 @@ export async function evaluateResponses(
     return undefined;
   }
 
+  const fnStart = Date.now();
+
   // Phase 1: compute deduplication keys (synchronous, preserves order)
   const keyOccurrences: Record<string, number> = {};
   const entries: Array<{ key: string; response: ProviderResponse }> = [];
@@ -73,12 +75,16 @@ export async function evaluateResponses(
     entries.push({ key, response });
   }
 
+  process.stderr.write(`  [evaluateResponses] start: ${entries.length} entries, evaluator=${evaluator.name}\n`);
+
   // Phase 2: evaluate all responses in parallel with per-call timeout
   const evalResults = await Promise.all(
     entries.map(({ key, response }) =>
       evaluateWithTimeout(evaluator, response.content, groundTruth, prompt, key),
     ),
   );
+
+  process.stderr.write(`  [evaluateResponses] done in ${((Date.now() - fnStart) / 1000).toFixed(1)}s\n`);
 
   // Phase 3: assemble results
   const results: Record<string, EvaluationResult> = {};
@@ -121,6 +127,8 @@ export async function evaluateConsensusStrategies(
     return undefined;
   }
 
+  const fnStart = Date.now();
+
   // Collect valid entries
   const entries: Array<{ strategy: StrategyName; answer: string }> = [];
   for (const [strategy, answer] of Object.entries(consensus)) {
@@ -129,12 +137,16 @@ export async function evaluateConsensusStrategies(
     }
   }
 
+  process.stderr.write(`  [evaluateConsensus] start: ${entries.length} strategies=[${entries.map(e => e.strategy).join(',')}], evaluator=${evaluator.name}\n`);
+
   // Evaluate all strategies in parallel with per-call timeout
   const evalResults = await Promise.all(
     entries.map(({ strategy, answer }) =>
       evaluateWithTimeout(evaluator, answer, groundTruth, prompt, `consensus:${strategy}`),
     ),
   );
+
+  process.stderr.write(`  [evaluateConsensus] done in ${((Date.now() - fnStart) / 1000).toFixed(1)}s\n`);
 
   // Assemble results
   const results: Partial<Record<StrategyName, EvaluationResult>> = {};

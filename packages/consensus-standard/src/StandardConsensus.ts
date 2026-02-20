@@ -23,10 +23,9 @@ export class StandardConsensus implements ConsensusStrategy {
     }
 
     async generateConsensus(responses: ConsensusModelResponse[], topN: number, originalPrompt: string): Promise<string> {
-        // Standard consensus uses ALL responses, ignoring topN in principle,
-        // OR we can say "Standard" implies Top N = All?
-        // Usually standard means "Summarize everything".
         void topN; // Unused
+        const sumStart = Date.now();
+        process.stderr.write(`    [standard] generateConsensus start: ${responses.length} responses\n`);
 
         const responsesText = responses.map(r => `Model: ${r.modelName}\nResponse:\n${r.content}`).join('\n\n---\n\n');
 
@@ -46,12 +45,14 @@ If the question asks for a constrained format (single letter, number, JSON, etc.
         `.trim();
 
         return new Promise((resolve) => {
-
             this.summarizerProvider.streamResponse(prompt, this.summarizerModelId,
                 () => { void 0; },
-                (finalText: string) => resolve(finalText),
+                (finalText: string) => {
+                    process.stderr.write(`    [standard] generateConsensus done in ${((Date.now() - sumStart) / 1000).toFixed(1)}s\n`);
+                    resolve(finalText);
+                },
                 (err: Error) => {
-                    console.error('Summarizer error:', err);
+                    process.stderr.write(`    [standard] generateConsensus error in ${((Date.now() - sumStart) / 1000).toFixed(1)}s: ${err.message}\n`);
                     resolve('Failed to generate summary.');
                 }
             );

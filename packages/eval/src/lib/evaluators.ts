@@ -90,6 +90,8 @@ export class LLMJudgeNumericEvaluator {
     const expected = extractNumericAnswer(groundTruth) ?? groundTruth.trim();
 
     let predicted: string | null;
+    const start = Date.now();
+    process.stderr.write(`    [judge-numeric] start generateStructured model=${this.model}\n`);
     try {
       const result = await this.provider.generateStructured<{ answer: string }>(
         NUMERIC_JUDGE_PROMPT + response,
@@ -98,8 +100,10 @@ export class LLMJudgeNumericEvaluator {
         { temperature: 0 },
       );
       predicted = result.parsed.answer ?? null;
-    } catch {
+      process.stderr.write(`    [judge-numeric] done in ${((Date.now() - start) / 1000).toFixed(1)}s predicted=${predicted}\n`);
+    } catch (err) {
       predicted = null;
+      process.stderr.write(`    [judge-numeric] error in ${((Date.now() - start) / 1000).toFixed(1)}s: ${err instanceof Error ? err.message : String(err)}\n`);
     }
 
     return {
@@ -140,6 +144,8 @@ export class LLMJudgeMCQEvaluator {
     const expected = (extractChoiceLetter(groundTruth) ?? groundTruth.trim()).toUpperCase();
 
     let predicted: string | null;
+    const start = Date.now();
+    process.stderr.write(`    [judge-mcq] start generateStructured model=${this.model}\n`);
     try {
       const result = await this.provider.generateStructured<{ answer: string }>(
         MCQ_JUDGE_PROMPT + response,
@@ -148,9 +154,10 @@ export class LLMJudgeMCQEvaluator {
         { temperature: 0 },
       );
       predicted = result.parsed.answer?.toUpperCase() ?? null;
-    } catch {
-      // Judge call failed — mark as unanswered (no regex fallback)
+      process.stderr.write(`    [judge-mcq] done in ${((Date.now() - start) / 1000).toFixed(1)}s predicted=${predicted}\n`);
+    } catch (err) {
       predicted = null;
+      process.stderr.write(`    [judge-mcq] error in ${((Date.now() - start) / 1000).toFixed(1)}s: ${err instanceof Error ? err.message : String(err)}\n`);
     }
 
     return {
@@ -188,6 +195,8 @@ export class LLMJudgeExactMatchEvaluator {
   async evaluate(response: string, groundTruth: string): Promise<EvaluationResult> {
     let equivalent = false;
     let predicted: string | null;
+    const start = Date.now();
+    process.stderr.write(`    [judge-exact] start generateStructured model=${this.model}\n`);
     try {
       const result = await this.provider.generateStructured<{
         equivalent: boolean;
@@ -203,8 +212,10 @@ export class LLMJudgeExactMatchEvaluator {
       );
       equivalent = result.parsed.equivalent ?? false;
       predicted = result.parsed.extracted_answer ?? null;
-    } catch {
+      process.stderr.write(`    [judge-exact] done in ${((Date.now() - start) / 1000).toFixed(1)}s equivalent=${equivalent}\n`);
+    } catch (err) {
       predicted = null;
+      process.stderr.write(`    [judge-exact] error in ${((Date.now() - start) / 1000).toFixed(1)}s: ${err instanceof Error ? err.message : String(err)}\n`);
     }
 
     return {

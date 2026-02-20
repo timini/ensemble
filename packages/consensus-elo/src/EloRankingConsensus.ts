@@ -42,12 +42,15 @@ export class EloRankingConsensus implements ConsensusStrategy {
             throw new Error('At least 3 responses are required for ELO ranking');
         }
 
+        const rankStart = Date.now();
+
         // Initialize ELO scores
         const eloScores = new Map<string, number>();
         responses.forEach(r => eloScores.set(r.modelId, INITIAL_ELO));
 
         // Generate all-vs-all pairings (3 models = 3 pairs, 5 models = 10 pairs)
         const pairings = this.generatePairings(responses);
+        process.stderr.write(`    [elo-rank] start: ${responses.length} responses, ${pairings.length} pairs (${pairings.length * 2} judge calls)\n`);
 
         // Run all pairwise comparisons in parallel
         // Each pair internally runs 2 judge calls (forward + reversed)
@@ -61,9 +64,9 @@ export class EloRankingConsensus implements ConsensusStrategy {
             })),
         );
 
+        process.stderr.write(`    [elo-rank] judgments done in ${((Date.now() - rankStart) / 1000).toFixed(1)}s\n`);
+
         // Apply ELO updates — skip only double-errors (confidence === undefined)
-        // Bug fix: previously `if (winnerId)` skipped ties (null) AND errors.
-        // Now ties correctly produce 0.5/0.5 ELO updates.
         for (const { pair, judgment } of judgments) {
             if (judgment.confidence !== undefined) {
                 updateElo(eloScores, pair[0].modelId, pair[1].modelId, judgment.winnerId, judgment.confidence);
@@ -101,6 +104,8 @@ export class EloRankingConsensus implements ConsensusStrategy {
     }
 
     private async summarizeResponses(responses: ConsensusModelResponse[], originalPrompt: string): Promise<string> {
+        const sumStart = Date.now();
+        process.stderr.write(`    [elo-summarize] start: ${responses.length} top responses\n`);
         const responsesText = responses.map((response, index) =>
             `Candidate ${index + 1}\nResponse:\n${response.content}`
         ).join('\n\n---\n\n');
@@ -131,9 +136,12 @@ Output rules:
         return new Promise((resolve) => {
             this.summarizerProvider.streamResponse(prompt, this.summarizerModelId,
                 () => { void 0; },
-                (finalText: string) => resolve(finalText),
+                (finalText: string) => {
+                    process.stderr.write(`    [elo-summarize] done in ${((Date.now() - sumStart) / 1000).toFixed(1)}s\n`);
+                    resolve(finalText);
+                },
                 (err: Error) => {
-                    console.error('Summarizer error:', err);
+                    process.stderr.write(`    [elo-summarize] error in ${((Date.now() - sumStart) / 1000).toFixed(1)}s: ${err.message}\n`);
                     resolve('Failed to generate summary.');
                 }
             );

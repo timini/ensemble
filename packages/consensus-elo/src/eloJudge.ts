@@ -106,7 +106,10 @@ async function executeSingleJudgment(
     provider: AIProvider,
     modelId: string,
     prompt: string,
+    label: string,
 ): Promise<{ outcome: SingleJudgmentOutcome; reasoning: string }> {
+    const start = Date.now();
+    process.stderr.write(`      [elo-judge] ${label} start streamResponse\n`);
     return new Promise((resolve) => {
         let settled = false;
         provider.streamResponse(
@@ -116,13 +119,15 @@ async function executeSingleJudgment(
             (finalText: string) => {
                 if (!settled) {
                     settled = true;
-                    resolve(parseJudgeResponse(finalText));
+                    const result = parseJudgeResponse(finalText);
+                    process.stderr.write(`      [elo-judge] ${label} done in ${((Date.now() - start) / 1000).toFixed(1)}s outcome=${result.outcome}\n`);
+                    resolve(result);
                 }
             },
             (err: Error) => {
                 if (!settled) {
                     settled = true;
-                    console.error('Judge error:', err);
+                    process.stderr.write(`      [elo-judge] ${label} error in ${((Date.now() - start) / 1000).toFixed(1)}s: ${err.message}\n`);
                     resolve({ outcome: 'ERROR', reasoning: '' });
                 }
             },
@@ -154,13 +159,14 @@ export async function judgePairWithSwap(
     modelB: ConsensusModelResponse,
     originalPrompt: string,
 ): Promise<PairJudgment> {
+    const pairLabel = `${modelA.modelId}-vs-${modelB.modelId}`;
     const forwardPrompt = buildJudgePrompt(modelA.content, modelB.content, originalPrompt);
     const reversedPrompt = buildJudgePrompt(modelB.content, modelA.content, originalPrompt);
 
     // Run both calls in parallel for minimal latency impact
     const [forwardResult, reversedResult] = await Promise.all([
-        executeSingleJudgment(provider, modelId, forwardPrompt),
-        executeSingleJudgment(provider, modelId, reversedPrompt),
+        executeSingleJudgment(provider, modelId, forwardPrompt, `${pairLabel}/fwd`),
+        executeSingleJudgment(provider, modelId, reversedPrompt, `${pairLabel}/rev`),
     ]);
 
     // Map reversed outcome back to original pair order
