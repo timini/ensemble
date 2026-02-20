@@ -3,7 +3,7 @@ import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '@/lib/utils';
 import OpenAIMono from '@lobehub/icons/es/OpenAI/components/Mono';
 import AnthropicMono from '@lobehub/icons/es/Anthropic/components/Mono';
-import GoogleMono from '@lobehub/icons/es/Google/components/Mono';
+import DeepMindMono from '@lobehub/icons/es/DeepMind/components/Mono';
 import XAIMono from '@lobehub/icons/es/XAI/components/Mono';
 import DeepSeekMono from '@lobehub/icons/es/DeepSeek/components/Mono';
 import PerplexityMono from '@lobehub/icons/es/Perplexity/components/Mono';
@@ -41,7 +41,7 @@ export interface ProviderLogoProps
 const PROVIDER_ICONS: Record<ProviderLogoProvider, typeof OpenAIMono> = {
   openai: OpenAIMono,
   anthropic: AnthropicMono,
-  google: GoogleMono,
+  google: DeepMindMono,
   xai: XAIMono,
   deepseek: DeepSeekMono,
   perplexity: PerplexityMono,
