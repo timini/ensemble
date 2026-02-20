@@ -115,7 +115,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: packages/eval/datasets
-          key: eval-datasets-v1
+          key: eval-datasets-v2
           restore-keys: eval-datasets-
 
       - name: Build consensus packages
