@@ -5,7 +5,7 @@ import { Card, CardContent } from '../../atoms/Card';
 import { Badge } from '../../atoms/Badge';
 import { cn } from '@/lib/utils';
 
-export type Provider = 'openai' | 'anthropic' | 'google' | 'xai';
+export type Provider = 'openai' | 'anthropic' | 'google' | 'xai' | 'deepseek';
 export type { ModelModality };
 
 export interface ModelCardProps {
@@ -45,6 +45,10 @@ const PROVIDER_CONFIG = {
   xai: {
     name: 'XAI',
     icon: '🚀',
+  },
+  deepseek: {
+    name: 'DeepSeek',
+    icon: '🐋',
   },
 } as const;
 

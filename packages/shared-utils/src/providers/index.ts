@@ -6,3 +6,4 @@ export * from './clients/openai/FreeOpenAIClient';
 export * from './clients/anthropic/FreeAnthropicClient';
 export * from './clients/google/FreeGoogleClient';
 export * from './clients/xai/FreeXAIClient';
+export * from './clients/deepseek/FreeDeepSeekClient';

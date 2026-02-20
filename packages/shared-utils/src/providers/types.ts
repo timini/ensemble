@@ -1,4 +1,4 @@
-export type ProviderName = 'openai' | 'anthropic' | 'google' | 'xai';
+export type ProviderName = 'openai' | 'anthropic' | 'google' | 'xai' | 'deepseek';
 export type ProviderMode = 'mock' | 'free' | 'pro';
 export type ModelModality = 'text' | 'image' | 'audio' | 'video';
 

@@ -39,7 +39,7 @@ export function useApiKeyModal({
         provider: selectedProvider,
         label: `${selectedProvider.charAt(0).toUpperCase() + selectedProvider.slice(1)} API Key`,
         value: safeApiKeys[selectedProvider]?.key ?? '',
-        placeholder: selectedProvider === 'openai' ? 'sk-...' : selectedProvider === 'anthropic' ? 'sk-ant-...' : selectedProvider === 'google' ? 'AIza...' : 'xai-...',
+        placeholder: selectedProvider === 'openai' ? 'sk-...' : selectedProvider === 'anthropic' ? 'sk-ant-...' : selectedProvider === 'google' ? 'AIza...' : selectedProvider === 'deepseek' ? 'sk-...' : 'xai-...',
         helperText:
           hydratedStatuses[selectedProvider] === 'valid'
             ? 'API key configured'

@@ -13,7 +13,7 @@ import { toError } from '~/lib/errors';
 import { getHydratedStatus } from '~/lib/providerStatus';
 import { logger } from '~/lib/logger';
 
-const PROVIDERS: Provider[] = ['openai', 'anthropic', 'google', 'xai'];
+const PROVIDERS: Provider[] = ['openai', 'anthropic', 'google', 'xai', 'deepseek'];
 
 export function useConfigPage() {
     const { t } = useTranslation('common');
@@ -40,6 +40,7 @@ export function useConfigPage() {
         anthropic: null,
         google: null,
         xai: null,
+        deepseek: null,
     });
     const { resetAutoHideTimer } = useApiKeyAutoHide();
     const [webCryptoSupported, setWebCryptoSupported] = useState(true);
@@ -63,6 +64,7 @@ export function useConfigPage() {
             anthropic: apiKeys.anthropic?.status ?? 'idle',
             google: apiKeys.google?.status ?? 'idle',
             xai: apiKeys.xai?.status ?? 'idle',
+            deepseek: apiKeys.deepseek?.status ?? 'idle',
         }),
         [apiKeys],
     );

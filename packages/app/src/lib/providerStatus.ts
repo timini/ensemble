@@ -6,6 +6,7 @@ const DEFAULT_STATUS: Record<Provider, ValidationStatus> = {
   anthropic: 'idle',
   google: 'idle',
   xai: 'idle',
+  deepseek: 'idle',
 };
 
 const READY_STATUS: Record<Provider, string> = {
@@ -13,6 +14,7 @@ const READY_STATUS: Record<Provider, string> = {
   anthropic: 'Ready',
   google: 'Ready',
   xai: 'Ready',
+  deepseek: 'Ready',
 };
 
 export function getHydratedStatus(
@@ -53,5 +55,6 @@ export function createProviderStatusLabels(options: {
     anthropic: mapStatusToLabel(statuses.anthropic),
     google: mapStatusToLabel(statuses.google),
     xai: mapStatusToLabel(statuses.xai),
+    deepseek: mapStatusToLabel(statuses.deepseek),
   };
 }

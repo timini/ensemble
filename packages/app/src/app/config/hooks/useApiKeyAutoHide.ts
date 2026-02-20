@@ -3,7 +3,7 @@ import { useStore } from '~/store';
 import type { Provider } from '@/components/molecules/ApiKeyInput';
 
 const AUTO_HIDE_DELAY_MS = 10_000;
-const PROVIDERS: Provider[] = ['openai', 'anthropic', 'google', 'xai'];
+const PROVIDERS: Provider[] = ['openai', 'anthropic', 'google', 'xai', 'deepseek'];
 
 /**
  * Auto-hides revealed API keys after a period of inactivity and

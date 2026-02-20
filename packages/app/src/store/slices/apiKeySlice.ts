@@ -25,6 +25,7 @@ export interface ApiKeySlice {
     anthropic: ApiKeyData | null;
     google: ApiKeyData | null;
     xai: ApiKeyData | null;
+    deepseek: ApiKeyData | null;
   };
   encryptionInitialized: boolean;
 
@@ -47,6 +48,7 @@ export const createApiKeySlice: StateCreator<ApiKeySlice> = (set, get) => ({
     anthropic: null,
     google: null,
     xai: null,
+    deepseek: null,
   },
   encryptionInitialized: false,
 
@@ -56,7 +58,7 @@ export const createApiKeySlice: StateCreator<ApiKeySlice> = (set, get) => ({
       return;
     }
 
-    const providers: ProviderType[] = ['openai', 'anthropic', 'google', 'xai'];
+    const providers: ProviderType[] = ['openai', 'anthropic', 'google', 'xai', 'deepseek'];
 
     await Promise.all(
       providers.map(async (provider) => {
@@ -174,7 +176,7 @@ export const createApiKeySlice: StateCreator<ApiKeySlice> = (set, get) => ({
 
   hideAllApiKeys: () => {
     set((state) => {
-      const providers: ProviderType[] = ['openai', 'anthropic', 'google', 'xai'];
+      const providers: ProviderType[] = ['openai', 'anthropic', 'google', 'xai', 'deepseek'];
       const updatedKeys = { ...state.apiKeys };
       for (const provider of providers) {
         const entry = updatedKeys[provider];
@@ -198,6 +200,7 @@ export const createApiKeySlice: StateCreator<ApiKeySlice> = (set, get) => ({
         anthropic: null,
         google: null,
         xai: null,
+        deepseek: null,
       },
       encryptionInitialized: false,
     });

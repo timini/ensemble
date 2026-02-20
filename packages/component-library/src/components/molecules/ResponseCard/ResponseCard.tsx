@@ -10,7 +10,7 @@ import { cn } from '@/lib/utils';
 import { ChevronDown, ChevronUp, Copy } from 'lucide-react';
 import { Markdown } from '../../atoms/Markdown';
 
-export type Provider = 'openai' | 'anthropic' | 'google' | 'xai';
+export type Provider = 'openai' | 'anthropic' | 'google' | 'xai' | 'deepseek';
 export type ResponseStatus = 'streaming' | 'complete' | 'error';
 export type ResponseType = 'ai' | 'manual';
 
@@ -50,6 +50,7 @@ export const PROVIDER_NAMES = {
   anthropic: 'Anthropic',
   google: 'Google',
   xai: 'XAI',
+  deepseek: 'DeepSeek',
 } as const;
 
 /**

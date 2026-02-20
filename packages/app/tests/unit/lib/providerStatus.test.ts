@@ -7,6 +7,7 @@ const baseStatuses: Record<Provider, 'idle' | 'invalid' | 'valid' | 'validating'
   anthropic: 'valid',
   google: 'validating',
   xai: 'idle',
+  deepseek: 'idle',
 };
 
 describe('createProviderStatusLabels', () => {
@@ -22,6 +23,7 @@ describe('createProviderStatusLabels', () => {
       anthropic: 'Ready',
       google: 'Ready',
       xai: 'Ready',
+      deepseek: 'Ready',
     });
   });
 
