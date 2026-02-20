@@ -120,10 +120,10 @@ export const ApiKeyInput = React.forwardRef<HTMLInputElement, ApiKeyInputProps>(
 
     return (
       <div className="w-full space-y-2" data-provider={provider} data-validation-status={validationStatus}>
-        <Label htmlFor={inputId} className="inline-flex items-center gap-1.5">
+        <div className="inline-flex items-center gap-1.5">
           <ProviderLogo provider={provider} size="sm" aria-hidden="true" />
-          {label}
-        </Label>
+          <Label htmlFor={inputId}>{label}</Label>
+        </div>
 
         <div className="relative">
           <Input
