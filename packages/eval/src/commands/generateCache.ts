@@ -37,7 +37,7 @@ import { parseModelSpec } from '../lib/modelSpecs.js';
 import { registerProviders } from '../lib/providers.js';
 import type { BenchmarkDatasetName, BenchmarkQuestion, EvalMode, PromptRunResult, ProviderResponse } from '../types.js';
 
-const DEFAULT_MODEL = 'google:gemini-3-flash-preview';
+const DEFAULT_MODEL = 'google:gemini-2.5-flash-lite';
 const DEFAULT_ENSEMBLE_SIZE = 5;
 const DEFAULT_TEMPERATURE = 0.7;
 const DEFAULT_SAMPLE = 100;
@@ -47,7 +47,7 @@ const DEFAULT_DATASETS: BenchmarkDatasetName[] = [
   'mmlu_pro', 'simpleqa', 'arc', 'hellaswag', 'hallumix',
 ];
 
-const DEFAULT_JUDGE_MODEL = 'google:gemini-2.5-flash';
+const DEFAULT_JUDGE_MODEL = 'google:gemini-2.5-flash-lite';
 
 interface GenerateCacheOptions {
   model: string;

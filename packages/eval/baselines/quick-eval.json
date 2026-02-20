@@ -1,5 +1,5 @@
 {
-  "model": "google:gemini-3-flash-preview",
+  "model": "google:gemini-2.5-flash-lite",
   "ensembleSize": 5,
   "sample": 30,
   "datasets": [
@@ -11,8 +11,7 @@
     "mmlu_pro",
     "simpleqa",
     "arc",
-    "hellaswag",
-    "hallumix"
+    "hellaswag"
   ],
   "strategies": [
     "standard",
@@ -20,32 +19,32 @@
     "majority",
     "council"
   ],
-  "updatedAt": "2026-02-19T20:48:40.370Z",
+  "updatedAt": "2026-02-20T11:33:50.844Z",
   "single": {
-    "accuracy": 0.8515625,
-    "correct": 218,
-    "total": 256
+    "accuracy": 0.6185185185185185,
+    "correct": 167,
+    "total": 270
   },
   "ensemble": {
     "standard": {
-      "accuracy": 0.861003861003861,
-      "correct": 223,
-      "total": 259
+      "accuracy": 0.6166666666666667,
+      "correct": 148,
+      "total": 240
     },
     "elo": {
-      "accuracy": 0.8671875,
-      "correct": 222,
-      "total": 256
+      "accuracy": 0.6212765957446809,
+      "correct": 146,
+      "total": 235
     },
     "majority": {
-      "accuracy": 0.8372093023255814,
-      "correct": 216,
-      "total": 258
+      "accuracy": 0.5907172995780591,
+      "correct": 140,
+      "total": 237
     },
     "council": {
-      "accuracy": 0.7890625,
-      "correct": 202,
-      "total": 256
+      "accuracy": 0.5957446808510638,
+      "correct": 140,
+      "total": 235
     }
   }
 }

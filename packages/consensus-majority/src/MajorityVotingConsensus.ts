@@ -27,13 +27,17 @@ export class MajorityVotingConsensus implements ConsensusStrategy {
             throw new Error('At least 2 responses are required for majority voting');
         }
 
+        const rankStart = Date.now();
+        process.stderr.write(`    [majority] rankResponses start: ${responses.length} responses\n`);
         const rankingPrompt = buildMajorityRankingPrompt(responses, prompt);
 
         try {
             const llmOutput = await this.completePrompt(rankingPrompt);
+            process.stderr.write(`    [majority] rankResponses done in ${((Date.now() - rankStart) / 1000).toFixed(1)}s\n`);
             const parsed = parseMajorityVotingOutput(llmOutput, responses);
             return parsed ?? buildFallbackRankings(responses);
-        } catch {
+        } catch (err) {
+            process.stderr.write(`    [majority] rankResponses error in ${((Date.now() - rankStart) / 1000).toFixed(1)}s: ${err instanceof Error ? err.message : String(err)}\n`);
             return buildFallbackRankings(responses);
         }
     }
@@ -77,9 +81,14 @@ export class MajorityVotingConsensus implements ConsensusStrategy {
             majorityModel,
         });
 
+        const synStart = Date.now();
+        process.stderr.write(`    [majority] synthesis start\n`);
         try {
-            return await this.completePrompt(synthesisPrompt);
-        } catch {
+            const result = await this.completePrompt(synthesisPrompt);
+            process.stderr.write(`    [majority] synthesis done in ${((Date.now() - synStart) / 1000).toFixed(1)}s\n`);
+            return result;
+        } catch (err) {
+            process.stderr.write(`    [majority] synthesis error in ${((Date.now() - synStart) / 1000).toFixed(1)}s: ${err instanceof Error ? err.message : String(err)}\n`);
             return 'Failed to generate summary.';
         }
     }
