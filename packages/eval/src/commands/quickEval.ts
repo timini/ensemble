@@ -229,6 +229,9 @@ export function createQuickEvalCommand(): Command {
         process.stdout.write(`  Baseline saved to ${options.baseline}\n`);
       }
       log(`  [${elapsed()}] Done.\n`);
+      // Force exit: zombie tasks from timed-out questions may hold open HTTP connections
+      // that keep the event loop alive. All results are already saved/printed.
+      process.exit(process.exitCode ?? 0);
     });
 
   return command;

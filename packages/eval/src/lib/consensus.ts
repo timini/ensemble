@@ -108,8 +108,12 @@ export async function generateConsensus(
     const counter = new TokenCountingProvider(summarizerClient);
     const start = Date.now();
     return fn(counter).then((result) => {
+      const durationMs = Date.now() - start;
       outputs[name] = result;
-      metrics[name] = { tokenCount: counter.totalTokens, durationMs: Date.now() - start };
+      metrics[name] = { tokenCount: counter.totalTokens, durationMs };
+      if (durationMs > 10_000) {
+        process.stderr.write(`  [consensus-slow] ${name} took ${(durationMs / 1000).toFixed(1)}s (${counter.totalTokens} tokens)\n`);
+      }
     });
   };
 

@@ -6,6 +6,9 @@ import type {
   StrategyName,
 } from '../types.js';
 
+/** Per-evaluate-call timeout in ms. Prevents a single hanging API call from blocking for 300s. */
+const EVAL_CALL_TIMEOUT_MS = 60_000;
+
 export interface EvaluatorLike {
   name: PromptEvaluation['evaluator'];
   evaluate(
@@ -13,6 +16,39 @@ export interface EvaluatorLike {
     groundTruth: string,
     prompt?: string,
   ): EvaluationResult | Promise<EvaluationResult>;
+}
+
+/** Wrap an evaluate call with a timeout so a single hanging judge call doesn't block forever. */
+async function evaluateWithTimeout(
+  evaluator: EvaluatorLike,
+  content: string,
+  groundTruth: string,
+  prompt: string | undefined,
+  label: string,
+): Promise<EvaluationResult> {
+  const start = Date.now();
+  let timer: ReturnType<typeof setTimeout>;
+  const timeoutPromise = new Promise<never>((_, reject) => {
+    timer = setTimeout(() => reject(new Error(`Eval call timed out after ${EVAL_CALL_TIMEOUT_MS}ms for ${label}`)), EVAL_CALL_TIMEOUT_MS);
+    timer.unref();
+  });
+  try {
+    const result = await Promise.race([
+      evaluator.evaluate(content, groundTruth, prompt),
+      timeoutPromise,
+    ]);
+    clearTimeout(timer!);
+    const elapsed = Date.now() - start;
+    if (elapsed > 10_000) {
+      process.stderr.write(`  [eval-slow] ${label} took ${(elapsed / 1000).toFixed(1)}s\n`);
+    }
+    return result;
+  } catch (err) {
+    clearTimeout(timer!);
+    const elapsed = Date.now() - start;
+    process.stderr.write(`  [eval-error] ${label} failed after ${(elapsed / 1000).toFixed(1)}s: ${err instanceof Error ? err.message : String(err)}\n`);
+    return { correct: false, expected: groundTruth.trim(), predicted: null };
+  }
 }
 
 export async function evaluateResponses(
@@ -37,10 +73,10 @@ export async function evaluateResponses(
     entries.push({ key, response });
   }
 
-  // Phase 2: evaluate all responses in parallel
+  // Phase 2: evaluate all responses in parallel with per-call timeout
   const evalResults = await Promise.all(
-    entries.map(({ response }) =>
-      evaluator.evaluate(response.content, groundTruth, prompt),
+    entries.map(({ key, response }) =>
+      evaluateWithTimeout(evaluator, response.content, groundTruth, prompt, key),
     ),
   );
 
@@ -93,9 +129,11 @@ export async function evaluateConsensusStrategies(
     }
   }
 
-  // Evaluate all strategies in parallel
+  // Evaluate all strategies in parallel with per-call timeout
   const evalResults = await Promise.all(
-    entries.map(({ answer }) => evaluator.evaluate(answer, groundTruth, prompt)),
+    entries.map(({ strategy, answer }) =>
+      evaluateWithTimeout(evaluator, answer, groundTruth, prompt, `consensus:${strategy}`),
+    ),
   );
 
   // Assemble results
