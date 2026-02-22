@@ -1,5 +1,6 @@
 import type { StateCreator, StoreMutatorIdentifier } from 'zustand';
 import { toError } from '~/lib/errors';
+import { logger } from '~/lib/logger';
 
 /**
  * Persistence middleware for Zustand store
@@ -53,7 +54,7 @@ export const persist = <
         };
       }
     } catch (error: unknown) {
-      console.error(
+      logger.error(
         'Failed to parse stored state:',
         toError(error, 'Invalid persisted state'),
       );
@@ -71,7 +72,7 @@ export const persist = <
           : state;
         storage.setItem(name, JSON.stringify(stateToPersist));
       } catch (error: unknown) {
-        console.error(
+        logger.error(
           'Failed to persist state:',
           toError(error, 'Unable to persist state'),
         );

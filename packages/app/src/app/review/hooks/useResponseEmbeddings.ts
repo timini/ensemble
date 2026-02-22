@@ -3,6 +3,7 @@ import type { ProviderType } from '~/store/slices/ensembleSlice';
 import type { OperatingMode } from '~/store/slices/modeSlice';
 import { generateEmbeddingsForResponses } from '~/lib/embeddings';
 import { toError } from '~/lib/errors';
+import { logger } from '~/lib/logger';
 import type { ModelResponse } from '~/store';
 type Embedding = { modelId: string; embedding: number[] };
 
@@ -72,7 +73,7 @@ export function useResponseEmbeddings({
         provider: embeddingsProvider,
         mode: mode === 'pro' ? 'pro' : 'free',
         onError: (modelId, error: Error) => {
-          console.error(
+          logger.error(
             `Failed to generate embeddings for ${modelId} via ${embeddingsProvider}`,
             error,
           );
@@ -89,7 +90,7 @@ export function useResponseEmbeddings({
         calculateAgreementState();
       }
     })().catch((error: unknown) => {
-      console.error(
+      logger.error(
         'Failed to process embeddings',
         toError(error, 'Unable to process embeddings'),
       );

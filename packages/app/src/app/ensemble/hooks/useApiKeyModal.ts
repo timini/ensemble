@@ -3,6 +3,7 @@ import type { Provider, ValidationStatus } from '@/components/molecules/ApiKeyIn
 import type { StoreState } from '~/store';
 import type { OperatingMode } from '~/store/slices/modeSlice';
 import { toError } from '~/lib/errors';
+import { logger } from '~/lib/logger';
 
 interface UseApiKeyModalOptions {
   safeApiKeys: StoreState['apiKeys'];
@@ -66,7 +67,7 @@ export function useApiKeyModal({
 
   const handleKeyChange = (provider: Provider, value: string) => {
     void setApiKey(provider, value).catch((error: unknown) => {
-      console.error(
+      logger.error(
         `Failed to store ${provider} API key`,
         toError(error, `Unable to store ${provider} API key`),
       );

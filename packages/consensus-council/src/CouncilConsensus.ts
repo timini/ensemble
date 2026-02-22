@@ -14,6 +14,15 @@ const DEFAULT_VALIDITY_THRESHOLD = 0.5;
 const DEFAULT_TOP_K = 3;
 const INITIAL_ELO = 1200;
 
+function writeDebug(message: string): void {
+    const stderr = (globalThis as {
+        process?: { stderr?: { write?: (chunk: string) => void } };
+    }).process?.stderr;
+    if (typeof stderr?.write === 'function') {
+        stderr.write(message);
+    }
+}
+
 export interface CouncilConsensusConfig {
     participants: CouncilParticipant[];
     summarizerProvider: AIProvider;
@@ -88,31 +97,31 @@ export class CouncilConsensus implements ConsensusStrategy {
         }));
 
         const n = branches.length;
-        process.stderr.write(`    [council] pipeline start: ${n} branches\n`);
+        writeDebug(`    [council] pipeline start: ${n} branches\n`);
         let stepStart: number;
 
         // Step 1: Critiques (N*(N-1) calls)
         stepStart = Date.now();
-        process.stderr.write(`    [council] critique start (${n * (n - 1)} calls)\n`);
+        writeDebug(`    [council] critique start (${n * (n - 1)} calls)\n`);
         this.onProgress?.({ round: 'critique', progress: 0, message: 'Running critique round...' });
         await runCritiqueRound(branches, prompt, find, complete);
-        process.stderr.write(`    [council] critique done in ${((Date.now() - stepStart) / 1000).toFixed(1)}s\n`);
+        writeDebug(`    [council] critique done in ${((Date.now() - stepStart) / 1000).toFixed(1)}s\n`);
         this.onProgress?.({ round: 'critique', progress: 1, message: 'Critique round complete.' });
 
         // Step 2: Rebuttals (N calls)
         stepStart = Date.now();
-        process.stderr.write(`    [council] rebuttal start (${n} calls)\n`);
+        writeDebug(`    [council] rebuttal start (${n} calls)\n`);
         this.onProgress?.({ round: 'rebuttal', progress: 0, message: 'Running rebuttal round...' });
         await runRebuttalRound(branches, prompt, find, complete);
-        process.stderr.write(`    [council] rebuttal done in ${((Date.now() - stepStart) / 1000).toFixed(1)}s\n`);
+        writeDebug(`    [council] rebuttal done in ${((Date.now() - stepStart) / 1000).toFixed(1)}s\n`);
         this.onProgress?.({ round: 'rebuttal', progress: 1, message: 'Rebuttal round complete.' });
 
         // Step 3: Judgment (N*(N-1) calls)
         stepStart = Date.now();
-        process.stderr.write(`    [council] judgment start (${n * (n - 1)} calls)\n`);
+        writeDebug(`    [council] judgment start (${n * (n - 1)} calls)\n`);
         this.onProgress?.({ round: 'judgment', progress: 0, message: 'Running judgment round...' });
         await runJudgmentRound(branches, prompt, find, complete, this.validityThreshold);
-        process.stderr.write(`    [council] judgment done in ${((Date.now() - stepStart) / 1000).toFixed(1)}s\n`);
+        writeDebug(`    [council] judgment done in ${((Date.now() - stepStart) / 1000).toFixed(1)}s\n`);
         this.onProgress?.({ round: 'judgment', progress: 1, message: 'Judgment round complete.' });
 
         // Filter invalid branches, fallback if all are invalid
@@ -120,23 +129,23 @@ export class CouncilConsensus implements ConsensusStrategy {
         if (validBranches.length === 0) {
             validBranches = branches.map((b) => ({ ...b, isValid: true }));
         }
-        process.stderr.write(`    [council] ${validBranches.length}/${n} branches valid\n`);
+        writeDebug(`    [council] ${validBranches.length}/${n} branches valid\n`);
 
         // Step 4: ELO ranking
         stepStart = Date.now();
         const vPairs = validBranches.length * (validBranches.length - 1) / 2;
-        process.stderr.write(`    [council] elo start (${vPairs} pairs)\n`);
+        writeDebug(`    [council] elo start (${vPairs} pairs)\n`);
         this.onProgress?.({ round: 'elo', progress: 0, message: 'Running ELO ranking...' });
         const rankedBranches = await runCouncilEloRanking(validBranches, prompt, this.participants, complete);
-        process.stderr.write(`    [council] elo done in ${((Date.now() - stepStart) / 1000).toFixed(1)}s\n`);
+        writeDebug(`    [council] elo done in ${((Date.now() - stepStart) / 1000).toFixed(1)}s\n`);
         this.onProgress?.({ round: 'elo', progress: 1, message: 'ELO ranking complete.' });
 
         // Step 5: Summarize top-K
         stepStart = Date.now();
-        process.stderr.write(`    [council] summary start (top ${effectiveTopK})\n`);
+        writeDebug(`    [council] summary start (top ${effectiveTopK})\n`);
         this.onProgress?.({ round: 'summary', progress: 0, message: 'Generating summary...' });
         const summary = await this.summarizeTopBranches(rankedBranches.slice(0, effectiveTopK), prompt);
-        process.stderr.write(`    [council] summary done in ${((Date.now() - stepStart) / 1000).toFixed(1)}s\n`);
+        writeDebug(`    [council] summary done in ${((Date.now() - stepStart) / 1000).toFixed(1)}s\n`);
         this.onProgress?.({ round: 'summary', progress: 1, message: 'Summary complete.' });
 
         const tree: CouncilDebateTree = {

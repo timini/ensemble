@@ -10,6 +10,7 @@ import { decrypt, encrypt } from '@ensemble-ai/shared-utils/security';
 import type { ValidationStatus } from '@/components/molecules/ApiKeyInput';
 import type { ProviderType } from './ensembleSlice';
 import { toError } from '~/lib/errors';
+import { logger } from '~/lib/logger';
 
 export interface ApiKeyData {
   encrypted: string | null;
@@ -98,7 +99,7 @@ export const createApiKeySlice: StateCreator<ApiKeySlice> = (set, get) => ({
             error,
             `Failed to decrypt ${provider} API key`,
           );
-          console.error(`Failed to decrypt ${provider} API key`, normalizedError);
+          logger.error(`Failed to decrypt ${provider} API key`, normalizedError);
           set((state) => {
             const currentEntry = state.apiKeys[provider];
             return {
@@ -154,7 +155,7 @@ export const createApiKeySlice: StateCreator<ApiKeySlice> = (set, get) => ({
         error,
         `Failed to encrypt ${provider} API key`,
       );
-      console.error(`Failed to encrypt ${provider} API key`, normalizedError);
+      logger.error(`Failed to encrypt ${provider} API key`, normalizedError);
       throw normalizedError;
     }
   },

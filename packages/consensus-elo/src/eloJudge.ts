@@ -17,6 +17,15 @@ import type { AIProvider, ConsensusModelResponse } from '@ensemble-ai/consensus-
 import type { SingleJudgmentOutcome, PairJudgment } from './eloTypes';
 import { mapReversedOutcome, resolveSwappedOutcomes } from './eloTypes';
 
+function writeDebug(message: string): void {
+    const stderr = (globalThis as {
+        process?: { stderr?: { write?: (chunk: string) => void } };
+    }).process?.stderr;
+    if (typeof stderr?.write === 'function') {
+        stderr.write(message);
+    }
+}
+
 /**
  * Builds the judge prompt for a pairwise comparison.
  * Includes chain-of-thought instruction requesting brief reasoning before the verdict.
@@ -109,7 +118,7 @@ async function executeSingleJudgment(
     label: string,
 ): Promise<{ outcome: SingleJudgmentOutcome; reasoning: string }> {
     const start = Date.now();
-    process.stderr.write(`      [elo-judge] ${label} start streamResponse\n`);
+    writeDebug(`      [elo-judge] ${label} start streamResponse\n`);
     return new Promise((resolve) => {
         let settled = false;
         provider.streamResponse(
@@ -120,14 +129,14 @@ async function executeSingleJudgment(
                 if (!settled) {
                     settled = true;
                     const result = parseJudgeResponse(finalText);
-                    process.stderr.write(`      [elo-judge] ${label} done in ${((Date.now() - start) / 1000).toFixed(1)}s outcome=${result.outcome}\n`);
+                    writeDebug(`      [elo-judge] ${label} done in ${((Date.now() - start) / 1000).toFixed(1)}s outcome=${result.outcome}\n`);
                     resolve(result);
                 }
             },
             (err: Error) => {
                 if (!settled) {
                     settled = true;
-                    process.stderr.write(`      [elo-judge] ${label} error in ${((Date.now() - start) / 1000).toFixed(1)}s: ${err.message}\n`);
+                    writeDebug(`      [elo-judge] ${label} error in ${((Date.now() - start) / 1000).toFixed(1)}s: ${err.message}\n`);
                     resolve({ outcome: 'ERROR', reasoning: '' });
                 }
             },

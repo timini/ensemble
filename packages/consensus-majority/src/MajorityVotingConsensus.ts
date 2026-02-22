@@ -13,6 +13,15 @@ import {
 
 const MIN_RESPONSES_FOR_MAJORITY = 2;
 
+function writeDebug(message: string): void {
+    const stderr = (globalThis as {
+        process?: { stderr?: { write?: (chunk: string) => void } };
+    }).process?.stderr;
+    if (typeof stderr?.write === 'function') {
+        stderr.write(message);
+    }
+}
+
 export class MajorityVotingConsensus implements ConsensusStrategy {
     constructor(
         private summarizerProvider: AIProvider,
@@ -28,16 +37,16 @@ export class MajorityVotingConsensus implements ConsensusStrategy {
         }
 
         const rankStart = Date.now();
-        process.stderr.write(`    [majority] rankResponses start: ${responses.length} responses\n`);
+        writeDebug(`    [majority] rankResponses start: ${responses.length} responses\n`);
         const rankingPrompt = buildMajorityRankingPrompt(responses, prompt);
 
         try {
             const llmOutput = await this.completePrompt(rankingPrompt);
-            process.stderr.write(`    [majority] rankResponses done in ${((Date.now() - rankStart) / 1000).toFixed(1)}s\n`);
+            writeDebug(`    [majority] rankResponses done in ${((Date.now() - rankStart) / 1000).toFixed(1)}s\n`);
             const parsed = parseMajorityVotingOutput(llmOutput, responses);
             return parsed ?? buildFallbackRankings(responses);
         } catch (err) {
-            process.stderr.write(`    [majority] rankResponses error in ${((Date.now() - rankStart) / 1000).toFixed(1)}s: ${err instanceof Error ? err.message : String(err)}\n`);
+            writeDebug(`    [majority] rankResponses error in ${((Date.now() - rankStart) / 1000).toFixed(1)}s: ${err instanceof Error ? err.message : String(err)}\n`);
             return buildFallbackRankings(responses);
         }
     }
@@ -82,13 +91,13 @@ export class MajorityVotingConsensus implements ConsensusStrategy {
         });
 
         const synStart = Date.now();
-        process.stderr.write(`    [majority] synthesis start\n`);
+        writeDebug(`    [majority] synthesis start\n`);
         try {
             const result = await this.completePrompt(synthesisPrompt);
-            process.stderr.write(`    [majority] synthesis done in ${((Date.now() - synStart) / 1000).toFixed(1)}s\n`);
+            writeDebug(`    [majority] synthesis done in ${((Date.now() - synStart) / 1000).toFixed(1)}s\n`);
             return result;
         } catch (err) {
-            process.stderr.write(`    [majority] synthesis error in ${((Date.now() - synStart) / 1000).toFixed(1)}s: ${err instanceof Error ? err.message : String(err)}\n`);
+            writeDebug(`    [majority] synthesis error in ${((Date.now() - synStart) / 1000).toFixed(1)}s: ${err instanceof Error ? err.message : String(err)}\n`);
             return 'Failed to generate summary.';
         }
     }

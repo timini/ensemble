@@ -1,6 +1,15 @@
 
 import type { AIProvider, ConsensusModelResponse, ConsensusStrategy, RankingResult } from '@ensemble-ai/consensus-core';
 
+function writeDebug(message: string): void {
+    const stderr = (globalThis as {
+        process?: { stderr?: { write?: (chunk: string) => void } };
+    }).process?.stderr;
+    if (typeof stderr?.write === 'function') {
+        stderr.write(message);
+    }
+}
+
 export class StandardConsensus implements ConsensusStrategy {
     constructor(
         private summarizerProvider: AIProvider,
@@ -25,7 +34,7 @@ export class StandardConsensus implements ConsensusStrategy {
     async generateConsensus(responses: ConsensusModelResponse[], topN: number, originalPrompt: string): Promise<string> {
         void topN; // Unused
         const sumStart = Date.now();
-        process.stderr.write(`    [standard] generateConsensus start: ${responses.length} responses\n`);
+        writeDebug(`    [standard] generateConsensus start: ${responses.length} responses\n`);
 
         const responsesText = responses.map(r => `Model: ${r.modelName}\nResponse:\n${r.content}`).join('\n\n---\n\n');
 
@@ -48,11 +57,11 @@ If the question asks for a constrained format (single letter, number, JSON, etc.
             this.summarizerProvider.streamResponse(prompt, this.summarizerModelId,
                 () => { void 0; },
                 (finalText: string) => {
-                    process.stderr.write(`    [standard] generateConsensus done in ${((Date.now() - sumStart) / 1000).toFixed(1)}s\n`);
+                    writeDebug(`    [standard] generateConsensus done in ${((Date.now() - sumStart) / 1000).toFixed(1)}s\n`);
                     resolve(finalText);
                 },
                 (err: Error) => {
-                    process.stderr.write(`    [standard] generateConsensus error in ${((Date.now() - sumStart) / 1000).toFixed(1)}s: ${err.message}\n`);
+                    writeDebug(`    [standard] generateConsensus error in ${((Date.now() - sumStart) / 1000).toFixed(1)}s: ${err.message}\n`);
                     resolve('Failed to generate summary.');
                 }
             );
