@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Card, CardHeader, CardContent } from '../../atoms/Card';
 import { Badge } from '../../atoms/Badge';
 import { ProviderLogo, type ProviderLogoProvider } from '../../atoms/ProviderLogo';
+import { ModelLogo } from '../../atoms/ModelLogo';
 import { LoadingSpinner } from '../../atoms/LoadingSpinner';
 import { InlineAlert } from '../../atoms/InlineAlert';
 import { Rating } from '../../atoms/Rating';
@@ -142,7 +143,14 @@ export const ResponseCard = React.forwardRef<HTMLDivElement, ResponseCardProps>(
                       {PROVIDER_NAMES[provider]}
                     </Badge>
                   )}
-                  {modelName && <span className="font-semibold text-base">{modelName}</span>}
+                  {modelName && (
+                    <span className="inline-flex items-center gap-1.5 font-semibold text-base">
+                      {provider && (
+                        <ModelLogo provider={provider} modelName={modelName} size="sm" />
+                      )}
+                      <span>{modelName}</span>
+                    </span>
+                  )}
                 </>
               )}
             </div>

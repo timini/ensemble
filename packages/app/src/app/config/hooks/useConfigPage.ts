@@ -189,6 +189,16 @@ export function useConfigPage() {
                 showKey: apiKeys.xai?.visible ?? false,
             },
             {
+                provider: 'deepseek' as Provider,
+                label: 'DeepSeek API Key',
+                value: apiKeys.deepseek?.key ?? '',
+                placeholder: 'sk-...',
+                helperText: hydratedStatuses.deepseek === 'valid' ? 'API key configured' : hydratedStatuses.deepseek === 'validating' ? 'Validating...' : hydratedStatuses.deepseek === 'invalid' ? 'Invalid API key' : 'Enter your DeepSeek API key',
+                error: apiKeys.deepseek?.error,
+                validationStatus: hydratedStatuses.deepseek,
+                showKey: apiKeys.deepseek?.visible ?? false,
+            },
+            {
                 provider: 'perplexity' as Provider,
                 label: 'Perplexity API Key',
                 value: apiKeys.perplexity?.key ?? '',

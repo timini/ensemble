@@ -15,6 +15,8 @@ describe('ResponseCardSkeleton', () => {
     expect(screen.getByTestId('skeleton-1')).toBeInTheDocument();
     expect(screen.getByText('GPT-4')).toBeInTheDocument();
     expect(screen.getByText('OpenAI')).toBeInTheDocument();
+    expect(screen.getByTestId('provider-logo-openai')).toBeInTheDocument();
+    expect(screen.getByTestId('model-logo-openai')).toBeInTheDocument();
   });
 
   it('maps provider keys to display names', () => {
@@ -22,11 +24,13 @@ describe('ResponseCardSkeleton', () => {
       <ResponseCardSkeleton modelName="Claude" provider="anthropic" />
     );
     expect(screen.getByText('Anthropic')).toBeInTheDocument();
+    expect(screen.getByTestId('model-logo-anthropic')).toHaveAttribute('data-logo-key', 'claude');
 
     rerender(
       <ResponseCardSkeleton modelName="Gemini" provider="google" />
     );
     expect(screen.getByText('Google')).toBeInTheDocument();
+    expect(screen.getByTestId('model-logo-google')).toHaveAttribute('data-logo-key', 'gemini');
   });
 
   it('renders aria-busy for loading state', () => {

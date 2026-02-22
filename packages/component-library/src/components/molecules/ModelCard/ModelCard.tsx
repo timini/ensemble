@@ -3,10 +3,10 @@ import { useTranslation } from 'react-i18next';
 import type { ModelModality } from '@ensemble-ai/shared-utils/providers';
 import { Card, CardContent } from '../../atoms/Card';
 import { Badge } from '../../atoms/Badge';
-import { ProviderLogo, type ProviderLogoProvider } from '../../atoms/ProviderLogo';
+import { ModelLogo, type ModelLogoProvider } from '../../atoms/ModelLogo';
 import { cn } from '@/lib/utils';
 
-export type Provider = ProviderLogoProvider;
+export type Provider = ModelLogoProvider;
 export type { ModelModality };
 
 export interface ModelCardProps {
@@ -34,7 +34,7 @@ export interface ModelCardProps {
  * ModelCard molecule for selecting AI models in an ensemble.
  *
  * Combines Card and Badge atoms to create a clean, centered selectable model card
- * matching the wireframe design with provider icons and selection states.
+ * matching the wireframe design with model-brand logos and selection states.
  *
  * @example
  * ```tsx
@@ -116,7 +116,12 @@ export const ModelCard = React.forwardRef<HTMLDivElement, ModelCardProps>(
       >
         <CardContent className="p-4 text-center">
           <div className="mb-2 flex justify-center">
-            <ProviderLogo provider={provider} size="lg" />
+            <ModelLogo
+              provider={provider}
+              modelName={modelName}
+              modelId={modelId}
+              size="lg"
+            />
           </div>
           <div className="font-medium text-sm">{modelName}</div>
           {modalities.length > 0 && (

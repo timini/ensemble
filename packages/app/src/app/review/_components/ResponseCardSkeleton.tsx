@@ -4,6 +4,8 @@
  */
 
 import { Card, CardHeader, CardContent } from "@/components/atoms/Card";
+import { ProviderLogo } from "@/components/atoms/ProviderLogo";
+import { ModelLogo } from "@/components/atoms/ModelLogo";
 import { PROVIDER_NAMES, type Provider } from "@/components/molecules/ResponseCard";
 
 interface ResponseCardSkeletonProps {
@@ -27,11 +29,13 @@ export function ResponseCardSkeleton({
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between gap-2">
           <div className="flex items-center gap-2">
-            <span className="rounded-full border px-2.5 py-0.5 text-xs font-semibold text-muted-foreground">
+            <span className="inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-semibold text-muted-foreground">
+              <ProviderLogo provider={provider} size="sm" />
               {PROVIDER_NAMES[provider]}
             </span>
-            <span className="text-base font-semibold text-muted-foreground">
-              {modelName}
+            <span className="inline-flex items-center gap-1.5 text-base font-semibold text-muted-foreground">
+              <ModelLogo provider={provider} modelName={modelName} size="sm" />
+              <span>{modelName}</span>
             </span>
           </div>
           <div className="h-5 w-16 animate-pulse rounded bg-muted" />

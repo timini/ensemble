@@ -15,6 +15,13 @@ export { Input } from './components/atoms/Input';
 export { Badge, badgeVariants, type BadgeProps } from './components/atoms/Badge';
 export { Icon, iconVariants, type IconProps } from './components/atoms/Icon';
 export { ProviderLogo, providerLogoVariants, type ProviderLogoProps, type ProviderLogoProvider } from './components/atoms/ProviderLogo';
+export {
+  ModelLogo,
+  modelLogoVariants,
+  resolveModelLogoKey,
+  type ModelLogoProps,
+  type ModelLogoProvider,
+} from './components/atoms/ModelLogo';
 export { LoadingSpinner, type LoadingSpinnerProps } from './components/atoms/LoadingSpinner';
 export { Tag, tagVariants, type TagProps } from './components/atoms/Tag';
 export { InlineAlert, type InlineAlertProps } from './components/atoms/InlineAlert';

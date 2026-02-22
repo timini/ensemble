@@ -2,6 +2,7 @@ import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { ModelCard, type ModelModality, type Provider } from '../../molecules/ModelCard';
 import { Heading } from '../../atoms/Heading';
+import { ProviderLogo } from '../../atoms/ProviderLogo';
 
 export interface Model {
   id: string;
@@ -114,7 +115,12 @@ export const ModelSelectionList = React.forwardRef<HTMLDivElement, ModelSelectio
             <div key={provider} data-testid="provider-section" className="mb-8">
               {/* Provider Header */}
               <div className="flex items-center justify-between mb-4">
-                <Heading level={4} size="lg" className="text-foreground">{t(`providers.${provider}`)}</Heading>
+                <div className="flex items-center gap-2">
+                  <ProviderLogo provider={provider} size="sm" />
+                  <Heading level={4} size="lg" className="text-foreground">
+                    {t(`providers.${provider}`)}
+                  </Heading>
+                </div>
                 {providerStatus?.[provider] && (
                   <div className="flex items-center gap-2">
                     {providerStatus[provider] === 'Ready' ? (

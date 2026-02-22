@@ -47,6 +47,10 @@ describe('ModelSelectionList', () => {
       expect(screen.getByText('Anthropic')).toBeInTheDocument();
       expect(screen.getByText('Google')).toBeInTheDocument();
       expect(screen.getByText('XAI')).toBeInTheDocument();
+      expect(screen.getByTestId('provider-logo-openai')).toBeInTheDocument();
+      expect(screen.getByTestId('provider-logo-anthropic')).toBeInTheDocument();
+      expect(screen.getByTestId('provider-logo-google')).toBeInTheDocument();
+      expect(screen.getByTestId('provider-logo-xai')).toBeInTheDocument();
     });
 
     it('groups models by provider', () => {
@@ -499,7 +503,7 @@ describe('ModelSelectionList', () => {
         />
       );
 
-      const gpt4Card = container.querySelector('[data-provider="openai"]');
+      const gpt4Card = container.querySelector('[data-testid="model-card-gpt-4"]');
       expect(gpt4Card).toHaveAttribute('data-selected', 'true');
       expect(gpt4Card).toHaveAttribute('data-summarizer', 'true');
     });
