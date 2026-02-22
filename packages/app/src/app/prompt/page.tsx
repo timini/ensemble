@@ -25,6 +25,7 @@ import {
 } from '@ensemble-ai/shared-utils/providers';
 import { FALLBACK_MODELS } from '~/lib/models';
 import { toError } from '~/lib/errors';
+import { logger } from '~/lib/logger';
 
 export default function PromptPage() {
   const { t } = useTranslation();
@@ -122,12 +123,21 @@ export default function PromptPage() {
             completeResponse(selection.id, responseTime, tokenCount);
           },
           (error: Error) => {
+            logger.error(
+              `[PromptPage] streamResponse error for ${selection.provider}/${selection.model}`,
+              error,
+            );
             setError(selection.id, error.message);
           },
         )
-        .catch((error: unknown) =>
-          setError(selection.id, toError(error).message),
-        );
+        .catch((error: unknown) => {
+          const normalizedError = toError(error);
+          logger.error(
+            `[PromptPage] streamResponse exception for ${selection.provider}/${selection.model}`,
+            normalizedError,
+          );
+          setError(selection.id, normalizedError.message);
+        });
     });
 
     completeStep('prompt');

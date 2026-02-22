@@ -8,6 +8,7 @@ import {
 import { initializeProviders } from "~/providers";
 import { FALLBACK_MODELS } from "~/lib/models";
 import { formatModelLabelFromId } from "~/lib/providerModels";
+import { logger } from "~/lib/logger";
 
 interface UseStreamingResponsesProps {
   hasHydrated: boolean;
@@ -111,7 +112,7 @@ export function useStreamingResponses({
           completeResponse(model.id, responseTime, tokenCount);
         },
         (error) => {
-          console.error(`[useStreamingResponses] Error for ${modelId}:`, error);
+          logger.error(`[useStreamingResponses] Error for ${modelId}:`, error);
           if (flushIntervals.current[modelId]) {
             clearInterval(flushIntervals.current[modelId]);
             delete flushIntervals.current[modelId];
@@ -120,11 +121,17 @@ export function useStreamingResponses({
         },
       );
     } catch (err) {
+      const normalizedError =
+        err instanceof Error ? err : new Error(String(err));
+      logger.error(
+        `[useStreamingResponses] Exception for ${modelId}:`,
+        normalizedError,
+      );
       if (flushIntervals.current[modelId]) {
         clearInterval(flushIntervals.current[modelId]);
         delete flushIntervals.current[modelId];
       }
-      setError(model.id, err instanceof Error ? err.message : String(err));
+      setError(model.id, normalizedError.message);
     }
   };
 

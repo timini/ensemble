@@ -17,7 +17,7 @@ const createContext = async (req: NextRequest) => {
 };
 
 const captureHandledTrpcErrors =
-  process.env.SENTRY_CAPTURE_HANDLED_TRPC_ERRORS === "true";
+  process.env.SENTRY_CAPTURE_HANDLED_TRPC_ERRORS !== "false";
 
 const handler = (req: NextRequest) =>
   fetchRequestHandler({

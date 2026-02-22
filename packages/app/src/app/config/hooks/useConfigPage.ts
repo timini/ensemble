@@ -119,7 +119,7 @@ export function useConfigPage() {
 
     const handleKeyChange = (provider: Provider, value: string) => {
         void setApiKey(provider, value).catch((error: unknown) => {
-            console.error(
+            logger.error(
                 `Failed to store ${provider} API key`,
                 toError(error, `Unable to store ${provider} API key`),
             );

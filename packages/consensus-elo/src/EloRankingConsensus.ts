@@ -21,6 +21,15 @@ import { judgePairWithSwap } from './eloJudge';
 
 const DEFAULT_TOP_K = 3;
 
+function writeDebug(message: string): void {
+    const stderr = (globalThis as {
+        process?: { stderr?: { write?: (chunk: string) => void } };
+    }).process?.stderr;
+    if (typeof stderr?.write === 'function') {
+        stderr.write(message);
+    }
+}
+
 export class EloRankingConsensus implements ConsensusStrategy {
     constructor(
         private judgeProvider: AIProvider,
@@ -50,7 +59,7 @@ export class EloRankingConsensus implements ConsensusStrategy {
 
         // Generate all-vs-all pairings (3 models = 3 pairs, 5 models = 10 pairs)
         const pairings = this.generatePairings(responses);
-        process.stderr.write(`    [elo-rank] start: ${responses.length} responses, ${pairings.length} pairs (${pairings.length * 2} judge calls)\n`);
+        writeDebug(`    [elo-rank] start: ${responses.length} responses, ${pairings.length} pairs (${pairings.length * 2} judge calls)\n`);
 
         // Run all pairwise comparisons in parallel
         // Each pair internally runs 2 judge calls (forward + reversed)
@@ -64,7 +73,7 @@ export class EloRankingConsensus implements ConsensusStrategy {
             })),
         );
 
-        process.stderr.write(`    [elo-rank] judgments done in ${((Date.now() - rankStart) / 1000).toFixed(1)}s\n`);
+        writeDebug(`    [elo-rank] judgments done in ${((Date.now() - rankStart) / 1000).toFixed(1)}s\n`);
 
         // Apply ELO updates — skip only double-errors (confidence === undefined)
         for (const { pair, judgment } of judgments) {
@@ -105,7 +114,7 @@ export class EloRankingConsensus implements ConsensusStrategy {
 
     private async summarizeResponses(responses: ConsensusModelResponse[], originalPrompt: string): Promise<string> {
         const sumStart = Date.now();
-        process.stderr.write(`    [elo-summarize] start: ${responses.length} top responses\n`);
+        writeDebug(`    [elo-summarize] start: ${responses.length} top responses\n`);
         const responsesText = responses.map((response, index) =>
             `Candidate ${index + 1}\nResponse:\n${response.content}`
         ).join('\n\n---\n\n');
@@ -137,11 +146,11 @@ Output rules:
             this.summarizerProvider.streamResponse(prompt, this.summarizerModelId,
                 () => { void 0; },
                 (finalText: string) => {
-                    process.stderr.write(`    [elo-summarize] done in ${((Date.now() - sumStart) / 1000).toFixed(1)}s\n`);
+                    writeDebug(`    [elo-summarize] done in ${((Date.now() - sumStart) / 1000).toFixed(1)}s\n`);
                     resolve(finalText);
                 },
                 (err: Error) => {
-                    process.stderr.write(`    [elo-summarize] error in ${((Date.now() - sumStart) / 1000).toFixed(1)}s: ${err.message}\n`);
+                    writeDebug(`    [elo-summarize] error in ${((Date.now() - sumStart) / 1000).toFixed(1)}s: ${err.message}\n`);
                     resolve('Failed to generate summary.');
                 }
             );

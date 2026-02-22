@@ -6,6 +6,7 @@ import {
 import type { ModelResponse } from '~/store';
 import type { ProviderType } from '~/store/slices/ensembleSlice';
 import { toError } from '~/lib/errors';
+import { logger } from '~/lib/logger';
 
 export type EmbeddingVector = {
   modelId: string;
@@ -76,7 +77,7 @@ export async function generateEmbeddingsForResponses({
   const handleError =
     onError ??
     ((modelId: string, error: Error) => {
-      console.error(
+      logger.error(
         `Failed to generate embeddings for ${modelId} via ${provider} (${resolvedMode})`,
         error,
       );

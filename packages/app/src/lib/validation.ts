@@ -7,6 +7,7 @@ import type { ValidationStatus } from '@/components/molecules/ApiKeyInput';
 import { ProviderRegistry } from '@ensemble-ai/shared-utils/providers';
 import { initializeProviders } from '~/providers';
 import { toError } from '~/lib/errors';
+import { logger } from '~/lib/logger';
 
 export interface ValidateApiKeyOptions {
   provider: Provider;
@@ -87,7 +88,7 @@ export async function validateApiKey({
       error,
       `Error validating ${provider} API key`,
     );
-    console.error(`Error validating ${provider} API key:`, normalizedError);
+    logger.error(`Error validating ${provider} API key:`, normalizedError);
 
     // Try to extract a user-friendly message
     let userMessage = normalizedError.message;

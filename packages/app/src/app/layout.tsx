@@ -16,6 +16,7 @@ import { SettingsModal } from '@/components/organisms/SettingsModal';
 import type { Theme, Language } from '@/components/organisms/SettingsModal';
 import { initializeProviders } from '~/providers';
 import { toError } from '~/lib/errors';
+import { logger } from '~/lib/logger';
 
 const geist = Geist({
   subsets: ['latin'],
@@ -59,12 +60,37 @@ export default function RootLayout({
   // Sync language with i18next
   useEffect(() => {
     i18n.changeLanguage(language).catch((error: unknown) => {
-      console.error(
+      logger.error(
         'Failed to change language:',
         toError(error, 'Unable to change language'),
       );
     });
   }, [language, i18n]);
+
+  useEffect(() => {
+    if (!hasHydrated) {
+      return;
+    }
+
+    const windowWithBootErrors = window as Window & {
+      __ENSEMBLE_BOOT_ERRORS__?: Array<{ message: string; stack?: string }>;
+    };
+
+    const bootErrors = windowWithBootErrors.__ENSEMBLE_BOOT_ERRORS__;
+    if (!bootErrors?.length) {
+      return;
+    }
+
+    for (const bootError of bootErrors) {
+      const startupError = new Error(bootError.message);
+      if (bootError.stack) {
+        startupError.stack = bootError.stack;
+      }
+      logger.error('Startup script error:', startupError);
+    }
+
+    windowWithBootErrors.__ENSEMBLE_BOOT_ERRORS__ = [];
+  }, [hasHydrated]);
 
   // Ensure html lang attribute always reflects current language (hydration-safe)
   useEffect(() => {
@@ -104,10 +130,11 @@ export default function RootLayout({
                   }
                 }
               } catch (error) {
-                console.error(
-                  'Failed to clear stale review state',
-                  toError(error, 'Failed to clear stale review state'),
-                );
+                const message = error instanceof Error ? error.message : String(error);
+                const stack = error instanceof Error ? error.stack : undefined;
+                window.__ENSEMBLE_BOOT_ERRORS__ = window.__ENSEMBLE_BOOT_ERRORS__ || [];
+                window.__ENSEMBLE_BOOT_ERRORS__.push({ message, stack });
+                console.error('Failed to clear stale review state', error);
               }
             })();`,
           }}

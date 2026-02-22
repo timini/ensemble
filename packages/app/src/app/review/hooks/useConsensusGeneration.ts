@@ -120,11 +120,23 @@ export function useConsensusGeneration() {
                 resultText = await strategy.generateConsensus(consensusResponses, 0, originalPrompt);
             }
 
+            if (isConsensusFailureText(resultText)) {
+                const fallbackError = new Error(resultText);
+                logger.error(
+                    `Consensus strategy returned failure sentinel (${consensusMethod})`,
+                    fallbackError,
+                );
+                setError(resultText);
+                return;
+            }
+
             setMetaAnalysis(resultText);
 
         } catch (err: unknown) {
-            console.error('Consensus Generation Error:', err);
-            setError(err instanceof Error ? err.message : 'Failed to generate consensus');
+            const normalizedError =
+                err instanceof Error ? err : new Error(String(err));
+            logger.error('Consensus Generation Error:', normalizedError);
+            setError(normalizedError.message || 'Failed to generate consensus');
         } finally {
             setIsGenerating(false);
         }
@@ -145,4 +157,10 @@ function validateProviderName(provider: string): ProviderName {
         return provider as ProviderName;
     }
     throw new Error(`Invalid provider: ${provider}`);
+}
+
+function isConsensusFailureText(value: string): boolean {
+    const normalized = value.trim().toLowerCase();
+    return normalized === 'failed to generate summary.'
+        || normalized === 'failed to generate council summary.';
 }
