@@ -326,6 +326,7 @@ describe('ResponseCard', () => {
         />
       );
       expect(screen.getByText('Anthropic')).toBeInTheDocument();
+      expect(screen.getByTestId('model-logo-anthropic')).toHaveAttribute('data-logo-key', 'claude');
     });
 
     it('renders Google provider correctly', () => {
@@ -339,6 +340,7 @@ describe('ResponseCard', () => {
         />
       );
       expect(screen.getByText('Google')).toBeInTheDocument();
+      expect(screen.getByTestId('model-logo-google')).toHaveAttribute('data-logo-key', 'gemini');
     });
 
     it('renders XAI provider correctly', () => {
@@ -352,6 +354,7 @@ describe('ResponseCard', () => {
         />
       );
       expect(screen.getByText('XAI')).toBeInTheDocument();
+      expect(screen.getByTestId('model-logo-xai')).toHaveAttribute('data-logo-key', 'grok');
     });
   });
 

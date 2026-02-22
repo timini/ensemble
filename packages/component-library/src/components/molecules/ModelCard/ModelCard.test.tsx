@@ -17,9 +17,9 @@ describe('ModelCard', () => {
       expect(card).toBeInTheDocument();
     });
 
-    it('renders provider logo', () => {
+    it('renders model logo', () => {
       render(<ModelCard provider="openai" modelName="GPT-4" selected={false} isSummarizer={false} />);
-      expect(screen.getByTestId('provider-logo-openai')).toBeInTheDocument();
+      expect(screen.getByTestId('model-logo-openai')).toBeInTheDocument();
     });
 
     it('renders card content', () => {
@@ -98,24 +98,24 @@ describe('ModelCard', () => {
   });
 
   describe('provider-specific behavior', () => {
-    it('renders OpenAI provider logo correctly', () => {
+    it('renders OpenAI model logo correctly', () => {
       render(<ModelCard provider="openai" modelName="GPT-4" selected={false} isSummarizer={false} />);
-      expect(screen.getByTestId('provider-logo-openai')).toBeInTheDocument();
+      expect(screen.getByTestId('model-logo-openai')).toHaveAttribute('data-logo-key', 'openai');
     });
 
-    it('renders Anthropic provider logo correctly', () => {
+    it('renders Claude model logo for Anthropic models', () => {
       render(<ModelCard provider="anthropic" modelName="Claude 3.5 Sonnet" selected={false} isSummarizer={false} />);
-      expect(screen.getByTestId('provider-logo-anthropic')).toBeInTheDocument();
+      expect(screen.getByTestId('model-logo-anthropic')).toHaveAttribute('data-logo-key', 'claude');
     });
 
-    it('renders Google provider logo correctly', () => {
+    it('renders Gemini model logo for Google models', () => {
       render(<ModelCard provider="google" modelName="Gemini Pro" selected={false} isSummarizer={false} />);
-      expect(screen.getByTestId('provider-logo-google')).toBeInTheDocument();
+      expect(screen.getByTestId('model-logo-google')).toHaveAttribute('data-logo-key', 'gemini');
     });
 
-    it('renders XAI provider logo correctly', () => {
+    it('renders Grok model logo for xAI models', () => {
       render(<ModelCard provider="xai" modelName="Grok" selected={false} isSummarizer={false} />);
-      expect(screen.getByTestId('provider-logo-xai')).toBeInTheDocument();
+      expect(screen.getByTestId('model-logo-xai')).toHaveAttribute('data-logo-key', 'grok');
     });
 
     it('applies correct provider data attribute', () => {
