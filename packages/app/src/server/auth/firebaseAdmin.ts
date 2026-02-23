@@ -63,7 +63,7 @@ export async function verifyFirebaseAuthToken(
       ...(picture ? { picture } : {}),
     };
   } catch (error) {
-    logger.error("[Firebase Auth] Token verification failed", error);
+    logger.warn("[Firebase Auth] Token verification failed", error);
     return null;
   }
 }
