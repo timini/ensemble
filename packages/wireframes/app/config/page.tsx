@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
+import Link from "next/link"
 import { CheckCircle, Eye, EyeOff, Info, Shield } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -115,7 +116,7 @@ export default function ConfigPage() {
             </CardContent>
           </Card>
 
-          <Card className="border-2 border-border opacity-70">
+          <Card className={mode === "pro" ? "border-2 border-primary bg-primary/10" : "border-2 border-border"}>
             <CardContent className="flex h-full flex-col p-6">
               <div className="mb-4 flex items-center gap-3">
                 <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/15 text-lg">⭐</div>
@@ -124,9 +125,20 @@ export default function ConfigPage() {
               <p className="mb-6 flex-1 text-muted-foreground">
                 Managed backend mode with authentication, credit billing, and server-side provider orchestration.
               </p>
-              <Button variant="outline" disabled onClick={() => setMode("pro")}>
-                Coming Soon
+              <Button
+                onClick={() => {
+                  setMode("pro")
+                  router.push("/auth/sign-in")
+                }}
+              >
+                Continue with Google
               </Button>
+              <p className="mt-3 text-xs text-muted-foreground">
+                New to Pro?{" "}
+                <Link href="/auth/sign-up" className="font-medium text-primary hover:underline">
+                  Create an account
+                </Link>
+              </p>
             </CardContent>
           </Card>
         </div>
