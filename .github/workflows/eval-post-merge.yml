@@ -1,18 +1,14 @@
-name: Eval Post-Merge Baseline Update
+name: Eval Baseline (Manual)
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - 'packages/shared-utils/**'
-      - 'packages/eval/**'
+  workflow_dispatch:
 
 concurrency:
   group: eval-post-merge
   cancel-in-progress: true
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   update-baseline:
@@ -24,9 +20,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-        with:
-          # Need a token that can push back to main
-          token: ${{ secrets.GITHUB_TOKEN }}
 
       - uses: actions/setup-node@v4
         with:
@@ -91,16 +84,10 @@ jobs:
             --sample 50 \
             --baseline baselines/quick-eval.json
 
-      - name: Commit updated baseline
+      - name: Upload generated baseline
         if: steps.check-keys.outputs.keys_available == 'true'
-        run: |
-          cd packages/eval
-          if git diff --quiet baselines/quick-eval.json 2>/dev/null || [ ! -f baselines/quick-eval.json ]; then
-            echo "No baseline changes to commit."
-            exit 0
-          fi
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add baselines/quick-eval.json
-          git commit -m "chore(eval): update quick-eval baseline [skip ci]"
-          git push
+        uses: actions/upload-artifact@v4
+        with:
+          name: quick-eval-baseline
+          path: packages/eval/baselines/quick-eval.json
+          if-no-files-found: error
