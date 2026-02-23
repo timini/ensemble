@@ -8,6 +8,7 @@ import type {
   ValidationResult,
 } from '../../types';
 import { MockProviderClient } from '../mock/MockProviderClient';
+import { sanitizeProviderErrorMessage } from '../../utils/sanitizeSensitiveData';
 
 export interface StreamHandlers {
   onChunk: (chunk: string) => void;
@@ -99,7 +100,11 @@ export abstract class BaseFreeClient implements AIProvider {
         timeoutPromise,
       ]);
     } catch (error) {
-      onError(error instanceof Error ? error : new Error(String(error)));
+      const safeMessage = sanitizeProviderErrorMessage(
+        error instanceof Error ? error.message : String(error),
+        `Streaming failed for ${this.provider}.`,
+      );
+      onError(new Error(safeMessage));
     } finally {
       // Clean up the timeout
       if (timeoutId !== null) {
@@ -134,7 +139,12 @@ export abstract class BaseFreeClient implements AIProvider {
     try {
       return await this.fetchTextModels(apiKey);
     } catch (error) {
-      console.warn(`Falling back to default text models for ${this.provider}`, error);
+      const safeError = sanitizeProviderErrorMessage(
+        error instanceof Error ? error.message : String(error),
+      );
+      console.warn(
+        `Falling back to default text models for ${this.provider}: ${safeError}`,
+      );
       return this.mockClient.listAvailableTextModels();
     }
   }

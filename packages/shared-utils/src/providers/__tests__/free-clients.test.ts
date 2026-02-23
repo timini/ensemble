@@ -187,8 +187,8 @@ describe('Free mode provider clients', () => {
       const result = await client.validateApiKey('AIza-test');
       expect(result.valid).toBe(true);
       expect(mocks.axiosGet).toHaveBeenCalledWith('https://generativelanguage.googleapis.com/v1beta/models', {
-        params: {
-          key: 'AIza-test',
+        headers: {
+          'x-goog-api-key': 'AIza-test',
         },
       });
     });

@@ -34,8 +34,8 @@ describe('FreeGoogleClient', () => {
         expect(axios.get).toHaveBeenCalledWith(
             'https://generativelanguage.googleapis.com/v1beta/models',
             {
-                params: {
-                    key: mockApiKey,
+                headers: {
+                    'x-goog-api-key': mockApiKey,
                 },
             }
         );
@@ -72,5 +72,21 @@ describe('FreeGoogleClient', () => {
         // BaseFreeClient catches error and returns mock models
         expect(models.length).toBeGreaterThan(0);
         expect(models).toContain('Gemini 1.5 Pro'); // From mock list
+    });
+
+    it('should validate API keys via x-goog-api-key header', async () => {
+        vi.mocked(axios.get).mockResolvedValue({ data: { models: [] } });
+
+        const result = await client.validateApiKey(mockApiKey);
+
+        expect(result).toEqual({ valid: true });
+        expect(axios.get).toHaveBeenCalledWith(
+            'https://generativelanguage.googleapis.com/v1beta/models',
+            {
+                headers: {
+                    'x-goog-api-key': mockApiKey,
+                },
+            }
+        );
     });
 });

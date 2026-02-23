@@ -1,9 +1,10 @@
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import { GoogleGenerativeAI, type ResponseSchema } from '@google/generative-ai';
 import axios from 'axios';
 import { BaseFreeClient, type StreamOptions, type StructuredOptions } from '../base/BaseFreeClient';
 import type { StructuredResponse, ValidationResult } from '../../types';
 import { extractAxiosErrorMessage } from '../../utils/extractAxiosError';
 import { hasNonTextModality } from '../../utils/modelFilters';
+import { sanitizeProviderErrorMessage } from '../../utils/sanitizeSensitiveData';
 
 interface GoogleModelEntry {
   name?: string;
@@ -26,8 +27,8 @@ export class FreeGoogleClient extends BaseFreeClient {
     try {
       // Validate using axios to avoid SDK overhead for simple check, or stick to axios for validation
       await axios.get('https://generativelanguage.googleapis.com/v1beta/models', {
-        params: {
-          key: apiKey,
+        headers: {
+          'x-goog-api-key': apiKey,
         },
       });
       return { valid: true };
@@ -43,8 +44,8 @@ export class FreeGoogleClient extends BaseFreeClient {
     const response = await axios.get<GoogleModelsResponse>(
       'https://generativelanguage.googleapis.com/v1beta/models',
       {
-        params: {
-          key: apiKey,
+        headers: {
+          'x-goog-api-key': apiKey,
         },
       },
     );
@@ -70,7 +71,8 @@ export class FreeGoogleClient extends BaseFreeClient {
    * `additionalProperties` would need recursive handling if ever used.
    */
   private static sanitizeSchemaForGoogle(schema: Record<string, unknown>): Record<string, unknown> {
-    const { additionalProperties: _, ...rest } = schema;
+    const rest = { ...schema };
+    delete rest.additionalProperties;
     return rest;
   }
 
@@ -87,7 +89,7 @@ export class FreeGoogleClient extends BaseFreeClient {
       model: options.model,
       generationConfig: {
         responseMimeType: 'application/json',
-        responseSchema: sanitizedSchema as unknown as import('@google/generative-ai').ResponseSchema,
+        responseSchema: sanitizedSchema as unknown as ResponseSchema,
         ...(options.options?.temperature !== undefined && {
           temperature: options.options.temperature,
         }),
@@ -140,9 +142,10 @@ export class FreeGoogleClient extends BaseFreeClient {
       options.onComplete(fullResponse, Date.now() - startTime, tokenCount > 0 ? tokenCount : undefined);
     } catch (error) {
       // Extract error message from Google SDK error
-      const errorMessage = error instanceof Error
-        ? error.message
-        : String(error);
+      const errorMessage = sanitizeProviderErrorMessage(
+        error instanceof Error ? error.message : String(error),
+        'Unknown Google provider error.',
+      );
       options.onError(new Error(`Google API error: ${errorMessage}`));
     }
   }

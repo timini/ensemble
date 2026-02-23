@@ -1,6 +1,7 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { BaseFreeClient, type StreamOptions, type StructuredOptions } from '../base/BaseFreeClient';
 import type { StructuredResponse, ValidationResult } from '../../types';
+import { sanitizeProviderErrorMessage } from '../../utils/sanitizeSensitiveData';
 
 export class FreeAnthropicClient extends BaseFreeClient {
   private createClient(apiKey: string) {
@@ -25,9 +26,10 @@ export class FreeAnthropicClient extends BaseFreeClient {
         error:
           error instanceof Anthropic.APIError && error.status === 401
             ? 'Invalid Anthropic API key.'
-            : error instanceof Error && error.message
-              ? error.message
-              : 'An unknown error occurred.',
+            : sanitizeProviderErrorMessage(
+                error instanceof Error ? error.message : String(error),
+                'Invalid Anthropic API key.',
+              ),
       };
     }
   }
@@ -128,9 +130,10 @@ export class FreeAnthropicClient extends BaseFreeClient {
       options.onComplete(fullResponse, Date.now() - startTime, tokenCount > 0 ? tokenCount : undefined);
     } catch (error) {
       // Extract error message from Anthropic SDK error
-      const errorMessage = error instanceof Error
-        ? error.message
-        : String(error);
+      const errorMessage = sanitizeProviderErrorMessage(
+        error instanceof Error ? error.message : String(error),
+        'Unknown Anthropic provider error.',
+      );
       options.onError(new Error(`Anthropic API error: ${errorMessage}`));
     }
   }

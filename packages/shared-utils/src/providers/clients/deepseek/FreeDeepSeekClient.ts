@@ -1,6 +1,7 @@
 import OpenAI from 'openai';
 import { BaseFreeClient, type StreamOptions, type StructuredOptions } from '../base/BaseFreeClient';
 import type { StructuredResponse, ValidationResult } from '../../types';
+import { sanitizeProviderErrorMessage } from '../../utils/sanitizeSensitiveData';
 
 export class FreeDeepSeekClient extends BaseFreeClient {
   private createClient(apiKey: string) {
@@ -21,7 +22,13 @@ export class FreeDeepSeekClient extends BaseFreeClient {
       await client.models.list();
       return { valid: true };
     } catch (error) {
-      return { valid: false, error: error instanceof Error ? error.message : 'Invalid DeepSeek API key.' };
+      return {
+        valid: false,
+        error: sanitizeProviderErrorMessage(
+          error instanceof Error ? error.message : String(error),
+          'Invalid DeepSeek API key.',
+        ),
+      };
     }
   }
 
@@ -117,9 +124,10 @@ export class FreeDeepSeekClient extends BaseFreeClient {
 
       options.onComplete(fullResponse, Date.now() - startTime, tokenCount > 0 ? tokenCount : undefined);
     } catch (error) {
-      const errorMessage = error instanceof Error
-        ? error.message
-        : String(error);
+      const errorMessage = sanitizeProviderErrorMessage(
+        error instanceof Error ? error.message : String(error),
+        'Unknown DeepSeek provider error.',
+      );
       options.onError(new Error(`DeepSeek API error: ${errorMessage}`));
     }
   }

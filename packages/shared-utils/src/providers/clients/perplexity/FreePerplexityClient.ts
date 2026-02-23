@@ -1,6 +1,7 @@
 import OpenAI from 'openai';
 import { BaseFreeClient, type StreamOptions } from '../base/BaseFreeClient';
 import type { ValidationResult } from '../../types';
+import { sanitizeProviderErrorMessage } from '../../utils/sanitizeSensitiveData';
 
 export class FreePerplexityClient extends BaseFreeClient {
   private createClient(apiKey: string) {
@@ -25,12 +26,16 @@ export class FreePerplexityClient extends BaseFreeClient {
       });
       return { valid: true };
     } catch (error) {
-      if (error instanceof Error && error.message.includes('401')) {
+      const safeMessage = sanitizeProviderErrorMessage(
+        error instanceof Error ? error.message : String(error),
+        'Invalid Perplexity API key.',
+      );
+      if (safeMessage.includes('401')) {
         return { valid: false, error: 'Invalid API key (401 Unauthorized)' };
       }
       return {
         valid: false,
-        error: error instanceof Error ? error.message : String(error),
+        error: safeMessage,
       };
     }
   }
@@ -81,9 +86,10 @@ export class FreePerplexityClient extends BaseFreeClient {
 
       options.onComplete(fullResponse, Date.now() - startTime, tokenCount > 0 ? tokenCount : undefined);
     } catch (error) {
-      const errorMessage = error instanceof Error
-        ? error.message
-        : String(error);
+      const errorMessage = sanitizeProviderErrorMessage(
+        error instanceof Error ? error.message : String(error),
+        'Unknown Perplexity provider error.',
+      );
       options.onError(new Error(`Perplexity API error: ${errorMessage}`));
     }
   }

@@ -4,7 +4,10 @@
 
 import type { Provider } from '@/components/molecules/ApiKeyInput';
 import type { ValidationStatus } from '@/components/molecules/ApiKeyInput';
-import { ProviderRegistry } from '@ensemble-ai/shared-utils/providers';
+import {
+  ProviderRegistry,
+  sanitizeProviderErrorMessage,
+} from '@ensemble-ai/shared-utils/providers';
 import { initializeProviders } from '~/providers';
 import { toError } from '~/lib/errors';
 import { logger } from '~/lib/logger';
@@ -80,18 +83,25 @@ export async function validateApiKey({
     if (result.valid) {
       onStatusChange(provider, 'valid');
     } else {
+      const providerError = sanitizeProviderErrorMessage(
+        result.error ?? 'Invalid API key',
+        'Invalid API key',
+      );
       // Pass specific error message from provider if available, or generic message
-      onStatusChange(provider, 'invalid', result.error ?? 'Invalid API key');
+      onStatusChange(provider, 'invalid', providerError);
     }
   } catch (error: unknown) {
-    const normalizedError = toError(
-      error,
+    const normalizedMessage = sanitizeProviderErrorMessage(
+      toError(
+        error,
+        `Error validating ${provider} API key`,
+      ).message,
       `Error validating ${provider} API key`,
     );
-    logger.error(`Error validating ${provider} API key:`, normalizedError);
+    logger.error(`Error validating ${provider} API key: ${normalizedMessage}`);
 
     // Try to extract a user-friendly message
-    let userMessage = normalizedError.message;
+    let userMessage = normalizedMessage;
     if (userMessage.includes('401')) {
       userMessage = 'Invalid API key (401 Unauthorized)';
     } else if (userMessage.includes('429')) {
