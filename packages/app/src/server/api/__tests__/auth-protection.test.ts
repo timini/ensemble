@@ -19,6 +19,20 @@ describe("tRPC auth protection", () => {
     verifyFirebaseAuthTokenMock.mockReset();
   });
 
+  it("does not verify bearer token for public procedures", async () => {
+    const ctx = await createTRPCContext({
+      headers: new Headers({
+        authorization: "Bearer valid-token",
+      }),
+    });
+    const caller = createCaller(ctx);
+
+    await expect(caller.post.hello({ text: "world" })).resolves.toEqual({
+      greeting: "Hello world",
+    });
+    expect(verifyFirebaseAuthTokenMock).not.toHaveBeenCalled();
+  });
+
   it("rejects protected procedures when no auth header is provided", async () => {
     const ctx = await createTRPCContext({
       headers: new Headers(),
@@ -47,6 +61,7 @@ describe("tRPC auth protection", () => {
       message: "Authentication required",
     });
     expect(verifyFirebaseAuthTokenMock).toHaveBeenCalledWith("invalid-token");
+    expect(verifyFirebaseAuthTokenMock).toHaveBeenCalledTimes(1);
   });
 
   it("allows protected procedures when bearer token is valid", async () => {
@@ -71,5 +86,6 @@ describe("tRPC auth protection", () => {
       picture: "https://example.com/avatar.png",
     });
     expect(verifyFirebaseAuthTokenMock).toHaveBeenCalledWith("valid-token");
+    expect(verifyFirebaseAuthTokenMock).toHaveBeenCalledTimes(1);
   });
 });
