@@ -23,6 +23,7 @@ export default withSentryConfig(config, {
     project: process.env.SENTRY_PROJECT,
     authToken: process.env.SENTRY_AUTH_TOKEN,
     silent: !process.env.SENTRY_AUTH_TOKEN,
+    tunnelRoute: "/monitoring",
     sourcemaps: { deleteSourcemapsAfterUpload: true },
     telemetry: false,
     hideSourceMaps: true,

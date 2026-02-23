@@ -27,3 +27,11 @@ env:
     value: "true"
     availability:
       - BUILD
+
+  # Enable Sentry in Firebase App Hosting rollouts.
+  # Secret names are resolved in Google Secret Manager.
+  - variable: NEXT_PUBLIC_SENTRY_DSN
+    secret: NEXT_PUBLIC_SENTRY_DSN
+    availability:
+      - BUILD
+      - RUNTIME
