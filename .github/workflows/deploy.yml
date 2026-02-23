@@ -100,53 +100,61 @@ jobs:
           TARGET_SHA="${GITHUB_SHA}"
           DEPLOY_URL="https://ensemble-app--${{ vars.FIREBASE_PROJECT_ID }}.us-central1.hosted.app"
           API_BASE="https://firebaseapphosting.googleapis.com/v1beta/projects/${PROJECT_ID}/locations/us-central1/backends/${BACKEND_ID}"
-          MATCHING_ROLLOUT_SEEN="false"
 
           echo "Waiting for Firebase App Hosting rollout for commit ${TARGET_SHA}..."
           for i in {1..20}; do
             ACCESS_TOKEN="$(gcloud auth print-access-token)"
-            ROLLOUTS_JSON="$(curl -sS -H "Authorization: Bearer ${ACCESS_TOKEN}" "${API_BASE}/rollouts?pageSize=50")"
+            ROLLOUTS_JSON="$(curl -sS -H "Authorization: Bearer ${ACCESS_TOKEN}" "${API_BASE}/rollouts?pageSize=200")"
 
-            LATEST_ROLLOUT="$(echo "${ROLLOUTS_JSON}" | jq -c '(.rollouts // []) | sort_by(.createTime) | reverse | .[0]')"
-            if [[ -z "${LATEST_ROLLOUT}" || "${LATEST_ROLLOUT}" == "null" ]]; then
-              echo "Attempt ${i}/20: no rollouts found yet; waiting 30s..."
+            if [[ "$(echo "${ROLLOUTS_JSON}" | jq -r '(.rollouts // []) | length')" == "0" ]]; then
+              echo "Attempt ${i}/20: no rollouts found; waiting 30s..."
               sleep 30
               continue
             fi
 
-            ROLLOUT_NAME="$(echo "${LATEST_ROLLOUT}" | jq -r '.name')"
-            ROLLOUT_STATE="$(echo "${LATEST_ROLLOUT}" | jq -r '.state')"
-            BUILD_RESOURCE="$(echo "${LATEST_ROLLOUT}" | jq -r '.build // empty')"
+            MATCH_FOUND="false"
+            MATCH_ROLLOUT_STATE=""
+            MATCH_BUILD_STATE=""
+            MATCH_BUILD_ERROR=""
+            MATCH_ROLLOUT_NAME=""
 
-            if [[ -z "${BUILD_RESOURCE}" ]]; then
-              echo "Attempt ${i}/20: latest rollout has no build resource yet (${ROLLOUT_NAME}); waiting 30s..."
+            while IFS= read -r ROLLOUT_JSON; do
+              BUILD_RESOURCE="$(echo "${ROLLOUT_JSON}" | jq -r '.build // empty')"
+              if [[ -z "${BUILD_RESOURCE}" ]]; then
+                continue
+              fi
+
+              BUILD_JSON="$(curl -sS -H "Authorization: Bearer ${ACCESS_TOKEN}" "https://firebaseapphosting.googleapis.com/v1beta/${BUILD_RESOURCE}")"
+              BUILD_SHA="$(echo "${BUILD_JSON}" | jq -r '.source.codebase.hash // empty')"
+              if [[ "${BUILD_SHA}" != "${TARGET_SHA}" ]]; then
+                continue
+              fi
+
+              MATCH_FOUND="true"
+              MATCH_ROLLOUT_NAME="$(echo "${ROLLOUT_JSON}" | jq -r '.name')"
+              MATCH_ROLLOUT_STATE="$(echo "${ROLLOUT_JSON}" | jq -r '.state')"
+              MATCH_BUILD_STATE="$(echo "${BUILD_JSON}" | jq -r '.state // empty')"
+              MATCH_BUILD_ERROR="$(echo "${BUILD_JSON}" | jq -r '.error.message // empty')"
+              break
+            done < <(echo "${ROLLOUTS_JSON}" | jq -c '(.rollouts // []) | sort_by(.createTime) | reverse | .[]')
+
+            if [[ "${MATCH_FOUND}" == "false" ]]; then
+              echo "Attempt ${i}/20: no rollout found yet for commit ${TARGET_SHA}; waiting 30s..."
               sleep 30
               continue
             fi
 
-            BUILD_JSON="$(curl -sS -H "Authorization: Bearer ${ACCESS_TOKEN}" "https://firebaseapphosting.googleapis.com/v1beta/${BUILD_RESOURCE}")"
-            BUILD_SHA="$(echo "${BUILD_JSON}" | jq -r '.source.codebase.hash // empty')"
-            BUILD_STATE="$(echo "${BUILD_JSON}" | jq -r '.state // empty')"
-            BUILD_ERROR="$(echo "${BUILD_JSON}" | jq -r '.error.message // empty')"
+            echo "Attempt ${i}/20: rollout=${MATCH_ROLLOUT_NAME} rolloutState=${MATCH_ROLLOUT_STATE} buildState=${MATCH_BUILD_STATE} commit=${TARGET_SHA}"
 
-            echo "Attempt ${i}/20: rollout=${ROLLOUT_NAME} rolloutState=${ROLLOUT_STATE} buildState=${BUILD_STATE} commit=${BUILD_SHA}"
-
-            if [[ "${BUILD_SHA}" != "${TARGET_SHA}" ]]; then
-              echo "Latest rollout is for a different commit; waiting 30s..."
-              sleep 30
-              continue
-            fi
-            MATCHING_ROLLOUT_SEEN="true"
-
-            if [[ "${ROLLOUT_STATE}" == "FAILED" || "${BUILD_STATE}" == "FAILED" ]]; then
+            if [[ "${MATCH_ROLLOUT_STATE}" == "FAILED" || "${MATCH_BUILD_STATE}" == "FAILED" ]]; then
               echo "Firebase App Hosting rollout failed for commit ${TARGET_SHA}."
-              if [[ -n "${BUILD_ERROR}" ]]; then
-                echo "Build error: ${BUILD_ERROR}"
+              if [[ -n "${MATCH_BUILD_ERROR}" ]]; then
+                echo "Build error: ${MATCH_BUILD_ERROR}"
               fi
               exit 1
             fi
 
-            if [[ "${ROLLOUT_STATE}" == "SUCCEEDED" ]]; then
+            if [[ "${MATCH_ROLLOUT_STATE}" == "SUCCEEDED" ]]; then
               echo "Rollout succeeded for commit ${TARGET_SHA}. Verifying deployed URL..."
               if curl -sf --max-time 10 "${DEPLOY_URL}" > /dev/null 2>&1; then
                 echo "Deployment verified successfully!"
@@ -161,19 +169,7 @@ jobs:
             sleep 30
           done
 
-          if [[ "${MATCHING_ROLLOUT_SEEN}" == "true" ]]; then
-            echo "Timed out waiting for matching rollout to complete for commit ${TARGET_SHA}."
-            exit 1
-          fi
-
-          echo "::warning::Timed out waiting for Firebase rollout for commit ${TARGET_SHA}. No matching rollout observed."
-          echo "Falling back to deployment URL health check..."
-          if curl -sf --max-time 10 "${DEPLOY_URL}" > /dev/null 2>&1; then
-            echo "Deployment URL is healthy. Continuing despite missing commit-pinned rollout."
-            exit 0
-          fi
-
-          echo "Deployment URL check failed after rollout timeout."
+          echo "Timed out waiting for Firebase App Hosting rollout for commit ${TARGET_SHA}."
           exit 1
 
       - name: Output deployment URL

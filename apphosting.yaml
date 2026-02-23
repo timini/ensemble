@@ -28,10 +28,5 @@ env:
     availability:
       - BUILD
 
-  # Enable Sentry in Firebase App Hosting rollouts.
-  # Secret names are resolved in Google Secret Manager.
-  - variable: NEXT_PUBLIC_SENTRY_DSN
-    secret: NEXT_PUBLIC_SENTRY_DSN
-    availability:
-      - BUILD
-      - RUNTIME
+  # Optional runtime/build env like NEXT_PUBLIC_SENTRY_DSN should be injected
+  # from App Hosting environment settings or Secret Manager once provisioned.
