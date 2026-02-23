@@ -2,6 +2,7 @@ import OpenAI from 'openai';
 import { BaseFreeClient, type StreamOptions, type StructuredOptions } from '../base/BaseFreeClient';
 import type { StructuredResponse, ValidationResult } from '../../types';
 import { hasNonTextModality } from '../../utils/modelFilters';
+import { sanitizeProviderErrorMessage } from '../../utils/sanitizeSensitiveData';
 
 export class FreeOpenAIClient extends BaseFreeClient {
   private createClient(apiKey: string) {
@@ -22,7 +23,13 @@ export class FreeOpenAIClient extends BaseFreeClient {
       await client.models.retrieve('gpt-4o-mini');
       return { valid: true };
     } catch (error) {
-      return { valid: false, error: error instanceof Error ? error.message : 'Invalid OpenAI API key.' };
+      return {
+        valid: false,
+        error: sanitizeProviderErrorMessage(
+          error instanceof Error ? error.message : String(error),
+          'Invalid OpenAI API key.',
+        ),
+      };
     }
   }
 

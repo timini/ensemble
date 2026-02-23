@@ -4,6 +4,7 @@ import { BaseFreeClient, type StreamOptions, type StructuredOptions } from '../b
 import type { StructuredResponse, ValidationResult } from '../../types';
 import { extractAxiosErrorMessage } from '../../utils/extractAxiosError';
 import { hasNonTextModality } from '../../utils/modelFilters';
+import { sanitizeProviderErrorMessage } from '../../utils/sanitizeSensitiveData';
 
 interface XaiModelEntry {
   id?: string;
@@ -154,9 +155,10 @@ export class FreeXAIClient extends BaseFreeClient {
       options.onComplete(fullResponse, Date.now() - startTime, tokenCount > 0 ? tokenCount : undefined);
     } catch (error) {
       // Extract error message from XAI/OpenAI SDK error
-      const errorMessage = error instanceof Error
-        ? error.message
-        : String(error);
+      const errorMessage = sanitizeProviderErrorMessage(
+        error instanceof Error ? error.message : String(error),
+        'Unknown xAI provider error.',
+      );
       options.onError(new Error(`XAI API error: ${errorMessage}`));
     }
   }
