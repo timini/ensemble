@@ -41,10 +41,15 @@ function getProviderApiKey(provider: ProviderName): string | null {
 }
 
 function getProviderClient(provider: ProviderName) {
+  const apiKey = getProviderApiKey(provider);
+  if (!apiKey) {
+    throw new Error(`Server API key not configured for provider: ${provider}`);
+  }
+
   return createProviderClient({
     provider,
     mode: "free",
-    getApiKey: () => getProviderApiKey(provider),
+    getApiKey: () => apiKey,
   });
 }
 

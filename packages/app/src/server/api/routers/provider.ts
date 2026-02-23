@@ -104,6 +104,8 @@ export const providerRouter = createTRPCRouter({
           });
 
         return () => {
+          // Shared provider client API doesn't currently expose cancellation hooks.
+          // We stop emitting when unsubscribed; underlying provider call may still complete.
           isSubscribed = false;
         };
       });

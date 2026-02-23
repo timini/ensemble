@@ -44,6 +44,7 @@ try {
   console.log(
     `[ensure-firebase-test-user] Updated existing test user: ${email}`,
   );
+  process.exit(0);
 } catch (error) {
   if (
     typeof error === "object" &&
