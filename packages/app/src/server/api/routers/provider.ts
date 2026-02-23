@@ -1,4 +1,5 @@
 import { TRPCError } from "@trpc/server";
+import { observable } from "@trpc/server/observable";
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import {
@@ -54,5 +55,57 @@ export const providerRouter = createTRPCRouter({
           message,
         });
       }
+    }),
+
+  streamTextEvents: protectedProcedure
+    .input(
+      z.object({
+        provider: providerSchema,
+        model: z.string().min(1),
+        prompt: z.string().min(1),
+        temperature: z.number().min(0).max(2).optional(),
+      }),
+    )
+    .subscription(({ input }) => {
+      return observable<
+        | { type: "chunk"; chunk: string }
+        | {
+            type: "complete";
+            response: string;
+            responseTimeMs: number;
+            tokenCount?: number;
+          }
+      >((emit) => {
+        let isSubscribed = true;
+
+        void streamProviderResponse(input, {
+          onChunk: (chunk) => {
+            if (!isSubscribed) return;
+            emit.next({ type: "chunk", chunk });
+          },
+        })
+          .then((result) => {
+            if (!isSubscribed) return;
+            emit.next({
+              type: "complete",
+              ...result,
+            });
+            emit.complete();
+          })
+          .catch((error) => {
+            if (!isSubscribed) return;
+            const message = error instanceof Error ? error.message : String(error);
+            emit.error(
+              new TRPCError({
+                code: "INTERNAL_SERVER_ERROR",
+                message,
+              }),
+            );
+          });
+
+        return () => {
+          isSubscribed = false;
+        };
+      });
     }),
 });

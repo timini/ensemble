@@ -17,6 +17,10 @@ interface StreamProviderResult {
   tokenCount?: number;
 }
 
+interface StreamProviderOptions {
+  onChunk?: (chunk: string) => void;
+}
+
 function getProviderApiKey(provider: ProviderName): string | null {
   switch (provider) {
     case "openai":
@@ -52,6 +56,7 @@ export async function listProviderTextModels(
 
 export async function streamProviderResponse(
   input: StreamProviderInput,
+  options?: StreamProviderOptions,
 ): Promise<StreamProviderResult> {
   const client = getProviderClient(input.provider);
   let bufferedResponse = "";
@@ -62,6 +67,7 @@ export async function streamProviderResponse(
       input.model,
       (chunk) => {
         bufferedResponse += chunk;
+        options?.onChunk?.(chunk);
       },
       (fullResponse, responseTime, tokenCount) => {
         resolve({
