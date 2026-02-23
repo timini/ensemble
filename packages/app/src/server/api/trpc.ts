@@ -7,9 +7,10 @@
  * need to use are documented accordingly near the end.
  */
 import { logger } from '~/lib/logger';
-import { initTRPC } from "@trpc/server";
+import { initTRPC, TRPCError } from "@trpc/server";
 import superjson from "superjson";
 import { ZodError } from "zod";
+import { verifyFirebaseAuthToken } from "~/server/auth/firebaseAdmin";
 
 /**
  * 1. CONTEXT
@@ -23,9 +24,24 @@ import { ZodError } from "zod";
  *
  * @see https://trpc.io/docs/server/context
  */
+function getBearerToken(headers: Headers): string | null {
+  const authHeader = headers.get("authorization");
+  if (!authHeader) {
+    return null;
+  }
+
+  const [scheme, token] = authHeader.split(" ");
+  if (scheme?.toLowerCase() !== "bearer" || !token) {
+    return null;
+  }
+
+  return token;
+}
+
 export const createTRPCContext = async (opts: { headers: Headers }) => {
   return {
     ...opts,
+    bearerToken: getBearerToken(opts.headers),
   };
 };
 
@@ -102,3 +118,23 @@ const timingMiddleware = t.middleware(async ({ next, path }) => {
  * are logged in.
  */
 export const publicProcedure = t.procedure.use(timingMiddleware);
+
+/**
+ * Protected (authenticated) procedure
+ */
+export const protectedProcedure = publicProcedure.use(async ({ ctx, next }) => {
+  const authUser = ctx.bearerToken
+    ? await verifyFirebaseAuthToken(ctx.bearerToken)
+    : null;
+
+  if (!authUser) {
+    throw new TRPCError({ code: "UNAUTHORIZED", message: "Authentication required" });
+  }
+
+  return next({
+    ctx: {
+      ...ctx,
+      authUser,
+    },
+  });
+});
