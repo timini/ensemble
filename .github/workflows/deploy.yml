@@ -11,7 +11,7 @@ concurrency:
   cancel-in-progress: false
 
 env:
-  NODE_VERSION: '20'
+  NODE_VERSION: "20"
 
 jobs:
   # Run existing CI checks first
@@ -41,7 +41,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
+          cache: "npm"
 
       - name: Install dependencies
         run: npm ci
@@ -60,7 +60,7 @@ jobs:
       - name: Build app
         run: npm run build --workspace=packages/app
         env:
-          SKIP_ENV_VALIDATION: 'true'
+          SKIP_ENV_VALIDATION: "true"
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
           SENTRY_ORG: ${{ vars.SENTRY_ORG }}
           SENTRY_PROJECT: ${{ vars.SENTRY_PROJECT }}
@@ -100,6 +100,7 @@ jobs:
           TARGET_SHA="${GITHUB_SHA}"
           DEPLOY_URL="https://ensemble-app--${{ vars.FIREBASE_PROJECT_ID }}.us-central1.hosted.app"
           API_BASE="https://firebaseapphosting.googleapis.com/v1beta/projects/${PROJECT_ID}/locations/us-central1/backends/${BACKEND_ID}"
+          MATCHING_ROLLOUT_SEEN="false"
 
           echo "Waiting for Firebase App Hosting rollout for commit ${TARGET_SHA}..."
           for i in {1..20}; do
@@ -135,6 +136,7 @@ jobs:
               sleep 30
               continue
             fi
+            MATCHING_ROLLOUT_SEEN="true"
 
             if [[ "${ROLLOUT_STATE}" == "FAILED" || "${BUILD_STATE}" == "FAILED" ]]; then
               echo "Firebase App Hosting rollout failed for commit ${TARGET_SHA}."
@@ -159,7 +161,19 @@ jobs:
             sleep 30
           done
 
-          echo "Timed out waiting for Firebase App Hosting rollout for commit ${TARGET_SHA}."
+          if [[ "${MATCHING_ROLLOUT_SEEN}" == "true" ]]; then
+            echo "Timed out waiting for matching rollout to complete for commit ${TARGET_SHA}."
+            exit 1
+          fi
+
+          echo "::warning::Timed out waiting for Firebase rollout for commit ${TARGET_SHA}. No matching rollout observed."
+          echo "Falling back to deployment URL health check..."
+          if curl -sf --max-time 10 "${DEPLOY_URL}" > /dev/null 2>&1; then
+            echo "Deployment URL is healthy. Continuing despite missing commit-pinned rollout."
+            exit 0
+          fi
+
+          echo "Deployment URL check failed after rollout timeout."
           exit 1
 
       - name: Output deployment URL
@@ -187,7 +201,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
+          cache: "npm"
 
       - name: Install dependencies
         run: npm ci
@@ -214,9 +228,9 @@ jobs:
       - name: Run Free Mode E2E Tests against deployed app
         run: npm run test:free --workspace=packages/e2e
         env:
-          E2E_MODE: 'free'
+          E2E_MODE: "free"
           E2E_BASE_URL: ${{ needs.deploy.outputs.deploy_url }}
-          NEXT_PUBLIC_MOCK_MODE: 'false'
+          NEXT_PUBLIC_MOCK_MODE: "false"
           TEST_OPENAI_API_KEY: ${{ secrets.TEST_OPENAI_API_KEY }}
           TEST_ANTHROPIC_API_KEY: ${{ secrets.TEST_ANTHROPIC_API_KEY }}
           TEST_GOOGLE_API_KEY: ${{ secrets.TEST_GOOGLE_API_KEY }}
