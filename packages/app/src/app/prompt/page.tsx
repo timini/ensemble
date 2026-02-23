@@ -26,6 +26,7 @@ import {
 import { FALLBACK_MODELS } from '~/lib/models';
 import { toError } from '~/lib/errors';
 import { logger } from '~/lib/logger';
+import type { ConsensusMethod } from '~/store/slices/ensembleSlice';
 
 export default function PromptPage() {
   const { t } = useTranslation();
@@ -43,7 +44,9 @@ export default function PromptPage() {
   const completeResponse = useStore((state) => state.completeResponse);
   const setError = useStore((state) => state.setError);
   const mode = useStore((state) => state.mode);
-  const consensusMethod = useStore((state) => state.consensusMethod);
+  const consensusMethod = useStore(
+    (state): ConsensusMethod => state.consensusMethod,
+  );
   const eloTopN = useStore((state) => state.eloTopN);
   const setConsensusMethod = useStore((state) => state.setConsensusMethod);
   const setEloTopN = useStore((state) => state.setEloTopN);
