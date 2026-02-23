@@ -43,6 +43,21 @@
       ],
       "@ensemble-ai/shared-utils/*": [
         "../shared-utils/src/*"
+      ],
+      "@ensemble-ai/consensus-core": [
+        "../consensus-core/src/index.ts"
+      ],
+      "@ensemble-ai/consensus-standard": [
+        "../consensus-standard/src/index.ts"
+      ],
+      "@ensemble-ai/consensus-elo": [
+        "../consensus-elo/src/index.ts"
+      ],
+      "@ensemble-ai/consensus-majority": [
+        "../consensus-majority/src/index.ts"
+      ],
+      "@ensemble-ai/consensus-council": [
+        "../consensus-council/src/index.ts"
       ]
     }
   },
