@@ -20,7 +20,7 @@ export function StandardTurn({ result }: StandardTurnProps) {
       </ModelResponseGrid>
 
       {/* Funnel connector */}
-      <FunnelConnector columns={result.responses.length} modelCount={result.responses.length} leadModel={result.synthesizedBy} />
+      <FunnelConnector columns={result.responses.length} label={`Synthesising ${result.responses.length} models via ${result.synthesizedBy}`} />
 
       {/* Synthesis */}
       <EnsembleAnswerCard synthesis={result.synthesis} synthesizedBy={result.synthesizedBy} />

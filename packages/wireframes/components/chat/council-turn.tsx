@@ -5,7 +5,7 @@ import { ChevronDown, ChevronRight } from "lucide-react"
 import type { CouncilResult } from "./chat-types"
 import { ModelResponseCard } from "./model-response-card"
 import { ModelResponseGrid } from "./model-response-grid"
-import { VerticalConnector, RoundSeparator } from "./turn-connector"
+import { VerticalConnector, FunnelConnector, RoundSeparator } from "./turn-connector"
 import { EnsembleAnswerCard } from "./ensemble-answer-card"
 import { AgreementAnalysis } from "./agreement-analysis"
 
@@ -28,6 +28,8 @@ export function CouncilTurn({ result }: CouncilTurnProps) {
   const firstRound = result.rounds[0]
   const laterRounds = result.rounds.slice(1)
   const totalResponses = result.rounds.reduce((sum, r) => sum + r.responses.length, 0)
+  const lastRound = result.rounds[result.rounds.length - 1]
+  const lastRoundModelCount = lastRound ? lastRound.responses.length : firstRound ? firstRound.responses.length : 3
 
   return (
     <div className="space-y-0">
@@ -71,7 +73,11 @@ export function CouncilTurn({ result }: CouncilTurnProps) {
         )
       })}
 
-      <VerticalConnector />
+      {/* Funnel connector with converging splines */}
+      <FunnelConnector
+        columns={lastRoundModelCount}
+        label={`Synthesising ${result.rounds.length} rounds via ${result.synthesizedBy}`}
+      />
 
       {/* Final synthesis */}
       <EnsembleAnswerCard synthesis={result.finalSynthesis} synthesizedBy={result.synthesizedBy} />

@@ -7,12 +7,12 @@ export function VerticalConnector() {
 
 interface FunnelConnectorProps {
   columns?: number
-  modelCount?: number
-  leadModel?: string
+  /** Descriptive label shown below the icon, e.g. "Synthesising 3 models via GPT-4o" */
+  label?: string
 }
 
 /** Funnel connector — smooth splines from each response column converge into a central synthesis icon */
-export function FunnelConnector({ columns = 3, modelCount, leadModel }: FunnelConnectorProps) {
+export function FunnelConnector({ columns = 3, label = "Synthesising" }: FunnelConnectorProps) {
   const W = 1000
   const H = 240
   const centerX = W / 2
@@ -21,10 +21,6 @@ export function FunnelConnector({ columns = 3, modelCount, leadModel }: FunnelCo
   const positions = Array.from({ length: columns }, (_, i) =>
     ((i + 0.5) / columns) * W,
   )
-
-  const label = modelCount && leadModel
-    ? `Synthesising ${modelCount} models via ${leadModel}`
-    : "Synthesising"
 
   return (
     <div className="flex flex-col items-center">
