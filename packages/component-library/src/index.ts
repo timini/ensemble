@@ -86,6 +86,7 @@ export {
   type ProgressStepsProps,
 } from './components/molecules/ProgressSteps';
 export { SummarizerIndicator, type SummarizerIndicatorProps } from './components/molecules/SummarizerIndicator';
+export { FinalVotesSummary, type FinalVotesSummaryProps } from './components/molecules/FinalVotesSummary';
 
 // Organisms (Level 3: Complex UI sections)
 export { ModeSelector, type ModeSelectorProps, type Mode as ModeType } from './components/organisms/ModeSelector';

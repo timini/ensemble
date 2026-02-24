@@ -74,6 +74,13 @@
     },
     "summarizerIndicator": {
       "label": "Modèle de synthèse :"
+    },
+    "finalVotesSummary": {
+      "confidenceLabel": "Confiance",
+      "showReasoning": "Afficher le raisonnement",
+      "hideReasoning": "Masquer le raisonnement",
+      "noVotes": "Aucun vote final disponible",
+      "unknownProvider": "Fournisseur inconnu"
     }
   },
   "organisms": {

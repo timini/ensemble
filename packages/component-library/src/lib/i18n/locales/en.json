@@ -74,6 +74,13 @@
     },
     "summarizerIndicator": {
       "label": "Summarizer Model:"
+    },
+    "finalVotesSummary": {
+      "confidenceLabel": "Confidence",
+      "showReasoning": "Show reasoning",
+      "hideReasoning": "Hide reasoning",
+      "noVotes": "No final votes available",
+      "unknownProvider": "Unknown provider"
     }
   },
   "organisms": {
