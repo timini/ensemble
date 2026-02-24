@@ -74,6 +74,19 @@
     },
     "summarizerIndicator": {
       "label": "Modèle de synthèse :"
+    },
+    "consensusMetrics": {
+      "roundsLabel": "Tours",
+      "roundsValue": "{{rounds}}/{{maxRounds}} tours",
+      "finalAgreementLabel": "Accord final",
+      "unanimousLabel": "Unanime",
+      "unanimousYes": "Oui",
+      "unanimousNo": "Non",
+      "agreement": {
+        "high": "Accord élevé",
+        "medium": "Accord moyen",
+        "low": "Accord faible"
+      }
     }
   },
   "organisms": {
