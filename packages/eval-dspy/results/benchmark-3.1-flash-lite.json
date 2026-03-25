@@ -1,0 +1,66 @@
+{
+  "model": "gemini/gemini-3.1-flash-lite-preview",
+  "ensemble_sizes": [
+    3,
+    5,
+    7
+  ],
+  "sample": 30,
+  "datasets": [
+    "gsm8k",
+    "arc"
+  ],
+  "updated_at": "2026-03-23T21:45:00.092607+00:00",
+  "results": [
+    {
+      "dataset": "gsm8k",
+      "single": {
+        "accuracy": 0.9666666666666667,
+        "correct": 29,
+        "total": 30
+      },
+      "ensemble": {
+        "ensemble_n3": {
+          "accuracy": 0.9,
+          "correct": 27,
+          "total": 30
+        },
+        "ensemble_n5": {
+          "accuracy": 0.8666666666666667,
+          "correct": 26,
+          "total": 30
+        },
+        "ensemble_n7": {
+          "accuracy": 0.9,
+          "correct": 27,
+          "total": 30
+        }
+      }
+    },
+    {
+      "dataset": "arc",
+      "single": {
+        "accuracy": 0.9,
+        "correct": 27,
+        "total": 30
+      },
+      "ensemble": {
+        "ensemble_n3": {
+          "accuracy": 0.9,
+          "correct": 27,
+          "total": 30
+        },
+        "ensemble_n5": {
+          "accuracy": 0.9,
+          "correct": 27,
+          "total": 30
+        },
+        "ensemble_n7": {
+          "accuracy": 0.9,
+          "correct": 27,
+          "total": 30
+        }
+      }
+    }
+  ]
+}
