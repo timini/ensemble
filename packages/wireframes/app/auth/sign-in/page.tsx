@@ -20,7 +20,7 @@ export default function SignInPage() {
   const goNext = () => {
     setState("success")
     setTimeout(() => {
-      router.push("/pro/dashboard")
+      router.push("/")
     }, 500)
   }
 
@@ -53,7 +53,7 @@ export default function SignInPage() {
             <Sparkles className="h-3.5 w-3.5" />
             Fastest way in
           </p>
-          <h2 className="mt-3 text-2xl font-bold">Sign in to Pro Mode</h2>
+          <h2 className="mt-3 text-2xl font-bold">Sign in to Ensemble AI</h2>
           <p className="mt-2 text-sm text-muted-foreground">
             Continue with Google for the smoothest sign-in experience.
           </p>
@@ -70,7 +70,7 @@ export default function SignInPage() {
 
         {state === "success" && (
           <div className="mb-4 rounded-md border border-emerald-300 bg-emerald-50 p-3 text-sm text-emerald-700">
-            Signed in successfully. Taking you to your Pro dashboard...
+            Signed in successfully. Redirecting...
           </div>
         )}
 

@@ -21,7 +21,7 @@ export default function SignUpPage() {
   const goNext = () => {
     setState("success")
     setTimeout(() => {
-      router.push("/pro/dashboard")
+      router.push("/")
     }, 500)
   }
 
@@ -52,11 +52,11 @@ export default function SignUpPage() {
         <div className="mb-6 text-center">
           <p className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2 py-1 text-xs font-medium text-primary">
             <Sparkles className="h-3.5 w-3.5" />
-            Fastest setup
+            Get started free
           </p>
-          <h2 className="mt-3 text-2xl font-bold">Create your Pro account</h2>
+          <h2 className="mt-3 text-2xl font-bold">Create your Ensemble AI account</h2>
           <p className="mt-2 text-sm text-muted-foreground">
-            Use Google for one-click signup, then start comparing models instantly.
+            Sign up to get 50 free credits and start comparing AI models.
           </p>
         </div>
 
@@ -71,7 +71,7 @@ export default function SignUpPage() {
 
         {state === "success" && (
           <div className="mb-4 rounded-md border border-emerald-300 bg-emerald-50 p-3 text-sm text-emerald-700">
-            Account created. Taking you to your Pro dashboard...
+            Welcome! You have 50 free credits to get started.
           </div>
         )}
 

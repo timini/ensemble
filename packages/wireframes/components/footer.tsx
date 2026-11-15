@@ -7,7 +7,7 @@ export function Footer() {
     <footer className="border-t border-border bg-background" data-testid="site-footer">
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-6 py-8 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex flex-wrap items-center gap-4">
-          <Link href="/config" className="text-sm text-muted-foreground transition-colors hover:text-foreground">
+          <Link href="/" className="text-sm text-muted-foreground transition-colors hover:text-foreground">
             Get Started
           </Link>
           <Link href="/features" className="text-sm text-muted-foreground transition-colors hover:text-foreground">
