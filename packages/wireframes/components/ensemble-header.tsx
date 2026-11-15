@@ -3,6 +3,7 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { Settings } from "lucide-react"
+import { ProTopNav } from "@/components/pro/pro-top-nav"
 
 const links = [
   { href: "/features", label: "Features" },
@@ -11,6 +12,7 @@ const links = [
 
 export function EnsembleHeader() {
   const pathname = usePathname()
+  const isProRoute = pathname.startsWith("/pro")
 
   return (
     <header className="border-b border-border bg-background">
@@ -21,19 +23,23 @@ export function EnsembleHeader() {
         </Link>
 
         <nav className="flex shrink-0 items-center gap-2 sm:gap-4" aria-label="Main navigation">
-          {links.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              className={`text-sm transition-colors ${
-                pathname === link.href
-                  ? "font-semibold text-foreground"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              {link.label}
-            </Link>
-          ))}
+          {isProRoute ? (
+            <ProTopNav />
+          ) : (
+            links.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                className={`text-sm transition-colors ${
+                  pathname === link.href
+                    ? "font-semibold text-foreground"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                {link.label}
+              </Link>
+            ))
+          )}
           <button
             type="button"
             aria-label="Open settings"
