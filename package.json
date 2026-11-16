@@ -23,7 +23,7 @@
     "build": "npm run build --workspace=@ensemble-ai/consensus-core --workspace=@ensemble-ai/consensus-standard --workspace=@ensemble-ai/consensus-elo --workspace=@ensemble-ai/consensus-majority --workspace=@ensemble-ai/consensus-council --workspace=@ensemble-ai/shared-utils --workspace=@ensemble-ai/eval --workspace=@ai-ensemble/component-library --workspace=@ai-ensemble/app",
     "lint": "npm run lint --workspaces --if-present",
     "lint:fix": "npm run lint:fix --workspaces --if-present",
-    "test": "npm run test --workspaces --if-present",
+    "test": "npm run test --workspace=@ensemble-ai/consensus-core --workspace=@ensemble-ai/consensus-standard --workspace=@ensemble-ai/consensus-elo --workspace=@ensemble-ai/consensus-majority --workspace=@ensemble-ai/consensus-council --workspace=@ensemble-ai/shared-utils --workspace=@ensemble-ai/eval --workspace=@ai-ensemble/component-library --workspace=@ai-ensemble/app",
     "test:e2e": "npm run test --workspace=packages/e2e",
     "test:unit": "npm run test:unit --workspaces --if-present",
     "typecheck": "npm run typecheck --workspaces --if-present",
