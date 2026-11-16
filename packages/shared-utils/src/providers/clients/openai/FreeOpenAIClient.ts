@@ -3,6 +3,7 @@ import { BaseFreeClient, type StreamOptions, type StructuredOptions } from '../b
 import type { StructuredResponse, ValidationResult } from '../../types';
 import { hasNonTextModality } from '../../utils/modelFilters';
 import { sanitizeProviderErrorMessage } from '../../utils/sanitizeSensitiveData';
+import { openAISamplingParams } from './openAIModelRules';
 
 export class FreeOpenAIClient extends BaseFreeClient {
   private createClient(apiKey: string) {
@@ -80,9 +81,7 @@ export class FreeOpenAIClient extends BaseFreeClient {
           schema: options.schema.schema,
         },
       },
-      ...(options.options?.temperature !== undefined && {
-        temperature: options.options.temperature,
-      }),
+      ...openAISamplingParams(options.model, options.options?.temperature),
     });
 
     const raw = response.choices[0]?.message?.content ?? '';
@@ -111,9 +110,7 @@ export class FreeOpenAIClient extends BaseFreeClient {
       stream: true,
       messages: [{ role: 'user', content: options.prompt }],
       stream_options: { include_usage: true },
-      ...(options.streamOptions?.temperature !== undefined && {
-        temperature: options.streamOptions.temperature,
-      }),
+      ...openAISamplingParams(options.model, options.streamOptions?.temperature),
       ...(options.streamOptions?.seed !== undefined && {
         seed: options.streamOptions.seed,
       }),

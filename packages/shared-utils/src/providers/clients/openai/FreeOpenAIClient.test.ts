@@ -193,3 +193,59 @@ describe('FreeOpenAIClient model filtering', () => {
     expect(models).toEqual(['gpt-4o']);
   });
 });
+
+describe('FreeOpenAIClient sampling parameters', () => {
+  const schema = {
+    name: 'answer',
+    schema: {
+      type: 'object',
+      properties: { answer: { type: 'string' } },
+      required: ['answer'],
+      additionalProperties: false,
+    },
+  };
+
+  const emptyStream = () => ({
+    async *[Symbol.asyncIterator]() {
+      yield { choices: [{ delta: {}, finish_reason: 'stop' }], usage: { total_tokens: 1 } };
+    },
+  });
+
+  beforeEach(() => {
+    mocks.openAiChatCreate.mockReset();
+  });
+
+  it.each(['gpt-6-astra', 'gpt-6-luna', 'gpt-5.6-terra', 'gpt-5', 'o3-mini', 'o4-mini'])(
+    'omits temperature for reasoning model %s when streaming',
+    async (model) => {
+      mocks.openAiChatCreate.mockResolvedValueOnce(emptyStream());
+      const client = new FreeOpenAIClient('openai', () => 'sk-test');
+      await client.streamResponse('hi', model, vi.fn(), vi.fn(), vi.fn(), {
+        temperature: 0.7,
+        seed: 1,
+      });
+      const request = mocks.openAiChatCreate.mock.calls[0][0];
+      expect(request).not.toHaveProperty('temperature');
+      expect(request).toMatchObject({ model, seed: 1 });
+    },
+  );
+
+  it('keeps temperature for non-reasoning models', async () => {
+    mocks.openAiChatCreate.mockResolvedValueOnce(emptyStream());
+    const client = new FreeOpenAIClient('openai', () => 'sk-test');
+    await client.streamResponse('hi', 'gpt-4.1', vi.fn(), vi.fn(), vi.fn(), { temperature: 0.7 });
+    expect(mocks.openAiChatCreate.mock.calls[0][0]).toMatchObject({ temperature: 0.7 });
+  });
+
+  it('omits temperature for reasoning models in structured output', async () => {
+    mocks.openAiChatCreate.mockResolvedValueOnce({
+      choices: [{ message: { content: '{"answer":"4"}' } }],
+      usage: { total_tokens: 5 },
+    });
+    const client = new FreeOpenAIClient('openai', () => 'sk-test');
+    await client.generateStructured('2+2?', 'gpt-6-luna', schema, { temperature: 0 });
+    const request = mocks.openAiChatCreate.mock.calls[0][0];
+    expect(request).not.toHaveProperty('temperature');
+    expect(request).not.toHaveProperty('max_tokens');
+  });
+});
