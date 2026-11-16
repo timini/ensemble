@@ -16,6 +16,8 @@ export interface AgreementSectionProps {
   /** Number of completed answers. */
   responseCount: number;
   averageConfidence: number;
+  /** Answers left out of the score because their embedding failed. */
+  excludedModels?: string[];
 }
 
 /**
@@ -28,19 +30,27 @@ export function AgreementSection({
   pairwiseComparisons,
   responseCount,
   averageConfidence,
+  excludedModels = [],
 }: AgreementSectionProps) {
   const { t } = useTranslation();
 
   if (responseCount < 2) return null;
 
-  if (status === "unavailable" || status === "error") {
+  // Ready but nothing to compare: the vectors could not be scored (for
+  // example a zero vector or mismatched sizes). Say so instead of a blank.
+  const effectiveStatus =
+    status === "ready" && pairwiseComparisons.length === 0 ? "error" : status;
+
+  if (effectiveStatus === "unavailable" || effectiveStatus === "error") {
     const key =
-      status === "unavailable" ? "agreementUnavailable" : "agreementError";
+      effectiveStatus === "unavailable"
+        ? "agreementUnavailable"
+        : "agreementError";
     return (
       <div
         className="mt-8"
         data-testid={
-          status === "unavailable"
+          effectiveStatus === "unavailable"
             ? "agreement-unavailable"
             : "agreement-embeddings-error"
         }
@@ -53,10 +63,19 @@ export function AgreementSection({
     );
   }
 
-  if (status !== "ready" || pairwiseComparisons.length === 0) return null;
+  if (effectiveStatus !== "ready") return null;
 
   return (
     <div className="mt-8">
+      {excludedModels.length > 0 && (
+        <div className="mb-4" data-testid="agreement-partial-note">
+          <InlineAlert variant="info">
+            {t("pages.review.agreementPartialNote", {
+              models: excludedModels.join(", "),
+            })}
+          </InlineAlert>
+        </div>
+      )}
       <AgreementAnalysis
         overallAgreement={overallAgreement}
         pairwiseComparisons={pairwiseComparisons}

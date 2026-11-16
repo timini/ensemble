@@ -122,6 +122,7 @@ export default function RootLayout({
                       parsed.responses = [];
                       parsed.manualResponses = [];
                       parsed.embeddings = [];
+                      parsed.embeddingsSource = null;
                       parsed.similarityMatrix = null;
                       parsed.agreementStats = null;
                       parsed.metaAnalysis = null;

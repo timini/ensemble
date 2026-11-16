@@ -49,19 +49,21 @@ export default function ReviewPage() {
     viewAgreementStats,
     viewMetaAnalysis,
     viewEmbeddings,
+    viewEmbeddingsSource,
     viewSimilarityMatrix,
   } = useReviewPageState(hasHydrated);
 
   const { completedResponses, pairwiseComparisons, overallAgreement, averageConfidence } =
-    useReviewAnalytics(viewResponses, viewAgreementStats, viewSimilarityMatrix);
+    useReviewAnalytics(viewResponses, viewAgreementStats, viewSimilarityMatrix, viewEmbeddings);
 
   const { retryModel } = useStreamingResponses({ hasHydrated, prompt, mode });
 
-  const { status: embeddingsStatus } = useResponseEmbeddings({
+  const { status: embeddingsStatus, excludedModels } = useResponseEmbeddings({
     hasHydrated,
     completedResponses,
     embeddingsProvider,
     viewEmbeddings,
+    viewEmbeddingsSource,
     viewSimilarityMatrix,
     mode,
     setEmbeddings,
@@ -163,6 +165,7 @@ export default function ReviewPage() {
         pairwiseComparisons={pairwiseComparisons}
         responseCount={completedResponses.length}
         averageConfidence={averageConfidence}
+        excludedModels={excludedModels}
       />
 
       {/* 4. Individual Responses Section (matches wireframe order - at bottom) */}

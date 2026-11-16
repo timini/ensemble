@@ -41,7 +41,7 @@ The middleware subscribes to the store and writes `JSON.stringify(serialize(stat
 
 So everything else is persisted, including the prompt, responses, manual responses, embeddings, similarity matrix, agreement stats and meta-analysis. Code comments in `index.ts` and `responseSlice.ts` say response data is not persisted; that is not what the code does.
 
-An inline script in `src/app/layout.tsx` then clears the prompt, responses, manual responses, embeddings, similarity matrix, agreement stats and meta-analysis from the stored JSON whenever a full page load (navigation type `navigate`) lands on `/review`. Client-side navigation keeps them. In practice a user who reopens or bookmarks `/review` loses the last run. Roadmap M1 removes this wipe and M4 adds proper history.
+An inline script in `src/app/layout.tsx` then clears the prompt, responses, manual responses, embeddings, embeddings source, similarity matrix, agreement stats and meta-analysis from the stored JSON whenever a full page load (navigation type `navigate`) lands on `/review`. Client-side navigation keeps them. In practice a user who reopens or bookmarks `/review` loses the last run. Roadmap M1 removes this wipe and M4 adds proper history.
 
 On load, the middleware merges the stored JSON over the initial state. There is no `deserialize` and no schema versioning.
 
@@ -99,8 +99,8 @@ Components that read persisted state use `useHasHydrated()` (`src/hooks/useHasHy
 
 ### Responses (`responseSlice.ts`)
 
-- State: `prompt`, `responses` (`{ modelId, provider, model, response, isStreaming, isComplete, responseTime, tokenCount, error }[]`), `manualResponses`, `embeddings`, `similarityMatrix`, `agreementStats` (`mean`, `median`, `min`, `max`, `stddev`), `metaAnalysis`
-- Actions: `setPrompt`, `startStreaming(modelId, provider, model)`, `appendStreamChunk(modelId, chunk)`, `completeResponse(modelId, responseTime, tokenCount?)`, `setError(modelId, error)`, `addManualResponse(label, response)`, `removeManualResponse(id)`, `setEmbeddings(embeddings)`, `calculateAgreement()`, `setMetaAnalysis(analysis)`, `resetStreamingState()`, `clearResponses()`
+- State: `prompt`, `responses` (`{ modelId, provider, model, response, isStreaming, isComplete, responseTime, tokenCount, error }[]`), `manualResponses`, `embeddings`, `embeddingsSource` (provider that produced `embeddings`, or null), `similarityMatrix`, `agreementStats` (`mean`, `median`, `min`, `max`, `stddev`), `metaAnalysis`
+- Actions: `setPrompt`, `startStreaming(modelId, provider, model)`, `appendStreamChunk(modelId, chunk)`, `completeResponse(modelId, responseTime, tokenCount?)`, `setError(modelId, error)`, `addManualResponse(label, response)`, `removeManualResponse(id)`, `setEmbeddings(embeddings, source?)`, `calculateAgreement()`, `setMetaAnalysis(analysis)`, `resetStreamingState()`, `clearResponses()`
 - `calculateAgreement()` builds a cosine similarity matrix from `embeddings` with `similarityMatrix` and `agreementStatistics` from `@ensemble-ai/shared-utils/similarity`, using the upper triangle for the stats. If the vectors cannot be compared (different lengths or a zero vector) it clears the matrix and stats instead of storing a wrong score. Embeddings come from OpenAI or Google (see [PROVIDER_ARCHITECTURE.md](./PROVIDER_ARCHITECTURE.md#embeddings-and-agreement-scores)); only mock mode uses hash-based vectors.
 
 ## Usage

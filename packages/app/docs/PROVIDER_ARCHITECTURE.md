@@ -90,12 +90,14 @@ Code in `packages/shared-utils/src/providers/embeddings/`.
 | Provider | Model | Call |
 |----------|-------|------|
 | OpenAI | `text-embedding-3-small` | `requestOpenAICompatibleEmbedding`: `POST {baseURL}/embeddings` with `{ model, input }` and an optional bearer key |
-| Google | `gemini-embedding-2` | `requestGeminiEmbedding`: `POST /v1beta/models/{model}:embedContent` with the `x-goog-api-key` header, default 3072 dimensions |
+| Google | `gemini-embedding-2` | `requestGeminiEmbedding`: `POST /v1beta/models/{model}:embedContent` with the `x-goog-api-key` header and `outputDimensionality: 768` (the model default is 3072) to keep the persisted store small |
 | Anthropic, xAI, DeepSeek, Perplexity | none | throw `EmbeddingsNotSupportedError` |
 
 `requestOpenAICompatibleEmbedding` takes a base URL, an optional key and a model id, so the OpenAI-compatible provider planned for M2 (Ollama, LM Studio, OpenRouter) can reuse it. Error messages from both helpers go through `sanitizeProviderErrorMessage`.
 
-Provider choice: `selectEmbeddingsProvider` (shared-utils) and `resolveEmbeddingsProvider` (`packages/app/src/lib/embeddingsProvider.ts`). The stored preference is `auto`, `openai` or `google`, set with the embeddings provider setting on `/config`. An override is used when its key is valid; otherwise OpenAI, then Google. With neither key valid there is no provider, and the review page shows "No agreement score" instead of a score. If the embeddings calls fail for all but one answer, it shows "Agreement could not be scored".
+Provider choice: `selectEmbeddingsProvider` (shared-utils) and `resolveEmbeddingsProvider` (`packages/app/src/lib/embeddingsProvider.ts`). The stored preference is `auto`, `openai` or `google`, set with the embeddings provider setting on `/config`. An override is used when its key is valid; otherwise OpenAI, then Google. With neither key valid there is no provider, and the review page shows "No agreement score" instead of a score. If the embeddings calls fail for all but one answer, or the vectors cannot be compared, it shows "Agreement could not be scored". If some calls fail but at least two answers have embeddings, the score covers those answers and a note lists the answers left out.
+
+The store records which provider produced the embeddings (`embeddingsSource`). When `/review` mounts again (reload, back and forward) and the stored embeddings came from the provider now resolved, they are reused and no embeddings calls are made.
 
 The review page computes the cosine similarity matrix and agreement statistics from these vectors with `shared-utils/similarity`. Only mock mode uses the mock client's hash-based vectors.
 

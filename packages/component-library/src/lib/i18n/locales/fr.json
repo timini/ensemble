@@ -288,7 +288,8 @@
       "agreementUnavailableTitle": "Pas de score d'accord",
       "agreementUnavailableDescription": "Le score d'accord nécessite un fournisseur d'embeddings. Ajoutez une clé API OpenAI ou Google valide sur la page de configuration.",
       "agreementErrorTitle": "Le score d'accord n'a pas pu être calculé",
-      "agreementErrorDescription": "Le fournisseur d'embeddings n'a pas renvoyé de résultat pour assez de réponses. Vérifiez votre clé API et réessayez."
+      "agreementErrorDescription": "Le fournisseur d'embeddings n'a pas renvoyé de résultat pour assez de réponses. Vérifiez votre clé API et réessayez.",
+      "agreementPartialNote": "Exclues du score d'accord car leurs embeddings n'ont pas pu être générés : {{models}}."
     }
   }
 }

@@ -110,6 +110,15 @@ describe('responseSlice', () => {
 
     store.getState().setEmbeddings(embeddings);
     expect(store.getState().embeddings).toHaveLength(2);
+    expect(store.getState().embeddingsSource).toBeNull();
+  });
+
+  it('records which provider produced the embeddings', () => {
+    store.getState().setEmbeddings([{ modelId: 'a', embedding: [1, 0] }], 'google');
+    expect(store.getState().embeddingsSource).toBe('google');
+
+    store.getState().resetStreamingState();
+    expect(store.getState().embeddingsSource).toBeNull();
   });
 
   it('calculates agreement with no embeddings', () => {

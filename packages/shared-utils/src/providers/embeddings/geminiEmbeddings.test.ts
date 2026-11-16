@@ -31,6 +31,7 @@ describe('requestGeminiEmbedding', () => {
     expect(JSON.parse(init.body)).toEqual({
       model: 'models/gemini-embedding-2',
       content: { parts: [{ text: 'bonjour' }] },
+      outputDimensionality: 768,
     });
   });
 

@@ -60,4 +60,39 @@ describe("AgreementSection", () => {
     );
     expect(container).toBeEmptyDOMElement();
   });
+
+  it("lists answers left out of the score when some embeddings failed", () => {
+    render(
+      <AgreementSection
+        {...baseProps}
+        responseCount={3}
+        excludedModels={["claude"]}
+        status="ready"
+      />,
+    );
+    expect(screen.getByTestId("agreement-analysis")).toBeInTheDocument();
+    expect(screen.getByTestId("agreement-partial-note")).toHaveTextContent(
+      "claude",
+    );
+  });
+
+  it("shows no partial note when every answer was embedded", () => {
+    render(<AgreementSection {...baseProps} status="ready" />);
+    expect(
+      screen.queryByTestId("agreement-partial-note"),
+    ).not.toBeInTheDocument();
+  });
+
+  it("shows the error message when ready but nothing could be compared", () => {
+    render(
+      <AgreementSection
+        {...baseProps}
+        pairwiseComparisons={[]}
+        status="ready"
+      />,
+    );
+    expect(
+      screen.getByTestId("agreement-embeddings-error"),
+    ).toBeInTheDocument();
+  });
 });

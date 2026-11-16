@@ -117,6 +117,49 @@ describe('agreement utilities', () => {
     expect(buildPairwiseComparisons(responses, malformed)).toEqual([]);
   });
 
+  it('scores only the embedded answers when the matrix covers fewer answers', () => {
+    const make = (modelId: string, model: string): ModelResponse => ({
+      modelId,
+      provider: 'openai',
+      model,
+      response: `Response ${model}`,
+      isStreaming: false,
+      isComplete: true,
+      responseTime: 100,
+      error: null,
+      tokenCount: null,
+    });
+    const responses = [make('a', 'A'), make('b', 'B'), make('c', 'C')];
+    // Embedding for "b" failed, so the matrix covers "a" and "c" only.
+    const matrix = [
+      [1, 0.6],
+      [0.6, 1],
+    ];
+
+    const comparisons = buildPairwiseComparisons(responses, matrix, ['a', 'c']);
+
+    expect(comparisons).toHaveLength(1);
+    expect(comparisons[0]).toMatchObject({ model1: 'A', model2: 'C' });
+    expect(comparisons[0]!.similarity).toBeCloseTo(0.8);
+  });
+
+  it('returns an empty array when the matrix does not match the embedded ids', () => {
+    const responses = [
+      {
+        modelId: 'a',
+        provider: 'openai' as const,
+        model: 'A',
+        response: 'x',
+        isStreaming: false,
+        isComplete: true,
+        responseTime: 1,
+        error: null,
+        tokenCount: null,
+      },
+    ];
+    expect(buildPairwiseComparisons(responses, [[1, 0.5], [0.5, 1]], ['a', 'b', 'c'])).toEqual([]);
+  });
+
   it('calculates average confidence across comparisons', () => {
     expect(calculateAverageConfidence([])).toBe(0);
 

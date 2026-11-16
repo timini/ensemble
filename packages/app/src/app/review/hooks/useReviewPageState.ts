@@ -15,6 +15,7 @@ export function useReviewPageState(hasHydrated: boolean) {
   const metaAnalysis = useStore((state) => state.metaAnalysis);
   const manualResponses = useStore((state) => state.manualResponses);
   const embeddings = useStore((state) => state.embeddings);
+  const embeddingsSource = useStore((state) => state.embeddingsSource);
   const similarityMatrix = useStore((state) => state.similarityMatrix);
   const mode = useStore((state) => state.mode);
   const embeddingsPreference = useStore((state) => state.embeddingsProvider);
@@ -64,6 +65,8 @@ export function useReviewPageState(hasHydrated: boolean) {
     [embeddings, hasHydrated],
   );
 
+  const viewEmbeddingsSource = hasHydrated ? embeddingsSource : null;
+
   const viewSimilarityMatrix = useMemo(
     () => (hasHydrated ? similarityMatrix : null),
     [hasHydrated, similarityMatrix],
@@ -85,6 +88,7 @@ export function useReviewPageState(hasHydrated: boolean) {
     viewAgreementStats,
     viewMetaAnalysis,
     viewEmbeddings,
+    viewEmbeddingsSource,
     viewSimilarityMatrix,
   };
 }

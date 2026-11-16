@@ -50,6 +50,8 @@ export interface ResponseSlice {
   responses: ModelResponse[];
   manualResponses: ManualResponse[];
   embeddings: Array<{ modelId: string; embedding: number[] }>;
+  /** Provider that produced `embeddings`, or null when unknown. */
+  embeddingsSource: string | null;
   similarityMatrix: number[][] | null;
   agreementStats: AgreementStats | null;
   metaAnalysis: string | null;
@@ -63,6 +65,7 @@ export interface ResponseSlice {
   removeManualResponse: (id: string) => void;
   setEmbeddings: (
     embeddings: Array<{ modelId: string; embedding: number[] }>,
+    source?: string | null,
   ) => void;
   calculateAgreement: () => void;
   setMetaAnalysis: (analysis: string) => void;
@@ -75,6 +78,7 @@ export const createResponseSlice: StateCreator<ResponseSlice> = (set, get) => ({
   responses: [],
   manualResponses: [],
   embeddings: [],
+  embeddingsSource: null,
   similarityMatrix: null,
   agreementStats: null,
   metaAnalysis: null,
@@ -169,8 +173,8 @@ export const createResponseSlice: StateCreator<ResponseSlice> = (set, get) => ({
     }));
   },
 
-  setEmbeddings: (embeddings) => {
-    set({ embeddings });
+  setEmbeddings: (embeddings, source = null) => {
+    set({ embeddings, embeddingsSource: source });
   },
 
   calculateAgreement: () => {
@@ -203,6 +207,7 @@ export const createResponseSlice: StateCreator<ResponseSlice> = (set, get) => ({
     set({
       responses: [],
       embeddings: [],
+      embeddingsSource: null,
       similarityMatrix: null,
       agreementStats: null,
       metaAnalysis: null,

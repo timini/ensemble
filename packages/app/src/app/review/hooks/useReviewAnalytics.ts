@@ -6,6 +6,8 @@ import {
 } from "~/lib/agreement";
 import type { ModelResponse, AgreementStats } from "~/store";
 
+type Embedding = { modelId: string; embedding: number[] };
+
 /**
  * Derives analytics values from completed responses and agreement data.
  * Returns completedResponses, pairwiseComparisons, overallAgreement, and averageConfidence.
@@ -14,6 +16,7 @@ export function useReviewAnalytics(
   viewResponses: ModelResponse[],
   viewAgreementStats: AgreementStats | null,
   viewSimilarityMatrix: number[][] | null,
+  viewEmbeddings: Embedding[],
 ) {
   const completedResponses = useMemo(
     () =>
@@ -26,9 +29,16 @@ export function useReviewAnalytics(
     [viewResponses],
   );
 
+  // The matrix follows the order of the stored embeddings, which can cover
+  // fewer answers than completedResponses when some embedding calls failed.
   const pairwiseComparisons = useMemo(
-    () => buildPairwiseComparisons(completedResponses, viewSimilarityMatrix),
-    [completedResponses, viewSimilarityMatrix],
+    () =>
+      buildPairwiseComparisons(
+        completedResponses,
+        viewSimilarityMatrix,
+        viewEmbeddings.map((entry) => entry.modelId),
+      ),
+    [completedResponses, viewSimilarityMatrix, viewEmbeddings],
   );
 
   const overallAgreement = useMemo(

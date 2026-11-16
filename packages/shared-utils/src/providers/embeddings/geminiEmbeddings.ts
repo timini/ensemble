@@ -16,9 +16,15 @@ interface GeminiEmbedContentResponse {
 }
 
 /**
- * Call the Gemini `models/{model}:embedContent` REST method for one text.
- * The default output size (3072) is kept; cosine similarity does not depend
- * on the vector length.
+ * Output size requested from Gemini. The model's default is 3072. Embeddings
+ * are persisted in localStorage, so a smaller vector keeps the store small;
+ * the model supports truncated (MRL) outputs, so 768 still scores well.
+ */
+export const GEMINI_EMBEDDING_DIMENSIONS = 768;
+
+/**
+ * Call the Gemini `models/{model}:embedContent` REST method for one text,
+ * asking for `GEMINI_EMBEDDING_DIMENSIONS` values.
  */
 export async function requestGeminiEmbedding({
   apiKey,
@@ -37,6 +43,7 @@ export async function requestGeminiEmbedding({
     body: JSON.stringify({
       model: `models/${model}`,
       content: { parts: [{ text }] },
+      outputDimensionality: GEMINI_EMBEDDING_DIMENSIONS,
     }),
     signal,
   });

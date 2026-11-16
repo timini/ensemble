@@ -26,16 +26,34 @@ const completed = [response("a"), response("b")];
 // Stable reference, as the store would give.
 const noEmbeddings: { modelId: string; embedding: number[] }[] = [];
 
-function setup(embeddingsProvider: "openai" | "google" | null) {
+type Embedding = { modelId: string; embedding: number[] };
+
+interface SetupOptions {
+  responses?: ModelResponse[];
+  embeddings?: Embedding[];
+  embeddingsSource?: string | null;
+  similarityMatrix?: number[][] | null;
+}
+
+function setup(
+  embeddingsProvider: "openai" | "google" | null,
+  {
+    responses = completed,
+    embeddings = noEmbeddings,
+    embeddingsSource = null,
+    similarityMatrix = null,
+  }: SetupOptions = {},
+) {
   const setEmbeddings = vi.fn();
   const calculateAgreementState = vi.fn();
   const hook = renderHook(() =>
     useResponseEmbeddings({
       hasHydrated: true,
-      completedResponses: completed,
+      completedResponses: responses,
       embeddingsProvider,
-      viewEmbeddings: noEmbeddings,
-      viewSimilarityMatrix: null,
+      viewEmbeddings: embeddings,
+      viewEmbeddingsSource: embeddingsSource,
+      viewSimilarityMatrix: similarityMatrix,
       mode: "free",
       setEmbeddings,
       calculateAgreementState,
@@ -67,6 +85,7 @@ describe("useResponseEmbeddings", () => {
       expect.objectContaining({ provider: "google", mode: "free" }),
     );
     expect(setEmbeddings).toHaveBeenCalledTimes(1);
+    expect(setEmbeddings).toHaveBeenCalledWith(expect.any(Array), "google");
     expect(hook.result.current.status).toBe("ready");
   });
 
@@ -88,5 +107,62 @@ describe("useResponseEmbeddings", () => {
     const { hook } = setup("openai");
 
     await waitFor(() => expect(hook.result.current.status).toBe("error"));
+  });
+
+  it("reuses persisted embeddings from the same provider on a fresh mount", async () => {
+    const persisted = [
+      { modelId: "a", embedding: [1, 0] },
+      { modelId: "b", embedding: [0, 1] },
+    ];
+    const { hook, calculateAgreementState } = setup("openai", {
+      embeddings: persisted,
+      embeddingsSource: "openai",
+      similarityMatrix: [
+        [1, 0],
+        [0, 1],
+      ],
+    });
+
+    await waitFor(() => expect(hook.result.current.status).toBe("ready"));
+    expect(generateEmbeddingsForResponses).not.toHaveBeenCalled();
+    expect(calculateAgreementState).not.toHaveBeenCalled();
+  });
+
+  it("embeds again when persisted embeddings came from another provider", async () => {
+    generateEmbeddingsForResponses.mockResolvedValue([
+      { modelId: "a", embedding: [1, 0] },
+      { modelId: "b", embedding: [0, 1] },
+    ]);
+    const { calculateAgreementState } = setup("google", {
+      embeddings: [
+        { modelId: "a", embedding: [1, 0, 0] },
+        { modelId: "b", embedding: [0, 1, 0] },
+      ],
+      embeddingsSource: "openai",
+    });
+
+    await waitFor(() => expect(calculateAgreementState).toHaveBeenCalled());
+    expect(generateEmbeddingsForResponses).toHaveBeenCalledWith(
+      expect.objectContaining({ provider: "google", existingEmbeddings: [] }),
+    );
+  });
+
+  it("reports the answers whose embeddings failed when others succeeded", async () => {
+    generateEmbeddingsForResponses.mockImplementation(
+      ({ onError }: { onError: (id: string, e: Error) => void }) => {
+        onError("b", new Error("rate limited"));
+        return Promise.resolve([
+          { modelId: "a", embedding: [1, 0] },
+          { modelId: "c", embedding: [0, 1] },
+        ]);
+      },
+    );
+    const three = [response("a"), response("b"), response("c")];
+    const { hook } = setup("openai", { responses: three });
+
+    await waitFor(() => expect(hook.result.current.status).toBe("ready"));
+    expect(hook.result.current.failedModelIds).toEqual(["b"]);
+    // The test passes the store's embeddings unchanged, so "b" has none.
+    expect(hook.result.current.excludedModels).toEqual(["b"]);
   });
 });
