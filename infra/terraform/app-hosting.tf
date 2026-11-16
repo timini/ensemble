@@ -6,11 +6,14 @@ resource "google_service_account" "app_hosting" {
   create_ignore_already_exists = true
 }
 
+# backend_id must match firebase.json and the live backend. Changing it forces
+# replacement, so run terraform plan first. If the state does not already
+# track this backend, import it instead of letting terraform create a new one.
 resource "google_firebase_app_hosting_backend" "production" {
   provider         = google-beta
   project          = var.project_id
   location         = var.region
-  backend_id       = "ai-ensemble"
+  backend_id       = "ensemble-app"
   app_id           = google_firebase_web_app.ensemble_ai.app_id
   serving_locality = "GLOBAL_ACCESS"
   service_account  = google_service_account.app_hosting.email

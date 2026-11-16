@@ -61,8 +61,8 @@ Adding a provider touches about 16 files: `types.ts`, `createProviderClient.ts`,
 
 ## Hosting today
 
-- Firebase App Hosting, backend `ensemble-app` (`firebase.json`), configured by `apphosting.yaml`: 1 vCPU, 2 GiB, `minInstances: 1`, `maxInstances: 10`. The minimum of 1 means a server is billed while idle.
-- `infra/terraform/` creates the Firebase project, App Hosting backend (id `ai-ensemble`, which does not match `firebase.json`), APIs, IAM and GitHub Workload Identity.
+- Firebase App Hosting, backend `ensemble-app` (`firebase.json`), configured by `apphosting.yaml`: 1 vCPU, 1 GiB, `minInstances: 0`, `maxInstances: 3`. With a minimum of 0 nothing is billed while idle; the first request after a quiet spell pays a cold start.
+- `infra/terraform/` creates the Firebase project, App Hosting backend (id `ensemble-app`, matching `firebase.json`), APIs, IAM and GitHub Workload Identity.
 - `.github/workflows/deploy.yml` deploys on push to `main`, then runs the `free-mode` E2E suite against the deployed URL with real provider keys.
 
 ## Eval harness
