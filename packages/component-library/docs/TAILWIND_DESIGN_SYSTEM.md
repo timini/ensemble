@@ -1,69 +1,56 @@
 # Tailwind Design System
 
-> **Source of Truth**: This document is based on the wireframe implementations in `packages/wireframes/`, which serve as the design reference for all component library implementations.
+The wireframes in `packages/wireframes/` show layout and flow. Colours come from the semantic tokens below, not from the raw Tailwind colours used in the wireframes.
 
 ## Overview
 
-The Ensemble AI component library uses **Tailwind CSS** with semantic design tokens for consistent styling across light and dark themes. All color values use RGB format with CSS custom properties for easy theme switching.
+The component library uses Tailwind CSS 3.4 with semantic design tokens for light and dark themes. Tokens are CSS custom properties that hold space-separated RGB triples, so Tailwind's opacity modifiers work (for example `bg-primary/90`).
 
-## Design Tokens
+The same token values are defined twice: in `src/styles/globals.css` here (used by Storybook) and in `packages/app/src/styles/globals.css` (used by the app). Change both together.
 
-### Color System
+## Design tokens
 
-Defined in `src/styles/globals.css` using CSS custom properties:
+### Colours
 
-#### Semantic Colors
+| Token | Light | Dark | Usage |
+|-------|-------|------|-------|
+| `background` | `255 255 255` | `15 15 25` | Page background |
+| `foreground` | `15 23 42` | `241 245 249` | Body text |
+| `card` | `255 255 255` | `22 22 38` | Card backgrounds |
+| `card-foreground` | `15 23 42` | `241 245 249` | Card text |
+| `popover` | `255 255 255` | `22 22 38` | Popovers, tooltips |
+| `popover-foreground` | `15 23 42` | `241 245 249` | Popover text |
+| `primary` | `79 70 229` (indigo) | `129 140 248` | Primary actions, active states |
+| `primary-foreground` | `255 255 255` | `15 15 25` | Text on primary |
+| `secondary` | `241 245 249` | `30 30 50` | Secondary actions |
+| `secondary-foreground` | `15 23 42` | `241 245 249` | Text on secondary |
+| `muted` | `241 245 249` | `30 30 50` | Muted backgrounds |
+| `muted-foreground` | `100 116 139` | `148 163 184` | Muted text |
+| `accent` | `237 233 254` | `46 39 82` | Hover and highlight backgrounds |
+| `accent-foreground` | `67 56 202` | `224 231 255` | Text on accent |
+| `destructive` | `220 38 38` | `239 68 68` | Errors, danger actions |
+| `destructive-foreground` | `255 255 255` | `255 255 255` | Text on destructive |
+| `success` | `34 197 94` | `74 222 128` | Valid, completed |
+| `success-foreground` | `15 23 42` | `15 15 25` | Text on success |
+| `warning` | `245 158 11` | `251 191 36` | Warnings |
+| `warning-foreground` | `15 23 42` | `15 15 25` | Text on warning |
+| `info` | `59 130 246` | `96 165 250` | Informational |
+| `info-foreground` | `255 255 255` | `15 15 25` | Text on info |
+| `border` | `226 232 240` | `40 40 65` | Borders (applied to `*` by default) |
+| `input` | `226 232 240` | `40 40 65` | Input borders |
+| `ring` | `79 70 229` | `129 140 248` | Focus ring |
 
-| Token | Light Mode | Dark Mode | Usage |
-|-------|------------|-----------|-------|
-| `background` | `rgb(255 255 255)` | `rgb(10 10 10)` | Page background |
-| `foreground` | `rgb(10 10 10)` | `rgb(250 250 250)` | Body text |
-| `card` | `rgb(255 255 255)` | `rgb(10 10 10)` | Card backgrounds |
-| `card-foreground` | `rgb(10 10 10)` | `rgb(250 250 250)` | Card text |
-| `primary` | `rgb(24 24 27)` | `rgb(250 250 250)` | Primary actions |
-| `primary-foreground` | `rgb(250 250 250)` | `rgb(24 24 27)` | Text on primary |
-| `secondary` | `rgb(244 244 245)` | `rgb(39 39 42)` | Secondary actions |
-| `secondary-foreground` | `rgb(24 24 27)` | `rgb(250 250 250)` | Text on secondary |
-| `muted` | `rgb(244 244 245)` | `rgb(39 39 42)` | Muted backgrounds |
-| `muted-foreground` | `rgb(113 113 122)` | `rgb(161 161 170)` | Muted text |
-| `accent` | `rgb(244 244 245)` | `rgb(39 39 42)` | Accent backgrounds |
-| `accent-foreground` | `rgb(24 24 27)` | `rgb(250 250 250)` | Text on accent |
-| `destructive` | `rgb(239 68 68)` | `rgb(127 29 29)` | Error/danger actions |
-| `destructive-foreground` | `rgb(250 250 250)` | `rgb(250 250 250)` | Text on destructive |
-| `border` | `rgb(228 228 231)` | `rgb(39 39 42)` | Border color |
-| `input` | `rgb(228 228 231)` | `rgb(39 39 42)` | Input borders |
-| `ring` | `rgb(24 24 27)` | `rgb(212 212 216)` | Focus ring |
+`src/components/foundations/ColorPalette.stories.tsx` renders these in Storybook.
 
-#### Wireframe-Specific Colors
+### Border radius
 
-From `packages/wireframes/app/config/page.tsx` and other wireframe pages:
+`--radius` is `0.5rem`. `tailwind.config.ts` maps:
 
-| Usage | Class | Color | Notes |
-|-------|-------|-------|-------|
-| Page Background | `bg-gray-50` | Light gray | Main page background |
-| Primary Button | `bg-blue-600 hover:bg-blue-700` | Blue | Call-to-action buttons |
-| Secondary Button | `bg-gray-100 hover:bg-gray-200` | Light gray | Secondary actions |
-| Success State | `border-green-300 bg-green-50` | Green | Valid/connected inputs |
-| Success Text | `text-green-600` | Green | Validation messages |
-| Success Icon | `text-green-500` | Green | Check icons |
-| Card Border | `border-2 hover:border-blue-200` | Blue on hover | Interactive cards |
-| Headings | `text-gray-900` | Dark gray | Page titles, headings |
-| Body Text | `text-gray-600` | Medium gray | Descriptions, labels |
-| Icon Background | `bg-blue-100` | Light blue | Icon container circles |
-| Icon Foreground | `text-blue-600` | Blue | Icon colors |
+- `rounded-lg` to `var(--radius)` (0.5rem)
+- `rounded-md` to `calc(var(--radius) - 2px)`
+- `rounded-sm` to `calc(var(--radius) - 4px)`
 
-### Border Radius
-
-Default border radius: `0.5rem` (8px)
-
-```css
---radius: 0.5rem;
-```
-
-Applied via Tailwind utility classes:
-- `rounded` - Default radius (0.5rem)
-- `rounded-full` - Circular (9999px) - used for avatars, icon containers
-- `rounded-lg` - Large radius (0.75rem)
+`rounded` and `rounded-full` keep Tailwind's defaults.
 
 ### Spacing
 
@@ -80,35 +67,7 @@ Uses Tailwind's default spacing scale based on `0.25rem` (4px) increments:
 
 ### Typography
 
-Uses Tailwind's default font system with custom weights and sizes:
-
-#### Headings
-
-```tsx
-// Page titles
-<h2 className="text-3xl font-bold text-gray-900 mb-4">
-
-// Section titles
-<h3 className="text-lg font-semibold mb-6">
-
-// Card titles
-<h4 className="text-xl font-semibold">
-```
-
-#### Body Text
-
-```tsx
-// Primary text
-<p className="text-gray-600">
-
-// Small text
-<span className="text-sm text-green-600 font-medium">
-
-// Muted text
-<span className="text-gray-400">
-```
-
-#### Font Weights
+Tailwind's default font stack and sizes in Storybook. The app sets `font-sans` to Geist. For headings and body text, use the `Heading` and `Text` atoms rather than raw classes where possible.
 
 | Class | Weight | Usage |
 |-------|--------|-------|
@@ -116,238 +75,120 @@ Uses Tailwind's default font system with custom weights and sizes:
 | `font-semibold` | 600 | Section titles, card titles |
 | `font-bold` | 700 | Page titles |
 
-## Component Patterns
+Text colours: `text-foreground` for body text, `text-muted-foreground` for secondary text.
 
-### Cards
-
-From wireframes (`packages/wireframes/app/config/page.tsx:54`):
-
-```tsx
-<Card className="border-2 hover:border-blue-200 transition-colors">
-  <CardContent className="p-6">
-    {/* Card content */}
-  </CardContent>
-</Card>
-```
-
-**Pattern**: 2px border with hover state transition
+## Component patterns
 
 ### Buttons
 
-From wireframes:
+Use the `Button` atom's variants (`default`, `destructive`, `warning`, `success`, `outline`, `secondary`, `ghost`, `link`) rather than adding colour classes.
 
 ```tsx
-// Primary action
-<Button className="bg-blue-600 hover:bg-blue-700">
-
-// Full width
-<Button className="w-full bg-blue-600 hover:bg-blue-700">
+<Button>Continue</Button>
+<Button variant="outline">Back</Button>
 ```
 
-**Pattern**: Blue background, darker on hover
+### Validation states
 
-### Inputs with Validation
+`success` and `destructive` tokens mark valid and invalid inputs (see `ApiKeyInput`).
 
-From wireframes (`packages/wireframes/app/config/page.tsx:100`):
+### Progress indicators
+
+From `src/components/molecules/ProgressSteps/ProgressSteps.tsx`:
 
 ```tsx
-// Success state
-<Input
-  className="pr-20 border-green-300 bg-green-50"
-  readOnly
-/>
-
-// With icons (show/hide password, validation)
-<div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center space-x-2">
-  <button className="text-gray-400 hover:text-gray-600">
-    {showPassword ? <EyeOff /> : <Eye />}
-  </button>
-  <CheckCircle className="w-4 h-4 text-green-500" />
-</div>
+isCompleted && 'bg-success text-success-foreground',
+isActive && 'bg-primary text-primary-foreground',
+!isCompleted && !isActive && 'bg-muted text-muted-foreground',
 ```
 
-**Pattern**: Green border/background for valid states, icons positioned absolutely
+## Dark mode
 
-### Icon Containers
+`darkMode: 'class'`. The `dark` class on the root element switches the token values. The app's theme slice sets it on `document.documentElement`; Storybook's `ThemeDecorator` sets it from the toolbar.
 
-From wireframes (`packages/wireframes/app/config/page.tsx:57`):
+Because tokens change with the theme, components using `bg-background`, `text-foreground` and similar need no `dark:` variants. Use `dark:` only for the rare case a token does not cover.
 
-```tsx
-<div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-  <span className="text-blue-600 text-lg">🔧</span>
-</div>
-```
+Check both themes in Storybook and keep text contrast at WCAG 2.1 AA (4.5:1).
 
-**Pattern**: Circular containers (10x10) with light background and colored icon
+## Responsive design
 
-### Progress Indicators
+Tailwind's default breakpoints:
 
-From `packages/component-library/src/components/ProgressSteps/`:
-
-```tsx
-// Active step
-<div className="bg-blue-500 text-white dark:bg-blue-600">
-
-// Completed step
-<div className="bg-green-500 text-white dark:bg-green-600">
-
-// Upcoming step
-<div className="bg-muted text-muted-foreground">
-```
-
-**Pattern**: Color-coded states with dark mode variants
-
-## Dark Mode
-
-### Enabling Dark Mode
-
-Dark mode is controlled via the `.dark` class on the root element:
+| Breakpoint | Min width |
+|------------|-----------|
+| `sm` | 640px |
+| `md` | 768px |
+| `lg` | 1024px |
+| `xl` | 1280px |
+| `2xl` | 1536px |
 
 ```tsx
-<html className="dark">
-  {/* All children inherit dark mode styles */}
-</html>
-```
-
-### Dark Mode Classes
-
-Use the `dark:` variant for dark mode styles:
-
-```tsx
-<div className="bg-white dark:bg-gray-900">
-<p className="text-gray-900 dark:text-gray-100">
-<div className="border-gray-200 dark:border-gray-800">
-```
-
-### Dark Mode Best Practices
-
-1. **Always provide both variants**: Every background, text, and border should have light and dark variants
-2. **Use semantic tokens**: Prefer `bg-background`, `text-foreground` over specific colors
-3. **Test in both modes**: Visual validation required in Storybook with theme decorator
-4. **Maintain contrast**: WCAG 2.1 AA compliance (4.5:1 ratio for text)
-
-## Responsive Design
-
-### Breakpoints
-
-Uses Tailwind's default breakpoints:
-
-| Breakpoint | Min Width | Usage |
-|------------|-----------|-------|
-| `sm` | 640px | Mobile landscape |
-| `md` | 768px | Tablet |
-| `lg` | 1024px | Desktop |
-| `xl` | 1280px | Large desktop |
-| `2xl` | 1536px | Extra large |
-
-### Responsive Patterns
-
-From wireframes:
-
-```tsx
-// Mobile: stack, Desktop: 2-column grid
+// Stack on mobile, two columns from md
 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-
-// Container with max width
-<div className="max-w-4xl mx-auto px-6 py-8">
 ```
 
 ## Accessibility
 
-### Focus States
+- Focus: components use `focus-visible:ring-1 focus-visible:ring-ring` (Button) or similar. Keep a visible focus ring.
+- Contrast: 4.5:1 for normal text, 3:1 for large text and interactive elements.
+- Touch targets: aim for 44px by 44px on interactive elements.
 
-Always include focus ring for keyboard navigation:
+## Usage guidelines
 
-```tsx
-<button className="focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2">
-```
-
-### Color Contrast
-
-- **Normal text**: Minimum 4.5:1 contrast ratio
-- **Large text** (18px+ or 14px+ bold): Minimum 3:1 contrast ratio
-- **Interactive elements**: Minimum 3:1 against background
-
-### Icon Sizing
-
-Minimum touch target: 44px x 44px for interactive elements
+Do:
 
 ```tsx
-// Icon button (adequate touch target)
-<button className="w-10 h-10 flex items-center justify-center">
-  <Icon className="w-4 h-4" />
-</button>
-```
-
-## Usage Guidelines
-
-### DO ✅
-
-```tsx
-// Use semantic tokens
 <div className="bg-background text-foreground">
-
-// Provide dark mode variants
-<Card className="bg-white dark:bg-gray-900">
-
-// Use spacing scale consistently
-<div className="space-y-4">
-
-// Reference wireframes for patterns
-<Button className="bg-blue-600 hover:bg-blue-700"> // From wireframes
+<p className="text-muted-foreground">
+<div className="border border-border rounded-lg">
+<Button variant="destructive">
 ```
 
-### DON'T ❌
+Don't:
 
 ```tsx
-// Don't hardcode arbitrary colors
-<div className="bg-[#3b82f6]"> // Use semantic tokens instead
-
-// Don't mix color scales
-<div className="text-gray-600 dark:text-slate-200"> // Use same scale
-
-// Don't skip dark mode
-<Card className="bg-white"> // Missing dark variant
-
-// Don't guess patterns
-<Button className="bg-purple-500"> // Check wireframes first
+<div className="bg-[#3b82f6]">        // arbitrary colour, use a token
+<div className="bg-blue-600">         // raw palette colour, use primary
+<Card className="bg-white">           // breaks dark mode, use bg-card
 ```
 
-## Tailwind Configuration
+Some stories wrap content in `dark bg-gray-900` to preview dark mode; that is a story-only convenience.
 
-Located in `tailwind.config.ts`:
+## Tailwind configuration
+
+`tailwind.config.ts` (abridged):
 
 ```ts
 export default {
-  content: [
-    "./src/**/*.{js,ts,jsx,tsx,mdx}",
-  ],
+  darkMode: 'class',
+  content: ['./src/**/*.{ts,tsx}', './.storybook/**/*.{ts,tsx}'],
   theme: {
     extend: {
       colors: {
-        background: "rgb(var(--color-background) / <alpha-value>)",
-        foreground: "rgb(var(--color-foreground) / <alpha-value>)",
-        // ... other semantic tokens
+        background: 'rgb(var(--color-background) / <alpha-value>)',
+        foreground: 'rgb(var(--color-foreground) / <alpha-value>)',
+        primary: {
+          DEFAULT: 'rgb(var(--color-primary) / <alpha-value>)',
+          foreground: 'rgb(var(--color-primary-foreground) / <alpha-value>)',
+        },
+        // secondary, destructive, success, warning, info, muted, accent,
+        // popover, card, border, input, ring
       },
       borderRadius: {
-        DEFAULT: "var(--radius)",
+        lg: 'var(--radius)',
+        md: 'calc(var(--radius) - 2px)',
+        sm: 'calc(var(--radius) - 4px)',
       },
     },
   },
-  darkMode: "class",
   plugins: [],
-}
+} satisfies Config;
 ```
+
+`packages/app/tailwind.config.ts` has the same theme plus a Geist `fontFamily.sans`, and adds `../component-library/src/**/*.{ts,tsx}` to `content` so component classes are generated in the app.
 
 ## References
 
-- **Wireframes**: `packages/wireframes/app/` - Design source of truth
-- **Component Library**: `packages/component-library/src/components/` - Implementation
-- **Globals CSS**: `packages/component-library/src/styles/globals.css` - Token definitions
-- **Tailwind Docs**: https://tailwindcss.com/docs
-
----
-
-**Version**: 1.0.0
-**Last Updated**: 2025-09-30
-**Design Reference**: `packages/wireframes/`
+- `packages/wireframes/app/`: layout reference
+- `src/styles/globals.css`: token definitions
+- [Tailwind CSS v3 docs](https://v3.tailwindcss.com/docs)

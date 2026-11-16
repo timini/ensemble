@@ -1,77 +1,76 @@
 # @ensemble-ai/shared-utils
 
-Shared utilities for Ensemble AI application.
+Non-UI code shared by the app and the eval package: provider clients, similarity maths, Web Crypto helpers, and re-exports of the consensus strategies. UI helpers stay in the component library.
 
-## Overview
+The package is consumed from `dist/`. After changing it, rebuild:
 
-This package contains domain utilities used across the Ensemble AI monorepo. These are **non-UI utilities** - UI-specific utilities remain in `@ensemble-ai/component-library`.
-
-## Modules
-
-### Similarity (`similarity/`)
-
-Cosine similarity calculations for AI response agreement analysis.
-
-**Functions:**
-- `cosineSimilarity(vectorA, vectorB)` - Calculate cosine similarity between two embedding vectors (-1 to 1)
-- `similarityMatrix(vectors)` - Generate pairwise similarity matrix for multiple vectors
-- `agreementStatistics(similarities)` - Calculate mean, median, min, max, stddev from similarity scores
-
-**Usage:**
-```typescript
-import { cosineSimilarity, similarityMatrix, agreementStatistics } from '@ensemble-ai/shared-utils/similarity';
-
-// Compare two embeddings
-const similarity = cosineSimilarity([1, 2, 3], [2, 3, 4]);
-
-// Generate matrix for multiple responses
-const embeddings = [embedding1, embedding2, embedding3];
-const matrix = similarityMatrix(embeddings);
-
-// Calculate agreement statistics
-const scores = [0.85, 0.92, 0.78];
-const stats = agreementStatistics(scores); // { mean, median, min, max, stddev }
+```bash
+npm run build --workspace=packages/shared-utils
 ```
 
-### Crypto (Future - Phase 3)
+The app's `tsconfig.json` also maps the bare `@ensemble-ai/shared-utils` import to `src/index.ts`, but subpath imports such as `@ensemble-ai/shared-utils/providers` resolve to `dist/`.
 
-Client-side encryption for API keys using Web Crypto API (AES-256).
+## Entry points
 
-### Embeddings (Future - Phase 3)
+| Import | Contents |
+|--------|----------|
+| `@ensemble-ai/shared-utils` | Everything below |
+| `@ensemble-ai/shared-utils/providers` | `AIProvider` and related types, `ProviderRegistry`, `createProviderClient`, `MockProviderClient`, the six `Free*Client` classes, `sanitizeProviderErrorMessage` |
+| `@ensemble-ai/shared-utils/similarity` | `cosineSimilarity`, `similarityMatrix`, `agreementStatistics`, `normalizeSimilarity` |
+| `@ensemble-ai/shared-utils/security` | `encrypt`, `decrypt`, `deriveKey`, `isWebCryptoAvailable` |
+| `@ensemble-ai/shared-utils/consensus` | Re-exports from `@ensemble-ai/consensus-core` and the four strategy packages (kept for backward compatibility; new code can import those packages directly) |
 
-Utilities for generating embeddings from AI model responses.
+## Providers (`src/providers/`)
 
-### Streaming (Future - Phase 2-3)
+- Providers: `openai`, `anthropic`, `google`, `xai`, `deepseek`, `perplexity`.
+- Modes: `mock` and `free` are implemented. `createProviderClient` throws `not yet implemented` for `pro`.
+- Free clients call the provider APIs from the browser with the vendor SDKs (`dangerouslyAllowBrowser: true`).
+- `generateEmbeddings` is not implemented for any real provider. `BaseFreeClient` returns the mock client's hash-based vector, so similarity scores computed from it are not semantic.
+- Perplexity has no `generateStructured` implementation.
 
-Utilities for handling streaming responses from AI providers.
+Full description: [packages/app/docs/PROVIDER_ARCHITECTURE.md](../app/docs/PROVIDER_ARCHITECTURE.md).
+
+## Similarity (`src/similarity/`)
+
+```typescript
+import {
+  cosineSimilarity,
+  similarityMatrix,
+  agreementStatistics,
+  normalizeSimilarity,
+} from '@ensemble-ai/shared-utils/similarity';
+
+cosineSimilarity([1, 2, 3], [2, 3, 4]);    // -1 to 1; throws on empty, mismatched or zero vectors
+similarityMatrix([v1, v2, v3]);            // n x n, diagonal is 1
+agreementStatistics([0.85, 0.92, 0.78]);   // { mean, median, min, max, stddev }
+normalizeSimilarity(0.4);                  // maps -1..1 to 0..1, clamped
+```
+
+These functions are correct for any vectors. The vectors the app feeds them today are placeholders (see Providers above).
+
+## Security (`src/security/`)
+
+- `encrypt(plaintext)` and `decrypt(ciphertext)`: AES-256-GCM via Web Crypto, output `base64(iv):base64(payload)`.
+- `deriveKey()`: SHA-256 of browser and screen properties (user agent, language, platform, core count, screen size, time zone), imported as an AES key and cached. This keeps keys out of plain sight in localStorage; it does not protect against code running on the page, and changing browser or screen settings can make stored keys undecryptable.
+- `isWebCryptoAvailable()`
 
 ## Development
 
 ```bash
-# Install dependencies
-npm install
-
-# Run tests
-npm test
-
-# Type checking
+npm run build       # tsc
+npm test            # vitest run --coverage
+npm run test:watch
 npm run typecheck
-
-# Build
-npm run build
-
-# Lint
-npm run lint
+npm run lint        # eslint, zero warnings allowed
+npm run clean       # rm -rf dist
 ```
 
-## Testing
+Tests sit next to the code (`*.test.ts`) and in `src/providers/__tests__/`. Coverage is measured for `src/providers` and `src/similarity` only. Thresholds are currently lowered to 65% lines and statements, 75% functions and branches (`vitest.config.ts`).
 
-All utilities include comprehensive unit tests with 100% coverage.
+## Dependency note
 
-- **Test Framework**: Vitest
-- **Coverage Requirement**: 80%+ (currently 100%)
-- **Test Location**: `src/**/*.test.ts`
+The Anthropic and Google clients import `@anthropic-ai/sdk` and `@google/generative-ai`, but those are not listed in this package's `package.json`. They resolve through the workspace because the app depends on them. `openai` is listed here as `^4.68.4`, while the app uses `^6.8.1`.
 
 ## License
 
-Private - All rights reserved
+UNLICENSED. Private.

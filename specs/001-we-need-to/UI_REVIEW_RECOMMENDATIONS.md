@@ -1,5 +1,7 @@
 # UI Implementation Review - Recommended Spec Updates
 
+> **Status (2026-11-15):** Historical. Phases 1 to 3 are largely built. The active plan is [docs/ROADMAP.md](../../docs/ROADMAP.md), which supersedes the Phase 4 tasks (T235 onward) and replaces NextAuth, Prisma, Postgres and Vercel with Firebase Auth, Firestore and Firebase App Hosting. Product direction is in [docs/PRODUCT_VISION.md](../../docs/PRODUCT_VISION.md).
+
 **Date**: 2025-09-30
 **Reviewed**: shadcn/ui wireframe implementation
 **Status**: 9 discrepancies found, recommendations below

@@ -1,311 +1,114 @@
 # @ai-ensemble/component-library
 
-Production-ready React component library built with TypeScript, Tailwind CSS, and Storybook. Follows [shadcn/ui](https://ui.shadcn.com/) patterns and **[Atomic Design](https://bradfrost.com/blog/post/atomic-web-design/)** principles with full test coverage and visual regression testing.
+React components for the Ensemble AI app, built with TypeScript, Tailwind CSS 3.4 and Storybook 9. Components follow [shadcn/ui](https://ui.shadcn.com/) patterns (CVA variants, `cn()` class merging) and are grouped by [Atomic Design](https://bradfrost.com/blog/post/atomic-web-design/) level.
 
-## 📦 Components (Atomic Design)
+The package is not built or published. It points `main` and `types` at `src/index.ts`, and the app imports components through its `@/*` path alias (mapped to `../component-library/src/*`), for example `import { Button } from '@/components/atoms/Button'`.
 
-This library follows **Atomic Design** principles, organizing components from simple to complex:
+## Components
 
-### 🔹 Atoms (12) - Basic Building Blocks
-- **Button** - All variants (default, destructive, outline, secondary, ghost, link) and sizes
-- **Card** - Flexible container with Header, Footer, Title, Description, and Content subcomponents
-- **Input** - Text input with validation states and accessibility
-- **Badge** - Status badges with multiple variants
-- **Icon** - Icon wrapper with variants (lucide-react)
-- **LoadingSpinner** - Loading indicator with size variants
-- **Tag** - Chip/tag for filters and selections (removable, selectable)
-- **InlineAlert** - Inline messages (info, success, warning, error)
-- **Textarea** - Multiline text input with auto-resize
-- **Label** - Semantic form labels with proper `htmlFor` association
-- **Progress** - Animated progress bars with variants
-- **Separator** - Horizontal and vertical dividers
+### Atoms (22)
 
-### 🔸 Molecules (2) - Simple Combinations
-- **EnsembleHeader** - Application header with branding
-- **ProgressSteps** - Workflow stepper (Config → Ensemble → Prompt → Review)
+Avatar, Badge, Button, Card, Dialog, Heading, Icon, InlineAlert, Input, Label, Link, LoadingSpinner, Markdown, ModelLogo, Progress, ProviderLogo, Rating, Select, Separator, Tag, Text, Textarea
 
-### 🔶 Organisms (Planned)
-- Navbar, DataTable, Modal, Dropdown, Tabs, CommandPalette
+### Molecules (10)
 
-### 📄 Templates (Planned)
-- DashboardLayout, AuthLayout, WizardLayout
+ApiKeyInput, ConsensusPresetSelector, EnsembleHeader, Footer, ModelCard, ModeSelectionCard, ProgressSteps, PromptInput, ResponseCard, SummarizerIndicator
+
+### Organisms (16)
+
+AgreementAnalysis, ApiKeyConfiguration, ApiKeyConfigurationModal, ConsensusCard, EnsembleConfigurationSummary, EnsembleManagementPanel, EnsembleSidebar, ManualResponseModal, ModelSelectionList, ModeSelector, PageHero, PromptCard, PromptInputWithHint, PromptTips, SettingsModal, WorkflowNavigator
+
+There is no templates level. `src/components/foundations/ColorPalette.stories.tsx` documents the colour tokens.
+
+Most components have a `.stories.tsx` and a `.test.tsx` next to them. Exceptions today: Dialog and Markdown have neither; PromptCard has a test but no story.
 
 ### Utilities
-- **cn()** - Smart className merger using `clsx` + `tailwind-merge` for conflict resolution
 
-## 🚀 Quick Start
+- `cn()` in `src/lib/utils.ts`: `clsx` plus `tailwind-merge`
+- `src/lib/i18n/`: i18next config and EN/FR locale files used by components and Storybook
+- `src/lib/test-utils/i18n-test-wrapper.tsx`: wraps components in the i18n provider for tests
 
-```bash
-# Install dependencies
-npm install
+## Scripts
 
-# Start Storybook development server
-npm run storybook
+| Script | Description |
+|--------|-------------|
+| `npm run storybook` | Storybook dev server on port 6006 |
+| `npm run build-storybook` | Static Storybook build |
+| `npm run build` | `tsc --noEmit` (type check only, no output) |
+| `npm test` / `npm run test:unit` | `vitest run --coverage` |
+| `npm run test:watch` | Vitest watch mode |
+| `npm run test:storybook` | Storybook test runner against a running Storybook |
+| `npm run test:storybook:ci` | Builds Storybook, serves it, runs the test runner |
+| `npm run lint`, `npm run lint:fix` | ESLint |
+| `npm run typecheck` | `tsc --noEmit` |
 
-# Run tests
-npm run test
+`scripts/screenshot-stories.ts` screenshots a hard-coded list of 77 story ids into `screenshots/`. The ids use an old `ui-*` prefix, while stories are now titled `Atoms/...`, `Molecules/...` and `Organisms/...`, so the list needs updating before the script is useful. Nothing compares the screenshots automatically.
 
-# Run tests in watch mode
-npm test
-
-# Build TypeScript
-npm run build
-
-# Run linting
-npm run lint
-
-# Fix linting issues
-npm run lint:fix
-```
-
-## 📖 Usage
+## Usage
 
 ```tsx
-import { Button, Card, CardHeader, CardTitle, CardContent } from '@ai-ensemble/component-library';
+import { Button } from '@/components/atoms/Button';
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/atoms/Card';
 
-function MyComponent() {
+export function Example() {
   return (
     <Card>
       <CardHeader>
         <CardTitle>Welcome</CardTitle>
       </CardHeader>
       <CardContent>
-        <Button variant="default" size="lg">
-          Click me
-        </Button>
+        <Button size="lg">Click me</Button>
       </CardContent>
     </Card>
   );
 }
 ```
 
-## 🎨 Design System
+## Design system
 
-All components use Tailwind CSS with a custom theme:
+Colours are CSS variables holding RGB triples, defined in `src/styles/globals.css` for `:root` (light) and `.dark`. `tailwind.config.ts` maps them to Tailwind colours (`background`, `foreground`, `primary`, `secondary`, `muted`, `accent`, `destructive`, `success`, `warning`, `info`, `card`, `popover`, `border`, `input`, `ring`) and sets `darkMode: 'class'`. Radius comes from `--radius`. See [docs/TAILWIND_DESIGN_SYSTEM.md](docs/TAILWIND_DESIGN_SYSTEM.md).
 
-- **Colors**: CSS variables for theming (`--color-primary`, `--color-secondary`, etc.)
-- **Spacing**: Tailwind's default spacing scale
-- **Typography**: System font stack with proper line heights
-- **Radius**: Consistent border radius via `--radius` CSS variable
+## Testing
 
-## 🧪 Testing
+- Unit tests: Vitest with jsdom and React Testing Library. Coverage thresholds are 80% for lines, functions, branches and statements (`vitest.config.ts`).
+- Storybook: `@storybook/test-runner` checks that every story renders. Theme and i18n decorators live in `.storybook/decorators/`.
 
-### Test Stack
-- **Unit Tests**: Vitest + React Testing Library
-- **Visual Regression**: Playwright screenshot testing (59 stories)
-- **Storybook Tests**: Interaction testing via test-runner
-- **Coverage Target**: 80%+ (currently 127 tests passing)
+See [docs/TESTING.md](docs/TESTING.md).
 
-### Running Tests
-
-```bash
-# Run all unit tests
-npm run test:unit
-
-# Run Storybook tests
-npm run test:storybook
-
-# Run Storybook tests in CI (with static build)
-npm run test:storybook:ci
-
-# Take visual regression screenshots
-npx tsx scripts/screenshot-stories.ts
-```
-
-### Test Structure
-```
-src/components/
-  ui/
-    Button/
-      Button.tsx              # Implementation
-      Button.test.tsx         # Unit tests
-      Button.stories.tsx      # Storybook stories
-      Button.snapshot.test.tsx # Snapshot tests (optional)
-      index.ts                # Public exports
-```
-
-## 📐 Component Development
-
-### TDD Workflow (Required)
-1. **Write Storybook story** - Define component API and variants
-2. **Write unit tests** - Test behavior, accessibility, edge cases
-3. **Implement component** - Build component to pass tests
-4. **Take screenshots** - Capture visual regression baseline
-
-### Component Guidelines
-- **Composition over inheritance** - Use CVA (class-variance-authority) for variants
-- **TypeScript first** - Full type safety with exported types
-- **Accessibility** - WCAG 2.1 AA compliance required
-- **200-line limit** - Keep components focused and maintainable
-- **Forwardable refs** - All components support `React.forwardRef`
-
-### Example: Creating a New Component
-
-```tsx
-// 1. Define variants with CVA
-import { cva, type VariantProps } from 'class-variance-authority';
-
-const componentVariants = cva(
-  'base-classes',
-  {
-    variants: {
-      variant: {
-        default: 'default-classes',
-        outline: 'outline-classes',
-      },
-      size: {
-        sm: 'small-classes',
-        md: 'medium-classes',
-      },
-    },
-    defaultVariants: {
-      variant: 'default',
-      size: 'md',
-    },
-  }
-);
-
-// 2. Define props interface
-export interface ComponentProps
-  extends React.HTMLAttributes<HTMLDivElement>,
-    VariantProps<typeof componentVariants> {}
-
-// 3. Implement component
-export const Component = React.forwardRef<HTMLDivElement, ComponentProps>(
-  ({ className, variant, size, ...props }, ref) => {
-    return (
-      <div
-        ref={ref}
-        className={cn(componentVariants({ variant, size }), className)}
-        {...props}
-      />
-    );
-  }
-);
-Component.displayName = 'Component';
-```
-
-## 🔧 Available Scripts
-
-| Script | Description |
-|--------|-------------|
-| `npm run storybook` | Start Storybook dev server on port 6006 |
-| `npm run build-storybook` | Build static Storybook for deployment |
-| `npm run build` | Type-check TypeScript (no output) |
-| `npm test` | Run Vitest in watch mode |
-| `npm run test:unit` | Run all unit tests once |
-| `npm run test:storybook` | Run Storybook interaction tests |
-| `npm run test:storybook:ci` | Run Storybook tests in CI mode |
-| `npm run lint` | Run ESLint |
-| `npm run lint:fix` | Fix ESLint issues automatically |
-| `npm run typecheck` | Run TypeScript compiler check |
-
-## 📁 Project Structure
-
-Organized following **Atomic Design** principles:
+## Project structure
 
 ```
 packages/component-library/
-├── .storybook/              # Storybook configuration
-│   ├── main.ts             # Storybook main config
-│   └── preview.ts          # Global decorators and parameters
-├── docs/                    # Documentation
-│   ├── ATOMIC_DESIGN_ARCHITECTURE.md  # Atomic design guide
-│   ├── COMPONENT_DEVELOPMENT_GUIDE.md # TDD workflow
-│   └── TAILWIND_DESIGN_SYSTEM.md      # Design tokens
+├── .storybook/          main.cjs, preview.ts, test-runner.ts, decorators/
+├── docs/
+├── scripts/             screenshot-stories.ts
+├── screenshots/         story screenshots
 ├── src/
 │   ├── components/
-│   │   ├── atoms/          # Level 1: Basic building blocks
-│   │   │   ├── Button/     # Action trigger
-│   │   │   ├── Card/       # Container component
-│   │   │   ├── Input/      # Text input
-│   │   │   ├── Badge/      # Status indicator
-│   │   │   ├── Icon/       # Icon wrapper
-│   │   │   ├── LoadingSpinner/
-│   │   │   ├── Tag/        # Chip/filter tag
-│   │   │   ├── InlineAlert/
-│   │   │   ├── Textarea/
-│   │   │   ├── Label/
-│   │   │   ├── Progress/
-│   │   │   └── Separator/
-│   │   ├── molecules/      # Level 2: Simple combinations
-│   │   │   ├── EnsembleHeader/
-│   │   │   └── ProgressSteps/
-│   │   ├── organisms/      # Level 3: Complex components (planned)
-│   │   └── templates/      # Level 4: Page layouts (planned)
-│   ├── lib/
-│   │   └── utils.ts        # Utility functions (cn, etc.)
-│   ├── styles/
-│   │   └── globals.css     # Global styles and CSS variables
-│   └── index.ts            # Public API exports
-├── scripts/
-│   └── screenshot-stories.ts # Visual regression script
-├── screenshots/             # Visual regression baselines (59 PNGs)
-├── package.json
+│   │   ├── atoms/
+│   │   ├── molecules/
+│   │   ├── organisms/
+│   │   └── foundations/
+│   ├── lib/             utils.ts, similarity.ts, i18n/, test-utils/
+│   ├── styles/          globals.css
+│   └── index.ts         public exports
 ├── tailwind.config.ts
-├── tsconfig.json
-├── vitest.config.ts
-└── README.md
+└── vitest.config.ts
 ```
 
-## 🎯 Coverage Status
+## Component guidelines
 
-- **Total Components**: 10 (8 atoms + 2 composites)
-- **Unit Tests**: 127 passing
-- **Storybook Stories**: 59 with full documentation
-- **Visual Regression**: 59 baseline screenshots
-- **Test Coverage**: 80%+ on all components
+- Use CVA for variants and export the variant function alongside the component.
+- Export a props interface and add JSDoc.
+- Use `React.forwardRef` where the component wraps a DOM element.
+- Keep component files around 200 lines. A few are over (`ResponseCard`, `EnsembleSidebar`, `SettingsModal`).
+- Use i18n keys for all user-visible text.
+- Use `data-testid` for test selectors.
 
-## 🔄 Commit Discipline
+## Docs
 
-This project follows strict commit discipline for quality:
-
-- **Frequency**: Commit after each discrete task (every 30-60 minutes)
-- **Format**: Use Conventional Commits (`feat:`, `fix:`, `test:`, `refactor:`, `docs:`)
-- **Pre-Commit Hooks**: Linting, type checking, and unit tests run automatically
-- **Never bypass**: Don't use `--no-verify` except in emergencies
-
-### Good Commit Examples
-```bash
-git commit -m "feat: add Progress component with variants (T095)"
-git commit -m "test: add unit tests for Label component (T049)"
-git commit -m "fix: correct Button disabled state styling"
-git commit -m "docs: update README with testing instructions"
-```
-
-## 🤝 Contributing
-
-1. **Follow TDD**: Write tests before implementation
-2. **Run tests**: Ensure all tests pass before committing
-3. **Check coverage**: Maintain 80%+ test coverage
-4. **Update docs**: Document new components and APIs
-5. **Take screenshots**: Update visual regression baselines
-
-## 📚 Documentation
-
-- **[ATOMIC_DESIGN_ARCHITECTURE.md](docs/ATOMIC_DESIGN_ARCHITECTURE.md)** - Atomic design principles and component organization
-- **[COMPONENT_DEVELOPMENT_GUIDE.md](docs/COMPONENT_DEVELOPMENT_GUIDE.md)** - TDD workflow and best practices
-- **[TAILWIND_DESIGN_SYSTEM.md](docs/TAILWIND_DESIGN_SYSTEM.md)** - Design tokens and styling guidelines
-- **Storybook** - Interactive component documentation at `http://localhost:6006`
-- **tailwind.config.ts** - Tailwind theme configuration
-
-## 🏗️ Tech Stack
-
-- **React 19** - UI library
-- **TypeScript 5.8** - Type safety
-- **Tailwind CSS 3.4** - Utility-first styling
-- **Storybook 9.1** - Component development and documentation
-- **Vitest 3.2** - Unit testing framework
-- **Playwright 1.55** - Screenshot testing and E2E
-- **CVA** - Variant management
-- **Lucide React** - Icon library
-
-## 📄 License
-
-Private package for @ai-ensemble project.
-
----
-
-**Version**: 0.1.0
-**Last Updated**: 2025-09-30
-**Status**: Phase 1.1 Complete ✅
+- [ATOMIC_DESIGN_ARCHITECTURE.md](docs/ATOMIC_DESIGN_ARCHITECTURE.md)
+- [COMPONENT_DEVELOPMENT_GUIDE.md](docs/COMPONENT_DEVELOPMENT_GUIDE.md)
+- [TAILWIND_DESIGN_SYSTEM.md](docs/TAILWIND_DESIGN_SYSTEM.md)
+- [TESTING.md](docs/TESTING.md)
+- [KNOWN_ISSUES.md](docs/KNOWN_ISSUES.md)

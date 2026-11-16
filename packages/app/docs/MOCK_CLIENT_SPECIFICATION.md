@@ -1,588 +1,90 @@
 # Mock Client Specification
 
-**Document Version**: 1.0.0
-**Last Updated**: 2025-10-01
-**Target Phase**: Phase 2 (UI Integration)
+`MockProviderClient` (`packages/shared-utils/src/providers/clients/mock/MockProviderClient.ts`) implements `AIProvider` without any network calls. It streams lorem ipsum so the UI and the mock-mode Playwright suite can run without API keys or cost.
 
-## Overview
+## When it is used
 
-The Mock Client simulates AI provider streaming responses using lorem ipsum text. It enables:
-- **UI development** without real API costs
-- **E2E testing** with predictable, reproducible responses
-- **Performance testing** of streaming UI components
+- **Mock mode.** Start the app with `npm run dev:mock` (sets `NEXT_PUBLIC_MOCK_MODE=true`). Every provider call then uses the mock client. The `packages/e2e` `mock-mode` project starts the app this way.
+- **Fallbacks in other modes.** The prompt page and `src/lib/embeddings.ts` fall back to the mock client if no client is registered for the current mode.
+- **Inside the free clients.** `BaseFreeClient` keeps a mock instance and uses it for `generateEmbeddings` (always) and for model lists when no key is set or the provider's list call fails.
 
-## Purpose
+Mock mode is not offered on `/config`. It is controlled only by the env var, which is read at build time, so a build made with `NEXT_PUBLIC_MOCK_MODE=true` serves mock responses.
 
-Mock mode is **development-only** and **NOT user-facing**:
-- ✅ Used by developers in Phase 2 for UI integration
-- ✅ Used by Playwright E2E tests
-- ❌ NOT exposed in the Config page mode selector (only Free/Pro shown to users)
-- ❌ NOT available in production builds
+## Behavior
 
----
+### streamResponse
 
-## Behavior Specification
+- Ignores the prompt. Output does not depend on it.
+- Picks a word count from a per-model range (see below), then builds text by picking random words from a fixed lorem ipsum list. No punctuation or capitalisation.
+- Splits the text into chunks of 50 to 100 characters.
+- Waits 50 to 100 ms before each chunk and calls `onChunk`.
+- Calls `onComplete(fullText, responseTime, tokenCount)` with `tokenCount = round(wordCount * 1.3)`.
 
-### 1. Response Generation
+Word count ranges by model id:
 
-**Text Source**: Lorem ipsum generator
+| Model id | Words |
+|----------|-------|
+| `gpt-4o` | 750 to 1000 |
+| `gpt-4o-mini` | 600 to 800 |
+| `o1-preview` | 650 to 850 |
+| `claude-3-5-sonnet` | 700 to 900 |
+| `claude-3-opus` | 800 to 1000 |
+| `claude-3-haiku` | 550 to 750 |
+| `gemini-1.5-pro` | 700 to 950 |
+| `gemini-1.5-flash` | 600 to 800 |
+| `grok-2` | 700 to 900 |
+| `grok-2-mini` | 550 to 750 |
+| `sonar` | 600 to 800 |
+| `sonar-pro` | 700 to 900 |
+| `sonar-reasoning` | 650 to 850 |
+| anything else | 600 to 800 |
 
-**Word Count**: 500-1000 words per response (randomized)
+At these settings a response takes roughly 4 to 9 seconds to stream.
 
-**Content Structure**:
-```
-Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod
-tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
-quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
-consequat...
+### generateEmbeddings
 
-[Continue for 500-1000 words total]
-```
-
-**Variation**:
-- Each model generates slightly different lorem ipsum text
-- Text length varies randomly within 500-1000 word range
-- Ensures diverse responses for agreement analysis testing
-
----
-
-### 2. Streaming Parameters
-
-**Chunk Size**: 50-100 characters per chunk (randomized)
-
-**Chunk Delay**: 50-100ms between chunks (randomized)
-
-**Total Streaming Time**:
-- Minimum: ~5 seconds (500 words ÷ 100 chars/chunk × 50ms)
-- Maximum: ~10 seconds (1000 words ÷ 50 chars/chunk × 100ms)
-
-**Example Timing**:
-```
-Word Count: 750 words ≈ 4500 characters
-Chunk Size: 75 chars (average)
-Chunks: 4500 ÷ 75 = 60 chunks
-Delay: 75ms (average)
-Total Time: 60 × 75ms = 4.5 seconds
-```
-
-**Latency Target**: <100ms p95 (measured from chunk generation to UI display)
-
----
-
-### 3. Streaming Algorithm
+Returns a 1536-length vector, deterministic for a given text:
 
 ```typescript
-async function streamLoremIpsum(
-  model: string,
-  onChunk: (chunk: string) => void,
-  onComplete: (fullResponse: string, responseTime: number) => void,
-  onError: (error: Error) => void
-): Promise<void> {
-  const startTime = Date.now();
-
-  try {
-    // Generate lorem ipsum text (500-1000 words)
-    const wordCount = randomInt(500, 1000);
-    const fullText = generateLoremIpsum(wordCount);
-
-    // Split into chunks (50-100 characters)
-    const chunks: string[] = [];
-    let position = 0;
-
-    while (position < fullText.length) {
-      const chunkSize = randomInt(50, 100);
-      const chunk = fullText.slice(position, position + chunkSize);
-      chunks.push(chunk);
-      position += chunkSize;
-    }
-
-    // Stream chunks with delay
-    for (const chunk of chunks) {
-      const delay = randomInt(50, 100); // 50-100ms
-      await sleep(delay);
-      onChunk(chunk);
-    }
-
-    // Complete streaming
-    const responseTime = Date.now() - startTime;
-    onComplete(fullText, responseTime);
-  } catch (error) {
-    onError(error as Error);
-  }
-}
+const hash = simpleHash(text); // 32-bit string hash
+return Array.from({ length: 1536 }, (_, i) => (Math.sin(hash + i) + 1) / 2);
 ```
 
----
+There is no noise term. The values reflect the hash of the text, not its meaning. Because the free clients also use this function, agreement scores in every mode are computed from these vectors and are not semantic.
 
-### 4. Model-Specific Responses
+### validateApiKey
 
-Each model generates **slightly different** lorem ipsum to simulate unique perspectives:
+Waits 100 to 300 ms and returns `{ valid: true }` for any input.
 
-#### GPT-4o (OpenAI)
-```
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod
-tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam...
-```
-- **Word count**: 750-1000 words
-- **Tone**: Slightly more formal/academic
+### generateStructured
 
-#### Claude 3.5 Sonnet (Anthropic)
-```
-Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod
-tempor incididunt. Ut labore et dolore magna aliqua enim ad minim veniam...
-```
-- **Word count**: 700-900 words
-- **Tone**: Slightly more conversational
+Waits 50 to 150 ms and returns an object where each schema property that has an `enum` gets its first enum value. Other properties are left out.
 
-#### Gemini 1.5 Pro (Google)
-```
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed eiusmod tempor
-incididunt ut labore et dolore magna aliqua, ad minim veniam quis nostrud...
-```
-- **Word count**: 600-800 words
-- **Tone**: Slightly more technical
+### listAvailableModels and listAvailableTextModels
 
-#### Grok-2 (XAI)
-```
-Lorem ipsum dolor sit amet, consectetur adipiscing. Sed do eiusmod tempor
-incididunt ut labore et dolore magna aliqua veniam quis nostrud exercitation...
-```
-- **Word count**: 500-700 words
-- **Tone**: Slightly more casual
-
-**Variation Purpose**: Ensures similarity scores vary (not all 1.0) for realistic agreement analysis testing.
-
----
-
-### 5. Embeddings Generation
-
-**Dimension**: 1536 (matches OpenAI text-embedding-3-small)
-
-**Generation**: Random vector with controlled similarity
-
-```typescript
-async function generateMockEmbeddings(text: string): Promise<number[]> {
-  // Generate base vector (deterministic from text hash)
-  const baseVector = hashToVector(text, 1536);
-
-  // Add controlled noise for variation
-  return baseVector.map(val => val + (Math.random() - 0.5) * 0.1);
-}
-
-function hashToVector(text: string, dimension: number): number[] {
-  // Simple hash to vector conversion for deterministic embeddings
-  const hash = simpleHash(text);
-  return Array.from({ length: dimension }, (_, i) => {
-    return Math.sin(hash + i) * 0.5 + 0.5; // Normalize to [0, 1]
-  });
-}
-```
-
-**Similarity Behavior**:
-- Similar text → embeddings with cosine similarity ~0.8-0.95
-- Different text → embeddings with cosine similarity ~0.3-0.7
-- Allows testing agreement analysis with realistic scores
-
----
-
-### 6. Error Simulation
-
-Mock client can simulate errors for testing error handling:
-
-**Error Types**:
-1. **Rate Limit Error** (10% probability)
-   ```
-   Error: Rate limit exceeded. Please try again in 60 seconds.
-   ```
-
-2. **Invalid Model Error** (if unknown model requested)
-   ```
-   Error: Model 'unknown-model' not found.
-   ```
-
-3. **Network Timeout** (5% probability after 5 seconds)
-   ```
-   Error: Request timed out after 5000ms.
-   ```
-
-**Configuration**:
-```typescript
-interface MockClientConfig {
-  enableErrors: boolean;      // Default: false
-  errorProbability: number;   // Default: 0.0 (0-1 range)
-  timeoutAfterMs: number;     // Default: 30000
-}
-```
-
----
-
-## Implementation
-
-### MockProviderClient (`packages/shared-utils/src/providers/clients/mock/MockProviderClient.ts`)
-
-```typescript
-import { AIProvider } from '../../types.js';
-
-export class MockProviderClient implements AIProvider {
-  private config: MockClientConfig;
-
-  constructor(config: MockClientConfig = {}) {
-    this.config = {
-      enableErrors: config.enableErrors ?? false,
-      errorProbability: config.errorProbability ?? 0.0,
-      timeoutAfterMs: config.timeoutAfterMs ?? 30000,
-    };
-  }
-
-  async streamResponse(
-    prompt: string,
-    model: string,
-    onChunk: (chunk: string) => void,
-    onComplete: (fullResponse: string, responseTime: number) => void,
-    onError: (error: Error) => void
-  ): Promise<void> {
-    // Simulate error (if enabled)
-    if (this.config.enableErrors && Math.random() < this.config.errorProbability) {
-      onError(new Error('Rate limit exceeded. Please try again in 60 seconds.'));
-      return;
-    }
-
-    const startTime = Date.now();
-
-    try {
-      // Generate lorem ipsum (500-1000 words)
-      const wordCount = this.getWordCountForModel(model);
-      const fullText = generateLoremIpsum(wordCount);
-
-      // Split into chunks (50-100 chars)
-      const chunks = this.chunkText(fullText);
-
-      // Stream with delays
-      for (const chunk of chunks) {
-        const delay = randomInt(50, 100);
-        await sleep(delay);
-        onChunk(chunk);
-      }
-
-      // Complete
-      const responseTime = Date.now() - startTime;
-      onComplete(fullText, responseTime);
-    } catch (error) {
-      onError(error as Error);
-    }
-  }
-
-  async generateEmbeddings(text: string): Promise<number[]> {
-    // Generate deterministic vector from text hash
-    return hashToVector(text, 1536);
-  }
-
-  async validateApiKey(apiKey: string): Promise<{ valid: boolean }> {
-    // Mock always validates successfully
-    return { valid: true };
-  }
-
-  listAvailableModels() {
-    return [
-      {
-        id: 'gpt-4o',
-        name: 'GPT-4o',
-        provider: 'openai',
-        contextWindow: 128000,
-        costPer1kTokens: 0.005,
-      },
-      {
-        id: 'claude-3-5-sonnet',
-        name: 'Claude 3.5 Sonnet',
-        provider: 'anthropic',
-        contextWindow: 200000,
-        costPer1kTokens: 0.003,
-      },
-      {
-        id: 'gemini-1-5-pro',
-        name: 'Gemini 1.5 Pro',
-        provider: 'google',
-        contextWindow: 1000000,
-        costPer1kTokens: 0.00125,
-      },
-      {
-        id: 'grok-2',
-        name: 'Grok-2',
-        provider: 'xai',
-        contextWindow: 128000,
-        costPer1kTokens: 0.002,
-      },
-    ];
-  }
-
-  private getWordCountForModel(model: string): number {
-    // Model-specific word count ranges
-    const ranges: Record<string, [number, number]> = {
-      'gpt-4o': [750, 1000],
-      'claude-3-5-sonnet': [700, 900],
-      'gemini-1-5-pro': [600, 800],
-      'grok-2': [500, 700],
-    };
-
-    const [min, max] = ranges[model] || [500, 1000];
-    return randomInt(min, max);
-  }
-
-  private chunkText(text: string): string[] {
-    const chunks: string[] = [];
-    let position = 0;
-
-    while (position < text.length) {
-      const chunkSize = randomInt(50, 100);
-      const chunk = text.slice(position, position + chunkSize);
-      chunks.push(chunk);
-      position += chunkSize;
-    }
-
-    return chunks;
-  }
-}
-```
-
----
-
-## Utility Functions
-
-### Lorem Ipsum Generator
-
-```typescript
-const LOREM_IPSUM_WORDS = [
-  'lorem', 'ipsum', 'dolor', 'sit', 'amet', 'consectetur', 'adipiscing',
-  'elit', 'sed', 'do', 'eiusmod', 'tempor', 'incididunt', 'ut', 'labore',
-  'et', 'dolore', 'magna', 'aliqua', 'enim', 'ad', 'minim', 'veniam',
-  'quis', 'nostrud', 'exercitation', 'ullamco', 'laboris', 'nisi', 'aliquip',
-  // ... (expand to 100+ words)
-];
-
-function generateLoremIpsum(wordCount: number): string {
-  const words: string[] = [];
-
-  for (let i = 0; i < wordCount; i++) {
-    const word = LOREM_IPSUM_WORDS[i % LOREM_IPSUM_WORDS.length];
-    words.push(word);
-  }
-
-  // Add punctuation every 10-15 words
-  let text = '';
-  for (let i = 0; i < words.length; i++) {
-    text += words[i];
-
-    if ((i + 1) % randomInt(10, 15) === 0) {
-      text += '. ';
-      // Capitalize next word
-      if (i + 1 < words.length) {
-        words[i + 1] = words[i + 1].charAt(0).toUpperCase() + words[i + 1].slice(1);
-      }
-    } else {
-      text += ' ';
-    }
-  }
-
-  return text.trim();
-}
-```
-
-### Random Utilities
-
-```typescript
-function randomInt(min: number, max: number): number {
-  return Math.floor(Math.random() * (max - min + 1)) + min;
-}
-
-function sleep(ms: number): Promise<void> {
-  return new Promise(resolve => setTimeout(resolve, ms));
-}
-```
-
-### Hash to Vector
-
-```typescript
-function simpleHash(text: string): number {
-  let hash = 0;
-  for (let i = 0; i < text.length; i++) {
-    const char = text.charCodeAt(i);
-    hash = ((hash << 5) - hash) + char;
-    hash = hash & hash; // Convert to 32-bit integer
-  }
-  return Math.abs(hash);
-}
-
-function hashToVector(text: string, dimension: number): number[] {
-  const hash = simpleHash(text);
-  return Array.from({ length: dimension }, (_, i) => {
-    return (Math.sin(hash + i) + 1) / 2; // Normalize to [0, 1]
-  });
-}
-```
-
----
-
-## Testing
-
-### Unit Tests
-
-```typescript
-import { MockProviderClient } from '@ensemble-ai/shared-utils/providers';
-
-describe('MockProviderClient', () => {
-  it('streams lorem ipsum with correct timing', async () => {
-    const client = new MockProviderClient();
-    const chunks: string[] = [];
-    const startTime = Date.now();
-
-    await client.streamResponse(
-      'Test prompt',
-      'gpt-4o',
-      (chunk) => chunks.push(chunk),
-      (fullResponse, responseTime) => {
-        // Verify word count
-        const wordCount = fullResponse.split(' ').length;
-        expect(wordCount).toBeGreaterThanOrEqual(750);
-        expect(wordCount).toBeLessThanOrEqual(1000);
-
-        // Verify timing
-        expect(responseTime).toBeGreaterThan(5000);
-        expect(responseTime).toBeLessThan(10000);
-      },
-      (error) => fail(error.message)
-    );
-
-    // Verify chunk count
-    expect(chunks.length).toBeGreaterThan(50);
-  });
-
-  it('generates deterministic embeddings', async () => {
-    const client = new MockProviderClient();
-    const text = 'Lorem ipsum dolor sit amet';
-
-    const embedding1 = await client.generateEmbeddings(text);
-    const embedding2 = await client.generateEmbeddings(text);
-
-    // Same text should produce identical embeddings
-    expect(embedding1).toEqual(embedding2);
-    expect(embedding1).toHaveLength(1536);
-  });
-
-  it('simulates errors when configured', async () => {
-    const client = new MockProviderClient({
-      enableErrors: true,
-      errorProbability: 1.0, // Always error
-    });
-
-    let errorOccurred = false;
-
-    await client.streamResponse(
-      'Test prompt',
-      'gpt-4o',
-      (chunk) => {},
-      (fullResponse, responseTime) => fail('Should have errored'),
-      (error) => {
-        errorOccurred = true;
-        expect(error.message).toContain('Rate limit');
-      }
-    );
-
-    expect(errorOccurred).toBe(true);
-  });
-});
-```
-
-### E2E Tests with Mock Mode
-
-```typescript
-import { test, expect } from '@playwright/test';
-
-test('streaming displays chunks progressively', async ({ page }) => {
-  await page.goto('/prompt');
-
-  // Use mock mode
-  await page.evaluate(() => {
-    localStorage.setItem('ensemble-ai-mode', 'mock');
-  });
-
-  await page.fill('[data-testid="prompt-input"]', 'What is AI?');
-  await page.click('[data-testid="submit-prompt"]');
-
-  // Wait for streaming to start
-  await page.waitForSelector('[data-testid="response-streaming"]');
-
-  // Verify chunks appear progressively
-  let previousLength = 0;
-  for (let i = 0; i < 5; i++) {
-    await page.waitForTimeout(1000);
-    const text = await page.locator('[data-testid="response-gpt-4o"]').textContent();
-    expect(text!.length).toBeGreaterThan(previousLength);
-    previousLength = text!.length;
-  }
-
-  // Wait for completion
-  await page.waitForSelector('[data-testid="response-complete"]');
-  const finalText = await page.locator('[data-testid="response-gpt-4o"]').textContent();
-  expect(finalText!.split(' ').length).toBeGreaterThan(500);
-});
-```
-
----
+Return a static list of 15 models across all six providers (GPT-4o, Claude 3.5 Sonnet, Gemini 1.5 Pro, Grok 2, DeepSeek Chat, Sonar and others). With `providerFilter` set, only that provider's models are returned. `listAvailableTextModels` returns the display names.
 
 ## Configuration
 
-### Development Mode
-
 ```typescript
-// Enable mock mode in development
-export const MOCK_CLIENT_CONFIG = {
-  enableErrors: false,        // No errors in dev
-  errorProbability: 0.0,
-  timeoutAfterMs: 30000,
-};
+interface MockClientConfig {
+  enableErrors?: boolean;     // default false
+  errorProbability?: number;  // default 0
+  timeoutAfterMs?: number;    // default 30000, stored but not used
+  providerFilter?: ProviderName;
+}
 ```
 
-### Testing Mode
-
-```typescript
-// Enable errors in E2E tests
-export const MOCK_CLIENT_TEST_CONFIG = {
-  enableErrors: true,         // Test error handling
-  errorProbability: 0.1,      // 10% error rate
-  timeoutAfterMs: 5000,       // Faster timeout
-};
-```
-
----
+When `enableErrors` is true, `streamResponse` fails with `Rate limit exceeded. Please try again in 60 seconds.` with probability `errorProbability`. The app always creates mock clients with only `providerFilter`, so errors are never simulated in the running app.
 
 ## Limitations
 
-### What Mock Mode Does NOT Support
+- Output ignores the prompt and has no structure.
+- Embeddings and agreement scores are not meaningful.
+- Token counts and costs are estimates only.
+- No timeout or network error simulation.
 
-❌ **Real AI responses** - Only lorem ipsum text
-❌ **Prompt-specific answers** - Same lorem ipsum regardless of prompt
-❌ **Context awareness** - No conversation history
-❌ **Real embeddings** - Random vectors only
-❌ **Model-specific behavior** - All models use same algorithm
-❌ **Token counting** - No accurate token usage
-❌ **Cost calculation** - Fake costs only
+## Related
 
-### When to Use Real APIs
-
-Use Free/Pro modes when you need:
-- ✅ Actual AI model responses
-- ✅ Prompt-specific answers
-- ✅ Real embeddings for agreement analysis
-- ✅ Production testing
-
----
-
-## Related Documentation
-
-- [PROVIDER_ARCHITECTURE.md](./PROVIDER_ARCHITECTURE.md) - AIProvider interface and client modes
-- [STATE_MANAGEMENT.md](./STATE_MANAGEMENT.md) - Zustand store for response management
-- [Constitution Principle XI](../../.specify/memory/constitution.md#xi-mock-client) - Mock client requirements
-
----
-
-**Status**: ✅ Ready for Phase 2 Implementation
+- [PROVIDER_ARCHITECTURE.md](./PROVIDER_ARCHITECTURE.md)
+- [STATE_MANAGEMENT.md](./STATE_MANAGEMENT.md)

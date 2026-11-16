@@ -1,6 +1,6 @@
 # Component Development Guide
 
-> **TDD Workflow**: This guide documents the Test-Driven Development workflow mandated by Constitution Principle VIII.
+This guide documents the test-first workflow required by Constitution Principle VIII (`.specify/memory/constitution.md`). The Button examples below are simplified; the real component is in `src/components/atoms/Button/`.
 
 ## Overview
 
@@ -12,9 +12,7 @@ All components in the Ensemble AI component library follow a strict **Test-Drive
 
 **Write tests BEFORE implementation. Implementation comes LAST.**
 
-```
-Story → Tests → Implementation → Validation
-```
+Order: story, then tests, then implementation, then validation in Storybook.
 
 ### Step-by-Step Process
 
@@ -24,11 +22,11 @@ Story → Tests → Implementation → Validation
 cd packages/component-library
 
 # Example: Creating a new Button component
-mkdir -p src/components/ui/Button
-touch src/components/ui/Button/Button.tsx
-touch src/components/ui/Button/Button.stories.tsx
-touch src/components/ui/Button/Button.test.tsx
-touch src/components/ui/Button/index.ts
+mkdir -p src/components/atoms/Button
+touch src/components/atoms/Button/Button.tsx
+touch src/components/atoms/Button/Button.stories.tsx
+touch src/components/atoms/Button/Button.test.tsx
+touch src/components/atoms/Button/index.ts
 ```
 
 #### 2. Write Storybook Story FIRST
@@ -42,7 +40,7 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { Button } from './Button';
 
 const meta = {
-  title: 'UI/Button',
+  title: 'Atoms/Button',
   component: Button,
   parameters: {
     layout: 'centered',
@@ -144,12 +142,12 @@ export const Loading: Story = {
 ```
 
 **Story Requirements:**
-- ✅ All variants documented
-- ✅ All sizes documented
-- ✅ All states documented (disabled, loading, error, etc.)
-- ✅ Both themes visible via Storybook theme decorator
-- ✅ Both languages testable via Storybook i18n decorator
-- ✅ `autodocs` tag enabled for automatic documentation
+- All variants documented
+- All sizes documented
+- All states documented (disabled, loading, error, etc.)
+- Both themes visible via Storybook theme decorator
+- Both languages testable via Storybook i18n decorator
+- `autodocs` tag enabled for automatic documentation
 
 #### 3. Write Unit Tests BEFORE Implementation
 
@@ -185,13 +183,13 @@ describe('Button', () => {
     it('renders with small size', () => {
       render(<Button size="sm">Small</Button>);
       const button = screen.getByRole('button');
-      expect(button).toHaveClass('h-9');
+      expect(button).toHaveClass('h-8');
     });
 
     it('renders with large size', () => {
       render(<Button size="lg">Large</Button>);
       const button = screen.getByRole('button');
-      expect(button).toHaveClass('h-11');
+      expect(button).toHaveClass('h-10');
     });
 
     it('renders as disabled', () => {
@@ -262,22 +260,22 @@ describe('Button', () => {
 ```
 
 **Test Requirements:**
-- ✅ Test all variants
-- ✅ Test all sizes
-- ✅ Test all states (disabled, loading, error)
-- ✅ Test onClick handler
-- ✅ Test keyboard navigation (Enter, Space)
-- ✅ Test ARIA attributes
-- ✅ Snapshot tests for visual regression
-- ✅ Use `data-testid` for complex queries (NOT CSS classes)
-- ✅ Target: 80%+ code coverage
+- Test all variants
+- Test all sizes
+- Test all states (disabled, loading, error)
+- Test onClick handler
+- Test keyboard navigation (Enter, Space)
+- Test ARIA attributes
+- Snapshot tests for visual regression
+- Use `data-testid` for complex queries (NOT CSS classes)
+- Target: 80%+ code coverage
 
-**Run Tests (They WILL FAIL)**:
+**Run tests (they should fail)**:
 ```bash
 npm run test:unit
 ```
 
-Expected output: **ALL TESTS FAILING** (implementation doesn't exist yet)
+Expected output: the new tests fail, because the implementation does not exist yet.
 
 #### 4. Implement Component Until Tests Pass
 
@@ -289,7 +287,7 @@ Now implement the component to make ALL tests pass:
 import * as React from 'react';
 import { Slot } from '@radix-ui/react-slot';
 import { cva, type VariantProps } from 'class-variance-authority';
-import { cn } from '@/lib/utils';
+import { cn } from '../../../lib/utils';
 
 const buttonVariants = cva(
   'inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50',
@@ -304,10 +302,10 @@ const buttonVariants = cva(
         link: 'text-primary underline-offset-4 hover:underline',
       },
       size: {
-        default: 'h-10 px-4 py-2',
-        sm: 'h-9 rounded-md px-3',
-        lg: 'h-11 rounded-md px-8',
-        icon: 'h-10 w-10',
+        default: 'h-9 px-4 py-2',
+        sm: 'h-8 rounded-md px-3 text-xs',
+        lg: 'h-10 rounded-md px-8',
+        icon: 'h-9 w-9',
       },
     },
     defaultVariants: {
@@ -351,14 +349,14 @@ export { Button, buttonVariants };
 ```
 
 **Implementation Requirements:**
-- ✅ TypeScript interface with proper types
-- ✅ JSDoc comments with usage examples
-- ✅ `React.forwardRef` for ref forwarding
-- ✅ CVA (class-variance-authority) for variant management
-- ✅ `cn()` utility for className merging
-- ✅ Max 200 lines (Constitution Principle II)
-- ✅ No hardcoded colors (use semantic tokens)
-- ✅ No hardcoded text (use i18n keys if needed)
+- TypeScript interface with proper types
+- JSDoc comments with usage examples
+- `React.forwardRef` for ref forwarding
+- CVA (class-variance-authority) for variant management
+- `cn()` utility for className merging
+- Max 200 lines (Constitution Principle II)
+- No hardcoded colors (use semantic tokens)
+- No hardcoded text (use i18n keys if needed)
 
 **Export Component**:
 
@@ -367,12 +365,12 @@ export { Button, buttonVariants };
 export { Button, buttonVariants, type ButtonProps } from './Button';
 ```
 
-**Run Tests Again (They SHOULD PASS)**:
+**Run tests again (they should pass)**:
 ```bash
 npm run test:unit
 ```
 
-Expected output: **ALL TESTS PASSING** ✅
+Expected output: all tests pass.
 
 #### 5. Visual Validation in Storybook
 
@@ -381,33 +379,33 @@ npm run storybook
 ```
 
 **Visual Checklist:**
-- ✅ All variants render correctly
-- ✅ All sizes render correctly
-- ✅ Dark mode works (toggle theme in Storybook toolbar)
-- ✅ French translations work (if using i18n keys)
-- ✅ Hover states work
-- ✅ Focus states show ring
-- ✅ Disabled state shows opacity
-- ✅ Responsive behavior (if applicable)
+- All variants render correctly
+- All sizes render correctly
+- Dark mode works (toggle theme in Storybook toolbar)
+- French translations work (if using i18n keys)
+- Hover states work
+- Focus states show ring
+- Disabled state shows opacity
+- Responsive behavior (if applicable)
 
 #### 6. Coverage Verification
 
 ```bash
-npm run test -- --coverage
+npm test   # vitest run --coverage
 ```
 
 **Coverage Requirements:**
-- ✅ Statements: 80%+
-- ✅ Branches: 80%+
-- ✅ Functions: 80%+
-- ✅ Lines: 80%+
+- Statements: 80%+
+- Branches: 80%+
+- Functions: 80%+
+- Lines: 80%+
 
 If coverage is below 80%, add more tests until threshold is met.
 
 #### 7. Commit
 
 ```bash
-git add src/components/ui/Button/
+git add src/components/atoms/Button/
 git commit -m "feat: add Button component with variants and tests
 
 - Implemented Button component with 6 variants (default, destructive, outline, secondary, ghost, link)
@@ -537,7 +535,7 @@ function Toggle() {
 
 ## Testing Best Practices
 
-### Do ✅
+### Do
 
 ```tsx
 // Use semantic queries
@@ -553,13 +551,10 @@ await userEvent.keyboard('{Enter}')
 // Use data-testid for complex queries only
 screen.getByTestId('complex-widget')
 
-// Mock Zustand store
-vi.mock('@/store', () => ({
-  useStore: vi.fn(() => ({ theme: 'dark' })),
-}))
+// Pass state in as props. Components in this package do not read the app's Zustand store.
 ```
 
-### Don't ❌
+### Don't
 
 ```tsx
 // Don't use CSS selectors
@@ -584,7 +579,7 @@ it('renders', () => {
 ```tsx
 // Group related stories
 export default {
-  title: 'UI/Form/Input',  // Nested categories
+  title: 'Atoms/Input',  // Level/Component
   component: Input,
 } satisfies Meta<typeof Input>;
 
@@ -606,20 +601,18 @@ argTypes: {
 ### Interactive Stories
 
 ```tsx
-// Use actions for event handlers
-import { action } from '@storybook/addon-actions';
+// Use fn() for event handlers so calls show in the Actions panel
+import { fn, userEvent, within, expect } from 'storybook/test';
 
 export const WithClick: Story = {
   args: {
-    onClick: action('clicked'),
+    onClick: fn(),
     children: 'Click me',
   },
 };
 
-// Use play function for interactions
-import { userEvent, within } from '@storybook/testing-library';
-import { expect } from '@storybook/jest';
-
+// Use a play function for interactions (the test runner executes it).
+// No stories use play functions yet.
 export const Interaction: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
@@ -660,8 +653,3 @@ export const Interaction: Story = {
 - **Vitest Docs**: https://vitest.dev/guide/
 - **Storybook Docs**: https://storybook.js.org/docs/react/get-started/introduction
 
----
-
-**Version**: 1.0.0
-**Last Updated**: 2025-09-30
-**TDD Enforcement**: Constitution Principle VIII
