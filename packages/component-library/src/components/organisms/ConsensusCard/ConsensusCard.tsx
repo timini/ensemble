@@ -59,6 +59,7 @@ export const ConsensusCard = React.forwardRef<HTMLDivElement, ConsensusCardProps
         ref={ref}
         className="bg-gradient-to-br from-primary/10 to-primary/5 border-primary/20"
         data-testid="consensus-card"
+        data-status={status}
       >
         <CardContent className="p-6">
           <div className="flex items-start justify-between mb-4">

@@ -220,16 +220,21 @@ test.describe('Full Workflow - Mock Mode', () => {
     });
 
     await test.step('Test "Start Over" navigation', async () => {
-      // Wait for response cards to render so layout is stable before clicking navigation.
+      // Wait for streaming to finish. While responses and the consensus are still
+      // streaming, the content above the button keeps growing and the button never
+      // settles, so the click times out waiting for a stable element.
       const responseCards = page.locator('[data-testid^="response-card-"]');
       await expect(responseCards.first()).toBeVisible({ timeout: 10000 });
+      const cardCount = await responseCards.count();
+      for (let i = 0; i < cardCount; i++) {
+        await expect(responseCards.nth(i)).toHaveAttribute('data-status', 'complete', { timeout: 15000 });
+      }
+      await expect(page.getByTestId('consensus-card')).toHaveAttribute('data-status', 'success', { timeout: 15000 });
 
       const startOverButton = page.getByRole('button', { name: /start over/i });
       await expect(startOverButton).toBeVisible({ timeout: 10000 });
       await expect(startOverButton).toBeEnabled({ timeout: 10000 });
       await startOverButton.scrollIntoViewIfNeeded();
-      // Brief pause to let any final layout shifts settle
-      await page.waitForTimeout(500);
 
       await Promise.all([
         page.waitForURL('**/config', { timeout: 15000 }),
