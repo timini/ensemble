@@ -2,6 +2,7 @@ import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { PromptCard } from './PromptCard';
+import { renderWithI18n } from '../../../lib/test-utils/i18n-test-wrapper';
 
 const mockPrompt = 'What is the meaning of life?';
 
@@ -65,6 +66,25 @@ describe('PromptCard', () => {
         it('renders in a card', () => {
             const { container } = render(<PromptCard prompt={mockPrompt} />);
             expect(container.firstChild).toBeInTheDocument();
+        });
+    });
+
+    describe('i18n', () => {
+        it('renders heading and copy label in French', () => {
+            renderWithI18n(<PromptCard prompt={mockPrompt} />, { language: 'fr' });
+            expect(screen.getByText('Votre invite')).toBeInTheDocument();
+            expect(screen.getByTestId('copy-prompt-button')).toHaveTextContent('Copier');
+        });
+
+        it('shows the French copied label after copying', async () => {
+            const user = userEvent.setup();
+            const mockClipboard = { writeText: vi.fn().mockResolvedValue(undefined) };
+            Object.defineProperty(navigator, 'clipboard', { value: mockClipboard, writable: true });
+
+            renderWithI18n(<PromptCard prompt={mockPrompt} />, { language: 'fr' });
+            await user.click(screen.getByTestId('copy-prompt-button'));
+
+            expect(screen.getByTestId('copy-prompt-button')).toHaveTextContent('Copié !');
         });
     });
 });

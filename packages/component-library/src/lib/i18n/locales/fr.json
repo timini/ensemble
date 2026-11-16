@@ -27,6 +27,9 @@
     }
   },
   "atoms": {
+    "dialog": {
+      "close": "Fermer"
+    },
     "inlineAlert": {
       "dismiss": "Fermer"
     },
@@ -116,6 +119,11 @@
       "failedText": "Échec de la génération du consensus",
       "failedDescription": "Une erreur s'est produite lors de la génération du résumé consensuel.",
       "errorLabel": "Erreur :"
+    },
+    "promptCard": {
+      "heading": "Votre invite",
+      "copy": "Copier",
+      "copied": "Copié !"
     },
     "ensembleConfigurationSummary": {
       "heading": "Configuration de Votre Ensemble",

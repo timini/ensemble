@@ -27,6 +27,9 @@
     }
   },
   "atoms": {
+    "dialog": {
+      "close": "Close"
+    },
     "inlineAlert": {
       "dismiss": "Dismiss"
     },

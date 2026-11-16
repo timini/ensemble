@@ -10,11 +10,15 @@ export interface MarkdownProps {
     children: string;
     /** Additional CSS classes */
     className?: string;
+    /** Test id for the container. Defaults to "markdown". */
+    'data-testid'?: string;
 }
 
 /**
  * Markdown atom for rendering markdown content with proper styling.
- * 
+ *
+ * Raw HTML in the source is not rendered, so model output cannot inject markup.
+ *
  * Supports GitHub Flavored Markdown (GFM) including:
  * - Tables
  * - Strikethrough
@@ -31,10 +35,11 @@ export interface MarkdownProps {
  * ```
  */
 export const Markdown = React.forwardRef<HTMLDivElement, MarkdownProps>(
-    ({ children, className }, ref) => {
+    ({ children, className, 'data-testid': testId = 'markdown' }, ref) => {
         return (
             <div
                 ref={ref}
+                data-testid={testId}
                 className={cn(
                     'prose prose-sm dark:prose-invert max-w-none',
                     // Headings
