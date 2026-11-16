@@ -4,8 +4,21 @@ import type { StructuredResponse, ValidationResult } from '../../types';
 import { hasNonTextModality } from '../../utils/modelFilters';
 import { sanitizeProviderErrorMessage } from '../../utils/sanitizeSensitiveData';
 import { openAISamplingParams } from './openAIModelRules';
+import { requestOpenAICompatibleEmbedding } from '../../embeddings/openAICompatibleEmbeddings';
+import { OPENAI_BASE_URL, OPENAI_EMBEDDING_MODEL } from '../../embeddings/models';
 
 export class FreeOpenAIClient extends BaseFreeClient {
+  override readonly supportsEmbeddings: boolean = true;
+
+  protected override embedWithProvider(apiKey: string, text: string): Promise<number[]> {
+    return requestOpenAICompatibleEmbedding({
+      baseURL: OPENAI_BASE_URL,
+      apiKey,
+      model: OPENAI_EMBEDDING_MODEL,
+      input: text,
+    });
+  }
+
   private createClient(apiKey: string) {
     return new OpenAI({
       apiKey,

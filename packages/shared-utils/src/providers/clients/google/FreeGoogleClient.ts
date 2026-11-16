@@ -5,6 +5,8 @@ import type { StructuredResponse, ValidationResult } from '../../types';
 import { extractAxiosErrorMessage } from '../../utils/extractAxiosError';
 import { hasNonTextModality } from '../../utils/modelFilters';
 import { sanitizeProviderErrorMessage } from '../../utils/sanitizeSensitiveData';
+import { requestGeminiEmbedding } from '../../embeddings/geminiEmbeddings';
+import { GOOGLE_EMBEDDING_MODEL } from '../../embeddings/models';
 
 interface GoogleModelEntry {
   name?: string;
@@ -15,6 +17,12 @@ interface GoogleModelsResponse {
 }
 
 export class FreeGoogleClient extends BaseFreeClient {
+  override readonly supportsEmbeddings: boolean = true;
+
+  protected override embedWithProvider(apiKey: string, text: string): Promise<number[]> {
+    return requestGeminiEmbedding({ apiKey, model: GOOGLE_EMBEDDING_MODEL, text });
+  }
+
   private createClient(apiKey: string) {
     return new GoogleGenerativeAI(apiKey);
   }

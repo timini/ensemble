@@ -9,3 +9,4 @@ export * from './clients/xai/FreeXAIClient';
 export * from './clients/deepseek/FreeDeepSeekClient';
 export * from './clients/perplexity/FreePerplexityClient';
 export * from './utils/sanitizeSensitiveData';
+export * from './embeddings';

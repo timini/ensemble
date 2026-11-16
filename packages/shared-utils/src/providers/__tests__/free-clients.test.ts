@@ -376,7 +376,7 @@ describe('Free mode provider clients', () => {
     expect(models).toEqual(['gpt-4o', 'o1-preview']);
   });
 
-  it('requires API keys for stream and embedding operations in the base client', async () => {
+  it('requires API keys for streaming and reports missing embeddings support in the base client', async () => {
     const onError = vi.fn();
     const client = new TestFreeClient(() => null);
     await client.streamResponse('prompt', 'model', vi.fn(), vi.fn(), onError);
@@ -386,7 +386,9 @@ describe('Free mode provider clients', () => {
       }),
     );
 
-    await expect(client.generateEmbeddings('text')).rejects.toThrow('Missing API key');
+    await expect(client.generateEmbeddings('text')).rejects.toThrow(
+      'does not provide an embeddings API',
+    );
   });
 
   it('falls back to mock text models when fetchTextModels fails', async () => {

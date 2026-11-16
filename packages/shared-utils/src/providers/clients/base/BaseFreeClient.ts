@@ -9,6 +9,7 @@ import type {
 } from '../../types';
 import { MockProviderClient } from '../mock/MockProviderClient';
 import { sanitizeProviderErrorMessage } from '../../utils/sanitizeSensitiveData';
+import { EmbeddingsNotSupportedError } from '../../embeddings/errors';
 
 export interface StreamHandlers {
   onChunk: (chunk: string) => void;
@@ -34,8 +35,10 @@ export interface StructuredOptions {
 /**
  * Base class for Free mode provider clients.
  *
- * Handles API key presence checks and the temporary fallback to mock behaviour
- * for streaming and embeddings until dedicated implementations are available.
+ * Handles API key presence checks and timeouts. The mock client is only used
+ * for the static model metadata and the fallback text model list; embeddings
+ * never fall back to fake vectors. A provider without an embeddings API
+ * throws EmbeddingsNotSupportedError.
  */
 export abstract class BaseFreeClient implements AIProvider {
   protected readonly mockClient: MockProviderClient;
@@ -113,7 +116,14 @@ export abstract class BaseFreeClient implements AIProvider {
     }
   }
 
+  /** True when this client implements embedWithProvider. */
+  readonly supportsEmbeddings: boolean = false;
+
   async generateEmbeddings(text: string): Promise<number[]> {
+    if (!this.supportsEmbeddings) {
+      throw new EmbeddingsNotSupportedError(this.provider);
+    }
+
     const apiKey = this.resolveApiKey();
 
     if (!apiKey) {
@@ -122,8 +132,12 @@ export abstract class BaseFreeClient implements AIProvider {
       );
     }
 
-    // TODO: Replace fallback with real embeddings implementation.
-    return this.mockClient.generateEmbeddings(text);
+    return this.embedWithProvider(apiKey, text);
+  }
+
+  /** Provider-specific embeddings call. Override together with supportsEmbeddings. */
+  protected async embedWithProvider(_apiKey: string, _text: string): Promise<number[]> {
+    throw new EmbeddingsNotSupportedError(this.provider);
   }
 
   listAvailableModels() {
