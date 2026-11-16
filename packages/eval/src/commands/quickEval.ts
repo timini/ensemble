@@ -213,10 +213,18 @@ export function createQuickEvalCommand(): Command {
         const previous = await loadBaseline(options.baseline);
         const mismatch = previous ? baselineMismatch(previous, current) : null;
         if (previous && mismatch) {
+          // stdout lands in eval-results.txt and the PR comment, so make the skip obvious there.
           process.stdout.write(
-            `\n  Regression check skipped: ${mismatch}.\n` +
+            `\n  WARNING: REGRESSION CHECK SKIPPED (not a pass): ${mismatch}.\n` +
             '  Regenerate the baseline with the eval-post-merge workflow (or eval:ci locally).\n',
           );
+          // stderr is not redirected in CI, so the annotation shows on the workflow run.
+          if (process.env.GITHUB_ACTIONS === 'true') {
+            process.stderr.write(
+              `::warning title=Eval regression check skipped::${mismatch}. ` +
+              'Regenerate and commit baselines/quick-eval.json.\n',
+            );
+          }
         } else if (previous) {
           log(`  [${elapsed()}] Running regression check...\n`);
           const result = checkRegression(previous, current, significanceLevel);
