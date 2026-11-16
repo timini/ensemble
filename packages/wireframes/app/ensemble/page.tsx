@@ -43,7 +43,7 @@ const models: Model[] = [
   { id: "gemini-4-hydrogen", provider: "google", name: "Gemini 4 Hydrogen" },
   { id: "grok-4.7", provider: "xai", name: "Grok 4.7" },
   { id: "deepseek-v4-pro", provider: "deepseek", name: "DeepSeek V4 Pro" },
-  { id: "sonar", provider: "perplexity", name: "Perplexity Sonar" },
+  { id: "perplexity-fast", provider: "perplexity", name: "Perplexity Fast" },
 ]
 
 const presets = [

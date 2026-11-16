@@ -93,23 +93,24 @@ export const FALLBACK_MODELS: Model[] = [
     modalities: ['text'],
   },
 
-  // Perplexity (Sonar)
+  // Perplexity Agent API effort presets (Sonar Chat Completions ended on
+  // 2026-09-27). Each preset runs web search with Perplexity's chosen model.
   {
-    id: 'sonar',
+    id: 'perplexity-fast',
     provider: 'perplexity',
-    name: 'Sonar',
+    name: 'Perplexity Fast',
     modalities: ['text'],
   },
   {
-    id: 'sonar-pro',
+    id: 'perplexity-low',
     provider: 'perplexity',
-    name: 'Sonar Pro',
+    name: 'Perplexity Low',
     modalities: ['text'],
   },
   {
-    id: 'sonar-reasoning-pro',
+    id: 'perplexity-medium',
     provider: 'perplexity',
-    name: 'Sonar Reasoning Pro',
+    name: 'Perplexity Medium',
     modalities: ['text'],
   },
 ];

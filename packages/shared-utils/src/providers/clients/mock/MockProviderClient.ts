@@ -228,18 +228,18 @@ export class MockProviderClient implements AIProvider {
         modalities: ['text'],
       },
       {
-        id: 'sonar',
-        name: 'Sonar',
+        id: 'perplexity-fast',
+        name: 'Perplexity Fast',
         provider: 'perplexity',
         contextWindow: 128000,
-        costPer1kTokens: 0.00025,
+        costPer1kTokens: 0.001,
         modalities: ['text'],
       },
       {
-        id: 'sonar-pro',
-        name: 'Sonar Pro',
+        id: 'perplexity-low',
+        name: 'Perplexity Low',
         provider: 'perplexity',
-        contextWindow: 200000,
+        contextWindow: 128000,
         costPer1kTokens: 0.003,
         modalities: ['text'],
       },
@@ -269,8 +269,8 @@ export class MockProviderClient implements AIProvider {
       'grok-4.3': [550, 750],
       'deepseek-v4-pro': [700, 900],
       'deepseek-flash': [550, 750],
-      'sonar': [600, 800],
-      'sonar-pro': [700, 900],
+      'perplexity-fast': [600, 800],
+      'perplexity-low': [700, 900],
     };
 
     const [min, max] = ranges[model] ?? [600, 800];

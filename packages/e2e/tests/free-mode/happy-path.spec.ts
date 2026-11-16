@@ -49,7 +49,7 @@ const PROVIDERS = [
   { modelPrefix: 'claude', responsePrefix: 'response-card-anthropic-', label: 'Anthropic' },
   { modelPrefix: 'gemini', responsePrefix: 'response-card-google-', label: 'Google' },
   { modelPrefix: 'grok', responsePrefix: 'response-card-xai-', label: 'XAI' },
-  { modelPrefix: 'sonar', responsePrefix: 'response-card-perplexity-', label: 'Perplexity' },
+  { modelPrefix: 'perplexity', responsePrefix: 'response-card-perplexity-', label: 'Perplexity' },
 ];
 
 test.describe('Free Mode — Happy Path', () => {

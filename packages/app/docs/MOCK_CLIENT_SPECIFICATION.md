@@ -35,8 +35,8 @@ Word count ranges by model id:
 | `grok-4.3` | 550 to 750 |
 | `deepseek-v4-pro` | 700 to 900 |
 | `deepseek-flash` | 550 to 750 |
-| `sonar` | 600 to 800 |
-| `sonar-pro` | 700 to 900 |
+| `perplexity-fast` | 600 to 800 |
+| `perplexity-low` | 700 to 900 |
 | anything else | 600 to 800 |
 
 At these settings a response takes roughly 4 to 9 seconds to stream.
@@ -62,7 +62,7 @@ Waits 50 to 150 ms and returns an object where each schema property that has an 
 
 ### listAvailableModels and listAvailableTextModels
 
-Return a static list of 13 models across all six providers, using real provider ids (GPT-6 Astra, Claude Opus 5.5, Gemini 4 Carbon, Grok 4.7, DeepSeek V4 Pro, Sonar and others). With `providerFilter` set, only that provider's models are returned. `listAvailableTextModels` returns the display names.
+Return a static list of 13 models across all six providers, using real provider ids (GPT-6 Astra, Claude Opus 5.5, Gemini 4 Carbon, Grok 4.7, DeepSeek V4 Pro, Perplexity Fast and others). With `providerFilter` set, only that provider's models are returned. `listAvailableTextModels` returns the display names.
 
 ## Configuration
 

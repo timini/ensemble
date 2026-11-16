@@ -78,7 +78,7 @@ export const AllModelFamilies: Story = {
         <span className="text-xs text-muted-foreground">DeepSeek</span>
       </div>
       <div className="flex flex-col items-center gap-2">
-        <ModelLogo provider="perplexity" modelName="Sonar Pro" size="xl" />
+        <ModelLogo provider="perplexity" modelName="Perplexity Fast" size="xl" />
         <span className="text-xs text-muted-foreground">Perplexity</span>
       </div>
     </div>

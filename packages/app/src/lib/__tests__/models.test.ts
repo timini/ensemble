@@ -21,7 +21,10 @@ const RETIRED_MODEL_IDS = [
   'claude-3-opus-20240229',
   'deepseek-chat',
   'deepseek-reasoner',
+  'sonar',
+  'sonar-pro',
   'sonar-reasoning',
+  'sonar-reasoning-pro',
 ];
 
 const PROVIDERS = ['openai', 'anthropic', 'google', 'xai', 'deepseek', 'perplexity'] as const;

@@ -11,7 +11,10 @@ import { MockProviderClient } from '../clients/mock/MockProviderClient.js';
 const RETIRED_MODEL_IDS = [
   'deepseek-chat',
   'deepseek-reasoner',
+  'sonar',
+  'sonar-pro',
   'sonar-reasoning',
+  'sonar-reasoning-pro',
   'sonar-deep-research',
   'gpt-4o',
   'gpt-4o-mini',
@@ -39,12 +42,12 @@ describe('hard-coded model lists', () => {
     ]);
   });
 
-  it('Perplexity offers current Sonar ids only', async () => {
+  it('Perplexity offers Agent API effort presets, not retired Sonar ids', async () => {
     const client = new FreePerplexityClient('perplexity', () => 'pplx');
     await expect(client.listAvailableTextModels()).resolves.toEqual([
-      'sonar',
-      'sonar-pro',
-      'sonar-reasoning-pro',
+      'perplexity-fast',
+      'perplexity-low',
+      'perplexity-medium',
     ]);
   });
 
@@ -62,7 +65,7 @@ describe('hard-coded model lists', () => {
       ['claude-sonnet-5-5', 'claude-haiku-5-5'],
       ['gemini-4-carbon', 'gemini-4-hydrogen'],
       ['grok-4.7', 'grok-4.3'],
-      ['sonar', 'sonar-pro', 'sonar-reasoning-pro'],
+      ['perplexity-fast', 'perplexity-low', 'perplexity-medium'],
     ]);
   });
 
@@ -84,8 +87,8 @@ describe('hard-coded model lists', () => {
         'grok-4.3',
         'deepseek-v4-pro',
         'deepseek-flash',
-        'sonar',
-        'sonar-pro',
+        'perplexity-fast',
+        'perplexity-low',
       ]),
     );
   });

@@ -19,7 +19,7 @@ const PREFERRED_MODELS: Record<string, string[]> = {
   claude: ['claude-haiku-5-5', 'claude-sonnet-5-5'],
   gemini: ['gemini-3.5-flash-lite', 'gemini-4-hydrogen'],
   grok: ['grok-4.3', 'grok-4.7'],
-  sonar: ['sonar', 'sonar-pro'],
+  perplexity: ['perplexity-fast', 'perplexity-low'],
 };
 
 /**

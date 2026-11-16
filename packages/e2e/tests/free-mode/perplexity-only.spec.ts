@@ -23,11 +23,11 @@ const TIMEOUT = {
 
 /**
  * Known-good Perplexity model IDs in priority order.
- * Sonar and Sonar Pro are the most reliable for testing.
+ * These are Agent API effort presets; fast and low are the quickest.
  */
 const PREFERRED_PERPLEXITY_MODELS = [
-  'sonar',
-  'sonar-pro',
+  'perplexity-fast',
+  'perplexity-low',
 ];
 
 test.describe('Free Mode - Perplexity Only', () => {
@@ -55,7 +55,7 @@ test.describe('Free Mode - Perplexity Only', () => {
 
     // Wait for Perplexity model cards to load
     await expect(
-      page.locator('[data-testid^="model-card-sonar"]').first(),
+      page.locator('[data-testid^="model-card-perplexity-"]').first(),
     ).toBeVisible({ timeout: TIMEOUT.MODEL_VISIBLE });
 
     // Select 2 different known-good models
@@ -71,10 +71,10 @@ test.describe('Free Mode - Perplexity Only', () => {
 
     // Fallback: if preferred models weren't found, pick the last two
     if (selectedCount < 2) {
-      const allSonar = page.locator('[data-testid^="model-card-sonar"]');
-      const count = await allSonar.count();
+      const allPerplexity = page.locator('[data-testid^="model-card-perplexity-"]');
+      const count = await allPerplexity.count();
       for (let i = count - 1; i >= 0 && selectedCount < 2; i--) {
-        await allSonar.nth(i).click();
+        await allPerplexity.nth(i).click();
         selectedCount++;
       }
     }

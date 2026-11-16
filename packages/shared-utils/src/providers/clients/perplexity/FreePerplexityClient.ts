@@ -1,83 +1,101 @@
-import OpenAI from 'openai';
 import { BaseFreeClient, type StreamOptions } from '../base/BaseFreeClient';
 import type { ValidationResult } from '../../types';
 import { sanitizeProviderErrorMessage } from '../../utils/sanitizeSensitiveData';
+import {
+  PERPLEXITY_API_BASE,
+  PERPLEXITY_TEXT_MODELS,
+  agentHttpError,
+  readAgentEvents,
+  toAgentModelSelector,
+} from './perplexityAgentApi';
 
+/**
+ * Free mode client for Perplexity's Agent API.
+ *
+ * Sonar Chat Completions ended on 2026-09-27, so this client calls
+ * `POST /v1/agent` with plain `fetch` (the endpoint is not at the path the
+ * OpenAI SDK's Responses helper expects). Model ids are effort presets; see
+ * `perplexityAgentApi.ts`.
+ */
 export class FreePerplexityClient extends BaseFreeClient {
-  private createClient(apiKey: string) {
-    return new OpenAI({
-      apiKey,
-      baseURL: 'https://api.perplexity.ai',
-      dangerouslyAllowBrowser: true,
-    });
-  }
-
   async validateApiKey(apiKey: string): Promise<ValidationResult> {
     if (!apiKey || apiKey.trim().length === 0) {
       return { valid: false, error: 'API key is required.' };
     }
 
     try {
-      const client = this.createClient(apiKey);
-      await client.chat.completions.create({
-        model: 'sonar',
-        messages: [{ role: 'user', content: 'hi' }],
-        max_tokens: 1,
+      // Listing models needs a valid key but runs no model, so it costs nothing.
+      const response = await fetch(`${PERPLEXITY_API_BASE}/models`, {
+        method: 'GET',
+        headers: { Authorization: `Bearer ${apiKey}` },
       });
-      return { valid: true };
-    } catch (error) {
-      const safeMessage = sanitizeProviderErrorMessage(
-        error instanceof Error ? error.message : String(error),
-        'Invalid Perplexity API key.',
-      );
-      if (safeMessage.includes('401')) {
+      if (response.status === 401) {
         return { valid: false, error: 'Invalid API key (401 Unauthorized)' };
       }
+      if (!response.ok) {
+        throw await agentHttpError(response);
+      }
+      return { valid: true };
+    } catch (error) {
       return {
         valid: false,
-        error: safeMessage,
+        error: sanitizeProviderErrorMessage(
+          error instanceof Error ? error.message : String(error),
+          'Invalid Perplexity API key.',
+        ),
       };
     }
   }
 
   protected async fetchTextModels(_apiKey: string): Promise<string[]> {
-    // sonar-reasoning was removed in December 2025. sonar-deep-research is
-    // left out because it is slow and billed per search and reasoning token.
-    return ['sonar', 'sonar-pro', 'sonar-reasoning-pro'];
+    // GET /v1/models lists provider/model ids from other vendors, which the
+    // app already offers directly. The presets are Perplexity's own offering.
+    return [...PERPLEXITY_TEXT_MODELS];
   }
 
   protected override async streamWithProvider(options: StreamOptions): Promise<void> {
     const startTime = Date.now();
     let fullResponse = '';
-    let tokenCount = 0;
+    let tokenCount: number | undefined;
 
     try {
-      const client = this.createClient(options.apiKey);
-
-      const stream = await client.chat.completions.create({
-        model: options.model,
-        stream: true,
-        stream_options: { include_usage: true },
-        messages: [{ role: 'user', content: options.prompt }],
+      // Effort presets fix their own sampling, so temperature and seed are
+      // not forwarded.
+      const response = await fetch(`${PERPLEXITY_API_BASE}/agent`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${options.apiKey}`,
+          'Content-Type': 'application/json',
+          Accept: 'text/event-stream',
+        },
+        body: JSON.stringify({
+          ...toAgentModelSelector(options.model),
+          input: options.prompt,
+          stream: true,
+        }),
       });
 
-      for await (const chunk of stream as AsyncIterable<{
-        choices?: { delta?: { content?: unknown } }[];
-        usage?: { total_tokens?: number };
-      }>) {
-        if (chunk.usage?.total_tokens) {
-          tokenCount = chunk.usage.total_tokens;
-        }
+      if (!response.ok || !response.body) {
+        throw await agentHttpError(response);
+      }
 
-        const deltaContent = chunk.choices?.[0]?.delta?.content;
-
-        if (typeof deltaContent === 'string') {
-          fullResponse += deltaContent;
-          options.onChunk(deltaContent);
+      for await (const event of readAgentEvents(response.body)) {
+        if (event.type === 'response.output_text.delta' && typeof event.delta === 'string') {
+          fullResponse += event.delta;
+          options.onChunk(event.delta);
+        } else if (event.type === 'response.completed') {
+          tokenCount = event.response?.usage?.total_tokens ?? undefined;
+        } else if (event.type === 'response.failed' || event.type === 'error') {
+          throw new Error(
+            event.response?.error?.message ??
+              event.error?.message ??
+              event.message ??
+              'The Agent API run failed.',
+          );
         }
       }
 
-      options.onComplete(fullResponse, Date.now() - startTime, tokenCount > 0 ? tokenCount : undefined);
+      options.onComplete(fullResponse, Date.now() - startTime, tokenCount || undefined);
     } catch (error) {
       const errorMessage = sanitizeProviderErrorMessage(
         error instanceof Error ? error.message : String(error),
