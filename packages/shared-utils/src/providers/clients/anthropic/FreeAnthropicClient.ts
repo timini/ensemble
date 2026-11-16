@@ -2,6 +2,29 @@ import Anthropic from '@anthropic-ai/sdk';
 import { BaseFreeClient, type StreamOptions, type StructuredOptions } from '../base/BaseFreeClient';
 import type { StructuredResponse, ValidationResult } from '../../types';
 import { sanitizeProviderErrorMessage } from '../../utils/sanitizeSensitiveData';
+import { acceptsSamplingParams, supportsStructuredOutputs } from './anthropicModelRules';
+
+/**
+ * Claude 5.5 models think by default and thinking tokens count against
+ * `max_tokens`, so the old 1024 limit cut answers short. These are ceilings,
+ * not targets: billing follows the tokens actually generated.
+ */
+const STREAM_MAX_TOKENS = 16000;
+const STRUCTURED_MAX_TOKENS = 8000;
+
+type StructuredOutputBody = Anthropic.MessageCreateParamsNonStreaming & {
+  output_config: { format: { type: 'json_schema'; schema: Record<string, unknown> } };
+};
+
+/** Returns `{ temperature }` only when it was requested and the model accepts it. */
+function samplingParams(model: string, temperature: number | undefined): { temperature?: number } {
+  return temperature !== undefined && acceptsSamplingParams(model) ? { temperature } : {};
+}
+
+function tokenCountOf(response: Anthropic.Message): { tokenCount?: number } {
+  const total = (response.usage?.input_tokens ?? 0) + (response.usage?.output_tokens ?? 0);
+  return total > 0 ? { tokenCount: total } : {};
+}
 
 export class FreeAnthropicClient extends BaseFreeClient {
   private createClient(apiKey: string) {
@@ -55,10 +78,59 @@ export class FreeAnthropicClient extends BaseFreeClient {
   ): Promise<StructuredResponse<T>> {
     const client = this.createClient(options.apiKey);
     const startTime = Date.now();
+    const temperature = samplingParams(options.model, options.options?.temperature);
 
+    if (!supportsStructuredOutputs(options.model)) {
+      return this.generateWithForcedTool<T>(client, options, startTime, temperature);
+    }
+
+    // Structured outputs replace the forced tool call, which Claude Opus 5.5,
+    // Sonnet 5.5 and Fable 5.1+ reject with HTTP 400. The installed SDK
+    // version does not type `output_config` yet, so the body is widened.
+    const body: StructuredOutputBody = {
+      model: options.model,
+      max_tokens: STRUCTURED_MAX_TOKENS,
+      messages: [{ role: 'user', content: options.prompt }],
+      output_config: {
+        format: { type: 'json_schema', schema: options.schema.schema },
+      },
+      ...temperature,
+    };
+    const response = await client.messages.create(body);
+
+    if (response.stop_reason === 'refusal') {
+      throw new Error('Anthropic refused to produce structured output for this prompt.');
+    }
+    if (response.stop_reason === 'max_tokens') {
+      throw new Error('Anthropic structured output was cut off by max_tokens.');
+    }
+
+    const raw = response.content
+      .filter((block): block is Anthropic.TextBlock => block.type === 'text')
+      .map((block) => block.text)
+      .join('');
+    if (!raw) {
+      throw new Error('Anthropic returned empty structured output.');
+    }
+
+    return {
+      parsed: JSON.parse(raw) as T,
+      raw,
+      responseTimeMs: Date.now() - startTime,
+      ...tokenCountOf(response),
+    };
+  }
+
+  /** Forced tool call for models released before structured outputs. */
+  private async generateWithForcedTool<T>(
+    client: Anthropic,
+    options: StructuredOptions,
+    startTime: number,
+    temperature: { temperature?: number },
+  ): Promise<StructuredResponse<T>> {
     const response = await client.messages.create({
       model: options.model,
-      max_tokens: 1024,
+      max_tokens: STRUCTURED_MAX_TOKENS,
       messages: [{ role: 'user', content: options.prompt }],
       tools: [
         {
@@ -68,9 +140,7 @@ export class FreeAnthropicClient extends BaseFreeClient {
         },
       ],
       tool_choice: { type: 'tool' as const, name: options.schema.name },
-      ...(options.options?.temperature !== undefined && {
-        temperature: options.options.temperature,
-      }),
+      ...temperature,
     });
 
     const toolBlock = response.content.find(
@@ -82,15 +152,11 @@ export class FreeAnthropicClient extends BaseFreeClient {
     }
 
     const parsed = toolBlock.input as T;
-    const raw = JSON.stringify(parsed);
-    const tokenCount =
-      (response.usage?.input_tokens ?? 0) + (response.usage?.output_tokens ?? 0);
-
     return {
       parsed,
-      raw,
+      raw: JSON.stringify(parsed),
       responseTimeMs: Date.now() - startTime,
-      ...(tokenCount > 0 ? { tokenCount } : {}),
+      ...tokenCountOf(response),
     };
   }
 
@@ -104,12 +170,10 @@ export class FreeAnthropicClient extends BaseFreeClient {
 
       const stream = await client.messages.create({
         model: options.model,
-        max_tokens: 1024, // Default limit
+        max_tokens: STREAM_MAX_TOKENS,
         messages: [{ role: 'user', content: options.prompt }],
         stream: true,
-        ...(options.streamOptions?.temperature !== undefined && {
-          temperature: options.streamOptions.temperature,
-        }),
+        ...samplingParams(options.model, options.streamOptions?.temperature),
       });
 
       for await (const event of stream) {
