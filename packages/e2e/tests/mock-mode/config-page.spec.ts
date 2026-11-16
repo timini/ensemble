@@ -6,6 +6,7 @@
  * - Mode selection (Free mode)
  * - Next button disabled until mode selected
  * - Navigation to /ensemble after selection
+ * - Embeddings provider setting
  */
 
 import { test, expect, type Page } from '@playwright/test';
@@ -144,6 +145,21 @@ test.describe('Config Page', () => {
 
     // Should navigate to ensemble page
     await expect(page).toHaveURL('/ensemble');
+  });
+
+  test('shows the embeddings provider setting and keeps the choice', async ({ page }) => {
+    await page.locator('[data-mode="free"]').click();
+
+    const selector = page.getByTestId('embeddings-provider-selector');
+    await expect(selector).toBeVisible();
+    await expect(page.getByTestId('embeddings-provider-option-auto')).toBeChecked();
+    await expect(page.getByTestId('embeddings-provider-active')).toContainText('OpenAI');
+
+    await page.getByTestId('embeddings-provider-option-google').check();
+    await expect(page.getByTestId('embeddings-provider-active')).toContainText('Google');
+
+    await page.reload();
+    await expect(page.getByTestId('embeddings-provider-option-google')).toBeChecked();
   });
 
   test('mode selection persists across page refreshes', async ({ page }) => {

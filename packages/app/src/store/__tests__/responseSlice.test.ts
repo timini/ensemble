@@ -136,6 +136,42 @@ describe('responseSlice', () => {
     expect(state.agreementStats?.median).toBeGreaterThan(0);
   });
 
+  it('computes stats over the upper triangle only', () => {
+    store.getState().setEmbeddings([
+      { modelId: 'a', embedding: [1, 0] },
+      { modelId: 'b', embedding: [1, 0] },
+      { modelId: 'c', embedding: [0, 1] },
+    ]);
+    store.getState().calculateAgreement();
+
+    const { similarityMatrix, agreementStats } = store.getState();
+    expect(similarityMatrix?.[0]?.[1]).toBeCloseTo(1, 10);
+    expect(similarityMatrix?.[0]?.[2]).toBeCloseTo(0, 10);
+    expect(agreementStats?.mean).toBeCloseTo(1 / 3, 10);
+    expect(agreementStats?.min).toBeCloseTo(0, 10);
+    expect(agreementStats?.max).toBeCloseTo(1, 10);
+  });
+
+  it('clears agreement when embedding lengths differ', () => {
+    store.getState().setEmbeddings([
+      { modelId: 'a', embedding: [1, 0, 0] },
+      { modelId: 'b', embedding: [1, 0] },
+    ]);
+    store.getState().calculateAgreement();
+    expect(store.getState().similarityMatrix).toBeNull();
+    expect(store.getState().agreementStats).toBeNull();
+  });
+
+  it('clears agreement when an embedding is a zero vector', () => {
+    store.getState().setEmbeddings([
+      { modelId: 'a', embedding: [0, 0] },
+      { modelId: 'b', embedding: [1, 0] },
+    ]);
+    store.getState().calculateAgreement();
+    expect(store.getState().similarityMatrix).toBeNull();
+    expect(store.getState().agreementStats).toBeNull();
+  });
+
   it('sets meta-analysis', () => {
     store.getState().setMetaAnalysis('This is the meta-analysis');
     expect(store.getState().metaAnalysis).toBe('This is the meta-analysis');

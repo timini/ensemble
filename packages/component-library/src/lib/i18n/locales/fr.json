@@ -77,6 +77,19 @@
     },
     "summarizerIndicator": {
       "label": "Modèle de synthèse :"
+    },
+    "embeddingsProviderSelector": {
+      "heading": "Fournisseur d'embeddings",
+      "description": "Le score d'accord compare le sens des réponses à l'aide des embeddings d'un fournisseur.",
+      "options": {
+        "auto": "Automatique (OpenAI, puis Google)",
+        "openai": "OpenAI",
+        "google": "Google"
+      },
+      "noValidKey": "Aucune clé valide",
+      "active": "Le score d'accord utilisera les embeddings {{provider}}.",
+      "noneTitle": "Pas de score d'accord",
+      "noneDescription": "Ajoutez une clé API OpenAI ou Google valide pour calculer l'accord entre les réponses."
     }
   },
   "organisms": {
@@ -271,7 +284,11 @@
       "noResponses": "Aucune réponse pour le moment. Les réponses apparaîtront ici lorsque les modèles seront terminés.",
       "backButton": "Retour à l'Invite",
       "newComparisonButton": "Nouvelle Comparaison",
-      "startOverButton": "Recommencer"
+      "startOverButton": "Recommencer",
+      "agreementUnavailableTitle": "Pas de score d'accord",
+      "agreementUnavailableDescription": "Le score d'accord nécessite un fournisseur d'embeddings. Ajoutez une clé API OpenAI ou Google valide sur la page de configuration.",
+      "agreementErrorTitle": "Le score d'accord n'a pas pu être calculé",
+      "agreementErrorDescription": "Le fournisseur d'embeddings n'a pas renvoyé de résultat pour assez de réponses. Vérifiez votre clé API et réessayez."
     }
   }
 }

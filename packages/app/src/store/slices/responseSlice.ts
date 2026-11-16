@@ -11,6 +11,12 @@
  */
 
 import type { StateCreator } from 'zustand';
+import {
+  agreementStatistics,
+  similarityMatrix as buildSimilarityMatrix,
+} from '@ensemble-ai/shared-utils/similarity';
+import { toError } from '~/lib/errors';
+import { logger } from '~/lib/logger';
 import type { ProviderType } from './ensembleSlice';
 
 export interface ModelResponse {
@@ -168,62 +174,25 @@ export const createResponseSlice: StateCreator<ResponseSlice> = (set, get) => ({
   },
 
   calculateAgreement: () => {
-    const state = get();
-    const { embeddings } = state;
+    const { embeddings } = get();
 
     if (embeddings.length < 2) {
       set({ similarityMatrix: null, agreementStats: null });
       return;
     }
 
-    // Calculate cosine similarity matrix
-    const n = embeddings.length;
-    const matrix: number[][] = Array.from({ length: n }, () =>
-      Array.from({ length: n }, () => 0),
-    );
-
-    for (let i = 0; i < n; i++) {
-      for (let j = 0; j < n; j++) {
-        if (i === j) {
-          matrix[i]![j] = 1.0;
-        } else {
-          const similarity = cosineSimilarity(
-            embeddings[i]!.embedding,
-            embeddings[j]!.embedding,
-          );
-          matrix[i]![j] = similarity;
-        }
-      }
+    try {
+      const matrix = buildSimilarityMatrix(embeddings.map((entry) => entry.embedding));
+      set({
+        similarityMatrix: matrix,
+        agreementStats: agreementStatistics(upperTriangle(matrix)),
+      });
+    } catch (error: unknown) {
+      // Mismatched or zero vectors cannot be compared. Show no score rather
+      // than a wrong one.
+      logger.error('Unable to calculate agreement', toError(error));
+      set({ similarityMatrix: null, agreementStats: null });
     }
-
-    // Calculate statistics (upper triangle only, excluding diagonal)
-    const similarities: number[] = [];
-    for (let i = 0; i < n; i++) {
-      for (let j = i + 1; j < n; j++) {
-        similarities.push(matrix[i]![j]!);
-      }
-    }
-
-    const mean =
-      similarities.reduce((sum, val) => sum + val, 0) / similarities.length;
-    const sortedSims = [...similarities].sort((a, b) => a - b);
-    const median =
-      sortedSims.length % 2 === 0
-        ? (sortedSims[sortedSims.length / 2 - 1]! +
-            sortedSims[sortedSims.length / 2]!) /
-          2
-        : sortedSims[Math.floor(sortedSims.length / 2)]!;
-    const min = Math.min(...similarities);
-    const max = Math.max(...similarities);
-    const variance =
-      similarities.reduce((sum, val) => sum + (val - mean) ** 2, 0) /
-      similarities.length;
-    const stddev = Math.sqrt(variance);
-
-    set({
-      similarityMatrix: matrix,
-      agreementStats: { mean, median, min, max, stddev },
-    });
   },
 
   setMetaAnalysis: (analysis) => {
@@ -246,19 +215,13 @@ export const createResponseSlice: StateCreator<ResponseSlice> = (set, get) => ({
   },
 });
 
-/**
- * Calculate cosine similarity between two vectors
- */
-function cosineSimilarity(a: number[], b: number[]): number {
-  let dotProduct = 0;
-  let normA = 0;
-  let normB = 0;
-
-  for (let i = 0; i < a.length; i++) {
-    dotProduct += a[i]! * b[i]!;
-    normA += a[i]! * a[i]!;
-    normB += b[i]! * b[i]!;
+/** Pairwise values above the diagonal of a square matrix. */
+function upperTriangle(matrix: number[][]): number[] {
+  const values: number[] = [];
+  for (let i = 0; i < matrix.length; i++) {
+    for (let j = i + 1; j < matrix.length; j++) {
+      values.push(matrix[i]![j]!);
+    }
   }
-
-  return dotProduct / (Math.sqrt(normA) * Math.sqrt(normB));
+  return values;
 }

@@ -17,7 +17,7 @@ describe('ensembleSlice', () => {
     const state = store.getState();
     expect(state.selectedModels).toEqual([]);
     expect(state.summarizerModel).toBeNull();
-    expect(state.embeddingsProvider).toBe('openai');
+    expect(state.embeddingsProvider).toBe('auto');
     expect(state.savedEnsembles).toEqual([]);
     expect(state.currentEnsembleId).toBeNull();
   });
@@ -68,8 +68,10 @@ describe('ensembleSlice', () => {
   });
 
   it('sets embeddings provider', () => {
-    store.getState().setEmbeddingsProvider('anthropic');
-    expect(store.getState().embeddingsProvider).toBe('anthropic');
+    store.getState().setEmbeddingsProvider('google');
+    expect(store.getState().embeddingsProvider).toBe('google');
+    store.getState().setEmbeddingsProvider('auto');
+    expect(store.getState().embeddingsProvider).toBe('auto');
   });
 
   it('sets majority consensus method', () => {

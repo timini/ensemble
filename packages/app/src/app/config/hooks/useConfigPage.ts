@@ -272,5 +272,6 @@ export function useConfigPage() {
         handleContinue,
         handleProgressStepClick,
         allowContinue,
+        hydratedStatuses,
     };
 }

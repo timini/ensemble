@@ -157,24 +157,9 @@ export function useEnsemblePage() {
         setSummarizer(modelId);
     };
 
-    const setEmbeddingsProvider = useStore((state) => state.setEmbeddingsProvider);
-
+    // The embeddings provider is resolved from the valid keys when the
+    // review page scores agreement (see ~/lib/embeddingsProvider).
     const handleContinue = () => {
-        // Ensure we have a valid embeddings provider selected
-        const currentProvider = useStore.getState().embeddingsProvider;
-        const currentProviderStatus = validationStatus[currentProvider];
-
-        if (currentProviderStatus !== 'valid') {
-            // Find first valid provider
-            const validProvider = (Object.keys(validationStatus) as Provider[]).find(
-                (p) => validationStatus[p] === 'valid'
-            );
-
-            if (validProvider) {
-                setEmbeddingsProvider(validProvider as ProviderType);
-            }
-        }
-
         completeStep('ensemble');
         setCurrentStep('prompt');
         router.push('/prompt');

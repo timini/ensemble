@@ -1,4 +1,5 @@
 import {
+  isEmbeddingsNotSupportedError,
   ProviderRegistry,
   type ProviderMode,
   type AIProvider,
@@ -61,17 +62,15 @@ export async function generateEmbeddingsForResponses({
   const resolvedMode = resolveEmbeddingsMode(mode);
   let client: AIProvider;
 
+  // No fallback to the mock client outside mock mode: fake vectors would
+  // produce a fake agreement score.
   try {
     client = registry.getProvider(provider, resolvedMode);
   } catch (error: unknown) {
-    if (resolvedMode !== 'mock' && registry.hasProvider(provider, 'mock')) {
-      client = registry.getProvider(provider, 'mock');
-    } else {
-      throw toError(
-        error,
-        `Provider '${provider}' not registered for mode '${resolvedMode}'`,
-      );
-    }
+    throw toError(
+      error,
+      `Provider '${provider}' not registered for mode '${resolvedMode}'`,
+    );
   }
 
   const handleError =
@@ -96,6 +95,10 @@ export async function generateEmbeddingsForResponses({
       const embedding = await client.generateEmbeddings(response.response);
       embeddingMap.set(response.modelId, embedding);
     } catch (error: unknown) {
+      // A provider without embeddings fails the same way for every response.
+      if (isEmbeddingsNotSupportedError(error)) {
+        throw error;
+      }
       handleError(response.modelId, toError(error));
     }
   }

@@ -5,6 +5,9 @@
  */
 
 import type { StateCreator } from 'zustand';
+import type { EmbeddingsProviderPreference } from '@ensemble-ai/shared-utils/providers';
+
+export type { EmbeddingsProviderPreference };
 
 export type ProviderType = 'openai' | 'anthropic' | 'google' | 'xai' | 'deepseek' | 'perplexity';
 export type ConsensusMethod = 'standard' | 'elo' | 'majority' | 'council';
@@ -29,7 +32,8 @@ export interface SavedEnsemble {
 export interface EnsembleSlice {
   selectedModels: ModelSelection[];
   summarizerModel: string | null;
-  embeddingsProvider: ProviderType;
+  /** `auto` picks OpenAI, then Google, from the valid keys. */
+  embeddingsProvider: EmbeddingsProviderPreference;
   savedEnsembles: SavedEnsemble[];
   currentEnsembleId: string | null;
   consensusMethod: ConsensusMethod;
@@ -38,7 +42,7 @@ export interface EnsembleSlice {
   addModel: (provider: ProviderType, model: string) => void;
   removeModel: (modelId: string) => void;
   setSummarizer: (modelId: string) => void;
-  setEmbeddingsProvider: (provider: ProviderType) => void;
+  setEmbeddingsProvider: (provider: EmbeddingsProviderPreference) => void;
   setConsensusMethod: (method: ConsensusMethod) => void;
   setEloTopN: (n: number) => void;
   saveEnsemble: (name: string, description: string) => void;
@@ -50,7 +54,7 @@ export interface EnsembleSlice {
 export const createEnsembleSlice: StateCreator<EnsembleSlice> = (set) => ({
   selectedModels: [],
   summarizerModel: null,
-  embeddingsProvider: 'openai',
+  embeddingsProvider: 'auto',
   savedEnsembles: [],
   currentEnsembleId: null,
   consensusMethod: 'standard',

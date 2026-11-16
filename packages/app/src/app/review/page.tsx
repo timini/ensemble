@@ -11,7 +11,6 @@ import { FALLBACK_MODELS } from "~/lib/models";
 import { formatModelLabelFromId } from "~/lib/providerModels";
 import { PageHero } from "@/components/organisms/PageHero";
 import { ConsensusCard } from "@/components/organisms/ConsensusCard";
-import { AgreementAnalysis } from "@/components/organisms/AgreementAnalysis";
 import { ProgressSteps } from "@/components/molecules/ProgressSteps";
 import { Button } from "@/components/atoms/Button";
 import { WorkflowNavigator } from "@/components/organisms/WorkflowNavigator";
@@ -24,6 +23,7 @@ import { useConsensusGeneration } from "./hooks/useConsensusGeneration";
 import { useConsensusStatus } from "./hooks/useConsensusStatus";
 import { useConsensusTrigger } from "./hooks/useConsensusTrigger";
 import { ResponsesSection } from "./_components/ResponsesSection";
+import { AgreementSection } from "./_components/AgreementSection";
 
 const MAX_EXPANDED_CARDS = 3;
 
@@ -57,7 +57,7 @@ export default function ReviewPage() {
 
   const { retryModel } = useStreamingResponses({ hasHydrated, prompt, mode });
 
-  useResponseEmbeddings({
+  const { status: embeddingsStatus } = useResponseEmbeddings({
     hasHydrated,
     completedResponses,
     embeddingsProvider,
@@ -157,17 +157,13 @@ export default function ReviewPage() {
       )}
 
       {/* 3. Agreement Analysis Section (matches wireframe order) */}
-      {pairwiseComparisons.length > 0 && (
-        <div className="mt-8">
-          <AgreementAnalysis
-            overallAgreement={overallAgreement}
-            pairwiseComparisons={pairwiseComparisons}
-            responseCount={completedResponses.length}
-            comparisonCount={pairwiseComparisons.length}
-            averageConfidence={averageConfidence}
-          />
-        </div>
-      )}
+      <AgreementSection
+        status={embeddingsStatus}
+        overallAgreement={overallAgreement}
+        pairwiseComparisons={pairwiseComparisons}
+        responseCount={completedResponses.length}
+        averageConfidence={averageConfidence}
+      />
 
       {/* 4. Individual Responses Section (matches wireframe order - at bottom) */}
       <ResponsesSection

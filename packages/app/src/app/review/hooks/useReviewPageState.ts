@@ -1,5 +1,6 @@
 import { useMemo } from "react";
 import { useStore } from "~/store";
+import { resolveEmbeddingsProvider } from "~/lib/embeddingsProvider";
 
 /**
  * Extracts all store selectors and hydration-gated memos for the Review page.
@@ -16,11 +17,27 @@ export function useReviewPageState(hasHydrated: boolean) {
   const embeddings = useStore((state) => state.embeddings);
   const similarityMatrix = useStore((state) => state.similarityMatrix);
   const mode = useStore((state) => state.mode);
-  const embeddingsProvider = useStore((state) => state.embeddingsProvider);
+  const embeddingsPreference = useStore((state) => state.embeddingsProvider);
+  const apiKeys = useStore((state) => state.apiKeys);
   const setCurrentStep = useStore((state) => state.setCurrentStep);
   const resetStreamingState = useStore((state) => state.resetStreamingState);
   const setEmbeddings = useStore((state) => state.setEmbeddings);
   const calculateAgreement = useStore((state) => state.calculateAgreement);
+
+  // Provider used for agreement embeddings, or null when none is available.
+  const embeddingsProvider = useMemo(() => {
+    const statuses = Object.fromEntries(
+      Object.entries(apiKeys).map(([provider, entry]) => [
+        provider,
+        entry?.status ?? "idle",
+      ]),
+    );
+    return resolveEmbeddingsProvider({
+      preference: embeddingsPreference,
+      statuses,
+      mockMode: process.env.NEXT_PUBLIC_MOCK_MODE === "true",
+    });
+  }, [apiKeys, embeddingsPreference]);
 
   const viewResponses = useMemo(
     () => (hasHydrated ? responses : []),

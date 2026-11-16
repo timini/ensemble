@@ -77,6 +77,19 @@
     },
     "summarizerIndicator": {
       "label": "Summarizer Model:"
+    },
+    "embeddingsProviderSelector": {
+      "heading": "Embeddings provider",
+      "description": "Agreement scores compare the meaning of answers using embeddings from one provider.",
+      "options": {
+        "auto": "Automatic (OpenAI, then Google)",
+        "openai": "OpenAI",
+        "google": "Google"
+      },
+      "noValidKey": "No valid key",
+      "active": "Agreement will use {{provider}} embeddings.",
+      "noneTitle": "No agreement score",
+      "noneDescription": "Add a valid OpenAI or Google API key to score agreement between answers."
     }
   },
   "organisms": {
@@ -271,7 +284,11 @@
       "noResponses": "No responses yet. Responses will appear here when models complete.",
       "backButton": "Back to Prompt",
       "newComparisonButton": "New Comparison",
-      "startOverButton": "Start Over"
+      "startOverButton": "Start Over",
+      "agreementUnavailableTitle": "No agreement score",
+      "agreementUnavailableDescription": "Scoring agreement needs an embeddings provider. Add a valid OpenAI or Google API key on the configuration page.",
+      "agreementErrorTitle": "Agreement could not be scored",
+      "agreementErrorDescription": "The embeddings provider did not return results for enough answers. Check your API key and try again."
     }
   }
 }

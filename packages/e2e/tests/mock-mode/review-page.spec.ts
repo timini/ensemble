@@ -5,7 +5,7 @@
  * - Page loads
  * - Shows the submitted prompt
  * - Shows responses (empty state initially, Mock API in future)
- * - Shows agreement analysis (when responses exist)
+ * - Shows agreement analysis once mock embeddings exist
  * - Shows consensus/meta-analysis (when exists)
  * - Navigation buttons work (Back, New Comparison, Start Over)
  */
@@ -95,6 +95,12 @@ test.describe('Review Page', () => {
     await expect(page.locator('[data-testid^="response-card-"]').first()).toBeVisible({
       timeout: 20000,
     });
+  });
+
+  test('shows agreement analysis once responses have embeddings', async ({ page }) => {
+    await expect(page.getByTestId('agreement-analysis')).toBeVisible({ timeout: 30000 });
+    await expect(page.getByTestId('agreement-unavailable')).toHaveCount(0);
+    await expect(page.getByTestId('agreement-embeddings-error')).toHaveCount(0);
   });
 
   test('can navigate back to prompt page', async ({ page }) => {

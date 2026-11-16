@@ -13,7 +13,9 @@ import { ApiKeyConfiguration } from '@/components/organisms/ApiKeyConfiguration'
 import { WorkflowNavigator } from '@/components/organisms/WorkflowNavigator';
 import { ProgressSteps } from '@/components/molecules/ProgressSteps';
 import { InlineAlert } from '@/components/atoms/InlineAlert';
+import { EmbeddingsProviderSelector } from '@/components/molecules/EmbeddingsProviderSelector';
 import { useConfigPage } from './hooks/useConfigPage';
+import { useEmbeddingsProviderSetting } from './hooks/useEmbeddingsProviderSetting';
 
 export default function ConfigPage() {
   const {
@@ -30,7 +32,9 @@ export default function ConfigPage() {
     handleContinue,
     handleProgressStepClick,
     allowContinue,
+    hydratedStatuses,
   } = useConfigPage();
+  const embeddings = useEmbeddingsProviderSetting(hydratedStatuses);
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-6xl">
@@ -93,6 +97,15 @@ export default function ConfigPage() {
             onKeyChange={handleKeyChange}
             onToggleShow={handleToggleShow}
           />
+
+          <div className="rounded-lg border border-border p-6">
+            <EmbeddingsProviderSelector
+              value={embeddings.value}
+              available={embeddings.available}
+              activeProvider={embeddings.activeProvider}
+              onChange={embeddings.onChange}
+            />
+          </div>
         </div>
       )}
 

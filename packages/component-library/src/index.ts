@@ -77,6 +77,12 @@ export { ModeSelectionCard, type ModeSelectionCardProps, type Mode } from './com
 export { EnsembleHeader } from './components/molecules/EnsembleHeader';
 export { Footer, type FooterProps } from './components/molecules/Footer';
 export {
+  EmbeddingsProviderSelector,
+  type EmbeddingsProviderSelectorProps,
+  type EmbeddingsProviderId,
+  type EmbeddingsProviderValue,
+} from './components/molecules/EmbeddingsProviderSelector';
+export {
   ConsensusPresetSelector,
   type ConsensusPresetSelectorProps,
 } from './components/molecules/ConsensusPresetSelector';

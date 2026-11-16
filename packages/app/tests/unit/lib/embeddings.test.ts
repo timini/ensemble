@@ -4,6 +4,7 @@ import {
   resolveEmbeddingsMode,
 } from '~/lib/embeddings';
 import {
+  EmbeddingsNotSupportedError,
   MockProviderClient,
   ProviderRegistry,
 } from '@ensemble-ai/shared-utils/providers';
@@ -52,7 +53,7 @@ describe('generateEmbeddingsForResponses', () => {
     const result = await generateEmbeddingsForResponses({
       responses,
       provider: 'openai',
-      mode: 'free',
+      mode: 'mock',
     });
 
     expect(result).toHaveLength(2);
@@ -78,7 +79,7 @@ describe('generateEmbeddingsForResponses', () => {
     const result = await generateEmbeddingsForResponses({
       responses,
       provider: 'openai',
-      mode: 'free',
+      mode: 'mock',
       existingEmbeddings,
     });
 
@@ -103,13 +104,45 @@ describe('generateEmbeddingsForResponses', () => {
     const result = await generateEmbeddingsForResponses({
       responses,
       provider: 'openai',
-      mode: 'free',
+      mode: 'mock',
       onError,
     });
 
     expect(onError).toHaveBeenCalledTimes(1);
     expect(onError).toHaveBeenCalledWith('model-a', expect.any(Error));
     expect(result).toHaveLength(0);
+  });
+});
+
+describe('generateEmbeddingsForResponses outside mock mode', () => {
+  it('does not fall back to mock vectors when the free client is missing', async () => {
+    process.env.NEXT_PUBLIC_MOCK_MODE = 'false';
+    const responses = [createResponse('model-a', 'text')];
+
+    await expect(
+      generateEmbeddingsForResponses({ responses, provider: 'openai', mode: 'free' }),
+    ).rejects.toThrow("not found for mode 'free'");
+  });
+
+  it('rethrows when the provider has no embeddings API', async () => {
+    process.env.NEXT_PUBLIC_MOCK_MODE = 'false';
+    class NoEmbeddingsClient extends MockProviderClient {
+      override async generateEmbeddings(): Promise<number[]> {
+        throw new EmbeddingsNotSupportedError('anthropic');
+      }
+    }
+    registry.register('anthropic', 'free', new NoEmbeddingsClient());
+    const onError = vi.fn();
+
+    await expect(
+      generateEmbeddingsForResponses({
+        responses: [createResponse('model-a', 'text')],
+        provider: 'anthropic',
+        mode: 'free',
+        onError,
+      }),
+    ).rejects.toBeInstanceOf(EmbeddingsNotSupportedError);
+    expect(onError).not.toHaveBeenCalled();
   });
 });
 
