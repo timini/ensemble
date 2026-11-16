@@ -230,6 +230,28 @@ describe('FreeOpenAIClient sampling parameters', () => {
     },
   );
 
+  it.each(['gpt-5.1', 'gpt-5.1-2025-11-13', 'gpt-5.2', 'gpt-5.2-2025-12-11'])(
+    'keeps temperature for %s, which defaults to reasoning effort none',
+    async (model) => {
+      mocks.openAiChatCreate.mockResolvedValueOnce(emptyStream());
+      const client = new FreeOpenAIClient('openai', () => 'sk-test');
+      await client.streamResponse('hi', model, vi.fn(), vi.fn(), vi.fn(), { temperature: 0 });
+      const request = mocks.openAiChatCreate.mock.calls[0][0];
+      expect(request).toMatchObject({ model, temperature: 0 });
+      expect(request).not.toHaveProperty('reasoning_effort');
+    },
+  );
+
+  it.each(['gpt-5.1-codex', 'gpt-5.2-pro', 'gpt-5.5'])(
+    'omits temperature for %s, which defaults to a reasoning effort above none',
+    async (model) => {
+      mocks.openAiChatCreate.mockResolvedValueOnce(emptyStream());
+      const client = new FreeOpenAIClient('openai', () => 'sk-test');
+      await client.streamResponse('hi', model, vi.fn(), vi.fn(), vi.fn(), { temperature: 0 });
+      expect(mocks.openAiChatCreate.mock.calls[0][0]).not.toHaveProperty('temperature');
+    },
+  );
+
   it('keeps temperature for non-reasoning models', async () => {
     mocks.openAiChatCreate.mockResolvedValueOnce(emptyStream());
     const client = new FreeOpenAIClient('openai', () => 'sk-test');
