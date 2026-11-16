@@ -42,9 +42,11 @@ Known gap: no provider implements `generateEmbeddings`. `BaseFreeClient` falls b
 - Interface: `AIProvider` in `shared-utils/src/providers/types.ts` (`streamResponse`, `generateEmbeddings`, `validateApiKey`, `listAvailableModels`, `listAvailableTextModels`, `generateStructured`).
 - `ProviderName`: `openai | anthropic | google | xai | deepseek | perplexity`. `ProviderMode`: `mock | free | pro`.
 - Clients live in `shared-utils/src/providers/clients/<provider>/`. All extend `base/BaseFreeClient.ts` (key check, 120 s stream timeout, error cleanup).
-  - OpenAI, xAI, DeepSeek and Perplexity use the `openai` SDK; the last three set a fixed `baseURL`.
+  - OpenAI, xAI and DeepSeek use the `openai` SDK; the last two set a fixed `baseURL`.
   - Anthropic uses `@anthropic-ai/sdk`. Google uses `@google/generative-ai` plus axios.
-  - All set `dangerouslyAllowBrowser: true`.
+  - Perplexity calls the Agent API (`POST https://api.perplexity.ai/v1/agent`) with `fetch`, because Sonar Chat Completions ended on 2026-09-27. Its model ids (`perplexity-fast`, `perplexity-low`, `perplexity-medium`) are Agent API effort presets. Old `sonar*` ids still map to a preset. Key validation uses the free `GET /v1/models`.
+  - The SDK clients set `dangerouslyAllowBrowser: true`.
+  - Per-model request rules: Anthropic models from Opus 4.7 on (including all 5.x models) get no `temperature`, and structured output uses `output_config.format` instead of a forced `tool_choice`, which Opus 5.5 and Sonnet 5.5 reject (`clients/anthropic/anthropicModelRules.ts`). OpenAI models whose default reasoning effort is above `none` (o-series, `gpt-5`, GPT-5.5 and later, GPT-6) get no `temperature`; base `gpt-5.1` and `gpt-5.2` default to `none` and keep it (`clients/openai/openAIModelRules.ts`).
 - `factories/createProviderClient.ts` switches on provider and mode. `pro` throws "not yet implemented".
 - `registry/ProviderRegistry.ts` is a singleton keyed by provider and mode. The app registers clients in `app/src/providers/index.ts`.
 

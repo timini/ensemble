@@ -24,7 +24,8 @@ The app's `tsconfig.json` also maps the bare `@ensemble-ai/shared-utils` import 
 
 - Providers: `openai`, `anthropic`, `google`, `xai`, `deepseek`, `perplexity`.
 - Modes: `mock` and `free` are implemented. `createProviderClient` throws `not yet implemented` for `pro`.
-- Free clients call the provider APIs from the browser with the vendor SDKs (`dangerouslyAllowBrowser: true`).
+- Free clients call the provider APIs from the browser with the vendor SDKs (`dangerouslyAllowBrowser: true`). Perplexity is the exception: it calls the Agent API (`/v1/agent`) with `fetch`, and its model ids are effort presets (`perplexity-fast`, `perplexity-low`, `perplexity-medium`).
+- Anthropic and OpenAI clients drop `temperature` for models that reject it, and Anthropic structured output uses `output_config.format` rather than a forced tool call. See the provider notes in the architecture document linked below.
 - `generateEmbeddings` is not implemented for any real provider. `BaseFreeClient` returns the mock client's hash-based vector, so similarity scores computed from it are not semantic.
 - Perplexity has no `generateStructured` implementation.
 
