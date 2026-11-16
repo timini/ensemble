@@ -73,18 +73,18 @@ Each milestone ends with something a user can see or with a number we can trust.
 
 Goal: the repo installs, builds and deploys cleanly, and nothing costs money while idle.
 
-- [ ] `npm install && npm run build && npm test` pass from a clean checkout. Fix anything that has rotted since February.
-- [ ] Check whether the February deploy is still live. Set `minInstances: 0`, `maxInstances: 3`, `memoryMiB: 1024` in `apphosting.yaml`. Add a $10 budget alert.
-- [ ] Fix the Terraform backend id mismatch so `terraform plan` matches what is deployed.
-- [ ] Make `eval-ci.yml` manual or label-triggered only. Point post-deploy E2E at mock mode plus one cheap smoke call.
-- [ ] Hide `/test-components` in production builds. Remove the T3 `post` router demo.
-- [ ] Refresh the fallback model list and default presets to current models.
-- [ ] Align eval defaults and `eval:ci:*` scripts with the committed caches (`gemini-3-flash-preview`), or regenerate the caches, so CI stops making live calls.
-- [ ] Add `@anthropic-ai/sdk` and `@google/generative-ai` to `shared-utils` dependencies and align its `openai` version (`^4`) with the app (`^6`).
-- [ ] Fix stale story ids in `component-library/scripts/screenshot-stories.ts`. Add the missing stories and tests for Dialog, Markdown and PromptCard.
-- [ ] Merge the duplicated token definitions in the app and component-library `globals.css`.
-- [ ] Fix code comments in `store/index.ts` and `responseSlice.ts` that say responses are not persisted.
-- [ ] Docs match the code (this document set).
+- [x] `npm install && npm run build && npm test` pass from a clean checkout. Fix anything that has rotted since February.
+- [x] Check whether the February deploy is still live. Set `minInstances: 0`, `maxInstances: 3`, `memoryMiB: 1024` in `apphosting.yaml`. Add a $10 budget alert. (Live service scaled to zero on 2026-11-16. The budget alert is still to do; it needs owner approval for the billing change.)
+- [x] Fix the Terraform backend id mismatch so `terraform plan` matches what is deployed. (Code fixed. `terraform plan` has not been run against remote state; it may need a `terraform import` first.)
+- [x] Make `eval-ci.yml` manual or label-triggered only. Point post-deploy E2E at mock mode plus one cheap smoke call.
+- [x] Hide `/test-components` in production builds. Remove the T3 `post` router demo.
+- [x] Refresh the fallback model list and default presets to current models.
+- [x] Align eval defaults and `eval:ci:*` scripts with the committed caches (`gemini-3-flash-preview`), or regenerate the caches, so CI stops making live calls. (Done. The committed `baselines/quick-eval.json` still records `gemini-2.5-flash-lite`, so the regression gate skips with a warning until one paid manual baseline run is committed.)
+- [x] Add `@anthropic-ai/sdk` and `@google/generative-ai` to `shared-utils` dependencies and align its `openai` version (`^4`) with the app (`^6`).
+- [x] Fix stale story ids in `component-library/scripts/screenshot-stories.ts`. Add the missing stories and tests for Dialog, Markdown and PromptCard.
+- [x] Merge the duplicated token definitions in the app and component-library `globals.css`.
+- [x] Fix code comments in `store/index.ts` and `responseSlice.ts` that say responses are not persisted.
+- [x] Docs match the code (this document set).
 
 Done when: a clean clone builds, CI is green, and the idle bill is near zero.
 
@@ -99,6 +99,8 @@ Goal: everything the UI shows is real.
 - [ ] Majority consensus: add a mechanical vote for short answers (number, letter, yes/no) using structured output, and fall back to the LLM method for long answers.
 - [ ] Error handling per model card: invalid key, rate limit, timeout, provider down. One failed model must not fail the run.
 - [ ] Remove the localStorage wipe on `/review` and keep the last run. Full history comes in M4.
+- [ ] Perplexity: Sonar chat completions ended on 2026-09-27. Move `FreePerplexityClient` to the current Sonar or Agent API for validation and streaming.
+- [ ] Anthropic: Claude 5.5 models reject a forced `tool_choice` and non-default `temperature`. Use `tool_choice: auto` with a strict tool (or structured output) and drop `temperature`, so majority, ELO and council work with Anthropic keys.
 - [ ] Finish the open Free-mode test tasks from the old list: presets (T178), manual response (T179), agreement for 2 to 6 responses (T180), error scenarios (T226).
 
 Done when: the agreement score changes when answers change in meaning, and a user sees the cost before and after every run.
