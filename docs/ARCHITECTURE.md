@@ -63,7 +63,8 @@ Adding a provider touches about 16 files: `types.ts`, `createProviderClient.ts`,
 
 - Firebase App Hosting, backend `ensemble-app` (`firebase.json`), configured by `apphosting.yaml`: 1 vCPU, 1 GiB, `minInstances: 0`, `maxInstances: 3`. With a minimum of 0 nothing is billed while idle; the first request after a quiet spell pays a cold start.
 - `infra/terraform/` creates the Firebase project, App Hosting backend (id `ensemble-app`, matching `firebase.json`), APIs, IAM and GitHub Workload Identity.
-- `.github/workflows/deploy.yml` deploys on push to `main`, then runs the `free-mode` E2E suite against the deployed URL with real provider keys.
+- `.github/workflows/deploy.yml` deploys on push to `main`, then runs a free HTTP smoke check of the deployed URL and one Google-only E2E test (when `TEST_GOOGLE_API_KEY` is set). The full `free-mode` suite runs only on a manual dispatch with `full_e2e`.
+- `.github/workflows/eval-ci.yml` (paid evals) runs only on manual dispatch or on PRs labelled `run-eval`.
 
 ## Eval harness
 

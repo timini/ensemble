@@ -89,9 +89,9 @@ If the saved baseline file was produced with a different model, ensemble size or
 
 ## CI
 
-`.github/workflows/eval-ci.yml` runs on pull requests that touch the consensus packages, `shared-utils` or `eval`. A path filter decides which strategies are affected, and each affected strategy runs as its own job with `npm run eval:ci:<strategy>`. The jobs need a Google API key secret. A final `eval-report` job downloads the results and posts a PR comment. A job fails if regressions are detected.
+`.github/workflows/eval-ci.yml` makes paid calls, so it does not run on every PR. It runs on manual dispatch (with a `strategies` input) or on pull requests that touch the consensus packages, `shared-utils` or `eval` and carry the `run-eval` label. On a PR, a path filter decides which strategies are affected, and each affected strategy runs as its own job with `npm run eval:ci:<strategy>`. The jobs need a Google API key secret. A final `eval-report` job downloads the results and posts a PR comment. A job fails if regressions are detected.
 
-Each job builds the consensus packages, `shared-utils` and `eval`, then runs `quick-eval` with `--baseline baselines/quick-eval.json` and `--question-timeout 300`. Because of the model mismatch above, ensemble responses are generated live in CI.
+Each job builds the consensus packages, `shared-utils` and `eval`, then runs `quick-eval` with `--baseline baselines/quick-eval.json` and `--question-timeout 300`. Ensemble responses and the single-model baseline come from the committed caches; consensus and judge calls are live.
 
 ## Concurrency: AIMD limiter
 

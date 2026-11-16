@@ -52,7 +52,7 @@ npx playwright show-report
 ## CI
 
 - `.github/workflows/ci.yml` runs the mock-mode suite on pull requests and pushes.
-- `.github/workflows/deploy.yml` deploys `main` to Firebase App Hosting, then runs the free-mode suite against the deployed URL with `TEST_*_API_KEY` secrets. Every merge to `main` makes real, paid provider calls; roadmap M0 replaces this with mock tests plus one cheap smoke call.
+- `.github/workflows/deploy.yml` deploys `main` to Firebase App Hosting, then runs an HTTP smoke check of the deployed URL and `google-only.spec.ts` (one test, no retries, skipped when `TEST_GOOGLE_API_KEY` is not set). The full free-mode suite runs only when the workflow is dispatched by hand with `full_e2e` enabled.
 - The Husky `pre-push` hook is empty. Nothing runs on push locally.
 
 ## Environment variables
