@@ -5,7 +5,9 @@
  *
  * This slice is persisted to localStorage with the rest of the store (see
  * src/store/index.ts). The inline script in src/app/layout.tsx clears the
- * response fields on a full page load of /review.
+ * prompt and the response fields when /review is opened by a fresh navigation
+ * (navigation type "navigate"). Reloads, back/forward loads and client-side
+ * navigation keep the persisted data.
  */
 
 import type { StateCreator } from 'zustand';

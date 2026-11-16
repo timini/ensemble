@@ -38,9 +38,12 @@ import {
  * is kept). That includes the prompt, responses, embeddings and agreement
  * results.
  *
- * Response data is cleared by an inline script in src/app/layout.tsx, which
- * runs on a full page load of /review and resets those fields in localStorage
- * before the store hydrates. Client-side navigation does not clear them.
+ * The prompt and response data are cleared by an inline script in
+ * src/app/layout.tsx when /review is opened by a fresh navigation (navigation
+ * type "navigate"). It resets the prompt, responses, manual responses,
+ * embeddings, similarity matrix, agreement stats and meta analysis in
+ * localStorage before the store hydrates. Reloads, back/forward loads and
+ * client-side navigation keep the persisted data.
  */
 
 export type StoreState = ThemeSlice &
