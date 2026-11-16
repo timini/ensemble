@@ -20,7 +20,9 @@ export class FreeOpenAIClient extends BaseFreeClient {
     try {
       const client = this.createClient(apiKey);
 
-      await client.models.retrieve('gpt-4o-mini');
+      // Listing models checks the key without depending on one model id
+      // that OpenAI may later retire.
+      await client.models.list();
       return { valid: true };
     } catch (error) {
       return {
@@ -35,7 +37,7 @@ export class FreeOpenAIClient extends BaseFreeClient {
 
   protected async fetchTextModels(apiKey: string): Promise<string[]> {
     if (process.env.NEXT_PUBLIC_MOCK_MODE === 'true') {
-      return ['gpt-4o', 'gpt-4o-mini'];
+      return ['gpt-6-astra', 'gpt-6-luna'];
     }
     const client = this.createClient(apiKey);
 
@@ -44,8 +46,8 @@ export class FreeOpenAIClient extends BaseFreeClient {
       .map((model) => model.id)
       .filter((id): id is string => {
         if (!id) return false;
-        const isChatCandidate =
-          id.startsWith('gpt-') || id.startsWith('o1-') || id.startsWith('o3-');
+        // gpt-* chat models plus o-series reasoning models (o1, o3, o4-mini).
+        const isChatCandidate = id.startsWith('gpt-') || /^o\d+($|-)/.test(id);
         if (!isChatCandidate) return false;
         // Exclude models that don't support the Chat Completions endpoint.
         // Patterns derived from probing the OpenAI API (404 = not chat).

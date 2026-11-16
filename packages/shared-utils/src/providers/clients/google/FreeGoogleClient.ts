@@ -39,7 +39,7 @@ export class FreeGoogleClient extends BaseFreeClient {
 
   protected async fetchTextModels(apiKey: string): Promise<string[]> {
     if (process.env.NEXT_PUBLIC_MOCK_MODE === 'true') {
-      return ['gemini-1.5-flash', 'gemini-1.5-pro'];
+      return ['gemini-4-carbon', 'gemini-4-hydrogen'];
     }
     const response = await axios.get<GoogleModelsResponse>(
       'https://generativelanguage.googleapis.com/v1beta/models',

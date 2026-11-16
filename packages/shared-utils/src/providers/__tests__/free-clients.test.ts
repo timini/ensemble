@@ -116,15 +116,17 @@ describe('Free mode provider clients', () => {
 
   describe('FreeOpenAIClient', () => {
     it('validates API key successfully', async () => {
-      mocks.openAiRetrieve.mockResolvedValueOnce({});
+      mocks.openAiList.mockResolvedValueOnce({ data: [] });
       const client = new FreeOpenAIClient('openai', () => 'sk-test');
       const result = await client.validateApiKey('sk-test');
       expect(result.valid).toBe(true);
-      expect(mocks.openAiRetrieve).toHaveBeenCalledWith('gpt-4o-mini');
+      // Listing models checks the key without depending on any one model id.
+      expect(mocks.openAiList).toHaveBeenCalled();
+      expect(mocks.openAiRetrieve).not.toHaveBeenCalled();
     });
 
     it('reports validation errors', async () => {
-      mocks.openAiRetrieve.mockRejectedValueOnce(new Error('Invalid key'));
+      mocks.openAiList.mockRejectedValueOnce(new Error('Invalid key'));
       const client = new FreeOpenAIClient('openai', () => 'sk-test');
       const result = await client.validateApiKey('sk-test');
       expect(result.valid).toBe(false);
@@ -167,15 +169,25 @@ describe('Free mode provider clients', () => {
     it('fetches text models via Anthropic SDK', async () => {
       mocks.anthropicModelsList.mockResolvedValueOnce({
         data: [
-          { id: 'claude-3-5-sonnet-20241022' },
-          { id: 'claude-3-opus-20240229' },
+          { id: 'claude-opus-5-5' },
+          { id: 'claude-haiku-5-5' },
           { id: 'text-embedding-ada-002' }, // Should be filtered out
         ],
       });
       const client = new FreeAnthropicClient('anthropic', () => 'sk-ant');
       await expect(client.listAvailableTextModels()).resolves.toEqual([
-        'claude-3-5-sonnet-20241022',
-        'claude-3-opus-20240229',
+        'claude-opus-5-5',
+        'claude-haiku-5-5',
+      ]);
+    });
+
+    it('falls back to current Claude models when the SDK call fails', async () => {
+      mocks.anthropicModelsList.mockRejectedValueOnce(new Error('network'));
+      const client = new FreeAnthropicClient('anthropic', () => 'sk-ant');
+      await expect(client.listAvailableTextModels()).resolves.toEqual([
+        'claude-opus-5-5',
+        'claude-sonnet-5-5',
+        'claude-haiku-5-5',
       ]);
     });
   });

@@ -33,7 +33,8 @@ export class FreeDeepSeekClient extends BaseFreeClient {
   }
 
   protected async fetchTextModels(_apiKey: string): Promise<string[]> {
-    return ['deepseek-chat', 'deepseek-reasoner'];
+    // deepseek-chat and deepseek-reasoner were retired on 2026-07-24.
+    return ['deepseek-v4-pro', 'deepseek-flash'];
   }
 
   protected override async generateStructuredWithProvider<T>(

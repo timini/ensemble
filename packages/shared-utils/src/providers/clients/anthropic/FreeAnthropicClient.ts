@@ -36,7 +36,7 @@ export class FreeAnthropicClient extends BaseFreeClient {
 
   protected async fetchTextModels(apiKey: string): Promise<string[]> {
     if (process.env.NEXT_PUBLIC_MOCK_MODE === 'true') {
-      return ['claude-3-5-sonnet', 'claude-3-haiku'];
+      return ['claude-sonnet-5-5', 'claude-haiku-5-5'];
     }
     try {
       const client = this.createClient(apiKey);
@@ -46,7 +46,7 @@ export class FreeAnthropicClient extends BaseFreeClient {
         .filter((id) => id.startsWith('claude-'));
     } catch {
       // Fallback to known model list if SDK call fails
-      return ['claude-3-5-sonnet-20241022', 'claude-3-opus-20240229', 'claude-3-sonnet-20240229', 'claude-3-haiku-20240307'];
+      return ['claude-opus-5-5', 'claude-sonnet-5-5', 'claude-haiku-5-5'];
     }
   }
 

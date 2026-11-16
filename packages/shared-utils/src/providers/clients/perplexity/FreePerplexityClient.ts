@@ -41,16 +41,9 @@ export class FreePerplexityClient extends BaseFreeClient {
   }
 
   protected async fetchTextModels(_apiKey: string): Promise<string[]> {
-    if (process.env.NEXT_PUBLIC_MOCK_MODE === 'true') {
-      return ['sonar', 'sonar-pro', 'sonar-reasoning'];
-    }
-    return [
-      'sonar',
-      'sonar-pro',
-      'sonar-deep-research',
-      'sonar-reasoning',
-      'sonar-reasoning-pro',
-    ];
+    // sonar-reasoning was removed in December 2025. sonar-deep-research is
+    // left out because it is slow and billed per search and reasoning token.
+    return ['sonar', 'sonar-pro', 'sonar-reasoning-pro'];
   }
 
   protected override async streamWithProvider(options: StreamOptions): Promise<void> {

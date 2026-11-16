@@ -43,7 +43,7 @@ export class FreeXAIClient extends BaseFreeClient {
 
   protected async fetchTextModels(apiKey: string): Promise<string[]> {
     if (process.env.NEXT_PUBLIC_MOCK_MODE === 'true') {
-      return ['grok-beta'];
+      return ['grok-4.7', 'grok-4.3'];
     }
     const response = await axios.get<XaiModelsResponse>('https://api.x.ai/v1/models', {
       headers: {

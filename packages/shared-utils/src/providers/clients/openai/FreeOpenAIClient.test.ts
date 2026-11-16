@@ -37,6 +37,9 @@ describe('FreeOpenAIClient model filtering', () => {
         { id: 'o1-preview' },
         { id: 'o1-mini' },
         { id: 'o3-mini' },
+        { id: 'gpt-6-astra' },
+        { id: 'gpt-6-luna' },
+        { id: 'gpt-6.1-sol' },
       ],
     });
 
@@ -47,7 +50,27 @@ describe('FreeOpenAIClient model filtering', () => {
       'gpt-4o', 'gpt-4o-mini', 'gpt-4-turbo', 'gpt-4.1', 'gpt-4.1-mini',
       'gpt-4.1-nano', 'gpt-3.5-turbo', 'gpt-5', 'gpt-5-mini', 'gpt-5.2',
       'o1-preview', 'o1-mini', 'o3-mini',
+      'gpt-6-astra', 'gpt-6-luna', 'gpt-6.1-sol',
     ]);
+  });
+
+  it('includes o-series reasoning models without a hyphenated suffix', async () => {
+    mocks.openAiList.mockResolvedValueOnce({
+      data: [
+        { id: 'o1' },
+        { id: 'o3' },
+        { id: 'o4-mini' },
+        { id: 'omni-moderation-latest' },
+        { id: 'text-embedding-3-small' },
+        { id: 'dall-e-3' },
+        { id: 'whisper-1' },
+      ],
+    });
+
+    const client = new FreeOpenAIClient('openai', () => 'sk-test');
+    const models = await client.listAvailableTextModels();
+
+    expect(models).toEqual(['o1', 'o3', 'o4-mini']);
   });
 
   it('excludes Responses API models (codex)', async () => {
