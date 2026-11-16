@@ -41,8 +41,8 @@ test.describe('Consensus Presets (Mock Mode)', () => {
         await expect(page).toHaveURL(/\/ensemble/);
 
         // Select only 2 models first to test ELO disabled state
-        await page.getByTestId('model-card-gpt-4o').click();
-        await page.getByTestId('model-card-gpt-4o-mini').click();
+        await page.getByTestId('model-card-gpt-6-astra').click();
+        await page.getByTestId('model-card-gpt-6-luna').click();
 
         await page.getByRole('button', { name: 'Next', exact: true }).click();
 

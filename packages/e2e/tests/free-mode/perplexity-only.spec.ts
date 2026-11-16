@@ -28,7 +28,6 @@ const TIMEOUT = {
 const PREFERRED_PERPLEXITY_MODELS = [
   'sonar',
   'sonar-pro',
-  'sonar-reasoning',
 ];
 
 test.describe('Free Mode - Perplexity Only', () => {

@@ -309,12 +309,12 @@
         "heading": "20+ Models Across 6 Providers",
         "body": "Access the best models from every leading AI provider. New models appear automatically via dynamic discovery.",
         "providers": [
-          { "name": "OpenAI", "models": "GPT-4o, GPT-4o Mini, o1-preview, o1-mini" },
-          { "name": "Anthropic", "models": "Claude 3.5 Sonnet, Claude 3 Opus, Claude 3 Haiku" },
-          { "name": "Google", "models": "Gemini 1.5 Pro, Gemini 1.5 Flash, Gemini 2.5 Flash" },
-          { "name": "xAI", "models": "Grok 2, Grok 2 Mini" },
-          { "name": "Perplexity", "models": "Sonar, Sonar Pro, Sonar Deep Research, Sonar Reasoning, Sonar Reasoning Pro" },
-          { "name": "DeepSeek", "models": "DeepSeek Chat, DeepSeek Reasoner" }
+          { "name": "OpenAI", "models": "GPT-6 Astra, GPT-6 Luna" },
+          { "name": "Anthropic", "models": "Claude Opus 5.5, Claude Sonnet 5.5, Claude Haiku 5.5" },
+          { "name": "Google", "models": "Gemini 4 Carbon, Gemini 4 Hydrogen, Gemini 3.5 Flash-Lite" },
+          { "name": "xAI", "models": "Grok 4.7, Grok 4.3" },
+          { "name": "Perplexity", "models": "Sonar, Sonar Pro, Sonar Reasoning Pro" },
+          { "name": "DeepSeek", "models": "DeepSeek V4 Pro, DeepSeek Flash" }
         ]
       },
       "security": {

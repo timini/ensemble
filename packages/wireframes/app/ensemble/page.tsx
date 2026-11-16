@@ -35,14 +35,14 @@ const providerStatus: Record<Provider, "Ready" | "API key required"> = {
 }
 
 const models: Model[] = [
-  { id: "gpt-4o", provider: "openai", name: "GPT-4o" },
-  { id: "gpt-4o-mini", provider: "openai", name: "GPT-4o Mini" },
-  { id: "claude-3.5-sonnet", provider: "anthropic", name: "Claude 3.5 Sonnet" },
-  { id: "claude-3-haiku", provider: "anthropic", name: "Claude 3 Haiku" },
-  { id: "gemini-2.0-flash", provider: "google", name: "Gemini 2.0 Flash" },
-  { id: "gemini-1.5-pro", provider: "google", name: "Gemini 1.5 Pro" },
-  { id: "grok-2", provider: "xai", name: "Grok 2" },
-  { id: "deepseek-chat", provider: "deepseek", name: "DeepSeek Chat" },
+  { id: "gpt-6-astra", provider: "openai", name: "GPT-6 Astra" },
+  { id: "gpt-6-luna", provider: "openai", name: "GPT-6 Luna" },
+  { id: "claude-sonnet-5-5", provider: "anthropic", name: "Claude Sonnet 5.5" },
+  { id: "claude-haiku-5-5", provider: "anthropic", name: "Claude Haiku 5.5" },
+  { id: "gemini-4-carbon", provider: "google", name: "Gemini 4 Carbon" },
+  { id: "gemini-4-hydrogen", provider: "google", name: "Gemini 4 Hydrogen" },
+  { id: "grok-4.7", provider: "xai", name: "Grok 4.7" },
+  { id: "deepseek-v4-pro", provider: "deepseek", name: "DeepSeek V4 Pro" },
   { id: "sonar", provider: "perplexity", name: "Perplexity Sonar" },
 ]
 
@@ -51,20 +51,20 @@ const presets = [
     id: "research",
     name: "Research Synthesis",
     description: "Deep reasoning stack for long-form synthesis.",
-    summarizer: "GPT-4o",
+    summarizer: "GPT-6 Astra",
   },
   {
     id: "drafting",
     name: "Rapid Drafting",
     description: "Fast and lightweight set for quick iteration.",
-    summarizer: "GPT-4o Mini",
+    summarizer: "GPT-6 Luna",
   },
 ]
 
 export default function EnsemblePage() {
   const router = useRouter()
-  const [selectedModels, setSelectedModels] = useState<string[]>(["gpt-4o", "gpt-4o-mini"])
-  const [summarizerModel, setSummarizerModel] = useState<string>("gpt-4o")
+  const [selectedModels, setSelectedModels] = useState<string[]>(["gpt-6-astra", "gpt-6-luna"])
+  const [summarizerModel, setSummarizerModel] = useState<string>("gpt-6-astra")
 
   const groupedModels = useMemo(() => {
     return models.reduce<Record<Provider, Model[]>>(

@@ -17,7 +17,7 @@ const PROVIDERS: ProviderName[] = [
 
 const provider = (process.env.TEST_BACKEND_PROVIDER ??
   "openai") as ProviderName;
-const model = process.env.TEST_BACKEND_MODEL ?? "gpt-4o-mini";
+const model = process.env.TEST_BACKEND_MODEL ?? "gpt-6-luna";
 const firebaseWebApiKey = process.env.TEST_FIREBASE_WEB_API_KEY;
 const firebaseAuthEmail = process.env.TEST_FIREBASE_AUTH_EMAIL;
 const firebaseAuthPassword = process.env.TEST_FIREBASE_AUTH_PASSWORD;

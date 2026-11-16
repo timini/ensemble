@@ -24,19 +24,19 @@ Word count ranges by model id:
 
 | Model id | Words |
 |----------|-------|
-| `gpt-4o` | 750 to 1000 |
-| `gpt-4o-mini` | 600 to 800 |
-| `o1-preview` | 650 to 850 |
-| `claude-3-5-sonnet` | 700 to 900 |
-| `claude-3-opus` | 800 to 1000 |
-| `claude-3-haiku` | 550 to 750 |
-| `gemini-1.5-pro` | 700 to 950 |
-| `gemini-1.5-flash` | 600 to 800 |
-| `grok-2` | 700 to 900 |
-| `grok-2-mini` | 550 to 750 |
+| `gpt-6-astra` | 750 to 1000 |
+| `gpt-6-luna` | 600 to 800 |
+| `claude-opus-5-5` | 800 to 1000 |
+| `claude-sonnet-5-5` | 700 to 900 |
+| `claude-haiku-5-5` | 550 to 750 |
+| `gemini-4-carbon` | 700 to 950 |
+| `gemini-4-hydrogen` | 600 to 800 |
+| `grok-4.7` | 700 to 900 |
+| `grok-4.3` | 550 to 750 |
+| `deepseek-v4-pro` | 700 to 900 |
+| `deepseek-flash` | 550 to 750 |
 | `sonar` | 600 to 800 |
 | `sonar-pro` | 700 to 900 |
-| `sonar-reasoning` | 650 to 850 |
 | anything else | 600 to 800 |
 
 At these settings a response takes roughly 4 to 9 seconds to stream.
@@ -62,7 +62,7 @@ Waits 50 to 150 ms and returns an object where each schema property that has an 
 
 ### listAvailableModels and listAvailableTextModels
 
-Return a static list of 15 models across all six providers (GPT-4o, Claude 3.5 Sonnet, Gemini 1.5 Pro, Grok 2, DeepSeek Chat, Sonar and others). With `providerFilter` set, only that provider's models are returned. `listAvailableTextModels` returns the display names.
+Return a static list of 13 models across all six providers, using real provider ids (GPT-6 Astra, Claude Opus 5.5, Gemini 4 Carbon, Grok 4.7, DeepSeek V4 Pro, Sonar and others). With `providerFilter` set, only that provider's models are returned. `listAvailableTextModels` returns the display names.
 
 ## Configuration
 

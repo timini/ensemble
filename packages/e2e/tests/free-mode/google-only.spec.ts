@@ -27,10 +27,8 @@ const TIMEOUT = {
  * generation time, so we target specific working IDs.
  */
 const PREFERRED_GOOGLE_MODELS = [
-  'gemini-2.0-flash',
-  'gemini-2.5-flash',
-  'gemini-2.0-flash-lite',
-  'gemini-1.5-flash',
+  'gemini-3.5-flash-lite',
+  'gemini-4-hydrogen',
 ];
 
 test.describe('Free Mode - Google Only', () => {

@@ -8,8 +8,8 @@ import { Textarea } from "@/components/ui/textarea"
 import { Badge } from "@/components/ui/badge"
 import { ProgressSteps } from "@/components/progress-steps"
 
-const selectedModels = ["gpt-4o", "gpt-4o-mini"]
-const summarizerModel = "gpt-4o"
+const selectedModels = ["gpt-6-astra", "gpt-6-luna"]
+const summarizerModel = "gpt-6-astra"
 
 export default function PromptPage() {
   const router = useRouter()

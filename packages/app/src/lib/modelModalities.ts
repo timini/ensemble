@@ -47,10 +47,12 @@ function supportsImage(provider: ProviderName, identifier: string): boolean {
         identifier.includes('gpt-4o') ||
         identifier.includes('gpt-4-turbo') ||
         identifier.includes('gpt-4.1') ||
+        /^gpt-[5-9]/.test(identifier) ||
         identifier.includes('vision')
       );
     case 'anthropic':
-      return identifier.startsWith('claude-3');
+      // Every Claude model from the 3 family onward accepts image input.
+      return identifier.startsWith('claude-');
     case 'google':
       return identifier.startsWith('gemini-');
     case 'xai':

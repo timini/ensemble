@@ -54,7 +54,7 @@ describe('Ensemble Page - Model Selection Integration', () => {
       expect(screen.getByTestId('model-selection-list')).toBeInTheDocument();
     });
 
-    // Find the first model card (should be GPT-4o from OpenAI)
+    // Find the first model card in the list
     const modelCard = container.querySelector('[data-testid^="model-card-"]');
     expect(modelCard).toBeInTheDocument();
     expect(modelCard).toHaveAttribute('data-selected', 'false');

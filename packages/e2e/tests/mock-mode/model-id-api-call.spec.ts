@@ -1,8 +1,8 @@
 /**
  * Model ID API Call Test
  *
- * Verifies that model IDs (e.g., "gpt-4o") are stored in the Zustand store
- * and passed to provider API calls, NOT display names (e.g., "GPT-4o").
+ * Verifies that model IDs (e.g., "gpt-6-luna") are stored in the Zustand store
+ * and passed to provider API calls, NOT display names (e.g., "GPT-6 Luna").
  *
  * This test prevents regression of a bug where display names like
  * "Gemini 3 Pro Preview" were sent to the Google API instead of
@@ -60,8 +60,8 @@ test.describe('Model ID in API Calls', () => {
     const selectedModels = storeState.selectedModels;
     expect(selectedModels).toHaveLength(2);
 
-    // The .model field should contain the model ID (e.g., "gpt-4o"),
-    // NOT the display name (e.g., "GPT-4o")
+    // The .model field should contain the model ID (e.g., "gpt-6-luna"),
+    // NOT the display name (e.g., "GPT-6 Luna")
     expect(selectedModels[0].model).toBe(firstModelId);
     expect(selectedModels[1].model).toBe(secondModelId);
 

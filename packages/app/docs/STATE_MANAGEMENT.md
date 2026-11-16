@@ -88,7 +88,7 @@ Components that read persisted state use `useHasHydrated()` (`src/hooks/useHasHy
 ### Ensemble (`ensembleSlice.ts`)
 
 - State:
-  - `selectedModels: { id, provider, model }[]` (`model` is the API id, such as `gpt-4o`)
+  - `selectedModels: { id, provider, model }[]` (`model` is the API id, such as `gpt-6-luna`)
   - `summarizerModel: string | null`
   - `embeddingsProvider` (default `'openai'`)
   - `consensusMethod: 'standard' | 'elo' | 'majority' | 'council'` (default `'standard'`)

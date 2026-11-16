@@ -7,30 +7,19 @@ import { expect, type Page } from '@playwright/test';
  * Known-good model IDs per provider prefix, tried in priority order.
  *
  * Provider APIs may list deprecated models that return 404 errors at generation
- * time (e.g. gemini-1.5-pro, claude-3.5-sonnet). This list ensures we pick
- * models that are currently working.
+ * time (e.g. gemini-1.5-pro, claude-3-5-sonnet). This list ensures we pick
+ * models that are currently working. Cheap models come first to keep the
+ * post-deploy run inexpensive.
  *
- * Both dynamic API IDs (e.g. claude-3-5-haiku-20241022) and corrected fallback
- * IDs are included so the helper works regardless of whether the dynamic model
- * fetch succeeded.
+ * The ids appear in both the dynamic provider lists and the fallback list, so
+ * the helper works whether or not the dynamic model fetch succeeded.
  */
 const PREFERRED_MODELS: Record<string, string[]> = {
-  gpt: ['gpt-4o-mini', 'gpt-4o'],
-  claude: [
-    'claude-sonnet-4-5-20250514',
-    'claude-3-5-haiku-20241022',
-    'claude-3-7-sonnet-20250219',
-    'claude-3-5-sonnet-20241022',
-    'claude-3-haiku-20240307',
-  ],
-  gemini: [
-    'gemini-2.0-flash',
-    'gemini-2.5-flash',
-    'gemini-2.0-flash-lite',
-    'gemini-1.5-flash',
-  ],
-  grok: ['grok-2', 'grok-3'],
-  sonar: ['sonar', 'sonar-pro', 'sonar-reasoning'],
+  gpt: ['gpt-6-luna', 'gpt-6-astra'],
+  claude: ['claude-haiku-5-5', 'claude-sonnet-5-5'],
+  gemini: ['gemini-3.5-flash-lite', 'gemini-4-hydrogen'],
+  grok: ['grok-4.3', 'grok-4.7'],
+  sonar: ['sonar', 'sonar-pro'],
 };
 
 /**
