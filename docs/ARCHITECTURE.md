@@ -68,7 +68,7 @@ Adding a provider touches about 16 files: `types.ts`, `createProviderClient.ts`,
 ## Eval harness
 
 - Datasets load from Hugging Face in `eval/src/lib/benchmarkDatasetLoaders.ts`: gsm8k, math500, truthfulqa, gpqa, mmlu_pro, simpleqa, hle, arc, hellaswag.
-- Models are given as `provider:model`. Defaults are in `eval/src/commands/quickEval.ts` (`google:gemini-2.5-flash-lite`). Committed caches in `eval/.cache/ensemble/` are for `google:gemini-3-flash-preview`.
+- Models are given as `provider:model`. Defaults are in `eval/src/lib/evalDefaults.ts`: `google:gemini-3-flash-preview`, which matches the committed caches in `eval/.cache/`.
 - Scoring uses an LLM judge through `generateStructured` (`eval/src/lib/evaluators.ts`), with a regex fallback for numbers.
 - Concurrency: AIMD limiter in `eval/src/lib/concurrencyPool.ts`.
 - Known issues, all addressed in M3: TruthfulQA options are not shuffled; failed questions are dropped instead of counted wrong; cost uses mock prices; the same model often generates, merges and judges; `report/` data is not in the repo.

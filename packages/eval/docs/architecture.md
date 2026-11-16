@@ -67,14 +67,15 @@ When `quick-eval` finds an ensemble cache for the requested model, it loads the 
 
 `--no-cache` (and `--mode mock`) disables cache lookups for that run. It does not delete cache files.
 
-### Model defaults do not match the committed caches
+### Model defaults
 
-- `quick-eval` defaults to `google:gemini-2.5-flash-lite` for model, consensus model and judge (`src/commands/quickEval.ts`).
-- The `eval:ci:*` scripts also pass `google:gemini-2.5-flash-lite`.
-- `generate-cache` defaults to `google:gemini-2.5-flash-lite`.
-- The committed caches are for `google:gemini-3-flash-preview`.
+Defaults live in `src/lib/evalDefaults.ts` and are shared by `quick-eval`, `generate-cache` and the `eval:ci*` scripts (a unit test keeps them in step):
 
-So a default run, and the CI gate, do not hit the committed caches and make live ensemble calls. To use the caches, pass `--model google:gemini-3-flash-preview`.
+- Model: `google:gemini-3-flash-preview`, the model of the committed caches, so default and CI runs hit them.
+- Judge: `google:gemini-2.5-flash`, the judge that scored the committed single-model baseline cache.
+- Consensus model: `google:gemini-2.5-flash-lite`. On a cached run the consensus calls (plus judge calls) are the only live calls, so they use the cheapest model.
+
+If the saved baseline file was produced with a different model, ensemble size or sample size, `quick-eval --baseline` skips the regression check, says why, and writes a fresh baseline.
 
 ### Generate, then evaluate
 

@@ -5,19 +5,18 @@ import { loadBenchmarkQuestions } from '../lib/benchmarkDatasets.js';
 import { resolveBenchmarkDatasetName } from '../lib/benchmarkDatasetShared.js';
 import { loadEnsembleCache } from '../lib/ensembleCache.js';
 import { parseStrategies } from '../lib/consensus.js';
+import { CACHED_EVAL_MODEL, DEFAULT_CONSENSUS_MODEL, DEFAULT_JUDGE_MODEL } from '../lib/evalDefaults.js';
 import { parseModelSpec } from '../lib/modelSpecs.js';
 import { registerProviders } from '../lib/providers.js';
 import { printResults, type DatasetResult } from './quickEvalOutput.js';
 import { runDataset, type RunDatasetArgs } from './quickEvalRunner.js';
 import {
-  buildBaselineFromResults, loadBaseline, saveBaseline,
+  baselineMismatch, buildBaselineFromResults, loadBaseline, saveBaseline,
   checkRegression, printRegressionReport,
 } from './quickEvalBaseline.js';
 import type { BenchmarkDatasetName, BenchmarkQuestion, EvalMode, StrategyName } from '../types.js';
 
-const DEFAULT_MODEL = 'google:gemini-2.5-flash-lite';
-const DEFAULT_CONSENSUS_MODEL = 'google:gemini-2.5-flash-lite';
-const DEFAULT_JUDGE_MODEL = 'google:gemini-2.5-flash-lite';
+const DEFAULT_MODEL = CACHED_EVAL_MODEL;
 const DEFAULT_ENSEMBLE_SIZE = 5;
 const DEFAULT_TEMPERATURE = 0.7;
 const DEFAULT_SAMPLE = 30;
@@ -212,7 +211,13 @@ export function createQuickEvalCommand(): Command {
         );
         log(`  [${elapsed()}] Loading previous baseline...\n`);
         const previous = await loadBaseline(options.baseline);
-        if (previous) {
+        const mismatch = previous ? baselineMismatch(previous, current) : null;
+        if (previous && mismatch) {
+          process.stdout.write(
+            `\n  Regression check skipped: ${mismatch}.\n` +
+            '  Regenerate the baseline with the eval-post-merge workflow (or eval:ci locally).\n',
+          );
+        } else if (previous) {
           log(`  [${elapsed()}] Running regression check...\n`);
           const result = checkRegression(previous, current, significanceLevel);
           printRegressionReport(result);

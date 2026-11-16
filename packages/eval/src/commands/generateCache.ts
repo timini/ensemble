@@ -31,13 +31,14 @@ import { loadBenchmarkQuestions } from '../lib/benchmarkDatasets.js';
 import { resolveBenchmarkDatasetName } from '../lib/benchmarkDatasetShared.js';
 import { loadEnsembleCache, saveEnsembleCache, type EnsembleCacheEntry } from '../lib/ensembleCache.js';
 import { EnsembleRunner } from '../lib/ensembleRunner.js';
+import { CACHED_EVAL_MODEL, DEFAULT_JUDGE_MODEL } from '../lib/evalDefaults.js';
 import { createEvaluatorForDataset, type JudgeConfig } from '../lib/evaluators.js';
 import { evaluateResponses } from '../lib/evaluation.js';
 import { parseModelSpec } from '../lib/modelSpecs.js';
 import { registerProviders } from '../lib/providers.js';
 import type { BenchmarkDatasetName, BenchmarkQuestion, EvalMode, PromptRunResult, ProviderResponse } from '../types.js';
 
-const DEFAULT_MODEL = 'google:gemini-2.5-flash-lite';
+const DEFAULT_MODEL = CACHED_EVAL_MODEL;
 const DEFAULT_ENSEMBLE_SIZE = 5;
 const DEFAULT_TEMPERATURE = 0.7;
 const DEFAULT_SAMPLE = 100;
@@ -46,8 +47,6 @@ const DEFAULT_DATASETS: BenchmarkDatasetName[] = [
   'gsm8k', 'truthfulqa', 'gpqa', 'hle', 'math500',
   'mmlu_pro', 'simpleqa', 'arc', 'hellaswag', 'hallumix',
 ];
-
-const DEFAULT_JUDGE_MODEL = 'google:gemini-2.5-flash-lite';
 
 interface GenerateCacheOptions {
   model: string;

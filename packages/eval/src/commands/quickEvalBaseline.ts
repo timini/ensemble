@@ -90,6 +90,28 @@ export async function saveBaseline(path: string, baseline: QuickEvalBaselineFile
 }
 
 /**
+ * Explain why a saved baseline cannot be compared with the current run, or
+ * return null when it can. Comparing runs with a different model, ensemble
+ * size or sample size would report regressions (or passes) that mean nothing.
+ */
+export function baselineMismatch(
+  previous: QuickEvalBaselineFile,
+  current: QuickEvalBaselineFile,
+): string | null {
+  const diffs: string[] = [];
+  if (previous.model !== current.model) {
+    diffs.push(`model ${previous.model} vs ${current.model}`);
+  }
+  if (previous.ensembleSize !== current.ensembleSize) {
+    diffs.push(`ensemble size ${previous.ensembleSize} vs ${current.ensembleSize}`);
+  }
+  if (previous.sample !== current.sample) {
+    diffs.push(`sample ${previous.sample} vs ${current.sample}`);
+  }
+  return diffs.length > 0 ? `baseline differs from this run: ${diffs.join(', ')}` : null;
+}
+
+/**
  * Check for regressions between a previous and current baseline using
  * Fisher's exact test with Holm-Bonferroni correction.
  *
