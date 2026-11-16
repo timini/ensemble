@@ -112,7 +112,7 @@ Firebase App Hosting, configured by `apphosting.yaml` and `firebase.json`, with 
 - Follow the test-first workflow in [CLAUDE.md](./CLAUDE.md) and [AGENTS.md](./AGENTS.md).
 - Use Conventional Commit prefixes (`feat:`, `fix:`, `docs:`, `chore:`).
 - Never bypass the Husky hooks with `--no-verify`.
-- UI text goes through i18n keys (English and French). Colours come from the semantic tokens in `packages/component-library/src/styles/globals.css`.
+- UI text goes through i18n keys (English and French). Colours come from the semantic tokens in `packages/component-library/src/styles/tokens.css`.
 
 ## License
 

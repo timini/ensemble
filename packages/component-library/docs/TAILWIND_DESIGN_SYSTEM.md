@@ -6,7 +6,7 @@ The wireframes in `packages/wireframes/` show layout and flow. Colours come from
 
 The component library uses Tailwind CSS 3.4 with semantic design tokens for light and dark themes. Tokens are CSS custom properties that hold space-separated RGB triples, so Tailwind's opacity modifiers work (for example `bg-primary/90`).
 
-The same token values are defined twice: in `src/styles/globals.css` here (used by Storybook) and in `packages/app/src/styles/globals.css` (used by the app). Change both together.
+Token values are defined once, in `src/styles/tokens.css`. This package's `src/styles/globals.css` (used by Storybook) and `packages/app/src/styles/globals.css` (used by the app) both import it. Edit tokens there only.
 
 ## Design tokens
 
@@ -190,5 +190,6 @@ export default {
 ## References
 
 - `packages/wireframes/app/`: layout reference
-- `src/styles/globals.css`: token definitions
+- `src/styles/tokens.css`: token definitions
+- `src/styles/globals.css`: Tailwind directives and base styles
 - [Tailwind CSS v3 docs](https://v3.tailwindcss.com/docs)

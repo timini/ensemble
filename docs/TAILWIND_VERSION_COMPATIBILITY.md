@@ -14,7 +14,7 @@ All three front-end packages use Tailwind CSS 3.4 with the v3 config and PostCSS
 | `packages/component-library` | `^3.4.17` |
 | `packages/wireframes` | `^3.4.17` |
 
-The app and component library share the same semantic tokens (RGB triples in `globals.css`, mapped in `tailwind.config.ts`). The token values have changed since this incident (primary is now indigo, `79 70 229`), and `success`, `warning` and `info` were added; see `packages/component-library/docs/TAILWIND_DESIGN_SYSTEM.md`.
+The app and component library share the same semantic tokens (RGB triples in `packages/component-library/src/styles/tokens.css`, mapped in `tailwind.config.ts`). The token values have changed since this incident (primary is now indigo, `79 70 229`), and `success`, `warning` and `info` were added; see `packages/component-library/docs/TAILWIND_DESIGN_SYSTEM.md`.
 
 The rest of this document is the record of the original incident.
 
@@ -270,8 +270,9 @@ Ideas recorded at the time, and their status:
 
 - `packages/app/tailwind.config.ts` - App's Tailwind configuration
 - `packages/app/postcss.config.js` - PostCSS configuration
-- `packages/app/src/styles/globals.css` - Global styles with CSS variables
+- `packages/app/src/styles/globals.css` - App global styles; imports the shared tokens
 - `packages/component-library/tailwind.config.ts` - Component library's Tailwind config
+- `packages/component-library/src/styles/tokens.css` - Shared CSS variables (design tokens)
 - `packages/component-library/src/styles/globals.css` - Component library's global styles
 - `packages/app/src/app/test-components/page.tsx` - Component testing page
 

@@ -66,7 +66,7 @@ npm run preview          # production build and start
 ### Tech stack
 
 - **Framework**: Next.js 15 (App Router), React 19
-- **Styling**: Tailwind CSS 3.4 with semantic tokens in `packages/component-library/src/styles/globals.css`
+- **Styling**: Tailwind CSS 3.4 with semantic tokens in `packages/component-library/src/styles/tokens.css`
 - **State**: Zustand 5 with localStorage persistence (`ensemble-ai-store`)
 - **Server**: tRPC 11 with TanStack Query 5, Firebase Admin for token verification
 - **Testing**: Vitest and Testing Library (unit), Storybook test runner, Playwright (E2E)
