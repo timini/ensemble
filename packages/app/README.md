@@ -19,7 +19,7 @@ The main workflow is four steps. Each step is a page under `src/app/`.
 | `/review` | Step 4. Responses, agreement analysis and the consensus answer |
 | `/about` | Static explainer with a flow diagram |
 | `/features` | Static features page |
-| `/test-components` | Dev page that renders component-library buttons |
+| `/test-components` | Dev page that renders component-library buttons (404 in production unless `NEXT_PUBLIC_MOCK_MODE=true`) |
 | `/api/trpc/[trpc]` | tRPC endpoint (see Server below) |
 
 Consensus methods offered on `/ensemble`: `standard`, `elo`, `majority`, `council`. All four are LLM-driven. `majority` asks the summarizer to rank and synthesize; it is not a mechanical vote.
