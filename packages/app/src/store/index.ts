@@ -32,9 +32,15 @@ import {
 /**
  * Root Zustand store combining all slices
  *
- * Uses persistence middleware to sync essential state to localStorage
- * Persisted: theme, language, workflow step, mode, API keys (encrypted), saved ensembles
- * NOT persisted: responses, embeddings, streaming state (transient)
+ * Uses persistence middleware to sync state to localStorage under
+ * 'ensemble-ai-store'. The whole store is written, after
+ * sanitizeStateForPersist strips plaintext API keys (only the encrypted form
+ * is kept). That includes the prompt, responses, embeddings and agreement
+ * results.
+ *
+ * Response data is cleared by an inline script in src/app/layout.tsx, which
+ * runs on a full page load of /review and resets those fields in localStorage
+ * before the store hydrates. Client-side navigation does not clear them.
  */
 
 export type StoreState = ThemeSlice &

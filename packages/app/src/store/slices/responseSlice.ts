@@ -1,8 +1,11 @@
 /**
  * Response Slice
  *
- * Manages AI responses and streaming state
- * NOT persisted (transient data)
+ * Manages AI responses and streaming state.
+ *
+ * This slice is persisted to localStorage with the rest of the store (see
+ * src/store/index.ts). The inline script in src/app/layout.tsx clears the
+ * response fields on a full page load of /review.
  */
 
 import type { StateCreator } from 'zustand';

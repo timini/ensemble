@@ -5,9 +5,9 @@ import { logger } from '~/lib/logger';
 /**
  * Persistence middleware for Zustand store
  *
- * Syncs essential store state to localStorage for persistence across sessions
- * Only persists: theme, language, API keys (encrypted), and presets
- * Transient data (responses, streaming state) is NOT persisted
+ * Syncs store state to localStorage for persistence across sessions.
+ * It writes whatever the serialize option returns, or the full state if none
+ * is given. It does not filter out response data itself.
  */
 
 type PersistOptions<T> = {
