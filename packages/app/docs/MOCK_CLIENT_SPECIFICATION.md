@@ -5,8 +5,8 @@
 ## When it is used
 
 - **Mock mode.** Start the app with `npm run dev:mock` (sets `NEXT_PUBLIC_MOCK_MODE=true`). Every provider call then uses the mock client. The `packages/e2e` `mock-mode` project starts the app this way.
-- **Fallbacks in other modes.** The prompt page and `src/lib/embeddings.ts` fall back to the mock client if no client is registered for the current mode.
-- **Inside the free clients.** `BaseFreeClient` keeps a mock instance and uses it for `generateEmbeddings` (always) and for model lists when no key is set or the provider's list call fails.
+- **Fallbacks in other modes.** The prompt page falls back to the mock client if no client is registered for the current mode. Embeddings never fall back to it outside mock mode.
+- **Inside the free clients.** `BaseFreeClient` keeps a mock instance for the static model metadata and for model lists when no key is set or the provider's list call fails. It is not used for embeddings.
 
 Mock mode is not offered on `/config`. It is controlled only by the env var, which is read at build time, so a build made with `NEXT_PUBLIC_MOCK_MODE=true` serves mock responses.
 
@@ -50,7 +50,7 @@ const hash = simpleHash(text); // 32-bit string hash
 return Array.from({ length: 1536 }, (_, i) => (Math.sin(hash + i) + 1) / 2);
 ```
 
-There is no noise term. The values reflect the hash of the text, not its meaning. Because the free clients also use this function, agreement scores in every mode are computed from these vectors and are not semantic.
+There is no noise term. The values reflect the hash of the text, not its meaning, so agreement scores in mock mode are not semantic. Free mode uses real OpenAI or Google embeddings.
 
 ### validateApiKey
 
@@ -80,7 +80,7 @@ When `enableErrors` is true, `streamResponse` fails with `Rate limit exceeded. P
 ## Limitations
 
 - Output ignores the prompt and has no structure.
-- Embeddings and agreement scores are not meaningful.
+- Embeddings and agreement scores are not meaningful in mock mode.
 - Token counts and costs are estimates only.
 - No timeout or network error simulation.
 

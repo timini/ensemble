@@ -49,7 +49,7 @@ cd packages/wireframes && npm install && npm run dev   # reference UX (separate 
 | Path | What it is |
 |---|---|
 | `packages/app` | Next.js 15 app (App Router, React 19, Tailwind 3.4, Zustand, tRPC 11) |
-| `packages/component-library` | 48 UI components with Storybook 9 and Vitest |
+| `packages/component-library` | 49 UI components with Storybook 9 and Vitest |
 | `packages/shared-utils` | Provider clients, registry, similarity maths, Web Crypto helpers |
 | `packages/consensus-*` | The four consensus methods: standard, majority, elo, council, plus shared types in `consensus-core` |
 | `packages/eval` | Benchmark CLI for comparing ensembles with single models |

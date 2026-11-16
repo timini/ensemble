@@ -54,7 +54,7 @@ export interface AIProvider {
 
 ### MockProviderClient
 
-`packages/shared-utils/src/providers/clients/mock/MockProviderClient.ts`. Lorem ipsum streaming, hash-based embeddings, always-valid keys, a static model list. Details in [MOCK_CLIENT_SPECIFICATION.md](./MOCK_CLIENT_SPECIFICATION.md).
+`packages/shared-utils/src/providers/clients/mock/MockProviderClient.ts`. Lorem ipsum streaming, hash-based embeddings (used in mock mode only), always-valid keys, a static model list. Details in [MOCK_CLIENT_SPECIFICATION.md](./MOCK_CLIENT_SPECIFICATION.md).
 
 ### Free clients
 
@@ -81,11 +81,23 @@ What `BaseFreeClient` does:
 - `streamResponse` reports a missing-key error, races the provider stream against a 2 minute timeout, and sanitizes error messages before passing them on.
 - `listAvailableTextModels` calls the provider's model list API when a key is present and falls back to the mock list on failure or when no key is set.
 - `generateStructured` delegates to each subclass. Perplexity does not implement it, so it throws "structured output is not yet implemented for Free mode".
-- `generateEmbeddings` checks the key is present, then returns `MockProviderClient.generateEmbeddings(text)`. No client calls a real embeddings API.
+- `generateEmbeddings` throws `EmbeddingsNotSupportedError` unless the subclass sets `supportsEmbeddings` and implements `embedWithProvider`. When it does, it checks the key is present and calls the provider.
 
 ### Embeddings and agreement scores
 
-Because of that fallback, every embedding in the app (all modes) is a deterministic sine vector seeded by a hash of the text. The review page's cosine similarity matrix and agreement statistics are computed on these vectors. They do not measure semantic agreement. Real embeddings are not built yet; see [ROADMAP](../../../docs/ROADMAP.md).
+Code in `packages/shared-utils/src/providers/embeddings/`.
+
+| Provider | Model | Call |
+|----------|-------|------|
+| OpenAI | `text-embedding-3-small` | `requestOpenAICompatibleEmbedding`: `POST {baseURL}/embeddings` with `{ model, input }` and an optional bearer key |
+| Google | `gemini-embedding-2` | `requestGeminiEmbedding`: `POST /v1beta/models/{model}:embedContent` with the `x-goog-api-key` header, default 3072 dimensions |
+| Anthropic, xAI, DeepSeek, Perplexity | none | throw `EmbeddingsNotSupportedError` |
+
+`requestOpenAICompatibleEmbedding` takes a base URL, an optional key and a model id, so the OpenAI-compatible provider planned for M2 (Ollama, LM Studio, OpenRouter) can reuse it. Error messages from both helpers go through `sanitizeProviderErrorMessage`.
+
+Provider choice: `selectEmbeddingsProvider` (shared-utils) and `resolveEmbeddingsProvider` (`packages/app/src/lib/embeddingsProvider.ts`). The stored preference is `auto`, `openai` or `google`, set with the embeddings provider setting on `/config`. An override is used when its key is valid; otherwise OpenAI, then Google. With neither key valid there is no provider, and the review page shows "No agreement score" instead of a score. If the embeddings calls fail for all but one answer, it shows "Agreement could not be scored".
+
+The review page computes the cosine similarity matrix and agreement statistics from these vectors with `shared-utils/similarity`. Only mock mode uses the mock client's hash-based vectors.
 
 ## Factory and registry
 
@@ -103,8 +115,8 @@ The app's `initializeProviders()` (`packages/app/src/providers/index.ts`) regist
 
 - `/config`: `src/lib/validation.ts` calls `validateApiKey` on the free client (or mock client in mock mode).
 - `/ensemble`: `src/lib/providerModels.ts` calls `listAvailableTextModels` to fill the model picker.
-- `/prompt` and `/review`: `streamResponse` is called once per selected model (`src/app/prompt/page.tsx`, `src/app/review/hooks/useStreamingResponses.ts`). If the client for the current mode is missing, the prompt page and `src/lib/embeddings.ts` fall back to the mock client.
-- `/review`: `src/lib/embeddings.ts` calls `generateEmbeddings`; `src/app/review/hooks/useConsensusGeneration.ts` passes the summarizer model's client to the chosen consensus strategy (`standard`, `elo`, `majority`, `council`).
+- `/prompt` and `/review`: `streamResponse` is called once per selected model (`src/app/prompt/page.tsx`, `src/app/review/hooks/useStreamingResponses.ts`). If the client for the current mode is missing, the prompt page falls back to the mock client. `src/lib/embeddings.ts` does not: it throws, so no fake vectors reach the agreement score.
+- `/review`: `src/lib/embeddings.ts` calls `generateEmbeddings` on the provider chosen by `src/lib/embeddingsProvider.ts`; `src/app/review/hooks/useConsensusGeneration.ts` passes the summarizer model's client to the chosen consensus strategy (`standard`, `elo`, `majority`, `council`).
 
 Example, simplified from the prompt page:
 

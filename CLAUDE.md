@@ -26,7 +26,7 @@ Modes:
 npm workspaces monorepo:
 
 - `packages/app/`: Next.js 15 App Router app. Routes: `/` (redirects to `/config` today), `/config`, `/ensemble`, `/prompt`, `/review`, `/features`, `/about`, `/test-components` (dev only), `/api/trpc/[trpc]`.
-- `packages/component-library/`: 48 atomic-design components (atoms, molecules, organisms) developed in Storybook. The app imports its source via a tsconfig alias.
+- `packages/component-library/`: 49 atomic-design components (atoms, molecules, organisms) developed in Storybook. The app imports its source via a tsconfig alias.
 - `packages/shared-utils/`: provider clients, registry, factory, similarity maths, Web Crypto helpers. Exports from `dist`; rebuild after changes with `npm run build --workspace=packages/shared-utils`.
 - `packages/consensus-core`, `consensus-standard`, `consensus-majority`, `consensus-elo`, `consensus-council`: consensus strategies.
 - `packages/eval/`: benchmark CLI. `packages/eval-baseline/`: Python lm-eval runner.
@@ -86,7 +86,7 @@ Client modes:
 - **Free clients**: direct browser calls with the user's key (`dangerouslyAllowBrowser: true`).
 - **Pro client**: not built. `createProviderClient` throws for `pro`. Planned as `ProAPIClient` over the `streamTextEvents` tRPC subscription (M5).
 
-Known gap: no client implements `generateEmbeddings`; they fall back to hash-based mock vectors, so agreement scores are not semantic. Fixing this is M1.
+Embeddings: OpenAI (`text-embedding-3-small`) and Google (`gemini-embedding-2`) implement `generateEmbeddings`. Other providers throw `EmbeddingsNotSupportedError`. Only mock mode uses hash-based fake vectors.
 
 Adding a provider touches about 16 files; the list is in `docs/ARCHITECTURE.md`.
 

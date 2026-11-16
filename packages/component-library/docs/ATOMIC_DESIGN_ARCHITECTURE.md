@@ -18,9 +18,9 @@ Dialog and Select wrap Radix primitives. Markdown wraps `react-markdown` with `r
 
 Small combinations of atoms with one focused purpose.
 
-Current molecules (10), in `src/components/molecules/`:
+Current molecules (11), in `src/components/molecules/`:
 
-ApiKeyInput, ConsensusPresetSelector, EnsembleHeader, Footer, ModelCard, ModeSelectionCard, ProgressSteps, PromptInput, ResponseCard, SummarizerIndicator
+ApiKeyInput, ConsensusPresetSelector, EmbeddingsProviderSelector, EnsembleHeader, Footer, ModelCard, ModeSelectionCard, ProgressSteps, PromptInput, ResponseCard, SummarizerIndicator
 
 ### Organisms
 

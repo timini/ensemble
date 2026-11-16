@@ -32,9 +32,9 @@ Consensus methods offered on `/ensemble`: `standard`, `elo`, `majority`, `counci
 
 Supported providers: OpenAI, Anthropic, Google, xAI, DeepSeek, Perplexity.
 
-### Agreement scores are not semantic yet
+### Agreement scores
 
-The review page computes cosine similarity between response embeddings. No provider client calls a real embeddings API. `BaseFreeClient.generateEmbeddings` returns the mock client's hash-based vector, so the agreement numbers reflect a hash of the text, not its meaning. Treat them as placeholders.
+The review page computes cosine similarity between response embeddings from OpenAI (`text-embedding-3-small`) or Google (`gemini-embedding-2`). The provider is picked from the valid keys, OpenAI first, and can be overridden on `/config`. Without an OpenAI or Google key the page says there is no agreement score instead of showing one. Mock mode uses hash-based vectors, so its scores are not semantic.
 
 ## Scripts
 

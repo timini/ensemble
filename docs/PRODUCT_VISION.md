@@ -71,7 +71,7 @@ Everything below already exists in some form in the codebase and will be finishe
 |---|---|---|
 | Multi-model streaming (OpenAI, Anthropic, Google, xAI, DeepSeek, Perplexity) | Works in Free mode | Works in Free and Pro. Model lists current. |
 | Local and open models (Ollama, LM Studio, llama.cpp, vLLM, OpenRouter, Groq, Together) | Missing | One OpenAI-compatible provider with a configurable base URL |
-| Agreement analysis | UI built, scores from fake hash vectors | Real embeddings, including a local embedding option |
+| Agreement analysis | Real embeddings from OpenAI or Google; no score shown without one of those keys | Real embeddings, including a local embedding option |
 | Consensus: standard, majority, elo, council | Built as packages and wired into the app | Kept, with a call count and cost estimate shown before running. Majority gets a mechanical vote for short answers. |
 | Ensemble presets | Built (save, load, delete in localStorage) | Kept, defaults updated to current models, synced for Pro users |
 | Manual responses (paste an answer from another tool) | Built | Kept |

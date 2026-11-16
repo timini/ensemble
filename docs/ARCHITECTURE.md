@@ -9,7 +9,7 @@ npm workspaces monorepo. Node 18+.
 | Package | npm name | Purpose |
 |---|---|---|
 | `packages/app` | `@ai-ensemble/app` | Next.js 15 App Router app (React 19, Tailwind 3.4, Zustand 5, tRPC 11, TanStack Query 5, i18next) |
-| `packages/component-library` | `@ai-ensemble/component-library` | 48 atomic-design components (22 atoms, 10 molecules, 16 organisms), Storybook 9, Vitest. The app imports its source through a tsconfig alias. |
+| `packages/component-library` | `@ai-ensemble/component-library` | 49 atomic-design components (22 atoms, 11 molecules, 16 organisms), Storybook 9, Vitest. The app imports its source through a tsconfig alias. |
 | `packages/shared-utils` | `@ensemble-ai/shared-utils` | Provider clients, provider registry and factory, similarity maths, Web Crypto helpers. Exports from `dist`, so build it after changes. |
 | `packages/consensus-core` | `@ensemble-ai/consensus-core` | `ConsensusStrategy` and `AIProvider` types shared by the strategies |
 | `packages/consensus-standard` | `@ensemble-ai/consensus-standard` | One summarizer call merges all answers |
@@ -32,10 +32,10 @@ Everything happens in the browser. The server only serves pages.
 3. On `/prompt` the user writes the prompt and picks a consensus method (`standard | elo | majority | council`, `store/slices/ensembleSlice.ts`).
 4. On `/review`:
    - `review/hooks/useStreamingResponses.ts` gets a client from `ProviderRegistry` and calls `streamResponse` for each model. Chunks are flushed to the store every 100 ms.
-   - `review/hooks/useResponseEmbeddings.ts` calls `generateEmbeddings` for each answer, and `lib/agreement.ts` builds the pairwise similarity.
+   - `review/hooks/useReviewPageState.ts` picks the embeddings provider with `lib/embeddingsProvider.ts`: the user's override on `/config` when its key is valid, otherwise OpenAI, then Google. `review/hooks/useResponseEmbeddings.ts` calls `generateEmbeddings` on that provider for each answer. `responseSlice.calculateAgreement` builds the cosine similarity matrix with `shared-utils/similarity`, and `lib/agreement.ts` turns it into pairwise comparisons. With no OpenAI or Google key, the page shows a message instead of a score.
    - `review/hooks/useConsensusGeneration.ts` runs the chosen consensus strategy with the summarizer model.
 
-Known gap: no provider implements `generateEmbeddings`. `BaseFreeClient` falls back to `MockProviderClient`, which returns vectors built from a hash of the text. Agreement scores are therefore not semantic. Fixing this is the first task in M1.
+Embeddings: OpenAI uses `text-embedding-3-small` and Google uses `gemini-embedding-2`. The other providers have no embeddings API and throw `EmbeddingsNotSupportedError`; nothing falls back to fake vectors outside mock mode. Mock mode keeps the mock client's deterministic hash vectors.
 
 ## Providers
 
@@ -93,7 +93,7 @@ Changes from today, by milestone:
 
 | Change | Milestone |
 |---|---|
-| Real `generateEmbeddings` for OpenAI, Google and OpenAI-compatible; one similarity implementation in shared-utils | M1 |
+| Real `generateEmbeddings` for OpenAI and Google (done); one similarity implementation in shared-utils (done); OpenAI-compatible embeddings through `requestOpenAICompatibleEmbedding` | M1, M2 |
 | Pricing table in shared-utils, used for estimates and actual cost | M1 |
 | `FreeOpenAICompatibleClient` with configurable base URL and optional key | M2 |
 | Eval harness accepts the OpenAI-compatible provider; methodology fixes | M3 |

@@ -90,18 +90,18 @@ Components that read persisted state use `useHasHydrated()` (`src/hooks/useHasHy
 - State:
   - `selectedModels: { id, provider, model }[]` (`model` is the API id, such as `gpt-6-luna`)
   - `summarizerModel: string | null`
-  - `embeddingsProvider` (default `'openai'`)
+  - `embeddingsProvider: 'auto' | 'openai' | 'google'` (default `'auto'`). The preference for agreement embeddings, set on `/config`. `src/lib/embeddingsProvider.ts` resolves it against the valid keys; older stored values such as `'anthropic'` count as `'auto'`.
   - `consensusMethod: 'standard' | 'elo' | 'majority' | 'council'` (default `'standard'`)
   - `eloTopN` (default `3`)
   - `savedEnsembles: { id, name, description, models, summarizer, consensusMethod, eloTopN }[]`
   - `currentEnsembleId`
-- Actions: `addModel(provider, model)`, `removeModel(modelId)`, `setSummarizer(modelId)`, `setEmbeddingsProvider(provider)`, `setConsensusMethod(method)`, `setEloTopN(n)`, `saveEnsemble(name, description)`, `loadEnsemble(id)`, `deleteEnsemble(id)`, `clearSelection()`
+- Actions: `addModel(provider, model)`, `removeModel(modelId)`, `setSummarizer(modelId)`, `setEmbeddingsProvider(preference)`, `setConsensusMethod(method)`, `setEloTopN(n)`, `saveEnsemble(name, description)`, `loadEnsemble(id)`, `deleteEnsemble(id)`, `clearSelection()`
 
 ### Responses (`responseSlice.ts`)
 
 - State: `prompt`, `responses` (`{ modelId, provider, model, response, isStreaming, isComplete, responseTime, tokenCount, error }[]`), `manualResponses`, `embeddings`, `similarityMatrix`, `agreementStats` (`mean`, `median`, `min`, `max`, `stddev`), `metaAnalysis`
 - Actions: `setPrompt`, `startStreaming(modelId, provider, model)`, `appendStreamChunk(modelId, chunk)`, `completeResponse(modelId, responseTime, tokenCount?)`, `setError(modelId, error)`, `addManualResponse(label, response)`, `removeManualResponse(id)`, `setEmbeddings(embeddings)`, `calculateAgreement()`, `setMetaAnalysis(analysis)`, `resetStreamingState()`, `clearResponses()`
-- `calculateAgreement()` builds a cosine similarity matrix from `embeddings` and computes stats over the upper triangle. The embeddings are hash-based placeholders (see [PROVIDER_ARCHITECTURE.md](./PROVIDER_ARCHITECTURE.md#embeddings-and-agreement-scores)), so these numbers are not semantic.
+- `calculateAgreement()` builds a cosine similarity matrix from `embeddings` with `similarityMatrix` and `agreementStatistics` from `@ensemble-ai/shared-utils/similarity`, using the upper triangle for the stats. If the vectors cannot be compared (different lengths or a zero vector) it clears the matrix and stats instead of storing a wrong score. Embeddings come from OpenAI or Google (see [PROVIDER_ARCHITECTURE.md](./PROVIDER_ARCHITECTURE.md#embeddings-and-agreement-scores)); only mock mode uses hash-based vectors.
 
 ## Usage
 
