@@ -40,6 +40,18 @@ export interface StreamResponseOptions {
   timeoutMs?: number;
   /** Aborts the request. onError then gets a ProviderError of kind `timeout`. */
   signal?: AbortSignal;
+  /** Host routing for servers that route a model to several hosts (OpenRouter). Ignored elsewhere. */
+  routing?: ProviderRouting;
+}
+
+/**
+ * OpenRouter host routing. `provider` is sent as OpenRouter's `provider`
+ * object (order, ignore, allow_fallbacks and so on). Structured calls also
+ * ask for `require_parameters: true` unless requireParameters is false.
+ */
+export interface ProviderRouting {
+  requireParameters?: boolean;
+  provider?: Record<string, unknown>;
 }
 
 export interface JsonSchema {
@@ -57,6 +69,8 @@ export interface GenerateStructuredOptions {
   timeoutMs?: number;
   /** Aborts the request; the call throws a ProviderError of kind `timeout`. */
   signal?: AbortSignal;
+  /** Host routing for servers that route a model to several hosts (OpenRouter). Ignored elsewhere. */
+  routing?: ProviderRouting;
 }
 
 /**

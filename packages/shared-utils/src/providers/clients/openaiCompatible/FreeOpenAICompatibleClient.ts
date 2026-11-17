@@ -1,6 +1,6 @@
-import { ProviderError, classifyProviderError, isProviderError } from '../../errors/providerError';
+import { ProviderError, classifyProviderError } from '../../errors/providerError';
 import { BaseFreeClient, type StreamOptions, type StructuredOptions } from '../base/BaseFreeClient';
-import type { ProviderName, StructuredResponse, TokenUsage, ValidationResult } from '../../types';
+import type { ProviderName, ProviderRouting, StructuredResponse, TokenUsage, ValidationResult } from '../../types';
 import { sanitizeProviderErrorMessage } from '../../utils/sanitizeSensitiveData';
 import { fromChatCompletionUsage, type ChatCompletionUsage } from '../../utils/usage';
 import { requestOpenAICompatibleEmbedding } from '../../embeddings/openAICompatibleEmbeddings';
@@ -41,7 +41,17 @@ interface InBandError {
 
 interface ChatChoiceBase {
   finish_reason?: string | null;
+  /** The upstream host's own finish reason (OpenRouter). */
+  native_finish_reason?: string | null;
   error?: InBandError | null;
+}
+
+/** Fields OpenRouter adds to a response body or stream chunk that say who served it. */
+interface ServedBy {
+  id?: unknown;
+  /** The host that served the request (OpenRouter), such as "Anthropic" or "Amazon Bedrock". */
+  provider?: unknown;
+  model?: unknown;
 }
 
 interface ChatMessageFields {
@@ -51,13 +61,13 @@ interface ChatMessageFields {
   reasoning_content?: unknown;
 }
 
-interface ChatChunk {
+interface ChatChunk extends ServedBy {
   choices?: (ChatChoiceBase & { delta?: ChatMessageFields })[];
   usage?: ChatCompletionUsage | null;
   error?: InBandError | null;
 }
 
-interface ChatCompletion {
+interface ChatCompletion extends ServedBy {
   choices?: (ChatChoiceBase & { message?: ChatMessageFields })[];
   usage?: ChatCompletionUsage | null;
   error?: InBandError | null;
@@ -105,30 +115,69 @@ export function inBandErrorOf(
   return new ProviderError(`OpenAI-compatible API error: ${message}`, 'provider_unavailable', { provider });
 }
 
+/** What a response said about itself, for the message of an empty reply. */
+export interface EmptyResponseDetails {
+  finishReason?: string | null;
+  nativeFinishReason?: string | null;
+  reasoningOnly?: boolean;
+  /** The host that served it (OpenRouter `provider`). */
+  servedBy?: string;
+  responseId?: string;
+  completionTokens?: number;
+}
+
 /**
  * A completion with no answer text. Usually a failed upstream call that was
- * not reported as an error. The finish reason and whether reasoning came
- * back are in the message, so the cause can be read from the logs.
+ * not reported as an error. The finish reasons, the host that served it, the
+ * response id, the completion tokens and whether reasoning came back are in
+ * the message, so the cause can be read from the logs and the results file.
  */
 export function emptyResponseError(
   provider: ProviderName,
   model: string,
-  finishReason: string | null | undefined,
-  reasoningOnly: boolean,
+  details: EmptyResponseDetails,
 ): ProviderError {
-  const details = [`finish_reason: ${finishReason ?? 'none'}`];
-  if (reasoningOnly) details.push('reasoning came back but no answer content');
-  return new ProviderError(`Empty response from ${model} (${details.join('; ')}).`, 'other', { provider });
+  const parts = [`finish_reason: ${details.finishReason ?? 'none'}`];
+  if (details.nativeFinishReason) parts.push(`native_finish_reason: ${details.nativeFinishReason}`);
+  if (details.servedBy) parts.push(`served by: ${details.servedBy}`);
+  if (details.responseId) parts.push(`id: ${details.responseId}`);
+  if (details.completionTokens !== undefined) parts.push(`completion_tokens: ${details.completionTokens}`);
+  if (details.reasoningOnly) parts.push('reasoning came back but no answer content');
+  return new ProviderError(`Empty response from ${model} (${parts.join('; ')}).`, 'other', { provider });
 }
 
-/** OpenRouter routes a model to several hosts; this keeps it on hosts that honour every parameter sent. */
-function routingFields(baseURL: string, hasResponseFormat: boolean): Record<string, unknown> {
-  if (!hasResponseFormat) return {};
+/** Collects what a body or stream chunk says about the host that served it. */
+function noteServedBy(target: EmptyResponseDetails, body: ServedBy & { usage?: ChatCompletionUsage | null }): void {
+  if (typeof body.provider === 'string' && body.provider) target.servedBy = body.provider;
+  if (typeof body.id === 'string' && body.id) target.responseId = body.id;
+  const completion = body.usage?.completion_tokens;
+  if (typeof completion === 'number') target.completionTokens = completion;
+}
+
+function isOpenRouter(baseURL: string): boolean {
   try {
-    return new URL(baseURL).hostname.endsWith('openrouter.ai') ? { provider: { require_parameters: true } } : {};
+    return new URL(baseURL).hostname.endsWith('openrouter.ai');
   } catch {
-    return {};
+    return false;
   }
+}
+
+/**
+ * OpenRouter's `provider` object. Structured calls ask for hosts that honour
+ * every parameter sent (require_parameters) unless routing turns that off;
+ * routing.provider adds host preferences such as order or ignore.
+ */
+export function routingFields(
+  baseURL: string,
+  hasResponseFormat: boolean,
+  routing?: ProviderRouting,
+): Record<string, unknown> {
+  if (!isOpenRouter(baseURL)) return {};
+  const provider: Record<string, unknown> = {
+    ...(hasResponseFormat && routing?.requireParameters !== false ? { require_parameters: true } : {}),
+    ...(routing?.provider ?? {}),
+  };
+  return Object.keys(provider).length > 0 ? { provider } : {};
 }
 
 /**
@@ -219,9 +268,6 @@ export class FreeOpenAICompatibleClient extends BaseFreeClient {
   ): Promise<StructuredResponse<T>> {
     const startTime = Date.now();
     let lastError: unknown;
-
-    let emptyFormats = 0;
-
     for (const format of STRUCTURED_FORMATS) {
       let completion: ChatCompletion;
       try {
@@ -232,7 +278,7 @@ export class FreeOpenAICompatibleClient extends BaseFreeClient {
             model: options.model,
             messages: [{ role: 'user', content: structuredPrompt(format, options.prompt, options.schema) }],
             ...(responseFormat ? { response_format: responseFormat } : {}),
-            ...routingFields(this.options.getBaseURL(), Boolean(responseFormat)),
+            ...routingFields(this.options.getBaseURL(), Boolean(responseFormat), options.options?.routing),
             ...(options.options?.temperature !== undefined && { temperature: options.options.temperature }),
           },
           signal: options.signal,
@@ -253,8 +299,13 @@ export class FreeOpenAICompatibleClient extends BaseFreeClient {
       const choice = completion.choices?.[0];
       const raw = contentText(choice?.message?.content);
       if (!raw.trim()) {
-        emptyFormats += 1;
-        lastError = emptyResponseError(this.provider, options.model, choice?.finish_reason, hasReasoning(choice?.message));
+        const details: EmptyResponseDetails = {
+          finishReason: choice?.finish_reason,
+          nativeFinishReason: choice?.native_finish_reason,
+          reasoningOnly: hasReasoning(choice?.message),
+        };
+        noteServedBy(details, completion);
+        lastError = emptyResponseError(this.provider, options.model, details);
         continue;
       }
       try {
@@ -274,7 +325,8 @@ export class FreeOpenAICompatibleClient extends BaseFreeClient {
       }
     }
 
-    if (emptyFormats === STRUCTURED_FORMATS.length && isProviderError(lastError)) throw lastError;
+    // An empty last format is reported as an empty reply (a ProviderError,
+    // passed through as it is), so the caller can fall back or retry.
     throw classifyProviderError(lastError ?? new Error('No structured output.'), {
       provider: this.provider,
       label: 'OpenAI-compatible structured output failed',
@@ -297,20 +349,22 @@ export class FreeOpenAICompatibleClient extends BaseFreeClient {
           messages: [{ role: 'user', content: options.prompt }],
           ...(options.streamOptions?.temperature !== undefined && { temperature: options.streamOptions.temperature }),
           ...(options.streamOptions?.seed !== undefined && { seed: options.streamOptions.seed }),
+          ...routingFields(this.options.getBaseURL(), false, options.streamOptions?.routing),
         },
         signal: options.signal,
       });
 
-      let finishReason: string | null | undefined;
-      let sawReasoning = false;
+      const details: EmptyResponseDetails = {};
       for await (const chunk of readServerSentEvents<ChatChunk>(response)) {
         const inBand = inBandErrorOf(chunk, this.provider);
         if (inBand) throw inBand;
+        noteServedBy(details, chunk);
         if (chunk.usage?.total_tokens) tokenCount = chunk.usage.total_tokens;
         usage = fromChatCompletionUsage(chunk.usage) ?? usage;
         const choice = chunk.choices?.[0];
-        if (choice?.finish_reason) finishReason = choice.finish_reason;
-        if (hasReasoning(choice?.delta)) sawReasoning = true;
+        if (choice?.finish_reason) details.finishReason = choice.finish_reason;
+        if (choice?.native_finish_reason) details.nativeFinishReason = choice.native_finish_reason;
+        if (hasReasoning(choice?.delta)) details.reasoningOnly = true;
         const content = contentText(choice?.delta?.content);
         if (content.length > 0) {
           fullResponse += content;
@@ -319,7 +373,7 @@ export class FreeOpenAICompatibleClient extends BaseFreeClient {
       }
 
       if (!fullResponse.trim()) {
-        throw emptyResponseError(this.provider, options.model, finishReason, sawReasoning);
+        throw emptyResponseError(this.provider, options.model, details);
       }
       options.onComplete(fullResponse, Date.now() - startTime, tokenCount > 0 ? tokenCount : undefined, usage);
     } catch (error) {

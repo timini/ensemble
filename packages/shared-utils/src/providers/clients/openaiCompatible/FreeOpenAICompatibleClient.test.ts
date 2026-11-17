@@ -201,7 +201,7 @@ describe('FreeOpenAICompatibleClient', () => {
       const onError = vi.fn();
       await makeClient(fetchMock).streamResponse('Hi', 'anthropic/claude', vi.fn(), onComplete, onError);
       expect(onComplete).not.toHaveBeenCalled();
-      expect(onError.mock.calls[0]![0].message).toMatch(/Empty response from anthropic\/claude \(finish_reason: stop\)/);
+      expect(onError.mock.calls[0]![0].message).toMatch(/Empty response from anthropic\/claude \(finish_reason: stop; completion_tokens: 0\)/);
     });
 
     it('says when a stream carried reasoning but no answer', async () => {
@@ -276,6 +276,59 @@ describe('FreeOpenAICompatibleClient', () => {
       const local = vi.fn().mockResolvedValue(json({ choices: [{ message: { content: '{"answer":"4"}' } }] }));
       await makeClient(local).generateStructured('q', 'm', schema);
       expect(bodyOf(local).provider).toBeUndefined();
+    });
+
+    it('names the finish reasons, host, id and completion tokens of an empty structured reply', async () => {
+      const fetchMock = vi.fn().mockImplementation(() =>
+        Promise.resolve(json({
+          id: 'gen-123',
+          provider: 'HostB',
+          choices: [{ message: { content: '' }, finish_reason: 'stop', native_finish_reason: 'end_turn' }],
+          usage: { prompt_tokens: 50, completion_tokens: 0, total_tokens: 50 },
+        })),
+      );
+      const error = await makeClient(fetchMock).generateStructured('q', 'm', schema).catch((e: Error) => e);
+      expect((error as Error).message).toMatch(/finish_reason: stop/);
+      expect((error as Error).message).toMatch(/native_finish_reason: end_turn/);
+      expect((error as Error).message).toMatch(/served by: HostB/);
+      expect((error as Error).message).toMatch(/id: gen-123/);
+      expect((error as Error).message).toMatch(/completion_tokens: 0/);
+    });
+
+    it('names the host of an empty stream from its chunks', async () => {
+      const fetchMock = vi.fn().mockResolvedValue(sse([
+        { id: 'gen-9', provider: 'HostB', choices: [{ delta: { content: '' } }] },
+        { id: 'gen-9', provider: 'HostB', choices: [{ delta: {}, finish_reason: 'stop', native_finish_reason: 'error' }],
+          usage: { prompt_tokens: 50, completion_tokens: 0, total_tokens: 50 } },
+        '[DONE]',
+      ]));
+      const onError = vi.fn();
+      await makeClient(fetchMock).streamResponse('q', 'm', vi.fn(), vi.fn(), onError);
+      const message = (onError.mock.calls[0]![0] as Error).message;
+      expect(message).toMatch(/Empty response from m/);
+      expect(message).toMatch(/native_finish_reason: error; served by: HostB; id: gen-9; completion_tokens: 0/);
+    });
+
+    it('sends routing preferences to OpenRouter and can turn require_parameters off', async () => {
+      const fetchMock = vi.fn().mockImplementation(() =>
+        Promise.resolve(json({ choices: [{ message: { content: '{"answer":"4"}' } }] })),
+      );
+      const client = new FreeOpenAICompatibleClient('openai-compatible', () => 'k', {
+        getBaseURL: () => 'https://openrouter.ai/api/v1',
+        fetchImpl: fetchMock,
+      });
+      await client.generateStructured('q', 'm', schema, { routing: { requireParameters: false } });
+      expect(bodyOf(fetchMock).provider).toBeUndefined();
+      await client.generateStructured('q', 'm', schema, { routing: { provider: { ignore: ['HostB'] } } });
+      expect(bodyOf(fetchMock, 1).provider).toEqual({ require_parameters: true, ignore: ['HostB'] });
+
+      const stream = vi.fn().mockResolvedValue(sse([{ choices: [{ delta: { content: 'ok' } }] }, '[DONE]']));
+      const streaming = new FreeOpenAICompatibleClient('openai-compatible', () => 'k', {
+        getBaseURL: () => 'https://openrouter.ai/api/v1',
+        fetchImpl: stream,
+      });
+      await streaming.streamResponse('q', 'm', vi.fn(), vi.fn(), vi.fn(), { routing: { provider: { ignore: ['HostB'] } } });
+      expect(bodyOf(stream).provider).toEqual({ ignore: ['HostB'] });
     });
 
     it('tries the next format when OpenRouter has no host for the requested parameters', async () => {
