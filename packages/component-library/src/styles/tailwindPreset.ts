@@ -1,5 +1,5 @@
 import type { Config } from 'tailwindcss';
-import plugin from 'tailwindcss/plugin';
+import type { PluginAPI } from 'tailwindcss/types/config';
 
 /**
  * Tailwind preset for Ensemble AI. Maps the CSS variables in tokens.css to
@@ -21,18 +21,25 @@ const typeStep = (name: string, extra: Record<string, string> = {}) =>
     Record<string, string>,
   ];
 
-/** Adds `focus-ring`: a 2px ring in the ring colour, shown for keyboard focus only. */
-const focusRing = plugin(({ addUtilities }) => {
-  addUtilities({
-    '.focus-ring': {
-      outline: '2px solid transparent',
-      'outline-offset': '2px',
-      '&:focus-visible': {
-        outline: '2px solid rgb(var(--color-ring))',
+/**
+ * Adds `focus-ring`: a 2px ring in the ring colour, shown for keyboard focus only.
+ * Written as a plain plugin object rather than with `tailwindcss/plugin`, so the
+ * preset has no runtime import and loads from packages that resolve their own
+ * tailwindcss (the standalone wireframes).
+ */
+const focusRing = {
+  handler: ({ addUtilities }: PluginAPI) => {
+    addUtilities({
+      '.focus-ring': {
+        outline: '2px solid transparent',
+        'outline-offset': '2px',
+        '&:focus-visible': {
+          outline: '2px solid rgb(var(--color-ring))',
+        },
       },
-    },
-  });
-});
+    });
+  },
+};
 
 const preset = {
   darkMode: 'class',
