@@ -71,6 +71,11 @@ test.describe('Consensus Methods (Free Mode)', () => {
       await expect(page.getByTestId('method-option-elo')).toBeEnabled();
       await page.getByTestId('method-option-elo').click();
       await expect(page.getByTestId('method-menu-trigger')).toContainText('Ranked');
+
+      // The Ranked top N field shows in the menu.
+      await page.getByTestId('method-menu-trigger').click();
+      await expect(page.getByTestId('input-top-n')).toBeVisible();
+      await page.keyboard.press('Escape');
     });
 
     await test.step('Ask and get a consensus', async () => {

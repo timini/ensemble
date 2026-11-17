@@ -103,6 +103,44 @@ describe('MethodMenu', () => {
     expect(onSummarizerChange).toHaveBeenCalledWith('openai/gpt-6');
   });
 
+  it('sets the top N for the Ranked method, kept between 3 and the maximum', () => {
+    const onTopNChange = vi.fn();
+    renderWithI18n(
+      <MethodMenu
+        method="elo"
+        onMethodChange={() => undefined}
+        estimates={sampleEstimates}
+        topN={3}
+        topNMax={5}
+        onTopNChange={onTopNChange}
+        defaultOpen
+      />,
+    );
+    const input = screen.getByRole('spinbutton', { name: 'Best answers merged' });
+    expect(input).toHaveValue(3);
+    fireEvent.change(input, { target: { value: '4' } });
+    expect(onTopNChange).toHaveBeenLastCalledWith(4);
+    fireEvent.change(input, { target: { value: '9' } });
+    expect(onTopNChange).toHaveBeenLastCalledWith(5);
+    fireEvent.change(input, { target: { value: '1' } });
+    expect(onTopNChange).toHaveBeenLastCalledWith(3);
+  });
+
+  it('shows the top N only for the Ranked method', () => {
+    renderWithI18n(
+      <MethodMenu method="standard" onMethodChange={() => undefined} estimates={sampleEstimates} onTopNChange={() => undefined} defaultOpen />,
+    );
+    expect(screen.queryByTestId('input-top-n')).not.toBeInTheDocument();
+  });
+
+  it('labels the top N in French', () => {
+    renderWithI18n(
+      <MethodMenu method="elo" onMethodChange={() => undefined} estimates={sampleEstimates} onTopNChange={() => undefined} defaultOpen />,
+      { language: 'fr' },
+    );
+    expect(screen.getByRole('spinbutton', { name: 'Meilleures réponses fusionnées' })).toBeInTheDocument();
+  });
+
   it('shows no counts for a method with no estimate yet', () => {
     renderWithI18n(<MethodMenu method="majority" onMethodChange={() => undefined} estimates={{}} />, { language: 'fr' });
     const trigger = screen.getByTestId('method-menu-trigger');

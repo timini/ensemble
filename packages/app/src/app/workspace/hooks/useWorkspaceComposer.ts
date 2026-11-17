@@ -22,7 +22,7 @@ type ComposerState = Omit<
  * Composer state from the store: the prompt draft, the ensemble as chips
  * with the models the user can add (providers with a working key and
  * connected endpoints), the consensus method with the calls and cost of
- * every method, the summarizer and the manual answers.
+ * every method, the summarizer, the Ranked top N and the manual answers.
  */
 export function useWorkspaceComposer(
   statuses: Record<Provider, ValidationStatus>,
@@ -41,6 +41,8 @@ export function useWorkspaceComposer(
   const setMethod = useStore((state) => state.setConsensusMethod);
   const summarizerModel = useStore((state) => state.summarizerModel);
   const setSummarizer = useStore((state) => state.setSummarizer);
+  const eloTopN = useStore((state) => state.eloTopN);
+  const setEloTopN = useStore((state) => state.setEloTopN);
   const manual = useStore((state) => state.manualResponses);
   const removeManual = useStore((state) => state.removeManualResponse);
 
@@ -102,5 +104,9 @@ export function useWorkspaceComposer(
         ? summarizerModel
         : models[0]?.id,
     onSummarizerChange: setSummarizer,
+    topN: eloTopN,
+    onTopNChange: setEloTopN,
+    // Ranked merges at most every answer of the run.
+    topNMax: models.length + (hasHydrated ? manual.length : 0),
   };
 }

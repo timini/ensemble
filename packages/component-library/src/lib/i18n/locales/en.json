@@ -273,6 +273,7 @@
       "unavailable_one": "Needs at least {{count}} answer",
       "unavailable_other": "Needs at least {{count}} answers",
       "summarizer": "Merged by",
+      "topN": "Best answers merged",
       "note": "Calls include every answer and the agreement score.",
       "methods": {
         "standard": {

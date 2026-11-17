@@ -46,6 +46,10 @@ export interface ComposerProps {
   summarizers?: SummarizerOption[];
   summarizerId?: string;
   onSummarizerChange?: (id: string) => void;
+  /** Top N for the Ranked method, passed to the method menu. */
+  topN?: number;
+  onTopNChange?: (n: number) => void;
+  topNMax?: number;
   /** Opens the manual answer sheet. */
   onAddManualResponse?: () => void;
   onSavePreset?: () => void;
@@ -139,6 +143,9 @@ export function Composer(props: ComposerProps) {
           summarizers={props.summarizers}
           summarizerId={props.summarizerId}
           onSummarizerChange={props.onSummarizerChange}
+          topN={props.topN}
+          onTopNChange={props.onTopNChange}
+          topNMax={props.topNMax}
           disabled={running}
         />
         <div className="ml-auto flex items-center gap-1">

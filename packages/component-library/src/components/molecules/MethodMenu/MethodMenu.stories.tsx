@@ -26,9 +26,18 @@ const meta = {
   render: function Render(args) {
     const [method, setMethod] = React.useState<ConsensusMethod>(args.method);
     const [summarizer, setSummarizer] = React.useState(args.summarizerId);
+    const [topN, setTopN] = React.useState(args.topN);
     return (
       <div className="min-h-[460px]">
-        <MethodMenu {...args} method={method} onMethodChange={setMethod} summarizerId={summarizer} onSummarizerChange={setSummarizer} />
+        <MethodMenu
+          {...args}
+          method={method}
+          onMethodChange={setMethod}
+          summarizerId={summarizer}
+          onSummarizerChange={setSummarizer}
+          topN={topN}
+          onTopNChange={args.onTopNChange && setTopN}
+        />
       </div>
     );
   },
@@ -42,6 +51,11 @@ export const Closed: Story = {};
 
 /** Open, with the summarizer choice. */
 export const Open: Story = { args: { defaultOpen: true } };
+
+/** Ranked: also sets how many of the best answers are merged. */
+export const RankedTopN: Story = {
+  args: { method: 'elo', defaultOpen: true, topN: 3, topNMax: 5, onTopNChange: () => undefined },
+};
 
 /** Two models: Ranked and Council need three answers. */
 export const TwoModels: Story = {

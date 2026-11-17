@@ -273,6 +273,7 @@
       "unavailable_one": "Nécessite au moins {{count}} réponse",
       "unavailable_other": "Nécessite au moins {{count}} réponses",
       "summarizer": "Fusionné par",
+      "topN": "Meilleures réponses fusionnées",
       "note": "Les appels comprennent chaque réponse et le score d'accord.",
       "methods": {
         "standard": {

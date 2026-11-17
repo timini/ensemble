@@ -7,12 +7,9 @@ import { usePopover } from '../../../lib/usePopover';
 import { moveFocus } from '../../../lib/rovingFocus';
 import { cn } from '../../../lib/utils';
 import { methodCostLabel } from './methodCost';
+import { MethodMenuFooter, type SummarizerOption } from './MethodMenuFooter';
 
-/** A model that can write the consensus. */
-export interface SummarizerOption {
-  id: string;
-  name: string;
-}
+export type { SummarizerOption } from './MethodMenuFooter';
 
 export interface MethodMenuProps {
   method: ConsensusMethod;
@@ -23,6 +20,14 @@ export interface MethodMenuProps {
   summarizers?: SummarizerOption[];
   summarizerId?: string;
   onSummarizerChange?: (id: string) => void;
+  /**
+   * How many of the best ranked answers the Ranked (elo) method merges. The
+   * field shows only while that method is chosen and `onTopNChange` is set.
+   */
+  topN?: number;
+  onTopNChange?: (n: number) => void;
+  /** Largest top N allowed, usually the number of answers. Defaults to 6. */
+  topNMax?: number;
   /** Start with the panel open (stories). */
   defaultOpen?: boolean;
   disabled?: boolean;
@@ -38,7 +43,8 @@ const minAnswers = (m: ConsensusMethod) => (m === 'elo' || m === 'council' ? MIN
  * MethodMenu molecule: the consensus method dropdown in the composer. Every
  * method shows its number of model calls and its cost range from
  * `estimateRun` before the run, so the user sees what Council costs before
- * choosing it. The footer picks the model that merges the answers.
+ * choosing it. The footer picks the model that merges the answers and, for
+ * the Ranked method, how many of the best answers are merged.
  * The methods form a radio group: the arrow keys move to the next available
  * method and check it, Enter or a click checks it and closes the menu.
  *
@@ -55,13 +61,15 @@ export function MethodMenu({
   summarizers,
   summarizerId,
   onSummarizerChange,
+  topN = MIN_ANSWERS_FOR_RANKING,
+  onTopNChange,
+  topNMax = 6,
   defaultOpen = false,
   disabled,
 }: MethodMenuProps) {
   const { t, i18n } = useTranslation();
   const popover = usePopover(defaultOpen);
   const listRef = React.useRef<HTMLDivElement>(null);
-  const selectId = React.useId();
   const locale = i18n.language || 'en';
   const name = (m: ConsensusMethod) => t(`molecules.methodMenu.methods.${m}.name`);
   const calls = (e: RunEstimate) => t('molecules.methodMenu.calls', { count: e.calls.total });
@@ -159,26 +167,15 @@ export function MethodMenu({
               );
             })}
           </div>
-          {summarizers && summarizers.length > 0 && (
-            <div className="mt-1 flex items-center justify-between gap-2 border-t border-border px-2.5 pb-1 pt-2.5 text-caption">
-              <label htmlFor={selectId} className="text-muted-foreground">
-                {t('molecules.methodMenu.summarizer')}
-              </label>
-              <select
-                id={selectId}
-                value={summarizerId}
-                onChange={(e) => onSummarizerChange?.(e.target.value)}
-                data-testid="method-menu-summarizer"
-                className="focus-ring h-8 max-w-[60%] truncate rounded-md border border-border bg-card px-2 text-caption font-medium"
-              >
-                {summarizers.map((s) => (
-                  <option key={s.id} value={s.id}>
-                    {s.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-          )}
+          <MethodMenuFooter
+            summarizers={summarizers}
+            summarizerId={summarizerId}
+            onSummarizerChange={onSummarizerChange}
+            showTopN={method === 'elo'}
+            topN={topN}
+            onTopNChange={onTopNChange}
+            topNMax={topNMax}
+          />
           <p className="px-2.5 pb-1.5 pt-1 text-caption text-muted-foreground">{t('molecules.methodMenu.note')}</p>
         </div>
       )}

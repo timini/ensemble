@@ -25,8 +25,8 @@ The app's `/workspace` screen is built from these parts. `Organisms/AppShell` ha
 | Component | Role |
 |-----------|------|
 | `AppShell` | Header (history toggle, logo, links, settings, account slot), history sidebar from 1024 px or a sheet below, main content with a skip link |
-| `HistorySidebar` | Past runs grouped by date with their agreement level, search, delete, presets |
-| `Composer` | Prompt, model chips (`ModelChip`) with the inline `ModelPicker`, `MethodMenu` with calls and cost per method from `estimateRun` and the summarizer choice, `ComposerOptions` (manual answer, save preset), Ctrl or Cmd + Enter |
+| `HistorySidebar` | Past runs grouped by date with their agreement level (a run with no known time is listed last, with no date), search, delete, presets |
+| `Composer` | Prompt, model chips (`ModelChip`) with the inline `ModelPicker`, `MethodMenu` with calls and cost per method from `estimateRun`, the summarizer choice and the Ranked top N, `ComposerOptions` (manual answer, save preset), Ctrl or Cmd + Enter |
 | `ConsensusPanel` | `AgreementSummary` (score ring, level, calibrated or uncalibrated label, pair scores, or why there is no score with a way into settings) next to `ConsensusAnswer` (answer, majority vote, compact `RunCostSummary`) |
 | `AnswerColumns` | `AnswerCard` per model: columns from 768 px, swipeable tabs with arrow key support below, streaming, waiting and error states with a retry per model |
 | `Sheet` | Radix dialog shown as a side panel from 768 px and a bottom sheet below; traps focus, closes on Escape |

@@ -117,6 +117,13 @@ describe('Composer', () => {
     expect(props.onMethodChange).toHaveBeenCalledWith('majority');
   });
 
+  it('passes the Ranked top N through to the method menu', () => {
+    const props = setup({ method: 'elo', topN: 3, topNMax: 4, onTopNChange: vi.fn() });
+    fireEvent.click(screen.getByTestId('method-menu-trigger'));
+    fireEvent.change(screen.getByTestId('input-top-n'), { target: { value: '4' } });
+    expect(props.onTopNChange).toHaveBeenCalledWith(4);
+  });
+
   it('opens the manual answer sheet from the options menu', () => {
     const onAddManualResponse = vi.fn();
     setup({ onAddManualResponse });

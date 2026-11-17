@@ -30,6 +30,13 @@ test.describe('Consensus methods', () => {
     await selectMockModels(page, ['gpt-6-astra', 'gpt-6-luna', 'claude-haiku-5-5']);
     await chooseMethod(page, 'elo');
     await expect(page.getByTestId('method-menu-trigger')).toContainText('Ranked');
+
+    // Ranked also sets how many of the best answers are merged.
+    await page.getByTestId('method-menu-trigger').click();
+    const topN = page.getByTestId('input-top-n');
+    await expect(topN).toBeVisible();
+    await expect(topN).toHaveValue('3');
+    await expect(topN).toHaveAttribute('max', '3');
   });
 
   test('shows the majority vote breakdown with a winner', async ({ page }) => {
