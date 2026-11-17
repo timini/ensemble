@@ -42,7 +42,21 @@ export const Unreachable: Story = {
 
 /** Connected, but the embedding model is not in the server's list (not pulled yet). */
 export const EmbeddingModelMissing: Story = {
+  args: { endpoint: { ...ollama, id: 'lmstudio', presetId: 'lmstudio', label: 'LM Studio', embeddingModelFound: false } },
+};
+
+/** Ollama without the embedding model: the exact pull command is shown. */
+export const OllamaEmbeddingModelMissing: Story = {
   args: { endpoint: { ...ollama, embeddingModelFound: false } },
+};
+
+/** The hosted site was not allowed to reach this computer: the local run command is shown. */
+export const LocalBlocked: Story = {
+  args: {
+    endpoint: { ...ollama, status: 'invalid', errorCode: 'localBlocked' },
+    localRunCommand: 'npm run local',
+    guideUrl: 'https://github.com/timini/ensemble/blob/main/docs/LOCAL_MODELS.md',
+  },
 };
 
 /** A local preset pointed at a remote host: no Local badge, since it may be paid. */

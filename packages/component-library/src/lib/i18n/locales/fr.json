@@ -39,6 +39,11 @@
     },
     "endpointLogo": {
       "label": "Logo {{name}}"
+    },
+    "commandSnippet": {
+      "copy": "Copier",
+      "copied": "Copié",
+      "copyLabel": "Copier la commande"
     }
   },
   "molecules": {
@@ -188,8 +193,36 @@
       "embeddingModelMissing": "{{model}} ne figure pas dans la liste des modèles de ce serveur ; il ne sert donc pas aux scores d'accord.",
       "errors": {
         "baseUrlRequired": "L'URL de base est obligatoire.",
-        "unreachable": "Point de terminaison injoignable."
-      }
+        "unreachable": "Point de terminaison injoignable.",
+        "localBlocked": "Votre navigateur n'a pas laissé ce site joindre un serveur sur votre ordinateur."
+      },
+      "ollamaEmbeddingMissing": "{{model}} n'est pas installé dans Ollama ; il n'y a donc pas encore de score d'accord. Installez-le avec :"
+    },
+    "localServerHelp": {
+      "blocked": "Chrome et Firefox demandent l'autorisation avant qu'un site web joigne des serveurs sur votre ordinateur ; si la demande a été fermée ou refusée, autorisez l'accès au réseau local dans les paramètres du site. Safari bloque ces appels depuis les sites HTTPS. Le serveur doit aussi accepter ce site (pour Ollama, définissez OLLAMA_ORIGINS).",
+      "notFound": "Démarrez Ollama et cherchez à nouveau. S'il tourne déjà, votre navigateur empêche peut-être ce site de le joindre.",
+      "runLocally": "Le moyen le plus fiable d'utiliser des modèles locaux est de lancer Ensemble sur votre ordinateur, sans autorisation ni réglage OLLAMA_ORIGINS :",
+      "guideLink": "Guide des modèles locaux"
+    },
+    "ollamaDetectedNotice": {
+      "foundTitle": "Ollama tourne sur cet ordinateur",
+      "models_one": "{{count}} modèle de chat installé : {{models}}.",
+      "models_other": "{{count}} modèles de chat installés : {{models}}.",
+      "noChatModels": "Aucun modèle de chat n'est encore installé. Installez-en un petit avec :",
+      "embedding": "Les scores d'accord utiliseront {{model}}.",
+      "noEmbedding": "Aucun modèle d'embedding n'est installé ; il n'y aura donc pas de score d'accord. Installez-en un avec :",
+      "add": "Ajouter Ollama",
+      "dismiss": "Pas maintenant",
+      "askTitle": "Vous utilisez Ollama ?",
+      "askDescription": "Ensemble peut chercher Ollama sur cet ordinateur. Votre navigateur peut demander si ce site peut joindre des serveurs locaux.",
+      "check": "Chercher Ollama",
+      "checkingTitle": "Vous utilisez Ollama ?",
+      "checkingDescription": "Recherche d'Ollama sur cet ordinateur.",
+      "checking": "Recherche d'Ollama...",
+      "notFoundTitle": "Ollama est introuvable",
+      "notFoundDescription": "Ollama n'a pas répondu.",
+      "notFoundLocal": "Ollama n'a pas répondu sur http://localhost:11434. Démarrez-le (ouvrez l'application Ollama ou lancez ollama serve) et cherchez à nouveau.",
+      "checkAgain": "Chercher à nouveau"
     }
   },
   "organisms": {
@@ -358,7 +391,8 @@
       "presetLabel": "Type de point de terminaison",
       "add": "Ajouter un point de terminaison",
       "empty": "Aucun point de terminaison. Choisissez un type et ajoutez-en un.",
-      "localHint": "Les serveurs locaux doivent accepter les requêtes de ce site. Pour Ollama, définissez OLLAMA_ORIGINS."
+      "localHint": "Les serveurs locaux doivent accepter les requêtes de ce site (pour Ollama, définissez OLLAMA_ORIGINS), et certains navigateurs les bloquent depuis le site hébergé.",
+      "guideLink": "Guide d'installation des modèles locaux"
     }
   },
   "providers": {
@@ -395,7 +429,7 @@
       "newComparisonButton": "Nouvelle Comparaison",
       "startOverButton": "Recommencer",
       "agreementUnavailableTitle": "Pas de score d'accord",
-      "agreementUnavailableDescription": "Le score d'accord nécessite un fournisseur d'embeddings. Ajoutez une clé API OpenAI ou Google valide sur la page de configuration.",
+      "agreementUnavailableDescription": "Le score d'accord nécessite un fournisseur d'embeddings. Ajoutez une clé API OpenAI ou Google valide, ou un endpoint avec un modèle d'embedding, sur la page de configuration.",
       "agreementErrorTitle": "Le score d'accord n'a pas pu être calculé",
       "agreementErrorDescription": "Le fournisseur d'embeddings n'a pas renvoyé de résultat pour assez de réponses. Vérifiez votre clé API et réessayez.",
       "agreementPartialNote": "Exclues du score d'accord car leurs embeddings n'ont pas pu être générés : {{models}}.",
@@ -406,7 +440,8 @@
       "runExclusionCount": "Le consensus et l'accord utilisent les {{succeeded}} réponses sur {{total}} qui ont abouti.",
       "runExclusionCountNoAgreement": "Le consensus utilise les {{succeeded}} réponses sur {{total}} qui ont abouti.",
       "consensusInsufficientTitle": "Pas de consensus pour cette exécution",
-      "consensusInsufficientDescription": "Le consensus et l'accord nécessitent au moins 2 réponses, et seulement {{count}} modèle(s) sur {{total}} ont répondu. Réessayez les modèles en échec ci-dessous."
+      "consensusInsufficientDescription": "Le consensus et l'accord nécessitent au moins 2 réponses, et seulement {{count}} modèle(s) sur {{total}} ont répondu. Réessayez les modèles en échec ci-dessous.",
+      "agreementOllamaPull": "Votre serveur Ollama n'a pas de modèle d'embedding. Installez-en un, puis ouvrez la page de configuration pour qu'Ensemble le trouve :"
     }
   }
 }

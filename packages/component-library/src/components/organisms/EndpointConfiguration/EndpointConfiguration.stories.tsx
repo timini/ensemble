@@ -83,4 +83,13 @@ function Interactive() {
 }
 
 /** Add, edit and remove endpoints. */
+/** With the local models guide linked, and a local server the hosted site could not reach. */
+export const WithGuideAndBlockedLocal: Story = {
+  args: {
+    guideUrl: 'https://github.com/timini/ensemble/blob/main/docs/LOCAL_MODELS.md',
+    localRunCommand: 'npm run local',
+    endpoints: [{ ...ollama, status: 'invalid', errorCode: 'localBlocked' }],
+  },
+};
+
 export const AddAndRemove: Story = { render: () => <Interactive /> };

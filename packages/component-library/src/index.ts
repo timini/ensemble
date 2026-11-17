@@ -32,6 +32,7 @@ export {
 export { LoadingSpinner, type LoadingSpinnerProps } from './components/atoms/LoadingSpinner';
 export { Tag, tagVariants, type TagProps } from './components/atoms/Tag';
 export { InlineAlert, type InlineAlertProps } from './components/atoms/InlineAlert';
+export { CommandSnippet, type CommandSnippetProps } from './components/atoms/CommandSnippet';
 export { Textarea, type TextareaProps } from './components/atoms/Textarea';
 export { Label, labelVariants, type LabelProps } from './components/atoms/Label';
 export {
@@ -98,6 +99,20 @@ export {
   type EndpointValidationStatus,
   type EndpointErrorCode,
 } from './components/molecules/EndpointInput';
+export {
+  EndpointEmbeddingField,
+  type EndpointEmbeddingFieldProps,
+} from './components/molecules/EndpointEmbeddingField';
+export {
+  LocalServerHelp,
+  type LocalServerHelpProps,
+  type LocalServerHelpReason,
+} from './components/molecules/LocalServerHelp';
+export {
+  OllamaDetectedNotice,
+  type OllamaDetectedNoticeProps,
+  type OllamaNoticeState,
+} from './components/molecules/OllamaDetectedNotice';
 export {
   ConsensusPresetSelector,
   type ConsensusPresetSelectorProps,

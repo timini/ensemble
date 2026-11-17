@@ -66,4 +66,39 @@ describe('EndpointConfiguration', () => {
     await user.click(screen.getByTestId('endpoint-ollama-remove'));
     expect(onRemove).toHaveBeenCalledWith('ollama');
   });
+
+  it('links the local models guide when given', () => {
+    const { rerender } = render(
+      <EndpointConfiguration endpoints={[]} presets={presets} onAdd={vi.fn()} onChange={vi.fn()} onRemove={vi.fn()} />,
+    );
+    expect(screen.queryByTestId('endpoint-configuration-guide')).not.toBeInTheDocument();
+    rerender(
+      <EndpointConfiguration
+        endpoints={[]}
+        presets={presets}
+        guideUrl="https://example.com/guide"
+        onAdd={vi.fn()}
+        onChange={vi.fn()}
+        onRemove={vi.fn()}
+      />,
+    );
+    expect(screen.getByTestId('endpoint-configuration-guide')).toHaveAttribute('href', 'https://example.com/guide');
+    expect(screen.getByTestId('endpoint-configuration-guide')).toHaveTextContent('Setup guide for local models');
+  });
+
+  it('passes the local run command to an endpoint the browser blocked', () => {
+    render(
+      <EndpointConfiguration
+        endpoints={[{ ...endpoint, status: 'invalid', errorCode: 'localBlocked' }]}
+        presets={presets}
+        localRunCommand="npm run local -- --port 4000"
+        onAdd={vi.fn()}
+        onChange={vi.fn()}
+        onRemove={vi.fn()}
+      />,
+    );
+    expect(screen.getByTestId('endpoint-ollama-local-help-command-command')).toHaveTextContent(
+      'npm run local -- --port 4000',
+    );
+  });
 });

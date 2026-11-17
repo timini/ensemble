@@ -26,6 +26,10 @@ export interface EndpointConfigurationProps {
   onChange: (endpointId: string, field: EndpointField, value: string) => void;
   /** Called when an endpoint is removed. */
   onRemove: (endpointId: string) => void;
+  /** Link to the local models setup guide. */
+  guideUrl?: string;
+  /** Command that runs Ensemble locally, shown when the browser blocks a local server. */
+  localRunCommand?: string;
 }
 
 /**
@@ -50,6 +54,8 @@ export function EndpointConfiguration({
   onAdd,
   onChange,
   onRemove,
+  guideUrl,
+  localRunCommand,
 }: EndpointConfigurationProps) {
   const { t } = useTranslation();
   const prefix = 'organisms.endpointConfiguration';
@@ -61,7 +67,20 @@ export function EndpointConfiguration({
           {t(`${prefix}.heading`)}
         </Heading>
         <p className="text-sm text-muted-foreground">{t(`${prefix}.description`)}</p>
-        <p className="text-xs text-muted-foreground">{t(`${prefix}.localHint`)}</p>
+        <p className="text-xs text-muted-foreground">
+          {t(`${prefix}.localHint`)}{' '}
+          {guideUrl && (
+            <a
+              href={guideUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              data-testid="endpoint-configuration-guide"
+              className="text-primary underline-offset-4 hover:underline"
+            >
+              {t(`${prefix}.guideLink`)}
+            </a>
+          )}
+        </p>
       </div>
 
       {endpoints.length === 0 ? (
@@ -76,6 +95,8 @@ export function EndpointConfiguration({
               endpoint={endpoint}
               onChange={(field, value) => onChange(endpoint.id, field, value)}
               onRemove={() => onRemove(endpoint.id)}
+              guideUrl={guideUrl}
+              localRunCommand={localRunCommand}
             />
           ))}
         </div>

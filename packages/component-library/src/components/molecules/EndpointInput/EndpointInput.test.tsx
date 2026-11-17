@@ -56,14 +56,66 @@ describe('EndpointInput', () => {
   });
 
   it('warns when the embedding model is not in the server list', () => {
+    const lmstudio = { ...ollama, id: 'lmstudio', presetId: 'lmstudio' as const, label: 'LM Studio' };
+    const { rerender } = render(
+      <EndpointInput endpoint={{ ...lmstudio, embeddingModelFound: false }} onChange={vi.fn()} onRemove={vi.fn()} />,
+    );
+    expect(screen.getByTestId('endpoint-lmstudio-embedding-missing')).toHaveTextContent(
+      'nomic-embed-text is not in this server',
+    );
+    expect(screen.queryByTestId('endpoint-lmstudio-embedding-pull')).not.toBeInTheDocument();
+    rerender(<EndpointInput endpoint={{ ...lmstudio, embeddingModelFound: true }} onChange={vi.fn()} onRemove={vi.fn()} />);
+    expect(screen.queryByTestId('endpoint-lmstudio-embedding-missing')).not.toBeInTheDocument();
+  });
+
+  it('gives the exact ollama pull command when Ollama has no embedding model', () => {
     const { rerender } = render(
       <EndpointInput endpoint={{ ...ollama, embeddingModelFound: false }} onChange={vi.fn()} onRemove={vi.fn()} />,
     );
     expect(screen.getByTestId('endpoint-ollama-embedding-missing')).toHaveTextContent(
-      'nomic-embed-text is not in this server',
+      'nomic-embed-text is not installed',
     );
-    rerender(<EndpointInput endpoint={{ ...ollama, embeddingModelFound: true }} onChange={vi.fn()} onRemove={vi.fn()} />);
-    expect(screen.queryByTestId('endpoint-ollama-embedding-missing')).not.toBeInTheDocument();
+    expect(screen.getByTestId('endpoint-ollama-embedding-pull-command')).toHaveTextContent(
+      'ollama pull nomic-embed-text',
+    );
+    rerender(
+      <EndpointInput
+        endpoint={{ ...ollama, embeddingModel: '', embeddingModelFound: false }}
+        onChange={vi.fn()}
+        onRemove={vi.fn()}
+      />,
+    );
+    expect(screen.getByTestId('endpoint-ollama-embedding-pull-command')).toHaveTextContent(
+      'ollama pull nomic-embed-text',
+    );
+  });
+
+  it('explains a call the browser blocked and gives the local run command', () => {
+    render(
+      <EndpointInput
+        endpoint={{ ...ollama, status: 'invalid', errorCode: 'localBlocked' }}
+        localRunCommand="npm run local"
+        guideUrl="https://example.com/guide"
+        onChange={vi.fn()}
+        onRemove={vi.fn()}
+      />,
+    );
+    expect(screen.getByTestId('endpoint-ollama-status')).toHaveTextContent(
+      'Could not connect: Your browser did not let this site reach a server on your computer.',
+    );
+    expect(screen.getByTestId('endpoint-ollama-local-help')).toHaveAttribute('data-reason', 'blocked');
+    expect(screen.getByTestId('endpoint-ollama-local-help-command-command')).toHaveTextContent('npm run local');
+  });
+
+  it('shows no local run help for other failures', () => {
+    render(
+      <EndpointInput
+        endpoint={{ ...ollama, status: 'invalid', errorCode: 'unreachable' }}
+        onChange={vi.fn()}
+        onRemove={vi.fn()}
+      />,
+    );
+    expect(screen.queryByTestId('endpoint-ollama-local-help')).not.toBeInTheDocument();
   });
 
   it('translates the name of a Custom endpoint and keeps its number', () => {

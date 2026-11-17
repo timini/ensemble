@@ -39,6 +39,11 @@
     },
     "endpointLogo": {
       "label": "{{name}} logo"
+    },
+    "commandSnippet": {
+      "copy": "Copy",
+      "copied": "Copied",
+      "copyLabel": "Copy command"
     }
   },
   "molecules": {
@@ -188,8 +193,36 @@
       "embeddingModelMissing": "{{model}} is not in this server's model list, so it is not used for agreement scores.",
       "errors": {
         "baseUrlRequired": "Base URL is required.",
-        "unreachable": "Could not reach the endpoint."
-      }
+        "unreachable": "Could not reach the endpoint.",
+        "localBlocked": "Your browser did not let this site reach a server on your computer."
+      },
+      "ollamaEmbeddingMissing": "{{model}} is not installed in Ollama, so there is no agreement score yet. Install it with:"
+    },
+    "localServerHelp": {
+      "blocked": "Chrome and Firefox ask before a website may reach servers on your computer; if the prompt was dismissed or blocked, allow local network access in the site settings. Safari blocks these calls from HTTPS sites. The server must also allow this site (for Ollama, set OLLAMA_ORIGINS).",
+      "notFound": "Start Ollama and look again. If it is running, your browser may be stopping this site from reaching it.",
+      "runLocally": "The most reliable way to use local models is to run Ensemble on your computer, where no permission or OLLAMA_ORIGINS setting is needed:",
+      "guideLink": "Local models guide"
+    },
+    "ollamaDetectedNotice": {
+      "foundTitle": "Ollama is running on this computer",
+      "models_one": "{{count}} chat model installed: {{models}}.",
+      "models_other": "{{count}} chat models installed: {{models}}.",
+      "noChatModels": "No chat models are installed yet. Install a small one with:",
+      "embedding": "Agreement scores will use {{model}}.",
+      "noEmbedding": "No embedding model is installed, so there will be no agreement score. Install one with:",
+      "add": "Add Ollama",
+      "dismiss": "Not now",
+      "askTitle": "Using Ollama?",
+      "askDescription": "Ensemble can look for Ollama on this computer. Your browser may ask whether this site may reach local servers.",
+      "check": "Look for Ollama",
+      "checkingTitle": "Using Ollama?",
+      "checkingDescription": "Looking for Ollama on this computer.",
+      "checking": "Looking for Ollama...",
+      "notFoundTitle": "Ollama was not found",
+      "notFoundDescription": "Ollama did not answer.",
+      "notFoundLocal": "Ollama did not answer at http://localhost:11434. Start it (open the Ollama app, or run ollama serve) and look again.",
+      "checkAgain": "Look again"
     }
   },
   "organisms": {
@@ -358,7 +391,8 @@
       "presetLabel": "Endpoint type",
       "add": "Add endpoint",
       "empty": "No endpoints yet. Pick a type and add one.",
-      "localHint": "Local servers must allow requests from this site. For Ollama, set OLLAMA_ORIGINS."
+      "localHint": "Local servers must allow requests from this site (for Ollama, set OLLAMA_ORIGINS), and some browsers block them from the hosted site.",
+      "guideLink": "Setup guide for local models"
     }
   },
   "providers": {
@@ -395,7 +429,7 @@
       "newComparisonButton": "New Comparison",
       "startOverButton": "Start Over",
       "agreementUnavailableTitle": "No agreement score",
-      "agreementUnavailableDescription": "Scoring agreement needs an embeddings provider. Add a valid OpenAI or Google API key on the configuration page.",
+      "agreementUnavailableDescription": "Scoring agreement needs an embeddings provider. Add a valid OpenAI or Google API key, or an endpoint with an embedding model, on the configuration page.",
       "agreementErrorTitle": "Agreement could not be scored",
       "agreementErrorDescription": "The embeddings provider did not return results for enough answers. Check your API key and try again.",
       "agreementPartialNote": "Left out of the agreement score because their embeddings could not be generated: {{models}}.",
@@ -406,7 +440,8 @@
       "runExclusionCount": "Consensus and agreement use the {{succeeded}} of {{total}} model answers that succeeded.",
       "runExclusionCountNoAgreement": "Consensus uses the {{succeeded}} of {{total}} model answers that succeeded.",
       "consensusInsufficientTitle": "No consensus for this run",
-      "consensusInsufficientDescription": "Consensus and agreement need at least 2 answers, and only {{count}} of {{total}} models answered. Retry the failed models below."
+      "consensusInsufficientDescription": "Consensus and agreement need at least 2 answers, and only {{count}} of {{total}} models answered. Retry the failed models below.",
+      "agreementOllamaPull": "Your Ollama server has no embedding model. Install one, then open the configuration page so Ensemble finds it:"
     }
   }
 }

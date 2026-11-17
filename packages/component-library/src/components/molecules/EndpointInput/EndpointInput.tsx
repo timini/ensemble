@@ -4,45 +4,14 @@ import { Eye, EyeOff, Trash2 } from 'lucide-react';
 import { Input } from '../../atoms/Input';
 import { Label } from '../../atoms/Label';
 import { Badge } from '../../atoms/Badge';
-import { EndpointLogo, type EndpointLogoPreset } from '../../atoms/EndpointLogo';
+import { EndpointLogo } from '../../atoms/EndpointLogo';
+import { LocalServerHelp } from '../LocalServerHelp';
+import { EndpointEmbeddingField } from '../EndpointEmbeddingField';
 import { cn } from '@/lib/utils';
 
-export type EndpointValidationStatus = 'idle' | 'validating' | 'valid' | 'invalid';
+import type { EndpointField, EndpointInputValue, EndpointValidationStatus } from './EndpointInput.types';
 
-/** The fields of an endpoint the user can edit. */
-export type EndpointField = 'baseURL' | 'apiKey' | 'embeddingModel';
-
-/** Check failures that happen before the server answers. They are translated here. */
-export type EndpointErrorCode = 'baseUrlRequired' | 'unreachable';
-
-/** One configured OpenAI-compatible endpoint, as shown in the form. */
-export interface EndpointInputValue {
-  /** Endpoint id, unique among the configured endpoints. */
-  id: string;
-  /** Preset it was made from; picks the logo. */
-  presetId: EndpointLogoPreset;
-  /** Display name, such as "Ollama" or "OpenRouter 2". For Custom the translated name is shown instead. */
-  label: string;
-  baseURL: string;
-  apiKey: string;
-  embeddingModel: string;
-  status: EndpointValidationStatus;
-  /** Error from the server in the last check, shown when status is `invalid`. */
-  error?: string;
-  /** A check failure without a server message. Shown translated, in place of `error`. */
-  errorCode?: EndpointErrorCode;
-  /**
-   * Whether the last check found the embedding model in the server's model
-   * list. When false a hint says it will not be used for agreement scores.
-   */
-  embeddingModelFound?: boolean;
-  /** Models the endpoint listed in the last check. */
-  modelCount?: number;
-  /** Runs on the user's machine. Shows a Local badge. */
-  local: boolean;
-  /** The hosted service needs a key. Otherwise the key is labelled optional. */
-  requiresKey: boolean;
-}
+export type { EndpointErrorCode, EndpointField, EndpointInputValue, EndpointValidationStatus } from './EndpointInput.types';
 
 export interface EndpointInputProps {
   endpoint: EndpointInputValue;
@@ -50,6 +19,10 @@ export interface EndpointInputProps {
   onChange: (field: EndpointField, value: string) => void;
   /** Called when the user removes the endpoint. */
   onRemove: () => void;
+  /** Command that runs Ensemble locally, shown when the browser blocked a call to this computer. */
+  localRunCommand?: string;
+  /** Link to the local models guide. */
+  guideUrl?: string;
   className?: string;
 }
 
@@ -82,19 +55,23 @@ function displayName(endpoint: EndpointInputValue, customLabel: string): string 
  * />
  * ```
  */
-export function EndpointInput({ endpoint, onChange, onRemove, className }: EndpointInputProps) {
+export function EndpointInput({
+  endpoint,
+  onChange,
+  onRemove,
+  localRunCommand = 'npm run local',
+  guideUrl,
+  className,
+}: EndpointInputProps) {
   const { t } = useTranslation();
   const [showKey, setShowKey] = React.useState(false);
   const prefix = 'molecules.endpointInput';
   const testId = `endpoint-${endpoint.id}`;
   const name = displayName(endpoint, t(`${prefix}.customLabel`));
   const errorText = endpoint.errorCode ? t(`${prefix}.errors.${endpoint.errorCode}`) : (endpoint.error ?? '');
-  const embeddingMissing =
-    endpoint.status === 'valid' && endpoint.embeddingModel.trim() !== '' && endpoint.embeddingModelFound === false;
   const ids = {
     baseURL: React.useId(),
     apiKey: React.useId(),
-    embeddingModel: React.useId(),
   };
 
   const statusText =
@@ -167,21 +144,13 @@ export function EndpointInput({ endpoint, onChange, onRemove, className }: Endpo
             </button>
           </div>
         </div>
-        <div className="space-y-1">
-          <Label htmlFor={ids.embeddingModel}>{t(`${prefix}.embeddingModel`)}</Label>
-          <Input
-            id={ids.embeddingModel}
-            value={endpoint.embeddingModel}
-            onChange={(e) => onChange('embeddingModel', e.target.value)}
-            data-testid={`${testId}-embedding-model`}
-          />
-          <p className="text-xs text-muted-foreground">{t(`${prefix}.embeddingModelHelp`)}</p>
-          {embeddingMissing && (
-            <p className="text-xs text-muted-foreground" data-testid={`${testId}-embedding-missing`}>
-              {t(`${prefix}.embeddingModelMissing`, { model: endpoint.embeddingModel.trim() })}
-            </p>
-          )}
-        </div>
+        <EndpointEmbeddingField
+          endpointId={endpoint.id}
+          presetId={endpoint.presetId}
+          value={endpoint.embeddingModel}
+          missing={endpoint.status === 'valid' && endpoint.embeddingModelFound === false}
+          onChange={(value) => onChange('embeddingModel', value)}
+        />
       </div>
 
       <p
@@ -191,6 +160,14 @@ export function EndpointInput({ endpoint, onChange, onRemove, className }: Endpo
       >
         {statusText}
       </p>
+      {endpoint.status === 'invalid' && endpoint.errorCode === 'localBlocked' && (
+        <LocalServerHelp
+          reason="blocked"
+          localRunCommand={localRunCommand}
+          guideUrl={guideUrl}
+          data-testid={`${testId}-local-help`}
+        />
+      )}
     </div>
   );
 }

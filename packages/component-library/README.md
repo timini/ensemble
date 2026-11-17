@@ -6,17 +6,17 @@ The package is not built or published. It points `main` and `types` at `src/inde
 
 ## Components
 
-### Atoms (22)
+### Atoms (24)
 
-Avatar, Badge, Button, Card, Dialog, Heading, Icon, InlineAlert, Input, Label, Link, LoadingSpinner, Markdown, ModelLogo, Progress, ProviderLogo, Rating, Select, Separator, Tag, Text, Textarea
+Avatar, Badge, Button, Card, CommandSnippet, Dialog, EndpointLogo, Heading, Icon, InlineAlert, Input, Label, Link, LoadingSpinner, Markdown, ModelLogo, Progress, ProviderLogo, Rating, Select, Separator, Tag, Text, Textarea
 
-### Molecules (14)
+### Molecules (18)
 
-ApiKeyInput, ConsensusPresetSelector, EmbeddingsProviderSelector, EnsembleHeader, Footer, MajorityVoteBreakdown, ModelCard, ModeSelectionCard, ProgressSteps, PromptInput, ResponseCard, ResponseErrorNotice, RunCostSummary, SummarizerIndicator
+ApiKeyInput, ConsensusPresetSelector, EmbeddingsProviderSelector, EndpointEmbeddingField, EndpointInput, EnsembleHeader, Footer, LocalServerHelp, MajorityVoteBreakdown, ModelCard, ModeSelectionCard, OllamaDetectedNotice, ProgressSteps, PromptInput, ResponseCard, ResponseErrorNotice, RunCostSummary, SummarizerIndicator
 
-### Organisms (16)
+### Organisms (17)
 
-AgreementAnalysis, ApiKeyConfiguration, ApiKeyConfigurationModal, ConsensusCard, EnsembleConfigurationSummary, EnsembleManagementPanel, EnsembleSidebar, ManualResponseModal, ModelSelectionList, ModeSelector, PageHero, PromptCard, PromptInputWithHint, PromptTips, SettingsModal, WorkflowNavigator
+AgreementAnalysis, ApiKeyConfiguration, ApiKeyConfigurationModal, ConsensusCard, EndpointConfiguration, EnsembleConfigurationSummary, EnsembleManagementPanel, EnsembleSidebar, ManualResponseModal, ModelSelectionList, ModeSelector, PageHero, PromptCard, PromptInputWithHint, PromptTips, SettingsModal, WorkflowNavigator
 
 There is no templates level. `src/components/foundations/ColorPalette.stories.tsx` documents the colour tokens.
 
