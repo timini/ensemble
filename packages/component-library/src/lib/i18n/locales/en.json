@@ -11,7 +11,8 @@
       "features": "Features",
       "about": "About",
       "github": "GitHub",
-      "copyright": "© {{year}} Ensemble AI"
+      "copyright": "© {{year}} Ensemble AI",
+      "benchmarks": "Benchmarks"
     },
     "steps": {
       "config": "Config",
@@ -223,6 +224,16 @@
       "notFoundDescription": "Ollama did not answer.",
       "notFoundLocal": "Ollama did not answer at {{url}}. Start it (open the Ollama app, or run ollama serve) and look again.",
       "checkAgain": "Look again"
+    },
+    "accuracyInterval": {
+      "label": "Accuracy {{value}}%, 95% interval {{lower}}% to {{upper}}%",
+      "range": "95% CI {{lower}} to {{upper}}"
+    },
+    "benchmarksNotRun": {
+      "title": "Benchmarks not run yet",
+      "description": "No measured results are published. This page shows numbers only after the benchmark matrix has been run. Until then it shows the method and what a run will cost.",
+      "estimate": "Estimated cost of a full run: ${{low}} to ${{high}} for {{calls}} model calls.",
+      "commandLabel": "Run it yourself:"
     }
   },
   "organisms": {
@@ -237,7 +248,10 @@
       "confidence": "Confidence: {{percent}}%",
       "responsesAnalyzed": "RESPONSES ANALYZED",
       "comparisons": "COMPARISONS",
-      "avgConfidence": "AVG CONFIDENCE"
+      "avgConfidence": "AVG CONFIDENCE",
+      "uncalibrated": "Uncalibrated",
+      "uncalibratedHint": "High, medium and low use the default mapping because this embedding model has not been calibrated against benchmark answers yet.",
+      "calibrated": "Calibrated for {{model}}"
     },
     "apiKeyConfiguration": {
       "heading": "Configure API Keys",
@@ -393,6 +407,41 @@
       "empty": "No endpoints yet. Pick a type and add one.",
       "localHint": "Local servers must allow requests from this site (for Ollama, set OLLAMA_ORIGINS), and some browsers block them from the hosted site.",
       "guideLink": "Setup guide for local models"
+    },
+    "benchmarkResultsTable": {
+      "questions_one": "{{count}} question",
+      "questions_other": "{{count}} questions",
+      "configuration": "Configuration",
+      "accuracy": "Accuracy (95% CI)",
+      "pValue": "p vs best single model",
+      "cost": "Cost",
+      "kind": {
+        "single": "Single model",
+        "ensemble": "Ensemble",
+        "reference": "Reference"
+      },
+      "best": "Best single model",
+      "notTested": "Not tested",
+      "costLowerBound": "at least {{cost}}",
+      "failures_one": "{{count}} failed call",
+      "failures_other": "{{count}} failed calls"
+    },
+    "benchmarkMethod": {
+      "title": "Method",
+      "datasets": "Datasets: {{list}}. Up to {{sample}} questions each, sampled with seed {{questionSeed}}.",
+      "scoring": "Multiple-choice options are shuffled with seed {{optionSeed}}. Every model gives a structured final answer, which is read and scored mechanically, with no LLM judge. Failed or timed-out calls count as wrong.",
+      "models": "Open models, each alone and together as an ensemble: {{list}}.",
+      "ensemble": "Ensemble methods: {{list}}.",
+      "strategy": {
+        "majority": "mechanical majority vote",
+        "standard": "standard consensus written by {{summarizer}}",
+        "elo": "ELO ranking",
+        "council": "council"
+      },
+      "reference": "Premium reference, run once and cached: {{model}}.",
+      "statistics": "Accuracy has a 95% Wilson interval. Each configuration is compared with the best single open model on the same questions with a paired McNemar test (exact binomial below 25 discordant pairs).",
+      "cost": "Cost comes from the shared OpenRouter price table and the token usage each provider reported.",
+      "docsLink": "Full method and how to reproduce it"
     }
   },
   "providers": {

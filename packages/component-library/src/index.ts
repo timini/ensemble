@@ -135,6 +135,12 @@ export {
   type MajorityVoteOption,
   type MajorityVoteOutcome,
 } from './components/molecules/MajorityVoteBreakdown';
+export { AccuracyInterval, type AccuracyIntervalProps } from './components/molecules/AccuracyInterval';
+export {
+  BenchmarksNotRun,
+  type BenchmarksNotRunProps,
+  type BenchmarkRunEstimate,
+} from './components/molecules/BenchmarksNotRun';
 
 // Organisms (Level 3: Complex UI sections)
 export { ModeSelector, type ModeSelectorProps, type Mode as ModeType } from './components/organisms/ModeSelector';
@@ -151,3 +157,13 @@ export { ManualResponseModal, type ManualResponseModalProps, type ManualResponse
 export { PromptTips, type PromptTipsProps } from './components/organisms/PromptTips';
 export { PromptInputWithHint, type PromptInputWithHintProps } from './components/organisms/PromptInputWithHint';
 export { PromptCard, type PromptCardProps } from './components/organisms/PromptCard';
+export {
+  BenchmarkResultsTable,
+  type BenchmarkResultsTableProps,
+  type BenchmarkResultRow,
+} from './components/organisms/BenchmarkResultsTable';
+export {
+  BenchmarkMethod,
+  type BenchmarkMethodProps,
+  type BenchmarkMethodModel,
+} from './components/organisms/BenchmarkMethod';

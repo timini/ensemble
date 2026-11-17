@@ -227,7 +227,8 @@
             "url": "https://arxiv.org/abs/2502.00773"
           }
         ]
-      }
+      },
+      "benchmarksLink": "Voir les résultats et la méthode des benchmarks"
     },
     "features": {
       "title": "Fonctionnalités",
@@ -237,37 +238,77 @@
         "items": [
           {
             "title": "Analyse de concordance",
-            "body": "Voyez exactement où les modèles concordent ou divergent. Les embeddings vectoriels et la similarité cosinus créent une matrice N\u00d7N avec des résultats codés par couleur.",
-            "metrics": ["Matrice N\u00d7N", "Similarité cosinus", "Stats en temps réel"]
+            "body": "Voyez exactement où les modèles concordent ou divergent. Les embeddings vectoriels et la similarité cosinus créent une matrice N×N avec des résultats codés par couleur.",
+            "metrics": [
+              "Matrice N×N",
+              "Similarité cosinus",
+              "Stats en temps réel"
+            ]
           },
           {
             "title": "Double stratégie de consensus",
             "body": "Standard : synthétise toutes les réponses. Classement Elo : un jugement LLM par tournoi classe les réponses, puis ne synthétise que les meilleures.",
-            "metrics": ["Classement Elo", "Sélection Top N", "Juge impartial"]
+            "metrics": [
+              "Classement Elo",
+              "Sélection Top N",
+              "Juge impartial"
+            ]
           },
           {
             "title": "Intégration Humain + IA",
             "body": "Ajoutez des réponses d'outils externes, d'experts humains ou d'autres services d'IA. Incluses dans l'analyse de concordance et la génération de consensus.",
-            "metrics": ["Intégration complète", "Score de concordance", "Synthèse de consensus"]
+            "metrics": [
+              "Intégration complète",
+              "Score de concordance",
+              "Synthèse de consensus"
+            ]
           }
         ]
       },
       "capabilities": {
         "heading": "Conçu pour la performance",
         "items": [
-          { "number": "20+", "label": "Modèles d'IA", "description": "OpenAI, Anthropic, Google, xAI, DeepSeek et Perplexity" },
-          { "number": "<100ms", "label": "Streaming", "description": "Chunks tamponnés avec réponses parallèles" },
-          { "number": "AES-256", "label": "Chiffrement", "description": "Mode GCM avec IV 96 bits aléatoires" },
-          { "number": "Zéro", "label": "Verrouillage", "description": "Communication navigateur-API directe en Mode Gratuit" }
+          {
+            "number": "20+",
+            "label": "Modèles d'IA",
+            "description": "OpenAI, Anthropic, Google, xAI, DeepSeek et Perplexity"
+          },
+          {
+            "number": "<100ms",
+            "label": "Streaming",
+            "description": "Chunks tamponnés avec réponses parallèles"
+          },
+          {
+            "number": "AES-256",
+            "label": "Chiffrement",
+            "description": "Mode GCM avec IV 96 bits aléatoires"
+          },
+          {
+            "number": "Zéro",
+            "label": "Verrouillage",
+            "description": "Communication navigateur-API directe en Mode Gratuit"
+          }
         ]
       },
       "howItWorks": {
         "heading": "De la question au consensus en 4 étapes",
         "steps": [
-          { "name": "Configurer", "description": "Choisissez le Mode Gratuit avec clés API chiffrées AES-256 ou le Mode Pro avec crédits gérés." },
-          { "name": "Sélectionner l'ensemble", "description": "Choisissez 2 à 6 modèles parmi 6 fournisseurs. Sélectionnez votre synthétiseur et méthode de consensus." },
-          { "name": "Entrer l'invite", "description": "Rédigez votre question. Ajoutez optionnellement des réponses manuelles d'experts ou d'outils externes." },
-          { "name": "Examiner et analyser", "description": "Regardez les réponses en streaming parallèle. Consultez l'analyse de concordance et le consensus synthétisé en temps réel." }
+          {
+            "name": "Configurer",
+            "description": "Choisissez le Mode Gratuit avec clés API chiffrées AES-256 ou le Mode Pro avec crédits gérés."
+          },
+          {
+            "name": "Sélectionner l'ensemble",
+            "description": "Choisissez 2 à 6 modèles parmi 6 fournisseurs. Sélectionnez votre synthétiseur et méthode de consensus."
+          },
+          {
+            "name": "Entrer l'invite",
+            "description": "Rédigez votre question. Ajoutez optionnellement des réponses manuelles d'experts ou d'outils externes."
+          },
+          {
+            "name": "Examiner et analyser",
+            "description": "Regardez les réponses en streaming parallèle. Consultez l'analyse de concordance et le consensus synthétisé en temps réel."
+          }
         ]
       },
       "modes": {
@@ -301,12 +342,30 @@
         "heading": "Plus de 20 modèles chez 6 fournisseurs",
         "body": "Accédez aux meilleurs modèles de chaque fournisseur d'IA. Les nouveaux modèles apparaissent automatiquement grâce à la découverte dynamique.",
         "providers": [
-          { "name": "OpenAI", "models": "GPT-6 Astra, GPT-6 Luna" },
-          { "name": "Anthropic", "models": "Claude Opus 5.5, Claude Sonnet 5.5, Claude Haiku 5.5" },
-          { "name": "Google", "models": "Gemini 4 Carbon, Gemini 4 Hydrogen, Gemini 3.5 Flash-Lite" },
-          { "name": "xAI", "models": "Grok 4.7, Grok 4.3" },
-          { "name": "Perplexity", "models": "Perplexity Fast, Perplexity Low, Perplexity Medium" },
-          { "name": "DeepSeek", "models": "DeepSeek V4 Pro, DeepSeek Flash" }
+          {
+            "name": "OpenAI",
+            "models": "GPT-6 Astra, GPT-6 Luna"
+          },
+          {
+            "name": "Anthropic",
+            "models": "Claude Opus 5.5, Claude Sonnet 5.5, Claude Haiku 5.5"
+          },
+          {
+            "name": "Google",
+            "models": "Gemini 4 Carbon, Gemini 4 Hydrogen, Gemini 3.5 Flash-Lite"
+          },
+          {
+            "name": "xAI",
+            "models": "Grok 4.7, Grok 4.3"
+          },
+          {
+            "name": "Perplexity",
+            "models": "Perplexity Fast, Perplexity Low, Perplexity Medium"
+          },
+          {
+            "name": "DeepSeek",
+            "models": "DeepSeek V4 Pro, DeepSeek Flash"
+          }
         ]
       },
       "security": {
@@ -322,6 +381,20 @@
           "Communication directe navigateur-fournisseur",
           "Code source ouvert pour une transparence totale"
         ]
+      }
+    },
+    "benchmarks": {
+      "title": "Benchmarks",
+      "description": "Un ensemble fait-il mieux que son meilleur membre ? L'exactitude sur des benchmarks publics, avec intervalles de confiance et la méthode qui les a produits.",
+      "runInfo": "Exécution {{runId}} du {{date}}. Coût total {{cost}}.",
+      "mockNotice": "Ces chiffres viennent d'un essai à blanc avec des fournisseurs simulés. Ce ne sont pas de vrais résultats.",
+      "partialNotice": "Cette exécution est incomplète : il manque des jeux de données ou des configurations.",
+      "resultsHeading": "Résultats",
+      "rowLabel": {
+        "majority": "Ensemble, vote majoritaire mécanique",
+        "standard": "Ensemble, consensus standard",
+        "elo": "Ensemble, classement ELO",
+        "council": "Ensemble, conseil"
       }
     }
   }

@@ -11,7 +11,8 @@
       "features": "Fonctionnalités",
       "about": "À propos",
       "github": "GitHub",
-      "copyright": "© {{year}} IA Ensemble"
+      "copyright": "© {{year}} IA Ensemble",
+      "benchmarks": "Benchmarks"
     },
     "steps": {
       "config": "Config",
@@ -223,6 +224,16 @@
       "notFoundDescription": "Ollama n'a pas répondu.",
       "notFoundLocal": "Ollama n'a pas répondu sur {{url}}. Démarrez-le (ouvrez l'application Ollama ou lancez ollama serve) et cherchez à nouveau.",
       "checkAgain": "Chercher à nouveau"
+    },
+    "accuracyInterval": {
+      "label": "Exactitude {{value}} %, intervalle à 95 % de {{lower}} % à {{upper}} %",
+      "range": "IC 95 % de {{lower}} à {{upper}}"
+    },
+    "benchmarksNotRun": {
+      "title": "Benchmarks pas encore lancés",
+      "description": "Aucun résultat mesuré n'est publié. Cette page n'affiche des chiffres qu'après l'exécution de la matrice de benchmarks. En attendant, elle présente la méthode et le coût d'une exécution.",
+      "estimate": "Coût estimé d'une exécution complète : {{low}} $ à {{high}} $ pour {{calls}} appels de modèles.",
+      "commandLabel": "Lancez-la vous-même :"
     }
   },
   "organisms": {
@@ -237,7 +248,10 @@
       "confidence": "Confiance : {{percent}}%",
       "responsesAnalyzed": "RÉPONSES ANALYSÉES",
       "comparisons": "COMPARAISONS",
-      "avgConfidence": "CONFIANCE MOYENNE"
+      "avgConfidence": "CONFIANCE MOYENNE",
+      "uncalibrated": "Non calibré",
+      "uncalibratedHint": "Élevé, moyen et faible suivent la correspondance par défaut, car ce modèle d'embeddings n'a pas encore été calibré sur des réponses de benchmarks.",
+      "calibrated": "Calibré pour {{model}}"
     },
     "apiKeyConfiguration": {
       "heading": "Configurer les Clés API",
@@ -393,6 +407,41 @@
       "empty": "Aucun point de terminaison. Choisissez un type et ajoutez-en un.",
       "localHint": "Les serveurs locaux doivent accepter les requêtes de ce site (pour Ollama, définissez OLLAMA_ORIGINS), et certains navigateurs les bloquent depuis le site hébergé.",
       "guideLink": "Guide d'installation des modèles locaux"
+    },
+    "benchmarkResultsTable": {
+      "questions_one": "{{count}} question",
+      "questions_other": "{{count}} questions",
+      "configuration": "Configuration",
+      "accuracy": "Exactitude (IC 95 %)",
+      "pValue": "p contre le meilleur modèle seul",
+      "cost": "Coût",
+      "kind": {
+        "single": "Modèle seul",
+        "ensemble": "Ensemble",
+        "reference": "Référence"
+      },
+      "best": "Meilleur modèle seul",
+      "notTested": "Non testé",
+      "costLowerBound": "au moins {{cost}}",
+      "failures_one": "{{count}} appel échoué",
+      "failures_other": "{{count}} appels échoués"
+    },
+    "benchmarkMethod": {
+      "title": "Méthode",
+      "datasets": "Jeux de données : {{list}}. Jusqu'à {{sample}} questions chacun, tirées avec la graine {{questionSeed}}.",
+      "scoring": "Les options des QCM sont mélangées avec la graine {{optionSeed}}. Chaque modèle donne une réponse finale structurée, lue et notée mécaniquement, sans juge LLM. Les appels échoués ou expirés comptent comme faux.",
+      "models": "Modèles ouverts, seuls et ensemble : {{list}}.",
+      "ensemble": "Méthodes d'ensemble : {{list}}.",
+      "strategy": {
+        "majority": "vote majoritaire mécanique",
+        "standard": "consensus standard rédigé par {{summarizer}}",
+        "elo": "classement ELO",
+        "council": "conseil"
+      },
+      "reference": "Référence premium, exécutée une fois et mise en cache : {{model}}.",
+      "statistics": "L'exactitude a un intervalle de Wilson à 95 %. Chaque configuration est comparée au meilleur modèle ouvert seul sur les mêmes questions avec un test de McNemar apparié (binomial exact sous 25 paires discordantes).",
+      "cost": "Le coût provient de la table de prix OpenRouter partagée et de l'usage de jetons déclaré par chaque fournisseur.",
+      "docsLink": "Méthode complète et comment la reproduire"
     }
   },
   "providers": {

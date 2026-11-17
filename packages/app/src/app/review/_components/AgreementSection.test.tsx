@@ -23,6 +23,24 @@ describe("AgreementSection", () => {
     ).not.toBeInTheDocument();
   });
 
+  it("passes the calibration to the analysis so uncalibrated labels are marked", () => {
+    render(
+      <AgreementSection
+        {...baseProps}
+        status="ready"
+        levelThresholds={{ high: 0.8, medium: 0.5 }}
+        calibration={{
+          calibrated: false,
+          embeddingModel: "openai/text-embedding-3-small",
+        }}
+      />,
+    );
+    expect(screen.getByTestId("agreement-calibration")).toHaveAttribute(
+      "data-calibrated",
+      "false",
+    );
+  });
+
   it("explains that no embedding provider is available instead of a score", () => {
     render(<AgreementSection {...baseProps} status="unavailable" />);
     expect(screen.getByTestId("agreement-unavailable")).toHaveTextContent(

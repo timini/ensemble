@@ -193,6 +193,16 @@ export default function AboutPage() {
             <ArrowRight className="h-4 w-4" />
           </Link>
         </div>
+        <div>
+          <Link
+            href="/benchmarks"
+            data-testid="about-benchmarks-link"
+            className="inline-flex items-center gap-2 text-sm font-semibold text-primary transition-colors hover:text-primary/80"
+          >
+            {t("pages.about.benchmarksLink")}
+            <ArrowRight className="h-4 w-4" />
+          </Link>
+        </div>
       </div>
     </div>
   );

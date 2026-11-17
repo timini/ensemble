@@ -235,7 +235,8 @@
             "url": "https://arxiv.org/abs/2502.00773"
           }
         ]
-      }
+      },
+      "benchmarksLink": "See the benchmark results and method"
     },
     "features": {
       "title": "Features",
@@ -245,37 +246,77 @@
         "items": [
           {
             "title": "Agreement Analysis",
-            "body": "See exactly where models agree or diverge. Vector embeddings and cosine similarity create an N\u00d7N comparison matrix with colour-coded results.",
-            "metrics": ["N\u00d7N Matrix", "Cosine Similarity", "Real-time Stats"]
+            "body": "See exactly where models agree or diverge. Vector embeddings and cosine similarity create an N×N comparison matrix with colour-coded results.",
+            "metrics": [
+              "N×N Matrix",
+              "Cosine Similarity",
+              "Real-time Stats"
+            ]
           },
           {
             "title": "Dual Consensus Strategies",
             "body": "Standard: synthesise all responses. Elo Ranking: tournament-style LLM judging ranks responses, then synthesises only the top performers.",
-            "metrics": ["Elo Rating", "Top N Selection", "Impartial Judge"]
+            "metrics": [
+              "Elo Rating",
+              "Top N Selection",
+              "Impartial Judge"
+            ]
           },
           {
             "title": "Human + AI Integration",
             "body": "Add responses from external tools, human experts, or other AI services. Included in agreement analysis and consensus generation.",
-            "metrics": ["Full Integration", "Agreement Scoring", "Consensus Synthesis"]
+            "metrics": [
+              "Full Integration",
+              "Agreement Scoring",
+              "Consensus Synthesis"
+            ]
           }
         ]
       },
       "capabilities": {
         "heading": "Built for Performance",
         "items": [
-          { "number": "20+", "label": "AI Models", "description": "Across OpenAI, Anthropic, Google, xAI, DeepSeek, and Perplexity" },
-          { "number": "<100ms", "label": "Streaming", "description": "Buffered chunks with parallel responses" },
-          { "number": "AES-256", "label": "Encryption", "description": "GCM mode with random 96-bit IVs" },
-          { "number": "Zero", "label": "Lock-in", "description": "Direct browser-to-API in Free Mode" }
+          {
+            "number": "20+",
+            "label": "AI Models",
+            "description": "Across OpenAI, Anthropic, Google, xAI, DeepSeek, and Perplexity"
+          },
+          {
+            "number": "<100ms",
+            "label": "Streaming",
+            "description": "Buffered chunks with parallel responses"
+          },
+          {
+            "number": "AES-256",
+            "label": "Encryption",
+            "description": "GCM mode with random 96-bit IVs"
+          },
+          {
+            "number": "Zero",
+            "label": "Lock-in",
+            "description": "Direct browser-to-API in Free Mode"
+          }
         ]
       },
       "howItWorks": {
         "heading": "From Question to Consensus in 4 Steps",
         "steps": [
-          { "name": "Configure", "description": "Choose Free Mode with AES-256 encrypted API keys or Pro Mode with managed credits." },
-          { "name": "Select Ensemble", "description": "Pick 2\u20136 models across 6 providers. Choose your summariser and consensus method." },
-          { "name": "Enter Prompt", "description": "Write your question. Optionally add manual responses from experts or external tools." },
-          { "name": "Review & Analyse", "description": "Watch responses stream in parallel. See agreement analysis and synthesised consensus in real-time." }
+          {
+            "name": "Configure",
+            "description": "Choose Free Mode with AES-256 encrypted API keys or Pro Mode with managed credits."
+          },
+          {
+            "name": "Select Ensemble",
+            "description": "Pick 2–6 models across 6 providers. Choose your summariser and consensus method."
+          },
+          {
+            "name": "Enter Prompt",
+            "description": "Write your question. Optionally add manual responses from experts or external tools."
+          },
+          {
+            "name": "Review & Analyse",
+            "description": "Watch responses stream in parallel. See agreement analysis and synthesised consensus in real-time."
+          }
         ]
       },
       "modes": {
@@ -309,12 +350,30 @@
         "heading": "20+ Models Across 6 Providers",
         "body": "Access the best models from every leading AI provider. New models appear automatically via dynamic discovery.",
         "providers": [
-          { "name": "OpenAI", "models": "GPT-6 Astra, GPT-6 Luna" },
-          { "name": "Anthropic", "models": "Claude Opus 5.5, Claude Sonnet 5.5, Claude Haiku 5.5" },
-          { "name": "Google", "models": "Gemini 4 Carbon, Gemini 4 Hydrogen, Gemini 3.5 Flash-Lite" },
-          { "name": "xAI", "models": "Grok 4.7, Grok 4.3" },
-          { "name": "Perplexity", "models": "Perplexity Fast, Perplexity Low, Perplexity Medium" },
-          { "name": "DeepSeek", "models": "DeepSeek V4 Pro, DeepSeek Flash" }
+          {
+            "name": "OpenAI",
+            "models": "GPT-6 Astra, GPT-6 Luna"
+          },
+          {
+            "name": "Anthropic",
+            "models": "Claude Opus 5.5, Claude Sonnet 5.5, Claude Haiku 5.5"
+          },
+          {
+            "name": "Google",
+            "models": "Gemini 4 Carbon, Gemini 4 Hydrogen, Gemini 3.5 Flash-Lite"
+          },
+          {
+            "name": "xAI",
+            "models": "Grok 4.7, Grok 4.3"
+          },
+          {
+            "name": "Perplexity",
+            "models": "Perplexity Fast, Perplexity Low, Perplexity Medium"
+          },
+          {
+            "name": "DeepSeek",
+            "models": "DeepSeek V4 Pro, DeepSeek Flash"
+          }
         ]
       },
       "security": {
@@ -330,6 +389,20 @@
           "Direct browser-to-provider communication",
           "Open-source for full transparency"
         ]
+      }
+    },
+    "benchmarks": {
+      "title": "Benchmarks",
+      "description": "Does an ensemble beat its best member? Accuracy on public benchmarks, with confidence intervals and the method that produced them.",
+      "runInfo": "Run {{runId}} on {{date}}. Total cost {{cost}}.",
+      "mockNotice": "These numbers come from a mock dry run of the pipeline. They are not real results.",
+      "partialNotice": "This run is incomplete: some datasets or configurations are missing.",
+      "resultsHeading": "Results",
+      "rowLabel": {
+        "majority": "Ensemble, mechanical majority",
+        "standard": "Ensemble, standard consensus",
+        "elo": "Ensemble, ELO ranking",
+        "council": "Ensemble, council"
       }
     }
   }
