@@ -393,8 +393,8 @@
         "embeddings": "Score d'accord",
         "appearance": "Apparence",
         "data": "Données",
-        "clearData": "Effacer les clés, les préréglages et la dernière question",
-        "clearConfirm": "Cela supprime de ce navigateur toutes les clés, serveurs, préréglages et la dernière question.",
+        "clearData": "Effacer les clés, les préréglages et l'historique",
+        "clearConfirm": "Cela supprime de ce navigateur toutes les clés, serveurs, préréglages et exécutions enregistrées.",
         "clearConfirmYes": "Tout effacer",
         "clearCancel": "Annuler",
         "webCryptoTitle": "Ce navigateur ne peut pas chiffrer les clés",
@@ -407,6 +407,10 @@
         "placeholder": "Trois modèles de pointe",
         "save": "Enregistrer",
         "cancel": "Annuler"
+      },
+      "history": {
+        "savedRun": "Exécution enregistrée le {{date}}. Elle est en lecture seule : rien n'est renvoyé aux modèles.",
+        "newQuestion": "Poser une nouvelle question"
       }
     },
     "landing": {

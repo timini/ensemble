@@ -111,3 +111,25 @@ describe("useConsensusStatus", () => {
     ).toBe("awaiting");
   });
 });
+
+describe("useConsensusStatus for a run reopened from history", () => {
+  const readOnly = (metaAnalysis: string | null) =>
+    renderHook(() =>
+      useConsensusStatus({
+        hasHydrated: true,
+        responses: [answer("a"), answer("b")],
+        metaAnalysis,
+        isGenerating: false,
+        error: null,
+        readOnly: true,
+      }),
+    ).result.current;
+
+  it("shows the stored consensus", () => {
+    expect(readOnly("Both agree.")).toBe("success");
+  });
+
+  it("hides the card when the run kept no consensus, instead of waiting for one", () => {
+    expect(readOnly(null)).toBeNull();
+  });
+});

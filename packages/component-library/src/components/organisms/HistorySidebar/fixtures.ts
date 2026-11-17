@@ -6,7 +6,7 @@ const HOUR = 3_600_000;
 
 /** Runs with a known start time. */
 export const sampleHistory: Array<HistoryItem & { createdAt: number }> = [
-  { id: 'r1', prompt: 'Boiling point of water on Everest, and why it is lower', createdAt: NOW - 0.05 * HOUR, level: 'high' },
+  { id: 'r1', prompt: 'Boiling point of water on Everest, and why it is lower', createdAt: NOW - 0.05 * HOUR, level: 'high', searchText: 'about 71 degrees Celsius at the summit' },
   { id: 'r2', prompt: 'Is a 30-year fixed mortgage better than a tracker right now?', createdAt: NOW - 1 * HOUR, level: 'low' },
   { id: 'r3', prompt: 'Does vitamin D help with winter tiredness?', createdAt: NOW - 30 * HOUR, level: 'medium' },
   { id: 'r4', prompt: 'Postgres vs SQLite for a small internal tool', createdAt: NOW - 60 * HOUR, level: 'high' },

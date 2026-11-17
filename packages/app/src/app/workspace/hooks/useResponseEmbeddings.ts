@@ -1,10 +1,10 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
-import type { OperatingMode } from '~/store/slices/modeSlice';
-import { generateEmbeddingsForResponses } from '~/lib/embeddings';
-import type { EmbeddingProvider } from '~/lib/embeddingsProvider';
-import { toError } from '~/lib/errors';
-import { logger } from '~/lib/logger';
-import type { AgreementAnswer } from '~/lib/agreement';
+import { useEffect, useMemo, useRef, useState } from "react";
+import type { OperatingMode } from "~/store/slices/modeSlice";
+import { generateEmbeddingsForResponses } from "~/lib/embeddings";
+import type { EmbeddingProvider } from "~/lib/embeddingsProvider";
+import { toError } from "~/lib/errors";
+import { logger } from "~/lib/logger";
+import type { AgreementAnswer } from "~/lib/agreement";
 type Embedding = { modelId: string; embedding: number[] };
 
 /**
@@ -13,7 +13,7 @@ type Embedding = { modelId: string; embedding: number[] };
  * - `ready`: at least two answers have embeddings
  * - `error`: the embeddings calls failed and fewer than two answers have one
  */
-export type EmbeddingsStatus = 'unavailable' | 'pending' | 'ready' | 'error';
+export type EmbeddingsStatus = "unavailable" | "pending" | "ready" | "error";
 
 export interface UseResponseEmbeddingsResult {
   status: EmbeddingsStatus;
@@ -39,6 +39,11 @@ interface UseResponseEmbeddingsOptions {
   mode: OperatingMode;
   setEmbeddings: (embeddings: Embedding[], source: string | null) => void;
   calculateAgreementState: () => void;
+  /**
+   * A run reopened from history: its stored embeddings are used as they
+   * are and nothing is requested, so reopening a run never costs anything.
+   */
+  readOnly?: boolean;
 }
 
 export function useResponseEmbeddings({
@@ -51,22 +56,29 @@ export function useResponseEmbeddings({
   mode,
   setEmbeddings,
   calculateAgreementState,
+  readOnly = false,
 }: UseResponseEmbeddingsOptions): UseResponseEmbeddingsResult {
   const embeddingFetchRef = useRef(false);
   const lastEmbeddingsProviderRef = useRef<EmbeddingProvider | null>(null);
   const failedEmbeddingsRef = useRef<Set<string>>(new Set());
-  const [status, setStatus] = useState<EmbeddingsStatus>('pending');
+  const [status, setStatus] = useState<EmbeddingsStatus>("pending");
   const [failedModelIds, setFailedModelIds] = useState<string[]>([]);
 
   useEffect(() => {
-    if (!hasHydrated || !embeddingsProvider || completedResponses.length === 0) {
+    if (
+      readOnly ||
+      !hasHydrated ||
+      !embeddingsProvider ||
+      completedResponses.length === 0
+    ) {
       return;
     }
 
     // On a fresh mount the ref is empty, so fall back to the provider stored
     // with the persisted embeddings. Embeddings from the same provider are
     // reused instead of being requested (and billed) again.
-    const lastProvider = lastEmbeddingsProviderRef.current ?? viewEmbeddingsSource;
+    const lastProvider =
+      lastEmbeddingsProviderRef.current ?? viewEmbeddingsSource;
     const providerChanged = lastProvider !== embeddingsProvider;
 
     if (providerChanged) {
@@ -84,7 +96,7 @@ export function useResponseEmbeddings({
     if (!providerChanged && pendingResponses.length === 0) {
       lastEmbeddingsProviderRef.current = embeddingsProvider;
       if (viewEmbeddings.length >= 2) {
-        setStatus('ready');
+        setStatus("ready");
         if (!viewSimilarityMatrix) calculateAgreementState();
       }
       return;
@@ -102,7 +114,7 @@ export function useResponseEmbeddings({
         responses: completedResponses,
         existingEmbeddings,
         provider: embeddingsProvider,
-        mode: mode === 'pro' ? 'pro' : 'free',
+        mode: mode === "pro" ? "pro" : "free",
         onError: (modelId, error: Error) => {
           logger.error(
             `Failed to generate embeddings for ${modelId} via ${embeddingsProvider}`,
@@ -119,22 +131,25 @@ export function useResponseEmbeddings({
       setFailedModelIds(Array.from(failedEmbeddingsRef.current));
 
       if (orderedEmbeddings.length >= 2) {
-        setStatus('ready');
+        setStatus("ready");
         calculateAgreementState();
       } else {
-        setStatus(failedEmbeddingsRef.current.size > 0 ? 'error' : 'pending');
+        setStatus(failedEmbeddingsRef.current.size > 0 ? "error" : "pending");
       }
-    })().catch((error: unknown) => {
-      logger.error(
-        'Failed to process embeddings',
-        toError(error, 'Unable to process embeddings'),
-      );
-      if (cancelled) return;
-      lastEmbeddingsProviderRef.current = embeddingsProvider;
-      completedResponses.forEach((r) => failedEmbeddingsRef.current.add(r.modelId));
-      setFailedModelIds(Array.from(failedEmbeddingsRef.current));
-      setStatus('error');
-    })
+    })()
+      .catch((error: unknown) => {
+        logger.error(
+          "Failed to process embeddings",
+          toError(error, "Unable to process embeddings"),
+        );
+        if (cancelled) return;
+        lastEmbeddingsProviderRef.current = embeddingsProvider;
+        completedResponses.forEach((r) =>
+          failedEmbeddingsRef.current.add(r.modelId),
+        );
+        setFailedModelIds(Array.from(failedEmbeddingsRef.current));
+        setStatus("error");
+      })
       .finally(() => {
         embeddingFetchRef.current = false;
       });
@@ -149,6 +164,7 @@ export function useResponseEmbeddings({
     embeddingsProvider,
     hasHydrated,
     mode,
+    readOnly,
     setEmbeddings,
     viewEmbeddings,
     viewEmbeddingsSource,
@@ -158,12 +174,22 @@ export function useResponseEmbeddings({
   const excludedModels = useMemo(() => {
     const embedded = new Set(viewEmbeddings.map((entry) => entry.modelId));
     return completedResponses
-      .filter((r) => failedModelIds.includes(r.modelId) && !embedded.has(r.modelId))
+      .filter(
+        (r) => failedModelIds.includes(r.modelId) && !embedded.has(r.modelId),
+      )
       .map((r) => r.model);
   }, [completedResponses, failedModelIds, viewEmbeddings]);
 
+  if (readOnly) {
+    return {
+      status: viewEmbeddings.length >= 2 ? "ready" : "unavailable",
+      failedModelIds: [],
+      excludedModels: [],
+    };
+  }
+
   return {
-    status: embeddingsProvider ? status : 'unavailable',
+    status: embeddingsProvider ? status : "unavailable",
     failedModelIds,
     excludedModels,
   };

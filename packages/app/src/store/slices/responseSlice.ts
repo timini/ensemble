@@ -17,7 +17,11 @@ import type { TokenUsage } from "@ensemble-ai/shared-utils/providers";
 import type { CallUsage } from "@ensemble-ai/shared-utils/pricing";
 import { agreementFromEmbeddings } from "./agreementState";
 import type { MajorityVoteRecord } from "~/lib/majorityVote";
-import type { ModelSelection, ProviderType } from "./ensembleSlice";
+import type {
+  ConsensusMethod,
+  ModelSelection,
+  ProviderType,
+} from "./ensembleSlice";
 import type { ResponseErrorDetails } from "./responseErrorState";
 import type {
   AgreementStats,
@@ -62,6 +66,12 @@ export interface ResponseSlice {
   consensusUsage: CallUsage[];
   /** Vote breakdown of the last majority consensus, or null. */
   majorityVote: MajorityVoteRecord | null;
+  /**
+   * Set while a run reopened from history is on screen. That run is read
+   * only: no embeddings, consensus or retries are requested for it, and it
+   * shows the method and summarizer it was run with. Null for a live run.
+   */
+  historyView: HistoryView | null;
 
   setPrompt: (prompt: string) => void;
   /**
@@ -141,6 +151,13 @@ export function selectRunModels(state: {
 
 const NO_MODELS: ModelSelection[] = [];
 
+/** The reopened run's id and the settings it was run with. */
+export interface HistoryView {
+  id: string;
+  consensusMethod: ConsensusMethod;
+  summarizerModel: string | null;
+}
+
 /** Fields of an answer when its stream starts or restarts. */
 const STREAM_START = {
   response: "",
@@ -168,6 +185,7 @@ export const createResponseSlice: StateCreator<ResponseSlice> = (set, get) => ({
   metaAnalysis: null,
   consensusUsage: [],
   majorityVote: null,
+  historyView: null,
 
   setPrompt: (prompt) => {
     set({ prompt });
@@ -298,6 +316,7 @@ export const createResponseSlice: StateCreator<ResponseSlice> = (set, get) => ({
       runPrompt: null,
       runModels: [],
       runStartedAt: null,
+      historyView: null,
       consensusUsage: [],
       majorityVote: null,
       responses: [],

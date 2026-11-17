@@ -39,7 +39,12 @@ export function useWorkspaceRun({
   const hasHydrated = useHasHydrated();
   const endpoints = useStore((state) => state.endpoints);
   const runModels = useStore(selectRunModels);
-  const consensusMethod = useStore((state) => state.consensusMethod);
+  const liveMethod = useStore((state) => state.consensusMethod);
+  const clearManualResponses = useStore((s) => s.clearManualResponses);
+  // A run reopened from history is read only and keeps its own settings.
+  const historyView = useStore((state) => state.historyView);
+  const readOnly = historyView !== null;
+  const consensusMethod = historyView?.consensusMethod ?? liveMethod;
   const pullCommand = useStore((state) =>
     ollamaEmbeddingPullCommand(state.endpoints),
   );
@@ -62,12 +67,13 @@ export function useWorkspaceRun({
     mode: run.mode,
     setEmbeddings: run.setEmbeddings,
     calculateAgreementState: run.calculateAgreement,
+    readOnly,
   });
   const consensus = useConsensusGeneration();
   const retry = useModelRetry(retryModel, consensus.restart);
   const addManualAnswer = useAddManualAnswer(consensus.restart);
   useConsensusTrigger({
-    hasHydrated,
+    hasHydrated: hasHydrated && !readOnly,
     responses: run.viewResponses,
     manualResponses: run.viewManualResponses,
     metaAnalysis: run.metaAnalysis,
@@ -85,6 +91,7 @@ export function useWorkspaceRun({
     metaAnalysis: run.viewMetaAnalysis,
     isGenerating: consensus.isGenerating,
     error: consensus.error,
+    readOnly,
   });
   const runCost = useRunCost(
     run.viewResponses,
@@ -96,14 +103,17 @@ export function useWorkspaceRun({
   );
 
   const summarizerName = useMemo(() => {
-    const id = summarizerOrFallback(run.summarizerModel, runModels[0]?.model);
+    const chosen = historyView
+      ? historyView.summarizerModel
+      : run.summarizerModel;
+    const id = summarizerOrFallback(chosen, runModels[0]?.model);
     if (!id) return undefined;
     if (id.includes("/")) return endpointModelName(id, endpoints);
     return (
       FALLBACK_MODELS.find((m) => m.id === id)?.name ??
       formatModelLabelFromId(id)
     );
-  }, [run.summarizerModel, runModels, endpoints]);
+  }, [historyView, run.summarizerModel, runModels, endpoints]);
 
   const hasRun = hasHydrated && run.prompt !== null;
   const total = run.viewResponses.length + run.viewManualResponses.length;
@@ -118,7 +128,7 @@ export function useWorkspaceRun({
     summarizerName,
     text: run.viewMetaAnalysis ?? undefined,
     error: consensus.error ?? undefined,
-    onRetry: consensus.restart,
+    onRetry: readOnly ? undefined : consensus.restart,
     majorityVote:
       run.viewMajorityVote && status === "success"
         ? toMajorityVoteBreakdownProps(run.viewMajorityVote)
@@ -147,8 +157,14 @@ export function useWorkspaceRun({
     /** Starts a run of the current ensemble, dropping any consensus still running for the old one. */
     startRun: (prompt: string) => {
       consensus.restart();
+      // Manual answers of a reopened run belong to that run, not the next.
+      if (readOnly) clearManualResponses();
       startRun(prompt);
     },
+    /** True while a run reopened from history is on screen. */
+    readOnly,
+    /** Drops any consensus still running, before another run is shown. */
+    stopConsensus: consensus.restart,
     addManualAnswer,
     agreement: toAgreementProps({
       embeddings: embeddings.status,
@@ -169,7 +185,7 @@ export function useWorkspaceRun({
       manualResponses: run.viewManualResponses,
       runModels: hasHydrated ? runModels : [],
       endpoints,
-      onRetry: retry,
+      onRetry: readOnly ? undefined : retry,
     }),
     exclusion: {
       succeeded: analytics.completedResponses.length,

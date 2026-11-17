@@ -393,8 +393,8 @@
         "embeddings": "Agreement score",
         "appearance": "Appearance",
         "data": "Data",
-        "clearData": "Clear keys, presets and the last run",
-        "clearConfirm": "This removes every key, endpoint, preset and the last run from this browser.",
+        "clearData": "Clear keys, presets and history",
+        "clearConfirm": "This removes every key, endpoint, preset and saved run from this browser.",
         "clearConfirmYes": "Clear everything",
         "clearCancel": "Cancel",
         "webCryptoTitle": "This browser cannot encrypt keys",
@@ -407,6 +407,10 @@
         "placeholder": "Three frontier models",
         "save": "Save preset",
         "cancel": "Cancel"
+      },
+      "history": {
+        "savedRun": "Saved run from {{date}}. It is read only: nothing is sent to a model again.",
+        "newQuestion": "Ask a new question"
       }
     },
     "landing": {

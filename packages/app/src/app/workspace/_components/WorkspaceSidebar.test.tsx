@@ -135,4 +135,113 @@ describe("WorkspaceSidebar", () => {
     expect(onNewQuestion).toHaveBeenCalled();
     expect(onDone).toHaveBeenCalled();
   });
+
+  describe("with stored runs", () => {
+    const stored = (id: string, prompt: string, createdAt: number) => ({
+      id,
+      createdAt,
+      prompt,
+      models: [{ id: "a", provider: "openai" as const, model: "gpt-6-astra" }],
+      consensusMethod: "standard" as const,
+      summarizerModel: null,
+      responses: [
+        {
+          modelId: "a",
+          provider: "openai" as const,
+          model: "gpt-6-astra",
+          response: "About seventy-one degrees",
+          isStreaming: false,
+          isComplete: true,
+          responseTime: 1,
+          tokenCount: 1,
+          error: null,
+        },
+      ],
+      manualResponses: [],
+      embeddings: [],
+      embeddingsSource: null,
+      similarityMatrix: null,
+      agreementStats: null,
+      metaAnalysis: "Consensus text",
+      majorityVote: null,
+      consensusUsage: [],
+      agreementScore: 0.2,
+      agreementLevel: "low" as const,
+      costUsd: 0.01,
+    });
+    const now = Date.now();
+    const runs = [
+      stored("run-2", "Second", now - 1000),
+      stored("run-1", "First", now - 2000),
+    ];
+
+    function renderWithRuns(overrides: Record<string, unknown> = {}) {
+      const props = {
+        runPrompt: "Second",
+        agreement: { status: "pending" as const },
+        onNewQuestion: vi.fn(),
+        onDone: vi.fn(),
+        runs,
+        currentId: "run-2",
+        onOpenRun: vi.fn(),
+        onDeleteRun: vi.fn(),
+        ...overrides,
+      };
+      render(<WorkspaceSidebar {...props} />);
+      return props;
+    }
+
+    it("lists every stored run with its stored agreement level", () => {
+      renderWithRuns();
+      const items = screen.getAllByTestId("history-item");
+      expect(items).toHaveLength(2);
+      expect(items[1]).toHaveTextContent("First");
+      expect(items[1]).toHaveTextContent("Low agreement");
+    });
+
+    it("adds the run on screen while it is not stored yet", () => {
+      useStore.setState({ runStartedAt: now });
+      renderWithRuns({ runPrompt: "Third, still running", currentId: "run-3" });
+      expect(screen.getAllByTestId("history-item")).toHaveLength(3);
+      expect(screen.getAllByTestId("history-item")[0]).toHaveTextContent(
+        "Third, still running",
+      );
+    });
+
+    it("opens another run and closes the sheet", () => {
+      const props = renderWithRuns();
+      fireEvent.click(screen.getByText("First"));
+      expect(props.onOpenRun).toHaveBeenCalledWith("run-1");
+      expect(props.onDone).toHaveBeenCalled();
+    });
+
+    it("does not reopen the run already on screen", () => {
+      const props = renderWithRuns();
+      fireEvent.click(screen.getByText("Second"));
+      expect(props.onOpenRun).not.toHaveBeenCalled();
+      expect(props.onDone).toHaveBeenCalled();
+    });
+
+    it("deletes a stored run", () => {
+      const props = renderWithRuns();
+      fireEvent.click(screen.getByRole("button", { name: 'Delete "First"' }));
+      expect(props.onDeleteRun).toHaveBeenCalledWith("run-1");
+    });
+
+    it("finds a run by its answers and model names", () => {
+      renderWithRuns();
+      fireEvent.change(screen.getByRole("searchbox"), {
+        target: { value: "seventy" },
+      });
+      expect(screen.getAllByTestId("history-item")).toHaveLength(2);
+      fireEvent.change(screen.getByRole("searchbox"), {
+        target: { value: "astra" },
+      });
+      expect(screen.getAllByTestId("history-item")).toHaveLength(2);
+      fireEvent.change(screen.getByRole("searchbox"), {
+        target: { value: "First" },
+      });
+      expect(screen.getAllByTestId("history-item")).toHaveLength(1);
+    });
+  });
 });

@@ -14,6 +14,10 @@ import { useWorkspaceRun } from "../hooks/useWorkspaceRun";
 import { useNewQuestion } from "../hooks/useNewQuestion";
 import { useWorkspacePanel } from "../hooks/useWorkspacePanel";
 import { useOnboarding } from "../hooks/useOnboarding";
+import { useRunHistory } from "../hooks/useRunHistory";
+import { clearRuns } from "~/lib/runHistory";
+import { runRecordExtras } from "~/lib/runHistoryRecord";
+import { HistoryRunNotice } from "./HistoryRunNotice";
 import { SettingsSheet } from "./SettingsSheet";
 import { ManualAnswerDialog } from "./ManualAnswerDialog";
 import { SavePresetDialog } from "./SavePresetDialog";
@@ -64,6 +68,13 @@ export function Workspace() {
   const composer = useWorkspaceComposer(keys.hydratedStatuses);
   const run = useWorkspaceRun({ onOpenSettings: () => setSettingsOpen(true) });
   const newQuestion = useNewQuestion();
+  const mode = useStore((state) => state.mode);
+  const runStartedAt = useStore((state) => state.runStartedAt);
+  const history = useRunHistory({
+    enabled: hasHydrated && mode === "free",
+    extras: runRecordExtras(run.agreement, run.consensus.cost),
+    onOpen: run.stopConsensus,
+  });
   const saveEnsemble = useStore((state) => state.saveEnsemble);
 
   const ask = () => {
@@ -93,6 +104,13 @@ export function Workspace() {
           agreement={run.agreement}
           onNewQuestion={newQuestion}
           onDone={() => setHistoryOpen(false)}
+          runs={history.runs}
+          currentId={history.currentId}
+          onOpenRun={(id) => {
+            history.open(id);
+            top.current?.scrollIntoView({ block: "start" });
+          }}
+          onDeleteRun={(id) => void history.remove(id)}
         />
       }
     >
@@ -106,7 +124,9 @@ export function Workspace() {
           {...composer}
           onSubmit={ask}
           running={run.running}
-          onAddManualResponse={() => setManualOpen(true)}
+          onAddManualResponse={
+            run.readOnly ? undefined : () => setManualOpen(true)
+          }
           onSavePreset={
             composer.models.length > 0 ? () => setPresetOpen(true) : undefined
           }
@@ -121,10 +141,18 @@ export function Workspace() {
         {empty ? (
           keys.canRun && <ExampleQuestions onPick={composer.onPromptChange} />
         ) : (
-          <RunResult
-            run={run}
-            showPrompt={composer.prompt.trim() !== (run.prompt ?? "")}
-          />
+          <>
+            {run.readOnly && runStartedAt !== null && (
+              <HistoryRunNotice
+                startedAt={runStartedAt}
+                onNewQuestion={newQuestion}
+              />
+            )}
+            <RunResult
+              run={run}
+              showPrompt={composer.prompt.trim() !== (run.prompt ?? "")}
+            />
+          </>
         )}
       </div>
       <WorkspaceOnboarding
@@ -137,7 +165,8 @@ export function Workspace() {
         keys={keys}
         endpoints={endpoints}
         ollamaOffer={ollamaOffer}
-        onClearData={() => {
+        onClearData={async () => {
+          await clearRuns().catch(() => undefined);
           // Reset the store first: it persists every change, so it would
           // otherwise write the old state back before the page reloads.
           useStore.setState(useStore.getInitialState(), true);

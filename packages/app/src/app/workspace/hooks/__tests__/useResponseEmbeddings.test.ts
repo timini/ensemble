@@ -33,6 +33,7 @@ interface SetupOptions {
   embeddings?: Embedding[];
   embeddingsSource?: string | null;
   similarityMatrix?: number[][] | null;
+  readOnly?: boolean;
 }
 
 function setup(
@@ -42,6 +43,7 @@ function setup(
     embeddings = noEmbeddings,
     embeddingsSource = null,
     similarityMatrix = null,
+    readOnly = false,
   }: SetupOptions = {},
 ) {
   const setEmbeddings = vi.fn();
@@ -57,6 +59,7 @@ function setup(
       mode: "free",
       setEmbeddings,
       calculateAgreementState,
+      readOnly,
     }),
   );
   return { hook, setEmbeddings, calculateAgreementState };
@@ -164,5 +167,32 @@ describe("useResponseEmbeddings", () => {
     expect(hook.result.current.failedModelIds).toEqual(["b"]);
     // The test passes the store's embeddings unchanged, so "b" has none.
     expect(hook.result.current.excludedModels).toEqual(["b"]);
+  });
+
+  describe("for a run reopened from history", () => {
+    const stored = [
+      { modelId: "a", embedding: [1, 0] },
+      { modelId: "b", embedding: [0, 1] },
+    ];
+
+    it("uses the stored embeddings and requests none, even from another provider", () => {
+      const { hook } = setup("google", {
+        embeddings: stored,
+        embeddingsSource: "openai",
+        similarityMatrix: [
+          [1, 0],
+          [0, 1],
+        ],
+        readOnly: true,
+      });
+      expect(generateEmbeddingsForResponses).not.toHaveBeenCalled();
+      expect(hook.result.current.status).toBe("ready");
+    });
+
+    it("is unavailable when the run kept no embeddings", () => {
+      const { hook } = setup("openai", { readOnly: true });
+      expect(generateEmbeddingsForResponses).not.toHaveBeenCalled();
+      expect(hook.result.current.status).toBe("unavailable");
+    });
   });
 });

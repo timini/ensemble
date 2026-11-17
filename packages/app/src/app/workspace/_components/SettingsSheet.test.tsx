@@ -46,7 +46,7 @@ describe("SettingsSheet", () => {
     expect(screen.queryByTestId("clear-data-confirm")).not.toBeInTheDocument();
     fireEvent.click(screen.getByTestId("clear-data-button"));
     expect(screen.getByTestId("clear-data-confirm")).toHaveTextContent(
-      "This removes every key, endpoint, preset and the last run from this browser.",
+      "This removes every key, endpoint, preset and saved run from this browser.",
     );
     expect(props.onClearData).not.toHaveBeenCalled();
     fireEvent.click(screen.getByTestId("clear-data-confirm-button"));

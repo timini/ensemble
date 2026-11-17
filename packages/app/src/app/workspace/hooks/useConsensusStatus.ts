@@ -16,6 +16,7 @@ export function useConsensusStatus({
   metaAnalysis,
   isGenerating,
   error,
+  readOnly = false,
 }: {
   hasHydrated: boolean;
   responses: ModelResponse[];
@@ -24,17 +25,21 @@ export function useConsensusStatus({
   metaAnalysis: string | null;
   isGenerating: boolean;
   error: string | null;
+  /**
+   * A run reopened from history: no consensus is generated for it, so with
+   * none stored the card is hidden rather than left waiting.
+   */
+  readOnly?: boolean;
 }): ConsensusStatus | null {
   return useMemo(() => {
     if (!hasHydrated || responses.length === 0) return null;
 
     if (error) return "failed";
     if (metaAnalysis) return "success";
+    if (readOnly) return null;
     if (isGenerating) return "generating";
 
-    const allComplete = responses.every(
-      (r) => r.isComplete && !r.isStreaming,
-    );
+    const allComplete = responses.every((r) => r.isComplete && !r.isStreaming);
     if (!allComplete) return "awaiting";
 
     const succeeded = responses.filter(
@@ -44,5 +49,13 @@ export function useConsensusStatus({
 
     // All responses complete but consensus hasn't started yet
     return "generating";
-  }, [hasHydrated, responses, manualCount, error, metaAnalysis, isGenerating]);
+  }, [
+    hasHydrated,
+    responses,
+    manualCount,
+    error,
+    metaAnalysis,
+    isGenerating,
+    readOnly,
+  ]);
 }

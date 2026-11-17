@@ -28,7 +28,7 @@ export interface SettingsSheetProps {
   /** The Ollama offer on first run, or null. */
   ollamaOffer: OllamaDetectedNoticeProps | null;
   /** Clears everything stored in this browser. */
-  onClearData: () => void;
+  onClearData: () => void | Promise<void>;
 }
 
 function Section({

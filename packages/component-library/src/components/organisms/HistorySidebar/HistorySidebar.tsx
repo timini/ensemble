@@ -17,6 +17,8 @@ export interface HistoryItem {
   createdAt?: number;
   /** Agreement level of the run, when it was scored. */
   level?: AgreementLevel;
+  /** More text the search matches but the row does not show: answers, consensus, model names. */
+  searchText?: string;
 }
 
 /** A saved set of models. */
@@ -68,7 +70,8 @@ export function HistorySidebar(props: HistorySidebarProps) {
   const needle = query.trim().toLowerCase();
   const match = (text: string) => !needle || text.toLowerCase().includes(needle);
   const shownPresets = presets.filter((p) => match(p.name));
-  const groups = groupHistory(items.filter((i) => match(i.prompt)), props.now ?? Date.now());
+  const shownItems = items.filter((i) => match(i.prompt) || (!!i.searchText && match(i.searchText)));
+  const groups = groupHistory(shownItems, props.now ?? Date.now());
 
   return (
     <div data-testid="history-sidebar" className={cn('flex flex-col gap-6', props.className)}>

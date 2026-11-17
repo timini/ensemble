@@ -1,36 +1,62 @@
 "use client";
 
-import { HistorySidebar } from "@/components/organisms/HistorySidebar";
+import {
+  HistorySidebar,
+  type HistoryItem,
+} from "@/components/organisms/HistorySidebar";
 import {
   agreementLevel,
   type AgreementSummaryProps,
 } from "@/components/molecules/AgreementSummary";
 import { useStore } from "~/store";
 import { useHasHydrated } from "~/hooks/useHasHydrated";
+import type { StoredRun } from "~/lib/runHistory";
 
 export interface WorkspaceSidebarProps {
   /** Prompt of the run on screen, or null when there is none. */
   runPrompt: string | null;
   /** Agreement of that run, for its level dot. */
   agreement: AgreementSummaryProps;
-  /** Clears the run (New question, or deleting it). */
+  /** Clears the run (New question). */
   onNewQuestion: () => void;
   /** Closes the sidebar when it is a sheet (phones and tablets). */
   onDone: () => void;
+  /** Runs kept in this browser, newest first. */
+  runs?: StoredRun[];
+  /** History id of the run on screen. */
+  currentId?: string | null;
+  /** Puts a stored run back on screen. */
+  onOpenRun?: (id: string) => void;
+  /** Deletes a run. Defaults to clearing the screen. */
+  onDeleteRun?: (id: string) => void;
 }
 
-const RUN_ID = "last-run";
+const LIVE_ID = "last-run";
+
+/** What the search matches besides the prompt: answers, consensus, models. */
+function searchText(run: StoredRun): string {
+  return [
+    ...run.responses.map((r) => `${r.model} ${r.response}`),
+    ...run.manualResponses.map((m) => `${m.label} ${m.response}`),
+    run.metaAnalysis ?? "",
+  ].join(" ");
+}
 
 /**
- * History and presets for the workspace's sidebar. History is the last run
- * kept in this browser (full history in IndexedDB is a later M4 task);
- * presets are the saved ensembles, loaded or deleted from here.
+ * History and presets for the workspace's sidebar. History is the runs
+ * kept in IndexedDB (Free mode), plus the run on screen while it is not
+ * stored yet; opening one puts it back on screen read only. Presets are the
+ * saved ensembles, loaded or deleted from here.
  */
 export function WorkspaceSidebar({
   runPrompt,
   agreement,
   onNewQuestion,
   onDone,
+  runs = [],
+  currentId,
+  onOpenRun,
+  onDeleteRun,
 }: WorkspaceSidebarProps) {
   const hasHydrated = useHasHydrated();
   const savedEnsembles = useStore((state) => state.savedEnsembles);
@@ -40,19 +66,25 @@ export function WorkspaceSidebar({
   // date or time rather than an invented one.
   const runStartedAt = useStore((state) => state.runStartedAt);
 
-  const items = runPrompt
-    ? [
-        {
-          id: RUN_ID,
-          prompt: runPrompt,
-          createdAt: runStartedAt ?? undefined,
-          level:
-            agreement.status === "ready"
-              ? agreementLevel(agreement.score ?? 0, agreement.thresholds)
-              : undefined,
-        },
-      ]
-    : [];
+  const activeId = runPrompt ? (currentId ?? LIVE_ID) : undefined;
+  const items: HistoryItem[] = runs.map((run) => ({
+    id: run.id,
+    prompt: run.prompt,
+    createdAt: run.createdAt,
+    level: run.agreementLevel ?? undefined,
+    searchText: searchText(run),
+  }));
+  if (runPrompt && activeId && !runs.some((r) => r.id === activeId)) {
+    items.unshift({
+      id: activeId,
+      prompt: runPrompt,
+      createdAt: runStartedAt ?? undefined,
+      level:
+        agreement.status === "ready"
+          ? agreementLevel(agreement.score ?? 0, agreement.thresholds)
+          : undefined,
+    });
+  }
   const presets = (hasHydrated ? savedEnsembles : []).map((e) => ({
     id: e.id,
     name: e.name,
@@ -63,9 +95,12 @@ export function WorkspaceSidebar({
     <HistorySidebar
       items={items}
       presets={presets}
-      activeId={runPrompt ? RUN_ID : undefined}
-      onSelect={onDone}
-      onDelete={onNewQuestion}
+      activeId={activeId}
+      onSelect={(id) => {
+        if (id !== activeId) onOpenRun?.(id);
+        onDone();
+      }}
+      onDelete={(id) => (onDeleteRun ? onDeleteRun(id) : onNewQuestion())}
       onSelectPreset={(id) => {
         loadEnsemble(id);
         onDone();

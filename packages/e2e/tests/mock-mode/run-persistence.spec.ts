@@ -47,8 +47,9 @@ test.describe('Run persistence', () => {
 
     await ask(page, 'Second question');
 
-    await expect(page.getByTestId('history-item')).toHaveCount(1);
-    await expect(page.getByTestId('history-item')).toContainText('Second question');
+    // The first run moves to history; the second is the one on screen.
+    await expect(page.getByTestId('history-item')).toHaveCount(2);
+    await expect(page.locator('[data-testid="history-item"] [aria-current="true"]')).toContainText('Second question');
     await expect(page.getByTestId('answer-card')).toHaveCount(2);
     await expect(consensus(page)).not.toHaveAttribute('data-status', 'success');
     await waitForConsensus(page);
