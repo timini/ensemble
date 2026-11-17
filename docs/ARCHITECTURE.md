@@ -108,11 +108,12 @@ Adding a provider with its own API and key touches about 20 files: shared-utils 
 ## Eval harness
 
 - Datasets load from Hugging Face in `eval/src/lib/benchmarkDatasetLoaders.ts`: gsm8k, math500, truthfulqa, gpqa, mmlu_pro, simpleqa, hle, arc, hellaswag.
-- Models are given as `provider:model`. Defaults are in `eval/src/lib/evalDefaults.ts`: `google:gemini-3-flash-preview`, which matches the committed caches in `eval/.cache/`.
-- Scoring uses an LLM judge through `generateStructured` (`eval/src/lib/evaluators.ts`), with a regex fallback for numbers.
+- Models are given as `provider:model`, `<endpoint>:model` for OpenAI-compatible presets (`openrouter:qwen/qwen3-14b`, `ollama:llama3.2`) or `compat:<baseURL>#<model>` (`eval/src/lib/modelSpecs.ts`). Keys come from the environment (`OPENROUTER_API_KEY` and so on); local servers need none. Defaults are in `eval/src/lib/evalDefaults.ts`: `google:gemini-3-flash-preview`, which matches the committed caches in `eval/.cache/`.
+- New runs use the structured answer protocol (`eval/src/lib/methodology.ts`): multiple-choice options shuffled with a fixed seed (the permutation is recorded), a structured final answer through `generateStructured` with `json_object` and `Final answer:` fallbacks, and mechanical scoring, so only SimpleQA and HLE need an LLM judge. A judge must differ from the generators unless `--allow-same-judge` is set. The committed caches are scored with the legacy protocol (unshuffled, LLM judge) because their replies answered the old prompts.
+- Errors and timeouts count as wrong and are reported separately. Real runs default to 200 questions per dataset. Every report has 95% Wilson intervals and paired McNemar tests (`eval/src/lib/pairedStats.ts`).
 - Concurrency: AIMD limiter in `eval/src/lib/concurrencyPool.ts`.
-- Cost per answer comes from the shared price table, using reported token usage or a text-length estimate (`costFromTextLength`). Consensus calls are not priced yet.
-- Known issues, all addressed in M3: TruthfulQA options are not shuffled; failed questions are dropped instead of counted wrong; the same model often generates, merges and judges; `report/` data is not in the repo.
+- Cost per answer and per consensus call comes from the shared price table, using reported token usage or a text-length estimate (`costFromTextLength`). Local models cost $0. Judge calls are not priced.
+- Still open in M3: `report/` data is not in the repo. Details in `packages/eval/docs/architecture.md`.
 
 ## Target design
 
@@ -134,7 +135,7 @@ Changes from today, by milestone:
 | Real `generateEmbeddings` for OpenAI and Google (done); one similarity implementation in shared-utils (done); OpenAI-compatible embeddings through `requestOpenAICompatibleEmbedding` (done) | M1, M2 |
 | Pricing table in shared-utils, used for estimates and actual cost (done) | M1 |
 | `FreeOpenAICompatibleClient` with configurable base URL and optional key, several endpoints with presets (done); Ollama detection, local embeddings, `npm run local` (done) | M2 |
-| Eval harness accepts the OpenAI-compatible provider; methodology fixes | M3 |
+| Eval harness accepts the OpenAI-compatible provider; methodology fixes (done) | M3 |
 | Single workspace route replacing the four wizard pages; history in IndexedDB | M4 |
 | Client Firebase Auth, `ProAPIClient` over `streamTextEvents`, Firestore, credit ledger, Stripe routes | M5 |
 | Shares with Firestore TTL, synced history | M6 |
