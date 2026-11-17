@@ -75,6 +75,8 @@ export interface BuildRunCallUsageOptions {
   responses: ModelResponse[];
   selectedModels: ModelSelection[];
   consensusUsage: CallUsage[];
+  /** Manual answers; only their embeddings are billed. */
+  manualResponses?: { id: string; response: string }[];
   /** Answers that have an embedding. */
   embeddings: { modelId: string }[];
   /** Provider that produced the embeddings. */
@@ -112,7 +114,10 @@ export function buildRunCallUsage(
   const embeddingModel = embeddingModelRef(options.embeddingsSource);
   if (embeddingModel) {
     for (const { modelId } of options.embeddings) {
-      const text = responses.find((r) => r.modelId === modelId)?.response ?? "";
+      const text =
+        responses.find((r) => r.modelId === modelId)?.response ??
+        options.manualResponses?.find((m) => m.id === modelId)?.response ??
+        "";
       calls.push({
         ...embeddingModel,
         inputTokens: estimateTokensFromText(text),

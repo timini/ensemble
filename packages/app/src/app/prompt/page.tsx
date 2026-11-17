@@ -18,7 +18,6 @@ import { WorkflowNavigator } from "@/components/organisms/WorkflowNavigator";
 import { PromptTips } from "@/components/organisms/PromptTips";
 import { PromptInputWithHint } from "@/components/organisms/PromptInputWithHint";
 import { ProgressSteps } from "@/components/molecules/ProgressSteps";
-import { ResponseCard } from "@/components/molecules/ResponseCard";
 import { RunCostSummary } from "@/components/molecules/RunCostSummary";
 import { PRICE_TABLE_DATE } from "@ensemble-ai/shared-utils/pricing";
 import { useRunEstimate } from "~/hooks/useRunEstimate";
@@ -31,6 +30,7 @@ import { toError } from "~/lib/errors";
 import { logger } from "~/lib/logger";
 import { toResponseError } from "~/lib/responseErrors";
 import type { ConsensusMethod } from "~/store/slices/ensembleSlice";
+import { PromptManualResponses } from "./_components/PromptManualResponses";
 
 export default function PromptPage() {
   const { t } = useTranslation();
@@ -42,6 +42,7 @@ export default function PromptPage() {
   const prompt = useStore((state) => state.prompt);
   const setPrompt = useStore((state) => state.setPrompt);
   const manualResponses = useStore((state) => state.manualResponses);
+  const addManualResponse = useStore((state) => state.addManualResponse);
   const startRun = useStore((state) => state.startRun);
   const startStreaming = useStore((state) => state.startStreaming);
   const appendStreamChunk = useStore((state) => state.appendStreamChunk);
@@ -206,27 +207,11 @@ export default function PromptPage() {
           />
         )}
 
-        {/* Manual Responses Preview */}
-        {manualResponses.length > 0 && (
-          <div data-testid="manual-responses-preview" className="space-y-4">
-            <h3 className="text-lg font-semibold">
-              {t("organisms.ensembleSidebar.manualResponses")}
-            </h3>
-            <div className="space-y-4">
-              {manualResponses.map((manual) => (
-                <ResponseCard
-                  key={manual.id}
-                  responseType="manual"
-                  status="complete"
-                  content={manual.response}
-                  modelName={manual.label}
-                  defaultExpanded={false}
-                  testId={`manual-preview-${manual.id}`}
-                />
-              ))}
-            </div>
-          </div>
-        )}
+        {/* Manual answers: preview and add (FR-023) */}
+        <PromptManualResponses
+          manualResponses={manualResponses}
+          onAdd={addManualResponse}
+        />
       </div>
 
       {selectedModels.length > 0 && (

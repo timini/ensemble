@@ -147,4 +147,19 @@ describe("buildRunCallUsage", () => {
     });
     expect(calls).toEqual([]);
   });
+
+  it("prices the embedding of a manual answer from its text", () => {
+    const calls = buildRunCallUsage({
+      prompt: "",
+      responses: [],
+      manualResponses: [{ id: "manual-1", response: "m".repeat(40) }],
+      selectedModels,
+      consensusUsage: [],
+      embeddings: [{ modelId: "manual-1" }],
+      embeddingsSource: "openai",
+    });
+    expect(calls).toHaveLength(1);
+    expect(calls[0]?.modelId).toBe("text-embedding-3-small");
+    expect(calls[0]?.inputTokens).toBeGreaterThan(0);
+  });
 });

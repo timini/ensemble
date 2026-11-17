@@ -2,7 +2,6 @@
 
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { useHasHydrated } from "~/hooks/useHasHydrated";
@@ -26,6 +25,8 @@ import { ResponsesSection } from "./_components/ResponsesSection";
 import { AgreementSection } from "./_components/AgreementSection";
 import { RunExclusionNote } from "./_components/RunExclusionNote";
 import { useModelRetry } from "./hooks/useModelRetry";
+import { useAddManualAnswer } from "./hooks/useAddManualAnswer";
+import { useReviewNavigation } from "./hooks/useReviewNavigation";
 import { RunCostSummary } from "@/components/molecules/RunCostSummary";
 import { MajorityVoteBreakdown } from "@/components/molecules/MajorityVoteBreakdown";
 import { toMajorityVoteBreakdownProps } from "~/lib/majorityVote";
@@ -36,7 +37,6 @@ const MAX_EXPANDED_CARDS = 3;
 
 export default function ReviewPage() {
   const { t } = useTranslation();
-  const router = useRouter();
   const hasHydrated = useHasHydrated();
   const handleProgressStepClick = useStepNavigation();
 
@@ -47,8 +47,6 @@ export default function ReviewPage() {
     metaAnalysis,
     mode,
     embeddingsProvider,
-    setCurrentStep,
-    resetStreamingState,
     setEmbeddings,
     calculateAgreement,
     viewResponses,
@@ -63,6 +61,7 @@ export default function ReviewPage() {
 
   const {
     completedResponses,
+    agreementAnswers,
     pairwiseComparisons,
     overallAgreement,
     averageConfidence,
@@ -70,6 +69,7 @@ export default function ReviewPage() {
     allFinished,
   } = useReviewAnalytics(
     viewResponses,
+    viewManualResponses,
     viewAgreementStats,
     viewSimilarityMatrix,
     viewEmbeddings,
@@ -79,7 +79,7 @@ export default function ReviewPage() {
 
   const { status: embeddingsStatus, excludedModels } = useResponseEmbeddings({
     hasHydrated,
-    completedResponses,
+    completedResponses: agreementAnswers,
     embeddingsProvider,
     viewEmbeddings,
     viewEmbeddingsSource,
@@ -96,6 +96,7 @@ export default function ReviewPage() {
     restart: restartConsensus,
   } = useConsensusGeneration();
   const handleRetry = useModelRetry(retryModel, restartConsensus);
+  const handleAddManualAnswer = useAddManualAnswer(restartConsensus);
 
   useConsensusTrigger({
     hasHydrated,
@@ -126,22 +127,8 @@ export default function ReviewPage() {
     error: consensusError,
   });
 
-  const handleBack = () => {
-    setCurrentStep("prompt");
-    router.push("/prompt");
-  };
-
-  const handleNewComparison = () => {
-    resetStreamingState();
-    setCurrentStep("prompt");
-    router.push("/prompt");
-  };
-
-  const handleStartOver = () => {
-    setCurrentStep("config");
-    resetStreamingState();
-    router.push("/config");
-  };
+  const { handleBack, handleNewComparison, handleStartOver } =
+    useReviewNavigation();
 
   const pendingModels = useMemo(() => {
     if (!hasHydrated) return [];
@@ -209,7 +196,7 @@ export default function ReviewPage() {
         status={embeddingsStatus}
         overallAgreement={overallAgreement}
         pairwiseComparisons={pairwiseComparisons}
-        responseCount={completedResponses.length}
+        responseCount={agreementAnswers.length}
         averageConfidence={averageConfidence}
         excludedModels={excludedModels}
       />
@@ -222,6 +209,7 @@ export default function ReviewPage() {
         maxExpandedCards={MAX_EXPANDED_CARDS}
         onRetry={handleRetry}
         onBack={handleBack}
+        onAddManualResponse={handleAddManualAnswer}
       />
 
       {/* 5. Cost of the run (updates as consensus calls finish) */}

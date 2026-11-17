@@ -1,10 +1,30 @@
 import type { PairwiseComparison } from '@/components/organisms/AgreementAnalysis';
-import type { ModelResponse } from '~/store';
+import type { ManualResponse, ModelResponse } from '~/store';
 
 import { normalizeSimilarity } from '@ensemble-ai/shared-utils/similarity';
 
 // Re-export for use by consumers
 export { normalizeSimilarity };
+
+/**
+ * An answer the agreement analysis scores: a completed model answer or a
+ * manual answer. `model` is the name shown in the comparisons.
+ */
+export type AgreementAnswer = Pick<
+  ModelResponse,
+  'modelId' | 'model' | 'response' | 'isComplete' | 'error'
+>;
+
+/** A manual answer in the shape the agreement analysis scores. */
+export function manualAgreementAnswer(manual: ManualResponse): AgreementAnswer {
+  return {
+    modelId: manual.id,
+    model: manual.label,
+    response: manual.response,
+    isComplete: true,
+    error: null,
+  };
+}
 
 /**
  * Build pairwise comparisons from the similarity matrix.
@@ -15,7 +35,7 @@ export { normalizeSimilarity };
  * and only the embedded answers are compared.
  */
 export function buildPairwiseComparisons(
-  responses: ModelResponse[],
+  responses: AgreementAnswer[],
   similarityMatrix: number[][] | null,
   embeddedModelIds: string[] = responses.map((response) => response.modelId),
 ): PairwiseComparison[] {

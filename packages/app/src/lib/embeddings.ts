@@ -4,7 +4,7 @@ import {
   type ProviderMode,
   type AIProvider,
 } from '@ensemble-ai/shared-utils/providers';
-import type { ModelResponse } from '~/store';
+import type { AgreementAnswer } from '~/lib/agreement';
 import type { ProviderType } from '~/store/slices/ensembleSlice';
 import { toError } from '~/lib/errors';
 import { logger } from '~/lib/logger';
@@ -15,14 +15,15 @@ export type EmbeddingVector = {
 };
 
 export interface GenerateEmbeddingsOptions {
-  responses: ModelResponse[];
+  /** Model answers and manual answers to embed. */
+  responses: AgreementAnswer[];
   provider: ProviderType;
   mode: ProviderMode;
   existingEmbeddings?: EmbeddingVector[];
   onError?: (modelId: string, error: Error) => void;
 }
 
-function isEmbeddableResponse(response: ModelResponse): boolean {
+function isEmbeddableResponse(response: AgreementAnswer): boolean {
   return (
     response.isComplete &&
     !response.error &&

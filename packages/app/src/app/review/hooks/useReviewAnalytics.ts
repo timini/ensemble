@@ -2,19 +2,23 @@ import { useMemo } from "react";
 import {
   buildPairwiseComparisons,
   calculateAverageConfidence,
+  manualAgreementAnswer,
   normalizeSimilarity,
 } from "~/lib/agreement";
-import type { ModelResponse, AgreementStats } from "~/store";
+import type { ModelResponse, ManualResponse, AgreementStats } from "~/store";
 
 type Embedding = { modelId: string; embedding: number[] };
 
 /**
  * Derives analytics values from completed responses and agreement data.
- * Returns completedResponses (successful answers), pairwiseComparisons,
- * overallAgreement, averageConfidence, failedModels and allFinished.
+ * Returns completedResponses (successful model answers), agreementAnswers
+ * (those plus the manual answers, which the agreement analysis scores too),
+ * pairwiseComparisons, overallAgreement, averageConfidence, failedModels and
+ * allFinished.
  */
 export function useReviewAnalytics(
   viewResponses: ModelResponse[],
+  viewManualResponses: ManualResponse[],
   viewAgreementStats: AgreementStats | null,
   viewSimilarityMatrix: number[][] | null,
   viewEmbeddings: Embedding[],
@@ -30,16 +34,26 @@ export function useReviewAnalytics(
     [viewResponses],
   );
 
+  const agreementAnswers = useMemo(
+    () => [
+      ...completedResponses,
+      ...viewManualResponses
+        .filter((manual) => manual.response.trim().length > 0)
+        .map(manualAgreementAnswer),
+    ],
+    [completedResponses, viewManualResponses],
+  );
+
   // The matrix follows the order of the stored embeddings, which can cover
-  // fewer answers than completedResponses when some embedding calls failed.
+  // fewer answers than agreementAnswers when some embedding calls failed.
   const pairwiseComparisons = useMemo(
     () =>
       buildPairwiseComparisons(
-        completedResponses,
+        agreementAnswers,
         viewSimilarityMatrix,
         viewEmbeddings.map((entry) => entry.modelId),
       ),
-    [completedResponses, viewSimilarityMatrix, viewEmbeddings],
+    [agreementAnswers, viewSimilarityMatrix, viewEmbeddings],
   );
 
   const overallAgreement = useMemo(
@@ -66,6 +80,7 @@ export function useReviewAnalytics(
 
   return {
     completedResponses,
+    agreementAnswers,
     pairwiseComparisons,
     overallAgreement,
     averageConfidence,

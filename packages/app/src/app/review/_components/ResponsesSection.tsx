@@ -15,6 +15,7 @@ import type {
   ResponseErrorKind,
 } from "@/components/molecules/ResponseCard";
 import { ResponseCardSkeleton } from "./ResponseCardSkeleton";
+import { AddManualResponse } from "../../_components/AddManualResponse";
 
 interface SelectedModel {
   id: string;
@@ -48,6 +49,8 @@ interface ResponsesSectionProps {
   maxExpandedCards: number;
   onRetry: (modelId: string) => void;
   onBack: () => void;
+  /** Adds a manual answer to the run (FR-023). */
+  onAddManualResponse: (label: string, response: string) => void;
 }
 
 export function ResponsesSection({
@@ -57,6 +60,7 @@ export function ResponsesSection({
   maxExpandedCards,
   onRetry,
   onBack,
+  onAddManualResponse,
 }: ResponsesSectionProps) {
   const { t } = useTranslation();
 
@@ -67,20 +71,23 @@ export function ResponsesSection({
 
   return (
     <div className="mt-8 space-y-4">
-      <h3 className="text-xl font-semibold">
-        {t("pages.review.responsesHeading")}
-      </h3>
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <h3 className="text-xl font-semibold">
+          {t("pages.review.responsesHeading")}
+        </h3>
+        {!isEmpty && <AddManualResponse onAdd={onAddManualResponse} />}
+      </div>
 
       {isEmpty ? (
         <div
-          className="rounded-lg border border-dashed border-border bg-muted/30 p-12 text-center flex flex-col items-center"
+          className="flex flex-col items-center rounded-lg border border-dashed border-border bg-muted/30 p-12 text-center"
           data-testid="empty-responses"
         >
-          <MessageSquare className="w-12 h-12 text-muted-foreground mb-4" />
-          <p className="text-lg font-semibold mb-2">
+          <MessageSquare className="mb-4 h-12 w-12 text-muted-foreground" />
+          <p className="mb-2 text-lg font-semibold">
             {t("pages.review.noResponses")}
           </p>
-          <p className="text-sm text-muted-foreground max-w-md mb-6">
+          <p className="mb-6 max-w-md text-sm text-muted-foreground">
             {t("pages.review.noResponsesHint")}
           </p>
           <Button variant="outline" onClick={onBack}>
@@ -107,9 +114,7 @@ export function ResponsesSection({
               errorKind={response.errorKind ?? undefined}
               retryAfterSeconds={response.retryAfterSeconds ?? undefined}
               responseTime={
-                response.responseTime
-                  ? `${response.responseTime}ms`
-                  : undefined
+                response.responseTime ? `${response.responseTime}ms` : undefined
               }
               testId={`response-card-${response.modelId}`}
               tokenCount={response.tokenCount ?? undefined}

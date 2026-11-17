@@ -20,6 +20,7 @@ export function useRunCost(
   const prompt = useStore(selectRunPrompt);
   const selectedModels = useStore((state) => state.selectedModels);
   const consensusUsage = useStore((state) => state.consensusUsage);
+  const manualResponses = useStore((state) => state.manualResponses);
 
   return useMemo(() => {
     if (responses.length === 0 || responses.some((r) => !r.isComplete))
@@ -30,6 +31,7 @@ export function useRunCost(
         responses,
         selectedModels,
         consensusUsage,
+        manualResponses,
         embeddings,
         embeddingsSource,
       }),
@@ -39,6 +41,7 @@ export function useRunCost(
     responses,
     selectedModels,
     consensusUsage,
+    manualResponses,
     embeddings,
     embeddingsSource,
   ]);

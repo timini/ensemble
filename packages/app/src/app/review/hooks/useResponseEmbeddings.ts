@@ -4,7 +4,7 @@ import { generateEmbeddingsForResponses } from '~/lib/embeddings';
 import type { EmbeddingProvider } from '~/lib/embeddingsProvider';
 import { toError } from '~/lib/errors';
 import { logger } from '~/lib/logger';
-import type { ModelResponse } from '~/store';
+import type { AgreementAnswer } from '~/lib/agreement';
 type Embedding = { modelId: string; embedding: number[] };
 
 /**
@@ -28,7 +28,8 @@ export interface UseResponseEmbeddingsResult {
 
 interface UseResponseEmbeddingsOptions {
   hasHydrated: boolean;
-  completedResponses: ModelResponse[];
+  /** Completed model answers and manual answers. */
+  completedResponses: AgreementAnswer[];
   /** Resolved provider, or null when none is available. */
   embeddingsProvider: EmbeddingProvider | null;
   viewEmbeddings: Embedding[];
