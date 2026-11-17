@@ -29,10 +29,16 @@ describe('MockProviderClient', () => {
     expect(embedding).toHaveLength(1536);
   });
 
-  it('always validates mock API keys', async () => {
+  it('accepts any mock API key', async () => {
     const client = new MockProviderClient();
     const result = await client.validateApiKey('anything');
     expect(result.valid).toBe(true);
+  });
+
+  it('rejects a key containing "invalid", so E2E tests can show a failed key', async () => {
+    const client = new MockProviderClient();
+    const result = await client.validateApiKey('sk-invalid-key');
+    expect(result).toEqual({ valid: false, error: 'Invalid API key (401 Unauthorized)' });
   });
 
   it('lists available text models', async () => {

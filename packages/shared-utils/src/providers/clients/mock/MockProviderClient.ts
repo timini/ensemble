@@ -180,9 +180,11 @@ export class MockProviderClient implements AIProvider {
     return Promise.resolve(embedding);
   }
 
-  async validateApiKey(_apiKey: string): Promise<ValidationResult> {
+  /** Accepts any key except one containing "invalid", which E2E tests use for a rejected key. */
+  async validateApiKey(apiKey: string): Promise<ValidationResult> {
     const delay = this.randomInt(100, 300);
     await new Promise((resolve) => setTimeout(resolve, delay));
+    if (/invalid/i.test(apiKey)) return { valid: false, error: 'Invalid API key (401 Unauthorized)' };
     return { valid: true };
   }
 
