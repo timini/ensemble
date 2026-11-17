@@ -43,4 +43,10 @@ describe('modeSlice', () => {
     expect(state.mode).toBe('pro');
     expect(state.isModeConfigured).toBe(true);
   });
+
+  it('starts with onboarding not done, and marks it done', () => {
+    expect(store.getState().onboardingDone).toBe(false);
+    store.getState().completeOnboarding();
+    expect(store.getState().onboardingDone).toBe(true);
+  });
 });

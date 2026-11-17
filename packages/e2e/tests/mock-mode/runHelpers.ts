@@ -35,6 +35,18 @@ export function keysConfigured(count: number): RegExp {
   return count === 1 ? /1 API key configured/i : new RegExp(`${count} API keys configured`, 'i');
 }
 
+/**
+ * Empties browser storage except for the finished onboarding, and reloads,
+ * so a test starts as a returning visitor with nothing set up.
+ */
+export async function resetStorage(page: Page) {
+  await page.evaluate(() => {
+    localStorage.clear();
+    localStorage.setItem('ensemble-ai-store', JSON.stringify({ onboardingDone: true }));
+  });
+  await page.reload();
+}
+
 /** The settings sheet, opened from the header. */
 export async function openSettings(page: Page): Promise<Locator> {
   await page.getByTestId('app-shell-settings').click();

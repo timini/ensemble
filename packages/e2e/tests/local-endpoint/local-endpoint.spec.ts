@@ -141,3 +141,37 @@ test.describe('Free mode with a local OpenAI-compatible endpoint', () => {
     await expect(page.getByTestId('ollama-notice')).toHaveCount(0);
   });
 });
+
+test.describe('First-run onboarding with a local Ollama', () => {
+  test.setTimeout(120_000);
+  // A first visit: nothing in browser storage.
+  test.use({ storageState: { cookies: [], origins: [] } });
+
+  test.beforeEach(async ({ page }) => {
+    await page.request.post(`${FAKE_ROOT}/__reset`);
+  });
+
+  test('offers the running Ollama on the local path and starts with it', async ({ page }) => {
+    await page.goto('/workspace');
+    const sheet = page.getByTestId('onboarding-sheet');
+    await expect(sheet).toBeVisible();
+    await page.getByTestId('onboarding-path-local').click();
+
+    const notice = sheet.getByTestId('ollama-notice');
+    await expect(notice).toHaveAttribute('data-state', 'found', { timeout: 15_000 });
+    await expect(page.getByTestId('onboarding-start')).toBeDisabled();
+    await notice.getByTestId('ollama-notice-add').click();
+
+    await expect(sheet.getByTestId('onboarding-local-connected')).toHaveText('Connected to Ollama. 4 models available.', {
+      timeout: 15_000,
+    });
+    await page.getByTestId('onboarding-start').click();
+    await expect(sheet).toBeHidden();
+    await expect(page.getByTestId('workspace-setup')).toHaveCount(0);
+
+    await page.getByTestId('model-picker-trigger').click();
+    for (const model of MODELS) {
+      await expect(page.locator(`[data-testid="model-picker-option"][data-model-id="${model}"]`)).toBeVisible();
+    }
+  });
+});

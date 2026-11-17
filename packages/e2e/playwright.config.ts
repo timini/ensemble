@@ -51,6 +51,18 @@ const LOCAL_ENDPOINT_APP_PORT = 3100;
 const FAKE_OPENAI_PORT = 11499;
 const runLocalEndpointServers = isMockMode && !isDeployedTest;
 
+/**
+ * Browser storage with the first-run onboarding sheet already finished, so
+ * suites that are not about onboarding start on the plain workspace.
+ * tests/mock-mode/onboarding.spec.ts starts from empty storage instead.
+ */
+function onboardingDone(origin: string) {
+  return {
+    cookies: [],
+    origins: [{ origin, localStorage: [{ name: 'ensemble-ai-store', value: JSON.stringify({ onboardingDone: true }) }] }],
+  };
+}
+
 export default defineConfig({
   testDir: './tests',
   fullyParallel: true,
@@ -71,7 +83,7 @@ export default defineConfig({
     {
       name: 'mock-mode',
       testDir: './tests/mock-mode',
-      use: { ...devices['Desktop Chrome'] },
+      use: { ...devices['Desktop Chrome'], storageState: onboardingDone(new URL(baseURL).origin) },
     },
 
     // Free Mode: Tests with real API keys
@@ -92,7 +104,11 @@ export default defineConfig({
       name: 'local-endpoint',
       testDir: './tests/local-endpoint',
       fullyParallel: false,
-      use: { ...devices['Desktop Chrome'], baseURL: `http://localhost:${LOCAL_ENDPOINT_APP_PORT}` },
+      use: {
+        ...devices['Desktop Chrome'],
+        baseURL: `http://localhost:${LOCAL_ENDPOINT_APP_PORT}`,
+        storageState: onboardingDone(`http://localhost:${LOCAL_ENDPOINT_APP_PORT}`),
+      },
     },
 
     // Pro Mode: Placeholder for Phase 4 backend tests

@@ -56,7 +56,8 @@ function isNetworkFailure(error: unknown): boolean {
  * empty. A failed request with no HTTP answer is `unreachable`, or
  * `localBlocked` when a page that is not on this machine called a server
  * that is, since browsers can block those calls (docs/LOCAL_MODELS.md). In mock mode no request is sent: every endpoint with a base URL
- * connects, offers the mock models and can embed.
+ * connects, offers the mock models and can embed, unless its key contains
+ * `invalid` (as with the mock client's key check).
  */
 export async function checkEndpoint(
   endpoint: OpenAICompatibleEndpointConfig,
@@ -68,6 +69,9 @@ export async function checkEndpoint(
   }
 
   if (isMockMode()) {
+    if (/invalid/i.test(endpoint.apiKey ?? "")) {
+      return { status: "invalid", error: "Invalid API key (401 Unauthorized)" };
+    }
     const models = new MockProviderClient({
       providerFilter: "openai-compatible",
     }).listAvailableModels();

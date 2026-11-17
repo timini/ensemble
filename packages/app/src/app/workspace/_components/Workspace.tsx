@@ -13,10 +13,12 @@ import { useWorkspaceComposer } from "../hooks/useWorkspaceComposer";
 import { useWorkspaceRun } from "../hooks/useWorkspaceRun";
 import { useNewQuestion } from "../hooks/useNewQuestion";
 import { useWorkspacePanel } from "../hooks/useWorkspacePanel";
+import { useOnboarding } from "../hooks/useOnboarding";
 import { SettingsSheet } from "./SettingsSheet";
 import { ManualAnswerDialog } from "./ManualAnswerDialog";
 import { SavePresetDialog } from "./SavePresetDialog";
 import { RunResult } from "./RunResult";
+import { WorkspaceOnboarding } from "./WorkspaceOnboarding";
 import { WorkspaceSidebar } from "./WorkspaceSidebar";
 import {
   ExampleQuestions,
@@ -31,7 +33,9 @@ const STORE_KEY = "ensemble-ai-store";
  * top; the agreement score and consensus come next, then every answer.
  * History and presets are in the sidebar, keys and appearance in the
  * settings sheet. `?panel=settings|models|prompt` opens a part of it, which
- * is how the old wizard routes land here.
+ * is how the old wizard routes land here. On a first visit the onboarding
+ * sheet asks how to run models (`?start=keys|local` from the landing page
+ * picks the path).
  */
 export function Workspace() {
   const { t } = useTranslation("common");
@@ -50,6 +54,12 @@ export function Workspace() {
   const ollamaOffer = useOllamaDetection({
     enabled: hasHydrated && keys.webCryptoSupported,
     hasValidKey: keys.validKeyCount > 0,
+  });
+  const onboarding = useOnboarding({
+    hasHydrated,
+    keys,
+    endpoints,
+    onOpenSettings: () => setSettingsOpen(true),
   });
   const composer = useWorkspaceComposer(keys.hydratedStatuses);
   const run = useWorkspaceRun({ onOpenSettings: () => setSettingsOpen(true) });
@@ -105,7 +115,7 @@ export function Workspace() {
         {hasHydrated && !keys.canRun && (
           <SetupCard
             onOpenSettings={() => setSettingsOpen(true)}
-            ollamaOffer={settingsOpen ? null : ollamaOffer}
+            ollamaOffer={settingsOpen || onboarding.open ? null : ollamaOffer}
           />
         )}
         {empty ? (
@@ -117,6 +127,10 @@ export function Workspace() {
           />
         )}
       </div>
+      <WorkspaceOnboarding
+        onboarding={onboarding}
+        ollamaOffer={onboarding.open ? ollamaOffer : null}
+      />
       <SettingsSheet
         open={settingsOpen}
         onOpenChange={onSettingsChange}

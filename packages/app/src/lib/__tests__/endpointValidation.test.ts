@@ -93,6 +93,16 @@ describe("checkEndpoint", () => {
     expect(fetchImpl).not.toHaveBeenCalled();
   });
 
+  it('rejects a key containing "invalid" in mock mode, as the mock client does', async () => {
+    process.env.NEXT_PUBLIC_MOCK_MODE = "true";
+    expect(
+      await checkEndpoint({ ...endpoint, apiKey: "sk-or-invalid" }, vi.fn()),
+    ).toEqual({
+      status: "invalid",
+      error: "Invalid API key (401 Unauthorized)",
+    });
+  });
+
   it("gives a code, not English text, when the request fails without a message", async () => {
     process.env.NEXT_PUBLIC_MOCK_MODE = "false";
     const fetchImpl = vi.fn().mockRejectedValue(new Error(""));

@@ -6,13 +6,12 @@
  * openai-compatible-mock.
  */
 import { test, expect } from '@playwright/test';
-import { keysConfigured, openSettings } from './runHelpers';
+import { keysConfigured, openSettings, resetStorage } from './runHelpers';
 
 test.describe('Settings sheet', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/workspace');
-    await page.evaluate(() => localStorage.clear());
-    await page.reload();
+    await resetStorage(page);
   });
 
   test('opens from the header with keys, endpoints, embeddings, appearance and data', async ({ page }) => {
@@ -91,6 +90,9 @@ test.describe('Settings sheet', () => {
     await expect(sheet.getByTestId('clear-data-confirm')).toBeVisible();
     await sheet.getByTestId('clear-data-confirm-button').click();
 
+    // Everything is gone, so the first-run onboarding comes back.
+    await expect(page.getByTestId('onboarding-sheet')).toBeVisible();
+    await page.getByTestId('onboarding-skip').click();
     await expect(page.getByTestId('workspace-setup')).toBeVisible();
     sheet = await openSettings(page);
     await expect(sheet.getByText(/configure an api key to continue/i)).toBeVisible();

@@ -14,11 +14,19 @@ export interface ModeSlice {
   isModeConfigured: boolean;
   setMode: (mode: OperatingMode) => void;
   configureModeComplete: () => void;
+  /** The first-run onboarding sheet was finished or skipped. Persisted. */
+  onboardingDone: boolean;
+  completeOnboarding: () => void;
 }
 
 export const createModeSlice: StateCreator<ModeSlice> = (set) => ({
   mode: 'free',
   isModeConfigured: false,
+  onboardingDone: false,
+
+  completeOnboarding: () => {
+    set({ onboardingDone: true });
+  },
 
   setMode: (mode) => {
     set({ mode });
