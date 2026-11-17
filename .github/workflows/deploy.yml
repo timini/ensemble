@@ -201,8 +201,9 @@ jobs:
         run: |
           set -euo pipefail
           # minInstances is 0, so the first request may wait for a cold start.
-          for path in / /config; do
-            status="$(curl -sS -o /dev/null -w '%{http_code}' --max-time 60 \
+          # -L follows the / redirect, so this keeps working once / becomes a page.
+          for path in / /workspace; do
+            status="$(curl -sSL -o /dev/null -w '%{http_code}' --max-time 60 \
               --retry 5 --retry-delay 10 --retry-all-errors "${DEPLOY_URL}${path}")"
             echo "GET ${path} -> ${status}"
             if [[ "${status}" != "200" ]]; then
@@ -210,6 +211,24 @@ jobs:
               exit 1
             fi
           done
+          # The old wizard route is a server redirect into the settings panel.
+          check_redirect() {
+            local path="$1" expected="$2" out status location
+            out="$(curl -sS -o /dev/null -w '%{http_code} %{redirect_url}' --max-time 60 \
+              --retry 5 --retry-delay 10 --retry-all-errors "${DEPLOY_URL}${path}")"
+            status="${out%% *}"
+            location="${out#* }"
+            echo "GET ${path} -> ${status} ${location}"
+            if [[ "${status}" != "307" && "${status}" != "308" ]]; then
+              echo "::error::Expected a redirect from ${DEPLOY_URL}${path}, got ${status}"
+              exit 1
+            fi
+            if [[ "${location}" != *"${expected}" ]]; then
+              echo "::error::Expected ${DEPLOY_URL}${path} to redirect to ${expected}, got ${location}"
+              exit 1
+            fi
+          }
+          check_redirect /config '/workspace?panel=settings'
 
   # Post-deploy E2E against the deployed URL. By default this is one cheap
   # real-provider test (google-only spec: two short Gemini calls) and only runs
