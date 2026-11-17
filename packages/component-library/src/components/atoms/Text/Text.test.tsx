@@ -62,6 +62,13 @@ describe('Text', () => {
       expect(text).toHaveAttribute('data-variant', 'caption');
     });
 
+    it('renders lead variant at the lead size', () => {
+      render(<Text variant="lead">Lead text</Text>);
+      const text = screen.getByText('Lead text');
+      expect(text).toHaveAttribute('data-variant', 'lead');
+      expect(text).toHaveClass('text-lead');
+    });
+
     it('renders small variant', () => {
       render(<Text variant="small">Small text</Text>);
       const text = screen.getByText('Small text');

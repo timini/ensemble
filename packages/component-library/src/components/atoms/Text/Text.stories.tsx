@@ -11,7 +11,7 @@ const meta = {
   argTypes: {
     variant: {
       control: 'select',
-      options: ['body', 'helper', 'caption', 'small'],
+      options: ['body', 'lead', 'helper', 'caption', 'small'],
       description: 'Text style variant',
     },
     color: {
@@ -203,4 +203,12 @@ export const ErrorMessage: Story = {
       </Text>
     </div>
   ),
+};
+
+// Lead paragraph under a page title
+export const Lead: Story = {
+  args: {
+    variant: 'lead',
+    children: 'One prompt, several models, one agreement score.',
+  },
 };

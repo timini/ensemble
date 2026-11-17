@@ -126,7 +126,7 @@ describe('Link', () => {
     it('has focus ring styles', () => {
       render(<Link href="/test">Focusable Link</Link>);
       const link = screen.getByRole('link');
-      expect(link).toHaveClass('focus:outline-none', 'focus:ring-2', 'focus:ring-ring');
+      expect(link).toHaveClass('focus-ring');
     });
 
     it('includes accessible label for external icon', () => {

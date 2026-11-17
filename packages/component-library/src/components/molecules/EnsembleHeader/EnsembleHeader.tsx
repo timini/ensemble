@@ -21,14 +21,19 @@ export function EnsembleHeader({ onSettingsClick, currentPath }: EnsembleHeaderP
   const featuresLabel = isReady ? t('ensemble.header.features') : 'Features';
 
   return (
-    <header className="bg-background border-b border-border">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-4 sm:py-6">
-        <div className="flex items-center justify-between gap-4">
-          <a href="/config" className="group block min-w-0">
-            <h1 className="text-xl sm:text-2xl font-bold text-foreground group-hover:text-primary transition-colors truncate">{title}</h1>
-            <p className="text-muted-foreground mt-1 text-sm sm:text-base">{tagline}</p>
+    <header className="sticky top-0 z-40 border-b border-border bg-background/90 backdrop-blur">
+      <div className="mx-auto max-w-6xl px-4 sm:px-6">
+        <div className="flex h-16 items-center justify-between gap-4">
+          <a href="/config" className="focus-ring group flex min-w-0 items-center gap-2 rounded-md">
+            <svg viewBox="0 0 28 20" className="h-5 w-7 shrink-0 text-primary" aria-hidden="true">
+              <circle cx="8" cy="10" r="7" fill="none" stroke="currentColor" strokeWidth="1.75" />
+              <circle cx="14" cy="10" r="7" fill="currentColor" fillOpacity="0.18" stroke="currentColor" strokeWidth="1.75" />
+              <circle cx="20" cy="10" r="7" fill="none" stroke="currentColor" strokeWidth="1.75" />
+            </svg>
+            <h1 className="truncate font-display text-[1.375rem] font-normal leading-none text-foreground">{title}</h1>
+            <p className="ml-2 hidden truncate border-l border-border pl-3 text-label text-muted-foreground md:block">{tagline}</p>
           </a>
-          <nav className="flex items-center gap-2 sm:gap-4 shrink-0" aria-label="Main navigation">
+          <nav className="flex shrink-0 items-center gap-1 sm:gap-2" aria-label="Main navigation">
             {[
               { href: '/features', label: featuresLabel },
               { href: '/about', label: aboutLabel },
@@ -36,7 +41,7 @@ export function EnsembleHeader({ onSettingsClick, currentPath }: EnsembleHeaderP
               <a
                 key={href}
                 href={href}
-                className={`text-sm transition-colors ${
+                className={`focus-ring rounded-md px-2 py-1.5 text-label transition-colors duration-fast ${
                   currentPath === href
                     ? 'text-foreground font-semibold'
                     : 'text-muted-foreground hover:text-foreground'
@@ -48,10 +53,10 @@ export function EnsembleHeader({ onSettingsClick, currentPath }: EnsembleHeaderP
             ))}
             <button
               onClick={onSettingsClick}
-              className="p-2 hover:bg-accent rounded-md transition-colors"
+              className="focus-ring inline-flex size-10 items-center justify-center rounded-lg text-muted-foreground transition-colors duration-fast hover:bg-muted hover:text-foreground"
               aria-label="Open settings"
             >
-              <Settings className="w-5 h-5 text-muted-foreground" />
+              <Settings className="size-5" />
             </button>
           </nav>
         </div>

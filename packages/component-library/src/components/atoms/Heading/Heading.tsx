@@ -2,16 +2,18 @@ import * as React from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '../../../lib/utils';
 
-const headingVariants = cva('font-semibold text-foreground', {
+const headingVariants = cva('font-semibold text-foreground text-balance', {
   variants: {
     size: {
       xs: 'text-xs',
       sm: 'text-sm',
       md: 'text-base',
-      lg: 'text-lg',
-      xl: 'text-xl',
-      '2xl': 'text-2xl',
-      '3xl': 'text-3xl font-bold',
+      lg: 'text-lg tracking-tight',
+      xl: 'text-xl tracking-tight',
+      '2xl': 'text-2xl tracking-tight',
+      '3xl': 'text-3xl tracking-tight',
+      title: 'text-title',
+      display: 'font-display text-display font-normal',
     },
   },
   defaultVariants: {
@@ -25,7 +27,7 @@ export interface HeadingProps
   /** Heading level (h1-h6) */
   level: 1 | 2 | 3 | 4 | 5 | 6;
   /** Visual size - can differ from semantic level */
-  size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl';
+  size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl' | 'title' | 'display';
   /** Content to display */
   children: React.ReactNode;
 }

@@ -1,195 +1,159 @@
-# Tailwind Design System
+# Design system and tokens
 
-The wireframes in `packages/wireframes/` show layout and flow. Colours come from the semantic tokens below, not from the raw Tailwind colours used in the wireframes.
+The visual system for Ensemble AI: colour, type, spacing, radius, elevation, focus and motion. It was refreshed in roadmap M4. The aim is a calm tool that reads clearly at a glance: warm paper neutrals, graphite text, one deep teal for actions and agreement, and status colours only where they carry meaning.
 
-## Overview
+## Where things live
 
-The component library uses Tailwind CSS 3.4 with semantic design tokens for light and dark themes. Tokens are CSS custom properties that hold space-separated RGB triples, so Tailwind's opacity modifiers work (for example `bg-primary/90`).
+| File | What it holds |
+|------|---------------|
+| `src/styles/tokens.css` | Every token as a CSS variable, light (`:root`) and dark (`.dark`), plus the base rules every consumer needs: body font, `:focus-visible` outline, selection colour, `color-scheme`, reduced motion. Plain CSS, no Tailwind directives. |
+| `src/styles/tailwindPreset.ts` | Tailwind preset that maps the variables to utilities, and adds the `focus-ring` utility. |
+| `src/styles/globals.css` | Storybook entry: imports `tokens.css` and the Tailwind layers. |
+| `src/styles/tokens.test.ts` | Checks WCAG contrast for every text and UI pairing in both themes, and that every token exists. |
+| `src/lib/utils.ts` | `cn()`. Its `tailwind-merge` setup knows the semantic type sizes, so `text-lead text-muted-foreground` keeps both classes. |
 
-Token values are defined once, in `src/styles/tokens.css`. This package's `src/styles/globals.css` (used by Storybook) and `packages/app/src/styles/globals.css` (used by the app) both import it. Edit tokens there only.
+Three consumers use the preset and import `tokens.css`: this package (Storybook and tests), `packages/app` (`tailwind.config.ts`, `src/styles/globals.css`) and `packages/wireframes`. Change a value in `tokens.css` and all three follow. Do not copy values into another config.
 
-## Design tokens
-
-### Colours
-
-| Token | Light | Dark | Usage |
-|-------|-------|------|-------|
-| `background` | `255 255 255` | `15 15 25` | Page background |
-| `foreground` | `15 23 42` | `241 245 249` | Body text |
-| `card` | `255 255 255` | `22 22 38` | Card backgrounds |
-| `card-foreground` | `15 23 42` | `241 245 249` | Card text |
-| `popover` | `255 255 255` | `22 22 38` | Popovers, tooltips |
-| `popover-foreground` | `15 23 42` | `241 245 249` | Popover text |
-| `primary` | `79 70 229` (indigo) | `129 140 248` | Primary actions, active states |
-| `primary-foreground` | `255 255 255` | `15 15 25` | Text on primary |
-| `secondary` | `241 245 249` | `30 30 50` | Secondary actions |
-| `secondary-foreground` | `15 23 42` | `241 245 249` | Text on secondary |
-| `muted` | `241 245 249` | `30 30 50` | Muted backgrounds |
-| `muted-foreground` | `100 116 139` | `148 163 184` | Muted text |
-| `accent` | `237 233 254` | `46 39 82` | Hover and highlight backgrounds |
-| `accent-foreground` | `67 56 202` | `224 231 255` | Text on accent |
-| `destructive` | `220 38 38` | `239 68 68` | Errors, danger actions |
-| `destructive-foreground` | `255 255 255` | `255 255 255` | Text on destructive |
-| `success` | `34 197 94` | `74 222 128` | Valid, completed |
-| `success-foreground` | `15 23 42` | `15 15 25` | Text on success |
-| `warning` | `245 158 11` | `251 191 36` | Warnings |
-| `warning-foreground` | `15 23 42` | `15 15 25` | Text on warning |
-| `info` | `59 130 246` | `96 165 250` | Informational |
-| `info-foreground` | `255 255 255` | `15 15 25` | Text on info |
-| `border` | `226 232 240` | `40 40 65` | Borders (applied to `*` by default) |
-| `input` | `226 232 240` | `40 40 65` | Input borders |
-| `ring` | `79 70 229` | `129 140 248` | Focus ring |
-
-`src/components/foundations/ColorPalette.stories.tsx` renders these in Storybook.
-
-### Border radius
-
-`--radius` is `0.5rem`. `tailwind.config.ts` maps:
-
-- `rounded-lg` to `var(--radius)` (0.5rem)
-- `rounded-md` to `calc(var(--radius) - 2px)`
-- `rounded-sm` to `calc(var(--radius) - 4px)`
-
-`rounded` and `rounded-full` keep Tailwind's defaults.
-
-### Spacing
-
-Uses Tailwind's default spacing scale based on `0.25rem` (4px) increments:
-
-| Class | Value | Usage |
-|-------|-------|-------|
-| `space-x-2` / `space-y-2` | 0.5rem (8px) | Tight spacing |
-| `space-x-3` / `space-y-3` | 0.75rem (12px) | Default spacing |
-| `space-x-4` / `space-y-4` | 1rem (16px) | Medium spacing |
-| `space-x-6` / `space-y-6` | 1.5rem (24px) | Section spacing |
-| `px-6 py-8` | 1.5rem / 2rem | Page padding |
-| `mb-8` / `mb-12` | 2rem / 3rem | Section margins |
-
-### Typography
-
-Tailwind's default font stack and sizes in Storybook. The app sets `font-sans` to Geist. For headings and body text, use the `Heading` and `Text` atoms rather than raw classes where possible.
-
-| Class | Weight | Usage |
-|-------|--------|-------|
-| `font-medium` | 500 | Labels, small headings |
-| `font-semibold` | 600 | Section titles, card titles |
-| `font-bold` | 700 | Page titles |
-
-Text colours: `text-foreground` for body text, `text-muted-foreground` for secondary text.
-
-## Component patterns
-
-### Buttons
-
-Use the `Button` atom's variants (`default`, `destructive`, `warning`, `success`, `outline`, `secondary`, `ghost`, `link`) rather than adding colour classes.
-
-```tsx
-<Button>Continue</Button>
-<Button variant="outline">Back</Button>
+```ts
+// tailwind.config.ts in a consumer
+import preset from '../component-library/src/styles/tailwindPreset';
+export default { presets: [preset], content: ['./src/**/*.{ts,tsx}'] };
 ```
 
-### Validation states
+## Colour
 
-`success` and `destructive` tokens mark valid and invalid inputs (see `ApiKeyInput`).
+Colours are space separated RGB channels, so opacity modifiers work (`bg-primary/10`, `border-success/25`).
 
-### Progress indicators
+| Token | Light | Dark | Use |
+|-------|-------|------|-----|
+| `background` | `250 250 247` | `16 18 17` | Page |
+| `foreground` | `24 26 25` | `233 236 233` | Body text |
+| `card`, `card-foreground` | `255 255 255`, `24 26 25` | `24 27 26`, `233 236 233` | Cards, composer, panels |
+| `popover`, `popover-foreground` | `255 255 255`, `24 26 25` | `29 33 31`, `233 236 233` | Menus, dialogs, sheets |
+| `secondary`, `secondary-foreground` | `239 240 236`, `24 26 25` | `36 40 38`, `233 236 233` | Secondary buttons |
+| `muted` | `242 242 238` | `33 37 35` | Hover fills, tracks, skeletons |
+| `muted-foreground` | `88 94 90` | `160 168 163` | Secondary text, captions |
+| `border` | `225 226 220` | `46 51 49` | Dividers and card edges (decorative) |
+| `input` | `135 141 137` | `108 116 112` | Form control borders (3:1, so fields are findable) |
+| `primary`, `primary-foreground` | `14 104 92`, `255 255 255` | `86 210 186`, `6 38 33` | Main actions, links, selection |
+| `accent`, `accent-foreground` | `225 240 235`, `10 78 69` | `20 52 46`, `170 236 221` | Selected rows, active history item |
+| `ring` | `14 104 92` | `86 210 186` | Focus outline |
+| `success` | `22 117 58` | `92 214 138` | High agreement, valid key |
+| `warning` | `156 82 0` | `240 184 64` | Mixed agreement, cautions |
+| `destructive` | `186 32 44` | `248 118 118` | Low agreement, errors, delete |
+| `info` | `30 86 196` | `132 176 255` | Neutral notices |
 
-From `src/components/molecules/ProgressSteps/ProgressSteps.tsx`:
+Each status colour has a `-foreground` partner for text on a solid fill.
 
-```tsx
-isCompleted && 'bg-success text-success-foreground',
-isActive && 'bg-primary text-primary-foreground',
-!isCompleted && !isActive && 'bg-muted text-muted-foreground',
-```
+Contrast rules, enforced by `tokens.test.ts`:
+
+- 4.5:1 for every text pairing: `foreground` and `muted-foreground` on `background`, `card` and `muted`; every `X-foreground` on `X`; `primary`, `success`, `warning`, `destructive` and `info` used as text on `background` and `card`.
+- 3:1 for `ring` and `input` against `background` and `card` (WCAG 1.4.11).
+
+`border` is decorative and below 3:1 on purpose. Never let it be the only cue that something is interactive; controls carry text, an icon or an `input` border.
+
+Tinted backgrounds (`bg-success/10`, `bg-warning/[0.06]`) take `text-foreground`, not the status colour, unless the text is short and bold.
+
+## Type
+
+Three families, loaded with `next/font/google` in the app and the wireframes, and from Google Fonts by name in Storybook (`.storybook/preview-head.html`). Each has a system fallback stack, so nothing breaks offline.
+
+| Token | Family | Use |
+|-------|--------|-----|
+| `--font-sans` (`font-sans`) | Geist | Everything by default |
+| `--font-display` (`font-display`) | Instrument Serif, weight 400 | The landing headline, page titles, empty states. Never below `text-title`. |
+| `--font-mono` (`font-mono`) | Geist Mono | Keys, URLs, commands, code. Use `tabular-nums` on the sans face for numbers in running text. |
+
+The apps set `--font-sans-loaded`, `--font-display-loaded` and `--font-mono-loaded` from `next/font`; `tokens.css` reads them with the family name as fallback.
+
+Semantic type scale (`text-<step>`), size and line height from tokens:
+
+| Step | Size | Line height | Use |
+|------|------|-------------|-----|
+| `caption` | 12px | 16px | Metadata, section eyebrows (with `uppercase tracking-wider`) |
+| `label` | 14px | 20px | Controls, list rows, dense text |
+| `body` | 16px | 26px | Answers and paragraphs |
+| `lead` | 18px | 28px | The paragraph under a page title |
+| `heading` | 20px | 28px, weight 600 | Card and sheet titles |
+| `title` | 24px to 32px, fluid | 1.2, weight 600 | Page titles (weight 400 with `font-display`) |
+| `display` | 36px to 60px, fluid | 1.05 | Landing headline, with `font-display` |
+
+Tailwind's own `text-xs` to `text-6xl` still work for existing components. New work uses the semantic steps. The `Heading` atom has `size="title"` and `size="display"`; the `Text` atom has `variant="lead"`.
+
+## Spacing
+
+Tailwind's 4px scale, plus two layout tokens that grow with the viewport:
+
+| Utility | 0 to 767px | 768px up | 1280px up | Use |
+|---------|-----------|----------|-----------|-----|
+| `px-gutter`, `gap-gutter` | 16px | 24px | 32px | Page side padding |
+| `py-section` | 48px | 64px | 80px | Space between page sections |
+
+Inside components, keep to 4, 8, 12, 16, 20 and 24px (`1`, `2`, `3`, `4`, `5`, `6`). Card padding is `p-6` (`p-5` for dense panels).
+
+## Radius
+
+| Utility | Value | Use |
+|---------|-------|-----|
+| `rounded-sm`, `rounded` | 6px | Small inline elements |
+| `rounded-md` | 8px | Small buttons, menu items |
+| `rounded-lg` | 12px | Buttons, inputs, selects |
+| `rounded-xl` | 16px | Cards, menus |
+| `rounded-2xl` | 24px | Sheets, the composer, large panels |
+| `rounded-full` | | Chips, badges, avatars |
+
+## Elevation
+
+`shadow-sm` for resting cards and controls, `shadow-md` for the focused composer and hovered cards, `shadow-lg` for menus, dialogs and sheets. Dark mode uses deeper, black shadows; borders do most of the work there.
+
+## Focus
+
+Every focusable element shows a 2px outline in `ring` with a 2px offset on keyboard focus. `tokens.css` sets it for `:focus-visible` globally. Components that need it explicitly add the `focus-ring` utility. Text fields use a softer variant: `focus-visible:border-ring focus-visible:ring-4 focus-visible:ring-ring/20`. Do not remove an outline without replacing it.
+
+## Motion
+
+| Token | Utility | Value | Use |
+|-------|---------|-------|-----|
+| `--duration-fast` | `duration-fast` | 120ms | Colour and hover changes |
+| `--duration-base` | `duration-base` (default) | 180ms | Most transitions |
+| `--duration-slow` | `duration-slow` | 280ms | Entering panels, meters |
+| `--ease-standard` | `ease-standard` (default) | `cubic-bezier(0.2, 0, 0, 1)` | Everything |
+| `--ease-emphasized` | `ease-emphasized` | `cubic-bezier(0.3, 0, 0, 1.2)` | Rare, for a small overshoot |
+
+`animate-fade-in` and `animate-rise-in` cover overlays and menus. Motion only confirms what happened; nothing waits on it. Under `prefers-reduced-motion: reduce`, `tokens.css` cuts every animation and transition to near zero.
 
 ## Dark mode
 
-`darkMode: 'class'`. The `dark` class on the root element switches the token values. The app's theme slice sets it on `document.documentElement`; Storybook's `ThemeDecorator` sets it from the toolbar.
+`darkMode: 'class'`. The `dark` class on `<html>` swaps the token values. The app's theme slice sets it; Storybook's `ThemeDecorator` sets it from the toolbar and paints the story background. Components use tokens and need no `dark:` variants, with rare exceptions such as overlay scrims.
 
-Because tokens change with the theme, components using `bg-background`, `text-foreground` and similar need no `dark:` variants. Use `dark:` only for the rare case a token does not cover.
+## Component patterns
 
-Check both themes in Storybook and keep text contrast at WCAG 2.1 AA (4.5:1).
-
-## Responsive design
-
-Tailwind's default breakpoints:
-
-| Breakpoint | Min width |
-|------------|-----------|
-| `sm` | 640px |
-| `md` | 768px |
-| `lg` | 1024px |
-| `xl` | 1280px |
-| `2xl` | 1536px |
-
-```tsx
-// Stack on mobile, two columns from md
-<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-```
-
-## Accessibility
-
-- Focus: components use `focus-visible:ring-1 focus-visible:ring-ring` (Button) or similar. Keep a visible focus ring.
-- Contrast: 4.5:1 for normal text, 3:1 for large text and interactive elements.
-- Touch targets: aim for 44px by 44px on interactive elements.
-
-## Usage guidelines
+- Buttons: use the `Button` variants (`default`, `outline`, `secondary`, `ghost`, `link`, `destructive`, `warning`, `success`). `default` is the one primary action per view.
+- Status: `success`, `warning` and `destructive` mean high, mixed and low agreement as well as valid, caution and error. Keep that mapping.
+- Eyebrows: `text-caption font-medium uppercase tracking-wider text-muted-foreground` above a panel's content, as in the workspace wireframes.
 
 Do:
 
 ```tsx
-<div className="bg-background text-foreground">
-<p className="text-muted-foreground">
-<div className="border border-border rounded-lg">
-<Button variant="destructive">
+<div className="rounded-xl border border-border bg-card p-5 shadow-sm">
+<p className="text-label text-muted-foreground">
+<h1 className="font-display text-display">
 ```
 
 Don't:
 
 ```tsx
-<div className="bg-[#3b82f6]">        // arbitrary colour, use a token
-<div className="bg-blue-600">         // raw palette colour, use primary
-<Card className="bg-white">           // breaks dark mode, use bg-card
+<div className="bg-[#3b82f6]">   // arbitrary colour, use a token
+<div className="bg-blue-600">    // raw palette colour, use primary
+<Card className="bg-white">      // breaks dark mode, use bg-card
 ```
 
-Some stories wrap content in `dark bg-gray-900` to preview dark mode; that is a story-only convenience.
+## Responsive design
 
-## Tailwind configuration
-
-`tailwind.config.ts` (abridged):
-
-```ts
-export default {
-  darkMode: 'class',
-  content: ['./src/**/*.{ts,tsx}', './.storybook/**/*.{ts,tsx}'],
-  theme: {
-    extend: {
-      colors: {
-        background: 'rgb(var(--color-background) / <alpha-value>)',
-        foreground: 'rgb(var(--color-foreground) / <alpha-value>)',
-        primary: {
-          DEFAULT: 'rgb(var(--color-primary) / <alpha-value>)',
-          foreground: 'rgb(var(--color-primary-foreground) / <alpha-value>)',
-        },
-        // secondary, destructive, success, warning, info, muted, accent,
-        // popover, card, border, input, ring
-      },
-      borderRadius: {
-        lg: 'var(--radius)',
-        md: 'calc(var(--radius) - 2px)',
-        sm: 'calc(var(--radius) - 4px)',
-      },
-    },
-  },
-  plugins: [],
-} satisfies Config;
-```
-
-`packages/app/tailwind.config.ts` has the same theme plus a Geist `fontFamily.sans`, and adds `../component-library/src/**/*.{ts,tsx}` to `content` so component classes are generated in the app.
+Tailwind's default breakpoints (`sm` 640px, `md` 768px, `lg` 1024px, `xl` 1280px). Check every screen at 375, 768 and 1440px in both themes. In the workspace, answers are swipeable tabs below `md` and columns from `md`; the history sidebar shows from `lg`.
 
 ## References
 
-- `packages/wireframes/app/`: layout reference
-- `src/styles/tokens.css`: token definitions
-- `src/styles/globals.css`: Tailwind directives and base styles
+- `packages/wireframes`: layouts that use this system (`/states` lists every screen)
+- `src/components/foundations/ColorPalette.stories.tsx`: colour swatches in Storybook
 - [Tailwind CSS v3 docs](https://v3.tailwindcss.com/docs)

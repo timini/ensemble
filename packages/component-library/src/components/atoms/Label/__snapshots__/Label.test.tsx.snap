@@ -2,7 +2,7 @@
 
 exports[`Label > snapshots > matches snapshot for basic label 1`] = `
 <label
-  class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+  class="text-label font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
 >
   Email Address
 </label>
@@ -10,7 +10,7 @@ exports[`Label > snapshots > matches snapshot for basic label 1`] = `
 
 exports[`Label > snapshots > matches snapshot with custom className 1`] = `
 <label
-  class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-red-500"
+  class="text-label font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-red-500"
 >
   Custom Label
 </label>
@@ -18,7 +18,7 @@ exports[`Label > snapshots > matches snapshot with custom className 1`] = `
 
 exports[`Label > snapshots > matches snapshot with htmlFor 1`] = `
 <label
-  class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+  class="text-label font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
   for="email-input"
 >
   Email

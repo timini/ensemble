@@ -27,3 +27,18 @@ describe('cn', () => {
     expect(cn({ foo: true, bar: false, baz: true })).toBe('foo baz');
   });
 });
+
+describe('cn with design tokens', () => {
+  it('keeps a semantic text size next to a text colour', () => {
+    expect(cn('text-lead text-muted-foreground')).toBe('text-lead text-muted-foreground');
+    expect(cn('text-foreground', 'text-display')).toBe('text-foreground text-display');
+  });
+
+  it('lets a later semantic text size replace an earlier one', () => {
+    expect(cn('text-sm', 'text-label')).toBe('text-label');
+  });
+
+  it('keeps the focus-ring utility', () => {
+    expect(cn('focus-ring', 'outline-none')).toContain('focus-ring');
+  });
+});

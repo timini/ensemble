@@ -19,7 +19,7 @@ export const ThemeDecorator: Decorator = (Story, context) => {
   }, [theme]);
 
   return (
-    <div className={theme} style={{ minHeight: '100vh' }}>
+    <div className={`${theme} bg-background text-foreground`} style={{ minHeight: '100vh' }}>
       <Story />
     </div>
   );

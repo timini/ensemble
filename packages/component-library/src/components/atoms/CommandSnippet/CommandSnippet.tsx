@@ -39,7 +39,7 @@ export function CommandSnippet({ command, className, 'data-testid': testId = 'co
 
   return (
     <div
-      className={cn('flex items-start gap-2 rounded-md border border-border bg-muted px-3 py-2', className)}
+      className={cn('flex items-start gap-2 rounded-lg border border-border bg-muted px-3 py-2 font-mono text-caption', className)}
       data-testid={testId}
     >
       <code className="flex-1 break-all font-mono text-xs text-foreground" data-testid={`${testId}-command`}>

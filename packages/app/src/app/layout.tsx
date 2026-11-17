@@ -4,7 +4,7 @@ import '~/styles/globals.css';
 import '~/lib/i18n'; // Initialize i18next
 
 import { useEffect, useState } from 'react';
-import { Geist } from 'next/font/google';
+import { Geist, Geist_Mono, Instrument_Serif } from 'next/font/google';
 import { usePathname } from 'next/navigation';
 import { useTranslation } from 'react-i18next';
 import { TRPCReactProvider } from '~/trpc/react';
@@ -18,10 +18,15 @@ import { initializeProviders } from '~/providers';
 import { toError } from '~/lib/errors';
 import { logger } from '~/lib/logger';
 
-const geist = Geist({
+// tokens.css reads these variables in --font-sans, --font-mono and --font-display.
+const sans = Geist({ subsets: ['latin'], variable: '--font-sans-loaded' });
+const mono = Geist_Mono({ subsets: ['latin'], variable: '--font-mono-loaded' });
+const display = Instrument_Serif({
   subsets: ['latin'],
-  variable: '--font-geist-sans',
+  weight: '400',
+  variable: '--font-display-loaded',
 });
+const fontVariables = `${sans.variable} ${mono.variable} ${display.variable}`;
 
 export default function RootLayout({
   children,
@@ -75,7 +80,7 @@ export default function RootLayout({
   }, [resolvedLanguage]);
 
   return (
-    <html lang={resolvedLanguage} className={`${geist.variable} ${resolvedTheme}`}>
+    <html lang={resolvedLanguage} className={`${fontVariables} ${resolvedTheme}`}>
       <head>
         <title>Ensemble AI</title>
         <meta

@@ -5,14 +5,14 @@ import { useTranslation } from 'react-i18next';
 import { cn } from '@/lib/utils';
 
 const alertVariants = cva(
-  'flex items-start gap-3 p-4 rounded-md border',
+  'flex items-start gap-3 rounded-lg border p-4 text-sm',
   {
     variants: {
       variant: {
-        info: 'bg-info/10 border-info/20 text-foreground',
-        success: 'bg-success/10 border-success/20 text-foreground',
-        warning: 'bg-warning/10 border-warning/20 text-foreground',
-        error: 'bg-destructive/10 border-destructive/20 text-foreground',
+        info: 'border-info/25 bg-info/[0.06] text-foreground',
+        success: 'border-success/25 bg-success/[0.06] text-foreground',
+        warning: 'border-warning/25 bg-warning/[0.06] text-foreground',
+        error: 'border-destructive/25 bg-destructive/[0.06] text-foreground',
       },
     },
     defaultVariants: {

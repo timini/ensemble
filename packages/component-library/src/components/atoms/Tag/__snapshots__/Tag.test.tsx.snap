@@ -2,7 +2,7 @@
 
 exports[`Tag > snapshots > matches snapshot for default state 1`] = `
 <span
-  class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-medium transition-colors border bg-secondary text-secondary-foreground border-border"
+  class="inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-label font-medium transition-colors duration-fast bg-secondary text-secondary-foreground border-border"
   data-disabled="false"
   data-selected="false"
   data-variant="default"
@@ -13,7 +13,7 @@ exports[`Tag > snapshots > matches snapshot for default state 1`] = `
 
 exports[`Tag > snapshots > matches snapshot for removable state 1`] = `
 <div
-  class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-medium transition-colors border bg-secondary text-secondary-foreground border-border"
+  class="inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-label font-medium transition-colors duration-fast bg-secondary text-secondary-foreground border-border"
   data-disabled="false"
   data-selected="false"
   data-variant="default"
@@ -21,7 +21,7 @@ exports[`Tag > snapshots > matches snapshot for removable state 1`] = `
   Tag
   <button
     aria-label="Remove"
-    class="inline-flex items-center justify-center rounded-full hover:bg-black/10 dark:hover:bg-white/10 p-0.5 transition-colors"
+    class="inline-flex items-center justify-center rounded-full focus-ring p-0.5 transition-colors duration-fast hover:bg-foreground/10"
     type="button"
   >
     <svg
@@ -50,7 +50,7 @@ exports[`Tag > snapshots > matches snapshot for removable state 1`] = `
 
 exports[`Tag > snapshots > matches snapshot for selected state 1`] = `
 <span
-  class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-medium transition-colors border bg-secondary text-secondary-foreground border-primary"
+  class="inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-label font-medium transition-colors duration-fast bg-secondary text-secondary-foreground border-primary"
   data-disabled="false"
   data-selected="true"
   data-variant="default"

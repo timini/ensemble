@@ -66,7 +66,7 @@ export function Example() {
 
 ## Design system
 
-Colours are CSS variables holding RGB triples, defined in `src/styles/tokens.css` for `:root` (light) and `.dark`. Both this package's `globals.css` and the app's `globals.css` import that file. `tailwind.config.ts` maps them to Tailwind colours (`background`, `foreground`, `primary`, `secondary`, `muted`, `accent`, `destructive`, `success`, `warning`, `info`, `card`, `popover`, `border`, `input`, `ring`) and sets `darkMode: 'class'`. Radius comes from `--radius`. See [docs/TAILWIND_DESIGN_SYSTEM.md](docs/TAILWIND_DESIGN_SYSTEM.md).
+Every token (colour, type scale, fonts, spacing, radius, shadows, motion) is a CSS variable in `src/styles/tokens.css`, light in `:root` and dark in `.dark`, together with the shared base rules (body font, focus outline, reduced motion). `src/styles/tailwindPreset.ts` maps the variables to Tailwind utilities (`bg-primary`, `text-lead`, `font-display`, `rounded-xl`, `px-gutter`, `duration-fast`, `focus-ring` and so on) and sets `darkMode: 'class'`. This package, `packages/app` and `packages/wireframes` all use the preset and import `tokens.css`. `src/styles/tokens.test.ts` checks WCAG AA contrast for every text and UI pairing in both themes. See [docs/TAILWIND_DESIGN_SYSTEM.md](docs/TAILWIND_DESIGN_SYSTEM.md).
 
 ## Testing
 
@@ -90,7 +90,7 @@ packages/component-library/
 │   │   ├── organisms/
 │   │   └── foundations/
 │   ├── lib/             utils.ts, similarity.ts, i18n/, test-utils/
-│   ├── styles/          tokens.css, globals.css
+│   ├── styles/          tokens.css, tailwindPreset.ts, globals.css
 │   └── index.ts         public exports
 ├── tailwind.config.ts
 └── vitest.config.ts
