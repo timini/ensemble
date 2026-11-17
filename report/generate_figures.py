@@ -1,9 +1,22 @@
 #!/usr/bin/env python3
 """
-Generate all figures for the Ensemble AI evaluation report.
-Reads data from artifacts/eval/issue-114/ and outputs to report/figures/.
+Generate the figures for the Ensemble AI evaluation report.
+
+Two sources:
+
+  python3 generate_figures.py --results ../packages/eval/results/<run-id>
+      The benchmark matrix (npm run bench:matrix --workspace=packages/eval).
+      Reads <run-id>/summary.json and writes matrix_*.pdf/.png and
+      matrix_table.tex (see matrix_figures.py). Needs matplotlib only.
+
+  python3 generate_figures.py
+      The February issue-114 study, from artifacts/eval/issue-114/ (not in
+      the repository). Needs matplotlib, numpy, pandas and seaborn.
+
+Figures go to report/figures/. See packages/eval/docs/BENCHMARKS.md.
 """
 
+import argparse
 import json
 import os
 import sys
@@ -15,9 +28,15 @@ import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
-import numpy as np
-import seaborn as sns
-import pandas as pd
+
+import matrix_figures
+
+try:  # Only the issue-114 figures need these.
+    import numpy as np
+    import seaborn as sns
+    import pandas as pd
+except ImportError:  # pragma: no cover
+    np = sns = pd = None
 
 # Paths
 SCRIPT_DIR = Path(__file__).parent
@@ -46,7 +65,8 @@ STRATEGY_COLORS = {
     "mechanical": "#3498db",
 }
 
-sns.set_theme(style="whitegrid", font_scale=1.1)
+if sns is not None:
+    sns.set_theme(style="whitegrid", font_scale=1.1)
 plt.rcParams['figure.dpi'] = 150
 plt.rcParams['savefig.dpi'] = 150
 plt.rcParams['savefig.bbox'] = 'tight'
@@ -636,6 +656,15 @@ def fig_complementarity_heatmap(census):
 # Main
 # ==========================
 def main():
+    parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser.add_argument("--results", help="Benchmark matrix run directory (packages/eval/results/<run-id>)")
+    args = parser.parse_args()
+    if args.results:
+        written = matrix_figures.generate(args.results, FIGURES_DIR)
+        print(f"Wrote {', '.join(written)} to {FIGURES_DIR}")
+        return
+    if sns is None:
+        sys.exit("The issue-114 figures need numpy, pandas and seaborn: pip install numpy pandas seaborn")
     print("Loading data...")
     census = load_census()
     print(f"  Census: {len(census)} models")

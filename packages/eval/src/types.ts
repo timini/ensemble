@@ -102,12 +102,24 @@ export interface ProviderResponse {
   /** True when the provider reported no usage and tokens were estimated from text length. */
   costFromTextLength?: boolean;
   /**
+   * Billed tokens of the call. Output tokens include hidden reasoning tokens
+   * where the provider bills them as output. `estimated` when the provider
+   * reported no usage. Used by `calibrate-tokens`.
+   */
+  usage?: RecordedUsage;
+  /**
    * How the final answer was asked for on a structured run: `structured`
    * when generateStructured returned an answer, `text` when it fell back to
    * a plain reply with a "Final answer:" line. Unset on legacy runs.
    */
   answerSource?: 'structured' | 'text';
   error?: string;
+}
+
+export interface RecordedUsage {
+  inputTokens: number;
+  outputTokens: number;
+  source: 'reported' | 'estimated';
 }
 
 export interface SelfConsistencyResult {
@@ -132,6 +144,12 @@ export interface ConsensusStrategyMetrics {
   costUsd?: number;
   /** Set when consensus was a mechanical vote with no LLM call. */
   mechanical?: boolean;
+  /** Input tokens of the strategy's calls (reported, or estimated from text length). */
+  inputTokens?: number;
+  /** Output tokens of the strategy's calls, hidden reasoning included where reported. */
+  outputTokens?: number;
+  /** Number of LLM calls the strategy made. */
+  calls?: number;
 }
 
 export interface PromptRunResult {

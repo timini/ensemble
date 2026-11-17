@@ -46,13 +46,22 @@ function priceResponse(
   prompt: string,
   result: StreamResult,
   endpoints: readonly EndpointLocation[],
-): Pick<ProviderResponse, 'estimatedCostUsd' | 'costFromTextLength'> {
+): Pick<ProviderResponse, 'estimatedCostUsd' | 'costFromTextLength' | 'usage'> {
   if (result.error) return {};
   const usage = result.usage ?? usageFromText(prompt, result.content);
+  const recorded = {
+    usage: {
+      inputTokens: usage.inputTokens,
+      outputTokens: usage.outputTokens,
+      source: result.usage ? ('reported' as const) : ('estimated' as const),
+    },
+  };
   const price = getModelPrice(provider, model, PRICE_TABLE, endpoints);
   const cost = costOfTokens(price, usage.inputTokens, usage.outputTokens);
-  if (cost === null) return {};
-  return result.usage ? { estimatedCostUsd: cost } : { estimatedCostUsd: cost, costFromTextLength: true };
+  if (cost === null) return recorded;
+  return result.usage
+    ? { ...recorded, estimatedCostUsd: cost }
+    : { ...recorded, estimatedCostUsd: cost, costFromTextLength: true };
 }
 
 type StreamResult = Pick<ProviderResponse, 'content' | 'responseTimeMs' | 'tokenCount' | 'error' | 'answerSource'> & {

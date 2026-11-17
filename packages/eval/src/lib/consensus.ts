@@ -51,11 +51,17 @@ export interface ConsensusPricing {
 class TokenCountingProvider implements AIProvider {
   private _totalTokens = 0;
   private _costUsd: number | undefined;
+  inputTokens = 0;
+  outputTokens = 0;
+  calls = 0;
   constructor(private inner: AIProvider, private pricing?: ConsensusPricing) {}
   get totalTokens() { return this._totalTokens; }
   get costUsd() { return this._costUsd; }
 
   private addCost(model: string, usage: TokenUsage): void {
+    this.inputTokens += usage.inputTokens;
+    this.outputTokens += usage.outputTokens;
+    this.calls += 1;
     if (!this.pricing) return;
     const price = getModelPrice(this.pricing.provider, model, PRICE_TABLE, this.pricing.endpoints ?? []);
     const cost = costOfTokens(price, usage.inputTokens, usage.outputTokens);
@@ -166,6 +172,9 @@ export async function generateConsensus(
       metrics[name] = {
         tokenCount: counter.totalTokens,
         durationMs,
+        inputTokens: counter.inputTokens,
+        outputTokens: counter.outputTokens,
+        calls: counter.calls,
         ...(counter.costUsd !== undefined ? { costUsd: counter.costUsd } : {}),
       };
       process.stderr.write(`  [consensus] ${name} done in ${(durationMs / 1000).toFixed(1)}s (${counter.totalTokens} tokens)\n`);

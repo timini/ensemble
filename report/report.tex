@@ -413,6 +413,30 @@ The key parameters validated by the literature---$T=0.5$--$0.7$, $K=5$ as the mi
 The research strongly supports continuing with self-consistency as a baseline, while pursuing heterogeneous ensembles with diverse providers for complementary error patterns.
 
 % ================================================================
+% Benchmark matrix (roadmap M3). Present only after
+% `python3 generate_figures.py --results ../packages/eval/results/<run-id>`.
+\IfFileExists{figures/matrix_table.tex}{
+\subsection{Benchmark matrix}
+Three open 7B to 14B models from different families, each alone and together
+as an ensemble (mechanical majority and standard consensus), against one
+premium reference. Accuracy has 95\% Wilson intervals; $p$ is a paired McNemar
+test against the best single open model on the same questions. Method and
+configuration: \texttt{packages/eval/docs/BENCHMARKS.md}.
+
+\begin{table}[h]
+\centering
+\small
+\input{figures/matrix_table.tex}
+\caption{Benchmark matrix results.}
+\end{table}
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=\textwidth]{figures/matrix_accuracy.pdf}
+    \caption{Accuracy per dataset and configuration with 95\% Wilson intervals.}
+\end{figure}
+}{}
+
 \section{Related Work and External Critique}
 \label{sec:related}
 

@@ -1,0 +1,350 @@
+{
+  "schemaVersion": 1,
+  "status": "complete",
+  "runId": "fixture",
+  "mode": "mock",
+  "generatedAt": "2026-11-17T14:02:58.783Z",
+  "method": {
+    "matrix": "m3-matrix",
+    "description": "Three open 7B to 14B models from different families, alone and as an ensemble, against one premium reference. Model ids and prices checked against https://openrouter.ai/api/v1/models on 2026-11-17.",
+    "datasets": [
+      "gsm8k",
+      "mmlu_pro",
+      "gpqa",
+      "truthfulqa"
+    ],
+    "sample": 5,
+    "questionSeed": 42,
+    "optionSeed": 1729,
+    "protocol": "structured",
+    "temperature": 0,
+    "confidence": 0.95,
+    "models": [
+      {
+        "id": "qwen",
+        "label": "Qwen3.5 9B",
+        "spec": "openrouter:qwen/qwen3.5-9b"
+      },
+      {
+        "id": "llama",
+        "label": "Llama 3.1 8B Instruct",
+        "spec": "openrouter:meta-llama/llama-3.1-8b-instruct"
+      },
+      {
+        "id": "gemma",
+        "label": "Gemma 3 12B",
+        "spec": "openrouter:google/gemma-3-12b-it"
+      }
+    ],
+    "summarizer": "qwen",
+    "strategies": [
+      "majority",
+      "standard"
+    ],
+    "reference": {
+      "id": "reference",
+      "label": "Claude Sonnet 5.5",
+      "spec": "openrouter:anthropic/claude-sonnet-5.5"
+    }
+  },
+  "estimate": {
+    "lowUsd": 0.0547129,
+    "highUsd": 0.45791289999999996,
+    "calls": 100
+  },
+  "totalCostUsd": 0.01663187,
+  "datasets": [
+    {
+      "dataset": "gsm8k",
+      "n": 5,
+      "bestSingleId": "single:qwen",
+      "rows": [
+        {
+          "id": "single:qwen",
+          "kind": "single",
+          "label": "Qwen3.5 9B",
+          "models": [
+            "openrouter:qwen/qwen3.5-9b"
+          ],
+          "n": 5,
+          "correct": 0,
+          "accuracy": 0,
+          "ciLower": 0,
+          "ciUpper": 0.4345905021851495,
+          "failures": 0,
+          "vsBestSingle": null,
+          "costUsd": 8.982e-05,
+          "costIncomplete": false
+        },
+        {
+          "id": "single:llama",
+          "kind": "single",
+          "label": "Llama 3.1 8B Instruct",
+          "models": [
+            "openrouter:meta-llama/llama-3.1-8b-instruct"
+          ],
+          "n": 5,
+          "correct": 0,
+          "accuracy": 0,
+          "ciLower": 0,
+          "ciUpper": 0.4345905021851495,
+          "failures": 0,
+          "vsBestSingle": {
+            "pValue": 1,
+            "n10": 0,
+            "n01": 0,
+            "method": "exact",
+            "n": 5
+          },
+          "costUsd": 1.062e-05,
+          "costIncomplete": false
+        },
+        {
+          "id": "single:gemma",
+          "kind": "single",
+          "label": "Gemma 3 12B",
+          "models": [
+            "openrouter:google/gemma-3-12b-it"
+          ],
+          "n": 5,
+          "correct": 0,
+          "accuracy": 0,
+          "ciLower": 0,
+          "ciUpper": 0.4345905021851495,
+          "failures": 0,
+          "vsBestSingle": {
+            "pValue": 1,
+            "n10": 0,
+            "n01": 0,
+            "method": "exact",
+            "n": 5
+          },
+          "costUsd": 2.68e-05,
+          "costIncomplete": false
+        },
+        {
+          "id": "ensemble:majority",
+          "kind": "ensemble",
+          "label": "Ensemble, mechanical majority",
+          "models": [
+            "openrouter:qwen/qwen3.5-9b",
+            "openrouter:meta-llama/llama-3.1-8b-instruct",
+            "openrouter:google/gemma-3-12b-it"
+          ],
+          "strategy": "majority",
+          "n": 5,
+          "correct": 0,
+          "accuracy": 0,
+          "ciLower": 0,
+          "ciUpper": 0.4345905021851495,
+          "failures": 0,
+          "vsBestSingle": {
+            "pValue": 1,
+            "n10": 0,
+            "n01": 0,
+            "method": "exact",
+            "n": 5
+          },
+          "costUsd": 0.00012724000000000004,
+          "costIncomplete": false
+        },
+        {
+          "id": "ensemble:standard",
+          "kind": "ensemble",
+          "label": "Ensemble, standard consensus",
+          "models": [
+            "openrouter:qwen/qwen3.5-9b",
+            "openrouter:meta-llama/llama-3.1-8b-instruct",
+            "openrouter:google/gemma-3-12b-it"
+          ],
+          "strategy": "standard",
+          "n": 5,
+          "correct": 0,
+          "accuracy": 0,
+          "ciLower": 0,
+          "ciUpper": 0.4345905021851495,
+          "failures": 0,
+          "vsBestSingle": {
+            "pValue": 1,
+            "n10": 0,
+            "n01": 0,
+            "method": "exact",
+            "n": 5
+          },
+          "costUsd": 0.0019429900000000001,
+          "costIncomplete": false
+        },
+        {
+          "id": "reference",
+          "kind": "reference",
+          "label": "Claude Sonnet 5.5",
+          "models": [
+            "openrouter:anthropic/claude-sonnet-5.5"
+          ],
+          "n": 5,
+          "correct": 0,
+          "accuracy": 0,
+          "ciLower": 0,
+          "ciUpper": 0.4345905021851495,
+          "failures": 0,
+          "vsBestSingle": {
+            "pValue": 1,
+            "n10": 0,
+            "n01": 0,
+            "method": "exact",
+            "n": 5
+          },
+          "costUsd": 0.001092,
+          "costIncomplete": false
+        }
+      ],
+      "spentUsd": 0.0030349900000000004
+    },
+    {
+      "dataset": "mmlu_pro",
+      "n": 5,
+      "bestSingleId": "single:qwen",
+      "rows": [
+        {
+          "id": "single:qwen",
+          "kind": "single",
+          "label": "Qwen3.5 9B",
+          "models": [
+            "openrouter:qwen/qwen3.5-9b"
+          ],
+          "n": 5,
+          "correct": 0,
+          "accuracy": 0,
+          "ciLower": 0,
+          "ciUpper": 0.4345905021851495,
+          "failures": 0,
+          "vsBestSingle": null,
+          "costUsd": 0.00023943,
+          "costIncomplete": false
+        },
+        {
+          "id": "single:llama",
+          "kind": "single",
+          "label": "Llama 3.1 8B Instruct",
+          "models": [
+            "openrouter:meta-llama/llama-3.1-8b-instruct"
+          ],
+          "n": 5,
+          "correct": 0,
+          "accuracy": 0,
+          "ciLower": 0,
+          "ciUpper": 0.4345905021851495,
+          "failures": 0,
+          "vsBestSingle": {
+            "pValue": 1,
+            "n10": 0,
+            "n01": 0,
+            "method": "exact",
+            "n": 5
+          },
+          "costUsd": 2.8380000000000003e-05,
+          "costIncomplete": false
+        },
+        {
+          "id": "single:gemma",
+          "kind": "single",
+          "label": "Gemma 3 12B",
+          "models": [
+            "openrouter:google/gemma-3-12b-it"
+          ],
+          "n": 5,
+          "correct": 0,
+          "accuracy": 0,
+          "ciLower": 0,
+          "ciUpper": 0.4345905021851495,
+          "failures": 0,
+          "vsBestSingle": {
+            "pValue": 1,
+            "n10": 0,
+            "n01": 0,
+            "method": "exact",
+            "n": 5
+          },
+          "costUsd": 7.195e-05,
+          "costIncomplete": false
+        },
+        {
+          "id": "ensemble:majority",
+          "kind": "ensemble",
+          "label": "Ensemble, mechanical majority",
+          "models": [
+            "openrouter:qwen/qwen3.5-9b",
+            "openrouter:meta-llama/llama-3.1-8b-instruct",
+            "openrouter:google/gemma-3-12b-it"
+          ],
+          "strategy": "majority",
+          "n": 5,
+          "correct": 0,
+          "accuracy": 0,
+          "ciLower": 0,
+          "ciUpper": 0.4345905021851495,
+          "failures": 0,
+          "vsBestSingle": {
+            "pValue": 1,
+            "n10": 0,
+            "n01": 0,
+            "method": "exact",
+            "n": 5
+          },
+          "costUsd": 0.00033976,
+          "costIncomplete": false
+        },
+        {
+          "id": "ensemble:standard",
+          "kind": "ensemble",
+          "label": "Ensemble, standard consensus",
+          "models": [
+            "openrouter:qwen/qwen3.5-9b",
+            "openrouter:meta-llama/llama-3.1-8b-instruct",
+            "openrouter:google/gemma-3-12b-it"
+          ],
+          "strategy": "standard",
+          "n": 5,
+          "correct": 0,
+          "accuracy": 0,
+          "ciLower": 0,
+          "ciUpper": 0.4345905021851495,
+          "failures": 0,
+          "vsBestSingle": {
+            "pValue": 1,
+            "n10": 0,
+            "n01": 0,
+            "method": "exact",
+            "n": 5
+          },
+          "costUsd": 0.0023654400000000003,
+          "costIncomplete": false
+        },
+        {
+          "id": "reference",
+          "kind": "reference",
+          "label": "Claude Sonnet 5.5",
+          "models": [
+            "openrouter:anthropic/claude-sonnet-5.5"
+          ],
+          "n": 5,
+          "correct": 0,
+          "accuracy": 0,
+          "ciLower": 0,
+          "ciUpper": 0.4345905021851495,
+          "failures": 0,
+          "vsBestSingle": {
+            "pValue": 1,
+            "n10": 0,
+            "n01": 0,
+            "method": "exact",
+            "n": 5
+          },
+          "costUsd": 0.002958,
+          "costIncomplete": false
+        }
+      ],
+      "spentUsd": 0.0053234400000000005
+    }
+  ]
+}

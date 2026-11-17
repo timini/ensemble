@@ -180,6 +180,9 @@ describe('consensus', () => {
     });
     expect(result.metrics.standard?.tokenCount).toBe(300);
     expect(result.metrics.standard?.costUsd).toBeCloseTo((200 * 2.5 + 100 * 10) / 1e6, 12);
+    expect(result.metrics.standard?.inputTokens).toBe(200);
+    expect(result.metrics.standard?.outputTokens).toBe(100);
+    expect(result.metrics.standard?.calls).toBe(1);
   });
 
   it('prices local consensus models at zero', async () => {

@@ -89,6 +89,8 @@ describe('EnsembleRunner', () => {
     // gpt-4o in the shared price table: $2.50 input, $10 output per million tokens.
     expect(results[0].estimatedCostUsd).toBeCloseTo((200 * 2.5 + 1000 * 10) / 1e6, 12);
     expect(results[0].costFromTextLength).toBeUndefined();
+    // Usage is kept so token assumptions can be fitted later (calibrate-tokens).
+    expect(results[0].usage).toEqual({ inputTokens: 200, outputTokens: 1000, source: 'reported' });
     // No price for an unknown model id: no cost rather than a guess.
     expect(results[1].estimatedCostUsd).toBeUndefined();
     expect(results[1]).toMatchObject({
@@ -121,6 +123,7 @@ describe('EnsembleRunner', () => {
     // 'Test prompt' is 11 characters (3 tokens), 'openai answer' 13 (4 tokens).
     expect(result.estimatedCostUsd).toBeCloseTo((3 * 2.5 + 4 * 10) / 1e6, 12);
     expect(result.costFromTextLength).toBe(true);
+    expect(result.usage).toEqual({ inputTokens: 3, outputTokens: 4, source: 'estimated' });
   });
 
   it('supports configurable delay between starting model calls', async () => {
