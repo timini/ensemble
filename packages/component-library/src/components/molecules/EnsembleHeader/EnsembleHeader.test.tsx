@@ -14,11 +14,11 @@ describe('EnsembleHeader', () => {
     expect(screen.getByText('Ask several models, see where they agree.')).toBeInTheDocument();
   });
 
-  it('renders the brand name as a link to /config', () => {
+  it('renders the brand name as a link to the workspace', () => {
     render(<EnsembleHeader />);
     const brandLink = screen.getByRole('link', { name: /ensemble ai/i });
     expect(brandLink).toBeInTheDocument();
-    expect(brandLink).toHaveAttribute('href', '/config');
+    expect(brandLink).toHaveAttribute('href', '/workspace');
   });
 
   it('renders the settings button', () => {

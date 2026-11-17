@@ -25,6 +25,6 @@ export function moveFocus(
   else if (key === 'Home') index = 0;
   else if (key === 'End') index = items.length - 1;
   else return -1;
-  items[index].focus();
+  items[index]?.focus();
   return index;
 }

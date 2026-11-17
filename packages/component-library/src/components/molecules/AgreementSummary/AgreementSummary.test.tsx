@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { fireEvent, screen } from '@testing-library/react';
 import { AgreementSummary, agreementLevel } from './AgreementSummary';
 import { renderWithI18n } from '../../../lib/test-utils/i18n-test-wrapper';
@@ -91,5 +91,37 @@ describe('AgreementSummary', () => {
   it('explains how to get a score when no embedding model is set', () => {
     renderWithI18n(<AgreementSummary status="unavailable" />);
     expect(screen.getByTestId('agreement-unavailable')).toHaveTextContent('No agreement score');
+  });
+
+  it('offers to open settings when no embedding model is set', () => {
+    const onOpenSettings = vi.fn();
+    renderWithI18n(<AgreementSummary status="unavailable" onOpenSettings={onOpenSettings} />);
+    expect(screen.getByTestId('agreement-unavailable')).toHaveAttribute('data-reason', 'noEmbeddings');
+    fireEvent.click(screen.getByTestId('agreement-open-settings'));
+    expect(onOpenSettings).toHaveBeenCalled();
+  });
+
+  it('shows the command that installs a local embedding model', () => {
+    renderWithI18n(<AgreementSummary status="unavailable" command="ollama pull nomic-embed-text" />);
+    expect(screen.getByTestId('agreement-command')).toHaveTextContent('ollama pull nomic-embed-text');
+    expect(screen.getByTestId('agreement-unavailable')).toHaveTextContent('Your Ollama server has no embedding model');
+  });
+
+  it('says when the answers could not be scored', () => {
+    renderWithI18n(<AgreementSummary status="unavailable" reason="error" onOpenSettings={() => undefined} />);
+    const block = screen.getByTestId('agreement-unavailable');
+    expect(block).toHaveAttribute('data-reason', 'error');
+    expect(block).toHaveTextContent('could not be scored');
+    expect(screen.queryByTestId('agreement-open-settings')).not.toBeInTheDocument();
+  });
+
+  it('says when there are too few answers to compare', () => {
+    renderWithI18n(<AgreementSummary status="unavailable" reason="tooFewAnswers" />);
+    expect(screen.getByTestId('agreement-unavailable')).toHaveTextContent('at least 2 answers');
+  });
+
+  it('names the answers left out of the score', () => {
+    renderWithI18n(<AgreementSummary status="ready" score={0.9} pairs={pairs.slice(0, 1)} excluded={['Gemini']} />);
+    expect(screen.getByTestId('agreement-excluded')).toHaveTextContent('Gemini');
   });
 });

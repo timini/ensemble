@@ -13,6 +13,8 @@ export interface ModelChipProps {
   kind?: 'model' | 'manual';
   /** Shows a remove button when set. */
   onRemove?: () => void;
+  /** Model id or manual answer id, set as `data-model-id`. */
+  modelId?: string;
   /** Defaults to `model-chip`. */
   testId?: string;
   className?: string;
@@ -27,13 +29,14 @@ export interface ModelChipProps {
  * <ModelChip name="Claude Opus 5.5" provider="anthropic" onRemove={() => remove(id)} />
  * ```
  */
-export function ModelChip({ name, provider, kind = 'model', onRemove, testId = 'model-chip', className }: ModelChipProps) {
+export function ModelChip({ name, provider, kind = 'model', onRemove, modelId, testId = 'model-chip', className }: ModelChipProps) {
   const { t } = useTranslation();
   const manual = kind === 'manual';
   return (
     <span
       data-testid={testId}
       data-kind={kind}
+      data-model-id={modelId}
       title={manual ? t('molecules.modelChip.manual') : undefined}
       className={cn(
         'inline-flex h-8 max-w-full items-center gap-1.5 rounded-full border border-border bg-background pl-1 text-label',

@@ -9,6 +9,7 @@ import {
   type AgreementLevelThresholds,
 } from '../../organisms/AgreementAnalysis';
 import { cn } from '../../../lib/utils';
+import { AgreementUnavailable, type AgreementUnavailableReason } from './AgreementUnavailable';
 
 /** Similarity of two answers on the 0 to 1 scale. */
 export interface AgreementPair {
@@ -29,6 +30,14 @@ export interface AgreementSummaryProps {
   calibration?: AgreementCalibrationInfo;
   /** Answers in so far, while pending. */
   progress?: { done: number; total: number };
+  /** Why there is no score, when `unavailable`. Defaults to `noEmbeddings`. */
+  reason?: AgreementUnavailableReason;
+  /** Command that installs a local embedding model (`ollama pull ...`), when unavailable. */
+  command?: string;
+  /** Opens settings from the unavailable state. */
+  onOpenSettings?: () => void;
+  /** Answers left out of the score because their embedding failed. */
+  excluded?: string[];
   className?: string;
 }
 
@@ -47,6 +56,8 @@ export function agreementLevel(score: number, thresholds: AgreementLevelThreshol
  * words with what that means for the user, whether the labels are calibrated
  * for the embedding model, and the score of each pair of answers. While
  * pending it shows placeholders in the same places, so it does not jump.
+ * With no score it says why (no embedding model, a scoring error or too few
+ * answers) and how to get one.
  *
  * @example
  * ```tsx
@@ -54,7 +65,8 @@ export function agreementLevel(score: number, thresholds: AgreementLevelThreshol
  *   calibration={{ calibrated: false, embeddingModel: 'text-embedding-3-small' }} />
  * ```
  */
-export function AgreementSummary({ status, score = 0, pairs = [], thresholds, calibration, progress, className }: AgreementSummaryProps) {
+export function AgreementSummary(props: AgreementSummaryProps) {
+  const { status, score = 0, pairs = [], thresholds, calibration, progress, excluded = [], className } = props;
   const { t } = useTranslation();
   const [showPairs, setShowPairs] = React.useState(false);
   const headingId = React.useId();
@@ -76,12 +88,8 @@ export function AgreementSummary({ status, score = 0, pairs = [], thresholds, ca
       </h2>
 
       {status === 'unavailable' && (
-        <div data-testid="agreement-unavailable" className="mt-4 space-y-1">
-          <p className="text-label font-medium">{t(`${key}.unavailable`)}</p>
-          <p className="text-label text-muted-foreground">{t(`${key}.unavailableHint`)}</p>
-        </div>
+        <AgreementUnavailable reason={props.reason ?? 'noEmbeddings'} command={props.command} onOpenSettings={props.onOpenSettings} />
       )}
-
       {status === 'pending' && (
         <>
           <div className="mt-4 flex items-center gap-4">
@@ -158,6 +166,11 @@ export function AgreementSummary({ status, score = 0, pairs = [], thresholds, ca
             </div>
           )}
 
+          {excluded.length > 0 && (
+            <p data-testid="agreement-excluded" className="pt-3 text-caption text-muted-foreground">
+              {t(`${key}.excluded`, { models: excluded.join(', ') })}
+            </p>
+          )}
           {calibration && (
             <div data-testid="agreement-calibration" data-calibrated={String(calibration.calibrated)} className="mt-auto flex flex-wrap items-center gap-2 pt-4 text-caption text-muted-foreground">
               {calibration.calibrated ? (

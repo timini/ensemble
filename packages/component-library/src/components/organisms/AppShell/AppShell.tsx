@@ -28,20 +28,20 @@ const DESKTOP = '(min-width: 1024px)';
 const ICON_BUTTON =
   'focus-ring inline-flex size-10 items-center justify-center rounded-lg text-muted-foreground transition-colors duration-fast hover:bg-muted hover:text-foreground';
 
-const matchesDesktop = () => (typeof window !== 'undefined' && window.matchMedia?.(DESKTOP)?.matches) || false;
+function subscribe(onChange: () => void) {
+  const query = typeof window !== 'undefined' ? window.matchMedia?.(DESKTOP) : undefined;
+  query?.addEventListener?.('change', onChange);
+  return () => query?.removeEventListener?.('change', onChange);
+}
+const matchesDesktop = () => window.matchMedia?.(DESKTOP)?.matches ?? false;
 
+/**
+ * Whether the viewport is at least 1024 px. False on the server and while
+ * hydrating, so server and client markup match; the sidebar's width is
+ * reserved by CSS meanwhile, so nothing shifts when its content appears.
+ */
 function useIsDesktop() {
-  // Read the query on the first render so the desktop sidebar does not pop in.
-  const [desktop, setDesktop] = React.useState(matchesDesktop);
-  React.useEffect(() => {
-    const query = window.matchMedia?.(DESKTOP);
-    if (!query) return undefined;
-    setDesktop(query.matches);
-    const onChange = (e: MediaQueryListEvent) => setDesktop(e.matches);
-    query.addEventListener?.('change', onChange);
-    return () => query.removeEventListener?.('change', onChange);
-  }, []);
-  return desktop;
+  return React.useSyncExternalStore(subscribe, matchesDesktop, () => false);
 }
 
 /**
@@ -81,7 +81,7 @@ export function AppShell(props: AppShellProps) {
           {sidebar && (
             <button
               type="button"
-              onClick={() => (desktop ? setSidebarOpen((v) => !v) : setSheetOpen(true))}
+              onClick={() => (matchesDesktop() ? setSidebarOpen((v) => !v) : setSheetOpen(true))}
               aria-expanded={expanded}
               aria-label={expanded ? t('organisms.appShell.hideHistory') : t('organisms.appShell.showHistory')}
               data-testid="app-shell-history-toggle"
@@ -105,14 +105,15 @@ export function AppShell(props: AppShellProps) {
         </div>
       </header>
       <div className="flex flex-1">
-        {/* One container at a time: the aside on desktop, the sheet below 1024 px. */}
-        {sidebar && desktop && sidebarOpen && (
+        {/* The aside reserves its width from 1024 px by CSS; its content mounts once the
+            viewport is known, so the sidebar lives in one container at a time. */}
+        {sidebar && sidebarOpen && (
           <aside
             aria-label={t('organisms.appShell.history')}
             data-testid="app-shell-sidebar"
-            className="sticky top-14 h-[calc(100dvh-3.5rem)] w-72 shrink-0 overflow-y-auto border-r border-border bg-card/40 p-3"
+            className="sticky top-14 hidden h-[calc(100dvh-3.5rem)] w-72 shrink-0 overflow-y-auto border-r border-border bg-card/40 p-3 lg:block"
           >
-            {sidebar}
+            {desktop && sidebar}
           </aside>
         )}
         <main id={mainId} tabIndex={-1} className="min-w-0 flex-1 focus:outline-none">

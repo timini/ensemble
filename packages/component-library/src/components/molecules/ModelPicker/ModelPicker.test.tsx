@@ -101,4 +101,9 @@ describe('ModelPicker', () => {
     fireEvent.click(screen.getByTestId('model-picker-trigger'));
     expect(screen.getByTestId('model-picker-empty')).toHaveTextContent('Aucun modèle');
   });
+
+  it('marks each option with its model id', () => {
+    renderWithI18n(<ModelPicker options={[{ id: 'openai/gpt-6', name: 'GPT-6', provider: 'openai', group: 'OpenAI' }]} selectedIds={[]} onToggle={() => undefined} defaultOpen />);
+    expect(screen.getByTestId('model-picker-option')).toHaveAttribute('data-model-id', 'openai/gpt-6');
+  });
 });

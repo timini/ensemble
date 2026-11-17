@@ -70,6 +70,14 @@ describe('Composer', () => {
     expect(screen.queryByRole('button', { name: /Remove/ })).not.toBeInTheDocument();
   });
 
+  it('still lets the user add an answer by hand during a run', () => {
+    const onAddManualResponse = vi.fn();
+    setup({ running: true, onAddManualResponse });
+    fireEvent.click(screen.getByTestId('composer-options-trigger'));
+    fireEvent.click(screen.getByTestId('composer-option-manual'));
+    expect(onAddManualResponse).toHaveBeenCalled();
+  });
+
   it('shows a chip per model and removes one', () => {
     const props = setup();
     expect(screen.getAllByTestId('model-chip')).toHaveLength(3);

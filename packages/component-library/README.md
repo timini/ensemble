@@ -10,9 +10,9 @@ The package is not built or published. It points `main` and `types` at `src/inde
 
 AgreementRing, Avatar, Badge, Button, Card, CommandSnippet, Dialog, EndpointLogo, Heading, Icon, InlineAlert, Input, Label, Link, LoadingSpinner, Logo, Markdown, ModelLogo, Progress, ProviderLogo, Rating, Select, Separator, Sheet, Tag, Text, Textarea
 
-### Molecules (27)
+### Molecules (28)
 
-AccuracyInterval, AgreementSummary, AnswerCard, ApiKeyInput, BenchmarksNotRun, ComposerOptions, ConsensusAnswer, ConsensusPresetSelector, EmbeddingsProviderSelector, EndpointEmbeddingField, EndpointInput, EnsembleHeader, Footer, LocalServerHelp, MajorityVoteBreakdown, MethodMenu, ModelCard, ModelChip, ModelPicker, ModeSelectionCard, OllamaDetectedNotice, ProgressSteps, PromptInput, ResponseCard, ResponseErrorNotice, RunCostSummary, SummarizerIndicator
+AccuracyInterval, AgreementSummary, AnswerCard, ApiKeyInput, AppearanceSettings, BenchmarksNotRun, ComposerOptions, ConsensusAnswer, ConsensusPresetSelector, EmbeddingsProviderSelector, EndpointEmbeddingField, EndpointInput, EnsembleHeader, Footer, LocalServerHelp, MajorityVoteBreakdown, MethodMenu, ModelCard, ModelChip, ModelPicker, ModeSelectionCard, OllamaDetectedNotice, ProgressSteps, PromptInput, ResponseCard, ResponseErrorNotice, RunCostSummary, SummarizerIndicator
 
 ### Organisms (24)
 
@@ -20,18 +20,19 @@ AgreementAnalysis, AnswerColumns, ApiKeyConfiguration, ApiKeyConfigurationModal,
 
 ### M4 workspace
 
-The single workspace screen of the M4 redesign is built from these parts. `Organisms/AppShell` has `WorkspaceEmpty`, `WorkspaceRunning` and `WorkspaceDone` stories that assemble them with sample data.
+The app's `/workspace` screen is built from these parts. `Organisms/AppShell` has `WorkspaceEmpty`, `WorkspaceRunning` and `WorkspaceDone` stories that assemble them with sample data.
 
 | Component | Role |
 |-----------|------|
 | `AppShell` | Header (history toggle, logo, links, settings, account slot), history sidebar from 1024 px or a sheet below, main content with a skip link |
 | `HistorySidebar` | Past runs grouped by date with their agreement level, search, delete, presets |
 | `Composer` | Prompt, model chips (`ModelChip`) with the inline `ModelPicker`, `MethodMenu` with calls and cost per method from `estimateRun` and the summarizer choice, `ComposerOptions` (manual answer, save preset), Ctrl or Cmd + Enter |
-| `ConsensusPanel` | `AgreementSummary` (score ring, level, calibrated or uncalibrated label, pair scores) next to `ConsensusAnswer` (answer, majority vote, compact `RunCostSummary`) |
+| `ConsensusPanel` | `AgreementSummary` (score ring, level, calibrated or uncalibrated label, pair scores, or why there is no score with a way into settings) next to `ConsensusAnswer` (answer, majority vote, compact `RunCostSummary`) |
 | `AnswerColumns` | `AnswerCard` per model: columns from 768 px, swipeable tabs with arrow key support below, streaming, waiting and error states with a retry per model |
 | `Sheet` | Radix dialog shown as a side panel from 768 px and a bottom sheet below; traps focus, closes on Escape |
+| `AppearanceSettings` | Theme and language as segmented radio groups, for the settings sheet |
 
-The older wizard components (`ResponseCard`, `ConsensusCard`, `AgreementAnalysis`, `PromptCard` and others) stay until the app stops using them.
+The older wizard components (`ResponseCard`, `ConsensusCard`, `AgreementAnalysis`, `PromptCard`, `ProgressSteps`, `WorkflowNavigator` and others) are no longer used by the workspace. Some are still used elsewhere (`ApiKeyConfiguration`, `EndpointConfiguration` and `EmbeddingsProviderSelector` in the settings sheet, `EnsembleHeader` and `Footer` on the other pages); the rest can be removed in a later cleanup.
 
 There is no templates level. `src/components/foundations/ColorPalette.stories.tsx` documents the colour tokens.
 

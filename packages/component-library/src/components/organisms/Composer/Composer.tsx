@@ -58,6 +58,7 @@ export interface ComposerProps {
  * Composer organism: the top of the workspace. The prompt, the models as
  * chips with an inline picker, the consensus method with its calls and cost,
  * and the Ask button, in one card. Ctrl or Cmd + Enter sends the prompt.
+ * During a run the models are locked but answers can still be added by hand.
  *
  * @example
  * ```tsx
@@ -111,11 +112,12 @@ export function Composer(props: ComposerProps) {
       />
       <div role="group" aria-label={t('organisms.composer.models')} className="flex flex-wrap items-center gap-1.5 px-3 pb-3 sm:px-4">
         {models.map((m) => (
-          <ModelChip key={m.id} name={m.name} provider={m.provider} onRemove={running ? undefined : () => props.onRemoveModel(m.id)} />
+          <ModelChip key={m.id} modelId={m.id} name={m.name} provider={m.provider} onRemove={running ? undefined : () => props.onRemoveModel(m.id)} />
         ))}
         {manualResponses.map((r) => (
           <ModelChip
             key={r.id}
+            modelId={r.id}
             name={r.label}
             kind="manual"
             onRemove={running || !props.onRemoveManualResponse ? undefined : () => props.onRemoveManualResponse?.(r.id)}
@@ -143,7 +145,8 @@ export function Composer(props: ComposerProps) {
           <span data-testid="composer-shortcut" className="mr-2 hidden text-caption text-muted-foreground md:inline">
             {t('organisms.composer.shortcut', { keys: `${modKey} ${t('organisms.composer.enter')}` })}
           </span>
-          <ComposerOptions onAddManualResponse={props.onAddManualResponse} onSavePreset={props.onSavePreset} disabled={running} />
+          {/* Answers added by hand join a run in progress, so the menu stays available. */}
+          <ComposerOptions onAddManualResponse={props.onAddManualResponse} onSavePreset={props.onSavePreset} />
           <Button
             type="submit"
             disabled={!canSubmit}

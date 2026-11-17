@@ -98,11 +98,15 @@ export function MethodMenu({
         data-testid="method-menu-trigger"
         className="focus-ring flex h-9 items-center gap-2 rounded-lg border border-border bg-card px-3 text-label shadow-sm transition-colors duration-fast hover:bg-muted disabled:opacity-50"
       >
-        <span className="text-muted-foreground">{t('molecules.methodMenu.label')}</span>
+        <span className="sr-only text-muted-foreground sm:not-sr-only">{t('molecules.methodMenu.label')}</span>
         <span className="font-medium">{name(method)}</span>
         {current && (
-          <span className="hidden text-caption tabular-nums text-muted-foreground sm:inline">
-            {calls(current)}, {methodCostLabel(current, t, locale)}
+          <span className="text-caption tabular-nums text-muted-foreground">
+            {/* Phones show the cost alone, so it is always seen before asking. */}
+            <span data-testid="method-menu-calls" className="hidden sm:inline">
+              {calls(current)},{' '}
+            </span>
+            <span data-testid="method-menu-cost">{methodCostLabel(current, t, locale)}</span>
           </span>
         )}
         <ChevronDown className={cn('size-4 text-muted-foreground transition-transform duration-fast', popover.open && 'rotate-180')} aria-hidden="true" />

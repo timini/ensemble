@@ -330,7 +330,12 @@
       "pair": "{{a}} and {{b}}",
       "calibrated": "Calibrated for {{model}}",
       "uncalibrated": "Uncalibrated",
-      "uncalibratedHint": "Scored with {{model}}. The labels use default thresholds until this model is calibrated."
+      "uncalibratedHint": "Scored with {{model}}. The labels use default thresholds until this model is calibrated.",
+      "errorHint": "The answers could not be scored. The embedding calls failed; try the run again.",
+      "tooFewHint": "Agreement needs at least 2 answers to compare.",
+      "openSettings": "Open settings",
+      "excluded": "Left out of the score (no embedding): {{models}}.",
+      "commandHint": "Your Ollama server has no embedding model, so the answers cannot be compared. Install one, then ask again:"
     },
     "consensusAnswer": {
       "heading": "Consensus answer",
@@ -344,6 +349,12 @@
       "copy": "Copy",
       "copied": "Copied",
       "share": "Share"
+    },
+    "appearanceSettings": {
+      "theme": "Theme",
+      "light": "Light",
+      "dark": "Dark",
+      "language": "Language"
     }
   },
   "organisms": {

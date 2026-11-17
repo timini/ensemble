@@ -47,3 +47,18 @@ export const Pending: Story = { args: { status: 'pending', progress: { done: 2, 
 
 /** No embedding model configured. */
 export const Unavailable: Story = { args: { status: 'unavailable' } };
+
+/** No embedding model, with a way to open settings. */
+export const UnavailableWithSettings: Story = { args: { status: 'unavailable', onOpenSettings: () => undefined } };
+
+/** A connected Ollama with no embedding model: the command that installs one. */
+export const UnavailableOllamaPull: Story = { args: { status: 'unavailable', command: 'ollama pull nomic-embed-text', onOpenSettings: () => undefined } };
+
+/** The embedding calls failed. */
+export const ScoringError: Story = { args: { status: 'unavailable', reason: 'error' } };
+
+/** Fewer than 2 answers succeeded. */
+export const TooFewAnswers: Story = { args: { status: 'unavailable', reason: 'tooFewAnswers' } };
+
+/** One answer had no embedding and was left out. */
+export const PartlyScored: Story = { args: { pairs: samplePairs.slice(0, 1), excluded: ['Gemini 4 Carbon'] } };

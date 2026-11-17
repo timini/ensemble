@@ -148,6 +148,7 @@ export {
 export { ModelChip, type ModelChipProps } from './components/molecules/ModelChip';
 export { ModelPicker, type ModelPickerProps, type ModelPickerOption } from './components/molecules/ModelPicker';
 export { MethodMenu, methodCostLabel, type MethodMenuProps, type SummarizerOption } from './components/molecules/MethodMenu';
+export { AppearanceSettings, type AppearanceSettingsProps, type AppearanceTheme, type AppearanceLanguage } from './components/molecules/AppearanceSettings';
 export { ComposerOptions, type ComposerOptionsProps } from './components/molecules/ComposerOptions';
 export { AnswerCard, type AnswerCardProps, type AnswerStatus } from './components/molecules/AnswerCard';
 export {
@@ -155,6 +156,7 @@ export {
   agreementLevel,
   type AgreementSummaryProps,
   type AgreementPair,
+  type AgreementUnavailableReason,
 } from './components/molecules/AgreementSummary';
 export {
   ConsensusAnswer,

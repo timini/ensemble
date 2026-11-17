@@ -64,4 +64,9 @@ describe('AnswerCard', () => {
     expect(screen.getByRole('article')).toHaveTextContent('Added by hand');
     expect(screen.getByRole('article')).toHaveAttribute('data-kind', 'manual');
   });
+
+  it('carries the answer id for the workspace and tests', () => {
+    renderWithI18n(<AnswerCard modelName="GPT-6" answerId="gpt-6-luna" status="complete" content="x" />);
+    expect(screen.getByRole('article')).toHaveAttribute('data-answer-id', 'gpt-6-luna');
+  });
 });

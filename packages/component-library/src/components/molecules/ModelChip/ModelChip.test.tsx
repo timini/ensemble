@@ -30,4 +30,9 @@ describe('ModelChip', () => {
     expect(chip).toHaveAttribute('title', 'Ajoutée à la main');
     expect(screen.getByRole('button', { name: 'Retirer My notes' })).toBeInTheDocument();
   });
+
+  it('carries the model id', () => {
+    renderWithI18n(<ModelChip name="GPT-6" provider="openai" modelId="gpt-6-luna" />);
+    expect(screen.getByTestId('model-chip')).toHaveAttribute('data-model-id', 'gpt-6-luna');
+  });
 });

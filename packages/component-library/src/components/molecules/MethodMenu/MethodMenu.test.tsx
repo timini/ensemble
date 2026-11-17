@@ -16,6 +16,9 @@ describe('MethodMenu', () => {
     expect(trigger).toHaveTextContent('Standard');
     expect(trigger).toHaveTextContent('7 calls');
     expect(trigger).toHaveTextContent('$0.0040 to $0.012');
+    // The cost stays visible on phones; the call count shows from 640 px.
+    expect(screen.getByTestId('method-menu-cost')).not.toHaveClass('hidden');
+    expect(screen.getByTestId('method-menu-calls')).toHaveClass('hidden', 'sm:inline');
   });
 
   it('lists every method with its calls and cost', () => {

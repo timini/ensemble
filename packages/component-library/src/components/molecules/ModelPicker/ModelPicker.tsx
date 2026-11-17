@@ -126,6 +126,7 @@ export function ModelPicker({ options, selectedIds, onToggle, max = 6, defaultOp
                         disabled={!on && atLimit}
                         onClick={() => onToggle(o.id)}
                         data-testid="model-picker-option"
+                        data-model-id={o.id}
                         className="focus-ring flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-left text-label transition-colors duration-fast hover:bg-muted disabled:opacity-50"
                       >
                         <ModelLogo provider={o.provider} modelName={o.name} size="sm" />

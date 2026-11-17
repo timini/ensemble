@@ -33,6 +33,8 @@ export interface AnswerCardProps {
   onCopy?: () => void;
   /** DOM id, used by the mobile tabs. */
   id?: string;
+  /** Model id or manual answer id, set as `data-answer-id` for the app and tests. */
+  answerId?: string;
   /** Defaults to `answer-card`. */
   testId?: string;
   className?: string;
@@ -76,6 +78,7 @@ export function AnswerCard(props: AnswerCardProps) {
       data-testid={testId}
       data-status={status}
       data-kind={kind}
+      data-answer-id={props.answerId}
       className={cn(
         'flex h-full min-w-0 flex-col rounded-2xl border bg-card',
         status === 'error' ? 'border-destructive/40' : 'border-border',

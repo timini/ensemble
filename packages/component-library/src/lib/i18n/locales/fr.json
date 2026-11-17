@@ -330,7 +330,12 @@
       "pair": "{{a}} et {{b}}",
       "calibrated": "Calibré pour {{model}}",
       "uncalibrated": "Non calibré",
-      "uncalibratedHint": "Calculé avec {{model}}. Les libellés utilisent les seuils par défaut tant que ce modèle n'est pas calibré."
+      "uncalibratedHint": "Calculé avec {{model}}. Les libellés utilisent les seuils par défaut tant que ce modèle n'est pas calibré.",
+      "errorHint": "Les réponses n'ont pas pu être comparées. Les appels d'embeddings ont échoué ; relancez la question.",
+      "tooFewHint": "L'accord se mesure sur au moins 2 réponses.",
+      "openSettings": "Ouvrir les réglages",
+      "excluded": "Exclues du score (pas d'embedding) : {{models}}.",
+      "commandHint": "Votre serveur Ollama n'a pas de modèle d'embeddings, donc les réponses ne peuvent pas être comparées. Installez-en un, puis reposez la question :"
     },
     "consensusAnswer": {
       "heading": "Réponse de consensus",
@@ -344,6 +349,12 @@
       "copy": "Copier",
       "copied": "Copié",
       "share": "Partager"
+    },
+    "appearanceSettings": {
+      "theme": "Thème",
+      "light": "Clair",
+      "dark": "Sombre",
+      "language": "Langue"
     }
   },
   "organisms": {

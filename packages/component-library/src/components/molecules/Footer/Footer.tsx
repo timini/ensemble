@@ -13,7 +13,7 @@ export function Footer({ githubUrl = 'https://github.com/timini/ensemble' }: Foo
   const year = new Date().getFullYear();
 
   const navLinks = [
-    { href: '/config', label: isReady ? t('ensemble.footer.getStarted') : 'Get Started' },
+    { href: '/workspace', label: isReady ? t('ensemble.footer.getStarted') : 'Get Started' },
     { href: '/features', label: isReady ? t('ensemble.footer.features') : 'Features' },
     { href: '/about', label: isReady ? t('ensemble.footer.about') : 'About' },
     { href: '/benchmarks', label: isReady ? t('ensemble.footer.benchmarks') : 'Benchmarks' },

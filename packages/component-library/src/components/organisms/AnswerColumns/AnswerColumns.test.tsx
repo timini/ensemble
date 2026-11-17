@@ -11,6 +11,11 @@ describe('AnswerColumns', () => {
     expect(screen.getAllByTestId('answer-card')).toHaveLength(3);
   });
 
+  it('marks each card with its answer id', () => {
+    renderWithI18n(<AnswerColumns answers={sampleAnswers} />);
+    expect(screen.getAllByTestId('answer-card').map((c) => c.getAttribute('data-answer-id'))).toEqual(sampleAnswers.map((a) => a.id));
+  });
+
   it('has a tab per answer wired to its panel, the first selected', () => {
     renderWithI18n(<AnswerColumns answers={sampleAnswers} />);
     const tabs = within(screen.getByRole('tablist', { name: 'Answers' })).getAllByRole('tab');

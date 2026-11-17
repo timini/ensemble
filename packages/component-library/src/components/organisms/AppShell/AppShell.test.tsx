@@ -61,7 +61,8 @@ describe('AppShell', () => {
   it('mounts the sidebar once on small screens, in the sheet only', () => {
     desktop(false);
     renderWithI18n(<AppShell sidebar={<div data-testid="history-sidebar">Past runs</div>}>x</AppShell>);
-    expect(screen.queryByTestId('app-shell-sidebar')).not.toBeInTheDocument();
+    // The aside only reserves its width by CSS (hidden below 1024 px); it stays empty.
+    expect(screen.getByTestId('app-shell-sidebar')).toBeEmptyDOMElement();
     expect(screen.queryAllByTestId('history-sidebar')).toHaveLength(0);
     fireEvent.click(screen.getByRole('button', { name: 'Show history' }));
     expect(screen.getAllByTestId('history-sidebar')).toHaveLength(1);

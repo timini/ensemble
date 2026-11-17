@@ -4,7 +4,7 @@ import { AnswerCard, type AnswerCardProps } from '../../molecules/AnswerCard';
 import { cn } from '../../../lib/utils';
 
 /** One answer in the columns. `id` is the model id or the manual answer id. */
-export interface AnswerColumnItem extends Omit<AnswerCardProps, 'id' | 'testId'> {
+export interface AnswerColumnItem extends Omit<AnswerCardProps, 'id' | 'testId' | 'answerId'> {
   id: string;
 }
 
@@ -128,7 +128,7 @@ export function AnswerColumns({ answers, className }: AnswerColumnsProps) {
             aria-label={answer.modelName}
             className="w-full shrink-0 snap-center px-gutter md:snap-start md:px-0"
           >
-            <AnswerCard {...answer} />
+            <AnswerCard {...answer} answerId={id} />
           </div>
         ))}
       </div>

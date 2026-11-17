@@ -24,7 +24,7 @@ export function EnsembleHeader({ onSettingsClick, currentPath }: EnsembleHeaderP
     <header className="sticky top-0 z-40 border-b border-border bg-background/90 backdrop-blur">
       <div className="mx-auto max-w-6xl px-4 sm:px-6">
         <div className="flex h-16 items-center justify-between gap-4">
-          <a href="/config" className="focus-ring group flex min-w-0 items-center gap-2 rounded-md">
+          <a href="/workspace" className="focus-ring group flex min-w-0 items-center gap-2 rounded-md">
             <svg viewBox="0 0 28 20" className="h-5 w-7 shrink-0 text-primary" aria-hidden="true">
               <circle cx="8" cy="10" r="7" fill="none" stroke="currentColor" strokeWidth="1.75" />
               <circle cx="14" cy="10" r="7" fill="currentColor" fillOpacity="0.18" stroke="currentColor" strokeWidth="1.75" />
