@@ -11,7 +11,7 @@ describe('EnsembleHeader', () => {
 
   it('renders the tagline', () => {
     render(<EnsembleHeader />);
-    expect(screen.getByText('The smartest AI is an ensemble.')).toBeInTheDocument();
+    expect(screen.getByText('Ask several models, see where they agree.')).toBeInTheDocument();
   });
 
   it('renders the brand name as a link to /config', () => {
@@ -88,14 +88,14 @@ describe('EnsembleHeader', () => {
       renderWithI18n(<EnsembleHeader />, { language: 'en' });
 
       expect(screen.getByText('Ensemble AI')).toBeInTheDocument();
-      expect(screen.getByText('The smartest AI is an ensemble.')).toBeInTheDocument();
+      expect(screen.getByText('Ask several models, see where they agree.')).toBeInTheDocument();
     });
 
     it('renders French translations correctly', () => {
       renderWithI18n(<EnsembleHeader />, { language: 'fr' });
 
       expect(screen.getByText('IA Ensemble')).toBeInTheDocument();
-      expect(screen.getByText("L'IA la plus intelligente est un ensemble.")).toBeInTheDocument();
+      expect(screen.getByText("Interrogez plusieurs modèles, voyez où ils s'accordent.")).toBeInTheDocument();
     });
 
     it('displays translated title in English', () => {
@@ -115,13 +115,13 @@ describe('EnsembleHeader', () => {
     it('displays translated tagline in English', () => {
       renderWithI18n(<EnsembleHeader />, { language: 'en' });
 
-      expect(screen.getByText('The smartest AI is an ensemble.')).toBeInTheDocument();
+      expect(screen.getByText('Ask several models, see where they agree.')).toBeInTheDocument();
     });
 
     it('displays translated tagline in French', () => {
       renderWithI18n(<EnsembleHeader />, { language: 'fr' });
 
-      expect(screen.getByText("L'IA la plus intelligente est un ensemble.")).toBeInTheDocument();
+      expect(screen.getByText("Interrogez plusieurs modèles, voyez où ils s'accordent.")).toBeInTheDocument();
     });
   });
 });

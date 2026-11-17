@@ -53,7 +53,7 @@ exports[`EnsembleHeader Snapshots > matches snapshot for default header 1`] = `
         <p
           class="ml-2 hidden truncate border-l border-border pl-3 text-label text-muted-foreground md:block"
         >
-          The smartest AI is an ensemble.
+          Ask several models, see where they agree.
         </p>
       </a>
       <nav

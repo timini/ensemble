@@ -18,7 +18,7 @@ i18n.use(initReactI18next).init({
         ensemble: {
           header: {
             title: 'Ensemble AI',
-            tagline: 'The smartest AI is an ensemble.',
+            tagline: 'Ask several models, see where they agree.',
           },
           steps: {
             config: 'Config',
@@ -39,7 +39,7 @@ i18n.use(initReactI18next).init({
         ensemble: {
           header: {
             title: 'IA Ensemble',
-            tagline: "L'IA la plus intelligente est un ensemble.",
+            tagline: "Interrogez plusieurs modèles, voyez où ils s'accordent.",
           },
           steps: {
             config: 'Configuration',

@@ -16,7 +16,7 @@ export function EnsembleHeader({ onSettingsClick, currentPath }: EnsembleHeaderP
   const title = isReady ? t('ensemble.header.title') : 'Ensemble AI';
   const tagline = isReady
     ? t('ensemble.header.tagline')
-    : 'The smartest AI is an ensemble.';
+    : 'Ask several models, see where they agree.';
   const aboutLabel = isReady ? t('ensemble.header.about') : 'About';
   const featuresLabel = isReady ? t('ensemble.header.features') : 'Features';
 
