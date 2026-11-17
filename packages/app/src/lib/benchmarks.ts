@@ -3,7 +3,8 @@
  * by `npm run bench:matrix --workspace=packages/eval -- --publish` into
  * src/data/benchmark-summary.json; the format is described in
  * packages/eval/docs/BENCHMARKS.md. Anything that does not parse is shown as
- * "not run yet", never as numbers.
+ * "not run yet", never as numbers, and so is a mock dry run outside
+ * development.
  */
 import type { BenchmarkResultRow } from "@/components/organisms/BenchmarkResultsTable";
 
@@ -11,6 +12,8 @@ export const BENCHMARKS_DOCS_URL =
   "https://github.com/timini/ensemble/blob/main/packages/eval/docs/BENCHMARKS.md";
 export const BENCHMARK_COMMAND =
   "npm run bench:matrix --workspace=packages/eval";
+/** Fewest questions per dataset before an accuracy claim (PRODUCT_VISION). */
+export const MIN_SAMPLE = 200;
 
 export interface SummaryRow {
   id: string;
@@ -40,7 +43,9 @@ export interface DatasetSummary {
   n: number;
   bestSingleId: string | null;
   rows: SummaryRow[];
+  /** Cost of this dataset's results, cached reference answers included. */
   spentUsd: number;
+  spentIncomplete?: boolean;
 }
 
 interface MethodModel {
@@ -71,7 +76,10 @@ export interface BenchmarkSummary {
     reference: MethodModel;
   };
   estimate: { lowUsd: number; highUsd: number; calls: number } | null;
+  /** Cost of the results, cached reference answers included. */
   totalCostUsd: number | null;
+  /** Some calls had no price, so totalCostUsd is a lower bound. */
+  totalCostIncomplete?: boolean;
   datasets: DatasetSummary[];
 }
 
@@ -131,6 +139,19 @@ export function parseBenchmarkSummary(raw: unknown): BenchmarkSummary | null {
       d.rows.every(validRow),
   );
   return datasetsValid ? (raw as unknown as BenchmarkSummary) : null;
+}
+
+/**
+ * True when the page should show the summary's numbers: it has results, and
+ * it is not a mock dry run (those are shown in development only).
+ */
+export function shouldShowResults(
+  summary: BenchmarkSummary | null,
+  env: { NODE_ENV?: string },
+): boolean {
+  if (!summary || summary.status === "not-run" || summary.datasets.length === 0)
+    return false;
+  return summary.mode !== "mock" || env.NODE_ENV === "development";
 }
 
 /** Rows for BenchmarkResultsTable. Ensemble labels are translated; model names are not. */

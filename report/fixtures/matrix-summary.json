@@ -53,6 +53,7 @@
     "calls": 100
   },
   "totalCostUsd": 0.01663187,
+  "totalCostIncomplete": false,
   "datasets": [
     {
       "dataset": "gsm8k",
@@ -198,7 +199,8 @@
           "costIncomplete": false
         }
       ],
-      "spentUsd": 0.0030349900000000004
+      "spentUsd": 0.0030349900000000004,
+      "spentIncomplete": false
     },
     {
       "dataset": "mmlu_pro",
@@ -344,7 +346,8 @@
           "costIncomplete": false
         }
       ],
-      "spentUsd": 0.0053234400000000005
+      "spentUsd": 0.0053234400000000005,
+      "spentIncomplete": false
     }
   ]
 }

@@ -4,7 +4,8 @@
  * Accuracy of single models, ensembles and a premium reference on public
  * benchmarks, from the committed summary of the benchmark matrix
  * (src/data/benchmark-summary.json). With no results committed it says so
- * and shows the method; it never shows placeholder numbers.
+ * and shows the method; it never shows placeholder numbers. A mock dry-run
+ * summary is shown in development only, with a warning.
  */
 
 "use client";
@@ -22,16 +23,17 @@ import {
   BENCHMARK_COMMAND,
   BENCHMARKS_DOCS_URL,
   datasetLabel,
+  MIN_SAMPLE,
   parseBenchmarkSummary,
+  shouldShowResults,
   toResultRows,
   type BenchmarkSummary,
 } from "~/lib/benchmarks";
 
-const summary = parseBenchmarkSummary(summaryJson);
-
 function Results({ summary }: { summary: BenchmarkSummary }) {
   const { t, i18n } = useTranslation("common");
   const date = new Date(summary.generatedAt).toLocaleDateString(i18n.language);
+  const total = `$${(summary.totalCostUsd ?? 0).toFixed(2)}`;
   return (
     <section className="mt-8 space-y-6" data-testid="benchmarks-results">
       <Heading level={2} size="xl">
@@ -41,7 +43,9 @@ function Results({ summary }: { summary: BenchmarkSummary }) {
         {t("pages.benchmarks.runInfo", {
           runId: summary.runId ?? "",
           date,
-          cost: `$${(summary.totalCostUsd ?? 0).toFixed(2)}`,
+          cost: summary.totalCostIncomplete
+            ? t("pages.benchmarks.costAtLeast", { cost: total })
+            : total,
         })}
       </Text>
       {summary.mode === "mock" && (
@@ -55,12 +59,26 @@ function Results({ summary }: { summary: BenchmarkSummary }) {
         </InlineAlert>
       )}
       {summary.datasets.map((dataset) => (
-        <BenchmarkResultsTable
-          key={dataset.dataset}
-          title={datasetLabel(dataset.dataset)}
-          n={dataset.n}
-          rows={toResultRows(dataset, t)}
-        />
+        <div key={dataset.dataset} className="space-y-2">
+          <BenchmarkResultsTable
+            title={datasetLabel(dataset.dataset)}
+            n={dataset.n}
+            rows={toResultRows(dataset, t)}
+          />
+          {dataset.n < MIN_SAMPLE && (
+            <Text
+              variant="small"
+              color="muted"
+              data-testid="benchmarks-small-sample"
+            >
+              {t("pages.benchmarks.smallSampleNotice", {
+                dataset: datasetLabel(dataset.dataset),
+                n: dataset.n,
+                min: MIN_SAMPLE,
+              })}
+            </Text>
+          )}
+        </div>
       ))}
     </section>
   );
@@ -68,10 +86,10 @@ function Results({ summary }: { summary: BenchmarkSummary }) {
 
 export default function BenchmarksPage() {
   const { t } = useTranslation("common");
-  const hasResults =
-    summary !== null &&
-    summary.status !== "not-run" &&
-    summary.datasets.length > 0;
+  const summary = parseBenchmarkSummary(summaryJson);
+  const hasResults = shouldShowResults(summary, {
+    NODE_ENV: process.env.NODE_ENV,
+  });
   const method = summary?.method;
   const summarizer =
     method?.models.find((model) => model.id === method.summarizer)?.label ??

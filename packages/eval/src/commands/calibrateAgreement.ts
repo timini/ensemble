@@ -5,7 +5,7 @@ import { PRICE_TABLE, getModelPrice } from '@ensemble-ai/shared-utils/pricing';
 import { cosineSimilarity, type AgreementCalibrationFile } from '@ensemble-ai/shared-utils/similarity';
 import { answerPairs, fitAgreementThresholds, type ScoredPair } from '../lib/calibration/agreement.js';
 import { createEmbedder } from '../lib/calibration/embedder.js';
-import { readResultFiles } from '../lib/calibration/resultFiles.js';
+import { hasMockResults, readResultFiles } from '../lib/calibration/resultFiles.js';
 import { fileExists, readJsonFile, writeJsonFile } from '../lib/io.js';
 import { slug } from '../lib/matrix/plan.js';
 import type { EvalMode } from '../types.js';
@@ -19,7 +19,7 @@ interface Options {
   embedding: string;
   mode: string;
   yes?: boolean;
-  output: string;
+  output?: string;
   pairsFile?: string;
   highPrecision: string;
 }
@@ -43,14 +43,22 @@ export function createCalibrateAgreementCommand(): Command {
     .requiredOption('--embedding <spec>', 'Embedding model, e.g. openai:text-embedding-3-small or ollama:nomic-embed-text')
     .option('--mode <mode>', 'free (real embeddings) or mock', 'free')
     .option('--yes', 'Confirm the embedding spend (free mode)')
-    .option('--output <file>', 'Calibration JSON to update', DEFAULT_AGREEMENT_OUTPUT)
+    .option('--output <file>', 'Calibration JSON to update (default: the app calibration; required with --mode mock)')
     .option('--pairs-file <file>', 'Scored pairs cache (default: <first results dir>/calibration/<model>-<mode>-pairs.json)')
     .option('--high-precision <share>', 'Share of pairs above the high cut-off that must agree', '0.9')
     .action(async (options: Options) => {
       const mode = options.mode as EvalMode;
       if (mode !== 'free' && mode !== 'mock') throw new Error(`Invalid mode "${options.mode}".`);
+      const output = resolve(options.output ?? DEFAULT_AGREEMENT_OUTPUT);
+      if (mode === 'mock' && output === DEFAULT_AGREEMENT_OUTPUT) {
+        throw new Error('--mode mock embeds with fake vectors, so it never writes the app calibration. Pass --output <scratch file>.');
+      }
       const embedder = createEmbedder(options.embedding, mode);
       const results = options.results.map((r) => resolve(r));
+      const files = await readResultFiles(results, ['ensemble.json']);
+      if (mode === 'free' && hasMockResults(files)) {
+        throw new Error('Some results come from a mock run. Calibrate from a free-mode run, or use --mode mock with --output.');
+      }
       const first = results[0]!;
       const pairsFile = resolve(options.pairsFile
         ?? join(first.endsWith('.json') ? dirname(first) : first, 'calibration', `${slug(embedder.key)}-${mode}-pairs.json`));
@@ -62,7 +70,7 @@ export function createCalibrateAgreementCommand(): Command {
         scored = cache.pairs;
         process.stdout.write(`Using ${scored.length} scored pairs from ${pairsFile}\n`);
       } else {
-        const pairs = answerPairs(await readResultFiles(results, ['ensemble.json']));
+        const pairs = answerPairs(files);
         const texts = [...new Set(pairs.flatMap((p) => [p.textA, p.textB]))];
         const tokens = texts.reduce((s, t) => s + Math.ceil(t.length / 4), 0);
         const price = getModelPrice(embedder.provider, embedder.model, PRICE_TABLE);
@@ -87,7 +95,6 @@ export function createCalibrateAgreementCommand(): Command {
       }
 
       const fit = fitAgreementThresholds(scored, { highPrecision: Number.parseFloat(options.highPrecision) });
-      const output = resolve(options.output);
       const file: AgreementCalibrationFile = (await fileExists(output))
         ? await readJsonFile<AgreementCalibrationFile>(output)
         : { schemaVersion: 1, models: {} };

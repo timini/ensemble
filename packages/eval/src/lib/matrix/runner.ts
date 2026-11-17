@@ -34,6 +34,8 @@ export interface MatrixRunOptions {
   planOnly?: boolean;
   /** Also write the summary here (the app's committed copy). */
   publishPath?: string;
+  /** With planOnly, replace a published summary that holds results. */
+  force?: boolean;
   skipDownload?: boolean;
   /** Questions run at once per job. Results are written after each batch. */
   concurrency?: number;
@@ -66,6 +68,17 @@ async function existingResults(
 function mechanicalStrategies(questions: BenchmarkQuestion[], strategies: StrategyName[]): StrategyName[] {
   const allMechanical = questions.every((q) => q.answer && isMechanical(q.answer));
   return allMechanical && strategies.includes('majority') ? ['majority'] : [];
+}
+
+/** True when the file is a summary with results (status partial or complete). */
+async function holdsResults(path: string): Promise<boolean> {
+  if (!(await fileExists(path))) return false;
+  try {
+    const status = (await readJsonFile<{ status?: unknown }>(path)).status;
+    return status === 'partial' || status === 'complete';
+  } catch {
+    return false;
+  }
 }
 
 /** Run (or plan) the matrix. */
@@ -114,8 +127,12 @@ export async function runMatrix(options: MatrixRunOptions): Promise<MatrixRunRes
 
   if (options.planOnly) {
     if (options.publishPath) {
-      await writeJsonFile(options.publishPath, notRunSummary(config, estimate, now()));
-      log(`Wrote a not-run summary to ${options.publishPath}`);
+      if (!options.force && (await holdsResults(options.publishPath))) {
+        log(`${options.publishPath} holds results; left as it is. Pass --force to replace it with a not-run summary.`);
+      } else {
+        await writeJsonFile(options.publishPath, notRunSummary(config, estimate, now()));
+        log(`Wrote a not-run summary to ${options.publishPath}`);
+      }
     }
     return { estimate, ran: false, summary: null };
   }

@@ -22,6 +22,7 @@ interface MatrixCommandOptions {
   yes?: boolean;
   planOnly?: boolean;
   publish?: string | boolean;
+  force?: boolean;
   sample?: string;
   datasets?: string[];
   concurrency: string;
@@ -44,7 +45,8 @@ export function createMatrixCommand(): Command {
     .option('--results-dir <dir>', 'Where run directories and the reference cache go', DEFAULT_RESULTS_DIR)
     .option('--yes', 'Confirm the spend shown in the estimate (free mode)')
     .option('--plan-only', 'Print the estimate and stop (with --publish, write a not-run summary)')
-    .option('--publish [file]', 'Also write the summary for the app', false)
+    .option('--publish [file]', 'Also write the summary for the app (free mode only for the app copy)', false)
+    .option('--force', 'With --plan-only --publish, replace a summary that holds results')
     .option('--sample <n>', 'Override the questions per dataset (for dry runs)')
     .option('--datasets <names...>', 'Override the datasets (comma-separated allowed)')
     .option('--concurrency <n>', 'Questions run at once per job; results are saved after each batch', '8')
@@ -61,6 +63,9 @@ export function createMatrixCommand(): Command {
       const publishPath = options.publish === true
         ? DEFAULT_PUBLISH_PATH
         : typeof options.publish === 'string' ? resolve(options.publish) : undefined;
+      if (options.mode === 'mock' && publishPath === DEFAULT_PUBLISH_PATH) {
+        throw new Error('A mock run is never published to the app. Pass --publish <scratch file> to write its summary elsewhere.');
+      }
       await runMatrix({
         config,
         rawConfig,
@@ -71,6 +76,7 @@ export function createMatrixCommand(): Command {
         planOnly: Boolean(options.planOnly),
         ...(publishPath ? { publishPath } : {}),
         ...(options.skipDownload ? { skipDownload: true } : {}),
+        ...(options.force ? { force: true } : {}),
         concurrency: positiveInt(options.concurrency, 'concurrency'),
       });
     });

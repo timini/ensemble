@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { copyFileSync, existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync } from 'node:fs';
+import { copyFileSync, existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { parseMatrixConfig } from './config.js';
@@ -47,6 +47,19 @@ describe('runMatrix', () => {
     const summary = JSON.parse(readFileSync(publishPath, 'utf8')) as MatrixSummary;
     expect(summary.status).toBe('not-run');
     expect(summary.estimate?.calls).toBe(15);
+  });
+
+  it('keeps a published summary that holds results unless forced', async () => {
+    const publishPath = join(dir, 'app/summary.json');
+    mkdirSync(join(dir, 'app'));
+    const published = JSON.stringify({ schemaVersion: 1, status: 'complete', datasets: [{}] });
+    writeFileSync(publishPath, published);
+    await runMatrix({ ...base(), mode: 'free', yes: false, planOnly: true, publishPath });
+    expect(readFileSync(publishPath, 'utf8')).toBe(published);
+    expect(lines.join('\n')).toMatch(/holds results.*--force/);
+
+    await runMatrix({ ...base(), mode: 'free', yes: false, planOnly: true, publishPath, force: true });
+    expect((JSON.parse(readFileSync(publishPath, 'utf8')) as MatrixSummary).status).toBe('not-run');
   });
 
   it('runs end to end in mock mode, writes the documented layout and resumes from it', async () => {

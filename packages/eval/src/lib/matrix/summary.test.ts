@@ -87,6 +87,7 @@ describe('summarizeDataset', () => {
     expect(byId['ensemble:standard']!.costUsd).toBeCloseTo(0.05, 10);
     expect(byId.reference!.costUsd).toBeCloseTo(0.1, 10);
     expect(summary.spentUsd).toBeCloseTo(0.03 + 0.02 + 0.1, 10);
+    expect(summary.spentIncomplete).toBe(false);
     expect(byId['ensemble:standard']!.strategy).toBe('standard');
   });
 
@@ -96,6 +97,11 @@ describe('summarizeDataset', () => {
     const s = summarizeDataset(config, { dataset: 'gsm8k', ensemble: file, reference: null });
     expect(s.rows.find((r) => r.id === 'single:qwen')!.costIncomplete).toBe(true);
     expect(s.rows.some((r) => r.kind === 'reference')).toBe(false);
+    expect(s.spentIncomplete).toBe(true);
+    const total = summarizeMatrix(config, [{ dataset: 'gsm8k', ensemble: file, reference: null }], {
+      runId: 'r1', mode: 'mock', estimate: null, now: new Date('2026-11-17T12:00:00Z'),
+    });
+    expect(total.totalCostIncomplete).toBe(true);
   });
 });
 
@@ -110,6 +116,7 @@ describe('summarizeMatrix', () => {
     );
     expect(summary.status).toBe('complete');
     expect(summary.totalCostUsd).toBeCloseTo(0.15, 10);
+    expect(summary.totalCostIncomplete).toBe(false);
     expect(summary.method.models.map((m) => m.id)).toEqual(['qwen', 'llama', 'gemma']);
   });
 
@@ -124,7 +131,7 @@ describe('summarizeMatrix', () => {
 
   it('has a not-run form with the method and estimate but no numbers', () => {
     const summary = notRunSummary(config, { jobs: [], calls: 10, lowUsd: 1, highUsd: 2, unpricedModels: [] }, now);
-    expect(summary).toMatchObject({ status: 'not-run', runId: null, datasets: [], totalCostUsd: null });
+    expect(summary).toMatchObject({ status: 'not-run', runId: null, datasets: [], totalCostUsd: null, totalCostIncomplete: false });
     expect(summary.estimate).toEqual({ lowUsd: 1, highUsd: 2, calls: 10 });
   });
 });

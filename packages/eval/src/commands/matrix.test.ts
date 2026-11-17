@@ -27,13 +27,24 @@ describe('matrix command', () => {
   it('passes --yes, --run-id, overrides and --publish', async () => {
     await run([
       '--yes', '--run-id', 'r1', '--mode', 'mock', '--sample', '5', '--datasets', 'gsm8k,gpqa',
-      '--results-dir', '/tmp/x', '--publish', '--concurrency', '2',
+      '--results-dir', '/tmp/x', '--publish', '/tmp/x/summary.json', '--concurrency', '2', '--force',
     ]);
     const options = vi.mocked(runMatrix).mock.calls[0]![0];
-    expect(options).toMatchObject({ yes: true, runId: 'r1', mode: 'mock', resultsDir: resolve('/tmp/x'), concurrency: 2 });
+    expect(options).toMatchObject({ yes: true, runId: 'r1', mode: 'mock', resultsDir: resolve('/tmp/x'), concurrency: 2, force: true });
     expect(options.config.sample).toBe(5);
     expect(options.config.datasets).toEqual(['gsm8k', 'gpqa']);
-    expect(options.publishPath).toBe(DEFAULT_PUBLISH_PATH);
+    expect(options.publishPath).toBe(resolve('/tmp/x/summary.json'));
+  });
+
+  it('publishes a free run to the app summary', async () => {
+    await run(['--publish']);
+    expect(vi.mocked(runMatrix).mock.calls[0]![0].publishPath).toBe(DEFAULT_PUBLISH_PATH);
+  });
+
+  it('never publishes a mock run to the app summary', async () => {
+    await expect(run(['--mode', 'mock', '--publish'])).rejects.toThrow(/never published/);
+    await expect(run(['--mode', 'mock', '--publish', DEFAULT_PUBLISH_PATH])).rejects.toThrow(/never published/);
+    expect(runMatrix).not.toHaveBeenCalled();
   });
 
   it('rejects an unknown mode', async () => {

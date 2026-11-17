@@ -9,6 +9,10 @@ packages/eval/docs/BENCHMARKS.md) and writes into the figures directory:
   matrix_cost_accuracy.pdf/.png  mean accuracy against total cost per configuration
   matrix_table.tex               the numbers, with McNemar p-values against the best single model
 
+A summary from a mock dry run (mode "mock") is refused unless allow_mock is
+set (`--allow-mock` on generate_figures.py). With it, the table and figures
+are marked MOCK DATA so they cannot pass for real results.
+
 Needs only matplotlib.
 """
 
@@ -18,6 +22,11 @@ from pathlib import Path
 KIND_ORDER = {"single": 0, "ensemble": 1, "reference": 2}
 DATASET_LABELS = {"gsm8k": "GSM8K", "mmlu_pro": "MMLU-Pro", "gpqa": "GPQA", "truthfulqa": "TruthfulQA"}
 KIND_COLOURS = {"single": "#7f8c8d", "ensemble": "#2e86de", "reference": "#c0392b"}
+MOCK_LABEL = "MOCK DATA: not real results"
+
+
+def is_mock(summary):
+    return summary.get("mode") == "mock"
 
 
 def load_summary(run_dir):
@@ -57,6 +66,7 @@ def matrix_table(summary):
     lines = [
         r"\begin{tabular}{llrrrr}",
         r"\toprule",
+        *([rf"\multicolumn{{6}}{{l}}{{\textbf{{{MOCK_LABEL}}}}} \\", r"\midrule"] if is_mock(summary) else []),
         r"Dataset & Configuration & n & Accuracy (95\% CI) & $p$ vs best single & Cost (USD) \\",
         r"\midrule",
     ]
@@ -79,7 +89,10 @@ def matrix_table(summary):
     return "\n".join(lines) + "\n"
 
 
-def _save(fig, figures_dir, stem):
+def _save(fig, figures_dir, stem, summary):
+    if is_mock(summary):
+        fig.text(0.5, 0.5, MOCK_LABEL, ha="center", va="center", rotation=20,
+                 fontsize=20, color="#c0392b", alpha=0.35)
     fig.savefig(figures_dir / f"{stem}.pdf")
     fig.savefig(figures_dir / f"{stem}.png")
 
@@ -106,7 +119,7 @@ def fig_accuracy(summary, figures_dir, plt):
     ax.set_ylabel("Accuracy (%) with 95% Wilson interval")
     ax.set_ylim(0, 100)
     ax.legend(fontsize=7, ncol=2)
-    _save(fig, figures_dir, "matrix_accuracy")
+    _save(fig, figures_dir, "matrix_accuracy", summary)
     plt.close(fig)
 
 
@@ -122,12 +135,15 @@ def fig_cost_accuracy(summary, figures_dir, plt):
         ax.annotate(label, (cost, accuracy), fontsize=7, xytext=(4, 2), textcoords="offset points")
     ax.set_xlabel("Total cost over all datasets (USD)")
     ax.set_ylabel("Mean accuracy over datasets (%)")
-    _save(fig, figures_dir, "matrix_cost_accuracy")
+    _save(fig, figures_dir, "matrix_cost_accuracy", summary)
     plt.close(fig)
 
 
-def generate(run_dir, figures_dir):
-    """Write the matrix figures and table. Returns the list of files written."""
+def generate(run_dir, figures_dir, allow_mock=False):
+    """Write the matrix figures and table. Returns the list of files written.
+
+    Refuses a mock summary unless allow_mock is set; then the output is marked MOCK DATA.
+    """
     import matplotlib
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
@@ -137,6 +153,8 @@ def generate(run_dir, figures_dir):
     figures_dir.mkdir(parents=True, exist_ok=True)
     if summary.get("status") == "not-run" or not summary.get("datasets"):
         raise ValueError("This summary has no results yet (status not-run). Run the matrix first.")
+    if is_mock(summary) and not allow_mock:
+        raise ValueError("This summary is from a mock dry run (mode mock). Pass --allow-mock to draw it, marked MOCK DATA.")
     fig_accuracy(summary, figures_dir, plt)
     fig_cost_accuracy(summary, figures_dir, plt)
     (figures_dir / "matrix_table.tex").write_text(matrix_table(summary))

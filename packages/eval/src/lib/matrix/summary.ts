@@ -40,8 +40,14 @@ export interface DatasetSummary {
   n: number;
   bestSingleId: string | null;
   rows: SummaryRow[];
-  /** What the run spent on this dataset: every answer and consensus call once. */
+  /**
+   * Cost of this dataset's results: every answer and consensus call once.
+   * Reference answers count even when they came from the shared cache, so this
+   * is the cost of the results, not necessarily what this run paid.
+   */
   spentUsd: number;
+  /** True when some calls had no price, so spentUsd is a lower bound. */
+  spentIncomplete: boolean;
 }
 
 export interface MatrixSummary {
@@ -66,7 +72,10 @@ export interface MatrixSummary {
     reference: { id: string; label: string; spec: string };
   };
   estimate: { lowUsd: number; highUsd: number; calls: number } | null;
+  /** Sum of the datasets' spentUsd: the cost of the results, cached reference answers included. */
   totalCostUsd: number | null;
+  /** True when some calls had no price, so totalCostUsd is a lower bound. */
+  totalCostIncomplete: boolean;
   datasets: DatasetSummary[];
 }
 
@@ -163,11 +172,13 @@ export function summarizeDataset(config: MatrixConfig, results: DatasetResults):
   }
   const allAnswers = answerCost(ensembleRuns, () => true);
   let spentUsd = allAnswers.usd;
+  let spentIncomplete = allAnswers.incomplete;
   for (const strategy of config.ensembleStrategies) {
     const result = outcomes(ensembleRuns, (run) => run.consensusEvaluation?.results?.[strategy]?.correct);
     outcomeById.set(`ensemble:${strategy}`, result);
     const extra = consensusCost(ensembleRuns, strategy);
     spentUsd += extra.usd;
+    spentIncomplete ||= extra.incomplete;
     rows.push(row(
       { id: `ensemble:${strategy}`, kind: 'ensemble', label: strategyLabel(strategy), models: config.models.map((m) => m.spec), strategy },
       result,
@@ -181,6 +192,7 @@ export function summarizeDataset(config: MatrixConfig, results: DatasetResults):
     outcomeById.set('reference', result);
     const cost = answerCost(referenceRuns, (k) => k === key);
     spentUsd += cost.usd;
+    spentIncomplete ||= cost.incomplete;
     rows.push(row(
       { id: 'reference', kind: 'reference', label: config.reference.label, models: [config.reference.spec] },
       result,
@@ -210,6 +222,7 @@ export function summarizeDataset(config: MatrixConfig, results: DatasetResults):
     bestSingleId: best?.id ?? null,
     rows,
     spentUsd,
+    spentIncomplete,
   };
 }
 
@@ -247,6 +260,7 @@ export function notRunSummary(
     method: methodOf(config),
     estimate: estimate ? { lowUsd: estimate.lowUsd, highUsd: estimate.highUsd, calls: estimate.calls } : null,
     totalCostUsd: null,
+    totalCostIncomplete: false,
     datasets: [],
   };
 }
@@ -269,6 +283,7 @@ export function summarizeMatrix(
     runId: info.runId,
     mode: info.mode,
     totalCostUsd,
+    totalCostIncomplete: datasets.some((d) => d.spentIncomplete),
     datasets,
   };
 }

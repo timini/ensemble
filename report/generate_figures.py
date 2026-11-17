@@ -658,9 +658,11 @@ def fig_complementarity_heatmap(census):
 def main():
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--results", help="Benchmark matrix run directory (packages/eval/results/<run-id>)")
+    parser.add_argument("--allow-mock", action="store_true",
+                        help="Draw a mock dry-run summary, marked MOCK DATA (never for the published report)")
     args = parser.parse_args()
     if args.results:
-        written = matrix_figures.generate(args.results, FIGURES_DIR)
+        written = matrix_figures.generate(args.results, FIGURES_DIR, allow_mock=args.allow_mock)
         print(f"Wrote {', '.join(written)} to {FIGURES_DIR}")
         return
     if sns is None:

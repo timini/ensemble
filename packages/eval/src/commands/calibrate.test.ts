@@ -3,13 +3,13 @@ import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import type { BenchmarkResultsFile, PromptRunResult } from '../types.js';
-import { createCalibrateAgreementCommand } from './calibrateAgreement.js';
-import { createCalibrateTokensCommand } from './calibrateTokens.js';
+import { createCalibrateAgreementCommand, DEFAULT_AGREEMENT_OUTPUT } from './calibrateAgreement.js';
+import { createCalibrateTokensCommand, DEFAULT_TOKENS_OUTPUT } from './calibrateTokens.js';
 
 const LETTERS = ['A', 'B', 'C'];
 
 /** 12 questions, 3 models. Model 0 and 1 agree on even questions; model 2 always differs. */
-function ensembleFile(): BenchmarkResultsFile {
+function ensembleFile(mode: 'mock' | 'free' = 'mock'): BenchmarkResultsFile {
   const runs: PromptRunResult[] = Array.from({ length: 12 }, (_, q) => {
     const predicted = ['A', q % 2 === 0 ? 'A' : 'B', LETTERS[(q % 2) + 1]!];
     return {
@@ -33,7 +33,7 @@ function ensembleFile(): BenchmarkResultsFile {
     };
   });
   return {
-    type: 'benchmark', dataset: 'gpqa', mode: 'mock', models: [], strategies: ['standard'],
+    type: 'benchmark', dataset: 'gpqa', mode, models: [], strategies: ['standard'],
     sampleSize: 12, createdAt: '', updatedAt: '', runs,
   };
 }
@@ -46,6 +46,8 @@ beforeEach(() => {
   dir = mkdtempSync(join(tmpdir(), 'calibrate-'));
   mkdirSync(join(dir, 'run/gpqa'), { recursive: true });
   writeFileSync(join(dir, 'run/gpqa/ensemble.json'), JSON.stringify(ensembleFile()));
+  mkdirSync(join(dir, 'real/gpqa'), { recursive: true });
+  writeFileSync(join(dir, 'real/gpqa/ensemble.json'), JSON.stringify(ensembleFile('free')));
   output = join(dir, 'out.json');
   stdout.mockClear();
 });
@@ -57,7 +59,7 @@ const printed = () => stdout.mock.calls.map((c) => String(c[0])).join('');
 describe('calibrate-agreement', () => {
   it('prints the embedding count and spends nothing in free mode without --yes', async () => {
     await createCalibrateAgreementCommand().parseAsync(
-      ['--results', join(dir, 'run'), '--embedding', 'ollama:nomic-embed-text', '--output', output],
+      ['--results', join(dir, 'real'), '--embedding', 'ollama:nomic-embed-text', '--output', output],
       { from: 'user' },
     );
     expect(printed()).toMatch(/36 answer pairs, 36 texts to embed/);
@@ -81,9 +83,34 @@ describe('calibrate-agreement', () => {
 
   it('refuses an embedding model the app does not use', async () => {
     await expect(createCalibrateAgreementCommand().parseAsync(
-      ['--results', join(dir, 'run'), '--embedding', 'openai:text-embedding-3-large', '--mode', 'mock'],
+      ['--results', join(dir, 'run'), '--embedding', 'openai:text-embedding-3-large', '--mode', 'mock', '--output', output],
       { from: 'user' },
     )).rejects.toThrow(/embeds with openai:text-embedding-3-small/);
+  });
+
+  it('refuses results from a mock run in free mode', async () => {
+    await expect(createCalibrateAgreementCommand().parseAsync(
+      ['--results', join(dir, 'run'), '--embedding', 'ollama:nomic-embed-text', '--output', output],
+      { from: 'user' },
+    )).rejects.toThrow(/mock run/);
+  });
+
+  it('never writes the app calibration in mock mode', async () => {
+    const before = readFileSync(DEFAULT_AGREEMENT_OUTPUT, 'utf8');
+    for (const extra of [[], ['--output', DEFAULT_AGREEMENT_OUTPUT]]) {
+      await expect(createCalibrateAgreementCommand().parseAsync(
+        ['--results', join(dir, 'run'), '--embedding', 'openai:text-embedding-3-small', '--mode', 'mock', ...extra],
+        { from: 'user' },
+      )).rejects.toThrow(/--output/);
+    }
+    expect(readFileSync(DEFAULT_AGREEMENT_OUTPUT, 'utf8')).toBe(before);
+  });
+
+  it('explains that paths are relative to packages/eval when a results path is missing', async () => {
+    await expect(createCalibrateAgreementCommand().parseAsync(
+      ['--results', join(dir, 'packages/eval/results/nope'), '--embedding', 'ollama:nomic-embed-text'],
+      { from: 'user' },
+    )).rejects.toThrow(/relative to it \(results\/<run-id>\)/);
   });
 });
 
@@ -94,5 +121,18 @@ describe('calibrate-tokens', () => {
     const source = readFileSync(out, 'utf8');
     expect(source).toMatch(/"answer": \{\s+"low": \d+,\s+"high": \d+/);
     expect(source).toMatch(/"calls": 48/);
+  });
+
+  it('refuses to write the shared-utils module from mock results', async () => {
+    const before = readFileSync(DEFAULT_TOKENS_OUTPUT, 'utf8');
+    await expect(createCalibrateTokensCommand().parseAsync(['--results', join(dir, 'run')], { from: 'user' }))
+      .rejects.toThrow(/mock run/);
+    expect(readFileSync(DEFAULT_TOKENS_OUTPUT, 'utf8')).toBe(before);
+  });
+
+  it('fits free-mode results', async () => {
+    const out = join(dir, 'free.ts');
+    await createCalibrateTokensCommand().parseAsync(['--results', join(dir, 'real'), '--output', out], { from: 'user' });
+    expect(readFileSync(out, 'utf8')).toMatch(/"calls": 48/);
   });
 });

@@ -394,7 +394,9 @@
     "benchmarks": {
       "title": "Benchmarks",
       "description": "Does an ensemble beat its best member? Accuracy on public benchmarks, with confidence intervals and the method that produced them.",
-      "runInfo": "Run {{runId}} on {{date}}. Total cost {{cost}}.",
+      "runInfo": "Run {{runId}} on {{date}}. Cost of these results {{cost}}, cached reference answers included.",
+      "costAtLeast": "at least {{cost}}",
+      "smallSampleNotice": "{{dataset}} has {{n}} questions, below the {{min}} the method asks for before any accuracy claim. Treat its numbers as indicative.",
       "mockNotice": "These numbers come from a mock dry run of the pipeline. They are not real results.",
       "partialNotice": "This run is incomplete: some datasets or configurations are missing.",
       "resultsHeading": "Results",

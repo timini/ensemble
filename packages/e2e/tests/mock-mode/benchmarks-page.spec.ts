@@ -6,12 +6,16 @@ import { fileURLToPath } from 'node:url';
 /**
  * The page reads the committed summary, so the expectations follow it:
  * "not run yet" with the method while no results are committed, and one
- * results table per dataset once they are.
+ * results table per dataset once they are. The results rendering itself (tables, intervals,
+ * p-values, notices) is covered against fixture summaries in
+ * packages/app/src/app/benchmarks/__tests__/page.test.tsx. The matrix command
+ * never publishes a mock run to the app, and the page hides one outside
+ * development.
  */
 const summary = JSON.parse(
   readFileSync(resolve(dirname(fileURLToPath(import.meta.url)), '../../../app/src/data/benchmark-summary.json'), 'utf8'),
-) as { status: string; datasets: unknown[] };
-const hasResults = summary.status !== 'not-run' && summary.datasets.length > 0;
+) as { status: string; mode: string; datasets: unknown[] };
+const hasResults = summary.status !== 'not-run' && summary.datasets.length > 0 && summary.mode !== 'mock';
 
 test.describe('Benchmarks Page', () => {
   test.beforeEach(async ({ page }) => {
