@@ -3,6 +3,7 @@ import type { ConsensusMethod } from '@ensemble-ai/consensus-core';
 /** A step of a consensus method that makes model calls. */
 export type ConsensusPhase =
   | 'synthesis'
+  | 'extraction'
   | 'ranking'
   | 'judge'
   | 'summary'
@@ -53,7 +54,10 @@ const pairs = (n: number) => (n * (n - 1)) / 2;
  * packages:
  *
  * - standard: one synthesis call by the summarizer.
- * - majority: one ranking call and one synthesis call by the summarizer.
+ * - majority: one structured call by the summarizer extracts every short
+ *   final answer for a mechanical vote. When the vote has a winner that is
+ *   all; on a tie or long-form answers, one ranking call and one synthesis
+ *   call follow (the LLM fallback).
  * - elo: two judge calls per pair of answers (position swap) and one summary,
  *   all by the summarizer, which the app also uses as the judge.
  * - council: each participant critiques every other branch, writes one
@@ -83,9 +87,12 @@ export function countConsensusCalls({
       break;
     case 'majority':
       phases = [
+        { phase: 'extraction', calls: 1, caller: 'summarizer' },
         { phase: 'ranking', calls: 1, caller: 'summarizer' },
         { phase: 'synthesis', calls: 1, caller: 'summarizer' },
       ];
+      // A decisive vote skips the LLM fallback.
+      optionalCalls = 2;
       break;
     case 'elo':
       phases = [

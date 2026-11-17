@@ -7,7 +7,8 @@ const totals = (method: Parameters<typeof countConsensusCalls>[0]['method'], n: 
 describe('countConsensusCalls', () => {
   // Expected counts come from the strategy code:
   // standard: one synthesis call (StandardConsensus.generateConsensus).
-  // majority: one ranking call and one synthesis call (MajorityVotingConsensus).
+  // majority: one answer extraction call; a decisive vote stops there, otherwise
+  //   one ranking call and one synthesis call (MajorityVotingConsensus.runConsensus).
   // elo: two judge calls per pair (judgePairWithSwap) and one summary.
   // council: N*(N-1) critiques, N rebuttals, N*(N-1) judgments, one ELO judge
   //   call per pair of valid branches and one summary (CouncilConsensus.runPipeline).
@@ -18,11 +19,11 @@ describe('countConsensusCalls', () => {
     ['standard', 4, 1, 1],
     ['standard', 5, 1, 1],
     ['standard', 6, 1, 1],
-    ['majority', 2, 2, 2],
-    ['majority', 3, 2, 2],
-    ['majority', 4, 2, 2],
-    ['majority', 5, 2, 2],
-    ['majority', 6, 2, 2],
+    ['majority', 2, 3, 1],
+    ['majority', 3, 3, 1],
+    ['majority', 4, 3, 1],
+    ['majority', 5, 3, 1],
+    ['majority', 6, 3, 1],
     ['elo', 3, 7, 7],
     ['elo', 4, 13, 13],
     ['elo', 5, 21, 21],
@@ -52,6 +53,14 @@ describe('countConsensusCalls', () => {
     const result = totals('standard', 1);
     expect(result.available).toBe(false);
     expect(result.maxCalls).toBe(0);
+  });
+
+  it('splits majority into the vote and the LLM fallback', () => {
+    expect(totals('majority', 4).phases).toEqual([
+      { phase: 'extraction', calls: 1, caller: 'summarizer' },
+      { phase: 'ranking', calls: 1, caller: 'summarizer' },
+      { phase: 'synthesis', calls: 1, caller: 'summarizer' },
+    ]);
   });
 
   it('splits council with 5 models into its rounds', () => {

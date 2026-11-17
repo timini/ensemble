@@ -122,6 +122,8 @@ export function estimateRun(input: EstimateRunInput): RunEstimate {
 
   const phaseTokens: Record<ConsensusPhase, Tokens> = {
     synthesis: (s) => ({ input: O + p + r * A[s], output: A[s] }),
+    // Majority extracts a short final answer from every response in one call.
+    extraction: (s) => ({ input: O + p + r * A[s], output: r * V[s] }),
     // Majority ranks all answers in one call; council judges one pair per call.
     ranking: ranked
       ? (s) => ({ input: O + p + 2 * A[s], output: V[s] })

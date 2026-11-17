@@ -36,7 +36,7 @@ describe('estimateRun', () => {
   const expectedConsensus: Record<string, (number | null)[]> = {
     // index = N, null where the method cannot run
     standard: [null, null, 1, 1, 1, 1, 1],
-    majority: [null, null, 2, 2, 2, 2, 2],
+    majority: [null, null, 3, 3, 3, 3, 3],
     elo: [null, null, 0, 7, 13, 21, 31],
     council: [null, null, 0, 19, 35, 56, 82],
   };
@@ -143,6 +143,31 @@ describe('estimateRun', () => {
     expect(estimate.calls.answers).toBe(2);
     expect(estimate.calls.consensus).toBe(7);
     expect(estimate.calls.embeddings).toBe(2);
+  });
+
+  it('gives the majority minimum when the vote decides with one extraction call', () => {
+    const estimate = run('majority', 3);
+    expect(estimate.calls.consensus).toBe(3);
+    expect(estimate.calls.consensusMin).toBe(1);
+  });
+
+  it('prices majority extraction as one call reading every answer', () => {
+    const vote = estimateRun({
+      models: models(2),
+      consensusMethod: 'majority',
+      summarizer,
+      eloTopN: 3,
+      embeddings: null,
+      promptTokens: 100,
+      table,
+    });
+    const { answer, verdict, overhead } = ESTIMATE_TOKENS;
+    const answers = 2 * (100 * 1 + answer.low * 2);
+    const read = (overhead + 100 + 2 * answer.low) * 3;
+    const extraction = read + 2 * verdict.low * 6;
+    const ranking = read + verdict.low * 6;
+    const synthesis = read + answer.low * 6;
+    expect(vote.cost.lowUsd).toBeCloseTo((answers + extraction + ranking + synthesis) / 1e6, 12);
   });
 
   it('gives the council minimum when only one branch survives judgment', () => {
