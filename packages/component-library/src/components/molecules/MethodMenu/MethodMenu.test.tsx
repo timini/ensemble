@@ -45,16 +45,40 @@ describe('MethodMenu', () => {
     fireEvent.click(screen.getByTestId('method-menu-trigger'));
     const council = screen.getByRole('radio', { name: /Council/ });
     expect(council).toBeDisabled();
-    expect(council).toHaveTextContent('Needs 3 or more answers');
+    expect(council).toHaveTextContent('Needs at least 3 answers');
   });
 
-  it('moves between methods with the arrow keys', () => {
-    renderWithI18n(<MethodMenu method="standard" onMethodChange={() => undefined} estimates={sampleEstimates} />);
+  it('gives each method its own minimum with one answer', () => {
+    const off = estimate(2, 0, 0, { available: false });
+    const estimates = { standard: off, majority: off, elo: off, council: off };
+    renderWithI18n(<MethodMenu method="standard" onMethodChange={() => undefined} estimates={estimates} />, { language: 'fr' });
+    fireEvent.click(screen.getByTestId('method-menu-trigger'));
+    expect(screen.getByTestId('method-option-standard')).toHaveTextContent('Nécessite au moins 2 réponses');
+    expect(screen.getByTestId('method-option-majority')).toHaveTextContent('Nécessite au moins 2 réponses');
+    expect(screen.getByTestId('method-option-elo')).toHaveTextContent('Nécessite au moins 3 réponses');
+    expect(screen.getByTestId('method-option-council')).toHaveTextContent('Nécessite au moins 3 réponses');
+  });
+
+  it('moves between methods with the arrow keys and checks the one it lands on', () => {
+    const onMethodChange = vi.fn();
+    renderWithI18n(<MethodMenu method="standard" onMethodChange={onMethodChange} estimates={sampleEstimates} />);
     fireEvent.click(screen.getByTestId('method-menu-trigger'));
     const standard = screen.getByRole('radio', { name: /Standard/ });
     expect(standard).toHaveFocus();
     fireEvent.keyDown(standard, { key: 'ArrowDown' });
     expect(screen.getByRole('radio', { name: /Majority/ })).toHaveFocus();
+    expect(onMethodChange).toHaveBeenCalledWith('majority');
+    expect(screen.getByRole('radiogroup')).toBeInTheDocument();
+  });
+
+  it('focuses the first available method when the current one is unavailable', () => {
+    const estimates = { ...sampleEstimates, council: estimate(8, 0.01, 0.02, { available: false }) };
+    renderWithI18n(<MethodMenu method="council" onMethodChange={() => undefined} estimates={estimates} />);
+    fireEvent.click(screen.getByTestId('method-menu-trigger'));
+    const standard = screen.getByRole('radio', { name: /Standard/ });
+    expect(standard).toHaveFocus();
+    expect(standard).toHaveAttribute('tabindex', '0');
+    expect(screen.getByRole('radio', { name: /Council/ })).toHaveAttribute('tabindex', '-1');
   });
 
   it('chooses the summarizer', () => {

@@ -28,8 +28,11 @@ const DESKTOP = '(min-width: 1024px)';
 const ICON_BUTTON =
   'focus-ring inline-flex size-10 items-center justify-center rounded-lg text-muted-foreground transition-colors duration-fast hover:bg-muted hover:text-foreground';
 
+const matchesDesktop = () => (typeof window !== 'undefined' && window.matchMedia?.(DESKTOP)?.matches) || false;
+
 function useIsDesktop() {
-  const [desktop, setDesktop] = React.useState(false);
+  // Read the query on the first render so the desktop sidebar does not pop in.
+  const [desktop, setDesktop] = React.useState(matchesDesktop);
   React.useEffect(() => {
     const query = window.matchMedia?.(DESKTOP);
     if (!query) return undefined;
@@ -102,11 +105,12 @@ export function AppShell(props: AppShellProps) {
         </div>
       </header>
       <div className="flex flex-1">
-        {sidebar && sidebarOpen && (
+        {/* One container at a time: the aside on desktop, the sheet below 1024 px. */}
+        {sidebar && desktop && sidebarOpen && (
           <aside
             aria-label={t('organisms.appShell.history')}
             data-testid="app-shell-sidebar"
-            className="sticky top-14 hidden h-[calc(100dvh-3.5rem)] w-72 shrink-0 overflow-y-auto border-r border-border bg-card/40 p-3 lg:block"
+            className="sticky top-14 h-[calc(100dvh-3.5rem)] w-72 shrink-0 overflow-y-auto border-r border-border bg-card/40 p-3"
           >
             {sidebar}
           </aside>

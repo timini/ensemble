@@ -58,6 +58,29 @@ describe('AnswerColumns', () => {
     expect(screen.getAllByRole('tab')[1]).toHaveAttribute('aria-selected', 'true');
   });
 
+  it('ignores scroll frames from its own smooth scroll until it arrives', () => {
+    renderWithI18n(<AnswerColumns answers={sampleAnswers} />);
+    const track = screen.getByTestId('answer-columns-track');
+    Object.assign(track, { scrollTo: vi.fn() });
+    Object.defineProperty(track, 'clientWidth', { value: 300 });
+    const tabs = () => screen.getAllByRole('tab');
+    tabs()[0].focus();
+    fireEvent.keyDown(tabs()[0], { key: 'ArrowRight' });
+    track.scrollLeft = 100;
+    fireEvent.scroll(track);
+    expect(tabs()[1]).toHaveAttribute('aria-selected', 'true');
+    fireEvent.keyDown(tabs()[1], { key: 'ArrowRight' });
+    expect(tabs()[2]).toHaveAttribute('aria-selected', 'true');
+    track.scrollLeft = 320;
+    fireEvent.scroll(track);
+    expect(tabs()[2]).toHaveAttribute('aria-selected', 'true');
+    track.scrollLeft = 600;
+    fireEvent.scroll(track);
+    track.scrollLeft = 290;
+    fireEvent.scroll(track);
+    expect(tabs()[1]).toHaveAttribute('aria-selected', 'true');
+  });
+
   it('marks streaming and failed answers on their tabs', () => {
     const answers = [
       { ...sampleAnswers[0], status: 'streaming' as const },

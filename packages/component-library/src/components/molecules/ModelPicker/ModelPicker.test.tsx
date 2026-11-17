@@ -30,6 +30,31 @@ describe('ModelPicker', () => {
     expect(screen.getByTestId('model-picker-count')).toHaveTextContent('1 of 6 selected');
   });
 
+  it('moves to the first match on Enter in the search box without submitting a form', () => {
+    const onSubmit = vi.fn((e: { preventDefault: () => void }) => e.preventDefault());
+    renderWithI18n(
+      <form onSubmit={onSubmit}>
+        <ModelPicker options={options} selectedIds={[]} onToggle={() => undefined} />
+      </form>,
+    );
+    open();
+    const search = screen.getByRole('searchbox', { name: 'Search models' });
+    fireEvent.change(search, { target: { value: 'claude' } });
+    const enter = fireEvent.keyDown(search, { key: 'Enter' });
+    expect(enter).toBe(false);
+    expect(screen.getByRole('button', { name: /Claude Opus/ })).toHaveFocus();
+    expect(onSubmit).not.toHaveBeenCalled();
+  });
+
+  it('counts the selection with plural forms in French', () => {
+    const { rerender } = renderWithI18n(<ModelPicker options={options} selectedIds={['openai/gpt-6']} onToggle={() => undefined} />, { language: 'fr' });
+    open();
+    expect(screen.getByTestId('model-picker-count')).toHaveTextContent('1 sur 6 sélectionné');
+    expect(screen.getByTestId('model-picker-count')).not.toHaveTextContent('sélectionnés');
+    rerender(<ModelPicker options={options} selectedIds={['openai/gpt-6', 'anthropic/opus']} onToggle={() => undefined} />);
+    expect(screen.getByTestId('model-picker-count')).toHaveTextContent('2 sur 6 sélectionnés');
+  });
+
   it('toggles a model', () => {
     const onToggle = vi.fn();
     renderWithI18n(<ModelPicker options={options} selectedIds={[]} onToggle={onToggle} />);

@@ -64,9 +64,24 @@ describe('HistorySidebar', () => {
     fireEvent.change(screen.getByRole('searchbox', { name: 'Search history' }), { target: { value: 'local' } });
     expect(screen.getAllByTestId('history-preset')).toHaveLength(1);
     expect(screen.queryAllByTestId('history-item')).toHaveLength(0);
-    expect(screen.getByTestId('history-no-matches')).toHaveTextContent('Nothing matches "local".');
+    expect(screen.queryByTestId('history-no-matches')).not.toBeInTheDocument();
     fireEvent.change(screen.getByRole('searchbox'), { target: { value: 'VITAMIN' } });
     expect(screen.getAllByTestId('history-item')).toHaveLength(1);
+  });
+
+  it('says nothing matches only when no run and no preset matches', () => {
+    setup();
+    fireEvent.change(screen.getByRole('searchbox', { name: 'Search history' }), { target: { value: 'zzz' } });
+    expect(screen.queryAllByTestId('history-preset')).toHaveLength(0);
+    expect(screen.getByTestId('history-no-matches')).toHaveTextContent('Nothing matches "zzz".');
+  });
+
+  it('says nothing matches with presets but no runs, instead of the empty text', () => {
+    setup({ items: [] });
+    expect(screen.getByTestId('history-empty')).toBeInTheDocument();
+    fireEvent.change(screen.getByRole('searchbox', { name: 'Search history' }), { target: { value: 'zzz' } });
+    expect(screen.getByTestId('history-no-matches')).toHaveTextContent('Nothing matches "zzz".');
+    expect(screen.queryByTestId('history-empty')).not.toBeInTheDocument();
   });
 
   it('starts a new question', () => {

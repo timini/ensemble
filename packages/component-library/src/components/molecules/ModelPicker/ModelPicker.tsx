@@ -37,7 +37,9 @@ const OPTION = '[data-testid="model-picker-option"]';
 /**
  * ModelPicker molecule: the "Add model" chip in the composer and its inline
  * panel. Search, models grouped by provider or endpoint, a price per model
- * and a limit of six. Arrow keys move through the list; Escape closes.
+ * and a limit of six. Arrow keys move through the list; Enter in the search
+ * box moves to the first match (it never submits a surrounding form);
+ * Escape closes.
  *
  * @example
  * ```tsx
@@ -56,6 +58,15 @@ export function ModelPicker({ options, selectedIds, onToggle, max = 6, defaultOp
 
   const onKeyDown = (event: React.KeyboardEvent) => {
     if (moveFocus(listRef.current, OPTION, event.key) >= 0) event.preventDefault();
+  };
+
+  // The picker sits inside the composer form, so Enter in the search box
+  // would submit the form and start a run. Move to the first match instead.
+  const onSearchKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.key !== 'Enter') return;
+    event.preventDefault();
+    event.stopPropagation();
+    moveFocus(listRef.current, OPTION, 'Home');
   };
 
   return (
@@ -86,6 +97,7 @@ export function ModelPicker({ options, selectedIds, onToggle, max = 6, defaultOp
               autoFocus
               value={query}
               onChange={(e) => setQuery(e.target.value)}
+              onKeyDown={onSearchKeyDown}
               aria-label={t('molecules.modelPicker.search')}
               placeholder={t('molecules.modelPicker.search')}
               className="h-11 w-full rounded-t-xl bg-transparent pl-9 pr-3 text-label placeholder:text-muted-foreground focus:outline-none"

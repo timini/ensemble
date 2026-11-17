@@ -63,6 +63,18 @@ describe('ConsensusAnswer', () => {
     expect(screen.queryByTestId('consensus-answer-copy')).not.toBeInTheDocument();
   });
 
+  it('reserves the space of an answer while awaiting', () => {
+    renderWithI18n(<ConsensusAnswer status="awaiting" method="standard" />);
+    const lines = screen.getByTestId('consensus-answer-skeleton');
+    expect(lines).toHaveAttribute('aria-hidden', 'true');
+    expect(lines.children).toHaveLength(4);
+  });
+
+  it('says how many answers the standard method needs', () => {
+    renderWithI18n(<ConsensusAnswer status="unavailable" method="standard" />);
+    expect(screen.getByTestId('consensus-answer-state')).toHaveTextContent('needs at least 2 answers');
+  });
+
   it('shows a failure with the error and a retry', () => {
     const onRetry = vi.fn();
     renderWithI18n(<ConsensusAnswer status="failed" method="standard" error="500 from provider" onRetry={onRetry} />, { language: 'fr' });

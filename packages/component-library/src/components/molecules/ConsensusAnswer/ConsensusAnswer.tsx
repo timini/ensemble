@@ -2,6 +2,7 @@ import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { AlertCircle, Check, Copy, RotateCcw, Share2 } from 'lucide-react';
 import type { ConsensusMethod } from '@ensemble-ai/shared-utils/consensus';
+import { MIN_ANSWERS_FOR_CONSENSUS, MIN_ANSWERS_FOR_RANKING } from '@ensemble-ai/shared-utils/pricing';
 import { Markdown } from '../../atoms/Markdown';
 import { MajorityVoteBreakdown, type MajorityVoteBreakdownProps } from '../MajorityVoteBreakdown';
 import { RunCostSummary, type RunCostSummaryProps } from '../RunCostSummary';
@@ -31,13 +32,18 @@ export interface ConsensusAnswerProps {
   className?: string;
 }
 
+/** Widths of the placeholder lines, so waiting and writing keep the same height. */
+const LINES = ['w-full', 'w-11/12', 'w-full', 'w-3/5'];
+
 const action =
   'focus-ring inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-label transition-colors duration-fast hover:bg-muted';
 
 /**
  * ConsensusAnswer molecule: the merged answer, how it was made (method and
  * summarizer), the majority vote when there was one, and what the run cost.
- * Covers waiting, writing, failed and not available states.
+ * Covers waiting, writing, failed and not available states. Waiting and
+ * writing show placeholder lines so the card does not jump when the answer
+ * arrives.
  *
  * @example
  * ```tsx
@@ -91,15 +97,25 @@ export function ConsensusAnswer(props: ConsensusAnswerProps) {
               {t(`${key}.generating`)}
             </p>
             <div className="space-y-2.5" aria-hidden="true">
-              {['w-full', 'w-11/12', 'w-full', 'w-3/5'].map((w, i) => (
+              {LINES.map((w, i) => (
                 <div key={i} className={cn('h-3.5 animate-pulse rounded bg-muted', w)} />
               ))}
             </div>
           </div>
         )}
-        {(status === 'awaiting' || status === 'unavailable') && (
+        {status === 'awaiting' && (
+          <div data-testid="consensus-answer-state">
+            <p className="mb-3 text-label text-muted-foreground">{t(`${key}.awaiting`)}</p>
+            <div data-testid="consensus-answer-skeleton" className="space-y-2.5" aria-hidden="true">
+              {LINES.map((w, i) => (
+                <div key={i} className={cn('h-3.5 rounded bg-muted/60', w)} />
+              ))}
+            </div>
+          </div>
+        )}
+        {status === 'unavailable' && (
           <p data-testid="consensus-answer-state" className="text-label text-muted-foreground">
-            {t(`${key}.${status}`)}
+            {t(`${key}.unavailable`, { count: method === 'elo' || method === 'council' ? MIN_ANSWERS_FOR_RANKING : MIN_ANSWERS_FOR_CONSENSUS })}
           </p>
         )}
         {status === 'failed' && (

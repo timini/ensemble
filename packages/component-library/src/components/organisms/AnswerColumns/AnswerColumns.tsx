@@ -39,17 +39,36 @@ export function AnswerColumns({ answers, className }: AnswerColumnsProps) {
   const track = React.useRef<HTMLDivElement>(null);
   const tabs = React.useRef<Array<HTMLButtonElement | null>>([]);
   const active = Math.min(selected, Math.max(0, answers.length - 1));
+  // Panel a programmatic smooth scroll is heading to. Scroll frames on the way
+  // are ignored so the selected tab does not flick back to where it started.
+  const target = React.useRef<number | null>(null);
+  const targetTimer = React.useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+
+  React.useEffect(() => () => clearTimeout(targetTimer.current), []);
 
   const show = (index: number, focus = false) => {
     setSelected(index);
     if (focus) tabs.current[index]?.focus();
     const el = track.current;
+    target.current = index;
+    clearTimeout(targetTimer.current);
+    // Fallback for when the scroll never reaches the panel (no scroll needed, or interrupted).
+    targetTimer.current = setTimeout(() => {
+      target.current = null;
+    }, 1000);
     el?.scrollTo?.({ left: index * el.clientWidth, behavior: 'smooth' });
   };
 
   const onScroll = () => {
     const el = track.current;
-    if (el && el.clientWidth) setSelected(Math.round(el.scrollLeft / el.clientWidth));
+    if (!el || !el.clientWidth) return;
+    const index = Math.round(el.scrollLeft / el.clientWidth);
+    if (target.current !== null) {
+      if (index !== target.current) return;
+      target.current = null;
+      clearTimeout(targetTimer.current);
+    }
+    setSelected(index);
   };
 
   const onKeyDown = (event: React.KeyboardEvent) => {

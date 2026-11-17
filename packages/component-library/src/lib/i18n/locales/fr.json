@@ -256,7 +256,8 @@
       "search": "Rechercher un modèle",
       "noMatches": "Aucun modèle ne correspond à « {{query}} ».",
       "empty": "Aucun modèle pour l'instant. Ajoutez une clé ou un serveur local dans les réglages.",
-      "selected": "{{count}} sur {{max}} sélectionnés",
+      "selected_one": "{{count}} sur {{max}} sélectionné",
+      "selected_other": "{{count}} sur {{max}} sélectionnés",
       "limit": "{{max}} modèles au plus. Retirez-en un pour en ajouter un autre."
     },
     "methodMenu": {
@@ -269,7 +270,8 @@
       "costAtLeast": "au moins {{cost}}",
       "costFree": "gratuit",
       "costUnknown": "coût inconnu",
-      "unavailable": "Nécessite au moins 3 réponses",
+      "unavailable_one": "Nécessite au moins {{count}} réponse",
+      "unavailable_other": "Nécessite au moins {{count}} réponses",
       "summarizer": "Fusionné par",
       "note": "Les appels comprennent chaque réponse et le score d'accord.",
       "methods": {
@@ -320,7 +322,8 @@
         }
       },
       "pending": "Calculé quand toutes les réponses sont arrivées.",
-      "progress": "{{done}} réponses sur {{total}} pour l'instant.",
+      "progress_one": "{{count}} réponse sur {{total}} pour l'instant.",
+      "progress_other": "{{count}} réponses sur {{total}} pour l'instant.",
       "unavailable": "Pas de score d'accord",
       "unavailableHint": "Ajoutez un modèle d'embeddings dans les réglages (OpenAI, Google ou un serveur local) pour mesurer l'accord.",
       "pairs": "Score de chaque paire",
@@ -335,7 +338,8 @@
       "awaiting": "Le consensus est rédigé quand les réponses sont arrivées.",
       "generating": "Rédaction du consensus",
       "failed": "Le consensus n'a pas pu être rédigé.",
-      "unavailable": "Cette méthode nécessite au moins 3 réponses, aucun consensus n'a donc été rédigé.",
+      "unavailable_one": "Cette méthode nécessite au moins {{count}} réponse, aucun consensus n'a donc été rédigé.",
+      "unavailable_other": "Cette méthode nécessite au moins {{count}} réponses, aucun consensus n'a donc été rédigé.",
       "retry": "Réessayer",
       "copy": "Copier",
       "copied": "Copié",

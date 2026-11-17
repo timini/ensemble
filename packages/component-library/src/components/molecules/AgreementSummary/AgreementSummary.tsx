@@ -45,7 +45,8 @@ export function agreementLevel(score: number, thresholds: AgreementLevelThreshol
 /**
  * AgreementSummary molecule: the agreement score as a ring, its level in
  * words with what that means for the user, whether the labels are calibrated
- * for the embedding model, and the score of each pair of answers.
+ * for the embedding model, and the score of each pair of answers. While
+ * pending it shows placeholders in the same places, so it does not jump.
  *
  * @example
  * ```tsx
@@ -60,6 +61,8 @@ export function AgreementSummary({ status, score = 0, pairs = [], thresholds, ca
   const listId = React.useId();
   const level = agreementLevel(score, thresholds);
   const key = 'molecules.agreementSummary';
+  const answers = progress?.total ?? 3;
+  const pendingPairs = (answers * (answers - 1)) / 2;
 
   return (
     <section
@@ -80,12 +83,33 @@ export function AgreementSummary({ status, score = 0, pairs = [], thresholds, ca
       )}
 
       {status === 'pending' && (
-        <div className="mt-4 flex items-center gap-4">
-          <AgreementRing pending />
-          <p data-testid="agreement-pending" className="text-label text-muted-foreground">
-            {t(`${key}.pending`)} {progress && t(`${key}.progress`, progress)}
-          </p>
-        </div>
+        <>
+          <div className="mt-4 flex items-center gap-4">
+            <AgreementRing pending />
+            <p data-testid="agreement-pending" className="text-label text-muted-foreground">
+              {t(`${key}.pending`)} {progress && t(`${key}.progress`, { count: progress.done, total: progress.total })}
+            </p>
+          </div>
+          {/* Placeholders in the shape of the pair scores and calibration line, so the card keeps its height when the score arrives. */}
+          <div data-testid="agreement-pending-skeleton" aria-hidden="true" className="flex flex-1 flex-col">
+            {pendingPairs > 0 && (
+              <div className="mt-4 border-t border-border pt-3">
+                <div className="h-5 w-2/5 rounded bg-muted lg:hidden" />
+                <div className="hidden space-y-2.5 pt-1 lg:block">
+                  {Array.from({ length: pendingPairs }, (_, i) => (
+                    <div key={i} data-skeleton="pair" className="space-y-1">
+                      <div className="h-4 w-3/5 rounded bg-muted" />
+                      <div className="h-1 rounded-full bg-muted" />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+            <div data-testid="agreement-calibration-skeleton" className="mt-auto pt-4">
+              <div className="h-5 w-4/5 rounded bg-muted" />
+            </div>
+          </div>
+        </>
       )}
 
       {status === 'ready' && (

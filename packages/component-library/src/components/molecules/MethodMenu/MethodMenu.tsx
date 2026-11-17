@@ -2,7 +2,7 @@ import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Check, ChevronDown } from 'lucide-react';
 import type { ConsensusMethod } from '@ensemble-ai/shared-utils/consensus';
-import type { RunEstimate } from '@ensemble-ai/shared-utils/pricing';
+import { MIN_ANSWERS_FOR_CONSENSUS, MIN_ANSWERS_FOR_RANKING, type RunEstimate } from '@ensemble-ai/shared-utils/pricing';
 import { usePopover } from '../../../lib/usePopover';
 import { moveFocus } from '../../../lib/rovingFocus';
 import { cn } from '../../../lib/utils';
@@ -31,11 +31,16 @@ export interface MethodMenuProps {
 const METHODS: ConsensusMethod[] = ['standard', 'majority', 'elo', 'council'];
 const OPTION = '[role="radio"]';
 
+/** Fewest answers a method needs, as in shared-utils countConsensusCalls. */
+const minAnswers = (m: ConsensusMethod) => (m === 'elo' || m === 'council' ? MIN_ANSWERS_FOR_RANKING : MIN_ANSWERS_FOR_CONSENSUS);
+
 /**
  * MethodMenu molecule: the consensus method dropdown in the composer. Every
  * method shows its number of model calls and its cost range from
  * `estimateRun` before the run, so the user sees what Council costs before
  * choosing it. The footer picks the model that merges the answers.
+ * The methods form a radio group: the arrow keys move to the next available
+ * method and check it, Enter or a click checks it and closes the menu.
  *
  * @example
  * ```tsx
@@ -61,10 +66,22 @@ export function MethodMenu({
   const name = (m: ConsensusMethod) => t(`molecules.methodMenu.methods.${m}.name`);
   const calls = (e: RunEstimate) => t('molecules.methodMenu.calls', { count: e.calls.total });
   const current = estimates[method];
+  const isUnavailable = (m: ConsensusMethod) => estimates[m]?.consensusAvailable === false;
+  // Roving tab stop: the checked method, or the first available one when the
+  // checked method cannot run with the current answers.
+  const tabStop = isUnavailable(method) ? (METHODS.find((m) => !isUnavailable(m)) ?? method) : method;
 
   React.useEffect(() => {
-    if (popover.open) listRef.current?.querySelector<HTMLElement>('[aria-checked="true"]')?.focus();
+    if (popover.open) listRef.current?.querySelector<HTMLElement>('[tabindex="0"]')?.focus();
+    // Focus only when the panel opens, not on every method change.
   }, [popover.open]);
+
+  const onKeyDown = (event: React.KeyboardEvent) => {
+    if (moveFocus(listRef.current, OPTION, event.key) < 0) return;
+    event.preventDefault();
+    const next = (document.activeElement as HTMLElement | null)?.dataset.method as ConsensusMethod | undefined;
+    if (next && next !== method) onMethodChange(next);
+  };
 
   const choose = (m: ConsensusMethod) => {
     onMethodChange(m);
@@ -101,22 +118,23 @@ export function MethodMenu({
             ref={listRef}
             role="radiogroup"
             aria-label={t('molecules.methodMenu.listLabel')}
-            onKeyDown={(e) => moveFocus(listRef.current, OPTION, e.key) >= 0 && e.preventDefault()}
+            onKeyDown={onKeyDown}
           >
             {METHODS.map((m) => {
               const e = estimates[m];
               const on = m === method;
-              const unavailable = e ? !e.consensusAvailable : false;
+              const unavailable = isUnavailable(m);
               return (
                 <button
                   key={m}
                   type="button"
                   role="radio"
                   aria-checked={on}
-                  tabIndex={on ? 0 : -1}
+                  tabIndex={m === tabStop ? 0 : -1}
                   disabled={unavailable}
                   onClick={() => choose(m)}
                   data-testid={`method-option-${m}`}
+                  data-method={m}
                   className={cn(
                     'focus-ring flex w-full gap-3 rounded-lg p-2.5 text-left transition-colors duration-fast hover:bg-muted disabled:opacity-60',
                     on && 'bg-accent text-accent-foreground hover:bg-accent',
@@ -129,7 +147,7 @@ export function MethodMenu({
                       {e && <span className="shrink-0 text-caption tabular-nums text-muted-foreground">{calls(e)}</span>}
                     </span>
                     <span className="flex items-baseline justify-between gap-3 text-caption text-muted-foreground">
-                      <span>{unavailable ? t('molecules.methodMenu.unavailable') : t(`molecules.methodMenu.methods.${m}.detail`)}</span>
+                      <span>{unavailable ? t('molecules.methodMenu.unavailable', { count: minAnswers(m) }) : t(`molecules.methodMenu.methods.${m}.detail`)}</span>
                       {e && !unavailable && <span className="shrink-0 tabular-nums">{methodCostLabel(e, t, locale)}</span>}
                     </span>
                   </span>

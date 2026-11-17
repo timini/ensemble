@@ -145,10 +145,10 @@ export function HistorySidebar(props: HistorySidebarProps) {
         </section>
       ))}
 
-      {items.length === 0 && (
+      {items.length === 0 && !needle && (
         <p data-testid="history-empty" className="px-2.5 text-caption text-muted-foreground">{t(`${key}.empty`)}</p>
       )}
-      {needle && groups.length === 0 && items.length > 0 && (
+      {needle && groups.length === 0 && shownPresets.length === 0 && (
         <p data-testid="history-no-matches" className="px-2.5 text-caption text-muted-foreground">{t(`${key}.noMatches`, { query: query.trim() })}</p>
       )}
     </div>

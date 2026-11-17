@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import { fireEvent, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { Composer, type ComposerProps } from './Composer';
 import { modelOptions, samplePrompt, threeModels } from './fixtures';
 import { sampleEstimates } from '../../molecules/MethodMenu/fixtures';
@@ -81,6 +82,15 @@ describe('Composer', () => {
     fireEvent.click(screen.getByTestId('model-picker-trigger'));
     fireEvent.click(screen.getByRole('button', { name: /qwen3/ }));
     expect(props.onToggleModel).toHaveBeenCalledWith('ollama/qwen3:14b');
+  });
+
+  it('does not run the ensemble when Enter is pressed in the model search', async () => {
+    const user = userEvent.setup();
+    const props = setup();
+    await user.click(screen.getByTestId('model-picker-trigger'));
+    await user.type(screen.getByRole('searchbox', { name: 'Search models' }), 'qwen{Enter}');
+    expect(props.onSubmit).not.toHaveBeenCalled();
+    expect(screen.getByRole('button', { name: /qwen3/ })).toHaveFocus();
   });
 
   it('shows manual answers as chips and removes one', () => {

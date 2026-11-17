@@ -78,6 +78,16 @@ describe('AgreementSummary', () => {
     expect(screen.queryByTestId('agreement-level')).not.toBeInTheDocument();
   });
 
+  it('reserves the space of the finished summary while pending', () => {
+    renderWithI18n(<AgreementSummary status="pending" progress={{ done: 1, total: 4 }} />, { language: 'fr' });
+    expect(screen.getByTestId('agreement-pending')).toHaveTextContent("1 réponse sur 4 pour l'instant.");
+    const skeleton = screen.getByTestId('agreement-pending-skeleton');
+    expect(skeleton).toHaveAttribute('aria-hidden', 'true');
+    expect(skeleton.querySelectorAll('[data-skeleton="pair"]')).toHaveLength(6);
+    expect(screen.getByTestId('agreement-calibration-skeleton')).toBeInTheDocument();
+    expect(screen.queryByTestId('agreement-level')).not.toBeInTheDocument();
+  });
+
   it('explains how to get a score when no embedding model is set', () => {
     renderWithI18n(<AgreementSummary status="unavailable" />);
     expect(screen.getByTestId('agreement-unavailable')).toHaveTextContent('No agreement score');

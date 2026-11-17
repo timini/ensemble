@@ -58,6 +58,22 @@ describe('AppShell', () => {
     expect(screen.getByRole('dialog', { name: 'History and presets' })).toHaveTextContent('Past runs');
   });
 
+  it('mounts the sidebar once on small screens, in the sheet only', () => {
+    desktop(false);
+    renderWithI18n(<AppShell sidebar={<div data-testid="history-sidebar">Past runs</div>}>x</AppShell>);
+    expect(screen.queryByTestId('app-shell-sidebar')).not.toBeInTheDocument();
+    expect(screen.queryAllByTestId('history-sidebar')).toHaveLength(0);
+    fireEvent.click(screen.getByRole('button', { name: 'Show history' }));
+    expect(screen.getAllByTestId('history-sidebar')).toHaveLength(1);
+  });
+
+  it('mounts the sidebar once on desktop, from the first render', () => {
+    desktop(true);
+    renderWithI18n(<AppShell sidebar={<div data-testid="history-sidebar">Past runs</div>}>x</AppShell>);
+    expect(screen.getByTestId('app-shell-sidebar')).toBeInTheDocument();
+    expect(screen.getAllByTestId('history-sidebar')).toHaveLength(1);
+  });
+
   it('toggles the sidebar on desktop', () => {
     desktop(true);
     renderWithI18n(<AppShell sidebar={<p>Past runs</p>}>x</AppShell>);

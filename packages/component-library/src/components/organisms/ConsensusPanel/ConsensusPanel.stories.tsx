@@ -11,7 +11,7 @@ const meta = {
   parameters: { layout: 'padded' },
   tags: ['autodocs'],
   args: {
-    agreement: { status: 'ready', score: 0.86, pairs: samplePairs, calibration: { calibrated: true, embeddingModel: 'text-embedding-3-small' } },
+    agreement: { status: 'ready', score: 0.86, pairs: samplePairs, calibration: { calibrated: false, embeddingModel: 'text-embedding-3-small' } },
     consensus: { status: 'success', text: sampleConsensus, method: 'standard', summarizerName: 'Claude Opus 5.5', cost, durationMs: 6200, onShare: () => undefined },
   },
 } satisfies Meta<typeof ConsensusPanel>;

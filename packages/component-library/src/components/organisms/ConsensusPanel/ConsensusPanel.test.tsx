@@ -43,6 +43,6 @@ describe('ConsensusPanel', () => {
       { language: 'fr' },
     );
     expect(screen.getByTestId('consensus-panel')).not.toHaveAttribute('data-level');
-    expect(screen.getByTestId('agreement-pending')).toHaveTextContent('1 réponses sur 3');
+    expect(screen.getByTestId('agreement-pending')).toHaveTextContent('1 réponse sur 3');
   });
 });

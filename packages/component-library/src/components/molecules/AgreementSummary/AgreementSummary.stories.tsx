@@ -11,7 +11,8 @@ const meta = {
     status: 'ready',
     score: 0.86,
     pairs: samplePairs,
-    calibration: { calibrated: true, embeddingModel: 'text-embedding-3-small' },
+    // No embedding model is calibrated yet, so every real run shows this badge.
+    calibration: { calibrated: false, embeddingModel: 'text-embedding-3-small' },
   },
   decorators: [(Story) => <div className="max-w-sm"><Story /></div>],
 } satisfies Meta<typeof AgreementSummary>;
@@ -19,7 +20,7 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-/** High agreement with calibrated labels. */
+/** High agreement, labels not yet calibrated for the embedding model (what every run shows today). */
 export const High: Story = {};
 
 /** Mixed agreement. */
@@ -32,8 +33,14 @@ export const Low: Story = {
   args: { score: 0.31, pairs: [{ ...samplePairs[0], score: 0.44 }, { ...samplePairs[1], score: 0.22 }, { ...samplePairs[2], score: 0.27 }] },
 };
 
-/** Labels from the default mapping, not fitted for this embedding model. */
+/** Labels from the default mapping with a local embedding model. */
 export const Uncalibrated: Story = { args: { calibration: { calibrated: false, embeddingModel: 'nomic-embed-text' } } };
+
+/**
+ * Not a state the product can show yet: no embedding model has been
+ * calibrated. Kept to review the layout once calibration lands.
+ */
+export const CalibratedFuture: Story = { args: { calibration: { calibrated: true, embeddingModel: 'text-embedding-3-small' } } };
 
 /** Answers still arriving. */
 export const Pending: Story = { args: { status: 'pending', progress: { done: 2, total: 3 } } };

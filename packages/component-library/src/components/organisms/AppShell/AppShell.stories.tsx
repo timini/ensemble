@@ -80,7 +80,7 @@ function Workspace({ stage }: { stage: Stage }) {
               agreement={
                 running
                   ? { status: 'pending', progress: { done: 1, total: 3 } }
-                  : { status: 'ready', score: 0.86, pairs: samplePairs, calibration: { calibrated: true, embeddingModel: 'text-embedding-3-small' } }
+                  : { status: 'ready', score: 0.86, pairs: samplePairs, calibration: { calibrated: false, embeddingModel: 'text-embedding-3-small' } }
               }
               consensus={
                 running
