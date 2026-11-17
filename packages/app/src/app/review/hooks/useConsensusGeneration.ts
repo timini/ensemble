@@ -11,6 +11,7 @@ import { ProviderRegistry, type ProviderName } from '@ensemble-ai/shared-utils/p
 import { withUsageTracking } from '@ensemble-ai/shared-utils/pricing';
 import { FALLBACK_MODELS } from '~/lib/models';
 import { logger } from '~/lib/logger';
+import { toMajorityVoteRecord } from '~/lib/majorityVote';
 
 export function useConsensusGeneration() {
     const [isGenerating, setIsGenerating] = useState(false);
@@ -22,6 +23,7 @@ export function useConsensusGeneration() {
     const eloTopN = useStore((state) => state.eloTopN);
     const mode = useStore((state) => state.mode);
     const addConsensusUsage = useStore((state) => state.addConsensusUsage);
+    const setMajorityVote = useStore((state) => state.setMajorityVote);
 
     const generateConsensus = async (
         responses: { modelId: string; modelName: string; content: string }[],
@@ -44,6 +46,7 @@ export function useConsensusGeneration() {
 
         setIsGenerating(true);
         setError(null);
+        setMajorityVote(null);
         // Consensus usage is not cleared here: a regenerate (for example after
         // a summarizer change) adds to the calls earlier attempts already
         // billed. resetStreamingState clears it when a new run starts.
@@ -98,7 +101,11 @@ export function useConsensusGeneration() {
                     effectiveSummarizerModelId
                 );
 
-                resultText = await strategy.generateConsensus(consensusResponses, 0, originalPrompt);
+                // Vote on short answers first; the strategy falls back to the
+                // LLM method and says why when the vote cannot decide.
+                const outcome = await strategy.runConsensus(consensusResponses, 0, originalPrompt);
+                setMajorityVote(toMajorityVoteRecord(outcome, consensusResponses));
+                resultText = outcome.text;
             } else if (consensusMethod === 'council') {
                 const selectedModels = useStore.getState().selectedModels;
                 const participants: CouncilParticipant[] = selectedModels.map((m) => {

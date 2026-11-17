@@ -127,6 +127,7 @@ export default function RootLayout({
                       parsed.agreementStats = null;
                       parsed.metaAnalysis = null;
                       parsed.consensusUsage = [];
+                      parsed.majorityVote = null;
                     }
                     window.localStorage.setItem('ensemble-ai-store', JSON.stringify(parsed));
                   }

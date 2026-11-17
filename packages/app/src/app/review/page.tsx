@@ -25,6 +25,8 @@ import { useConsensusTrigger } from "./hooks/useConsensusTrigger";
 import { ResponsesSection } from "./_components/ResponsesSection";
 import { AgreementSection } from "./_components/AgreementSection";
 import { RunCostSummary } from "@/components/molecules/RunCostSummary";
+import { MajorityVoteBreakdown } from "@/components/molecules/MajorityVoteBreakdown";
+import { toMajorityVoteBreakdownProps } from "~/lib/majorityVote";
 import { PRICE_TABLE_DATE } from "@ensemble-ai/shared-utils/pricing";
 import { useRunCost } from "~/hooks/useRunCost";
 
@@ -51,6 +53,7 @@ export default function ReviewPage() {
     viewManualResponses,
     viewAgreementStats,
     viewMetaAnalysis,
+    viewMajorityVote,
     viewEmbeddings,
     viewEmbeddingsSource,
     viewSimilarityMatrix,
@@ -173,6 +176,13 @@ export default function ReviewPage() {
             status={consensusStatus}
             error={consensusError ?? undefined}
           />
+          {/* Majority runs: the vote on short answers behind the consensus */}
+          {viewMajorityVote && consensusStatus === "success" && (
+            <MajorityVoteBreakdown
+              className="mt-4"
+              {...toMajorityVoteBreakdownProps(viewMajorityVote)}
+            />
+          )}
         </div>
       )}
 

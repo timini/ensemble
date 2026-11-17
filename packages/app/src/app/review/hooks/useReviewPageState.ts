@@ -13,6 +13,7 @@ export function useReviewPageState(hasHydrated: boolean) {
   const responses = useStore((state) => state.responses);
   const agreementStats = useStore((state) => state.agreementStats);
   const metaAnalysis = useStore((state) => state.metaAnalysis);
+  const majorityVote = useStore((state) => state.majorityVote);
   const manualResponses = useStore((state) => state.manualResponses);
   const embeddings = useStore((state) => state.embeddings);
   const embeddingsSource = useStore((state) => state.embeddingsSource);
@@ -65,6 +66,8 @@ export function useReviewPageState(hasHydrated: boolean) {
     [embeddings, hasHydrated],
   );
 
+  const viewMajorityVote = hasHydrated ? majorityVote : null;
+
   const viewEmbeddingsSource = hasHydrated ? embeddingsSource : null;
 
   const viewSimilarityMatrix = useMemo(
@@ -87,6 +90,7 @@ export function useReviewPageState(hasHydrated: boolean) {
     viewManualResponses,
     viewAgreementStats,
     viewMetaAnalysis,
+    viewMajorityVote,
     viewEmbeddings,
     viewEmbeddingsSource,
     viewSimilarityMatrix,

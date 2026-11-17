@@ -19,6 +19,7 @@ import {
 } from "@ensemble-ai/shared-utils/similarity";
 import { toError } from "~/lib/errors";
 import { logger } from "~/lib/logger";
+import type { MajorityVoteRecord } from "~/lib/majorityVote";
 import type { ProviderType } from "./ensembleSlice";
 
 export interface ModelResponse {
@@ -64,6 +65,8 @@ export interface ResponseSlice {
   metaAnalysis: string | null;
   /** Token usage of each consensus call in the current run. */
   consensusUsage: CallUsage[];
+  /** Vote breakdown of the last majority consensus, or null. */
+  majorityVote: MajorityVoteRecord | null;
 
   setPrompt: (prompt: string) => void;
   startStreaming: (
@@ -88,6 +91,7 @@ export interface ResponseSlice {
   calculateAgreement: () => void;
   setMetaAnalysis: (analysis: string) => void;
   addConsensusUsage: (call: CallUsage) => void;
+  setMajorityVote: (vote: MajorityVoteRecord | null) => void;
   clearResponses: () => void;
   resetStreamingState: () => void;
 }
@@ -102,6 +106,7 @@ export const createResponseSlice: StateCreator<ResponseSlice> = (set, get) => ({
   agreementStats: null,
   metaAnalysis: null,
   consensusUsage: [],
+  majorityVote: null,
 
   setPrompt: (prompt) => {
     set({ prompt });
@@ -231,9 +236,14 @@ export const createResponseSlice: StateCreator<ResponseSlice> = (set, get) => ({
     set((state) => ({ consensusUsage: [...state.consensusUsage, call] }));
   },
 
+  setMajorityVote: (vote) => {
+    set({ majorityVote: vote });
+  },
+
   resetStreamingState: () => {
     set({
       consensusUsage: [],
+      majorityVote: null,
       responses: [],
       embeddings: [],
       embeddingsSource: null,

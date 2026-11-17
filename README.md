@@ -67,7 +67,7 @@ Package details are in each package's README.
 | Method | How it works | Extra model calls for 5 models |
 |---|---|---|
 | Standard | One summarizer model merges all answers | 1 |
-| Majority | A model ranks answers by how well they align, then merges | 2 |
+| Majority | Counts votes on short final answers (number, letter, yes/no, short phrase); for long or tied answers a model ranks answers by alignment, then merges | 1 to 3 |
 | ELO | Every pair is judged in both orders, answers are ranked, the top 3 are merged | 21 |
 | Council | Models critique each other, rebut, vote, then a summary is written | 56 |
 
