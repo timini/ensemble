@@ -9,8 +9,10 @@ dotenv.config({ path: path.resolve(process.cwd(), '../../.env') });
 /**
  * Playwright configuration for E2E testing
  *
- * Three test suites:
+ * Test suites:
  * - mock-mode: Tests with mock API clients (runs in CI before deployment)
+ * - local-endpoint: Free mode against a fake OpenAI-compatible server (runs
+ *   with mock-mode in `npm run test:mock`; no keys, no paid calls)
  * - free-mode: Tests with real API keys (runs post-deployment against deployed infra)
  * - pro-mode: Placeholder for Phase 4 backend tests
  *
@@ -39,6 +41,15 @@ const isMockMode = e2eMode === 'mock';
 // When set, tests run against the deployed URL instead of starting a local server
 const baseURL = process.env.E2E_BASE_URL || 'http://localhost:3000';
 const isDeployedTest = !!process.env.E2E_BASE_URL;
+
+/**
+ * Local endpoint suite: a second app server in Free mode (no mock clients)
+ * and a fake OpenAI-compatible server standing in for Ollama. Runs with the
+ * mock suite, needs no keys and makes no paid calls.
+ */
+const LOCAL_ENDPOINT_APP_PORT = 3100;
+const FAKE_OPENAI_PORT = 11499;
+const runLocalEndpointServers = isMockMode && !isDeployedTest;
 
 export default defineConfig({
   testDir: './tests',
@@ -75,6 +86,15 @@ export default defineConfig({
       use: { ...devices['Desktop Chrome'] },
     },
 
+    // Local endpoint: Free mode against the fake OpenAI-compatible server
+    // (fixtures/fake-openai-server.mjs). Real provider code, no cloud keys.
+    {
+      name: 'local-endpoint',
+      testDir: './tests/local-endpoint',
+      fullyParallel: false,
+      use: { ...devices['Desktop Chrome'], baseURL: `http://localhost:${LOCAL_ENDPOINT_APP_PORT}` },
+    },
+
     // Pro Mode: Placeholder for Phase 4 backend tests
     // Will test authentication, credits, and backend-proxied API calls
     {
@@ -90,16 +110,37 @@ export default defineConfig({
   ...(isDeployedTest
     ? {}
     : {
-        webServer: {
-          command: isMockMode
-            ? 'cd ../app && npm run dev:mock'
-            : 'cd ../app && npm run dev:free',
-          url: 'http://localhost:3000',
-          reuseExistingServer: !process.env.CI,
-          timeout: 120 * 1000,
-          env: {
-            NEXT_PUBLIC_MOCK_MODE: isMockMode ? 'true' : 'false',
+        webServer: [
+          {
+            command: isMockMode
+              ? 'cd ../app && npm run dev:mock'
+              : 'cd ../app && npm run dev:free',
+            url: 'http://localhost:3000',
+            reuseExistingServer: !process.env.CI,
+            timeout: 120 * 1000,
+            env: {
+              NEXT_PUBLIC_MOCK_MODE: isMockMode ? 'true' : 'false',
+            },
           },
-        },
+          ...(runLocalEndpointServers
+            ? [
+                {
+                  command: 'node fixtures/fake-openai-server.mjs',
+                  url: `http://localhost:${FAKE_OPENAI_PORT}/`,
+                  reuseExistingServer: !process.env.CI,
+                  timeout: 30 * 1000,
+                  env: { FAKE_OPENAI_PORT: String(FAKE_OPENAI_PORT) },
+                },
+                {
+                  // Own build directory so it can run next to the mock server.
+                  command: `cd ../app && npx cross-env NEXT_PUBLIC_MOCK_MODE=false NEXT_DIST_DIR=.next-e2e-free next dev --turbo -p ${LOCAL_ENDPOINT_APP_PORT}`,
+                  url: `http://localhost:${LOCAL_ENDPOINT_APP_PORT}`,
+                  reuseExistingServer: !process.env.CI,
+                  timeout: 180 * 1000,
+                  env: { NEXT_PUBLIC_MOCK_MODE: 'false' },
+                },
+              ]
+            : []),
+        ],
       }),
 });

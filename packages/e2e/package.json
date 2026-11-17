@@ -6,9 +6,11 @@
     "scripts": {
         "test:e2e": "playwright test",
         "test:ui": "playwright test --ui",
-        "test:mock": "cross-env E2E_MODE=mock playwright test --project=mock-mode",
+        "test:mock": "cross-env E2E_MODE=mock playwright test --project=mock-mode --project=local-endpoint",
         "test:free": "cross-env E2E_MODE=free playwright test --project=free-mode",
-        "test:pro": "cross-env E2E_MODE=pro playwright test --project=pro-mode"
+        "test:pro": "cross-env E2E_MODE=pro playwright test --project=pro-mode",
+        "test:local-endpoint": "cross-env E2E_MODE=mock playwright test --project=local-endpoint",
+        "fake-openai": "node fixtures/fake-openai-server.mjs"
     },
     "devDependencies": {
         "@playwright/test": "^1.55.1",
