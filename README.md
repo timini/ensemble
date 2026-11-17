@@ -14,10 +14,10 @@ Ensemble sends one prompt to 2 to 6 models in parallel, streams every answer sid
 
 Free mode works: bring your own keys for OpenAI, Anthropic, Google, xAI, DeepSeek and Perplexity, or point Ensemble at one or more OpenAI-compatible endpoints (Ollama, LM Studio, llama.cpp, vLLM, OpenRouter, Groq, Together or a custom URL). Local endpoints need no key. The browser calls the providers directly and keys are stored encrypted in the browser.
 
+Local models: with only Ollama installed, `npm run local` runs Ensemble on your computer, finds Ollama and runs a 3-model ensemble with real agreement scores and no API keys. See [docs/LOCAL_MODELS.md](./docs/LOCAL_MODELS.md) for the setup guide, other servers, recommended models and which browsers let the hosted site reach `localhost`.
+
 Not finished yet (see the roadmap):
 
-- Agreement scores use placeholder vectors, not real embeddings, so the score is not meaningful yet (M1).
-- Local models: detecting a running Ollama on first run, checking which browsers let the hosted site call `http://localhost`, and a setup guide (M2).
 - A redesigned single-screen UI with history (M4).
 - Pro mode: sign-in, Stripe credits and server-side model calls (M5).
 - Shareable result links (M6).
@@ -34,7 +34,9 @@ npm run build --workspace=packages/shared-utils   # the app imports its dist bun
 npm run dev                                        # app in Free mode on http://localhost:3000
 ```
 
-Open the app, enter at least one provider key on the config page, pick two or more models and ask a question.
+Open the app, enter at least one provider key or add an OpenAI-compatible endpoint on the config page, pick two or more models and ask a question.
+
+To use the production build with local models, run `npm run local` instead (http://localhost:3000; see [docs/LOCAL_MODELS.md](./docs/LOCAL_MODELS.md)).
 
 Other entry points:
 
@@ -86,7 +88,7 @@ npm run analyze:fta # static complexity check
 ### End-to-end tests
 
 ```bash
-npm run test:mock --workspace=packages/e2e   # mock providers, no keys needed (CI default)
+npm run test:mock --workspace=packages/e2e   # mock providers, plus Free mode against a fake Ollama; no keys (CI default)
 npm run test:free --workspace=packages/e2e   # real providers, needs TEST_*_API_KEY variables
 npm run test:ui --workspace=packages/e2e     # Playwright UI for debugging
 E2E_BASE_URL=https://<deployed-url> npm run test:free --workspace=packages/e2e   # against a deployment
