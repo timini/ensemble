@@ -105,8 +105,11 @@ export function AgreementSummary({ status, score = 0, pairs = [], thresholds, ca
                 </div>
               </div>
             )}
-            <div data-testid="agreement-calibration-skeleton" className="mt-auto pt-4">
-              <div className="h-5 w-4/5 rounded bg-muted" />
+            {/* Shaped like the uncalibrated badge and hint, which every run shows until a model is calibrated. */}
+            <div data-testid="agreement-calibration-skeleton" className="mt-auto space-y-2 pt-4">
+              <div className="h-5 w-24 rounded-full bg-muted" />
+              <div className="h-3.5 w-full rounded bg-muted" />
+              <div className="h-3.5 w-3/5 rounded bg-muted" />
             </div>
           </div>
         </>
