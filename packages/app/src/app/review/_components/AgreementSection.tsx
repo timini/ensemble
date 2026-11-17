@@ -3,10 +3,9 @@
 import { useTranslation } from "react-i18next";
 import {
   AgreementAnalysis,
-  type AgreementCalibrationInfo,
-  type AgreementLevelThresholds,
   type PairwiseComparison,
 } from "@/components/organisms/AgreementAnalysis";
+import { useAgreementCalibration } from "~/hooks/useAgreementCalibration";
 import { InlineAlert } from "@/components/atoms/InlineAlert";
 import { CommandSnippet } from "@/components/atoms/CommandSnippet";
 import type { EmbeddingsStatus } from "../hooks/useResponseEmbeddings";
@@ -26,10 +25,12 @@ export interface AgreementSectionProps {
    * embedding model: the exact command that installs one.
    */
   ollamaPullCommand?: string;
-  /** Label cut-offs for the embedding model in use (see lib/agreementCalibration.ts). */
-  levelThresholds?: AgreementLevelThresholds;
-  /** Whether those cut-offs are calibrated; shown with the analysis. */
-  calibration?: AgreementCalibrationInfo;
+  /**
+   * Embeddings provider that scored the answers. Picks the agreement label
+   * cut-offs for its embedding model and whether they are calibrated
+   * (see lib/agreementCalibration.ts).
+   */
+  embeddingsProvider?: string | null;
 }
 
 /**
@@ -44,10 +45,11 @@ export function AgreementSection({
   averageConfidence,
   excludedModels = [],
   ollamaPullCommand,
-  levelThresholds,
-  calibration,
+  embeddingsProvider = null,
 }: AgreementSectionProps) {
   const { t } = useTranslation();
+  const { levelThresholds, calibration } =
+    useAgreementCalibration(embeddingsProvider);
 
   if (responseCount < 2) return null;
 

@@ -34,10 +34,6 @@ import { PRICE_TABLE_DATE } from "@ensemble-ai/shared-utils/pricing";
 import { useRunCost } from "~/hooks/useRunCost";
 import { useStore } from "~/store";
 import { ollamaEmbeddingPullCommand } from "~/lib/endpointStatus";
-import {
-  agreementCalibrationFor,
-  embeddingModelKeyFor,
-} from "~/lib/agreementCalibration";
 
 const MAX_EXPANDED_CARDS = 3;
 
@@ -67,15 +63,6 @@ export default function ReviewPage() {
     viewEmbeddingsSource,
     viewSimilarityMatrix,
   } = useReviewPageState(hasHydrated);
-  const endpoints = useStore((state) => state.endpoints);
-  // Label thresholds fitted for the embedding model that scored the answers.
-  const agreementCalibration = useMemo(
-    () =>
-      agreementCalibrationFor(
-        embeddingModelKeyFor(viewEmbeddingsSource ?? embeddingsProvider, endpoints),
-      ),
-    [viewEmbeddingsSource, embeddingsProvider, endpoints],
-  );
 
   const {
     completedResponses,
@@ -218,7 +205,7 @@ export default function ReviewPage() {
         averageConfidence={averageConfidence}
         excludedModels={excludedModels}
         ollamaPullCommand={ollamaPullCommand}
-        {...agreementCalibration}
+        embeddingsProvider={viewEmbeddingsSource ?? embeddingsProvider}
       />
 
       {/* 4. Individual Responses Section (matches wireframe order - at bottom) */}

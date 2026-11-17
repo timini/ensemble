@@ -23,21 +23,20 @@ describe("AgreementSection", () => {
     ).not.toBeInTheDocument();
   });
 
-  it("passes the calibration to the analysis so uncalibrated labels are marked", () => {
+  it("marks the labels uncalibrated for an embedding model with no fit", () => {
     render(
       <AgreementSection
         {...baseProps}
         status="ready"
-        levelThresholds={{ high: 0.8, medium: 0.5 }}
-        calibration={{
-          calibrated: false,
-          embeddingModel: "openai/text-embedding-3-small",
-        }}
+        embeddingsProvider="openai"
       />,
     );
     expect(screen.getByTestId("agreement-calibration")).toHaveAttribute(
       "data-calibrated",
       "false",
+    );
+    expect(screen.getByTestId("agreement-calibration")).toHaveTextContent(
+      "Uncalibrated",
     );
   });
 
