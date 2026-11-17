@@ -7,6 +7,31 @@ const council = { answers: 5, consensus: 56, consensusMin: 46, embeddings: 5, to
 const allPriced = { pricedCallCount: 7, unpricedCallCount: 0 };
 
 describe('RunCostSummary', () => {
+  describe('local models', () => {
+    it('says local calls cost nothing', () => {
+      render(
+        <RunCostSummary
+          variant="actual"
+          callCount={4}
+          totalUsd={0}
+          estimated={false}
+          pricedCallCount={4}
+          unpricedCallCount={0}
+          localCallCount={4}
+        />,
+      );
+      expect(screen.getByTestId('run-cost-amount')).toHaveTextContent('Cost: $0.00');
+      expect(screen.getByTestId('run-cost-local')).toHaveTextContent('4 calls run on local models at no cost.');
+    });
+
+    it('shows no local note without local calls', () => {
+      render(
+        <RunCostSummary variant="actual" callCount={1} totalUsd={0.01} estimated={false} {...allPriced} />,
+      );
+      expect(screen.queryByTestId('run-cost-local')).not.toBeInTheDocument();
+    });
+  });
+
   describe('estimate', () => {
     it('shows the total calls with a breakdown and the cost range', () => {
       render(

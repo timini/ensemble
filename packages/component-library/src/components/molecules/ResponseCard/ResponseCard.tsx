@@ -58,6 +58,7 @@ export const PROVIDER_NAMES = {
   xai: 'XAI',
   deepseek: 'DeepSeek',
   perplexity: 'Perplexity',
+  'openai-compatible': 'OpenAI-compatible',
 } as const;
 
 /**

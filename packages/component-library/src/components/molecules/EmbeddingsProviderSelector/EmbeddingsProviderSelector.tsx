@@ -3,7 +3,7 @@ import { Heading } from '../../atoms/Heading';
 import { InlineAlert } from '../../atoms/InlineAlert';
 
 /** Providers that can compute embeddings. */
-export type EmbeddingsProviderId = 'openai' | 'google';
+export type EmbeddingsProviderId = 'openai' | 'google' | 'openai-compatible';
 
 /** Stored preference: a provider, or `auto`. */
 export type EmbeddingsProviderValue = 'auto' | EmbeddingsProviderId;
@@ -11,7 +11,10 @@ export type EmbeddingsProviderValue = 'auto' | EmbeddingsProviderId;
 export interface EmbeddingsProviderSelectorProps {
   /** Current preference. */
   value: EmbeddingsProviderValue;
-  /** Whether each provider has a valid API key. */
+  /**
+   * Whether each provider can embed: a valid key for OpenAI and Google, a
+   * connected endpoint with an embedding model for `openai-compatible`.
+   */
   available: Record<EmbeddingsProviderId, boolean>;
   /** Provider that will compute embeddings, or null when none can. */
   activeProvider: EmbeddingsProviderId | null;
@@ -19,21 +22,22 @@ export interface EmbeddingsProviderSelectorProps {
   onChange: (value: EmbeddingsProviderValue) => void;
 }
 
-const PROVIDERS: EmbeddingsProviderId[] = ['openai', 'google'];
+const PROVIDERS: EmbeddingsProviderId[] = ['openai', 'google', 'openai-compatible'];
 const OPTIONS: EmbeddingsProviderValue[] = ['auto', ...PROVIDERS];
 
 /**
  * Picks which provider computes the embeddings behind the agreement score.
  *
- * `auto` uses OpenAI, then Google, whichever has a valid key. A provider
- * without a valid key is disabled. When no provider is available the
+ * `auto` uses OpenAI, then Google, then an OpenAI-compatible endpoint with
+ * an embedding model, whichever is available first. An unavailable provider
+ * is disabled. When no provider is available the
  * component says that no agreement score will be shown.
  *
  * @example
  * ```tsx
  * <EmbeddingsProviderSelector
  *   value="auto"
- *   available={{ openai: true, google: false }}
+ *   available={{ openai: true, google: false, 'openai-compatible': false }}
  *   activeProvider="openai"
  *   onChange={setEmbeddingsProvider}
  * />
@@ -81,7 +85,11 @@ export function EmbeddingsProviderSelector({
                     className="block text-xs text-muted-foreground"
                     data-testid={`embeddings-provider-${option}-missing`}
                   >
-                    {t(`${prefix}.noValidKey`)}
+                    {t(
+                      option === 'openai-compatible'
+                        ? `${prefix}.noValidKeyEndpoint`
+                        : `${prefix}.noValidKey`,
+                    )}
                   </span>
                 )}
               </span>

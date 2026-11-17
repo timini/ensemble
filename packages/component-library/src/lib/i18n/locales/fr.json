@@ -82,14 +82,16 @@
       "heading": "Fournisseur d'embeddings",
       "description": "Le score d'accord compare le sens des réponses à l'aide des embeddings d'un fournisseur.",
       "options": {
-        "auto": "Automatique (OpenAI, puis Google)",
+        "auto": "Automatique (OpenAI, puis Google, puis un point de terminaison compatible OpenAI)",
         "openai": "OpenAI",
-        "google": "Google"
+        "google": "Google",
+        "openai-compatible": "Point de terminaison compatible OpenAI"
       },
       "noValidKey": "Aucune clé valide",
       "active": "Le score d'accord utilisera les embeddings {{provider}}.",
       "noneTitle": "Pas de score d'accord",
-      "noneDescription": "Ajoutez une clé API OpenAI ou Google valide pour calculer l'accord entre les réponses."
+      "noneDescription": "Ajoutez une clé API OpenAI ou Google valide, ou indiquez un modèle d'embeddings sur un point de terminaison compatible OpenAI, pour mesurer l'accord entre les réponses.",
+      "noValidKeyEndpoint": "Aucun point de terminaison avec un modèle d'embeddings"
     },
     "runCostSummary": {
       "calls_one": "{{count}} appel de modèle",
@@ -114,7 +116,9 @@
       "consensusUnavailable": "Cette méthode de consensus demande au moins 3 réponses, elle ne sera donc pas lancée.",
       "unpriced": "Pas de prix pour {{models}}. Ces appels ne sont pas comptés dans le coût.",
       "estimateSource": "La fourchette va de réponses courtes à longues. Prix OpenRouter du {{date}}.",
-      "priceSource": "Prix OpenRouter du {{date}}."
+      "priceSource": "Prix OpenRouter du {{date}}.",
+      "local_one": "{{count}} appel utilise un modèle local, sans coût.",
+      "local_other": "{{count}} appels utilisent des modèles locaux, sans coût."
     },
     "majorityVoteBreakdown": {
       "title": "Vote majoritaire",
@@ -158,6 +162,24 @@
       "other": {
         "title": "Ce modèle a échoué",
         "description": "Le fournisseur a renvoyé une erreur. Les détails sont ci-dessous."
+      }
+    },
+    "endpointInput": {
+      "baseUrl": "URL de base",
+      "apiKey": "Clé API",
+      "apiKeyOptional": "Clé API (facultative)",
+      "embeddingModel": "Modèle d'embeddings (facultatif)",
+      "embeddingModelHelp": "Sert aux scores d'accord, par exemple nomic-embed-text avec Ollama.",
+      "remove": "Supprimer {{name}}",
+      "showKey": "Afficher la clé API",
+      "hideKey": "Masquer la clé API",
+      "local": "Local",
+      "status": {
+        "idle": "Pas encore vérifié",
+        "validating": "Vérification du point de terminaison...",
+        "valid_one": "Connecté. {{count}} modèle disponible.",
+        "valid_other": "Connecté. {{count}} modèles disponibles.",
+        "invalid": "Connexion impossible : {{error}}"
       }
     }
   },
@@ -320,6 +342,14 @@
     "workflowNavigator": {
       "back": "Retour",
       "continue": "Continuer"
+    },
+    "endpointConfiguration": {
+      "heading": "Points de terminaison compatibles OpenAI",
+      "description": "Utilisez des modèles locaux (Ollama, LM Studio, llama.cpp, vLLM) ou des routeurs hébergés (OpenRouter, Groq, Together). Plusieurs points de terminaison peuvent servir en même temps.",
+      "presetLabel": "Type de point de terminaison",
+      "add": "Ajouter un point de terminaison",
+      "empty": "Aucun point de terminaison. Choisissez un type et ajoutez-en un.",
+      "localHint": "Les serveurs locaux doivent accepter les requêtes de ce site. Pour Ollama, définissez OLLAMA_ORIGINS."
     }
   },
   "providers": {
@@ -328,7 +358,8 @@
     "google": "Google",
     "xai": "XAI",
     "deepseek": "DeepSeek",
-    "perplexity": "Perplexity"
+    "perplexity": "Perplexity",
+    "openai-compatible": "Compatible OpenAI"
   },
   "pages": {
     "prompt": {

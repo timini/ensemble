@@ -82,14 +82,16 @@
       "heading": "Embeddings provider",
       "description": "Agreement scores compare the meaning of answers using embeddings from one provider.",
       "options": {
-        "auto": "Automatic (OpenAI, then Google)",
+        "auto": "Automatic (OpenAI, then Google, then an OpenAI-compatible endpoint)",
         "openai": "OpenAI",
-        "google": "Google"
+        "google": "Google",
+        "openai-compatible": "OpenAI-compatible endpoint"
       },
       "noValidKey": "No valid key",
       "active": "Agreement will use {{provider}} embeddings.",
       "noneTitle": "No agreement score",
-      "noneDescription": "Add a valid OpenAI or Google API key to score agreement between answers."
+      "noneDescription": "Add a valid OpenAI or Google API key, or set an embedding model on an OpenAI-compatible endpoint, to score agreement between answers.",
+      "noValidKeyEndpoint": "No endpoint with an embedding model"
     },
     "runCostSummary": {
       "calls_one": "{{count}} model call",
@@ -114,7 +116,9 @@
       "consensusUnavailable": "This consensus method needs at least 3 answers, so it will not run.",
       "unpriced": "No price for {{models}}. Those calls are not in the cost.",
       "estimateSource": "Range assumes short to long answers. Prices from OpenRouter, {{date}}.",
-      "priceSource": "Prices from OpenRouter, {{date}}."
+      "priceSource": "Prices from OpenRouter, {{date}}.",
+      "local_one": "{{count}} call runs on a local model at no cost.",
+      "local_other": "{{count}} calls run on local models at no cost."
     },
     "majorityVoteBreakdown": {
       "title": "Majority vote",
@@ -158,6 +162,24 @@
       "other": {
         "title": "This model failed",
         "description": "The provider returned an error. The details are below."
+      }
+    },
+    "endpointInput": {
+      "baseUrl": "Base URL",
+      "apiKey": "API key",
+      "apiKeyOptional": "API key (optional)",
+      "embeddingModel": "Embedding model (optional)",
+      "embeddingModelHelp": "Used for agreement scores, for example nomic-embed-text on Ollama.",
+      "remove": "Remove {{name}}",
+      "showKey": "Show API key",
+      "hideKey": "Hide API key",
+      "local": "Local",
+      "status": {
+        "idle": "Not checked yet",
+        "validating": "Checking the endpoint...",
+        "valid_one": "Connected. {{count}} model available.",
+        "valid_other": "Connected. {{count}} models available.",
+        "invalid": "Could not connect: {{error}}"
       }
     }
   },
@@ -320,6 +342,14 @@
     "workflowNavigator": {
       "back": "Back",
       "continue": "Continue"
+    },
+    "endpointConfiguration": {
+      "heading": "OpenAI-compatible endpoints",
+      "description": "Use local models (Ollama, LM Studio, llama.cpp, vLLM) or hosted routers (OpenRouter, Groq, Together). Several endpoints can be used at once.",
+      "presetLabel": "Endpoint type",
+      "add": "Add endpoint",
+      "empty": "No endpoints yet. Pick a type and add one.",
+      "localHint": "Local servers must allow requests from this site. For Ollama, set OLLAMA_ORIGINS."
     }
   },
   "providers": {
@@ -328,7 +358,8 @@
     "google": "Google",
     "xai": "XAI",
     "deepseek": "DeepSeek",
-    "perplexity": "Perplexity"
+    "perplexity": "Perplexity",
+    "openai-compatible": "OpenAI-compatible"
   },
   "pages": {
     "prompt": {

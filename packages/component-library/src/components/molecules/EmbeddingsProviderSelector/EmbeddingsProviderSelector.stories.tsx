@@ -16,12 +16,12 @@ const meta = {
   argTypes: {
     value: {
       control: 'radio',
-      options: ['auto', 'openai', 'google'],
+      options: ['auto', 'openai', 'google', 'openai-compatible'],
       description: 'Stored preference',
     },
     activeProvider: {
       control: 'radio',
-      options: ['openai', 'google', null],
+      options: ['openai', 'google', 'openai-compatible', null],
       description: 'Provider that will compute embeddings',
     },
   },
@@ -47,7 +47,7 @@ type Story = StoryObj<typeof meta>;
 export const AutoBothAvailable: Story = {
   args: {
     value: 'auto',
-    available: { openai: true, google: true },
+    available: { openai: true, google: true, 'openai-compatible': false },
     activeProvider: 'openai',
     onChange: () => {},
   },
@@ -57,7 +57,7 @@ export const AutoBothAvailable: Story = {
 export const AutoGoogleOnly: Story = {
   args: {
     value: 'auto',
-    available: { openai: false, google: true },
+    available: { openai: false, google: true, 'openai-compatible': false },
     activeProvider: 'google',
     onChange: () => {},
   },
@@ -67,8 +67,18 @@ export const AutoGoogleOnly: Story = {
 export const GoogleOverride: Story = {
   args: {
     value: 'google',
-    available: { openai: true, google: true },
+    available: { openai: true, google: true, 'openai-compatible': false },
     activeProvider: 'google',
+    onChange: () => {},
+  },
+};
+
+/** Local models only: an Ollama endpoint with nomic-embed-text scores agreement. */
+export const LocalEndpointOnly: Story = {
+  args: {
+    value: 'auto',
+    available: { openai: false, google: false, 'openai-compatible': true },
+    activeProvider: 'openai-compatible',
     onChange: () => {},
   },
 };
@@ -77,7 +87,7 @@ export const GoogleOverride: Story = {
 export const NoneAvailable: Story = {
   args: {
     value: 'auto',
-    available: { openai: false, google: false },
+    available: { openai: false, google: false, 'openai-compatible': false },
     activeProvider: null,
     onChange: () => {},
   },
@@ -87,7 +97,7 @@ export const NoneAvailable: Story = {
 export const Interactive: Story = {
   args: {
     value: 'auto',
-    available: { openai: true, google: true },
+    available: { openai: true, google: true, 'openai-compatible': false },
     activeProvider: 'openai',
     onChange: () => {},
   },

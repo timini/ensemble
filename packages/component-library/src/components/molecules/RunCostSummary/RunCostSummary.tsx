@@ -4,6 +4,9 @@ import { Coins } from 'lucide-react';
 import { Icon } from '../../atoms/Icon';
 import { Text } from '../../atoms/Text';
 import { cn } from '../../../lib/utils';
+import { coverageOf, formatUsd } from './runCostFormat';
+
+export { formatUsd };
 
 /** Call counts of a planned run. */
 export interface RunCostCalls {
@@ -26,6 +29,8 @@ interface CommonProps {
    * or as unknown when no call has a price.
    */
   unpricedCallCount: number;
+  /** Priced calls to local models. When above zero, a note says they cost nothing. */
+  localCallCount?: number;
   /** Date of the price table, shown as the source of the prices. */
   priceDate?: string;
   className?: string;
@@ -49,30 +54,6 @@ export interface RunCostActualProps extends CommonProps {
 }
 
 export type RunCostSummaryProps = RunCostEstimateProps | RunCostActualProps;
-
-/**
- * Format a USD amount: exactly two significant digits below one dollar
- * ($0.012, $0.90), cents from there up. Amounts that would round to a
- * dollar at two significant digits use cents too.
- */
-export function formatUsd(value: number, locale: string): string {
-  const small = value > 0 && value < 0.995;
-  return new Intl.NumberFormat(locale, {
-    style: 'currency',
-    currency: 'USD',
-    ...(small
-      ? { minimumSignificantDigits: 2, maximumSignificantDigits: 2 }
-      : { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
-  }).format(value);
-}
-
-/** How much of the run the price table covers. */
-type Coverage = 'all' | 'partial' | 'none';
-
-function coverageOf(priced: number, unpriced: number): Coverage {
-  if (unpriced === 0) return 'all';
-  return priced === 0 ? 'none' : 'partial';
-}
 
 /**
  * RunCostSummary molecule shows the model calls and cost of a run.
@@ -169,6 +150,11 @@ export const RunCostSummary = React.forwardRef<HTMLDivElement, RunCostSummaryPro
           {props.variant === 'actual' && props.estimated && coverage !== 'none' && (
             <Text as="p" className="text-sm text-muted-foreground" data-testid="run-cost-estimated-note">
               {t('molecules.runCostSummary.estimatedNote')}
+            </Text>
+          )}
+          {(props.localCallCount ?? 0) > 0 && (
+            <Text as="p" className="text-sm text-muted-foreground" data-testid="run-cost-local">
+              {t('molecules.runCostSummary.local', { count: props.localCallCount })}
             </Text>
           )}
           {unpriced.length > 0 && (

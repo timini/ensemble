@@ -78,6 +78,7 @@ export const ModelSelectionList = React.forwardRef<HTMLDivElement, ModelSelectio
         xai: [],
         deepseek: [],
         perplexity: [],
+        'openai-compatible': [],
       };
 
       models.forEach((model) => {

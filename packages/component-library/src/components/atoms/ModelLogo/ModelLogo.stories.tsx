@@ -11,7 +11,7 @@ const meta = {
   argTypes: {
     provider: {
       control: 'select',
-      options: ['openai', 'anthropic', 'google', 'xai', 'deepseek', 'perplexity'],
+      options: ['openai', 'anthropic', 'google', 'xai', 'deepseek', 'perplexity', 'openai-compatible'],
     },
     modelName: {
       control: 'text',
@@ -43,6 +43,16 @@ export const Gemini: Story = {
 
 export const Grok: Story = {
   args: { provider: 'xai', modelName: 'Grok 4', size: 'lg' },
+};
+
+/** An open model on an OpenAI-compatible endpoint: the family comes from the id. */
+export const OpenModelOnEndpoint: Story = {
+  args: { provider: 'openai-compatible', modelId: 'ollama/qwen2.5:7b', size: 'lg' },
+};
+
+/** An OpenAI-compatible model of no known family gets the server icon. */
+export const UnknownOpenModel: Story = {
+  args: { provider: 'openai-compatible', modelId: 'custom/my-finetune', size: 'lg' },
 };
 
 export const ProviderFallback: Story = {

@@ -16,6 +16,13 @@ export { Badge, badgeVariants, type BadgeProps } from './components/atoms/Badge'
 export { Icon, iconVariants, type IconProps } from './components/atoms/Icon';
 export { ProviderLogo, providerLogoVariants, type ProviderLogoProps, type ProviderLogoProvider } from './components/atoms/ProviderLogo';
 export {
+  EndpointLogo,
+  endpointLogoVariants,
+  ENDPOINT_LOGO_PRESETS,
+  type EndpointLogoProps,
+  type EndpointLogoPreset,
+} from './components/atoms/EndpointLogo';
+export {
   ModelLogo,
   modelLogoVariants,
   resolveModelLogoKey,
@@ -84,6 +91,13 @@ export {
   type EmbeddingsProviderValue,
 } from './components/molecules/EmbeddingsProviderSelector';
 export {
+  EndpointInput,
+  type EndpointInputProps,
+  type EndpointInputValue,
+  type EndpointField,
+  type EndpointValidationStatus,
+} from './components/molecules/EndpointInput';
+export {
   ConsensusPresetSelector,
   type ConsensusPresetSelectorProps,
 } from './components/molecules/ConsensusPresetSelector';
@@ -108,6 +122,11 @@ export {
 
 // Organisms (Level 3: Complex UI sections)
 export { ModeSelector, type ModeSelectorProps, type Mode as ModeType } from './components/organisms/ModeSelector';
+export {
+  EndpointConfiguration,
+  type EndpointConfigurationProps,
+  type EndpointPresetOption,
+} from './components/organisms/EndpointConfiguration';
 export { ApiKeyConfiguration, type ApiKeyConfigurationProps, type ApiKeyConfigurationItem } from './components/organisms/ApiKeyConfiguration';
 export { EnsembleConfigurationSummary, type EnsembleConfigurationSummaryProps } from './components/organisms/EnsembleConfigurationSummary';
 export { ConsensusCard, type ConsensusCardProps, type ConsensusStatus } from './components/organisms/ConsensusCard';

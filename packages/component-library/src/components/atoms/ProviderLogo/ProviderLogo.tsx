@@ -7,6 +7,7 @@ import DeepMindMono from '@lobehub/icons/es/DeepMind/components/Mono';
 import XAIMono from '@lobehub/icons/es/XAI/components/Mono';
 import DeepSeekMono from '@lobehub/icons/es/DeepSeek/components/Mono';
 import PerplexityMono from '@lobehub/icons/es/Perplexity/components/Mono';
+import { Server } from 'lucide-react';
 
 const SIZE_MAP = {
   sm: 20,
@@ -29,7 +30,17 @@ const providerLogoVariants = cva('inline-flex shrink-0 items-center justify-cent
   },
 });
 
-export type ProviderLogoProvider = 'openai' | 'anthropic' | 'google' | 'xai' | 'deepseek' | 'perplexity';
+export type ProviderLogoProvider =
+  | 'openai'
+  | 'anthropic'
+  | 'google'
+  | 'xai'
+  | 'deepseek'
+  | 'perplexity'
+  | 'openai-compatible';
+
+/** OpenAI-compatible endpoints are many products, so the provider gets a generic server icon. */
+const ServerIcon: React.FC<{ size?: number }> = ({ size }) => <Server size={size} aria-hidden="true" />;
 
 export interface ProviderLogoProps
   extends Omit<React.HTMLAttributes<HTMLSpanElement>, 'children'>,
@@ -38,13 +49,14 @@ export interface ProviderLogoProps
   provider: ProviderLogoProvider;
 }
 
-const PROVIDER_ICONS: Record<ProviderLogoProvider, typeof OpenAIMono> = {
+const PROVIDER_ICONS: Record<ProviderLogoProvider, React.ComponentType<{ size?: number }>> = {
   openai: OpenAIMono,
   anthropic: AnthropicMono,
   google: DeepMindMono,
   xai: XAIMono,
   deepseek: DeepSeekMono,
   perplexity: PerplexityMono,
+  'openai-compatible': ServerIcon,
 };
 
 /**

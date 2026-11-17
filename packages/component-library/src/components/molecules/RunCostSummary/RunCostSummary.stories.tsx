@@ -67,6 +67,20 @@ export const EstimateWithUnpricedModels: Story = {
 };
 
 /** After a run where every provider reported token counts. */
+/** A run on local models only: priced at zero and labelled local. */
+export const ActualLocalModels: Story = {
+  args: {
+    variant: 'actual',
+    callCount: 7,
+    totalUsd: 0,
+    estimated: false,
+    pricedCallCount: 7,
+    unpricedCallCount: 0,
+    localCallCount: 7,
+    priceDate: '2026-11-16',
+  },
+};
+
 export const ActualReported: Story = {
   args: {
     variant: 'actual',
