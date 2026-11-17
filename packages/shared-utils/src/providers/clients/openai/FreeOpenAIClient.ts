@@ -104,12 +104,14 @@ export class FreeOpenAIClient extends BaseFreeClient {
     }
     const parsed = JSON.parse(raw) as T;
     const tokenCount = response.usage?.total_tokens;
+    const usage = fromChatCompletionUsage(response.usage);
 
     return {
       parsed,
       raw,
       responseTimeMs: Date.now() - startTime,
       ...(tokenCount ? { tokenCount } : {}),
+      ...(usage ? { usage } : {}),
     };
   }
 

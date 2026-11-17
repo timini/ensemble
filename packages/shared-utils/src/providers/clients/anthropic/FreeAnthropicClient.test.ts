@@ -115,6 +115,7 @@ describe('FreeAnthropicClient', () => {
       expect(result.parsed).toEqual({ answer: 'B' });
       expect(result.raw).toBe('{"answer":"B"}');
       expect(result.tokenCount).toBe(15);
+      expect(result.usage).toEqual({ inputTokens: 10, outputTokens: 5 });
 
       const request = lastRequest();
       expect(request).toMatchObject({
@@ -157,6 +158,7 @@ describe('FreeAnthropicClient', () => {
       );
 
       expect(result.parsed).toEqual({ answer: 'C' });
+      expect(result.usage).toEqual({ inputTokens: 2, outputTokens: 3 });
       const request = lastRequest();
       expect(request).toMatchObject({
         tool_choice: { type: 'tool', name: 'mcq_answer' },

@@ -1,6 +1,6 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { BaseFreeClient, type StreamOptions, type StructuredOptions } from '../base/BaseFreeClient';
-import type { StructuredResponse, ValidationResult } from '../../types';
+import type { StructuredResponse, TokenUsage, ValidationResult } from '../../types';
 import { sanitizeProviderErrorMessage } from '../../utils/sanitizeSensitiveData';
 import { acceptsSamplingParams, supportsStructuredOutputs } from './anthropicModelRules';
 
@@ -21,9 +21,12 @@ function samplingParams(model: string, temperature: number | undefined): { tempe
   return temperature !== undefined && acceptsSamplingParams(model) ? { temperature } : {};
 }
 
-function tokenCountOf(response: Anthropic.Message): { tokenCount?: number } {
-  const total = (response.usage?.input_tokens ?? 0) + (response.usage?.output_tokens ?? 0);
-  return total > 0 ? { tokenCount: total } : {};
+/** Token count and input/output usage of a non-streaming response, when reported. */
+function tokenCountOf(response: Anthropic.Message): { tokenCount?: number; usage?: TokenUsage } {
+  const inputTokens = response.usage?.input_tokens ?? 0;
+  const outputTokens = response.usage?.output_tokens ?? 0;
+  const total = inputTokens + outputTokens;
+  return total > 0 ? { tokenCount: total, usage: { inputTokens, outputTokens } } : {};
 }
 
 export class FreeAnthropicClient extends BaseFreeClient {

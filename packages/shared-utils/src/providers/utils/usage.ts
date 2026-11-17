@@ -5,6 +5,12 @@ export interface ChatCompletionUsage {
   prompt_tokens?: number;
   completion_tokens?: number;
   total_tokens?: number;
+  /**
+   * OpenAI counts reasoning tokens inside `completion_tokens`. xAI reports
+   * them here only, outside `completion_tokens`, and adds them to
+   * `total_tokens`.
+   */
+  completion_tokens_details?: { reasoning_tokens?: number } | null;
 }
 
 /** Usage metadata of the Gemini API. Thinking tokens are billed as output. */
@@ -28,9 +34,19 @@ function usageOf(input: number | undefined, output: number | undefined): TokenUs
   return usage.inputTokens + usage.outputTokens > 0 ? usage : undefined;
 }
 
-/** Input and output tokens from an OpenAI-compatible usage block. */
+/**
+ * Input and output tokens from an OpenAI-compatible usage block. Output is
+ * the larger of `completion_tokens` and `total_tokens - prompt_tokens`, so
+ * xAI reasoning tokens (left out of `completion_tokens` but billed as output)
+ * are counted. For OpenAI and DeepSeek the two values are equal.
+ */
 export function fromChatCompletionUsage(usage: ChatCompletionUsage | null | undefined) {
-  return usageOf(usage?.prompt_tokens, usage?.completion_tokens);
+  if (!usage) return undefined;
+  const { prompt_tokens: prompt, completion_tokens: completion, total_tokens: total } = usage;
+  const rest = total !== undefined && prompt !== undefined ? total - prompt : undefined;
+  const output =
+    completion === undefined ? rest : rest === undefined ? completion : Math.max(completion, rest);
+  return usageOf(prompt, output);
 }
 
 /** Input and output tokens from Gemini usage metadata. */

@@ -11,6 +11,28 @@ describe('usage mappers', () => {
     expect(fromChatCompletionUsage(null)).toBeUndefined();
   });
 
+  it('keeps OpenAI output when reasoning is already inside completion_tokens', () => {
+    expect(
+      fromChatCompletionUsage({
+        prompt_tokens: 10,
+        completion_tokens: 50,
+        total_tokens: 60,
+        completion_tokens_details: { reasoning_tokens: 40 },
+      }),
+    ).toEqual({ inputTokens: 10, outputTokens: 50 });
+  });
+
+  it('counts xAI reasoning tokens, which completion_tokens leaves out, as output', () => {
+    expect(
+      fromChatCompletionUsage({
+        prompt_tokens: 47,
+        completion_tokens: 1,
+        total_tokens: 245,
+        completion_tokens_details: { reasoning_tokens: 197 },
+      }),
+    ).toEqual({ inputTokens: 47, outputTokens: 198 });
+  });
+
   it('counts Gemini thinking tokens as output', () => {
     expect(
       fromGeminiUsage({ promptTokenCount: 10, candidatesTokenCount: 5, thoughtsTokenCount: 20 }),

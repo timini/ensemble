@@ -289,4 +289,15 @@ describe('FreeOpenAIClient sampling parameters', () => {
     expect(request).not.toHaveProperty('temperature');
     expect(request).not.toHaveProperty('max_tokens');
   });
+
+  it('reports input and output tokens of a structured call', async () => {
+    mocks.openAiChatCreate.mockResolvedValueOnce({
+      choices: [{ message: { content: '{"answer":"4"}' } }],
+      usage: { prompt_tokens: 20, completion_tokens: 6, total_tokens: 26 },
+    });
+    const client = new FreeOpenAIClient('openai', () => 'sk-test');
+    const result = await client.generateStructured('2+2?', 'gpt-4.1', schema);
+    expect(result.usage).toEqual({ inputTokens: 20, outputTokens: 6 });
+    expect(result.tokenCount).toBe(26);
+  });
 });

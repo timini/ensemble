@@ -112,12 +112,14 @@ export class FreeGoogleClient extends BaseFreeClient {
     }
     const parsed = JSON.parse(raw) as T;
     const tokenCount = result.response.usageMetadata?.totalTokenCount;
+    const usage = fromGeminiUsage(result.response.usageMetadata);
 
     return {
       parsed,
       raw,
       responseTimeMs: Date.now() - startTime,
       ...(tokenCount ? { tokenCount } : {}),
+      ...(usage ? { usage } : {}),
     };
   }
 
