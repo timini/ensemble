@@ -314,7 +314,7 @@
       "levels": {
         "high": {
           "label": "High agreement",
-          "meaning": "The answers say the same thing. The consensus is probably safe to use."
+          "meaning": "The answers say the same thing. That is a reason for more confidence, not proof."
         },
         "medium": {
           "label": "Mixed agreement",
@@ -372,7 +372,7 @@
       "body": "A single model sounds just as sure when it is right as when it is guessing. Asking several and measuring how closely they agree gives you a warning sign.",
       "benchmarks": "See how we test it",
       "levels": {
-        "high": "The models say the same thing. The consensus is probably safe to use.",
+        "high": "The models say the same thing. That is a reason for more confidence, not proof.",
         "medium": "They overlap but differ on details. Check the parts they disagree on.",
         "low": "Stop and read the individual answers. No single answer should be trusted here."
       }

@@ -9,9 +9,10 @@
  * consensus answer. Costs come from the shared price table.
  *
  * Needs OPENROUTER_API_KEY in the environment. Costs well under one US cent.
- * Build shared-utils and the consensus packages first.
+ * From the repo root:
  *
- *   node --env-file=../eval/.env.local scripts/record-example-run.mjs
+ *   npm run build --workspace=packages/shared-utils
+ *   cd packages/app && node --env-file=../eval/.env.local --import tsx scripts/record-example-run.mjs
  */
 import { writeFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";

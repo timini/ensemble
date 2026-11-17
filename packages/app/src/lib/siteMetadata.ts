@@ -33,6 +33,29 @@ export const PAGE_METADATA = {
   benchmarks: {
     title: "Benchmarks",
     description:
-      "How we test whether an ensemble of models beats its best member, with the method, the numbers and their confidence intervals.",
+      "How we test whether an ensemble of models beats its best member: the method, and the results once the run is published.",
   },
 } as const;
+
+/** Title and description of one page, as in PAGE_METADATA. */
+export interface PageMetadata {
+  readonly title: string;
+  readonly description: string;
+}
+
+/**
+ * Open Graph metadata for one page. Next.js replaces the root layout's
+ * `openGraph` object instead of merging it, so each page has to repeat the
+ * type and site name. The title template does not apply inside `openGraph`,
+ * so the site name is added here unless the title already contains it.
+ */
+export function pageOpenGraph(page: PageMetadata) {
+  return {
+    type: "website" as const,
+    siteName: SITE_NAME,
+    title: page.title.includes(SITE_NAME)
+      ? page.title
+      : `${page.title} | ${SITE_NAME}`,
+    description: page.description,
+  };
+}

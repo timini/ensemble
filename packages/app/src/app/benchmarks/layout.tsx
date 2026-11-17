@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
-import { PAGE_METADATA } from "~/lib/siteMetadata";
+import { PAGE_METADATA, pageOpenGraph } from "~/lib/siteMetadata";
 
 export const metadata: Metadata = {
   ...PAGE_METADATA.benchmarks,
-  openGraph: PAGE_METADATA.benchmarks,
+  openGraph: pageOpenGraph(PAGE_METADATA.benchmarks),
 };
 
 /** Sets the metadata of /benchmarks; the page itself is a client component. */

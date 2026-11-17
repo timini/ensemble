@@ -30,7 +30,7 @@ describe('AgreementSummary', () => {
     const level = screen.getByTestId('agreement-level');
     expect(level).toHaveAttribute('data-level', 'high');
     expect(level).toHaveTextContent('High agreement');
-    expect(screen.getByTestId('agreement-meaning')).toHaveTextContent('probably safe to use');
+    expect(screen.getByTestId('agreement-meaning')).toHaveTextContent('a reason for more confidence, not proof');
   });
 
   it('applies calibrated thresholds', () => {

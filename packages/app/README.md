@@ -43,7 +43,7 @@ npm run build --workspace=packages/shared-utils
 cd packages/app && node --env-file=../eval/.env.local --import tsx scripts/record-example-run.mjs
 ```
 
-Page metadata (title, description, Open Graph) is set by the server layouts: `src/app/layout.tsx` for defaults, the page or route `layout.tsx` for each public page, with the text in `src/lib/siteMetadata.ts`. The client side of the root layout is `src/app/_components/RootShell.tsx`.
+Page metadata (title, description, Open Graph) is set by the server layouts: `src/app/layout.tsx` for defaults, the page or route `layout.tsx` for each public page, with the text in `src/lib/siteMetadata.ts`. Next.js replaces the root `openGraph` object rather than merging it, so pages build theirs with `pageOpenGraph()`, which repeats the type and site name and adds the site name to the title. The client side of the root layout is `src/app/_components/RootShell.tsx`.
 
 ### Agreement scores
 

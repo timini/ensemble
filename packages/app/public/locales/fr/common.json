@@ -268,7 +268,7 @@
           {
             "id": "score",
             "title": "Un score d’accord lisible",
-            "body": "Les réponses sont comparées deux à deux avec des embeddings sémantiques. Un accord élevé suggère une réponse fiable ; un accord faible vous invite à lire chaque réponse."
+            "body": "Les réponses sont comparées deux à deux avec des embeddings sémantiques. Un accord élevé signifie que les modèles donnent la même réponse : c’est une raison d’avoir plus confiance, pas une preuve ; un accord faible vous invite à lire chaque réponse."
           },
           {
             "id": "merge",
@@ -350,7 +350,7 @@
       },
       "claims": {
         "heading": "Ce que nous pouvons affirmer, et pas encore",
-        "body": "Dans nos tests, au moins un modèle de l’ensemble avait la bonne réponse sur 97,5 à 100 % des questions de maths où le meilleur modèle seul obtenait 85 à 95 %. Que la réponse fusionnée batte le meilleur modèle seul n’est pas établi : nos résultats sont pour l’instant partagés et les échantillons petits. La page des benchmarks donne la méthode et les chiffres."
+        "body": "Qu’un ensemble batte son meilleur modèle seul n’est pas établi. La page des benchmarks décrit comment nous le testons ; les résultats y paraîtront une fois l’évaluation terminée."
       }
     },
     "benchmarks": {

@@ -15,6 +15,9 @@ test.describe('Features Page', () => {
     await expect(page.getByRole('heading', { level: 1 })).toHaveText('Everything you need to compare AI answers');
     await expect(page.getByTestId('page-intro-lead')).toContainText('does not promise that the merged answer beats the best single model');
     await expect(page).toHaveTitle('Features | Ensemble AI');
+    await expect(page.locator('meta[property="og:title"]')).toHaveAttribute('content', 'Features | Ensemble AI');
+    await expect(page.locator('meta[property="og:site_name"]')).toHaveAttribute('content', 'Ensemble AI');
+    await expect(page.locator('meta[property="og:type"]')).toHaveAttribute('content', 'website');
   });
 
   test('lists what a run gives you, where models come from, privacy and the two modes', async ({ page }) => {
@@ -29,6 +32,9 @@ test.describe('Features Page', () => {
   test('makes no accuracy claim beyond the benchmarks, and links to them', async ({ page }) => {
     await expect(page.getByTestId('features-page')).not.toContainText(/more accurate|better answers|outperform/i);
     await expect(page.getByTestId('features-claims')).toContainText('is not settled');
+    // No benchmark run is published yet, so the page states no figures.
+    await expect(page.getByTestId('features-claims')).not.toContainText(/\d\s?%/);
+    await expect(page.getByTestId('features-page')).not.toContainText(/safe to use/i);
     await page.getByTestId('features-claims-benchmarks').click();
     await expect(page).toHaveURL(/\/benchmarks$/);
   });

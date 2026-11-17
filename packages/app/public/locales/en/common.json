@@ -268,7 +268,7 @@
           {
             "id": "score",
             "title": "An agreement score you can read",
-            "body": "Answers are compared pair by pair with semantic embeddings. High agreement suggests the answer is safe to use; low agreement tells you to read every answer."
+            "body": "Answers are compared pair by pair with semantic embeddings. High agreement means the models give the same answer, which is a reason for more confidence but not proof; low agreement tells you to read every answer."
           },
           {
             "id": "merge",
@@ -350,7 +350,7 @@
       },
       "claims": {
         "heading": "What we can and cannot claim yet",
-        "body": "In our tests, at least one model in the ensemble had the right answer on 97.5 to 100% of maths questions where the best single model scored 85 to 95%. Whether the merged answer beats the best single model is not settled: our results so far are mixed and the samples small. The benchmarks page has the method and the numbers."
+        "body": "Whether an ensemble beats its best single model is not settled. The benchmarks page describes how we test it; results will appear there once the run is done."
       }
     },
     "benchmarks": {

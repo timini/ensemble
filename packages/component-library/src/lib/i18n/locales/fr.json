@@ -314,7 +314,7 @@
       "levels": {
         "high": {
           "label": "Accord élevé",
-          "meaning": "Les réponses disent la même chose. Le consensus est probablement fiable."
+          "meaning": "Les réponses disent la même chose. C'est une raison d'avoir plus confiance, pas une preuve."
         },
         "medium": {
           "label": "Accord partiel",
@@ -372,7 +372,7 @@
       "body": "Un modèle seul paraît aussi sûr de lui quand il a raison que quand il devine. En interroger plusieurs et mesurer leur accord vous donne un signal d’alerte.",
       "benchmarks": "Voir comment nous le testons",
       "levels": {
-        "high": "Les modèles disent la même chose. Le consensus est probablement fiable.",
+        "high": "Les modèles disent la même chose. C'est une raison d'avoir plus confiance, pas une preuve.",
         "medium": "Ils se recoupent mais diffèrent sur des détails. Vérifiez les points de désaccord.",
         "low": "Arrêtez-vous et lisez chaque réponse. Aucune réponse seule ne mérite confiance ici."
       }

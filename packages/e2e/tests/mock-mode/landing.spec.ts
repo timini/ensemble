@@ -68,6 +68,7 @@ test.describe('Landing page', () => {
     await expect(page.locator('meta[name="description"]')).toHaveAttribute('content', /see where they agree/);
     await expect(page.locator('meta[property="og:title"]')).toHaveAttribute('content', /Ensemble AI/);
     await expect(page.locator('meta[property="og:description"]')).toHaveAttribute('content', /.+/);
+    await expect(page.locator('meta[property="og:site_name"]')).toHaveAttribute('content', 'Ensemble AI');
   });
 
   test('is translated into French', async ({ page }) => {
