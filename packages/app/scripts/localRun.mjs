@@ -103,3 +103,60 @@ export function startupMessage(port) {
     "Press Ctrl+C to stop.",
   ].join("\n");
 }
+
+/**
+ * @typedef {object} BuildMarker
+ * @property {boolean} mockMode NEXT_PUBLIC_MOCK_MODE of the build; always
+ *   false for a build made by `npm run local`.
+ * @property {string | null} gitHead commit the build was made from, or null
+ *   outside a git checkout.
+ */
+
+/**
+ * Where `npm run local` records the build it made. `next build` empties
+ * .next, so a later build by any other command removes the marker too.
+ * @param {string} appDir absolute path of packages/app
+ * @returns {string}
+ */
+export function buildMarkerPath(appDir) {
+  return path.join(appDir, ".next/standalone/.ensemble-local.json");
+}
+
+/**
+ * The marker to write after a successful build.
+ * @param {string | null} gitHead
+ * @returns {BuildMarker}
+ */
+export function buildMarker(gitHead) {
+  return { mockMode: false, gitHead };
+}
+
+/**
+ * Why the app must be built before it runs, or null to reuse the build.
+ * NEXT_PUBLIC_MOCK_MODE is fixed at build time, so a build this command did
+ * not make (perhaps a mock mode build) or one from an older commit is not
+ * reused. Uncommitted changes are not detected; use --rebuild for those.
+ * @param {object} state
+ * @param {boolean} state.rebuild --rebuild was given
+ * @param {boolean} state.serverExists the standalone server.js exists
+ * @param {unknown} state.marker parsed marker file, or null when missing or
+ *   unreadable
+ * @param {string | null} state.gitHead current commit, or null
+ * @returns {string | null}
+ */
+export function buildReason({ rebuild, serverExists, marker, gitHead }) {
+  if (rebuild) return "Building Ensemble (--rebuild)...";
+  if (!serverExists) {
+    return "Building Ensemble (first run only; this takes a few minutes)...";
+  }
+  const recorded = /** @type {Partial<BuildMarker> | null} */ (
+    marker && typeof marker === "object" ? marker : null
+  );
+  if (!recorded || recorded.mockMode !== false) {
+    return "Building Ensemble again: the existing build was not made by npm run local...";
+  }
+  if ((recorded.gitHead ?? null) !== gitHead) {
+    return "Building Ensemble again: the code has changed since the last build...";
+  }
+  return null;
+}

@@ -1,6 +1,9 @@
 import { describe, expect, it } from "vitest";
 import path from "node:path";
 import {
+  buildMarker,
+  buildMarkerPath,
+  buildReason,
   parseLocalRunArgs,
   standalonePaths,
   startupMessage,
@@ -53,5 +56,40 @@ describe("local run", () => {
     expect(message).toContain("http://localhost:3000");
     expect(message).toContain("OLLAMA_ORIGINS");
     expect(message).not.toMatch(/[–—]/);
+  });
+
+  it("keeps a marker next to the standalone build it made", () => {
+    expect(buildMarkerPath("/repo/packages/app")).toBe(
+      path.join("/repo/packages/app", ".next/standalone/.ensemble-local.json"),
+    );
+    expect(buildMarker("abc123")).toEqual({
+      mockMode: false,
+      gitHead: "abc123",
+    });
+  });
+
+  it("reuses only a build it made itself, in real mode, at the same commit", () => {
+    const ok = {
+      rebuild: false,
+      serverExists: true,
+      marker: buildMarker("abc123"),
+      gitHead: "abc123",
+    };
+    expect(buildReason(ok)).toBeNull();
+    expect(
+      buildReason({ ...ok, gitHead: null, marker: buildMarker(null) }),
+    ).toBeNull();
+    expect(buildReason({ ...ok, rebuild: true })).toMatch(/--rebuild/);
+    expect(buildReason({ ...ok, serverExists: false })).toMatch(/first run/);
+    // A build made by `npm run build` (maybe in mock mode) has no marker.
+    expect(buildReason({ ...ok, marker: null })).toMatch(
+      /not made by npm run local/,
+    );
+    expect(
+      buildReason({ ...ok, marker: { mockMode: true, gitHead: "abc123" } }),
+    ).toMatch(/not made by npm run local/);
+    expect(buildReason({ ...ok, gitHead: "def456" })).toMatch(
+      /code has changed/,
+    );
   });
 });

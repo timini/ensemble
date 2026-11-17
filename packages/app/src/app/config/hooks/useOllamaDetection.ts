@@ -12,6 +12,7 @@ import type {
 } from "@/components/molecules/OllamaDetectedNotice";
 import { useStore } from "~/store";
 import {
+  ASKED_OLLAMA_CHECK_TIMEOUT_MS,
   LOCAL_MODELS_GUIDE_URL,
   LOCAL_RUN_COMMAND,
   SUGGESTED_OLLAMA_CHAT_MODEL,
@@ -37,7 +38,9 @@ interface UseOllamaDetectionOptions {
  * browser already lets reach this machine, looks right away with a short
  * timeout and shows nothing when Ollama is absent. Otherwise a hosted page
  * offers a button that looks, so the browser's permission prompt follows a
- * click; it shows nothing to users who already have a key or denied access.
+ * click, and that check waits up to 30 s for the user to answer the prompt.
+ * The offer to look is hidden from users who have a valid key (also when the
+ * key turns valid later) or who denied access.
  * Mock mode never looks.
  *
  * @returns props for OllamaDetectedNotice, or null when nothing is shown
@@ -66,7 +69,16 @@ export function useOllamaDetection({
       const permission = await loopbackPermissionState();
       if (cancelled) return;
       if (!shouldProbeAutomatically(origin, permission)) {
-        if (permission !== "denied" && !hasValidKey) setState("ask");
+        // Keep the outcome of a check the user started; otherwise ask only
+        // while no key is valid, so a key that turns valid hides the offer.
+        const ask = permission !== "denied" && !hasValidKey;
+        setState((current) =>
+          current === null || current === "ask"
+            ? ask
+              ? "ask"
+              : null
+            : current,
+        );
         return;
       }
       const result = await detectOllama({ url: ollamaProbeURL() });
@@ -81,7 +93,10 @@ export function useOllamaDetection({
 
   const onCheck = useCallback(() => {
     setState("checking");
-    void detectOllama({ url: ollamaProbeURL() }).then((result) => {
+    void detectOllama({
+      url: ollamaProbeURL(),
+      timeoutMs: ASKED_OLLAMA_CHECK_TIMEOUT_MS,
+    }).then((result) => {
       if (result.found) setFound(result);
       setState(result.found ? "found" : "notFound");
     });
@@ -105,6 +120,7 @@ export function useOllamaDetection({
     chatPullCommand: `ollama pull ${SUGGESTED_OLLAMA_CHAT_MODEL}`,
     hosted: !isLoopbackURL(origin),
     localRunCommand: LOCAL_RUN_COMMAND,
+    probeUrl: ollamaProbeURL(),
     guideUrl: LOCAL_MODELS_GUIDE_URL,
     onAdd,
     onCheck,

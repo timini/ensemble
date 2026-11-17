@@ -7,11 +7,14 @@
  * docs/LOCAL_MODELS.md.
  */
 import { spawn, spawnSync } from "node:child_process";
-import { cpSync, existsSync } from "node:fs";
+import { cpSync, existsSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import {
   USAGE,
+  buildMarker,
+  buildMarkerPath,
+  buildReason,
   parseLocalRunArgs,
   standalonePaths,
   startupMessage,
@@ -34,11 +37,35 @@ if (options.help) {
   process.exit(0);
 }
 
+/** @returns {string | null} */
+function currentGitHead() {
+  const result = spawnSync("git", ["rev-parse", "HEAD"], {
+    cwd: repoRoot,
+    encoding: "utf8",
+  });
+  return result.status === 0 ? result.stdout.trim() : null;
+}
+
+/** @returns {unknown} */
+function readMarker() {
+  try {
+    return JSON.parse(readFileSync(markerPath, "utf8"));
+  } catch {
+    return null;
+  }
+}
+
 const paths = standalonePaths(appDir);
-if (options.rebuild || !existsSync(paths.server)) {
-  console.log(
-    "Building Ensemble (first run only; this takes a few minutes)...",
-  );
+const markerPath = buildMarkerPath(appDir);
+const gitHead = currentGitHead();
+const reason = buildReason({
+  rebuild: options.rebuild,
+  serverExists: existsSync(paths.server),
+  marker: readMarker(),
+  gitHead,
+});
+if (reason) {
+  console.log(reason);
   const npm = process.platform === "win32" ? "npm.cmd" : "npm";
   const build = spawnSync(npm, ["run", "build"], {
     cwd: repoRoot,
@@ -52,6 +79,7 @@ if (options.rebuild || !existsSync(paths.server)) {
     );
     process.exit(build.status ?? 1);
   }
+  writeFileSync(markerPath, `${JSON.stringify(buildMarker(gitHead))}\n`);
 }
 
 cpSync(paths.staticSource, paths.staticTarget, { recursive: true });

@@ -11,6 +11,7 @@ const base: OllamaDetectedNoticeProps = {
   chatPullCommand: 'ollama pull llama3.2:3b',
   hosted: false,
   localRunCommand: 'npm run local',
+  probeUrl: 'http://localhost:11434',
   onAdd: vi.fn(),
   onCheck: vi.fn(),
   onDismiss: vi.fn(),
@@ -70,5 +71,11 @@ describe('OllamaDetectedNotice', () => {
     render(<OllamaDetectedNotice {...base} state="notFound" hosted={false} />);
     expect(screen.queryByTestId('ollama-notice-help')).not.toBeInTheDocument();
     expect(screen.getByTestId('ollama-notice')).toHaveTextContent('ollama serve');
+    expect(screen.getByTestId('ollama-notice')).toHaveTextContent('http://localhost:11434');
+  });
+
+  it('names the address it looked at', () => {
+    render(<OllamaDetectedNotice {...base} state="notFound" hosted={false} probeUrl="http://127.0.0.1:11500" />);
+    expect(screen.getByTestId('ollama-notice')).toHaveTextContent('Ollama did not answer at http://127.0.0.1:11500.');
   });
 });

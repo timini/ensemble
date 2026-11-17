@@ -57,6 +57,7 @@ describe("useOllamaDetection", () => {
       embeddingModel: "nomic-embed-text:latest",
       hosted: false,
       embeddingPullCommand: "ollama pull nomic-embed-text",
+      probeUrl: "http://localhost:11434",
     });
     expect(detectOllama).toHaveBeenCalledWith({
       url: "http://localhost:11434",
@@ -117,6 +118,35 @@ describe("useOllamaDetection", () => {
     });
     await waitFor(() => expect(result.current?.state).toBe("notFound"));
     expect(detectOllama).toHaveBeenCalledTimes(1);
+    // The click raises the browser's permission prompt, and the request waits
+    // for the answer, so the check allows far longer than the 1.5 s default.
+    expect(detectOllama).toHaveBeenCalledWith({
+      url: "http://localhost:11434",
+      timeoutMs: 30_000,
+    });
+  });
+
+  it("stops asking once a key turns valid, and keeps the result of a check", async () => {
+    detectOllama.mockResolvedValue({ found: false });
+    const { result, rerender } = renderHook(
+      ({ hasValidKey }) =>
+        useOllamaDetection({ enabled: true, hasValidKey, pageOrigin: HOSTED }),
+      { initialProps: { hasValidKey: false } },
+    );
+    await waitFor(() => expect(result.current?.state).toBe("ask"));
+    rerender({ hasValidKey: true });
+    await waitFor(() => expect(result.current).toBeNull());
+
+    rerender({ hasValidKey: false });
+    await waitFor(() => expect(result.current?.state).toBe("ask"));
+    await act(async () => {
+      result.current?.onCheck();
+      await Promise.resolve();
+    });
+    await waitFor(() => expect(result.current?.state).toBe("notFound"));
+    rerender({ hasValidKey: true });
+    await new Promise((resolve) => setTimeout(resolve, 20));
+    expect(result.current?.state).toBe("notFound");
   });
 
   it("looks from the hosted site once the browser granted local access", async () => {

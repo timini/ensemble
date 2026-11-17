@@ -25,6 +25,8 @@ export interface OllamaDetectedNoticeProps {
   hosted: boolean;
   /** Command that runs Ensemble locally. */
   localRunCommand: string;
+  /** Address the app looked for Ollama at, named when nothing answered. */
+  probeUrl: string;
   /** Link to the local models guide. */
   guideUrl?: string;
   /** Add Ollama as an endpoint. */
@@ -49,7 +51,7 @@ const buttonClass =
  * ```tsx
  * <OllamaDetectedNotice state="found" chatModels={['llama3.2:3b']} embeddingModel="nomic-embed-text"
  *   embeddingPullCommand="ollama pull nomic-embed-text" chatPullCommand="ollama pull llama3.2:3b"
- *   hosted={false} localRunCommand="npm run local" onAdd={add} onCheck={check} onDismiss={hide} />
+ *   hosted={false} localRunCommand="npm run local" probeUrl="http://localhost:11434" onAdd={add} onCheck={check} onDismiss={hide} />
  * ```
  */
 export function OllamaDetectedNotice({
@@ -60,6 +62,7 @@ export function OllamaDetectedNotice({
   chatPullCommand,
   hosted,
   localRunCommand,
+  probeUrl,
   guideUrl,
   onAdd,
   onCheck,
@@ -104,7 +107,11 @@ export function OllamaDetectedNotice({
           )}
         </>
       ) : (
-        <p>{t(`${prefix}.${state === 'notFound' && !hosted ? 'notFoundLocal' : `${state}Description`}`)}</p>
+        <p>
+          {t(`${prefix}.${state === 'notFound' && !hosted ? 'notFoundLocal' : `${state}Description`}`, {
+            url: probeUrl,
+          })}
+        </p>
       )}
 
       {state === 'notFound' && hosted && (

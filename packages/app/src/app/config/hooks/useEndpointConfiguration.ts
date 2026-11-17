@@ -35,6 +35,24 @@ function shouldUseSuggestedModel(
   return current === "" || current === preset.embeddingModel;
 }
 
+/**
+ * A result from an earlier visit that the user may have fixed since without
+ * editing the endpoint: a local server that lacked the embedding model (they
+ * ran `ollama pull`), or a server that could not be reached or was blocked by
+ * the browser (they started it or allowed local network access).
+ */
+function isWorthCheckingAgain(endpoint: EndpointEntry): boolean {
+  if (
+    endpoint.errorCode === "unreachable" ||
+    endpoint.errorCode === "localBlocked"
+  )
+    return true;
+  return (
+    endpoint.embeddingModelFound === false &&
+    isLocalEndpoint(endpoint.presetId, endpoint.baseURL)
+  );
+}
+
 const PRESET_OPTIONS: EndpointPresetOption[] = ENDPOINT_PRESETS.map(
   ({ id, label }) => ({ id, label }),
 );
@@ -43,7 +61,10 @@ const PRESET_OPTIONS: EndpointPresetOption[] = ENDPOINT_PRESETS.map(
  * State and handlers for the OpenAI-compatible endpoints on the config page.
  * An endpoint is checked (`GET /models`) when it is added, 500 ms after an
  * edit of its base URL, key or embedding model, and on load when its status
- * is idle or its embedding model has not been looked up yet. It shows as
+ * is idle, its embedding model has not been looked up yet, a local server
+ * lacked the embedding model, or the server could not be reached or was
+ * blocked by the browser. The last cases are checked once per page load,
+ * so an endpoint that still fails is not checked over and over. It shows as
  * Local only when its preset is local and its base URL is loopback.
  *
  * @param enabled - false outside Free mode, or before the store has hydrated
@@ -56,6 +77,7 @@ export function useEndpointConfiguration(enabled: boolean) {
   const removeEndpoint = useStore((state) => state.removeEndpoint);
   const setEndpointStatus = useStore((state) => state.setEndpointStatus);
   const timers = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
+  const checkedOnLoad = useRef(false);
 
   const runCheck = useCallback(
     async (id: string) => {
@@ -105,11 +127,14 @@ export function useEndpointConfiguration(enabled: boolean) {
 
   useEffect(() => {
     if (!enabled) return;
+    const onLoad = !checkedOnLoad.current;
+    checkedOnLoad.current = true;
     endpoints
       .filter(
         (e) =>
           e.status === "idle" ||
-          (e.status === "valid" && e.embeddingModelFound === undefined),
+          (e.status === "valid" && e.embeddingModelFound === undefined) ||
+          (onLoad && e.status !== "validating" && isWorthCheckingAgain(e)),
       )
       .forEach((e) => scheduleCheck(e.id));
   }, [enabled, endpoints, scheduleCheck]);

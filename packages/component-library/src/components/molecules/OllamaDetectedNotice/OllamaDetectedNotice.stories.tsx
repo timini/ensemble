@@ -14,6 +14,7 @@ const meta = {
     chatPullCommand: 'ollama pull llama3.2:3b',
     hosted: false,
     localRunCommand: 'npm run local',
+    probeUrl: 'http://localhost:11434',
     guideUrl: 'https://github.com/timini/ensemble/blob/main/docs/LOCAL_MODELS.md',
     onAdd: () => {},
     onCheck: () => {},

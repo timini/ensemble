@@ -10,6 +10,13 @@ export const LOCAL_MODELS_GUIDE_URL =
 /** Runs Ensemble on the user's computer from a clone of the repository. */
 export const LOCAL_RUN_COMMAND = "npm run local";
 
+/**
+ * Time allowed for a check the user started. On a hosted page the click
+ * raises the browser's local network prompt, and the request waits until the
+ * user answers it, so the 1.5 s default of detectOllama would give up first.
+ */
+export const ASKED_OLLAMA_CHECK_TIMEOUT_MS = 30_000;
+
 /** A small chat model to suggest when Ollama has none installed. */
 export const SUGGESTED_OLLAMA_CHAT_MODEL = "llama3.2:3b";
 

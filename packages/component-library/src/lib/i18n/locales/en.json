@@ -221,7 +221,7 @@
       "checking": "Looking for Ollama...",
       "notFoundTitle": "Ollama was not found",
       "notFoundDescription": "Ollama did not answer.",
-      "notFoundLocal": "Ollama did not answer at http://localhost:11434. Start it (open the Ollama app, or run ollama serve) and look again.",
+      "notFoundLocal": "Ollama did not answer at {{url}}. Start it (open the Ollama app, or run ollama serve) and look again.",
       "checkAgain": "Look again"
     }
   },
