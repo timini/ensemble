@@ -14,7 +14,7 @@ Ensemble sends one prompt to 2 to 6 models in parallel, streams every answer sid
 
 Free mode works: bring your own keys for OpenAI, Anthropic, Google, xAI, DeepSeek and Perplexity, or point Ensemble at one or more OpenAI-compatible endpoints (Ollama, LM Studio, llama.cpp, vLLM, OpenRouter, Groq, Together or a custom URL). Local endpoints need no key. The browser calls the providers directly and keys are stored encrypted in the browser.
 
-Local models: with only Ollama installed, `npm run local` runs Ensemble on your computer, finds Ollama and runs a 3-model ensemble with real agreement scores and no API keys. See [docs/LOCAL_MODELS.md](./docs/LOCAL_MODELS.md) for the setup guide, other servers, recommended models and which browsers let the hosted site reach `localhost`.
+Local models: with only Ollama installed, `npm run local` runs Ensemble on your computer, finds Ollama and runs a 3-model ensemble with real agreement scores and no API keys. This flow is verified end to end against a fake Ollama server in the local-endpoint E2E suite, not yet against a real Ollama install. See [docs/LOCAL_MODELS.md](./docs/LOCAL_MODELS.md) for the setup guide, other servers, recommended models and which browsers let the hosted site reach `localhost`.
 
 Not finished yet (see the roadmap):
 

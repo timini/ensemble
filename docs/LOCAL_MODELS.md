@@ -31,13 +31,15 @@ This is the setup the M2 milestone targets: three local models, real agreement s
 4. Open http://localhost:3000/config and choose Free mode. Ensemble finds Ollama and offers to add it, listing the installed models. Click **Add Ollama**.
 5. Click **Next**, pick the three models and one of them as the summarizer, and ask a question. The answers, the agreement score (from `nomic-embed-text`) and the consensus all come from your machine. The cost shows as $0.00.
 
+This flow (finding Ollama, adding it, a 3-model ensemble with an agreement score) is verified end to end against a fake Ollama server in the local-endpoint E2E suite, not yet against a real Ollama install.
+
 Why run it locally? A page served from `http://localhost` may call other servers on `localhost` in every browser we tested, and Ollama accepts requests from `localhost` pages by default. The hosted HTTPS site needs extra setup and does not work in Safari at all (see Browser support below).
 
 ## Running Ensemble locally
 
 `npm run local` (from the repository root) runs `packages/app/bin/ensemble-local.mjs`. It:
 
-- builds the app the first time (the whole workspace, `npm run build`), or again with `--rebuild`;
+- builds the app (the whole workspace, `npm run build`) the first time, when the code has changed since its last build (a new git commit), when the existing build was not made by `npm run local` (for example a mock mode build from `npm run build`), and with `--rebuild`. It records each build it makes in `packages/app/.next/standalone/.ensemble-local.json`. Uncommitted edits are not detected; use `--rebuild` for those;
 - serves the production build on `http://localhost:3000`, bound to `127.0.0.1` so other machines on the network cannot reach it;
 - uses Free mode, so keys stay encrypted in your browser and model calls go straight from the browser to the servers.
 
@@ -45,7 +47,7 @@ Options go after `--`:
 
 ```bash
 npm run local -- --port 4000     # another port (or set PORT)
-npm run local -- --rebuild       # build again, for example after git pull
+npm run local -- --rebuild       # build again, for example after local edits
 npm run local -- --help
 ```
 
@@ -60,7 +62,7 @@ The hosted site can reach a local server in Chrome and Firefox, with two extra s
 
 Safari blocks `http://localhost` from HTTPS pages as mixed content. There is no setting to allow it; use `npm run local`.
 
-On the hosted site, Ensemble does not look for Ollama when the page loads, because that would raise the permission prompt unasked. It shows a **Look for Ollama** button instead (only on first run, when no endpoint is set up and no key is valid). When a check of a local endpoint fails from the hosted site, the endpoint card explains that the browser may have blocked it and shows the `npm run local` command.
+On the hosted site, Ensemble does not look for Ollama when the page loads, because that would raise the permission prompt unasked. It shows a **Look for Ollama** button instead (only on first run, when no endpoint is set up and no key is valid). The check after the click waits up to 30 seconds, so there is time to answer the prompt. We have not tested a real user clicking **Allow** in that prompt: a headless browser cannot answer it, so our tests cover only the granted and blocked states. When a check of a local endpoint fails from the hosted site, the endpoint card explains that the browser may have blocked it and shows the `npm run local` command.
 
 ## Setting OLLAMA_ORIGINS
 
@@ -132,7 +134,7 @@ Ensemble calls embeddings through the OpenAI-compatible endpoint (`POST /v1/embe
 
 - When Ensemble checks a local endpoint (`GET /v1/models`) and the embedding model in the field is missing, it switches to an embedding model the server has (`nomic-embed-text`, then `embeddinggemma`, `qwen3-embedding`, `mxbai-embed-large` and others, then any model with `embed` in its name). It never replaces a model you typed yourself, and never changes hosted endpoints.
 - When an endpoint is the only embedding provider (no OpenAI or Google key), the automatic embeddings setting uses it. You can also pick "OpenAI-compatible endpoint" explicitly on the configuration page.
-- When Ollama has no embedding model, the endpoint card, the Ollama offer and the review page show the exact command: `ollama pull nomic-embed-text`. After pulling, open the configuration page again so Ensemble checks the endpoint and finds it.
+- When Ollama has no embedding model, the endpoint card, the Ollama offer and the review page show the exact command: `ollama pull nomic-embed-text`. After pulling, open the configuration page again (or reload it): on load Ensemble checks again any local endpoint that lacked its embedding model, and any endpoint that could not be reached or was blocked by the browser.
 
 Other servers: LM Studio lists embedding models such as `text-embedding-nomic-embed-text-v1.5` once loaded. llama.cpp serves embeddings only from a server started with `--embeddings`, usually a second `llama-server` on another port added as a second endpoint. OpenRouter's embedding models are not in its `/models` list, so Ensemble does not use them yet; use a local embedding model or an OpenAI or Google key.
 
@@ -171,18 +173,16 @@ Hosted routers need no `OLLAMA_ORIGINS` or permission prompt; they work from the
 
 ## Troubleshooting
 
-**"Your browser did not let this site reach a server on your computer."** The hosted site called `localhost` and the browser blocked it, or the server refused the site's origin. In Chrome or Firefox, allow local network access in the site settings and set `OLLAMA_ORIGINS`. In Safari, or if that does not help, use `npm run local`.
-
-**"Could not connect: 403 ..."** The server rejected the site's origin. Set `OLLAMA_ORIGINS` (or the CORS setting of your server) to the site's URL and restart the server.
+**"Your browser did not let this site reach a server on your computer."** The hosted site called `localhost` and the browser blocked it, or the server refused the site's origin. A server that does not allow the site's origin (for Ollama, `OLLAMA_ORIGINS` is not set) also ends up here: its 403 carries no CORS headers, so the page never sees it. In Chrome or Firefox, allow local network access in the site settings and set `OLLAMA_ORIGINS`, then reload the configuration page. In Safari, or if that does not help, use `npm run local`.
 
 **"Could not reach the endpoint."** Nothing answered at the base URL. Check that the server runs (`curl http://localhost:11434/api/tags` for Ollama) and that the port in the base URL matches.
 
 **The Ollama offer does not appear.** It only shows on first run: in Free mode, with no endpoint configured, and until you dismiss it. On the hosted site it shows a **Look for Ollama** button instead of looking by itself. You can always click **Ollama** under "OpenAI-compatible endpoints" to add it by hand.
 
-**No agreement score.** No embedding model is available. Run `ollama pull nomic-embed-text`, then open the configuration page again.
+**No agreement score.** No embedding model is available. Run `ollama pull nomic-embed-text`, then open (or reload) the configuration page, which checks the endpoint again.
 
 **Answers time out.** A model that is loading for the first time can take a while; each answer may take up to 120 seconds. Run the ensemble again once the models are loaded, or use smaller models.
 
 **Port 3000 is in use.** `npm run local -- --port 4000`.
 
-**The local run shows an old version.** `npm run local -- --rebuild`.
+**The local run shows an old version.** It rebuilds by itself after a new commit, but not after uncommitted edits. Run `npm run local -- --rebuild`.
