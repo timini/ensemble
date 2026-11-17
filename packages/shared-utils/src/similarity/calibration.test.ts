@@ -35,6 +35,11 @@ describe('embeddingModelKey', () => {
     expect(embeddingModelKey('openai', 'text-embedding-3-small')).toBe('openai/text-embedding-3-small');
     expect(embeddingModelKey('ollama-2', 'nomic-embed-text')).toBe('ollama/nomic-embed-text');
   });
+
+  it("drops Ollama's default :latest tag, which names the same model", () => {
+    expect(embeddingModelKey('ollama', 'nomic-embed-text:latest')).toBe('ollama/nomic-embed-text');
+    expect(embeddingModelKey('ollama', 'qwen3-embedding:0.6b')).toBe('ollama/qwen3-embedding:0.6b');
+  });
 });
 
 describe('resolveAgreementCalibration', () => {

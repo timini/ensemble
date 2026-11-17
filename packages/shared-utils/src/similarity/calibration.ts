@@ -53,12 +53,14 @@ export const DEFAULT_AGREEMENT_THRESHOLDS: AgreementThresholds = { high: 0.6, me
 
 /**
  * Key of an embedding model in the calibration file. OpenAI-compatible
- * endpoint ids (`ollama-2`) are reduced to their preset id (`ollama`).
+ * endpoint ids (`ollama-2`) are reduced to their preset id (`ollama`), and
+ * Ollama's default `:latest` tag is dropped (`nomic-embed-text:latest` is
+ * `nomic-embed-text`), so a model listed with the tag finds its calibration.
  */
 export function embeddingModelKey(provider: string, model: string): string {
   const base = provider.replace(/-\d+$/, '');
   const isEndpoint = ENDPOINT_PRESETS.some((preset) => preset.id === base);
-  return `${isEndpoint ? base : provider}/${model}`;
+  return `${isEndpoint ? base : provider}/${model.replace(/:latest$/, '')}`;
 }
 
 function validThresholds(entry: AgreementThresholds | undefined): entry is AgreementThresholds {
