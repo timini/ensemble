@@ -12,12 +12,12 @@ Ensemble sends one prompt to 2 to 6 models in parallel, streams every answer sid
 
 ## Status
 
-Free mode works: bring your own keys for OpenAI, Anthropic, Google, xAI, DeepSeek and Perplexity. The browser calls the providers directly and keys are stored encrypted in the browser.
+Free mode works: bring your own keys for OpenAI, Anthropic, Google, xAI, DeepSeek and Perplexity, or point Ensemble at one or more OpenAI-compatible endpoints (Ollama, LM Studio, llama.cpp, vLLM, OpenRouter, Groq, Together or a custom URL). Local endpoints need no key. The browser calls the providers directly and keys are stored encrypted in the browser.
 
 Not finished yet (see the roadmap):
 
 - Agreement scores use placeholder vectors, not real embeddings, so the score is not meaningful yet (M1).
-- Local and open models through an OpenAI-compatible endpoint such as Ollama (M2).
+- Local models: detecting a running Ollama on first run, checking which browsers let the hosted site call `http://localhost`, and a setup guide (M2).
 - A redesigned single-screen UI with history (M4).
 - Pro mode: sign-in, Stripe credits and server-side model calls (M5).
 - Shareable result links (M6).

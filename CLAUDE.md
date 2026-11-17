@@ -26,7 +26,7 @@ Modes:
 npm workspaces monorepo:
 
 - `packages/app/`: Next.js 15 App Router app. Routes: `/` (redirects to `/config` today), `/config`, `/ensemble`, `/prompt`, `/review`, `/features`, `/about`, `/test-components` (dev only), `/api/trpc/[trpc]`.
-- `packages/component-library/`: 52 atomic-design components (atoms, molecules, organisms) developed in Storybook. The app imports its source via a tsconfig alias.
+- `packages/component-library/`: 55 atomic-design components (atoms, molecules, organisms) developed in Storybook. The app imports its source via a tsconfig alias.
 - `packages/shared-utils/`: provider clients, registry, factory, similarity maths, Web Crypto helpers. Exports from `dist`; rebuild after changes with `npm run build --workspace=packages/shared-utils`.
 - `packages/consensus-core`, `consensus-standard`, `consensus-majority`, `consensus-elo`, `consensus-council`: consensus strategies.
 - `packages/eval/`: benchmark CLI. `packages/eval-baseline/`: Python lm-eval runner.
@@ -78,7 +78,7 @@ npm run preview          # production build and start
 
 ### Providers
 
-`AIProvider` interface in `packages/shared-utils/src/providers/types.ts`. Six providers: `openai`, `anthropic`, `google`, `xai`, `deepseek`, `perplexity`. Clients live in `shared-utils/src/providers/clients/<provider>/` and extend `base/BaseFreeClient.ts`.
+`AIProvider` interface in `packages/shared-utils/src/providers/types.ts`. Six key providers: `openai`, `anthropic`, `google`, `xai`, `deepseek`, `perplexity`, plus `openai-compatible`, which covers any number of OpenAI-compatible endpoints (Ollama, LM Studio, OpenRouter and others; model ids carry the endpoint id, `ollama/llama3.2:3b`). Clients live in `shared-utils/src/providers/clients/<provider>/` and extend `base/BaseFreeClient.ts`.
 
 Client modes:
 
@@ -86,9 +86,9 @@ Client modes:
 - **Free clients**: direct browser calls with the user's key (`dangerouslyAllowBrowser: true`).
 - **Pro client**: not built. `createProviderClient` throws for `pro`. Planned as `ProAPIClient` over the `streamTextEvents` tRPC subscription (M5).
 
-Embeddings: OpenAI (`text-embedding-3-small`) and Google (`gemini-embedding-2`) implement `generateEmbeddings`. Other providers throw `EmbeddingsNotSupportedError`. Only mock mode uses hash-based fake vectors.
+Embeddings: OpenAI (`text-embedding-3-small`), Google (`gemini-embedding-2`) and OpenAI-compatible endpoints (the embedding model set on the endpoint) implement `generateEmbeddings`. Other providers throw `EmbeddingsNotSupportedError`. Only mock mode uses hash-based fake vectors.
 
-Adding a provider touches about 16 files; the list is in `docs/ARCHITECTURE.md`.
+Adding a provider with its own API touches about 20 files; adding an OpenAI-compatible service is one preset. Both are described in `docs/ARCHITECTURE.md`.
 
 ### Server (tRPC)
 
