@@ -1,4 +1,5 @@
 import OpenAI from 'openai';
+import { classifyProviderError } from '../../errors/providerError';
 import { BaseFreeClient, type StreamOptions, type StructuredOptions } from '../base/BaseFreeClient';
 import type { StructuredResponse, TokenUsage, ValidationResult } from '../../types';
 import { sanitizeProviderErrorMessage } from '../../utils/sanitizeSensitiveData';
@@ -135,11 +136,7 @@ export class FreeDeepSeekClient extends BaseFreeClient {
       usage,
     );
     } catch (error) {
-      const errorMessage = sanitizeProviderErrorMessage(
-        error instanceof Error ? error.message : String(error),
-        'Unknown DeepSeek provider error.',
-      );
-      options.onError(new Error(`DeepSeek API error: ${errorMessage}`));
+      options.onError(classifyProviderError(error, { provider: this.provider, label: 'DeepSeek API error' }));
     }
   }
 }

@@ -605,6 +605,67 @@ describe('Free mode provider clients', () => {
       expect(onComplete).not.toHaveBeenCalled();
     }, 10000);
 
+    it('reports a timeout as a ProviderError of kind timeout and honours timeoutMs', async () => {
+      vi.useFakeTimers();
+
+      let lateHandlers: { onChunk: (c: string) => void; onComplete: (r: string, t: number) => void } | null = null;
+      class SlowClient extends BaseFreeClient {
+        async validateApiKey() {
+          return { valid: true };
+        }
+
+        protected override async streamWithProvider(options: {
+          onChunk: (chunk: string) => void;
+          onComplete: (response: string, time: number) => void;
+        }): Promise<void> {
+          lateHandlers = options;
+          await new Promise(() => undefined);
+        }
+      }
+
+      const client = new SlowClient('anthropic', () => 'test-key');
+      const onChunk = vi.fn();
+      const onComplete = vi.fn();
+      const onError = vi.fn();
+      const streamPromise = client.streamResponse('p', 'm', onChunk, onComplete, onError, {
+        timeoutMs: 5000,
+      });
+
+      await vi.advanceTimersByTimeAsync(5001);
+      await streamPromise;
+
+      expect(onError).toHaveBeenCalledTimes(1);
+      const error = onError.mock.calls[0][0];
+      expect(error.kind).toBe('timeout');
+      expect(error.provider).toBe('anthropic');
+      expect(error.message).toContain('5s');
+
+      // A stream that wakes up after the timeout must not report anything.
+      lateHandlers!.onChunk('late');
+      lateHandlers!.onComplete('late', 1);
+      expect(onChunk).not.toHaveBeenCalled();
+      expect(onComplete).not.toHaveBeenCalled();
+    });
+
+    it('classifies a thrown provider error', async () => {
+      mocks.openAiChatCreate.mockRejectedValueOnce(new MockAPIError(429, '429 Rate limit reached'));
+      const client = new FreeOpenAIClient('openai', () => 'sk-test');
+      const onError = vi.fn();
+
+      await client.streamResponse('prompt', 'gpt-4o', vi.fn(), vi.fn(), onError);
+
+      expect(onError.mock.calls[0][0]).toMatchObject({ kind: 'rate_limited', status: 429, provider: 'openai' });
+    });
+
+    it('reports a missing key as invalid_key', async () => {
+      const client = new FreeOpenAIClient('openai', () => null);
+      const onError = vi.fn();
+
+      await client.streamResponse('prompt', 'gpt-4o', vi.fn(), vi.fn(), onError);
+
+      expect(onError.mock.calls[0][0]).toMatchObject({ kind: 'invalid_key' });
+    });
+
     it('should complete normally when stream finishes before timeout', async () => {
       class FastClient extends BaseFreeClient {
         async validateApiKey() {

@@ -238,4 +238,25 @@ describe('FreeAnthropicClient', () => {
       expect(lastRequest()).toMatchObject({ temperature: 0.7 });
     });
   });
+
+  describe('stream errors', () => {
+    beforeEach(() => mocks.messagesCreate.mockReset());
+
+    it.each([
+      [401, 'invalid_key'],
+      [429, 'rate_limited'],
+      [529, 'provider_unavailable'],
+    ])('classifies status %i as %s', async (status, kind) => {
+      const { default: Anthropic } = await import('@anthropic-ai/sdk');
+      const APIError = (Anthropic as unknown as { APIError: new (s: number, m: string) => Error }).APIError;
+      mocks.messagesCreate.mockRejectedValueOnce(new APIError(status, `${status} failed`));
+
+      const client = new FreeAnthropicClient('anthropic', () => 'sk-ant-test');
+      const onError = vi.fn();
+      await client.streamResponse('p', 'claude-opus-5-5', vi.fn(), vi.fn(), onError);
+
+      expect(onError.mock.calls[0][0]).toMatchObject({ kind, status, provider: 'anthropic' });
+      expect(onError.mock.calls[0][0].message).toContain('Anthropic API error');
+    });
+  });
 });

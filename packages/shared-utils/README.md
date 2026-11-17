@@ -15,7 +15,7 @@ The app's `tsconfig.json` also maps the bare `@ensemble-ai/shared-utils` import 
 | Import | Contents |
 |--------|----------|
 | `@ensemble-ai/shared-utils` | Everything below |
-| `@ensemble-ai/shared-utils/providers` | `AIProvider` and related types, `ProviderRegistry`, `createProviderClient`, `MockProviderClient`, the six `Free*Client` classes, `sanitizeProviderErrorMessage` |
+| `@ensemble-ai/shared-utils/providers` | `AIProvider` and related types, `ProviderRegistry`, `createProviderClient`, `MockProviderClient`, the six `Free*Client` classes, `sanitizeProviderErrorMessage`, `ProviderError`, `classifyProviderError`, `DEFAULT_STREAM_TIMEOUT_MS` |
 | `@ensemble-ai/shared-utils/similarity` | `cosineSimilarity`, `similarityMatrix`, `agreementStatistics`, `normalizeSimilarity` |
 | `@ensemble-ai/shared-utils/security` | `encrypt`, `decrypt`, `deriveKey`, `isWebCryptoAvailable` |
 | `@ensemble-ai/shared-utils/pricing` | `getModelPrice`, `PRICE_TABLE`, `estimateRun`, `countConsensusCalls`, `computeRunCost`, `withUsageTracking`, `estimateTokensFromText` |
@@ -29,6 +29,8 @@ The app's `tsconfig.json` also maps the bare `@ensemble-ai/shared-utils` import 
 - Anthropic and OpenAI clients drop `temperature` for models that reject it, and Anthropic structured output uses `output_config.format` rather than a forced tool call. See the provider notes in the architecture document linked below.
 - Embeddings (`src/providers/embeddings/`): OpenAI calls `text-embedding-3-small` through `requestOpenAICompatibleEmbedding` (`POST {baseURL}/embeddings`, optional key), which the OpenAI-compatible providers planned for M2 can reuse. Google calls `gemini-embedding-2` through `requestGeminiEmbedding` (`models/{model}:embedContent`, 768 dimensions via `outputDimensionality`). Other clients have `supportsEmbeddings = false` and throw `EmbeddingsNotSupportedError`; `BaseFreeClient` never returns fake vectors. `selectEmbeddingsProvider(preference, validProviders)` picks the override when its key is valid, otherwise OpenAI, then Google, or null.
 - Perplexity has no `generateStructured` implementation.
+- Errors (`src/providers/errors/providerError.ts`): every error a client passes to `onError` from `streamResponse` is a `ProviderError` with a `kind`: `invalid_key` (401, 403 or no key), `rate_limited` (429, with `retryAfterSeconds` from `Retry-After`, `retry-after-ms` or Google's `RetryInfo` when given), `timeout` (client-side, `StreamResponseOptions.timeoutMs`, default `DEFAULT_STREAM_TIMEOUT_MS` = 120 s), `provider_unavailable` (5xx or a network failure) or `other`. `classifyProviderError` reads the status from the SDK error, an axios response or the message. Messages are sanitized. After a timeout, late chunks and completions from the abandoned stream are dropped.
+- Mock errors: `new MockProviderClient({ errorScenarios })` (or `createProviderClient({ mode: 'mock', mockErrorScenarios })`) fails the listed models with a simulated 401, 429 (Retry-After 30 s), 503 or timeout (`timeoutMs`, default 2 s in mock). `errorScenarios` maps model id (or `*`) to a kind, and may be a function read at call time.
 
 Full description: [packages/app/docs/PROVIDER_ARCHITECTURE.md](../app/docs/PROVIDER_ARCHITECTURE.md).
 

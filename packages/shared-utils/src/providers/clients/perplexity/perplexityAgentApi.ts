@@ -108,8 +108,8 @@ export async function* readAgentEvents(
 }
 
 /**
- * Builds an error from a non-2xx Agent API response, keeping the status code
- * and the provider's message.
+ * Builds an error from a non-2xx Agent API response, keeping the status code,
+ * the response headers (for Retry-After) and the provider's message.
  */
 export async function agentHttpError(response: Response): Promise<Error> {
   let detail = response.statusText;
@@ -119,5 +119,8 @@ export async function agentHttpError(response: Response): Promise<Error> {
   } catch {
     // Body was not JSON; keep the status text.
   }
-  return new Error(`${response.status} ${detail}`.trim());
+  return Object.assign(new Error(`${response.status} ${detail}`.trim()), {
+    status: response.status,
+    headers: response.headers,
+  });
 }

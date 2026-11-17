@@ -10,7 +10,11 @@ import type {
 } from '../../types';
 import { MockProviderClient } from '../mock/MockProviderClient';
 import { sanitizeProviderErrorMessage } from '../../utils/sanitizeSensitiveData';
+import { ProviderError, classifyProviderError } from '../../errors/providerError';
 import { EmbeddingsNotSupportedError } from '../../embeddings/errors';
+
+/** Default client-side limit for one streamed answer (2 minutes). */
+export const DEFAULT_STREAM_TIMEOUT_MS = 120000;
 
 export interface StreamHandlers {
   onChunk: (chunk: string) => void;
@@ -41,7 +45,8 @@ export interface StructuredOptions {
 /**
  * Base class for Free mode provider clients.
  *
- * Handles API key presence checks and timeouts. The mock client is only used
+ * Handles API key presence checks, timeouts and error classification:
+ * every error passed to onError is a ProviderError with a kind. The mock client is only used
  * for the static model metadata and the fallback text model list; embeddings
  * never fall back to fake vectors. A provider without an embeddings API
  * throws EmbeddingsNotSupportedError.
@@ -61,7 +66,7 @@ export abstract class BaseFreeClient implements AIProvider {
   }
 
   /** Default timeout for streaming operations (2 minutes) */
-  protected static readonly STREAM_TIMEOUT_MS = 120000;
+  protected static readonly STREAM_TIMEOUT_MS = DEFAULT_STREAM_TIMEOUT_MS;
 
   async streamResponse(
     prompt: string,
@@ -80,47 +85,60 @@ export abstract class BaseFreeClient implements AIProvider {
 
     if (!apiKey) {
       onError(
-        new Error(
+        new ProviderError(
           `Missing API key for ${this.provider}. Configure an API key on the configuration page.`,
+          'invalid_key',
+          { provider: this.provider },
         ),
       );
       return;
     }
 
-    // Create a timeout promise to prevent hanging streams
+    // Once the stream has finished, failed or timed out, later callbacks from
+    // a stream that is still running in the background are dropped.
+    let settled = false;
+    const report = (error: unknown) => {
+      if (settled) return;
+      settled = true;
+      onError(classifyProviderError(error, { provider: this.provider }));
+    };
+
+    const timeoutMs = options?.timeoutMs ?? BaseFreeClient.STREAM_TIMEOUT_MS;
     let timeoutId: ReturnType<typeof setTimeout> | null = null;
     const timeoutPromise = new Promise<never>((_, reject) => {
       timeoutId = setTimeout(() => {
         reject(
-          new Error(
-            `Streaming timeout for ${this.provider} after ${BaseFreeClient.STREAM_TIMEOUT_MS / 1000}s. The API may be unresponsive.`,
+          new ProviderError(
+            `Streaming timeout for ${this.provider} after ${Math.round(timeoutMs / 1000)}s. The API may be unresponsive.`,
+            'timeout',
+            { provider: this.provider },
           ),
         );
-      }, BaseFreeClient.STREAM_TIMEOUT_MS);
+      }, timeoutMs);
     });
 
     try {
-      // Race the stream against the timeout
       await Promise.race([
         this.streamWithProvider({
           apiKey,
           prompt,
           model,
-          onChunk,
-          onComplete,
-          onError,
+          onChunk: (chunk) => {
+            if (!settled) onChunk(chunk);
+          },
+          onComplete: (...args) => {
+            if (settled) return;
+            settled = true;
+            onComplete(...args);
+          },
+          onError: report,
           streamOptions: options,
         }),
         timeoutPromise,
       ]);
     } catch (error) {
-      const safeMessage = sanitizeProviderErrorMessage(
-        error instanceof Error ? error.message : String(error),
-        `Streaming failed for ${this.provider}.`,
-      );
-      onError(new Error(safeMessage));
+      report(error);
     } finally {
-      // Clean up the timeout
       if (timeoutId !== null) {
         clearTimeout(timeoutId);
       }

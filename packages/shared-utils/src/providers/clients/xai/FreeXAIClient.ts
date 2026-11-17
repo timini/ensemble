@@ -1,10 +1,10 @@
 import OpenAI from 'openai';
 import axios from 'axios';
+import { classifyProviderError } from '../../errors/providerError';
 import { BaseFreeClient, type StreamOptions, type StructuredOptions } from '../base/BaseFreeClient';
 import type { StructuredResponse, TokenUsage, ValidationResult } from '../../types';
 import { extractAxiosErrorMessage } from '../../utils/extractAxiosError';
 import { hasNonTextModality } from '../../utils/modelFilters';
-import { sanitizeProviderErrorMessage } from '../../utils/sanitizeSensitiveData';
 import { fromChatCompletionUsage, type ChatCompletionUsage } from '../../utils/usage';
 
 interface XaiModelEntry {
@@ -164,12 +164,7 @@ export class FreeXAIClient extends BaseFreeClient {
       usage,
     );
     } catch (error) {
-      // Extract error message from XAI/OpenAI SDK error
-      const errorMessage = sanitizeProviderErrorMessage(
-        error instanceof Error ? error.message : String(error),
-        'Unknown xAI provider error.',
-      );
-      options.onError(new Error(`XAI API error: ${errorMessage}`));
+      options.onError(classifyProviderError(error, { provider: this.provider, label: 'XAI API error' }));
     }
   }
 }

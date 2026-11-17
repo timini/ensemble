@@ -214,6 +214,32 @@ describe('FreePerplexityClient', () => {
       expect(message).toContain('Perplexity API error');
       expect(message).toContain('429');
       expect(message).toContain('Rate limit exceeded');
+      expect(onError.mock.calls[0][0].kind).toBe('rate_limited');
+    });
+
+    it('keeps the retry-after header of a 429', async () => {
+      fetchMock.mockResolvedValueOnce(
+        new Response(JSON.stringify({ error: { message: 'Slow down' } }), {
+          status: 429,
+          headers: { 'Content-Type': 'application/json', 'Retry-After': '20' },
+        }),
+      );
+
+      const client = new FreePerplexityClient('perplexity', () => 'pplx-test');
+      const onError = vi.fn();
+      await client.streamResponse('q', 'perplexity-fast', vi.fn(), vi.fn(), onError);
+
+      expect(onError.mock.calls[0][0]).toMatchObject({ kind: 'rate_limited', retryAfterSeconds: 20 });
+    });
+
+    it('classifies a 503 as provider_unavailable', async () => {
+      fetchMock.mockResolvedValueOnce(jsonResponse(503, { error: { message: 'Overloaded' } }));
+
+      const client = new FreePerplexityClient('perplexity', () => 'pplx-test');
+      const onError = vi.fn();
+      await client.streamResponse('q', 'perplexity-fast', vi.fn(), vi.fn(), onError);
+
+      expect(onError.mock.calls[0][0].kind).toBe('provider_unavailable');
     });
 
     it('calls onError when fetch rejects', async () => {

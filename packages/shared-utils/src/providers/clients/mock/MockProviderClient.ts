@@ -15,12 +15,24 @@ import type {
   ValidationResult,
   ProviderName,
 } from '../../types.js';
+import { ProviderError, type ProviderErrorKind } from '../../errors/providerError.js';
+
+/** Provider failures the mock client can simulate. */
+export type MockErrorScenario = Exclude<ProviderErrorKind, 'other'>;
+
+/** Scenario per model id. The key `*` applies to every model. */
+export type MockErrorScenarios = Partial<Record<string, MockErrorScenario>>;
 
 export interface MockClientConfig {
   enableErrors?: boolean;
   errorProbability?: number;
   timeoutAfterMs?: number;
   providerFilter?: ProviderName;
+  /**
+   * Simulated failures, as a fixed map or a function read at call time (so
+   * a test or the app's mock mode can change them between calls).
+   */
+  errorScenarios?: MockErrorScenarios | (() => MockErrorScenarios);
 }
 
 interface MockClientResolvedConfig {
@@ -28,6 +40,26 @@ interface MockClientResolvedConfig {
   errorProbability: number;
   timeoutAfterMs: number;
   providerFilter?: ProviderName;
+  errorScenarios?: MockErrorScenarios | (() => MockErrorScenarios);
+}
+
+/** Default client-side timeout for a simulated `timeout` scenario. */
+const MOCK_TIMEOUT_MS = 2000;
+/** Retry-After sent with a simulated rate limit. */
+const MOCK_RETRY_AFTER_SECONDS = 30;
+
+const SIMULATED_HTTP_ERRORS: Record<Exclude<MockErrorScenario, 'timeout'>, { status: number; message: string }> = {
+  invalid_key: { status: 401, message: 'Incorrect API key provided.' },
+  rate_limited: { status: 429, message: 'Rate limit reached for requests.' },
+  provider_unavailable: { status: 503, message: 'The server is overloaded. Please try again later.' },
+};
+
+function simulatedHttpError(kind: Exclude<MockErrorScenario, 'timeout'>): ProviderError {
+  const { status, message } = SIMULATED_HTTP_ERRORS[kind];
+  return new ProviderError(`Mock API error: ${status} ${message}`, kind, {
+    status,
+    retryAfterSeconds: kind === 'rate_limited' ? MOCK_RETRY_AFTER_SECONDS : undefined,
+  });
 }
 
 const LOREM_IPSUM_WORDS = [
@@ -69,7 +101,14 @@ export class MockProviderClient implements AIProvider {
       errorProbability: config.errorProbability ?? 0,
       timeoutAfterMs: config.timeoutAfterMs ?? 30000,
       providerFilter: config.providerFilter,
+      errorScenarios: config.errorScenarios,
     };
+  }
+
+  private scenarioFor(model: string): MockErrorScenario | undefined {
+    const source = this.config.errorScenarios;
+    const scenarios = typeof source === 'function' ? source() : source;
+    return scenarios?.[model] ?? scenarios?.['*'];
   }
 
   async streamResponse(
@@ -78,10 +117,30 @@ export class MockProviderClient implements AIProvider {
     onChunk: (chunk: string) => void,
     onComplete: (fullResponse: string, responseTime: number, tokenCount?: number) => void,
     onError: (error: Error) => void,
-    _options?: StreamResponseOptions,
+    options?: StreamResponseOptions,
   ): Promise<void> {
     if (this.config.enableErrors && Math.random() < this.config.errorProbability) {
-      onError(new Error('Rate limit exceeded. Please try again in 60 seconds.'));
+      onError(simulatedHttpError('rate_limited'));
+      return;
+    }
+
+    const scenario = this.scenarioFor(model);
+    if (scenario === 'timeout') {
+      // A stream that starts, then stalls until the client gives up.
+      onChunk(this.generateLoremIpsum(12));
+      const timeoutMs = options?.timeoutMs ?? MOCK_TIMEOUT_MS;
+      await this.sleep(timeoutMs);
+      onError(
+        new ProviderError(
+          `Streaming timeout for mock after ${Math.round(timeoutMs / 1000)}s. The API may be unresponsive.`,
+          'timeout',
+        ),
+      );
+      return;
+    }
+    if (scenario) {
+      await this.sleep(this.randomInt(100, 200));
+      onError(simulatedHttpError(scenario));
       return;
     }
 
@@ -122,12 +181,18 @@ export class MockProviderClient implements AIProvider {
 
   async generateStructured<T>(
     prompt: string,
-    _model: string,
+    model: string,
     schema: JsonSchema,
     _options?: GenerateStructuredOptions,
   ): Promise<StructuredResponse<T>> {
     const delay = this.randomInt(50, 150);
     await new Promise((resolve) => setTimeout(resolve, delay));
+
+    const scenario = this.scenarioFor(model);
+    if (scenario === 'timeout') {
+      throw new ProviderError('Structured call timed out (mock).', 'timeout');
+    }
+    if (scenario) throw simulatedHttpError(scenario);
 
     if (schema.name === 'final_answers') {
       const parsed = { answers: mockFinalAnswers(prompt) } as T;

@@ -1,3 +1,4 @@
+import { classifyProviderError } from '../../errors/providerError';
 import { BaseFreeClient, type StreamOptions } from '../base/BaseFreeClient';
 import type { TokenUsage, ValidationResult } from '../../types';
 import { fromResponsesUsage } from '../../utils/usage';
@@ -100,11 +101,7 @@ export class FreePerplexityClient extends BaseFreeClient {
 
       options.onComplete(fullResponse, Date.now() - startTime, tokenCount || undefined, usage);
     } catch (error) {
-      const errorMessage = sanitizeProviderErrorMessage(
-        error instanceof Error ? error.message : String(error),
-        'Unknown Perplexity provider error.',
-      );
-      options.onError(new Error(`Perplexity API error: ${errorMessage}`));
+      options.onError(classifyProviderError(error, { provider: this.provider, label: 'Perplexity API error' }));
     }
   }
 }

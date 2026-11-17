@@ -1,5 +1,5 @@
 import type { AIProvider, ProviderMode, ProviderName } from '../types';
-import { MockProviderClient } from '../clients/mock/MockProviderClient';
+import { MockProviderClient, type MockClientConfig } from '../clients/mock/MockProviderClient';
 import { FreeOpenAIClient } from '../clients/openai/FreeOpenAIClient';
 import { FreeAnthropicClient } from '../clients/anthropic/FreeAnthropicClient';
 import { FreeGoogleClient } from '../clients/google/FreeGoogleClient';
@@ -11,15 +11,18 @@ interface CreateProviderClientOptions {
   provider: ProviderName;
   mode: ProviderMode;
   getApiKey?: () => string | null;
+  /** Simulated failures for mock clients (ignored in other modes). */
+  mockErrorScenarios?: MockClientConfig['errorScenarios'];
 }
 
 export function createProviderClient({
   provider,
   mode,
   getApiKey,
+  mockErrorScenarios,
 }: CreateProviderClientOptions): AIProvider {
   if (mode === 'mock') {
-    return new MockProviderClient({ providerFilter: provider });
+    return new MockProviderClient({ providerFilter: provider, errorScenarios: mockErrorScenarios });
   }
 
   if (mode === 'free') {

@@ -10,3 +10,5 @@ export * from './clients/deepseek/FreeDeepSeekClient';
 export * from './clients/perplexity/FreePerplexityClient';
 export * from './utils/sanitizeSensitiveData';
 export * from './embeddings';
+export * from './errors/providerError';
+export { DEFAULT_STREAM_TIMEOUT_MS } from './clients/base/BaseFreeClient';

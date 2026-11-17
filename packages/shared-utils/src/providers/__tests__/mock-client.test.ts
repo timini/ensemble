@@ -60,4 +60,48 @@ describe('MockProviderClient', () => {
     // Most labels agree so a mock majority run reaches a vote winner.
     expect(result.parsed.answers.map((a) => a.answer)).toEqual(['42', '42', '41']);
   });
+
+  describe('simulated errors', () => {
+    it.each([
+      ['invalid_key', 401],
+      ['rate_limited', 429],
+      ['provider_unavailable', 503],
+    ] as const)('fails %s streams for the configured model only', async (kind, status) => {
+      const client = new MockProviderClient({ errorScenarios: { 'gpt-6-luna': kind } });
+      const onError = vi.fn();
+      const onComplete = vi.fn();
+
+      await client.streamResponse('p', 'gpt-6-luna', vi.fn(), onComplete, onError);
+
+      expect(onComplete).not.toHaveBeenCalled();
+      expect(onError.mock.calls[0][0]).toMatchObject({ name: 'ProviderError', kind, status });
+    });
+
+    it('gives a retry-after for a simulated rate limit', async () => {
+      const client = new MockProviderClient({ errorScenarios: { '*': 'rate_limited' } });
+      const onError = vi.fn();
+      await client.streamResponse('p', 'any-model', vi.fn(), vi.fn(), onError);
+      expect(onError.mock.calls[0][0].retryAfterSeconds).toBe(30);
+    });
+
+    it('times out after timeoutMs for a simulated timeout', async () => {
+      const client = new MockProviderClient({ errorScenarios: () => ({ 'gpt-6-luna': 'timeout' }) });
+      const onError = vi.fn();
+      const onComplete = vi.fn();
+      const started = Date.now();
+
+      await client.streamResponse('p', 'gpt-6-luna', vi.fn(), onComplete, onError, { timeoutMs: 200 });
+
+      expect(Date.now() - started).toBeGreaterThanOrEqual(190);
+      expect(onComplete).not.toHaveBeenCalled();
+      expect(onError.mock.calls[0][0]).toMatchObject({ kind: 'timeout' });
+    });
+
+    it('fails structured calls for the configured model', async () => {
+      const client = new MockProviderClient({ errorScenarios: { 'gpt-6-luna': 'invalid_key' } });
+      await expect(
+        client.generateStructured('p', 'gpt-6-luna', { name: 'x', schema: {} }),
+      ).rejects.toMatchObject({ kind: 'invalid_key' });
+    });
+  });
 });

@@ -19,6 +19,12 @@ export interface ValidationResult {
 export interface StreamResponseOptions {
   temperature?: number;
   seed?: number;
+  /**
+   * Client-side limit for the whole stream, in milliseconds. When it passes,
+   * onError gets a ProviderError of kind `timeout`. Defaults to
+   * DEFAULT_STREAM_TIMEOUT_MS (120 s).
+   */
+  timeoutMs?: number;
 }
 
 export interface JsonSchema {

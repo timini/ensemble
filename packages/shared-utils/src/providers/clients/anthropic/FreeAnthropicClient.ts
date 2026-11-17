@@ -1,4 +1,5 @@
 import Anthropic from '@anthropic-ai/sdk';
+import { classifyProviderError } from '../../errors/providerError';
 import { BaseFreeClient, type StreamOptions, type StructuredOptions } from '../base/BaseFreeClient';
 import type { StructuredResponse, TokenUsage, ValidationResult } from '../../types';
 import { sanitizeProviderErrorMessage } from '../../utils/sanitizeSensitiveData';
@@ -204,12 +205,7 @@ export class FreeAnthropicClient extends BaseFreeClient {
         tokenCount > 0 ? { inputTokens, outputTokens } : undefined,
       );
     } catch (error) {
-      // Extract error message from Anthropic SDK error
-      const errorMessage = sanitizeProviderErrorMessage(
-        error instanceof Error ? error.message : String(error),
-        'Unknown Anthropic provider error.',
-      );
-      options.onError(new Error(`Anthropic API error: ${errorMessage}`));
+      options.onError(classifyProviderError(error, { provider: this.provider, label: 'Anthropic API error' }));
     }
   }
 }

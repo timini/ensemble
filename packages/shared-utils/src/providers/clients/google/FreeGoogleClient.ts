@@ -1,10 +1,10 @@
 import { GoogleGenerativeAI, type ResponseSchema } from '@google/generative-ai';
 import axios from 'axios';
+import { classifyProviderError } from '../../errors/providerError';
 import { BaseFreeClient, type StreamOptions, type StructuredOptions } from '../base/BaseFreeClient';
 import type { StructuredResponse, TokenUsage, ValidationResult } from '../../types';
 import { extractAxiosErrorMessage } from '../../utils/extractAxiosError';
 import { hasNonTextModality } from '../../utils/modelFilters';
-import { sanitizeProviderErrorMessage } from '../../utils/sanitizeSensitiveData';
 import { fromGeminiUsage } from '../../utils/usage';
 import { requestGeminiEmbedding } from '../../embeddings/geminiEmbeddings';
 import { GOOGLE_EMBEDDING_MODEL } from '../../embeddings/models';
@@ -159,12 +159,7 @@ export class FreeGoogleClient extends BaseFreeClient {
         usage,
       );
     } catch (error) {
-      // Extract error message from Google SDK error
-      const errorMessage = sanitizeProviderErrorMessage(
-        error instanceof Error ? error.message : String(error),
-        'Unknown Google provider error.',
-      );
-      options.onError(new Error(`Google API error: ${errorMessage}`));
+      options.onError(classifyProviderError(error, { provider: this.provider, label: 'Google API error' }));
     }
   }
 }
