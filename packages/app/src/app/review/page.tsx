@@ -93,9 +93,9 @@ export default function ReviewPage() {
     generateConsensus,
     isGenerating: isGeneratingConsensus,
     error: consensusError,
-    resetError: resetConsensusError,
+    restart: restartConsensus,
   } = useConsensusGeneration();
-  const handleRetry = useModelRetry(retryModel, resetConsensusError);
+  const handleRetry = useModelRetry(retryModel, restartConsensus);
 
   useConsensusTrigger({
     hasHydrated,
@@ -182,6 +182,7 @@ export default function ReviewPage() {
         failedModels={failedModels}
         manualCount={viewManualResponses.length}
         finished={allFinished}
+        agreementAvailable={embeddingsStatus !== "unavailable"}
       />
 
       {/* 2. Consensus Section (matches wireframe order) */}

@@ -14,12 +14,18 @@ export interface RunExclusionNoteProps {
   manualCount?: number;
   /** True once no answer is still streaming. */
   finished: boolean;
+  /**
+   * False when no embeddings provider is available, so the run has no
+   * agreement score to leave models out of. Defaults to true.
+   */
+  agreementAvailable?: boolean;
 }
 
 /**
  * Tells the user how failed models affect the run: which answers consensus
  * and agreement leave out, or, with fewer than two usable answers, why no
- * consensus can be made.
+ * consensus can be made. The count of answers used appears only once the
+ * run has finished, since it is not known before.
  */
 export function RunExclusionNote({
   succeeded,
@@ -27,6 +33,7 @@ export function RunExclusionNote({
   failedModels,
   manualCount = 0,
   finished,
+  agreementAvailable = true,
 }: RunExclusionNoteProps) {
   const { t } = useTranslation();
 
@@ -53,12 +60,24 @@ export function RunExclusionNote({
   return (
     <div className="mt-8" data-testid="run-exclusion-note">
       <InlineAlert variant="info">
-        {t("pages.review.runExclusionNote", {
-          count: failedModels.length,
-          models: failedModels.join(", "),
-          succeeded,
-          total,
-        })}
+        <p>
+          {t(
+            agreementAvailable
+              ? "pages.review.runExclusionNote"
+              : "pages.review.runExclusionNoteNoAgreement",
+            { count: failedModels.length, models: failedModels.join(", ") },
+          )}
+        </p>
+        {finished && (
+          <p className="mt-1" data-testid="run-exclusion-count">
+            {t(
+              agreementAvailable
+                ? "pages.review.runExclusionCount"
+                : "pages.review.runExclusionCountNoAgreement",
+              { succeeded, total },
+            )}
+          </p>
+        )}
       </InlineAlert>
     </div>
   );

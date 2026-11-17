@@ -69,4 +69,19 @@ test.describe('Review page persistence', () => {
     await expect(page.getByTestId('consensus-card')).not.toHaveAttribute('data-status', 'success');
     await expect(page.getByTestId('consensus-card')).toHaveAttribute('data-status', 'success', { timeout: 30_000 });
   });
+
+  test('after New comparison, /review does not run the unsubmitted draft', async ({ page }) => {
+    await startMockRun(page, { models: ['gpt-6-astra', 'gpt-6-luna'], prompt: 'Submitted question' });
+    await expect(page.getByTestId('consensus-card')).toHaveAttribute('data-status', 'success', { timeout: 30_000 });
+
+    await page.getByRole('button', { name: /new comparison/i }).click();
+    await expect(page).toHaveURL(/\/prompt/);
+    await page.getByTestId('prompt-textarea').fill('Draft never submitted ');
+
+    await page.goto('/review');
+
+    await expect(page).toHaveURL(/\/prompt/);
+    await expect(page.locator('[data-testid^="response-card-"]')).toHaveCount(0);
+    await expect(page.getByTestId('prompt-textarea')).toHaveValue('Draft never submitted ');
+  });
 });

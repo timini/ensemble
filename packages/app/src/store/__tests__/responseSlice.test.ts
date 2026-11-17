@@ -6,6 +6,8 @@ import { describe, it, expect, beforeEach } from "vitest";
 import { createStore, type StoreApi } from "zustand/vanilla";
 import {
   createResponseSlice,
+  selectRunPrompt,
+  type ModelResponse,
   type ResponseSlice,
 } from "../slices/responseSlice";
 import { markInterruptedStreams } from "../slices/responseErrorState";
@@ -371,11 +373,51 @@ describe("runPrompt", () => {
     expect(store.getState().runPrompt).toBe("New question");
   });
 
+  it("stores the submitted prompt as the draft too, so the two match", () => {
+    const store = createStore<ResponseSlice>()(createResponseSlice);
+    store.getState().setPrompt("Question  \n");
+    store.getState().startRun("Question");
+    expect(store.getState().prompt).toBe("Question");
+  });
+
   it("is cleared with the responses", () => {
     const store = createStore<ResponseSlice>()(createResponseSlice);
     store.getState().startRun("Q");
     store.getState().clearResponses();
     expect(store.getState().runPrompt).toBeNull();
+  });
+});
+
+describe("selectRunPrompt", () => {
+  it("returns the run's prompt when one was submitted", () => {
+    expect(
+      selectRunPrompt({ runPrompt: "Run", prompt: "Draft", responses: [] }),
+    ).toBe("Run");
+  });
+
+  it("falls back to the draft only for a stored run made before runPrompt existed", () => {
+    const legacy = {
+      runPrompt: null,
+      prompt: "Old",
+      responses: [{} as ModelResponse],
+    };
+    expect(selectRunPrompt(legacy)).toBe("Old");
+  });
+
+  it("is null for a draft that was never submitted", () => {
+    expect(
+      selectRunPrompt({ runPrompt: null, prompt: "Draft", responses: [] }),
+    ).toBeNull();
+  });
+
+  it("treats a stored run without the runPrompt field as legacy", () => {
+    expect(
+      selectRunPrompt({
+        runPrompt: undefined,
+        prompt: "Old",
+        responses: [{} as ModelResponse],
+      }),
+    ).toBe("Old");
   });
 });
 

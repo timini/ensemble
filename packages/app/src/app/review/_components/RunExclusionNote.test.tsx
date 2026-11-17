@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { cleanup, render, screen } from "@testing-library/react";
 import i18n from "~/lib/i18n";
 import { RunExclusionNote } from "./RunExclusionNote";
 
@@ -23,6 +23,38 @@ describe("RunExclusionNote", () => {
     const note = screen.getByTestId("run-exclusion-note");
     expect(note).toHaveTextContent("1 model failed");
     expect(note).toHaveTextContent("GPT-6 Luna");
+    expect(note).toHaveTextContent("2 of 3");
+  });
+
+  it("names the failed models but gives no answer count while others still stream", () => {
+    render(
+      <RunExclusionNote
+        succeeded={0}
+        total={3}
+        failedModels={["GPT-6 Luna"]}
+        finished={false}
+      />,
+    );
+    const note = screen.getByTestId("run-exclusion-note");
+    expect(note).toHaveTextContent("1 model failed");
+    expect(note).toHaveTextContent("GPT-6 Luna");
+    expect(note).not.toHaveTextContent("of 3");
+    expect(screen.queryByTestId("run-exclusion-count")).not.toBeInTheDocument();
+  });
+
+  it("does not mention an agreement score when there is none", () => {
+    render(
+      <RunExclusionNote
+        succeeded={2}
+        total={3}
+        failedModels={["GPT-6 Luna"]}
+        finished
+        agreementAvailable={false}
+      />,
+    );
+    const note = screen.getByTestId("run-exclusion-note");
+    expect(note).not.toHaveTextContent(/agreement/i);
+    expect(note).toHaveTextContent("left out of the consensus");
     expect(note).toHaveTextContent("2 of 3");
   });
 
@@ -84,6 +116,19 @@ describe("RunExclusionNote", () => {
     expect(screen.getByTestId("consensus-insufficient")).toHaveTextContent(
       "au moins 2 réponses",
     );
+    cleanup();
+    render(
+      <RunExclusionNote
+        succeeded={2}
+        total={3}
+        failedModels={["GPT-6 Luna"]}
+        finished
+        agreementAvailable={false}
+      />,
+    );
+    const note = screen.getByTestId("run-exclusion-note");
+    expect(note).toHaveTextContent("2 réponses sur 3");
+    expect(note).not.toHaveTextContent(/accord/i);
     await i18n.changeLanguage("en");
   });
 });

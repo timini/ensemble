@@ -148,10 +148,17 @@ export function useStreamingResponses({
     };
   }, []);
 
+  // The auto-start below runs once per visit to /review. Later changes to
+  // `prompt` come from the page resetting the run just before it navigates
+  // away ("New comparison", "Start over"); reacting to them would start
+  // billed calls nobody asked for, or race the page's own navigation.
+  const autoStartDone = useRef(false);
+
   useEffect(() => {
-    if (!hasHydrated) {
+    if (!hasHydrated || autoStartDone.current) {
       return;
     }
+    autoStartDone.current = true;
 
     // If no prompt, redirect back to prompt page
     if (!prompt) {

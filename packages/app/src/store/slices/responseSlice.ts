@@ -83,6 +83,21 @@ export interface ResponseSlice {
   resetStreamingState: () => void;
 }
 
+/**
+ * Prompt of the run on /review, or null when there is no submitted run.
+ * Runs stored before runPrompt existed have answers but no runPrompt; only
+ * those fall back to the draft. An unsubmitted draft never counts as a run,
+ * so /review does not start streams for it.
+ */
+export function selectRunPrompt(state: {
+  runPrompt?: string | null;
+  prompt: string | null;
+  responses: unknown[];
+}): string | null {
+  if (state.runPrompt) return state.runPrompt;
+  return state.responses.length > 0 ? state.prompt : null;
+}
+
 /** Fields of an answer when its stream starts or restarts. */
 const STREAM_START = {
   response: "",
@@ -113,9 +128,11 @@ export const createResponseSlice: StateCreator<ResponseSlice> = (set, get) => ({
     set({ prompt });
   },
 
+  // The draft takes the submitted (trimmed) text too, so the two never
+  // differ by whitespace alone.
   startRun: (prompt) => {
     get().resetStreamingState();
-    set({ runPrompt: prompt });
+    set({ runPrompt: prompt, prompt });
   },
 
   // A new answer, and a restart (retry), start from an empty answer.

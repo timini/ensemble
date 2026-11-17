@@ -1,5 +1,6 @@
 import { useMemo } from "react";
 import { useStore } from "~/store";
+import { selectRunPrompt } from "~/store/slices/responseSlice";
 import { resolveEmbeddingsProvider } from "~/lib/embeddingsProvider";
 
 /**
@@ -7,11 +8,9 @@ import { resolveEmbeddingsProvider } from "~/lib/embeddingsProvider";
  * Returns pre-hydration-safe values that avoid SSR/client mismatches.
  */
 export function useReviewPageState(hasHydrated: boolean) {
-  // The run's own prompt; runs persisted before runPrompt existed fall back
-  // to the draft.
-  const runPrompt = useStore((state) => state.runPrompt);
-  const draftPrompt = useStore((state) => state.prompt);
-  const prompt = runPrompt ?? draftPrompt;
+  // The submitted run's prompt, or null when there is no run (see
+  // selectRunPrompt). Never the unsubmitted draft.
+  const prompt = useStore(selectRunPrompt);
   const summarizerModel = useStore((state) => state.summarizerModel);
   const selectedModels = useStore((state) => state.selectedModels);
   const responses = useStore((state) => state.responses);

@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { useStore } from '~/store';
 import { EloRankingConsensus } from '@ensemble-ai/consensus-elo';
 import { MajorityVotingConsensus } from '@ensemble-ai/consensus-majority';
@@ -16,6 +16,9 @@ import { toMajorityVoteRecord } from '~/lib/majorityVote';
 export function useConsensusGeneration() {
     const [isGenerating, setIsGenerating] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    // Id of the latest consensus run. restart() bumps it, so a run that was
+    // still in flight finishes without storing its stale result.
+    const runId = useRef(0);
 
     const setMetaAnalysis = useStore((state) => state.setMetaAnalysis);
     const summarizerModelId = useStore((state) => state.summarizerModel);
@@ -44,6 +47,8 @@ export function useConsensusGeneration() {
             return;
         }
 
+        const id = ++runId.current;
+        const isCurrent = () => id === runId.current;
         setIsGenerating(true);
         setError(null);
         setMajorityVote(null);
@@ -104,7 +109,7 @@ export function useConsensusGeneration() {
                 // Vote on short answers first; the strategy falls back to the
                 // LLM method and says why when the vote cannot decide.
                 const outcome = await strategy.runConsensus(consensusResponses, 0, originalPrompt);
-                setMajorityVote(toMajorityVoteRecord(outcome, consensusResponses));
+                if (isCurrent()) setMajorityVote(toMajorityVoteRecord(outcome, consensusResponses));
                 resultText = outcome.text;
             } else if (consensusMethod === 'council') {
                 const selectedModels = useStore.getState().selectedModels;
@@ -134,6 +139,8 @@ export function useConsensusGeneration() {
                 resultText = await strategy.generateConsensus(consensusResponses, 0, originalPrompt);
             }
 
+            if (!isCurrent()) return;
+
             if (isConsensusFailureText(resultText)) {
                 const fallbackError = new Error(resultText);
                 logger.error(
@@ -150,7 +157,7 @@ export function useConsensusGeneration() {
             const normalizedError =
                 err instanceof Error ? err : new Error(String(err));
             logger.error('Consensus Generation Error:', normalizedError);
-            setError(normalizedError.message || 'Failed to generate consensus');
+            if (isCurrent()) setError(normalizedError.message || 'Failed to generate consensus');
         } finally {
             setIsGenerating(false);
         }
@@ -160,8 +167,16 @@ export function useConsensusGeneration() {
         generateConsensus,
         isGenerating,
         error,
-        /** Clears a consensus error so the trigger can run consensus again. */
-        resetError: () => setError(null),
+        /**
+         * Clears a consensus error and drops the result of any consensus still
+         * running, so the trigger runs consensus again on the current answers
+         * (for example after a failed model is retried). Calls already made
+         * stay in the run cost.
+         */
+        restart: () => {
+            runId.current += 1;
+            setError(null);
+        },
         consensusMethod
     };
 }

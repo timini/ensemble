@@ -20,14 +20,13 @@ vi.mock("@ensemble-ai/consensus-standard", () => ({
   },
 }));
 
-const fakeProvider = {
-  generateStructured: vi.fn(async () => ({
-    parsed: {},
-    raw: "{}",
-    responseTimeMs: 1,
-    usage: { inputTokens: 100, outputTokens: 20 },
-  })),
-} as unknown as AIProvider;
+const generateStructured = vi.fn(async () => ({
+  parsed: {},
+  raw: "{}",
+  responseTimeMs: 1,
+  usage: { inputTokens: 100, outputTokens: 20 },
+}));
+const fakeProvider = { generateStructured } as unknown as AIProvider;
 
 vi.mock("@ensemble-ai/shared-utils/providers", async (importOriginal) => {
   const actual = await importOriginal<Record<string, unknown>>();
@@ -83,5 +82,51 @@ describe("useConsensusGeneration usage", () => {
     await act(() => result.current.generateConsensus(answers, "q"));
     act(() => useStore.getState().resetStreamingState());
     expect(useStore.getState().consensusUsage).toEqual([]);
+  });
+});
+
+describe("useConsensusGeneration restart", () => {
+  beforeEach(() => {
+    useStore.getState().resetStreamingState();
+    useStore.setState({
+      consensusMethod: "standard",
+      summarizerModel: "gpt-6-astra",
+    });
+  });
+
+  it("drops the result of a consensus that was still running when restart was called", async () => {
+    let finish: () => void = () => undefined;
+    generateStructured.mockImplementationOnce(
+      () =>
+        new Promise((resolve) => {
+          finish = () =>
+            resolve({
+              parsed: {},
+              raw: "{}",
+              responseTimeMs: 1,
+              usage: { inputTokens: 100, outputTokens: 20 },
+            } as never);
+        }),
+    );
+    const { result } = renderHook(() => useConsensusGeneration());
+
+    let running: Promise<void> = Promise.resolve();
+    act(() => {
+      running = result.current.generateConsensus(answers, "q");
+    });
+    expect(result.current.isGenerating).toBe(true);
+
+    // A failed model is retried while consensus is generating.
+    act(() => result.current.restart());
+    await act(async () => {
+      finish();
+      await running;
+    });
+
+    expect(useStore.getState().metaAnalysis).toBeNull();
+    expect(result.current.isGenerating).toBe(false);
+    expect(result.current.error).toBeNull();
+    // The stale call was still made, so it stays in the run cost.
+    expect(useStore.getState().consensusUsage).toHaveLength(1);
   });
 });
