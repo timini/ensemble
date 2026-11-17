@@ -5,7 +5,7 @@
 ## When it is used
 
 - **Mock mode.** Start the app with `npm run dev:mock` (sets `NEXT_PUBLIC_MOCK_MODE=true`). Every provider call then uses the mock client. The `packages/e2e` `mock-mode` project starts the app this way.
-- **Fallbacks in other modes.** The prompt page falls back to the mock client if no client is registered for the current mode. Embeddings never fall back to it outside mock mode.
+- **No fallback in other modes.** The workspace (`app/workspace/hooks/useStreamingResponses.ts`) never falls back to the mock client: when no client is registered for the current mode, that model's answer fails with an error. Embeddings never fall back to it outside mock mode either.
 - **Inside the free clients.** `BaseFreeClient` keeps a mock instance for the static model metadata and for model lists when no key is set or the provider's list call fails. It is not used for embeddings.
 
 Mock mode is not offered in the app's settings. It is controlled only by the env var, which is read at build time, so a build made with `NEXT_PUBLIC_MOCK_MODE=true` serves mock responses.

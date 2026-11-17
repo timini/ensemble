@@ -151,7 +151,7 @@ For a 3-model ensemble, pick models from different families so their mistakes ar
 
 Together they need about 9 GB of memory while all three are loaded, which leaves room for the browser and the system on a 16 GB machine. Ollama keeps up to 3 models loaded by default (`OLLAMA_MAX_LOADED_MODELS`). If answers arrive one model at a time, the machine is short of memory; close other apps or swap one model for a smaller one (`qwen3:1.7b`, `gemma3:1b`). With more memory, `qwen3:8b` or `llama3.1:8b` give better answers.
 
-Use one of the three as the summarizer. The consensus step makes one more call (standard and majority methods); ELO and council make many more (the prompt page shows the count before you run).
+Use one of the three as the summarizer. The consensus step makes one more call (standard and majority methods); ELO and council make many more (the method menu in the composer shows the count before you run).
 
 ## Other servers
 
