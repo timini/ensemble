@@ -34,9 +34,12 @@ export interface StreamResponseOptions {
   /**
    * Client-side limit for the whole stream, in milliseconds. When it passes,
    * onError gets a ProviderError of kind `timeout`. Defaults to
-   * DEFAULT_STREAM_TIMEOUT_MS (120 s).
+   * DEFAULT_STREAM_TIMEOUT_MS (120 s). Clients that support it abort the
+   * underlying request when the limit passes.
    */
   timeoutMs?: number;
+  /** Aborts the request. onError then gets a ProviderError of kind `timeout`. */
+  signal?: AbortSignal;
 }
 
 export interface JsonSchema {
@@ -46,6 +49,14 @@ export interface JsonSchema {
 
 export interface GenerateStructuredOptions {
   temperature?: number;
+  /**
+   * Client-side limit for the whole call, in milliseconds. Clients that
+   * support it abort the request and throw a ProviderError of kind
+   * `timeout`. No limit by default.
+   */
+  timeoutMs?: number;
+  /** Aborts the request; the call throws a ProviderError of kind `timeout`. */
+  signal?: AbortSignal;
 }
 
 /**

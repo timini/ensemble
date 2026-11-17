@@ -1,4 +1,4 @@
-import { classifyProviderError } from '../../errors/providerError';
+import { ProviderError, classifyProviderError, isProviderError } from '../../errors/providerError';
 import { BaseFreeClient, type StreamOptions, type StructuredOptions } from '../base/BaseFreeClient';
 import type { ProviderName, StructuredResponse, TokenUsage, ValidationResult } from '../../types';
 import { sanitizeProviderErrorMessage } from '../../utils/sanitizeSensitiveData';
@@ -6,6 +6,7 @@ import { fromChatCompletionUsage, type ChatCompletionUsage } from '../../utils/u
 import { requestOpenAICompatibleEmbedding } from '../../embeddings/openAICompatibleEmbeddings';
 import { EmbeddingsNotSupportedError } from '../../embeddings/errors';
 import {
+  OpenAICompatibleHttpError,
   openAICompatibleRequest,
   readServerSentEvents,
   type OpenAICompatibleConnection,
@@ -27,14 +28,107 @@ export interface OpenAICompatibleClientOptions {
   fetchImpl?: typeof fetch;
 }
 
+/**
+ * An error a server reports inside a 200 response. OpenRouter does this when
+ * the upstream provider fails after the request was accepted: a top-level
+ * `error`, an `error` on the choice, or `finish_reason: "error"`.
+ */
+interface InBandError {
+  code?: unknown;
+  message?: unknown;
+  metadata?: unknown;
+}
+
+interface ChatChoiceBase {
+  finish_reason?: string | null;
+  error?: InBandError | null;
+}
+
+interface ChatMessageFields {
+  content?: unknown;
+  /** Reasoning text (OpenRouter `reasoning`, DeepSeek and vLLM `reasoning_content`). */
+  reasoning?: unknown;
+  reasoning_content?: unknown;
+}
+
 interface ChatChunk {
-  choices?: { delta?: { content?: unknown } }[];
+  choices?: (ChatChoiceBase & { delta?: ChatMessageFields })[];
   usage?: ChatCompletionUsage | null;
+  error?: InBandError | null;
 }
 
 interface ChatCompletion {
-  choices?: { message?: { content?: string | null } }[];
+  choices?: (ChatChoiceBase & { message?: ChatMessageFields })[];
   usage?: ChatCompletionUsage | null;
+  error?: InBandError | null;
+}
+
+/**
+ * Text of a message `content`: a string, or an array of content parts whose
+ * text parts are joined. Anything else is empty.
+ */
+export function contentText(content: unknown): string {
+  if (typeof content === 'string') return content;
+  if (!Array.isArray(content)) return '';
+  return content
+    .map((part) => {
+      if (typeof part === 'string') return part;
+      const text = (part as { text?: unknown } | null)?.text;
+      return typeof text === 'string' ? text : '';
+    })
+    .join('');
+}
+
+function hasReasoning(fields: ChatMessageFields | undefined): boolean {
+  return contentText(fields?.reasoning).trim().length > 0 || contentText(fields?.reasoning_content).trim().length > 0;
+}
+
+/** The error a 200 body or stream chunk carries, if any, as an error to throw. */
+export function inBandErrorOf(
+  body: Pick<ChatCompletion, 'error'> & { choices?: ChatChoiceBase[] },
+  provider: ProviderName,
+): ProviderError | undefined {
+  const choice = body.choices?.[0];
+  const error = body.error ?? choice?.error ?? undefined;
+  if (!error && choice?.finish_reason !== 'error') return undefined;
+  const message = typeof error?.message === 'string' && error.message.trim()
+    ? error.message.trim()
+    : 'The provider reported an error (finish_reason: error).';
+  const code = typeof error?.code === 'number' ? error.code : Number.parseInt(String(error?.code ?? ''), 10);
+  if (Number.isInteger(code) && code >= 400 && code <= 599) {
+    return classifyProviderError(new OpenAICompatibleHttpError(`${code} ${message}`, code, new Headers()), {
+      provider,
+      label: 'OpenAI-compatible API error',
+    });
+  }
+  // No usable status: an upstream failure after the request was accepted.
+  return new ProviderError(`OpenAI-compatible API error: ${message}`, 'provider_unavailable', { provider });
+}
+
+/**
+ * A completion with no answer text. Usually a failed upstream call that was
+ * not reported as an error. The finish reason and whether reasoning came
+ * back are in the message, so the cause can be read from the logs.
+ */
+export function emptyResponseError(
+  provider: ProviderName,
+  model: string,
+  finishReason: string | null | undefined,
+  reasoningOnly: boolean,
+): ProviderError {
+  const details = [`finish_reason: ${finishReason ?? 'none'}`];
+  if (reasoningOnly) details.push('reasoning came back but no answer content');
+  return new ProviderError(`Empty response from ${model} (${details.join('; ')}).`, 'other', { provider });
+}
+
+/** OpenRouter routes a model to several hosts; this keeps it on hosts that honour every parameter sent. */
+function routingFields(baseURL: string, hasResponseFormat: boolean): Record<string, unknown> {
+  if (!hasResponseFormat) return {};
+  try {
+    return new URL(baseURL).hostname.endsWith('openrouter.ai') ? { provider: { require_parameters: true } } : {};
+  } catch {
+    return {};
+  }
 }
 
 /**
@@ -126,6 +220,8 @@ export class FreeOpenAICompatibleClient extends BaseFreeClient {
     const startTime = Date.now();
     let lastError: unknown;
 
+    let emptyFormats = 0;
+
     for (const format of STRUCTURED_FORMATS) {
       let completion: ChatCompletion;
       try {
@@ -136,8 +232,10 @@ export class FreeOpenAICompatibleClient extends BaseFreeClient {
             model: options.model,
             messages: [{ role: 'user', content: structuredPrompt(format, options.prompt, options.schema) }],
             ...(responseFormat ? { response_format: responseFormat } : {}),
+            ...routingFields(this.options.getBaseURL(), Boolean(responseFormat)),
             ...(options.options?.temperature !== undefined && { temperature: options.options.temperature }),
           },
+          signal: options.signal,
         });
         completion = (await response.json()) as ChatCompletion;
       } catch (error) {
@@ -148,7 +246,17 @@ export class FreeOpenAICompatibleClient extends BaseFreeClient {
         continue;
       }
 
-      const raw = completion.choices?.[0]?.message?.content ?? '';
+      // An upstream failure is not a format problem: report it so the caller can retry.
+      const inBand = inBandErrorOf(completion, this.provider);
+      if (inBand) throw inBand;
+
+      const choice = completion.choices?.[0];
+      const raw = contentText(choice?.message?.content);
+      if (!raw.trim()) {
+        emptyFormats += 1;
+        lastError = emptyResponseError(this.provider, options.model, choice?.finish_reason, hasReasoning(choice?.message));
+        continue;
+      }
       try {
         const parsed = extractJson<T>(raw);
         const usage = fromChatCompletionUsage(completion.usage);
@@ -166,6 +274,7 @@ export class FreeOpenAICompatibleClient extends BaseFreeClient {
       }
     }
 
+    if (emptyFormats === STRUCTURED_FORMATS.length && isProviderError(lastError)) throw lastError;
     throw classifyProviderError(lastError ?? new Error('No structured output.'), {
       provider: this.provider,
       label: 'OpenAI-compatible structured output failed',
@@ -189,18 +298,29 @@ export class FreeOpenAICompatibleClient extends BaseFreeClient {
           ...(options.streamOptions?.temperature !== undefined && { temperature: options.streamOptions.temperature }),
           ...(options.streamOptions?.seed !== undefined && { seed: options.streamOptions.seed }),
         },
+        signal: options.signal,
       });
 
+      let finishReason: string | null | undefined;
+      let sawReasoning = false;
       for await (const chunk of readServerSentEvents<ChatChunk>(response)) {
+        const inBand = inBandErrorOf(chunk, this.provider);
+        if (inBand) throw inBand;
         if (chunk.usage?.total_tokens) tokenCount = chunk.usage.total_tokens;
         usage = fromChatCompletionUsage(chunk.usage) ?? usage;
-        const content = chunk.choices?.[0]?.delta?.content;
-        if (typeof content === 'string' && content.length > 0) {
+        const choice = chunk.choices?.[0];
+        if (choice?.finish_reason) finishReason = choice.finish_reason;
+        if (hasReasoning(choice?.delta)) sawReasoning = true;
+        const content = contentText(choice?.delta?.content);
+        if (content.length > 0) {
           fullResponse += content;
           options.onChunk(content);
         }
       }
 
+      if (!fullResponse.trim()) {
+        throw emptyResponseError(this.provider, options.model, finishReason, sawReasoning);
+      }
       options.onComplete(fullResponse, Date.now() - startTime, tokenCount > 0 ? tokenCount : undefined, usage);
     } catch (error) {
       options.onError(classifyProviderError(error, { provider: this.provider, label: 'OpenAI-compatible API error' }));

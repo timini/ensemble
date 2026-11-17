@@ -174,4 +174,136 @@ describe('FreeOpenAICompatibleClient', () => {
     const client = makeClient(vi.fn());
     await expect(client.generateEmbeddings('hello')).rejects.toThrow(/embeddings/i);
   });
+
+  describe('empty completions, in-band errors and aborts', () => {
+    /** A fetch that never answers until its signal aborts, like a hung connection. */
+    function hangingFetch() {
+      const signals: AbortSignal[] = [];
+      const fetchMock = vi.fn().mockImplementation((_url: string, init: RequestInit) => {
+        const signal = init.signal!;
+        signals.push(signal);
+        return new Promise((_, reject) => {
+          signal.addEventListener('abort', () => reject(new DOMException('This operation was aborted', 'AbortError')));
+        });
+      });
+      return { fetchMock, signals };
+    }
+
+    it('reports an empty stream as an error, not as an empty answer', async () => {
+      const fetchMock = vi.fn().mockResolvedValue(
+        sse([
+          { choices: [{ delta: { content: '' }, finish_reason: 'stop' }] },
+          { choices: [], usage: { prompt_tokens: 163, completion_tokens: 0, total_tokens: 163 } },
+          '[DONE]',
+        ]),
+      );
+      const onComplete = vi.fn();
+      const onError = vi.fn();
+      await makeClient(fetchMock).streamResponse('Hi', 'anthropic/claude', vi.fn(), onComplete, onError);
+      expect(onComplete).not.toHaveBeenCalled();
+      expect(onError.mock.calls[0]![0].message).toMatch(/Empty response from anthropic\/claude \(finish_reason: stop\)/);
+    });
+
+    it('says when a stream carried reasoning but no answer', async () => {
+      const fetchMock = vi.fn().mockResolvedValue(
+        sse([{ choices: [{ delta: { reasoning: 'Let me think' }, finish_reason: 'length' }] }, '[DONE]']),
+      );
+      const onError = vi.fn();
+      await makeClient(fetchMock).streamResponse('Hi', 'm', vi.fn(), vi.fn(), onError);
+      expect(onError.mock.calls[0]![0].message).toMatch(/finish_reason: length; reasoning came back but no answer content/);
+    });
+
+    it('reports an error chunk sent after a 200 (OpenRouter mid-stream error)', async () => {
+      const fetchMock = vi.fn().mockResolvedValue(
+        sse([
+          { error: { code: 502, message: 'Upstream overloaded' }, choices: [{ delta: { content: '' }, finish_reason: 'error' }] },
+          '[DONE]',
+        ]),
+      );
+      const onError = vi.fn();
+      await makeClient(fetchMock).streamResponse('Hi', 'm', vi.fn(), vi.fn(), onError);
+      expect(onError.mock.calls[0]![0]).toMatchObject({ kind: 'provider_unavailable', status: 502 });
+      expect(onError.mock.calls[0]![0].message).toMatch(/Upstream overloaded/);
+    });
+
+    it('joins content parts sent as an array', async () => {
+      const fetchMock = vi.fn().mockResolvedValue(
+        sse([{ choices: [{ delta: { content: [{ type: 'text', text: 'Final answer: 4' }] } }] }, '[DONE]']),
+      );
+      const onComplete = vi.fn();
+      await makeClient(fetchMock).streamResponse('Hi', 'm', vi.fn(), onComplete, vi.fn());
+      expect(onComplete.mock.calls[0]![0]).toBe('Final answer: 4');
+    });
+
+    it('throws an in-band choice error from a structured call without trying other formats', async () => {
+      const fetchMock = vi.fn().mockResolvedValue(
+        json({
+          choices: [{ message: { content: null }, finish_reason: 'error', error: { code: 429, message: 'Rate limited upstream' } }],
+          usage: { prompt_tokens: 163, completion_tokens: 0, total_tokens: 163 },
+        }),
+      );
+      await expect(makeClient(fetchMock).generateStructured('q', 'm', schema)).rejects.toMatchObject({
+        kind: 'rate_limited',
+      });
+      expect(fetchMock).toHaveBeenCalledTimes(1);
+    });
+
+    it('throws an empty-response error when every structured format comes back empty', async () => {
+      const fetchMock = vi.fn().mockImplementation(() =>
+        Promise.resolve(json({ choices: [{ message: { content: '' }, finish_reason: 'stop' }] })),
+      );
+      await expect(makeClient(fetchMock).generateStructured('q', 'm', schema)).rejects.toThrow(/Empty response from m/);
+      expect(fetchMock).toHaveBeenCalledTimes(3);
+    });
+
+    it('reads structured JSON sent as content parts', async () => {
+      const fetchMock = vi.fn().mockResolvedValue(
+        json({ choices: [{ message: { content: [{ type: 'text', text: '{"answer":"4"}' }] } }] }),
+      );
+      const result = await makeClient(fetchMock).generateStructured<{ answer: string }>('q', 'm', schema);
+      expect(result.parsed).toEqual({ answer: '4' });
+    });
+
+    it('asks OpenRouter to route structured calls only to hosts that honour response_format', async () => {
+      const fetchMock = vi.fn().mockResolvedValue(json({ choices: [{ message: { content: '{"answer":"4"}' } }] }));
+      const client = new FreeOpenAICompatibleClient('openai-compatible', () => 'k', {
+        getBaseURL: () => 'https://openrouter.ai/api/v1',
+        fetchImpl: fetchMock,
+      });
+      await client.generateStructured('q', 'm', schema);
+      expect(bodyOf(fetchMock).provider).toEqual({ require_parameters: true });
+
+      const local = vi.fn().mockResolvedValue(json({ choices: [{ message: { content: '{"answer":"4"}' } }] }));
+      await makeClient(local).generateStructured('q', 'm', schema);
+      expect(bodyOf(local).provider).toBeUndefined();
+    });
+
+    it('aborts the request when the stream times out', async () => {
+      const { fetchMock, signals } = hangingFetch();
+      const onError = vi.fn();
+      await makeClient(fetchMock).streamResponse('Hi', 'm', vi.fn(), vi.fn(), onError, { timeoutMs: 20 });
+      expect(signals[0]!.aborted).toBe(true);
+      expect(onError).toHaveBeenCalledTimes(1);
+      expect(onError.mock.calls[0]![0]).toMatchObject({ kind: 'timeout' });
+      expect(onError.mock.calls[0]![0].message).toMatch(/Streaming timeout/);
+    });
+
+    it('aborts a structured call on its timeout', async () => {
+      const { fetchMock, signals } = hangingFetch();
+      await expect(
+        makeClient(fetchMock).generateStructured('q', 'm', schema, { timeoutMs: 20 }),
+      ).rejects.toMatchObject({ kind: 'timeout', message: expect.stringMatching(/Structured output timeout/) });
+      expect(signals[0]!.aborted).toBe(true);
+    });
+
+    it('aborts when the caller aborts its signal', async () => {
+      const { fetchMock, signals } = hangingFetch();
+      const controller = new AbortController();
+      const pending = makeClient(fetchMock).generateStructured('q', 'm', schema, { signal: controller.signal });
+      await vi.waitFor(() => expect(signals).toHaveLength(1));
+      controller.abort();
+      await expect(pending).rejects.toMatchObject({ kind: 'timeout', message: expect.stringMatching(/aborted/) });
+      expect(signals[0]!.aborted).toBe(true);
+    });
+  });
 });

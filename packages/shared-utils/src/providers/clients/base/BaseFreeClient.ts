@@ -10,7 +10,7 @@ import type {
 } from '../../types';
 import { MockProviderClient } from '../mock/MockProviderClient';
 import { sanitizeProviderErrorMessage } from '../../utils/sanitizeSensitiveData';
-import { ProviderError, classifyProviderError } from '../../errors/providerError';
+import { ProviderError, classifyProviderError, isProviderError } from '../../errors/providerError';
 import { EmbeddingsNotSupportedError } from '../../embeddings/errors';
 
 /** Default client-side limit for one streamed answer (2 minutes). */
@@ -32,6 +32,8 @@ export interface StreamOptions extends StreamHandlers {
   prompt: string;
   model: string;
   streamOptions?: StreamResponseOptions;
+  /** Aborted on timeout or when the caller's signal aborts. Pass it to fetch. */
+  signal?: AbortSignal;
 }
 
 export interface StructuredOptions {
@@ -40,6 +42,59 @@ export interface StructuredOptions {
   model: string;
   schema: JsonSchema;
   options?: GenerateStructuredOptions;
+  /** Aborted on timeout or when the caller's signal aborts. Pass it to fetch. */
+  signal?: AbortSignal;
+}
+
+interface AbortLimits {
+  timeoutMs?: number;
+  signal?: AbortSignal;
+  timeoutError: () => ProviderError;
+  abortError: () => ProviderError;
+}
+
+/** The ProviderError a signal was aborted with, if any. */
+function abortReason(signal: AbortSignal): ProviderError | undefined {
+  return signal.aborted && isProviderError(signal.reason) ? signal.reason : undefined;
+}
+
+/**
+ * Run `work` with an AbortSignal that fires when the time limit passes or the
+ * caller's signal aborts. The returned promise rejects at that moment with the
+ * matching ProviderError, and the signal cancels the request underneath, so a
+ * call that ran out of time does not keep its connection open.
+ */
+async function runAbortable<T>(work: (signal: AbortSignal) => Promise<T>, limits: AbortLimits): Promise<T> {
+  const controller = new AbortController();
+  let rejectAbort: (error: ProviderError) => void = () => undefined;
+  const aborted = new Promise<never>((_, reject) => {
+    rejectAbort = reject;
+  });
+  const abortWith = (error: ProviderError) => {
+    if (controller.signal.aborted) return;
+    controller.abort(error);
+    rejectAbort(error);
+  };
+  const onCallerAbort = () => abortWith(limits.abortError());
+
+  let timeoutId: ReturnType<typeof setTimeout> | null = null;
+  if (limits.timeoutMs !== undefined && limits.timeoutMs > 0) {
+    timeoutId = setTimeout(() => abortWith(limits.timeoutError()), limits.timeoutMs);
+  }
+  if (limits.signal?.aborted) onCallerAbort();
+  else limits.signal?.addEventListener('abort', onCallerAbort, { once: true });
+
+  try {
+    // A request cancelled by the signal fails with a bare AbortError; report
+    // the reason it was cancelled instead.
+    const running = work(controller.signal).catch((error: unknown) => {
+      throw abortReason(controller.signal) ?? error;
+    });
+    return await Promise.race([running, aborted]);
+  } finally {
+    if (timeoutId !== null) clearTimeout(timeoutId);
+    limits.signal?.removeEventListener('abort', onCallerAbort);
+  }
 }
 
 /**
@@ -113,45 +168,44 @@ export abstract class BaseFreeClient implements AIProvider {
     };
 
     const timeoutMs = options?.timeoutMs ?? BaseFreeClient.STREAM_TIMEOUT_MS;
-    let timeoutId: ReturnType<typeof setTimeout> | null = null;
-    const timeoutPromise = new Promise<never>((_, reject) => {
-      timeoutId = setTimeout(() => {
-        reject(
-          new ProviderError(
-            `Streaming timeout for ${this.provider} after ${Math.round(timeoutMs / 1000)}s. The API may be unresponsive.`,
-            'timeout',
-            { provider: this.provider },
-          ),
-        );
-      }, timeoutMs);
-    });
-
     try {
-      await Promise.race([
-        this.streamWithProvider({
-          apiKey,
-          prompt,
-          model,
-          onChunk: (chunk) => {
-            if (!settled) onChunk(chunk);
-          },
-          onComplete: (...args) => {
-            if (settled) return;
-            settled = true;
-            onComplete(...args);
-          },
-          onError: report,
-          streamOptions: options,
-        }),
-        timeoutPromise,
-      ]);
+      await runAbortable(
+        (signal) =>
+          this.streamWithProvider({
+            apiKey,
+            prompt,
+            model,
+            onChunk: (chunk) => {
+              if (!settled) onChunk(chunk);
+            },
+            onComplete: (...args) => {
+              if (settled) return;
+              settled = true;
+              onComplete(...args);
+            },
+            onError: (error) => report(abortReason(signal) ?? error),
+            streamOptions: options,
+            signal,
+          }),
+        {
+          timeoutMs,
+          signal: options?.signal,
+          timeoutError: () =>
+            new ProviderError(
+              `Streaming timeout for ${this.provider} after ${Math.round(timeoutMs / 1000)}s. The API may be unresponsive.`,
+              'timeout',
+              { provider: this.provider },
+            ),
+          abortError: () => this.abortedError(),
+        },
+      );
     } catch (error) {
       report(error);
-    } finally {
-      if (timeoutId !== null) {
-        clearTimeout(timeoutId);
-      }
     }
+  }
+
+  private abortedError(): ProviderError {
+    return new ProviderError(`Request to ${this.provider} was aborted.`, 'timeout', { provider: this.provider });
   }
 
   /** True when this client implements embedWithProvider. */
@@ -219,13 +273,24 @@ export abstract class BaseFreeClient implements AIProvider {
       );
     }
 
-    return this.generateStructuredWithProvider<T>({
-      apiKey,
-      prompt,
-      model,
-      schema,
-      options,
-    });
+    const timeoutMs = options?.timeoutMs;
+    if (timeoutMs === undefined && !options?.signal) {
+      return this.generateStructuredWithProvider<T>({ apiKey, prompt, model, schema, options });
+    }
+    return runAbortable(
+      (signal) => this.generateStructuredWithProvider<T>({ apiKey, prompt, model, schema, options, signal }),
+      {
+        timeoutMs,
+        signal: options?.signal,
+        timeoutError: () =>
+          new ProviderError(
+            `Structured output timeout for ${this.provider} after ${Math.round((timeoutMs ?? 0) / 1000)}s. The API may be unresponsive.`,
+            'timeout',
+            { provider: this.provider },
+          ),
+        abortError: () => this.abortedError(),
+      },
+    );
   }
 
   protected async generateStructuredWithProvider<T>(
