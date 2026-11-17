@@ -29,6 +29,7 @@ import {
 import { FALLBACK_MODELS } from "~/lib/models";
 import { toError } from "~/lib/errors";
 import { logger } from "~/lib/logger";
+import { toResponseError } from "~/lib/responseErrors";
 import type { ConsensusMethod } from "~/store/slices/ensembleSlice";
 
 export default function PromptPage() {
@@ -41,7 +42,7 @@ export default function PromptPage() {
   const prompt = useStore((state) => state.prompt);
   const setPrompt = useStore((state) => state.setPrompt);
   const manualResponses = useStore((state) => state.manualResponses);
-  const resetStreamingState = useStore((state) => state.resetStreamingState);
+  const startRun = useStore((state) => state.startRun);
   const startStreaming = useStore((state) => state.startStreaming);
   const appendStreamChunk = useStore((state) => state.appendStreamChunk);
   const completeResponse = useStore((state) => state.completeResponse);
@@ -88,7 +89,9 @@ export default function PromptPage() {
   const handleSubmit = () => {
     if (!isValid) return;
 
-    resetStreamingState();
+    const currentPrompt = localPrompt.trim();
+    // Clears the previous run's answers, agreement and consensus.
+    startRun(currentPrompt);
 
     const registry = ProviderRegistry.getInstance();
     const clientMode: "mock" | "free" | "pro" =
@@ -97,8 +100,6 @@ export default function PromptPage() {
         : mode === "pro"
           ? "pro"
           : "free";
-
-    const currentPrompt = localPrompt.trim();
 
     selectedModels.forEach((selection) => {
       const displayName =
@@ -134,7 +135,8 @@ export default function PromptPage() {
               `[PromptPage] streamResponse error for ${selection.provider}/${selection.model}`,
               error,
             );
-            setError(selection.id, error.message);
+            const failure = toResponseError(error);
+            setError(selection.id, failure.message, failure.details);
           },
         )
         .catch((error: unknown) => {
@@ -143,7 +145,8 @@ export default function PromptPage() {
             `[PromptPage] streamResponse exception for ${selection.provider}/${selection.model}`,
             normalizedError,
           );
-          setError(selection.id, normalizedError.message);
+          const failure = toResponseError(normalizedError);
+          setError(selection.id, failure.message, failure.details);
         });
     });
 

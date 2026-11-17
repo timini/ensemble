@@ -354,7 +354,11 @@
       "agreementUnavailableDescription": "Le score d'accord nécessite un fournisseur d'embeddings. Ajoutez une clé API OpenAI ou Google valide sur la page de configuration.",
       "agreementErrorTitle": "Le score d'accord n'a pas pu être calculé",
       "agreementErrorDescription": "Le fournisseur d'embeddings n'a pas renvoyé de résultat pour assez de réponses. Vérifiez votre clé API et réessayez.",
-      "agreementPartialNote": "Exclues du score d'accord car leurs embeddings n'ont pas pu être générés : {{models}}."
+      "agreementPartialNote": "Exclues du score d'accord car leurs embeddings n'ont pas pu être générés : {{models}}.",
+      "runExclusionNote_one": "{{count}} modèle a échoué et n'est pas pris en compte dans le consensus ni dans le score d'accord : {{models}}. Ils utilisent les {{succeeded}} réponses sur {{total}} qui ont abouti.",
+      "runExclusionNote_other": "{{count}} modèles ont échoué et ne sont pas pris en compte dans le consensus ni dans le score d'accord : {{models}}. Ils utilisent les {{succeeded}} réponses sur {{total}} qui ont abouti.",
+      "consensusInsufficientTitle": "Pas de consensus pour cette exécution",
+      "consensusInsufficientDescription": "Le consensus et l'accord nécessitent au moins 2 réponses, et seulement {{count}} modèle(s) sur {{total}} ont répondu. Réessayez les modèles en échec ci-dessous."
     }
   }
 }

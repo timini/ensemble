@@ -10,7 +10,10 @@ import { formatModelLabelFromId } from "~/lib/providerModels";
 import { ResponseCard } from "@/components/molecules/ResponseCard";
 import { Button } from "@/components/atoms/Button";
 import { MessageSquare } from "lucide-react";
-import type { Provider } from "@/components/molecules/ResponseCard";
+import type {
+  Provider,
+  ResponseErrorKind,
+} from "@/components/molecules/ResponseCard";
 import { ResponseCardSkeleton } from "./ResponseCardSkeleton";
 
 interface SelectedModel {
@@ -25,6 +28,8 @@ interface StreamingResponse {
   provider: Provider;
   response: string;
   error?: string | null;
+  errorKind?: ResponseErrorKind | null;
+  retryAfterSeconds?: number | null;
   isStreaming: boolean;
   responseTime?: number | null;
   tokenCount?: number | null;
@@ -99,6 +104,8 @@ export function ResponsesSection({
               responseType="ai"
               content={response.response}
               error={response.error ?? undefined}
+              errorKind={response.errorKind ?? undefined}
+              retryAfterSeconds={response.retryAfterSeconds ?? undefined}
               responseTime={
                 response.responseTime
                   ? `${response.responseTime}ms`

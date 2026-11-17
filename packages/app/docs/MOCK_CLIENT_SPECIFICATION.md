@@ -74,17 +74,28 @@ interface MockClientConfig {
   errorProbability?: number;  // default 0
   timeoutAfterMs?: number;    // default 30000, stored but not used
   providerFilter?: ProviderName;
+  errorScenarios?: MockErrorScenarios | ((model: string) => MockErrorScenario | undefined);
 }
 ```
 
-When `enableErrors` is true, `streamResponse` fails with `Rate limit exceeded. Please try again in 60 seconds.` with probability `errorProbability`. The app always creates mock clients with only `providerFilter`, so errors are never simulated in the running app.
+When `enableErrors` is true, `streamResponse` fails with a simulated 429 with probability `errorProbability`.
+
+### Simulated provider errors
+
+`errorScenarios` maps a model id (or `*` for every model) to `invalid_key`, `rate_limited`, `provider_unavailable` or `timeout`, or is a function asked at the start of each call. For a listed model:
+
+- `invalid_key`, `rate_limited`, `provider_unavailable`: after 100 to 200 ms, `onError` gets a `ProviderError` with status 401, 429 (with `retryAfterSeconds: 30`) or 503.
+- `timeout`: one chunk is sent, then the stream stalls until `options.timeoutMs` (default 2 s in mock) and fails with a `timeout` `ProviderError`.
+- `generateStructured` rejects with the same kind.
+
+In the app (mock mode only), `src/lib/mockErrorScenarios.ts` feeds this from the `mockErrors` query parameter on any page, for example `/config?mockErrors=gpt-6-luna:401,gpt-6-astra:timeout`. The value is kept in sessionStorage for the tab; `mockErrors=` clears it. Kinds can be written as `401`, `403`, `429`, `500`, `502`, `503`, `timeout` or the kind names. Adding `:once` (`gpt-6-luna:429:once`) fails only the first call, so a retry succeeds. The mock-mode E2E tests in `packages/e2e/tests/mock-mode/provider-errors.spec.ts` use it.
 
 ## Limitations
 
 - Output ignores the prompt and has no structure.
 - Embeddings and agreement scores are not meaningful in mock mode.
 - The mock client reports no `usage`, so the review page labels the run cost as estimated from text length. The `costPer1kTokens` values in its model list are not used for pricing; the shared price table is.
-- No timeout or network error simulation.
+- Network errors other than the scenarios above (DNS, CORS, dropped connections) are not simulated.
 
 ## Related
 

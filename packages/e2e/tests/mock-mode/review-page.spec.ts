@@ -143,13 +143,17 @@ test.describe('Review Page', () => {
     await expect(page.getByRole('button', { name: /start over/i })).toBeVisible();
   });
 
-  test('redirects to prompt page if no prompt exists', async ({ page }) => {
-    // Navigate directly to review page without a prompt
-    await page.goto('/review');
+  test('redirects to prompt page if no prompt exists', async ({ browser }) => {
+    // The last run is kept across loads, so use a fresh context with no
+    // stored state to have no prompt at all.
+    const context = await browser.newContext();
+    const freshPage = await context.newPage();
+    await freshPage.goto('/review');
 
     // Should redirect to prompt page
-    await page.waitForURL('/prompt', { timeout: 5000 });
-    await expect(page).toHaveURL('/prompt');
+    await freshPage.waitForURL('/prompt', { timeout: 5000 });
+    await expect(freshPage).toHaveURL('/prompt');
+    await context.close();
   });
 
   test('workflow shows review step as active', async ({ page }) => {

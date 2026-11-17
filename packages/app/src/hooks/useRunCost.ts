@@ -16,7 +16,7 @@ export function useRunCost(
   embeddings: { modelId: string }[],
   embeddingsSource: string | null,
 ): RunCost | null {
-  const prompt = useStore((state) => state.prompt);
+  const prompt = useStore((state) => state.runPrompt ?? state.prompt);
   const selectedModels = useStore((state) => state.selectedModels);
   const consensusUsage = useStore((state) => state.consensusUsage);
 

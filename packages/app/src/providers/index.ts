@@ -4,12 +4,33 @@ import {
   type ProviderName,
 } from '@ensemble-ai/shared-utils/providers';
 import { useStore } from '~/store';
+import {
+  captureMockErrorScenarios,
+  createMockErrorResolver,
+} from '~/lib/mockErrorScenarios';
 
 const PROVIDERS: ProviderName[] = ['openai', 'anthropic', 'google', 'xai', 'deepseek', 'perplexity'];
+
+function tabStorage(): Storage | null {
+  try {
+    return typeof window === 'undefined' ? null : window.sessionStorage;
+  } catch {
+    return null;
+  }
+}
+
+const isMockMode = () => process.env.NEXT_PUBLIC_MOCK_MODE === 'true';
 
 export function initializeProviders(): void {
   const registry = ProviderRegistry.getInstance();
   const getState = () => useStore.getState();
+
+  // Mock mode only: `?mockErrors=...` simulates provider failures (see
+  // lib/mockErrorScenarios.ts). Never active in Free or Pro mode.
+  const storage = tabStorage();
+  if (isMockMode() && storage) {
+    captureMockErrorScenarios(window.location.search, storage);
+  }
 
   PROVIDERS.forEach((provider) => {
     if (!registry.hasProvider(provider, 'mock')) {
@@ -19,6 +40,9 @@ export function initializeProviders(): void {
         createProviderClient({
           provider,
           mode: 'mock',
+          mockErrorScenarios: isMockMode()
+            ? createMockErrorResolver(tabStorage)
+            : undefined,
         }),
       );
     }

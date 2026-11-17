@@ -3,7 +3,10 @@ import type { ModelResponse, ManualResponse } from "~/store/slices/responseSlice
 
 /**
  * Triggers consensus generation when all model responses have completed.
- * Waits for at least 2 completed responses before firing.
+ * Failed answers are left out; it waits for at least 2 successful answers
+ * (model or manual) before firing. It does not fire again after a consensus
+ * error, so a failing summarizer is not called in a loop; retrying a model
+ * clears the error.
  */
 export function useConsensusTrigger({
   hasHydrated,
@@ -15,6 +18,7 @@ export function useConsensusTrigger({
   prompt,
   generateConsensus,
   isGenerating,
+  error = null,
 }: {
   hasHydrated: boolean;
   responses: ModelResponse[];
@@ -29,9 +33,11 @@ export function useConsensusTrigger({
     summarizerOverride: string,
   ) => Promise<void>;
   isGenerating: boolean;
+  /** Error of the last consensus attempt, if it failed. */
+  error?: string | null;
 }) {
   useEffect(() => {
-    if (!hasHydrated || metaAnalysis || isGenerating) return;
+    if (!hasHydrated || metaAnalysis || isGenerating || error) return;
 
     // selectedModels[].model is an API identifier (e.g., "gpt-4o"), not a display name
     const effectiveSummarizerId =
@@ -76,5 +82,6 @@ export function useConsensusTrigger({
     prompt,
     generateConsensus,
     isGenerating,
+    error,
   ]);
 }

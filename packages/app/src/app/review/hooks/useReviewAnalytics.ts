@@ -10,7 +10,8 @@ type Embedding = { modelId: string; embedding: number[] };
 
 /**
  * Derives analytics values from completed responses and agreement data.
- * Returns completedResponses, pairwiseComparisons, overallAgreement, and averageConfidence.
+ * Returns completedResponses (successful answers), pairwiseComparisons,
+ * overallAgreement, averageConfidence, failedModels and allFinished.
  */
 export function useReviewAnalytics(
   viewResponses: ModelResponse[],
@@ -47,6 +48,17 @@ export function useReviewAnalytics(
     [viewAgreementStats],
   );
 
+  // Models whose answer failed (any error kind, including interrupted).
+  const failedModels = useMemo(
+    () => viewResponses.filter((r) => r.error).map((r) => r.model),
+    [viewResponses],
+  );
+
+  const allFinished = useMemo(
+    () => viewResponses.every((r) => !r.isStreaming),
+    [viewResponses],
+  );
+
   const averageConfidence = useMemo(
     () => calculateAverageConfidence(pairwiseComparisons),
     [pairwiseComparisons],
@@ -57,5 +69,7 @@ export function useReviewAnalytics(
     pairwiseComparisons,
     overallAgreement,
     averageConfidence,
+    failedModels,
+    allFinished,
   };
 }

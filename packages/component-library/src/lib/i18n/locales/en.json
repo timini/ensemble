@@ -354,7 +354,11 @@
       "agreementUnavailableDescription": "Scoring agreement needs an embeddings provider. Add a valid OpenAI or Google API key on the configuration page.",
       "agreementErrorTitle": "Agreement could not be scored",
       "agreementErrorDescription": "The embeddings provider did not return results for enough answers. Check your API key and try again.",
-      "agreementPartialNote": "Left out of the agreement score because their embeddings could not be generated: {{models}}."
+      "agreementPartialNote": "Left out of the agreement score because their embeddings could not be generated: {{models}}.",
+      "runExclusionNote_one": "{{count}} model failed and is left out of the consensus and the agreement score: {{models}}. They use the {{succeeded}} of {{total}} model answers that succeeded.",
+      "runExclusionNote_other": "{{count}} models failed and are left out of the consensus and the agreement score: {{models}}. They use the {{succeeded}} of {{total}} model answers that succeeded.",
+      "consensusInsufficientTitle": "No consensus for this run",
+      "consensusInsufficientDescription": "Consensus and agreement need at least 2 answers, and only {{count}} of {{total}} models answered. Retry the failed models below."
     }
   }
 }

@@ -9,6 +9,7 @@ import { initializeProviders } from "~/providers";
 import { FALLBACK_MODELS } from "~/lib/models";
 import { formatModelLabelFromId } from "~/lib/providerModels";
 import { logger } from "~/lib/logger";
+import { toResponseError } from "~/lib/responseErrors";
 
 interface UseStreamingResponsesProps {
   hasHydrated: boolean;
@@ -92,7 +93,7 @@ export function useStreamingResponses({
 
       // For Free mode, we need an API key
       if (clientMode === "free" && !apiKey) {
-        throw new Error(`API key for ${model.provider} is missing`);
+        throw new Error(`Missing API key for ${model.provider}.`);
       }
 
       await providerClient.streamResponse(
@@ -117,7 +118,8 @@ export function useStreamingResponses({
             clearInterval(flushIntervals.current[modelId]);
             delete flushIntervals.current[modelId];
           }
-          setError(model.id, error.message);
+          const failure = toResponseError(error);
+          setError(model.id, failure.message, failure.details);
         },
       );
     } catch (err) {
@@ -131,7 +133,8 @@ export function useStreamingResponses({
         clearInterval(flushIntervals.current[modelId]);
         delete flushIntervals.current[modelId];
       }
-      setError(model.id, normalizedError.message);
+      const failure = toResponseError(normalizedError);
+      setError(model.id, failure.message, failure.details);
     }
   };
 

@@ -24,6 +24,8 @@ import { useConsensusStatus } from "./hooks/useConsensusStatus";
 import { useConsensusTrigger } from "./hooks/useConsensusTrigger";
 import { ResponsesSection } from "./_components/ResponsesSection";
 import { AgreementSection } from "./_components/AgreementSection";
+import { RunExclusionNote } from "./_components/RunExclusionNote";
+import { useModelRetry } from "./hooks/useModelRetry";
 import { RunCostSummary } from "@/components/molecules/RunCostSummary";
 import { MajorityVoteBreakdown } from "@/components/molecules/MajorityVoteBreakdown";
 import { toMajorityVoteBreakdownProps } from "~/lib/majorityVote";
@@ -64,6 +66,8 @@ export default function ReviewPage() {
     pairwiseComparisons,
     overallAgreement,
     averageConfidence,
+    failedModels,
+    allFinished,
   } = useReviewAnalytics(
     viewResponses,
     viewAgreementStats,
@@ -89,7 +93,9 @@ export default function ReviewPage() {
     generateConsensus,
     isGenerating: isGeneratingConsensus,
     error: consensusError,
+    resetError: resetConsensusError,
   } = useConsensusGeneration();
+  const handleRetry = useModelRetry(retryModel, resetConsensusError);
 
   useConsensusTrigger({
     hasHydrated,
@@ -101,6 +107,7 @@ export default function ReviewPage() {
     prompt,
     generateConsensus,
     isGenerating: isGeneratingConsensus,
+    error: consensusError,
   });
 
   const summarizerDisplayName = useMemo(() => {
@@ -113,6 +120,7 @@ export default function ReviewPage() {
   const consensusStatus = useConsensusStatus({
     hasHydrated,
     responses: viewResponses,
+    manualCount: viewManualResponses.length,
     metaAnalysis: viewMetaAnalysis,
     isGenerating: isGeneratingConsensus,
     error: consensusError,
@@ -167,6 +175,15 @@ export default function ReviewPage() {
         <PromptCard prompt={displayPrompt} />
       </div>
 
+      {/* Failed models: what consensus and agreement leave out, or why there is no consensus */}
+      <RunExclusionNote
+        succeeded={completedResponses.length}
+        total={viewResponses.length}
+        failedModels={failedModels}
+        manualCount={viewManualResponses.length}
+        finished={allFinished}
+      />
+
       {/* 2. Consensus Section (matches wireframe order) */}
       {consensusStatus !== null && (
         <div className="mt-8">
@@ -202,7 +219,7 @@ export default function ReviewPage() {
         manualResponses={viewManualResponses}
         pendingModels={pendingModels}
         maxExpandedCards={MAX_EXPANDED_CARDS}
-        onRetry={retryModel}
+        onRetry={handleRetry}
         onBack={handleBack}
       />
 

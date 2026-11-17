@@ -28,6 +28,7 @@ import {
   createResponseSlice,
   type ResponseSlice,
 } from './slices/responseSlice';
+import { markInterruptedStreams } from './slices/responseErrorState';
 
 /**
  * Root Zustand store combining all slices
@@ -36,14 +37,12 @@ import {
  * 'ensemble-ai-store'. The whole store is written, after
  * sanitizeStateForPersist strips plaintext API keys (only the encrypted form
  * is kept). That includes the prompt, responses, embeddings and agreement
- * results.
+ * results, so the last run is still there after a reload or a later visit to
+ * /review. A new run clears it: the prompt page calls startRun on submit,
+ * which resets the results and records the run's prompt (runPrompt).
  *
- * The prompt and response data are cleared by an inline script in
- * src/app/layout.tsx when /review is opened by a fresh navigation (navigation
- * type "navigate"). It resets the prompt, responses, manual responses,
- * embeddings, similarity matrix, agreement stats, meta analysis, consensus
- * usage and majority vote in localStorage before the store hydrates. Reloads, back/forward loads and
- * client-side navigation keep the persisted data.
+ * On load, markInterruptedStreams marks answers that were still streaming as
+ * interrupted errors, because a fresh page has no live streams.
  */
 
 export type StoreState = ThemeSlice &
@@ -110,6 +109,7 @@ export const useStore = create<StoreState>()(
     {
       name: 'ensemble-ai-store',
       serialize: serializeStoreState,
+      deserialize: markInterruptedStreams,
     },
   ),
 );
@@ -121,3 +121,4 @@ export type { WorkflowStep } from './slices/workflowSlice';
 export type { OperatingMode } from './slices/modeSlice';
 export type { ProviderType, ModelSelection, SavedEnsemble } from './slices/ensembleSlice';
 export type { ModelResponse, ManualResponse, AgreementStats } from './slices/responseSlice';
+export type { ResponseErrorKind, ResponseErrorDetails } from './slices/responseErrorState';

@@ -160,6 +160,8 @@ export function useConsensusGeneration() {
         generateConsensus,
         isGenerating,
         error,
+        /** Clears a consensus error so the trigger can run consensus again. */
+        resetError: () => setError(null),
         consensusMethod
     };
 }

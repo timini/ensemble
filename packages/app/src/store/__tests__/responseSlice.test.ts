@@ -8,6 +8,7 @@ import {
   createResponseSlice,
   type ResponseSlice,
 } from "../slices/responseSlice";
+import { markInterruptedStreams } from "../slices/responseErrorState";
 
 describe("responseSlice", () => {
   let store: StoreApi<ResponseSlice>;
@@ -295,5 +296,133 @@ describe("responseSlice", () => {
     expect(response?.isComplete).toBe(false);
     expect(response?.error).toBeNull();
     expect(store.getState().responses).toHaveLength(1);
+  });
+
+  it("clears the old text and error details when a model restarts", () => {
+    store.getState().startStreaming("model-1", "openai", "gpt-4o");
+    store.getState().appendStreamChunk("model-1", "Partial");
+    store.getState().setError("model-1", "429", {
+      kind: "rate_limited",
+      retryAfterSeconds: 30,
+    });
+
+    store.getState().startStreaming("model-1", "openai", "gpt-4o");
+
+    const response = store.getState().responses[0];
+    expect(response?.response).toBe("");
+    expect(response?.errorKind).toBeNull();
+    expect(response?.retryAfterSeconds).toBeNull();
+  });
+
+  it("stores the error kind and retry delay", () => {
+    store.getState().startStreaming("model-1", "openai", "gpt-4o");
+    store.getState().setError("model-1", "429 Too many", {
+      kind: "rate_limited",
+      retryAfterSeconds: 12,
+    });
+
+    const response = store.getState().responses[0];
+    expect(response?.errorKind).toBe("rate_limited");
+    expect(response?.retryAfterSeconds).toBe(12);
+  });
+
+  it("defaults the error kind to other", () => {
+    store.getState().startStreaming("model-1", "openai", "gpt-4o");
+    store.getState().setError("model-1", "boom");
+    expect(store.getState().responses[0]?.errorKind).toBe("other");
+  });
+
+  it("clears the consensus but keeps its billed usage", () => {
+    store.getState().setMetaAnalysis("Consensus");
+    store.getState().addConsensusUsage({
+      provider: "openai",
+      modelId: "gpt-4o",
+      inputTokens: 1,
+      outputTokens: 1,
+      source: "reported",
+    });
+    store.getState().clearConsensus();
+
+    expect(store.getState().metaAnalysis).toBeNull();
+    expect(store.getState().majorityVote).toBeNull();
+    expect(store.getState().consensusUsage).toHaveLength(1);
+  });
+});
+
+describe("runPrompt", () => {
+  it("keeps the prompt a run was made with apart from the draft", () => {
+    const store = createStore<ResponseSlice>()(createResponseSlice);
+    store.getState().setPrompt("First question");
+    store.getState().startRun("First question");
+    store.getState().setPrompt("Draft of the next question");
+
+    expect(store.getState().runPrompt).toBe("First question");
+    expect(store.getState().prompt).toBe("Draft of the next question");
+  });
+
+  it("clears the previous results when a run starts", () => {
+    const store = createStore<ResponseSlice>()(createResponseSlice);
+    store.getState().startStreaming("m", "openai", "M");
+    store.getState().setMetaAnalysis("Old consensus");
+    store.getState().startRun("New question");
+
+    expect(store.getState().responses).toEqual([]);
+    expect(store.getState().metaAnalysis).toBeNull();
+    expect(store.getState().runPrompt).toBe("New question");
+  });
+
+  it("is cleared with the responses", () => {
+    const store = createStore<ResponseSlice>()(createResponseSlice);
+    store.getState().startRun("Q");
+    store.getState().clearResponses();
+    expect(store.getState().runPrompt).toBeNull();
+  });
+});
+
+describe("markInterruptedStreams", () => {
+  it("turns answers that were streaming when the page unloaded into interrupted errors", () => {
+    const stored = {
+      prompt: "Q",
+      responses: [
+        {
+          modelId: "a",
+          provider: "openai" as const,
+          model: "A",
+          response: "Half an ans",
+          isStreaming: true,
+          isComplete: false,
+          responseTime: null,
+          tokenCount: null,
+          error: null,
+        },
+        {
+          modelId: "b",
+          provider: "openai" as const,
+          model: "B",
+          response: "Done",
+          isStreaming: false,
+          isComplete: true,
+          responseTime: 10,
+          tokenCount: 5,
+          error: null,
+        },
+      ],
+    };
+
+    const result = markInterruptedStreams(stored);
+
+    expect(result.prompt).toBe("Q");
+    expect(result.responses?.[0]).toMatchObject({
+      isStreaming: false,
+      isComplete: true,
+      errorKind: "interrupted",
+    });
+    expect(result.responses?.[0]?.error).toBeTruthy();
+    expect(result.responses?.[1]).toEqual(stored.responses[1]);
+  });
+
+  it("leaves state without responses alone", () => {
+    const stored: { theme: string; responses?: undefined } = { theme: "dark" };
+    expect(markInterruptedStreams(stored)).toEqual(stored);
   });
 });

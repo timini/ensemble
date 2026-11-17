@@ -4,57 +4,33 @@
  * Manages AI responses and streaming state.
  *
  * This slice is persisted to localStorage with the rest of the store (see
- * src/store/index.ts). The inline script in src/app/layout.tsx clears the
- * prompt and the response fields when /review is opened by a fresh navigation
- * (navigation type "navigate"). Reloads, back/forward loads and client-side
- * navigation keep the persisted data.
+ * src/store/index.ts), so the last run survives a reload or a later visit to
+ * /review. Submitting a new prompt calls startRun, which clears the old
+ * answers, embeddings, agreement and consensus and records the run's
+ * prompt. When the store loads, markInterruptedStreams turns any answer that
+ * was still streaming into an `interrupted` error, since a fresh page has no
+ * live streams.
  */
 
 import type { StateCreator } from "zustand";
 import type { TokenUsage } from "@ensemble-ai/shared-utils/providers";
 import type { CallUsage } from "@ensemble-ai/shared-utils/pricing";
-import {
-  agreementStatistics,
-  similarityMatrix as buildSimilarityMatrix,
-} from "@ensemble-ai/shared-utils/similarity";
-import { toError } from "~/lib/errors";
-import { logger } from "~/lib/logger";
+import { agreementFromEmbeddings } from "./agreementState";
 import type { MajorityVoteRecord } from "~/lib/majorityVote";
 import type { ProviderType } from "./ensembleSlice";
+import type { ResponseErrorDetails } from "./responseErrorState";
+import type { AgreementStats, ManualResponse, ModelResponse } from "./responseTypes";
 
-export interface ModelResponse {
-  modelId: string;
-  provider: ProviderType;
-  model: string;
-  response: string;
-  isStreaming: boolean;
-  isComplete: boolean;
-  responseTime: number | null;
-  tokenCount: number | null;
-  /**
-   * Input and output tokens reported by the provider, or null when it
-   * reported none. Missing in runs persisted before usage was recorded.
-   */
-  usage?: TokenUsage | null;
-  error: string | null;
-}
-
-export interface ManualResponse {
-  id: string;
-  label: string;
-  response: string;
-}
-
-export interface AgreementStats {
-  mean: number;
-  median: number;
-  min: number;
-  max: number;
-  stddev: number;
-}
+export type { AgreementStats, ManualResponse, ModelResponse } from "./responseTypes";
 
 export interface ResponseSlice {
+  /** Prompt draft on /prompt, saved as the user types. */
   prompt: string | null;
+  /**
+   * Prompt the current run was submitted with, or null. Kept apart from the
+   * draft so editing the next prompt never relabels the last run's answers.
+   */
+  runPrompt: string | null;
   responses: ModelResponse[];
   manualResponses: ManualResponse[];
   embeddings: Array<{ modelId: string; embedding: number[] }>;
@@ -69,6 +45,8 @@ export interface ResponseSlice {
   majorityVote: MajorityVoteRecord | null;
 
   setPrompt: (prompt: string) => void;
+  /** Starts a new run: clears the previous results and records its prompt. */
+  startRun: (prompt: string) => void;
   startStreaming: (
     modelId: string,
     provider: ProviderType,
@@ -81,7 +59,11 @@ export interface ResponseSlice {
     tokenCount?: number,
     usage?: TokenUsage,
   ) => void;
-  setError: (modelId: string, error: string) => void;
+  setError: (
+    modelId: string,
+    error: string,
+    details?: ResponseErrorDetails,
+  ) => void;
   addManualResponse: (label: string, response: string) => void;
   removeManualResponse: (id: string) => void;
   setEmbeddings: (
@@ -92,12 +74,31 @@ export interface ResponseSlice {
   setMetaAnalysis: (analysis: string) => void;
   addConsensusUsage: (call: CallUsage) => void;
   setMajorityVote: (vote: MajorityVoteRecord | null) => void;
+  /**
+   * Drops the consensus text and majority vote so consensus runs again (for
+   * example after a failed model is retried). Billed usage is kept.
+   */
+  clearConsensus: () => void;
   clearResponses: () => void;
   resetStreamingState: () => void;
 }
 
+/** Fields of an answer when its stream starts or restarts. */
+const STREAM_START = {
+  response: "",
+  isStreaming: true,
+  isComplete: false,
+  responseTime: null,
+  tokenCount: null,
+  usage: null,
+  error: null,
+  errorKind: null,
+  retryAfterSeconds: null,
+} as const;
+
 export const createResponseSlice: StateCreator<ResponseSlice> = (set, get) => ({
   prompt: null,
+  runPrompt: null,
   responses: [],
   manualResponses: [],
   embeddings: [],
@@ -112,37 +113,27 @@ export const createResponseSlice: StateCreator<ResponseSlice> = (set, get) => ({
     set({ prompt });
   },
 
+  startRun: (prompt) => {
+    get().resetStreamingState();
+    set({ runPrompt: prompt });
+  },
+
+  // A new answer, and a restart (retry), start from an empty answer.
   startStreaming: (modelId, provider, model) => {
     set((state) => {
-      const existingIndex = state.responses.findIndex(
-        (r) => r.modelId === modelId,
-      );
-
-      if (existingIndex >= 0) {
-        const updated = [...state.responses];
-        updated[existingIndex] = {
-          ...updated[existingIndex]!,
-          isStreaming: true,
-          isComplete: false,
-          error: null,
+      if (state.responses.some((r) => r.modelId === modelId)) {
+        return {
+          responses: state.responses.map((r) =>
+            r.modelId === modelId ? { ...r, ...STREAM_START } : r,
+          ),
         };
-        return { responses: updated };
       }
-
-      const newResponse: ModelResponse = {
-        modelId,
-        provider,
-        model,
-        response: "",
-        isStreaming: true,
-        isComplete: false,
-        responseTime: null,
-        tokenCount: null,
-        usage: null,
-        error: null,
+      return {
+        responses: [
+          ...state.responses,
+          { modelId, provider, model, ...STREAM_START },
+        ],
       };
-
-      return { responses: [...state.responses, newResponse] };
     });
   },
 
@@ -173,11 +164,18 @@ export const createResponseSlice: StateCreator<ResponseSlice> = (set, get) => ({
     });
   },
 
-  setError: (modelId, error) => {
+  setError: (modelId, error, details) => {
     set((state) => {
       const responses = state.responses.map((r) =>
         r.modelId === modelId
-          ? { ...r, isStreaming: false, isComplete: true, error }
+          ? {
+              ...r,
+              isStreaming: false,
+              isComplete: true,
+              error,
+              errorKind: details?.kind ?? "other",
+              retryAfterSeconds: details?.retryAfterSeconds ?? null,
+            }
           : r,
       );
       return { responses };
@@ -205,27 +203,7 @@ export const createResponseSlice: StateCreator<ResponseSlice> = (set, get) => ({
   },
 
   calculateAgreement: () => {
-    const { embeddings } = get();
-
-    if (embeddings.length < 2) {
-      set({ similarityMatrix: null, agreementStats: null });
-      return;
-    }
-
-    try {
-      const matrix = buildSimilarityMatrix(
-        embeddings.map((entry) => entry.embedding),
-      );
-      set({
-        similarityMatrix: matrix,
-        agreementStats: agreementStatistics(upperTriangle(matrix)),
-      });
-    } catch (error: unknown) {
-      // Mismatched or zero vectors cannot be compared. Show no score rather
-      // than a wrong one.
-      logger.error("Unable to calculate agreement", toError(error));
-      set({ similarityMatrix: null, agreementStats: null });
-    }
+    set(agreementFromEmbeddings(get().embeddings));
   },
 
   setMetaAnalysis: (analysis) => {
@@ -240,8 +218,13 @@ export const createResponseSlice: StateCreator<ResponseSlice> = (set, get) => ({
     set({ majorityVote: vote });
   },
 
+  clearConsensus: () => {
+    set({ metaAnalysis: null, majorityVote: null });
+  },
+
   resetStreamingState: () => {
     set({
+      runPrompt: null,
       consensusUsage: [],
       majorityVote: null,
       responses: [],
@@ -254,18 +237,7 @@ export const createResponseSlice: StateCreator<ResponseSlice> = (set, get) => ({
   },
 
   clearResponses: () => {
-    set({ prompt: null, manualResponses: [] });
+    set({ prompt: null, runPrompt: null, manualResponses: [] });
     get().resetStreamingState();
   },
 });
-
-/** Pairwise values above the diagonal of a square matrix. */
-function upperTriangle(matrix: number[][]): number[] {
-  const values: number[] = [];
-  for (let i = 0; i < matrix.length; i++) {
-    for (let j = i + 1; j < matrix.length; j++) {
-      values.push(matrix[i]![j]!);
-    }
-  }
-  return values;
-}

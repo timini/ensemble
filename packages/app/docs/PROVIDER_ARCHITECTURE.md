@@ -83,7 +83,8 @@ Provider notes:
 What `BaseFreeClient` does:
 
 - Reads the key through a `getApiKey()` callback. The app passes a callback that reads the decrypted key from the Zustand store.
-- `streamResponse` reports a missing-key error, races the provider stream against a 2 minute timeout, and sanitizes error messages before passing them on.
+- `streamResponse` reports a missing key, races the provider stream against a client-side timeout (`StreamResponseOptions.timeoutMs`, default `DEFAULT_STREAM_TIMEOUT_MS`, 2 minutes), and drops chunks or completions that arrive after the timeout.
+- Every error passed to `onError` is a `ProviderError` (`src/providers/errors/providerError.ts`) with a sanitized message and a `kind`: `invalid_key` (401, 403 or no key), `rate_limited` (429, with `retryAfterSeconds` from `Retry-After`, `retry-after-ms` or Google's `RetryInfo`), `timeout`, `provider_unavailable` (5xx or a network failure) or `other`. `classifyProviderError` reads the status from the SDK error, an axios response or the message; each client's stream `catch` calls it with its label (for example "Anthropic API error").
 - `listAvailableTextModels` calls the provider's model list API when a key is present and falls back to the mock list on failure or when no key is set.
 - `generateStructured` delegates to each subclass. Perplexity does not implement it, so it throws "structured output is not yet implemented for Free mode".
 - `generateEmbeddings` throws `EmbeddingsNotSupportedError` unless the subclass sets `supportsEmbeddings` and implements `embedWithProvider`. When it does, it checks the key is present and calls the provider.
@@ -139,9 +140,18 @@ void client.streamResponse(
   (chunk) => appendStreamChunk(selection.id, chunk),
   (_full, responseTime, tokenCount, usage) =>
     completeResponse(selection.id, responseTime, tokenCount, usage),
-  (error) => setError(selection.id, error.message),
+  (error) => {
+    const failure = toResponseError(error); // src/lib/responseErrors.ts
+    setError(selection.id, failure.message, failure.details);
+  },
 );
 ```
+
+### Errors on the review page
+
+The response slice stores each failed answer's message, `errorKind` and `retryAfterSeconds`. `ResponseCard` shows the error through the `ResponseErrorNotice` molecule: a plain explanation per kind (EN and FR), the provider message and a retry button. Retry restarts only that model (`useStreamingResponses.retryModel`), and clears the consensus so it runs again once every answer is back; consensus calls already made stay in the run cost.
+
+One failed model does not fail the run. Agreement (`useReviewAnalytics`) and consensus (`useConsensusTrigger`) use only answers without an error. `RunExclusionNote` names the failed models and says how many answers were used, or, when fewer than 2 answers succeeded (manual answers count), explains why there is no consensus and hides the consensus card. After a consensus error the trigger does not fire again until a retry, so a failing summarizer is not called in a loop.
 
 ## Server-side provider path
 

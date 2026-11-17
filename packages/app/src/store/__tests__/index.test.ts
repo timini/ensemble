@@ -33,3 +33,49 @@ describe('serializeStoreState', () => {
     expect(serialized.encryptionInitialized).toBe(false);
   });
 });
+
+describe('store hydration', () => {
+  it('keeps the last run and marks streams cut off by a reload as interrupted', async () => {
+    const { vi } = await import('vitest');
+    // An in-memory Storage, so the test does not depend on how the Node
+    // version exposes localStorage under jsdom.
+    const data = new Map<string, string>();
+    const storage = {
+      getItem: (key: string) => data.get(key) ?? null,
+      setItem: (key: string, value: string) => void data.set(key, value),
+      removeItem: (key: string) => void data.delete(key),
+    };
+    vi.stubGlobal('localStorage', storage);
+    storage.setItem(
+      'ensemble-ai-store',
+      JSON.stringify({
+        prompt: 'Saved prompt',
+        metaAnalysis: 'Saved consensus',
+        responses: [
+          {
+            modelId: 'a',
+            provider: 'openai',
+            model: 'A',
+            response: 'Half',
+            isStreaming: true,
+            isComplete: false,
+            responseTime: null,
+            tokenCount: null,
+            error: null,
+          },
+        ],
+      }),
+    );
+    vi.resetModules();
+    const { useStore } = await import('../index');
+
+    const state = useStore.getState();
+    expect(state.prompt).toBe('Saved prompt');
+    expect(state.metaAnalysis).toBe('Saved consensus');
+    expect(state.responses[0]).toMatchObject({
+      isStreaming: false,
+      errorKind: 'interrupted',
+    });
+    vi.unstubAllGlobals();
+  });
+});

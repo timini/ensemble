@@ -67,31 +67,6 @@ export default function RootLayout({
     });
   }, [language, i18n]);
 
-  useEffect(() => {
-    if (!hasHydrated) {
-      return;
-    }
-
-    const windowWithBootErrors = window as Window & {
-      __ENSEMBLE_BOOT_ERRORS__?: Array<{ message: string; stack?: string }>;
-    };
-
-    const bootErrors = windowWithBootErrors.__ENSEMBLE_BOOT_ERRORS__;
-    if (!bootErrors?.length) {
-      return;
-    }
-
-    for (const bootError of bootErrors) {
-      const startupError = new Error(bootError.message);
-      if (bootError.stack) {
-        startupError.stack = bootError.stack;
-      }
-      logger.error('Startup script error:', startupError);
-    }
-
-    windowWithBootErrors.__ENSEMBLE_BOOT_ERRORS__ = [];
-  }, [hasHydrated]);
-
   // Ensure html lang attribute always reflects current language (hydration-safe)
   useEffect(() => {
     document.documentElement.setAttribute('lang', resolvedLanguage);
@@ -106,42 +81,6 @@ export default function RootLayout({
           content="Make better decisions with multiple AI perspectives"
         />
         <link rel="icon" href="/favicon.ico" />
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `(() => {
-              if (typeof window === 'undefined') return;
-              try {
-                const navigationEntries = performance.getEntriesByType('navigation');
-                const navType = navigationEntries && navigationEntries[0] ? navigationEntries[0].type : undefined;
-                if (window.location.pathname === '/review' && navType === 'navigate') {
-                  const raw = window.localStorage.getItem('ensemble-ai-store');
-                  if (raw) {
-                    const parsed = JSON.parse(raw);
-                    if (parsed && typeof parsed === 'object') {
-                      parsed.prompt = null;
-                      parsed.responses = [];
-                      parsed.manualResponses = [];
-                      parsed.embeddings = [];
-                      parsed.embeddingsSource = null;
-                      parsed.similarityMatrix = null;
-                      parsed.agreementStats = null;
-                      parsed.metaAnalysis = null;
-                      parsed.consensusUsage = [];
-                      parsed.majorityVote = null;
-                    }
-                    window.localStorage.setItem('ensemble-ai-store', JSON.stringify(parsed));
-                  }
-                }
-              } catch (error) {
-                const message = error instanceof Error ? error.message : String(error);
-                const stack = error instanceof Error ? error.stack : undefined;
-                window.__ENSEMBLE_BOOT_ERRORS__ = window.__ENSEMBLE_BOOT_ERRORS__ || [];
-                window.__ENSEMBLE_BOOT_ERRORS__.push({ message, stack });
-                console.error('Failed to clear stale review state', error);
-              }
-            })();`,
-          }}
-        />
       </head>
       <body>
         <TRPCReactProvider>
