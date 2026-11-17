@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils"
 
 const groups = [
   { provider: "OpenRouter", models: [
-    { name: "GPT-6.1 Sol", initials: "G", on: true, price: "$1.25" },
+    { name: "GPT-6 Astra", initials: "G", on: true, price: "$1.25" },
     { name: "Claude Opus 5.5", initials: "C", on: true, price: "$5.00" },
     { name: "Gemini 4 Carbon", initials: "Ge", on: true, price: "$1.00" },
     { name: "Grok 4.7", initials: "X", on: false, price: "$3.00" },

@@ -4,7 +4,9 @@ Reference layouts for Ensemble AI after the M4 redesign: a landing page, one wor
 
 It uses the component library's visual system directly: `app/globals.css` imports `../component-library/src/styles/tokens.css` and `tailwind.config.ts` uses `../component-library/src/styles/tailwindPreset.ts`. Fonts (Geist, Geist Mono, Instrument Serif) load through `next/font`, as in the app. What you see here is the real palette, type and spacing, not a sketch.
 
-All data is static (`lib/sample-run.ts`); nothing calls a provider. Copy is English only; the app adds French.
+The preset has no runtime imports, and `tsconfig.json` maps `tailwindcss` to this folder's copy, so the preset builds and type-checks with only this folder installed.
+
+All data is static placeholder data (`lib/sample-run.ts`), not a real run; nothing calls a provider. The landing card carries a "Sample data" marker. The app shows a real recorded run in its place. Copy is English only; the app adds French.
 
 It is not part of the root npm workspaces. Install and run it from this folder.
 
@@ -20,7 +22,7 @@ npm run screenshot   # needs the dev server; writes screenshots/<page>-<width>-<
 
 | Route | Contents |
 |-------|----------|
-| `/` | Landing: one sentence, a recorded example run (agreement score, consensus, three answers), three ways in (own keys, local models, Pro), what the score means, how it works. |
+| `/` | Landing: one sentence, an example run with placeholder data (agreement score, consensus, three answers), three ways in (own keys, local models, Pro), what the score means, how it works. |
 | `/workspace` | The one working screen. Composer on top (prompt, inline model chips, consensus method dropdown with calls and cost, a menu with manual answer, summarizer and save as preset). Agreement panel and consensus answer next, then the individual answers: columns from 768 px, swipeable tabs below. History and presets in a left sidebar from 1024 px, in a sheet below. |
 | `/benchmarks` | Method and a results table with confidence intervals, with an honest "not run yet" state. |
 | `/account` | Placeholder for Pro (roadmap M5): sign-in, credits, usage. |

@@ -1,4 +1,6 @@
-// Static data for the wireframes. Nothing here calls a provider.
+// Placeholder data for the wireframes. Nothing here calls a provider, and none
+// of it comes from a real run: the answers, scores, timings and costs are
+// illustrative. The app replaces this with a real recorded run (ROADMAP M4).
 
 export type AgreementLevel = "high" | "mixed" | "low"
 
@@ -17,9 +19,9 @@ export interface SampleAnswer {
 }
 
 export const models: SampleModel[] = [
-  { id: "gpt", name: "GPT-6.1 Sol", provider: "OpenAI", initials: "G" },
-  { id: "claude", name: "Claude Opus 5.5", provider: "Anthropic", initials: "C" },
-  { id: "gemini", name: "Gemini 4 Carbon", provider: "Google", initials: "Ge" },
+  { id: "gpt-6-astra", name: "GPT-6 Astra", provider: "OpenAI", initials: "G" },
+  { id: "claude-opus-5-5", name: "Claude Opus 5.5", provider: "Anthropic", initials: "C" },
+  { id: "gemini-4-carbon", name: "Gemini 4 Carbon", provider: "Google", initials: "Ge" },
 ]
 
 export const prompt =
@@ -64,8 +66,8 @@ export const agreement = {
   score: 0.86,
   level: "high" as AgreementLevel,
   pairs: [
-    { a: "GPT-6.1 Sol", b: "Claude Opus 5.5", score: 0.91 },
-    { a: "GPT-6.1 Sol", b: "Gemini 4 Carbon", score: 0.84 },
+    { a: "GPT-6 Astra", b: "Claude Opus 5.5", score: 0.91 },
+    { a: "GPT-6 Astra", b: "Gemini 4 Carbon", score: 0.84 },
     { a: "Claude Opus 5.5", b: "Gemini 4 Carbon", score: 0.83 },
   ],
   embeddings: "text-embedding-3-small",

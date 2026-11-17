@@ -2,12 +2,20 @@ import { AgreementRing } from "@/components/ui/agreement-ring"
 import { ModelMark } from "@/components/ui/model-mark"
 import { agreement, answers, consensus, levelLabel, prompt } from "@/lib/sample-run"
 
-/** Recorded run shown on the landing page. Real answers, no keys needed. */
+/**
+ * Example run shown on the landing page. The data is placeholder (see
+ * lib/sample-run.ts); the app shows a real recorded run here instead.
+ */
 export function ExampleRun() {
   return (
     <figure className="overflow-hidden rounded-2xl border border-border bg-card shadow-md">
       <div className="flex items-center justify-between gap-3 border-b border-border px-5 py-3">
-        <span className="text-caption font-medium uppercase tracking-wider text-muted-foreground">Recorded run</span>
+        <span className="flex items-center gap-2">
+          <span className="text-caption font-medium uppercase tracking-wider text-muted-foreground">Recorded run</span>
+          <span data-testid="sample-data-marker" className="rounded-full border border-dashed border-warning px-2 text-caption text-warning">
+            Sample data
+          </span>
+        </span>
         <span className="text-caption text-muted-foreground">3 models · 7 calls · $0.011</span>
       </div>
       <div className="space-y-5 p-5">
