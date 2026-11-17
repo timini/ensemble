@@ -54,7 +54,7 @@ There is no noise term. The values reflect the hash of the text, not its meaning
 
 ### validateApiKey
 
-Waits 100 to 300 ms and returns `{ valid: true }` for any input.
+Waits 100 to 300 ms and returns `{ valid: true }`, except for a key that contains `invalid` (any case), which returns `{ valid: false, error: 'Invalid API key (401 Unauthorized)' }`. E2E tests use that to show a rejected key.
 
 ### generateStructured
 

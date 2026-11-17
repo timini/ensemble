@@ -8,18 +8,18 @@ For where the product is going, see [docs/PRODUCT_VISION.md](../../docs/PRODUCT_
 
 ## Routes
 
-The app has one working screen, `/workspace` (`src/app/workspace/`): the composer on top (question, model chips, consensus method with calls and cost, options), then the agreement score and consensus answer, then every answer in columns (tabs on phones). History and presets sit in a sidebar, keys and appearance in a settings sheet. The old four-step wizard routes redirect into it.
+The app has one working screen, `/workspace` (`src/app/workspace/`): the composer on top (question, model chips, consensus method with calls and cost, options), then the agreement score and consensus answer, then every answer in columns (tabs on phones). History and presets sit in a sidebar, keys and appearance in a settings sheet. On a first visit an onboarding sheet asks one question (own key, local models or Pro, which is coming soon) and checks a key inline. The landing page at `/` explains the product and links in. The old four-step wizard routes redirect into the workspace.
 
 | Route | Purpose |
 |-------|---------|
-| `/` | Redirects to `/workspace` (until the landing page lands) |
-| `/workspace` | The workspace. `?panel=settings` opens settings, `?panel=models` the model picker, `?panel=prompt` focuses the question |
+| `/` | Landing page: one sentence on the product, a recorded real run (`src/data/example-run.json`), and the three ways in (`/workspace?start=keys`, `/workspace?start=local`, Pro coming soon) |
+| `/workspace` | The workspace. `?panel=settings` opens settings, `?panel=models` the model picker, `?panel=prompt` focuses the question. `?start=keys` or `?start=local` opens onboarding on that path when nothing works yet |
 | `/config` | Redirects to `/workspace?panel=settings` (API keys, OpenAI-compatible endpoints such as Ollama, LM Studio and OpenRouter, embeddings provider, theme, language) |
 | `/ensemble` | Redirects to `/workspace?panel=models` |
 | `/prompt` | Redirects to `/workspace?panel=prompt` |
 | `/review` | Redirects to `/workspace`, which shows the last run |
-| `/about` | Static explainer with a flow diagram |
-| `/features` | Static features page |
+| `/about` | Why Ensemble exists, what the agreement score can and cannot say, who it is for, and published research (framed by the claims rule) |
+| `/features` | What Ensemble does, models, privacy, Free and Pro, and what we can and cannot claim yet, with a link to `/benchmarks` |
 | `/benchmarks` | Benchmark results from `src/data/benchmark-summary.json` (accuracy with Wilson intervals, McNemar p-values, cost), or a "not run yet" state with the estimate and method |
 | `/test-components` | Dev page that renders component-library buttons (404 in production unless `NEXT_PUBLIC_MOCK_MODE=true`) |
 | `/api/trpc/[trpc]` | tRPC endpoint (see Server below) |
@@ -33,6 +33,17 @@ Consensus methods offered in the composer's method menu, each with its calls and
 - **Mock** (developer only). Set `NEXT_PUBLIC_MOCK_MODE=true` (or run `npm run dev:mock`). Every provider call uses `MockProviderClient`, which streams lorem ipsum. Used by the mock-mode Playwright suite in `packages/e2e`.
 
 Supported providers: OpenAI, Anthropic, Google, xAI, DeepSeek, Perplexity, and any number of OpenAI-compatible endpoints (Ollama, LM Studio, llama.cpp, vLLM, OpenRouter, Groq, Together, custom). On first run the workspace looks for a running Ollama and offers to add it; see [docs/LOCAL_MODELS.md](../../docs/LOCAL_MODELS.md).
+
+### Example run on the landing page
+
+`src/data/example-run.json` is a real run recorded once through OpenRouter with cheap models by `scripts/record-example-run.mjs`, which uses the same client, similarity and `StandardConsensus` code as the workspace. `src/lib/exampleRun.ts` turns its cosine similarities into the score and level the workspace would show. To record it again (it costs well under one US cent):
+
+```bash
+npm run build --workspace=packages/shared-utils
+cd packages/app && node --env-file=../eval/.env.local --import tsx scripts/record-example-run.mjs
+```
+
+Page metadata (title, description, Open Graph) is set by the server layouts: `src/app/layout.tsx` for defaults, the page or route `layout.tsx` for each public page, with the text in `src/lib/siteMetadata.ts`. The client side of the root layout is `src/app/_components/RootShell.tsx`.
 
 ### Agreement scores
 

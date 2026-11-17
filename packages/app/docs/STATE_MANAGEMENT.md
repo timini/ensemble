@@ -69,8 +69,8 @@ Components that read persisted state use `useHasHydrated()` (`src/hooks/useHasHy
 
 ### Mode (`modeSlice.ts`)
 
-- State: `mode: 'free' | 'pro'` (default `'free'`), `isModeConfigured`
-- Actions: `setMode(mode)`, `configureModeComplete()`
+- State: `mode: 'free' | 'pro'` (default `'free'`), `isModeConfigured`, `onboardingDone` (the first-run onboarding sheet was finished or skipped; persisted)
+- Actions: `setMode(mode)`, `configureModeComplete()`, `completeOnboarding()`
 - Mock mode is not in the store. It is controlled by `NEXT_PUBLIC_MOCK_MODE`. Pro mode is disabled in the UI and has no client; see [PROVIDER_ARCHITECTURE.md](./PROVIDER_ARCHITECTURE.md).
 
 ### API keys (`apiKeySlice.ts`)
