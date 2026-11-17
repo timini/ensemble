@@ -3,7 +3,7 @@ import type {
   ProviderRegistry,
   StreamResponseOptions,
 } from '@ensemble-ai/shared-utils/providers';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { EnsembleRunner } from './ensembleRunner.js';
 import type { EvalProvider } from '../types.js';
 
@@ -40,7 +40,7 @@ function buildProvider(args: {
   };
 }
 
-function buildRegistry(providers: Record<EvalProvider, AIProvider>): ProviderRegistry {
+function buildRegistry(providers: Partial<Record<EvalProvider, AIProvider>>): ProviderRegistry {
   return {
     getProvider: (provider: EvalProvider) => providers[provider],
   } as unknown as ProviderRegistry;
@@ -365,5 +365,107 @@ describe('EnsembleRunner', () => {
 
     expect(results).toHaveLength(1);
     expect(results[0].content).toBe('ok');
+  });
+
+  describe('structured final answers', () => {
+    const spec = { kind: 'choice' as const, choices: ['A', 'B', 'C', 'D'] };
+
+    it('asks generateStructured for the answer and stores it as a Final answer line', async () => {
+      const generateStructured = vi.fn(async () => ({
+        parsed: { reasoning: 'B is right.', answer: 'B' } as never,
+        raw: '{}',
+        responseTimeMs: 12,
+        usage: { inputTokens: 100, outputTokens: 50 },
+      }));
+      const stream = vi.fn();
+      const provider = { ...buildProvider({ onStream: stream }), generateStructured };
+      const runner = new EnsembleRunner(buildRegistry({ openai: provider }), 'free', { temperature: 0.5 });
+
+      const [result] = await runner.runPrompt('Q', [{ provider: 'openai', model: 'gpt-4o' }], { answer: spec });
+
+      expect(generateStructured).toHaveBeenCalledWith('Q', 'gpt-4o', expect.objectContaining({ name: 'final_answer' }), {
+        temperature: 0.5,
+      });
+      expect(stream).not.toHaveBeenCalled();
+      expect(result.content).toBe('B is right.\n\nFinal answer: B');
+      expect(result.answerSource).toBe('structured');
+      expect(result.tokenCount).toBe(150);
+      expect(result.estimatedCostUsd).toBeCloseTo((100 * 2.5 + 50 * 10) / 1e6, 12);
+    });
+
+    it('falls back to a streamed reply when the server rejects structured output', async () => {
+      const generateStructured = vi.fn(async () => {
+        throw Object.assign(new Error('response_format is not supported'), { status: 400 });
+      });
+      const provider = {
+        ...buildProvider({
+          onStream: async (_p, _m, _c, onComplete) => onComplete('Thinking.\nFinal answer: C', 9, 30),
+        }),
+        generateStructured,
+      };
+      const runner = new EnsembleRunner(buildRegistry({ openai: provider }), 'free');
+
+      const [result] = await runner.runPrompt('Q', [{ provider: 'openai', model: 'gpt-4o' }], { answer: spec });
+
+      expect(result.content).toBe('Thinking.\nFinal answer: C');
+      expect(result.answerSource).toBe('text');
+      expect(result.error).toBeUndefined();
+    });
+
+    it('reports rate limits instead of falling back', async () => {
+      const generateStructured = vi.fn(async () => {
+        throw Object.assign(new Error('429 Too Many Requests'), { status: 429 });
+      });
+      const stream = vi.fn();
+      const provider = { ...buildProvider({ onStream: stream }), generateStructured };
+      const runner = new EnsembleRunner(buildRegistry({ openai: provider }), 'free');
+
+      const [result] = await runner.runPrompt('Q', [{ provider: 'openai', model: 'gpt-4o' }], { answer: spec });
+
+      expect(result.error).toMatch(/429/);
+      expect(stream).not.toHaveBeenCalled();
+    });
+
+    it('uses the raw reply when the parsed object has no answer', async () => {
+      const provider = {
+        ...buildProvider({ onStream: vi.fn() }),
+        generateStructured: vi.fn(async () => ({ parsed: {} as never, raw: 'Final answer: D', responseTimeMs: 1 })),
+      };
+      const runner = new EnsembleRunner(buildRegistry({ openai: provider }), 'free');
+      const [result] = await runner.runPrompt('Q', [{ provider: 'openai', model: 'gpt-4o' }], { answer: spec });
+      expect(result.content).toBe('Final answer: D');
+      expect(result.answerSource).toBe('text');
+    });
+  });
+
+  describe('OpenAI-compatible pricing', () => {
+    const provider = buildProvider({
+      onStream: async (_p, _m, _c, onComplete) =>
+        onComplete('ok', 5, 1500, { inputTokens: 1000, outputTokens: 500 }),
+    });
+
+    it('prices local endpoint models at zero', async () => {
+      const runner = new EnsembleRunner(buildRegistry({ 'openai-compatible': provider }), 'free', {
+        endpoints: [{ id: 'ollama', baseURL: 'http://localhost:11434/v1' }],
+      });
+      const [result] = await runner.runPrompt('Q', [{ provider: 'openai-compatible', model: 'ollama/llama3.2' }]);
+      expect(result.estimatedCostUsd).toBe(0);
+    });
+
+    it('prices OpenRouter models from the shared table', async () => {
+      const runner = new EnsembleRunner(buildRegistry({ 'openai-compatible': provider }), 'free', {
+        endpoints: [{ id: 'openrouter', baseURL: 'https://openrouter.ai/api/v1' }],
+      });
+      const [result] = await runner.runPrompt('Q', [
+        { provider: 'openai-compatible', model: 'openrouter/anthropic/claude-fable-5' },
+      ]);
+      expect(result.estimatedCostUsd).toBeGreaterThan(0);
+    });
+
+    it('leaves endpoints it was not told about unpriced', async () => {
+      const runner = new EnsembleRunner(buildRegistry({ 'openai-compatible': provider }), 'free');
+      const [result] = await runner.runPrompt('Q', [{ provider: 'openai-compatible', model: 'ollama/llama3.2' }]);
+      expect(result.estimatedCostUsd).toBeUndefined();
+    });
   });
 });

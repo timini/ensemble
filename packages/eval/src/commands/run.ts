@@ -2,7 +2,7 @@ import { Command } from 'commander';
 import { ProviderRegistry } from '@ensemble-ai/shared-utils/providers';
 import { parseStrategies, generateConsensus } from '../lib/consensus.js';
 import { writeJsonFile } from '../lib/io.js';
-import { parseModelSpec, parseModelSpecs } from '../lib/modelSpecs.js';
+import { endpointsOf, parseModelSpec, parseModelSpecs } from '../lib/modelSpecs.js';
 import { registerProviders } from '../lib/providers.js';
 import { EnsembleRunner } from '../lib/ensembleRunner.js';
 import type { EvalMode, PromptRunResult } from '../types.js';
@@ -52,6 +52,7 @@ export function createRunCommand(): Command {
         throw new Error(`Invalid request delay "${options.requestDelayMs}".`);
       }
 
+      const endpoints = endpointsOf([...models, summarizer]);
       const registry = new ProviderRegistry();
       registerProviders(
         registry,
@@ -60,9 +61,10 @@ export function createRunCommand(): Command {
           ...(summarizer ? [summarizer.provider] : []),
         ],
         mode,
+        endpoints,
       );
 
-      const runner = new EnsembleRunner(registry, mode, { requestDelayMs });
+      const runner = new EnsembleRunner(registry, mode, { requestDelayMs, endpoints });
       const responses = await runner.runPrompt(prompt, models);
       const firstSuccessful = responses.find((response) => !response.error);
       const summarizerTarget = summarizer
@@ -77,6 +79,7 @@ export function createRunCommand(): Command {
             responses,
             registry.getProvider(summarizerTarget.provider, mode),
             summarizerTarget.model,
+            { provider: summarizerTarget.provider, endpoints },
           )
         : { outputs: {}, metrics: {} };
 

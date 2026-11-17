@@ -2,8 +2,10 @@ import { ProviderRegistry } from '@ensemble-ai/shared-utils/providers';
 import type { ConcurrencyLimiter } from '../lib/concurrencyPool.js';
 import { loadCachedBaseline } from '../lib/baselineCache.js';
 import { loadEnsembleCache } from '../lib/ensembleCache.js';
-import { createEvaluatorForDataset, type JudgeConfig } from '../lib/evaluators.js';
+import { createEvaluatorForDataset, datasetNeedsJudge, type JudgeConfig } from '../lib/evaluators.js';
 import { BenchmarkRunner } from '../lib/benchmarkRunner.js';
+import type { AnswerProtocol } from '../lib/methodology.js';
+import type { EndpointLocation } from '@ensemble-ai/shared-utils/pricing';
 import { createBenchmarkFile } from './benchmarkOutput.js';
 import type { DatasetResult } from './quickEvalOutput.js';
 import type {
@@ -37,11 +39,20 @@ export interface RunDatasetArgs {
   /** Judge model config (separate from evaluated model). */
   judgeProvider?: EvalProvider;
   judgeModelName?: string;
-  /** Max time (ms) per question before skipping. */
+  /** Max time (ms) per question. Questions that run out of time count as wrong. */
   questionTimeoutMs?: number;
+  /** Answer protocol of the questions and caches (see methodology.ts). Defaults to legacy. */
+  protocol?: AnswerProtocol;
+  /** OpenAI-compatible endpoints, for pricing. */
+  endpoints?: EndpointLocation[];
+}
+
+function protocolOf(args: RunDatasetArgs): AnswerProtocol {
+  return args.protocol ?? 'legacy';
 }
 
 function buildJudgeConfig(args: RunDatasetArgs): JudgeConfig | undefined {
+  if (!datasetNeedsJudge(args.datasetName, protocolOf(args))) return undefined;
   const judgeProvider = args.judgeProvider ?? args.provider;
   const judgeModel = args.judgeModelName ?? args.modelName;
   try {
@@ -67,7 +78,7 @@ async function runSingleBaseline(args: RunDatasetArgs): Promise<PromptRunResult[
 
   // Try pre-computed baseline cache first (sample-independent, keyed by model+dataset)
   if (useCache) {
-    const baselineCache = await loadCachedBaseline(model, datasetName);
+    const baselineCache = await loadCachedBaseline(model, datasetName, protocolOf(args));
     if (baselineCache && baselineCache.size > 0) {
       const hits = questions.filter((q) => baselineCache.has(q.id));
       if (hits.length === questions.length) {
@@ -81,7 +92,7 @@ async function runSingleBaseline(args: RunDatasetArgs): Promise<PromptRunResult[
 
   // Fallback: run live (no pre-computed cache available)
   process.stderr.write(`  [${datasetName}] Single (1x ${modelName})...\n`);
-  const evaluator = createEvaluatorForDataset(datasetName, buildJudgeConfig(args));
+  const evaluator = createEvaluatorForDataset(datasetName, buildJudgeConfig(args), { protocol: protocolOf(args) });
   const singleModels = [{ provider, model: modelName }];
   const singleOutput = createBenchmarkFile(datasetName, mode, [model], ['standard'], questions.length);
   const runner = new BenchmarkRunner({
@@ -90,6 +101,8 @@ async function runSingleBaseline(args: RunDatasetArgs): Promise<PromptRunResult[
     retry: { maxRetries: 3, baseDelayMs: 2000 },
     limiter: args.limiter,
     questionTimeoutMs: args.questionTimeoutMs,
+    protocol: protocolOf(args),
+    endpoints: args.endpoints,
   });
   const result = await runner.run({
     questions, outputPath: '/dev/null', output: singleOutput,
@@ -111,14 +124,14 @@ async function runEnsemble(args: RunDatasetArgs): Promise<PromptRunResult[]> {
 
   // Load ensemble response cache (raw API responses, independent of consensus strategy).
   const ensembleCache = useCache
-    ? await loadEnsembleCache(model, datasetName, ensembleSize, temperature)
+    ? await loadEnsembleCache(model, datasetName, ensembleSize, temperature, protocolOf(args))
     : null;
   const cacheHits = ensembleCache ? questions.filter((q) => ensembleCache.has(q.id)).length : 0;
 
   const stratList = strategies.join(',');
   const cacheInfo = cacheHits > 0 ? ` (${cacheHits}/${questions.length} cached)` : '';
   process.stderr.write(`  [${datasetName}] Ensemble (${ensembleSize}x ${modelName}, ${stratList})${cacheInfo}...\n`);
-  const evaluator = createEvaluatorForDataset(datasetName, buildJudgeConfig(args));
+  const evaluator = createEvaluatorForDataset(datasetName, buildJudgeConfig(args), { protocol: protocolOf(args) });
   const ensembleModels = Array.from({ length: ensembleSize }, () => ({ provider, model: modelName }));
   const ensembleOutput = createBenchmarkFile(
     datasetName, mode, Array(ensembleSize).fill(model), strategies, questions.length,
@@ -132,6 +145,8 @@ async function runEnsemble(args: RunDatasetArgs): Promise<PromptRunResult[]> {
     limiter: args.limiter,
     ensembleResponseCache: ensembleCache ?? undefined,
     questionTimeoutMs: args.questionTimeoutMs,
+    protocol: protocolOf(args),
+    endpoints: args.endpoints,
   });
   const result = await runner.run({
     questions, outputPath: '/dev/null', output: ensembleOutput,

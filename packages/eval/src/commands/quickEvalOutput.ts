@@ -1,13 +1,33 @@
 import type { PromptRunResult, StrategyName } from '../types.js';
 import {
   toPercent, toDelta, sumTokens, sumCost,
-  avgDurationMs, formatMs, computeAccuracy, sumStrategyMetrics,
+  avgDurationMs, formatMs, computeAccuracy, sumStrategyMetrics, type AccuracyCount,
 } from './quickEvalHelpers.js';
+import {
+  comparePaired, formatInterval, formatPValue, pairSingleWithStrategy, withInterval,
+} from '../lib/pairedStats.js';
 
 export interface DatasetResult {
   dataset: string;
   singleRuns: PromptRunResult[];
   ensembleRuns: PromptRunResult[];
+}
+
+/** "62.0% (124/200) 95% CI [55.1, 68.4]", plus failures when there were any. */
+function accuracyText(acc: AccuracyCount): string {
+  const ci = withInterval(acc.correct, acc.total);
+  const failures = acc.errors + acc.timeouts > 0
+    ? `  failed: ${acc.errors} error(s), ${acc.timeouts} timeout(s) (counted wrong)`
+    : '';
+  return `${toPercent(acc.accuracy)} (${acc.correct}/${acc.total}) 95% CI ${formatInterval(ci)}${failures}`;
+}
+
+/** Paired McNemar test of a strategy against the single model on the same questions. */
+function mcNemarText(singleRuns: PromptRunResult[], ensembleRuns: PromptRunResult[], strategy: StrategyName): string {
+  const pairs = pairSingleWithStrategy(singleRuns, ensembleRuns, strategy);
+  if (pairs.length === 0) return 'McNemar: no paired questions';
+  const c = comparePaired(pairs);
+  return `McNemar vs single: n=${c.n} single-only=${c.n10} ensemble-only=${c.n01} p=${formatPValue(c.pValue)} (${c.method})`;
 }
 
 export function printResults(
@@ -17,6 +37,7 @@ export function printResults(
   allDatasetResults: DatasetResult[],
   durationMs: number,
 ): void {
+  const w = (s: string) => process.stdout.write(s);
   const allSingleRuns = allDatasetResults.flatMap((d) => d.singleRuns);
   const allEnsembleRuns = allDatasetResults.flatMap((d) => d.ensembleRuns);
   const singleAcc = computeAccuracy(allSingleRuns);
@@ -24,17 +45,16 @@ export function printResults(
   const singleCost = sumCost(allSingleRuns);
   const singleAvgTime = avgDurationMs(allSingleRuns);
 
-  process.stdout.write(`\n${'='.repeat(70)}\n`);
-  process.stdout.write(`  QUICK EVAL RESULTS — ${model}\n`);
-  process.stdout.write(`${'='.repeat(70)}\n\n`);
+  w(`\n${'='.repeat(70)}\n`);
+  w(`  QUICK EVAL RESULTS: ${model}\n`);
+  w(`${'='.repeat(70)}\n\n`);
 
-  // Per-dataset breakdown
   for (const dr of allDatasetResults) {
     const dsSingle = computeAccuracy(dr.singleRuns);
     const dsSingleTokens = sumTokens(dr.singleRuns);
     const dsSingleTime = avgDurationMs(dr.singleRuns);
-    process.stdout.write(`  ${dr.dataset}:\n`);
-    process.stdout.write(`    Single:   ${toPercent(dsSingle.accuracy)} (${dsSingle.correct}/${dsSingle.total})  tokens: ${dsSingleTokens.toLocaleString()}  avg: ${formatMs(dsSingleTime)}/q\n`);
+    w(`  ${dr.dataset}:\n`);
+    w(`    Single:   ${accuracyText(dsSingle)}  tokens: ${dsSingleTokens.toLocaleString()}  avg: ${formatMs(dsSingleTime)}/q\n`);
     const dsModelToks = sumTokens(dr.ensembleRuns);
     for (const strategy of strategies) {
       const dsStrat = computeAccuracy(dr.ensembleRuns, strategy);
@@ -42,49 +62,34 @@ export function printResults(
       const sm = sumStrategyMetrics(dr.ensembleRuns, strategy);
       const stratTokens = dsModelToks + sm.tokenCount;
       const stratTokenDelta = stratTokens - dsSingleTokens;
-      process.stdout.write(`    ${strategy.padEnd(10)} ${toPercent(dsStrat.accuracy)} (${dsStrat.correct}/${dsStrat.total})  delta: ${toDelta(delta)}  tokens: ${stratTokens.toLocaleString()} (${stratTokenDelta > 0 ? '+' : ''}${stratTokenDelta.toLocaleString()})  avg: ${formatMs(sm.durationMs)}/q\n`);
+      w(`    ${strategy.padEnd(10)} ${accuracyText(dsStrat)}  delta: ${toDelta(delta)}  tokens: ${stratTokens.toLocaleString()} (${stratTokenDelta > 0 ? '+' : ''}${stratTokenDelta.toLocaleString()})  avg: ${formatMs(sm.durationMs)}/q\n`);
+      w(`               ${mcNemarText(dr.singleRuns, dr.ensembleRuns, strategy)}\n`);
     }
-    process.stdout.write('\n');
+    w('\n');
   }
 
-  // Summary table
-  process.stdout.write(`  ${'—'.repeat(66)}\n`);
-  process.stdout.write(`  SUMMARY\n`);
-  process.stdout.write(`  ${'—'.repeat(66)}\n\n`);
+  w(`  ${'-'.repeat(66)}\n`);
+  w('  SUMMARY\n');
+  w(`  ${'-'.repeat(66)}\n\n`);
 
-  const ensembleCost = sumCost(allEnsembleRuns);
+  const ensembleModelCost = sumCost(allEnsembleRuns);
   const modelTokens = sumTokens(allEnsembleRuns);
 
-  const hasCost = singleCost > 0 || ensembleCost > 0;
-  const costHeader = hasCost ? ' Cost' : '';
-  process.stdout.write(`  ${''.padEnd(16)} ${'Accuracy'.padEnd(22)} ${'Tokens'.padEnd(14)} ${'Avg Time'.padEnd(12)}${costHeader}\n`);
+  w(`  ${'Single (1x)'.padEnd(16)} ${accuracyText(singleAcc)}\n`);
+  w(`  ${''.padEnd(16)} tokens: ${singleTokens.toLocaleString()}  avg: ${formatMs(singleAvgTime)}/q  cost: $${singleCost.toFixed(4)}\n`);
 
-  const singleCostStr = hasCost ? ` $${singleCost.toFixed(4)}` : '';
-  process.stdout.write(`  ${'Single (1x)'.padEnd(16)} ${`${toPercent(singleAcc.accuracy)} (${singleAcc.correct}/${singleAcc.total})`.padEnd(22)} ${singleTokens.toLocaleString().padEnd(14)} ${`${formatMs(singleAvgTime)}/q`.padEnd(12)}${singleCostStr}\n`);
-
-  const ensembleCostStr = hasCost ? ` $${ensembleCost.toFixed(4)}` : '';
   for (const strategy of strategies) {
     const stratAcc = computeAccuracy(allEnsembleRuns, strategy);
     const sm = sumStrategyMetrics(allEnsembleRuns, strategy);
     const stratTokens = modelTokens + sm.tokenCount;
-    process.stdout.write(`  ${`${strategy} (${ensembleSize}x)`.padEnd(16)} ${`${toPercent(stratAcc.accuracy)} (${stratAcc.correct}/${stratAcc.total})`.padEnd(22)} ${stratTokens.toLocaleString().padEnd(14)} ${`${formatMs(sm.durationMs)}/q`.padEnd(12)}${ensembleCostStr}\n`);
+    // Strategy cost: the ensemble's answers plus this strategy's consensus calls.
+    const stratCost = ensembleModelCost + (sm.costUsd ?? 0);
+    w(`  ${`${strategy} (${ensembleSize}x)`.padEnd(16)} ${accuracyText(stratAcc)}\n`);
+    w(`  ${''.padEnd(16)} tokens: ${stratTokens.toLocaleString()}  avg: ${formatMs(sm.durationMs)}/q  cost: $${stratCost.toFixed(4)}\n`);
+    w(`  ${''.padEnd(16)} delta vs single: ${toDelta(stratAcc.accuracy - singleAcc.accuracy)}  ${mcNemarText(allSingleRuns, allEnsembleRuns, strategy)}\n`);
   }
 
-  process.stdout.write('\n');
-
-  // Per-strategy overhead vs single
-  for (const strategy of strategies) {
-    const stratAcc = computeAccuracy(allEnsembleRuns, strategy);
-    const accDelta = stratAcc.accuracy - singleAcc.accuracy;
-    const accIcon = accDelta > 0 ? ' ✓' : accDelta < 0 ? ' ✗' : '';
-    const sm = sumStrategyMetrics(allEnsembleRuns, strategy);
-    const stratTokens = modelTokens + sm.tokenCount;
-    const tokenDelta = stratTokens - singleTokens;
-    const tokenMult = singleTokens > 0 ? stratTokens / singleTokens : null;
-    const tokenMultStr = tokenMult !== null ? ` (${tokenMult.toFixed(1)}x)` : '';
-    process.stdout.write(`  ${strategy} vs single:  ${toDelta(accDelta)}${accIcon}  tokens: ${tokenDelta > 0 ? '+' : ''}${tokenDelta.toLocaleString()}${tokenMultStr}\n`);
-  }
-
-  process.stdout.write(`\n  Wall clock: ${Math.round(durationMs / 1000)}s\n`);
-  process.stdout.write(`${'='.repeat(70)}\n`);
+  w('\n  Costs come from the shared price table; local models cost $0 and unpriced models count as $0.\n');
+  w(`  Wall clock: ${Math.round(durationMs / 1000)}s\n`);
+  w(`${'='.repeat(70)}\n`);
 }

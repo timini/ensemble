@@ -128,4 +128,24 @@ describe('ensembleCache', () => {
       expect(loadedResponse.estimatedCostUsd).toBe(0.0001);
     });
   });
+
+  describe('ensembleCacheFileName', () => {
+    it('keeps legacy names and marks structured caches', async () => {
+      const { ensembleCacheFileName } = await import('./ensembleCache.js');
+      expect(ensembleCacheFileName('google:gemini-3-flash-preview', 'gsm8k', 5, 0.7)).toBe(
+        'google_gemini-3-flash-preview_gsm8k_5x_t0.7.json',
+      );
+      expect(ensembleCacheFileName('openrouter:qwen/qwen3-14b', 'gsm8k', 5, 0.7, 'structured')).toBe(
+        'openrouter_qwen_qwen3-14b_gsm8k_5x_t0.7_structured.json',
+      );
+    });
+
+    it('finds the committed legacy caches under their original names', async () => {
+      const { loadEnsembleCache } = await import('./ensembleCache.js');
+      const legacy = await loadEnsembleCache('google:gemini-3-flash-preview', 'gsm8k', 5, 0.7);
+      expect(legacy?.size).toBeGreaterThan(0);
+      const structured = await loadEnsembleCache('google:gemini-3-flash-preview', 'gsm8k', 5, 0.7, 'structured');
+      expect(structured).toBeNull();
+    });
+  });
 });

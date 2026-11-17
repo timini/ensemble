@@ -1,14 +1,45 @@
 import type { ProviderMode, ProviderName } from '@ensemble-ai/shared-utils/providers';
+import type { AnswerSpec } from './lib/finalAnswer.js';
 
-/** Providers the eval CLI can call. OpenAI-compatible endpoints need a base URL and are not supported here yet. */
-export type EvalProvider = Exclude<ProviderName, 'openai-compatible'>;
+/**
+ * Providers the eval CLI can call. `openai-compatible` covers OpenRouter,
+ * Groq, Together and local servers (Ollama, LM Studio, llama.cpp, vLLM); its
+ * specs carry an endpoint (see modelSpecs.ts).
+ */
+export type EvalProvider = ProviderName;
 export type EvalMode = Extract<ProviderMode, 'mock' | 'free'>;
 export type StrategyName = 'standard' | 'elo' | 'majority' | 'council';
 export type BenchmarkDatasetName = 'gsm8k' | 'truthfulqa' | 'gpqa' | 'hle' | 'math500' | 'mmlu_pro' | 'simpleqa' | 'arc' | 'hellaswag' | 'hallumix';
 
+/** An OpenAI-compatible endpoint named by a model spec. */
+export interface EvalEndpoint {
+  /** Endpoint id, the prefix of its qualified model ids (`openrouter`, `ollama`, `compat-1x2y3z`). */
+  id: string;
+  /** Base URL ending in `/v1`. */
+  baseURL: string;
+  /** Environment variable that holds the key. An empty key is sent when it is unset. */
+  apiKeyEnv: string;
+  /** The hosted service rejects calls without a key (OpenRouter, Groq, Together). */
+  requiresKey: boolean;
+}
+
 export interface ModelSpec {
   provider: EvalProvider;
+  /** Model id. For `openai-compatible` it is qualified with the endpoint id (`ollama/llama3.2`). */
   model: string;
+  /** Set for `openai-compatible` specs. */
+  endpoint?: EvalEndpoint;
+}
+
+/** A multiple-choice question in its dataset order, so its options can be shuffled. */
+export interface MultipleChoiceSource {
+  stem: string;
+  choices: string[];
+  correctIndex: number;
+  /** `dot` writes "Options:\nA. x"; `paren` writes "(A) x" (GPQA). */
+  style: 'dot' | 'paren';
+  /** Text after the options in the dataset's own prompt, kept for unstructured runs. */
+  footer?: string;
 }
 
 export interface BenchmarkQuestion {
@@ -17,6 +48,14 @@ export interface BenchmarkQuestion {
   groundTruth: string;
   category?: string;
   difficulty?: string;
+  /** Set by loaders for multiple-choice datasets. */
+  multipleChoice?: MultipleChoiceSource;
+  /** Displayed option i is dataset option optionPermutation[i]. Set when options were shuffled. */
+  optionPermutation?: number[];
+  /** Seed the options were shuffled with. */
+  optionSeed?: number;
+  /** Expected answer shape. Set on structured runs (see methodology.ts). */
+  answer?: AnswerSpec;
 }
 
 export interface DatasetLoadOptions {
@@ -34,10 +73,15 @@ export interface BenchmarkLoader {
   load(options?: DatasetLoadOptions): Promise<BenchmarkQuestion[]>;
 }
 
+/** Why an answer is missing: the call failed, or it ran out of time. Both count as wrong. */
+export type AnswerFailure = 'error' | 'timeout';
+
 export interface EvaluationResult {
   correct: boolean;
   expected: string;
   predicted: string | null;
+  /** Set when there was no answer to score because the call failed. */
+  failure?: AnswerFailure;
 }
 
 export interface PromptEvaluation {
@@ -57,6 +101,12 @@ export interface ProviderResponse {
   estimatedCostUsd?: number;
   /** True when the provider reported no usage and tokens were estimated from text length. */
   costFromTextLength?: boolean;
+  /**
+   * How the final answer was asked for on a structured run: `structured`
+   * when generateStructured returned an answer, `text` when it fell back to
+   * a plain reply with a "Final answer:" line. Unset on legacy runs.
+   */
+  answerSource?: 'structured' | 'text';
   error?: string;
 }
 
@@ -78,6 +128,10 @@ export interface ConsensusStrategyMetrics {
   tokenCount: number;
   /** Wall-clock time for this strategy's consensus generation. */
   durationMs: number;
+  /** Cost of the consensus calls from the shared price table. Unset when the model has no price. */
+  costUsd?: number;
+  /** Set when consensus was a mechanical vote with no LLM call. */
+  mechanical?: boolean;
 }
 
 export interface PromptRunResult {
@@ -95,6 +149,13 @@ export interface PromptRunResult {
   selfConsistency?: SelfConsistencyResult;
   /** Total wall-clock time for this question (model calls + consensus + eval). */
   durationMs?: number;
+  /** Set when the whole question failed or timed out. Every answer then counts as wrong. */
+  failure?: AnswerFailure;
+  /** `structured` for runs that asked for structured final answers (see methodology.ts). */
+  answerProtocol?: 'structured' | 'legacy';
+  /** Displayed option i was dataset option optionPermutation[i]. */
+  optionPermutation?: number[];
+  optionSeed?: number;
 }
 
 export interface BenchmarkResultsFile {
@@ -104,6 +165,10 @@ export interface BenchmarkResultsFile {
   models: string[];
   strategies: StrategyName[];
   sampleSize: number;
+  /** Answer protocol (see methodology.ts). Missing on files made before it existed, which are legacy. */
+  answerProtocol?: 'structured' | 'legacy';
+  /** Seed multiple-choice options were shuffled with. */
+  optionSeed?: number;
   createdAt: string;
   updatedAt: string;
   runs: PromptRunResult[];

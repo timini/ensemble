@@ -266,5 +266,10 @@ describe('quickEvalBaseline', () => {
     it('reports a different ensemble size', () => {
       expect(baselineMismatch({ ...base, ensembleSize: 3 }, base)).toContain('ensemble');
     });
+
+    it('treats a baseline with no protocol as legacy and reports a protocol change', () => {
+      expect(baselineMismatch(base, { ...base, protocol: 'legacy' })).toBeNull();
+      expect(baselineMismatch(base, { ...base, protocol: 'structured' })).toContain('protocol legacy vs structured');
+    });
   });
 });

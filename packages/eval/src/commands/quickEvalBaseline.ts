@@ -18,6 +18,8 @@ export interface QuickEvalBaselineFile {
   sample: number;
   datasets: string[];
   strategies: StrategyName[];
+  /** Answer protocol of the run (`mixed` when datasets differ). Missing on old baselines, which are legacy. */
+  protocol?: 'legacy' | 'structured' | 'mixed';
   updatedAt: string;
   single: AccuracyRecord;
   ensemble: Record<string, AccuracyRecord>;
@@ -53,6 +55,7 @@ export function buildBaselineFromResults(
   datasets: string[],
   strategies: StrategyName[],
   allDatasetResults: DatasetResult[],
+  protocol: QuickEvalBaselineFile['protocol'] = 'legacy',
 ): QuickEvalBaselineFile {
   const allSingleRuns = allDatasetResults.flatMap((d) => d.singleRuns);
   const allEnsembleRuns = allDatasetResults.flatMap((d) => d.ensembleRuns);
@@ -70,6 +73,7 @@ export function buildBaselineFromResults(
     sample,
     datasets,
     strategies,
+    protocol,
     updatedAt: new Date().toISOString(),
     single: { accuracy: singleAcc.accuracy, correct: singleAcc.correct, total: singleAcc.total },
     ensemble,
@@ -107,6 +111,11 @@ export function baselineMismatch(
   }
   if (previous.sample !== current.sample) {
     diffs.push(`sample ${previous.sample} vs ${current.sample}`);
+  }
+  const previousProtocol = previous.protocol ?? 'legacy';
+  const currentProtocol = current.protocol ?? 'legacy';
+  if (previousProtocol !== currentProtocol) {
+    diffs.push(`protocol ${previousProtocol} vs ${currentProtocol}`);
   }
   return diffs.length > 0 ? `baseline differs from this run: ${diffs.join(', ')}` : null;
 }

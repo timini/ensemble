@@ -55,13 +55,16 @@ export function analyzeBenchmarkRuns(
   const agreementCalibration = buildAgreementRows(aggregates.agreementBins);
   const comparisons = buildComparisonStats(
     aggregates.questions,
-    primaryStrategy,
+    strategyAccuracy.map((row) => row.label),
     modelAccuracy.map((row) => row.label),
     bootstrapIterations,
   );
+  const protocols = new Set(runs.map((run) => run.answerProtocol ?? 'legacy'));
+  const answerProtocol = protocols.size > 1 ? 'mixed' : ([...protocols][0] ?? 'legacy');
 
   return {
     promptCount: runs.length,
+    answerProtocol,
     modelAccuracy,
     strategyAccuracy,
     comparisons,

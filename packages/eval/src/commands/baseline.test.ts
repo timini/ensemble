@@ -5,7 +5,8 @@ vi.mock('../lib/benchmarkDatasets.js', () => ({
   loadBenchmarkQuestions: vi.fn(),
 }));
 
-vi.mock('../lib/evaluators.js', () => ({
+vi.mock('../lib/evaluators.js', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('../lib/evaluators.js')>()),
   createEvaluatorForDataset: vi.fn(),
 }));
 
@@ -86,20 +87,20 @@ describe('baseline command', () => {
     it('parses required --model and dataset argument', async () => {
       await runCommand(['gsm8k', '--model', 'openai:gpt-4o']);
 
-      expect(mockLoadBenchmarkQuestions).toHaveBeenCalledWith('gsm8k', { sample: 10 });
+      expect(mockLoadBenchmarkQuestions).toHaveBeenCalledWith('gsm8k', { sample: 20, seed: 42 });
       expect(MockEnsembleRunner).toHaveBeenCalledTimes(1);
     });
 
     it('parses --samples option', async () => {
       await runCommand(['gsm8k', '--model', 'openai:gpt-4o', '--samples', '5']);
 
-      expect(mockLoadBenchmarkQuestions).toHaveBeenCalledWith('gsm8k', { sample: 5 });
+      expect(mockLoadBenchmarkQuestions).toHaveBeenCalledWith('gsm8k', { sample: 5, seed: 42 });
     });
 
-    it('defaults samples to 10', async () => {
+    it('defaults samples to 20 in mock mode', async () => {
       await runCommand(['gsm8k', '--model', 'openai:gpt-4o']);
 
-      expect(mockLoadBenchmarkQuestions).toHaveBeenCalledWith('gsm8k', { sample: 10 });
+      expect(mockLoadBenchmarkQuestions).toHaveBeenCalledWith('gsm8k', { sample: 20, seed: 42 });
     });
 
     it('parses --output option', async () => {
@@ -228,7 +229,7 @@ describe('baseline command', () => {
     it('creates evaluator from dataset', async () => {
       await runCommand(['gsm8k', '--model', 'openai:gpt-4o']);
 
-      expect(mockCreateEvaluatorForDataset).toHaveBeenCalledWith('gsm8k', undefined);
+      expect(mockCreateEvaluatorForDataset).toHaveBeenCalledWith('gsm8k', undefined, { protocol: 'structured' });
     });
 
     it('calls evaluateResponses for each question', async () => {
@@ -296,6 +297,19 @@ describe('baseline command', () => {
       await expect(
         runCommand(['gsm8k', '--model', 'openai:gpt-4o']),
       ).rejects.toThrow('Model call failed');
+    });
+  });
+
+  describe('judge', () => {
+    it('refuses to judge a free-text dataset with the model under test', async () => {
+      mockLoadBenchmarkQuestions.mockResolvedValue({
+        datasetName: 'simpleqa',
+        questions: [{ id: 's-0', prompt: 'Who?', groundTruth: 'Ada' }],
+      });
+      await expect(runCommand(['simpleqa', '--model', 'openai:gpt-4o'])).rejects.toThrow(/needs an LLM judge/);
+      await expect(
+        runCommand(['simpleqa', '--model', 'openai:gpt-4o', '--judge', 'openai:gpt-4o']),
+      ).rejects.toThrow(/also generates answers/);
     });
   });
 });

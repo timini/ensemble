@@ -1,10 +1,22 @@
 import type {
+  AnswerFailure,
   ConsensusEvaluation,
   EvaluationResult,
   PromptEvaluation,
   ProviderResponse,
   StrategyName,
 } from '../types.js';
+
+const TIMEOUT_PATTERN = /timed?\s?out|timeout|ETIMEDOUT|aborted/i;
+
+/** Classify a failed call from its error message. */
+export function failureOf(message: string): AnswerFailure {
+  return TIMEOUT_PATTERN.test(message) ? 'timeout' : 'error';
+}
+
+function failedResult(groundTruth: string, failure: AnswerFailure): EvaluationResult {
+  return { correct: false, expected: groundTruth.trim(), predicted: null, failure };
+}
 
 /** Per-evaluate-call timeout in ms. Prevents a single hanging API call from blocking for 300s. */
 const EVAL_CALL_TIMEOUT_MS = 60_000;
@@ -67,7 +79,6 @@ export async function evaluateResponses(
   const keyOccurrences: Record<string, number> = {};
   const entries: Array<{ key: string; response: ProviderResponse }> = [];
   for (const response of responses) {
-    if (response.error) continue;
     const baseKey = `${response.provider}:${response.model}`;
     const occurrence = (keyOccurrences[baseKey] ?? 0) + 1;
     keyOccurrences[baseKey] = occurrence;
@@ -78,9 +89,12 @@ export async function evaluateResponses(
   process.stderr.write(`  [evaluateResponses] start: ${entries.length} entries, evaluator=${evaluator.name}\n`);
 
   // Phase 2: evaluate all responses in parallel with per-call timeout
+  // Failed calls are scored wrong without calling the evaluator.
   const evalResults = await Promise.all(
     entries.map(({ key, response }) =>
-      evaluateWithTimeout(evaluator, response.content, groundTruth, prompt, key),
+      response.error
+        ? Promise.resolve(failedResult(groundTruth, failureOf(response.error)))
+        : evaluateWithTimeout(evaluator, response.content, groundTruth, prompt, key),
     ),
   );
 
@@ -122,6 +136,8 @@ export async function evaluateConsensusStrategies(
   consensus: Partial<Record<StrategyName, string>>,
   groundTruth: string,
   prompt?: string,
+  /** Strategies the run asked for. Any without a usable answer is scored wrong as an error. */
+  expectedStrategies: StrategyName[] = [],
 ): Promise<ConsensusEvaluation | undefined> {
   if (!evaluator || groundTruth.length === 0) {
     return undefined;
@@ -152,6 +168,9 @@ export async function evaluateConsensusStrategies(
   const results: Partial<Record<StrategyName, EvaluationResult>> = {};
   for (let i = 0; i < entries.length; i++) {
     results[entries[i].strategy] = evalResults[i];
+  }
+  for (const strategy of expectedStrategies) {
+    if (!results[strategy]) results[strategy] = failedResult(groundTruth, 'error');
   }
 
   return {

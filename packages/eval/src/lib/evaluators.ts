@@ -2,8 +2,12 @@ import type { AIProvider } from '@ensemble-ai/shared-utils/providers';
 import type {
   BenchmarkDatasetName,
   EvaluationResult,
+  ModelSpec,
 } from '../types.js';
 import { extractChoiceLetter, extractNumericAnswer } from './parsers.js';
+import { answersMatch, extractFinalAnswer, type AnswerKind } from './finalAnswer.js';
+import type { AnswerProtocol } from './methodology.js';
+import { formatModelSpec, sameModel } from './modelSpecs.js';
 
 function numericValuesMatch(predicted: string, expected: string): boolean {
   const predictedNumber = Number(predicted);
@@ -231,11 +235,79 @@ export interface JudgeConfig {
   model: string;
 }
 
+const MECHANICAL_NAMES: Record<Exclude<AnswerKind, 'text'>, 'mcq' | 'numeric' | 'exact-match'> = {
+  choice: 'mcq',
+  numeric: 'numeric',
+  math: 'exact-match',
+  yesno: 'exact-match',
+};
+
+/**
+ * Scores a structured final answer with no LLM: reads the answer
+ * (extractFinalAnswer) and compares it for its kind (answersMatch).
+ */
+export class MechanicalEvaluator {
+  readonly name: 'mcq' | 'numeric' | 'exact-match';
+
+  constructor(private readonly kind: Exclude<AnswerKind, 'text'>) {
+    this.name = MECHANICAL_NAMES[kind];
+  }
+
+  evaluate(response: string, groundTruth: string): EvaluationResult {
+    const spec = { kind: this.kind };
+    const predicted = extractFinalAnswer(response, spec);
+    const expected = groundTruth.trim();
+    return { correct: answersMatch(predicted, expected, spec), expected, predicted };
+  }
+}
+
+const STRUCTURED_KIND: Partial<Record<BenchmarkDatasetName, Exclude<AnswerKind, 'text'>>> = {
+  truthfulqa: 'choice',
+  gpqa: 'choice',
+  mmlu_pro: 'choice',
+  arc: 'choice',
+  hellaswag: 'choice',
+  gsm8k: 'numeric',
+  math500: 'math',
+  hallumix: 'yesno',
+};
+
+/** True when scoring this dataset under this protocol calls an LLM judge. */
+export function datasetNeedsJudge(datasetName: BenchmarkDatasetName, protocol: AnswerProtocol): boolean {
+  if (protocol === 'structured') return STRUCTURED_KIND[datasetName] === undefined;
+  return datasetName !== 'gsm8k' && datasetName !== 'math500';
+}
+
+/**
+ * Refuse a judge that also generates answers: a model grading its own
+ * answers biases the score. Pass `allowSameModel` to force it.
+ */
+export function assertIndependentJudge(
+  judge: ModelSpec,
+  generators: readonly ModelSpec[],
+  options: { allowSameModel?: boolean } = {},
+): void {
+  if (options.allowSameModel) return;
+  if (generators.some((generator) => sameModel(generator, judge))) {
+    throw new Error(
+      `Judge model ${formatModelSpec(judge)} also generates answers. Pick a different judge, ` +
+        'or pass --allow-same-judge to force it.',
+    );
+  }
+}
+
+export interface EvaluatorOptions {
+  /** Defaults to `legacy`, the protocol of the committed caches. */
+  protocol?: AnswerProtocol;
+}
+
 export function createEvaluatorForDataset(
   datasetName: BenchmarkDatasetName | null,
   judge?: JudgeConfig,
+  options: EvaluatorOptions = {},
 ):
   | NumericEvaluator
+  | MechanicalEvaluator
   | LLMJudgeNumericEvaluator
   | LLMJudgeMCQEvaluator
   | LLMJudgeExactMatchEvaluator
@@ -244,6 +316,14 @@ export function createEvaluatorForDataset(
     return null;
   }
 
+  if (options.protocol === 'structured') {
+    const kind = STRUCTURED_KIND[datasetName];
+    if (kind) return new MechanicalEvaluator(kind);
+    if (!judge) {
+      throw new Error(`${datasetName} dataset requires a judge config`);
+    }
+    return new LLMJudgeExactMatchEvaluator(judge.provider, judge.model);
+  }
   switch (datasetName) {
     case 'gsm8k':
     case 'math500':

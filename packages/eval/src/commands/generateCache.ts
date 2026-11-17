@@ -12,12 +12,17 @@
  * Only consensus strategy + consensus evaluation calls hit the API.
  *
  * Key design: generates for a FIXED set of N questions per dataset
- * (default 100), chosen by deterministic shuffle (seed=42).
+ * (default 200), chosen by deterministic shuffle (seed=42).
+ *
+ * New caches use the structured answer protocol (shuffled options,
+ * structured final answers, mechanical scoring; see methodology.ts) and are
+ * saved under `_structured` file names. `--protocol legacy` regenerates the
+ * old free-text caches.
  *
  * Usage:
  *   ensemble-eval generate-cache --model google:gemini-2.5-pro
  *   ensemble-eval generate-cache --datasets gsm8k,truthfulqa
- *   ensemble-eval generate-cache --sample 200  # more questions
+ *   ensemble-eval generate-cache --model ollama:llama3.2 --judge-model google:gemini-2.5-flash
  *
  * After generating, commit both caches:
  *   git add packages/eval/.cache/
@@ -32,16 +37,19 @@ import { resolveBenchmarkDatasetName } from '../lib/benchmarkDatasetShared.js';
 import { loadEnsembleCache, saveEnsembleCache, type EnsembleCacheEntry } from '../lib/ensembleCache.js';
 import { EnsembleRunner } from '../lib/ensembleRunner.js';
 import { CACHED_EVAL_MODEL, DEFAULT_JUDGE_MODEL } from '../lib/evalDefaults.js';
-import { createEvaluatorForDataset, type JudgeConfig } from '../lib/evaluators.js';
+import {
+  assertIndependentJudge, createEvaluatorForDataset, datasetNeedsJudge, type JudgeConfig,
+} from '../lib/evaluators.js';
 import { evaluateResponses } from '../lib/evaluation.js';
-import { parseModelSpec } from '../lib/modelSpecs.js';
+import { DEFAULT_OPTION_SEED, prepareQuestions, type AnswerProtocol } from '../lib/methodology.js';
+import { endpointsOf, parseModelSpec } from '../lib/modelSpecs.js';
 import { registerProviders } from '../lib/providers.js';
 import type { BenchmarkDatasetName, BenchmarkQuestion, EvalMode, PromptRunResult, ProviderResponse } from '../types.js';
 
 const DEFAULT_MODEL = CACHED_EVAL_MODEL;
 const DEFAULT_ENSEMBLE_SIZE = 5;
 const DEFAULT_TEMPERATURE = 0.7;
-const DEFAULT_SAMPLE = 100;
+const DEFAULT_SAMPLE = 200;
 const DEFAULT_SEED = 42; // Deterministic shuffle for reproducibility
 const DEFAULT_DATASETS: BenchmarkDatasetName[] = [
   'gsm8k', 'truthfulqa', 'gpqa', 'hle', 'math500',
@@ -58,6 +66,8 @@ interface GenerateCacheOptions {
   datasets?: string[];
   mode: string;
   concurrency: string;
+  protocol: string;
+  allowSameJudge?: boolean;
 }
 
 function parseDatasets(raw?: string[]): BenchmarkDatasetName[] {
@@ -90,10 +100,19 @@ export function createGenerateCacheCommand(): Command {
     .option('--datasets <datasets...>', 'Datasets to generate for. Comma-separated. Defaults to all.')
     .option('--mode <mode>', 'Provider mode (mock or free).', 'free')
     .option('--concurrency <count>', 'Initial max concurrent questions (auto-adapts via AIMD).', '40')
+    .option('--protocol <protocol>', 'Answer protocol: structured or legacy.', 'structured')
+    .option('--allow-same-judge', 'Allow the judge to be the model under test (biased; off by default).')
     .action(async (options: GenerateCacheOptions) => {
-      const { provider, model: modelName } = parseModelSpec(options.model);
+      const modelSpec = parseModelSpec(options.model);
+      const judgeSpec = parseModelSpec(options.judgeModel);
+      const { provider, model: modelName } = modelSpec;
       const model = options.model;
-      const { provider: judgeProvider, model: judgeModelName } = parseModelSpec(options.judgeModel);
+      const { provider: judgeProvider, model: judgeModelName } = judgeSpec;
+      const protocol = options.protocol as AnswerProtocol;
+      if (protocol !== 'structured' && protocol !== 'legacy') {
+        throw new Error(`Invalid protocol "${options.protocol}". Expected structured or legacy.`);
+      }
+      const endpoints = endpointsOf([modelSpec, judgeSpec]);
       const ensembleSize = Number.parseInt(options.ensemble, 10);
       const temperature = Number.parseFloat(options.temperature);
       const sampleCount = Number.parseInt(options.sample, 10);
@@ -104,7 +123,10 @@ export function createGenerateCacheCommand(): Command {
 
       const registry = new ProviderRegistry();
       const providers = new Set([provider, judgeProvider]);
-      registerProviders(registry, [...providers], mode);
+      registerProviders(registry, [...providers], mode, endpoints);
+      if (datasetNames.some((name) => datasetNeedsJudge(name, protocol))) {
+        assertIndependentJudge(judgeSpec, [modelSpec], { allowSameModel: options.allowSameJudge });
+      }
 
       const monitor = new SystemMonitor();
       const limiter = new ConcurrencyLimiter({ initial: initialConcurrency, min: 1, max: 60, monitor });
@@ -129,6 +151,7 @@ export function createGenerateCacheCommand(): Command {
         temperature,
         retry: { maxRetries: 3, baseDelayMs: 2000 },
         onRateLimit: () => limiter.notifyRateLimit(),
+        endpoints,
       });
       const ensembleModels = Array.from({ length: ensembleSize }, () => ({ provider, model: modelName }));
 
@@ -146,7 +169,7 @@ export function createGenerateCacheCommand(): Command {
             shuffle: true,
             seed,
           });
-          selectedQuestions = result.questions;
+          selectedQuestions = prepareQuestions(datasetName, result.questions, { protocol });
         } catch (error) {
           const msg = error instanceof Error ? error.message : String(error);
           log(`  [${datasetName}] SKIP — ${msg}\n`);
@@ -154,7 +177,7 @@ export function createGenerateCacheCommand(): Command {
         }
 
         // Load existing cache to skip already-generated questions
-        const existingCache = await loadEnsembleCache(model, datasetName, ensembleSize, temperature);
+        const existingCache = await loadEnsembleCache(model, datasetName, ensembleSize, temperature, protocol);
         const cachedIds = existingCache ? new Set(existingCache.keys()) : new Set<string>();
         const uncached = selectedQuestions.filter((q) => !cachedIds.has(q.id));
 
@@ -167,7 +190,11 @@ export function createGenerateCacheCommand(): Command {
           const settled = await Promise.allSettled(
             uncached.map(async (question) => {
               const generate = async (): Promise<{ questionId: string; responses: ProviderResponse[] }> => {
-                const responses = await ensembleRunner.runPrompt(question.prompt, ensembleModels);
+                const responses = await ensembleRunner.runPrompt(
+                  question.prompt,
+                  ensembleModels,
+                  protocol === 'structured' && question.answer ? { answer: question.answer } : {},
+                );
                 return { questionId: question.id, responses };
               };
               const result = await limiter.run(generate);
@@ -187,7 +214,10 @@ export function createGenerateCacheCommand(): Command {
             }
           }
 
-          await saveEnsembleCache(model, datasetName, ensembleSize, temperature, newEntries);
+          await saveEnsembleCache(
+            model, datasetName, ensembleSize, temperature, newEntries,
+            protocol, protocol === 'structured' ? DEFAULT_OPTION_SEED : undefined,
+          );
           const totalCached = cachedIds.size + newEntries.length;
           log(`  [${datasetName}] saved ${newEntries.length} new entries (${totalCached} total cached)\n`);
         } else {
@@ -196,9 +226,11 @@ export function createGenerateCacheCommand(): Command {
 
         // --- Step 2: Evaluate single baseline (response[0] per question) ---
         // Always runs — takes response[0] from ensemble cache, evaluates with judge.
-        const fullCache = await loadEnsembleCache(model, datasetName, ensembleSize, temperature);
+        const fullCache = await loadEnsembleCache(model, datasetName, ensembleSize, temperature, protocol);
         if (fullCache) {
-          const evaluator = createEvaluatorForDataset(datasetName, judgeConfig);
+          const evaluator = createEvaluatorForDataset(
+            datasetName, datasetNeedsJudge(datasetName, protocol) ? judgeConfig : undefined, { protocol },
+          );
           const baselineResults: Array<{ questionId: string; result: PromptRunResult }> = [];
           let evalCompleted = 0;
 
@@ -227,6 +259,10 @@ export function createGenerateCacheCommand(): Command {
                   responses: [singleResponse],
                   consensus: {},
                   evaluation,
+                  ...(protocol === 'structured' ? { answerProtocol: 'structured' as const } : {}),
+                  ...(question.optionPermutation
+                    ? { optionPermutation: question.optionPermutation, optionSeed: question.optionSeed }
+                    : {}),
                 };
                 return { questionId: question.id, result };
               };
@@ -242,7 +278,7 @@ export function createGenerateCacheCommand(): Command {
             }
           }
 
-          await saveCachedBaseline(model, datasetName, baselineResults);
+          await saveCachedBaseline(model, datasetName, baselineResults, protocol);
           log(`  [${datasetName}] baseline saved (${baselineResults.length} evaluated)\n\n`);
         }
       }

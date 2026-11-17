@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { evaluateConsensusStrategies, evaluateResponses } from './evaluation.js';
+import { evaluateConsensusStrategies, evaluateResponses, failureOf } from './evaluation.js';
 import type { ProviderResponse } from '../types.js';
 
 describe('evaluateResponses', () => {
@@ -39,7 +39,7 @@ describe('evaluateResponses', () => {
     ).resolves.toBeUndefined();
   });
 
-  it('skips errored responses, tracks duplicate keys by occurrence, and computes accuracy', async () => {
+  it('counts errored responses as wrong, tracks duplicate keys by occurrence, and computes accuracy', async () => {
     const evaluator = {
       name: 'numeric' as const,
       evaluate: vi.fn((response: string) =>
@@ -56,12 +56,14 @@ describe('evaluateResponses', () => {
     expect(result).toMatchObject({
       evaluator: 'numeric',
       groundTruth: 'answer',
-      accuracy: 0.5,
+      accuracy: 1 / 3,
     });
     expect(result?.results).toEqual({
       'openai:gpt-4': { correct: true, expected: 'answer', predicted: 'first' },
+      'anthropic:claude': { correct: false, expected: 'answer', predicted: null, failure: 'error' },
       'openai:gpt-4#2': { correct: false, expected: 'answer', predicted: 'second' },
     });
+    expect(evaluator.evaluate).toHaveBeenCalledTimes(2);
     expect(evaluator.evaluate).toHaveBeenNthCalledWith(
       1,
       'first',
@@ -74,6 +76,37 @@ describe('evaluateResponses', () => {
       'answer',
       'prompt text',
     );
+  });
+});
+
+describe('failure counting', () => {
+  it('marks timed-out responses as timeouts', async () => {
+    const evaluator = { name: 'mcq' as const, evaluate: vi.fn(() => ({ correct: true, expected: 'A', predicted: 'A' })) };
+    const result = await evaluateResponses(
+      evaluator,
+      [{ provider: 'openai', model: 'm', content: '', responseTimeMs: 0, error: 'Request timed out after 120000ms' }],
+      'A',
+    );
+    expect(result?.accuracy).toBe(0);
+    expect(result?.results['openai:m']).toEqual({ correct: false, expected: 'A', predicted: null, failure: 'timeout' });
+    expect(failureOf('ETIMEDOUT')).toBe('timeout');
+    expect(failureOf('500 server error')).toBe('error');
+  });
+
+  it('counts a requested strategy with no answer as a wrong error', async () => {
+    const evaluator = { name: 'mcq' as const, evaluate: vi.fn(() => ({ correct: true, expected: 'A', predicted: 'A' })) };
+    const result = await evaluateConsensusStrategies(
+      evaluator,
+      { standard: 'A', elo: 'ELO strategy requires at least 3 successful model responses.' },
+      'A',
+      undefined,
+      ['standard', 'elo', 'majority'],
+    );
+    expect(result?.results).toEqual({
+      standard: { correct: true, expected: 'A', predicted: 'A' },
+      elo: { correct: false, expected: 'A', predicted: null, failure: 'error' },
+      majority: { correct: false, expected: 'A', predicted: null, failure: 'error' },
+    });
   });
 });
 

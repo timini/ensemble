@@ -6,6 +6,9 @@ import type {
 import { HuggingFaceBenchmarkLoader } from './huggingFaceBenchmarkLoader.js';
 import { toChoiceLetter } from './benchmarkDatasetShared.js';
 import { extractChoiceLetter, extractNumericAnswer } from './parsers.js';
+import { parseParenChoices } from './methodology.js';
+
+const LETTER_FOOTER = 'Respond with the single best option letter.';
 
 interface Gsm8kRow {
   question: string;
@@ -93,7 +96,7 @@ function mapGsm8kRow(row: Gsm8kRow, rowIdx: number): BenchmarkQuestion {
   };
 }
 
-function mapTruthfulQaRow(row: TruthfulQaRow, rowIdx: number): BenchmarkQuestion {
+export function mapTruthfulQaRow(row: TruthfulQaRow, rowIdx: number): BenchmarkQuestion {
   const choices = row.mc1_targets?.choices ?? [];
   const labels = row.mc1_targets?.labels ?? [];
   const correctIndex = labels.findIndex((label) => label === 1);
@@ -107,8 +110,9 @@ function mapTruthfulQaRow(row: TruthfulQaRow, rowIdx: number): BenchmarkQuestion
 
   return {
     id: `truthfulqa-${rowIdx}`,
-    prompt: `${row.question.trim()}\n\nOptions:\n${options}\n\nRespond with the single best option letter.`,
+    prompt: `${row.question.trim()}\n\nOptions:\n${options}\n\n${LETTER_FOOTER}`,
     groundTruth: toChoiceLetter(correctIndex),
+    multipleChoice: { stem: row.question.trim(), choices, correctIndex, style: 'dot', footer: LETTER_FOOTER },
   };
 }
 
@@ -131,16 +135,23 @@ function mapMath500Row(row: Math500Row, rowIdx: number): BenchmarkQuestion {
   };
 }
 
-function mapMmluProRow(row: MmluProRow, rowIdx: number): BenchmarkQuestion {
+export function mapMmluProRow(row: MmluProRow, rowIdx: number): BenchmarkQuestion {
+  const choices = row.options ?? [];
+  const correctIndex = Number.isInteger(row.answer_index)
+    ? row.answer_index
+    : (row.answer ?? '').charCodeAt(0) - 65;
   const options = (row.options ?? [])
     .map((choice, index) => `${toChoiceLetter(index)}. ${choice}`)
     .join('\n');
 
   return {
     id: `mmlu_pro-${rowIdx}`,
-    prompt: `${row.question.trim()}\n\nOptions:\n${options}\n\nRespond with the single best option letter.`,
+    prompt: `${row.question.trim()}\n\nOptions:\n${options}\n\n${LETTER_FOOTER}`,
     groundTruth: row.answer,
     category: row.category?.trim() || undefined,
+    ...(choices.length > 0 && correctIndex >= 0 && correctIndex < choices.length
+      ? { multipleChoice: { stem: row.question.trim(), choices, correctIndex, style: 'dot' as const, footer: LETTER_FOOTER } }
+      : {}),
   };
 }
 
@@ -161,7 +172,7 @@ function mapSimpleQaRow(row: SimpleQaRow, rowIdx: number): BenchmarkQuestion {
   };
 }
 
-function mapArcRow(row: ArcRow, rowIdx: number): BenchmarkQuestion {
+export function mapArcRow(row: ArcRow, rowIdx: number): BenchmarkQuestion {
   const labels = row.choices?.label ?? [];
   const texts = row.choices?.text ?? [];
 
@@ -177,14 +188,18 @@ function mapArcRow(row: ArcRow, rowIdx: number): BenchmarkQuestion {
 
   const normalizedKey = labelToLetter.get(row.answerKey) ?? row.answerKey;
 
+  const correctIndex = labels.indexOf(row.answerKey);
   return {
     id: `arc-${rowIdx}`,
-    prompt: `${row.question.trim()}\n\nOptions:\n${options}\n\nRespond with the single best option letter.`,
+    prompt: `${row.question.trim()}\n\nOptions:\n${options}\n\n${LETTER_FOOTER}`,
     groundTruth: normalizedKey,
+    ...(correctIndex >= 0
+      ? { multipleChoice: { stem: row.question.trim(), choices: [...texts], correctIndex, style: 'dot' as const, footer: LETTER_FOOTER } }
+      : {}),
   };
 }
 
-function mapHellaSwagRow(row: HellaSwagRow, rowIdx: number): BenchmarkQuestion {
+export function mapHellaSwagRow(row: HellaSwagRow, rowIdx: number): BenchmarkQuestion {
   const endings = row.endings ?? [];
   const options = endings
     .map((ending, index) => `${toChoiceLetter(index)}. ${ending}`)
@@ -195,10 +210,12 @@ function mapHellaSwagRow(row: HellaSwagRow, rowIdx: number): BenchmarkQuestion {
     throw new Error(`Failed to parse HellaSwag label at row ${rowIdx}`);
   }
 
+  const stem = `Complete the following:\n\n${row.ctx.trim()}`;
   return {
     id: `hellaswag-${rowIdx}`,
-    prompt: `Complete the following:\n\n${row.ctx.trim()}\n\nOptions:\n${options}\n\nRespond with the single best option letter.`,
+    prompt: `${stem}\n\nOptions:\n${options}\n\n${LETTER_FOOTER}`,
     groundTruth: toChoiceLetter(correctIndex),
+    multipleChoice: { stem, choices: [...endings], correctIndex, style: 'dot', footer: LETTER_FOOTER },
   };
 }
 
@@ -217,17 +234,30 @@ function mapHalluMixRow(row: HalluMixRow, rowIdx: number): BenchmarkQuestion {
   };
 }
 
-function mapGpqaRow(row: GpqaRow, rowIdx: number): BenchmarkQuestion {
+export function mapGpqaRow(row: GpqaRow, rowIdx: number): BenchmarkQuestion {
   const groundTruth = extractChoiceLetter(row.solution ?? '');
   if (!groundTruth) {
     throw new Error(`Failed to parse GPQA answer at row ${rowIdx}`);
   }
 
+  const parsed = parseParenChoices(row.problem.trim());
+  const correctIndex = groundTruth.charCodeAt(0) - 65;
   return {
     id: `gpqa-${rowIdx}`,
     prompt: row.problem.trim(),
     groundTruth,
     category: row.domain?.trim() || undefined,
+    ...(parsed && correctIndex >= 0 && correctIndex < parsed.choices.length
+      ? {
+          multipleChoice: {
+            stem: parsed.stem,
+            choices: parsed.choices,
+            correctIndex,
+            style: 'paren' as const,
+            footer: parsed.footer,
+          },
+        }
+      : {}),
   };
 }
 

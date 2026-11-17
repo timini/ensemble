@@ -1,4 +1,5 @@
 import type { AnalysisSummary } from './analysisTypes.js';
+import { formatInterval, formatPValue } from './pairedStats.js';
 
 function toPercent(value: number): string {
   return `${(value * 100).toFixed(2)}%`;
@@ -9,9 +10,16 @@ function toUsd(value: number): string {
 }
 
 function linesForAccuracyTable(title: string, rows: AnalysisSummary['modelAccuracy']): string[] {
-  const lines = [title, '', '| Label | Accuracy | Correct / Total |', '| --- | ---: | ---: |'];
+  const lines = [
+    title,
+    '',
+    '| Label | Accuracy | 95% CI | Correct / Total | Errors | Timeouts |',
+    '| --- | ---: | ---: | ---: | ---: | ---: |',
+  ];
   for (const row of rows) {
-    lines.push(`| ${row.label} | ${toPercent(row.accuracy)} | ${row.correct} / ${row.total} |`);
+    lines.push(
+      `| ${row.label} | ${toPercent(row.accuracy)} | ${formatInterval(row)} | ${row.correct} / ${row.total} | ${row.errors} | ${row.timeouts} |`,
+    );
   }
   lines.push('');
   return lines;
@@ -27,6 +35,11 @@ export function createMarkdownReport(
   lines.push(`Source: \`${sourceFile}\``);
   lines.push(`Prompts analyzed: ${analysis.promptCount}`);
   lines.push(`Primary strategy: ${analysis.primaryStrategy ?? 'n/a'}`);
+  lines.push(`Answer protocol: ${analysis.answerProtocol}`);
+  lines.push('');
+  lines.push(
+    '_Failed and timed-out answers count as wrong and are also listed on their own. Intervals are 95% Wilson score intervals._',
+  );
   lines.push('');
 
   lines.push(...linesForAccuracyTable('## Accuracy Summary - Models', analysis.modelAccuracy));
@@ -40,9 +53,10 @@ export function createMarkdownReport(
     lines.push('- No model/strategy overlap available for paired tests.');
   } else {
     for (const comparison of analysis.comparisons) {
-      lines.push(`- ${comparison.comparedAgainst} (n=${comparison.sampleSize})`);
+      const m = comparison.mcnemar;
+      lines.push(`- ${comparison.strategy} vs ${comparison.comparedAgainst} (n=${comparison.sampleSize})`);
       lines.push(
-        `  - McNemar p-value: ${comparison.mcnemar.pValue.toExponential(3)}, chi-squared=${comparison.mcnemar.chiSquared.toFixed(4)}`,
+        `  - Paired McNemar (${m.method}): p=${formatPValue(m.pValue)}; model right and strategy wrong ${m.n10}, strategy right and model wrong ${m.n01}`,
       );
       lines.push(
         `  - Bootstrap delta: ${toPercent(comparison.bootstrap.meanDelta)} (95% CI ${toPercent(comparison.bootstrap.ciLow)} to ${toPercent(comparison.bootstrap.ciHigh)})`,
@@ -107,7 +121,7 @@ export function createMarkdownReport(
   }
   lines.push('');
   lines.push(
-    '_Strategy costs are based on recorded model-response costs and may exclude extra summarizer-only overhead if not captured in the run schema._',
+    '_Costs come from the shared price table (local models cost $0, unpriced models count as $0). A strategy costs the ensemble answers plus its own consensus calls. Judge calls are not included._',
   );
   lines.push('');
 

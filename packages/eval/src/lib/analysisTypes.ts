@@ -1,11 +1,19 @@
 export interface AccuracyRow {
   label: string;
   correct: number;
+  /** All answers, including failed and timed-out ones, which count as wrong. */
   total: number;
   accuracy: number;
+  /** 95% Wilson interval. */
+  lower: number;
+  upper: number;
+  errors: number;
+  timeouts: number;
 }
 
 export interface ComparisonStats {
+  /** The ensemble strategy compared. */
+  strategy: string;
   comparedAgainst: string;
   sampleSize: number;
   mcnemar: {
@@ -14,7 +22,9 @@ export interface ComparisonStats {
     n01: number;
     n00: number;
     chiSquared: number;
+    /** Exact binomial p below 25 discordant pairs, chi-squared with continuity correction above. */
     pValue: number;
+    method: 'exact' | 'chi-squared';
   };
   bootstrap: {
     meanDelta: number;
@@ -80,6 +90,8 @@ export interface ChartBundle {
 
 export interface AnalysisSummary {
   promptCount: number;
+  /** Answer protocol of the runs: `structured`, `legacy` or `mixed`. */
+  answerProtocol: 'structured' | 'legacy' | 'mixed';
   modelAccuracy: AccuracyRow[];
   strategyAccuracy: AccuracyRow[];
   comparisons: ComparisonStats[];

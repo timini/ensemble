@@ -1,7 +1,8 @@
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 import { createRunCommand } from './run.js';
 
-vi.mock('@ensemble-ai/shared-utils/providers', () => {
+vi.mock('@ensemble-ai/shared-utils/providers', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@ensemble-ai/shared-utils/providers')>();
   const ProviderRegistry = vi.fn();
   ProviderRegistry.prototype.getProvider = vi.fn().mockReturnValue({
     streamResponse: vi.fn(),
@@ -10,7 +11,7 @@ vi.mock('@ensemble-ai/shared-utils/providers', () => {
     listAvailableModels: vi.fn().mockReturnValue([]),
     listAvailableTextModels: vi.fn(),
   });
-  return { ProviderRegistry };
+  return { ...actual, ProviderRegistry };
 });
 
 vi.mock('../lib/io.js', () => ({

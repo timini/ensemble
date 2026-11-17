@@ -77,4 +77,13 @@ describe('baselineCache', () => {
       expect(loaded![0]!.questionId).toBe('gsm8k-0');
     });
   });
+
+  describe('baselineCacheFileName', () => {
+    it('keeps legacy names and marks structured caches', async () => {
+      const { baselineCacheFileName, loadCachedBaseline } = await import('./baselineCache.js');
+      expect(baselineCacheFileName('google:gemini-3-flash-preview', 'arc')).toBe('google_gemini-3-flash-preview_arc.json');
+      expect(baselineCacheFileName('ollama:llama3.2', 'arc', 'structured')).toBe('ollama_llama3.2_arc_structured.json');
+      expect((await loadCachedBaseline('google:gemini-3-flash-preview', 'arc'))?.size).toBeGreaterThan(0);
+    });
+  });
 });

@@ -30,6 +30,7 @@ import type { AnalysisSummary } from '../lib/analysisTypes.js';
 function makeAnalysisSummary(): AnalysisSummary {
   return {
     promptCount: 2,
+    answerProtocol: 'legacy',
     modelAccuracy: [],
     strategyAccuracy: [],
     comparisons: [],

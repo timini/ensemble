@@ -1,5 +1,6 @@
 import type { PromptRunResult } from '../types.js';
 import { safeRatio } from './analysisHelpers.js';
+import { wilsonScoreInterval } from './wilsonScore.js';
 import type {
   AccuracyRow,
   AgreementCalibrationRow,
@@ -15,12 +16,19 @@ import type {
 
 export function toAccuracyRows(map: Map<string, AccuracyCounter>): AccuracyRow[] {
   return [...map.entries()]
-    .map(([label, value]) => ({
-      label,
-      correct: value.correct,
-      total: value.total,
-      accuracy: safeRatio(value.correct, value.total),
-    }))
+    .map(([label, value]) => {
+      const ci = wilsonScoreInterval(value.correct, value.total);
+      return {
+        label,
+        correct: value.correct,
+        total: value.total,
+        accuracy: safeRatio(value.correct, value.total),
+        lower: ci.lower,
+        upper: ci.upper,
+        errors: value.errors,
+        timeouts: value.timeouts,
+      };
+    })
     .sort(
       (left, right) =>
         right.accuracy - left.accuracy || left.label.localeCompare(right.label),

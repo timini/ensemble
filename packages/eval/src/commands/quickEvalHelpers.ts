@@ -1,4 +1,4 @@
-import type { ConsensusStrategyMetrics, PromptRunResult, StrategyName } from '../types.js';
+import type { ConsensusStrategyMetrics, EvaluationResult, PromptRunResult, StrategyName } from '../types.js';
 
 export function toPercent(value: number): string {
   return `${(value * 100).toFixed(1)}%`;
@@ -48,41 +48,52 @@ export function sumStrategyMetrics(
 ): ConsensusStrategyMetrics {
   let tokenCount = 0;
   let durationSum = 0;
+  let costUsd = 0;
   let count = 0;
   for (const run of runs) {
     const m = run.consensusMetrics?.[strategy];
     if (m) {
       tokenCount += m.tokenCount;
       durationSum += m.durationMs;
+      costUsd += m.costUsd ?? 0;
       count += 1;
     }
   }
-  return { tokenCount, durationMs: count > 0 ? durationSum / count : 0 };
+  return { tokenCount, durationMs: count > 0 ? durationSum / count : 0, costUsd };
 }
 
-export function computeAccuracy(runs: PromptRunResult[], strategy?: StrategyName): {
+export interface AccuracyCount {
   correct: number;
   total: number;
   accuracy: number;
-} {
+  /** Answers missing because the call failed. Counted in total as wrong. */
+  errors: number;
+  /** Answers missing because the call timed out. Counted in total as wrong. */
+  timeouts: number;
+}
+
+/**
+ * Accuracy over all answers, with failed and timed-out answers counted as
+ * wrong (they are in `total`) and also reported on their own.
+ */
+export function computeAccuracy(runs: PromptRunResult[], strategy?: StrategyName): AccuracyCount {
   let correct = 0;
   let total = 0;
-  if (strategy) {
-    for (const run of runs) {
+  let errors = 0;
+  let timeouts = 0;
+  const count = (result: EvaluationResult) => {
+    total += 1;
+    if (result.correct) correct += 1;
+    if (result.failure === 'error') errors += 1;
+    if (result.failure === 'timeout') timeouts += 1;
+  };
+  for (const run of runs) {
+    if (strategy) {
       const result = run.consensusEvaluation?.results?.[strategy];
-      if (result) {
-        total += 1;
-        if (result.correct) correct += 1;
-      }
-    }
-  } else {
-    for (const run of runs) {
-      if (!run.evaluation?.results) continue;
-      for (const result of Object.values(run.evaluation.results)) {
-        total += 1;
-        if (result.correct) correct += 1;
-      }
+      if (result) count(result);
+    } else {
+      for (const result of Object.values(run.evaluation?.results ?? {})) count(result);
     }
   }
-  return { correct, total, accuracy: total > 0 ? correct / total : 0 };
+  return { correct, total, accuracy: total > 0 ? correct / total : 0, errors, timeouts };
 }

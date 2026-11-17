@@ -9,6 +9,10 @@ import {
   CACHED_EVAL_MODEL,
   DEFAULT_CONSENSUS_MODEL,
   DEFAULT_JUDGE_MODEL,
+  DEFAULT_SAMPLE_FREE,
+  DEFAULT_SAMPLE_MOCK,
+  resolveSampleSize,
+  sampleSizeWarning,
 } from './evalDefaults.js';
 
 const pkgRoot = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
@@ -63,5 +67,29 @@ describe('eval defaults', () => {
       expect(flagValue(script, '--consensus-model')).toBe(DEFAULT_CONSENSUS_MODEL);
       expect(flagValue(script, '--judge-model')).toBe(DEFAULT_JUDGE_MODEL);
     }
+  });
+
+  it('eval:ci scripts keep the cached sample size so CI stays quick', () => {
+    const pkg = JSON.parse(readFileSync(resolve(pkgRoot, 'package.json'), 'utf8')) as {
+      scripts: Record<string, string>;
+    };
+    for (const [name, script] of Object.entries(pkg.scripts)) {
+      if (name.startsWith('eval:ci')) expect(flagValue(script, '--sample')).toBe('30');
+    }
+  });
+
+  it('real runs default to at least 200 questions per dataset', () => {
+    expect(DEFAULT_SAMPLE_FREE).toBeGreaterThanOrEqual(200);
+    expect(resolveSampleSize(undefined, 'free')).toBe(DEFAULT_SAMPLE_FREE);
+    expect(resolveSampleSize(undefined, 'mock')).toBe(DEFAULT_SAMPLE_MOCK);
+    expect(resolveSampleSize('50', 'free')).toBe(50);
+    expect(() => resolveSampleSize('0', 'free')).toThrow(/Invalid sample/);
+    expect(() => resolveSampleSize('abc', 'free')).toThrow(/Invalid sample/);
+  });
+
+  it('warns about small real runs only', () => {
+    expect(sampleSizeWarning(30, 'free')).toMatch(/below 200/);
+    expect(sampleSizeWarning(200, 'free')).toBeNull();
+    expect(sampleSizeWarning(5, 'mock')).toBeNull();
   });
 });
