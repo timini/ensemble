@@ -21,6 +21,7 @@ export function useRunCost(
   const selectedModels = useStore((state) => state.selectedModels);
   const consensusUsage = useStore((state) => state.consensusUsage);
   const manualResponses = useStore((state) => state.manualResponses);
+  const endpoints = useStore((state) => state.endpoints);
 
   return useMemo(() => {
     if (responses.length === 0 || responses.some((r) => !r.isComplete))
@@ -34,6 +35,7 @@ export function useRunCost(
         manualResponses,
         embeddings,
         embeddingsSource,
+        endpoints,
       }),
     );
   }, [
@@ -44,5 +46,6 @@ export function useRunCost(
     manualResponses,
     embeddings,
     embeddingsSource,
+    endpoints,
   ]);
 }

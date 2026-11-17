@@ -8,7 +8,7 @@
 import type { StateCreator } from 'zustand';
 import { decrypt, encrypt } from '@ensemble-ai/shared-utils/security';
 import type { ValidationStatus } from '@/components/molecules/ApiKeyInput';
-import type { ProviderType } from './ensembleSlice';
+import type { ApiKeyProvider } from './ensembleSlice';
 import { toError } from '~/lib/errors';
 import { logger } from '~/lib/logger';
 
@@ -31,14 +31,14 @@ export interface ApiKeySlice {
   };
   encryptionInitialized: boolean;
 
-  setApiKey: (provider: ProviderType, key: string) => Promise<void>;
-  toggleApiKeyVisibility: (provider: ProviderType) => void;
+  setApiKey: (provider: ApiKeyProvider, key: string) => Promise<void>;
+  toggleApiKeyVisibility: (provider: ApiKeyProvider) => void;
   hideAllApiKeys: () => void;
-  getApiKey: (provider: ProviderType) => string | null;
+  getApiKey: (provider: ApiKeyProvider) => string | null;
   clearApiKeys: () => void;
   initializeEncryption: () => Promise<void>;
   setApiKeyStatus: (
-    provider: ProviderType,
+    provider: ApiKeyProvider,
     status: ValidationStatus,
     error?: string,
   ) => void;
@@ -61,7 +61,7 @@ export const createApiKeySlice: StateCreator<ApiKeySlice> = (set, get) => ({
       return;
     }
 
-    const providers: ProviderType[] = ['openai', 'anthropic', 'google', 'xai', 'deepseek', 'perplexity'];
+    const providers: ApiKeyProvider[] = ['openai', 'anthropic', 'google', 'xai', 'deepseek', 'perplexity'];
 
     await Promise.all(
       providers.map(async (provider) => {
@@ -179,7 +179,7 @@ export const createApiKeySlice: StateCreator<ApiKeySlice> = (set, get) => ({
 
   hideAllApiKeys: () => {
     set((state) => {
-      const providers: ProviderType[] = ['openai', 'anthropic', 'google', 'xai', 'deepseek', 'perplexity'];
+      const providers: ApiKeyProvider[] = ['openai', 'anthropic', 'google', 'xai', 'deepseek', 'perplexity'];
       const updatedKeys = { ...state.apiKeys };
       for (const provider of providers) {
         const entry = updatedKeys[provider];

@@ -12,6 +12,7 @@ import { isWebCryptoAvailable } from '@ensemble-ai/shared-utils/security';
 import { toError } from '~/lib/errors';
 import { getHydratedStatus } from '~/lib/providerStatus';
 import { logger } from '~/lib/logger';
+import { endpointsProviderStatus } from '~/lib/endpointStatus';
 
 const PROVIDERS: Provider[] = ['openai', 'anthropic', 'google', 'xai', 'deepseek', 'perplexity'];
 
@@ -23,6 +24,9 @@ export function useConfigPage() {
     const mode = useStore((state) => state.mode);
     const setMode = useStore((state) => state.setMode);
     const apiKeys = useStore((state) => state.apiKeys);
+    const hasValidEndpoint = useStore(
+        (state) => endpointsProviderStatus(state.endpoints) === 'valid',
+    );
     const setApiKey = useStore((state) => state.setApiKey);
     const toggleApiKeyVisibility = useStore((state) => state.toggleApiKeyVisibility);
     const isModeConfigured = useStore((state) => state.isModeConfigured);
@@ -230,8 +234,9 @@ export function useConfigPage() {
         : 0;
     const configuredCountOverride = hasHydrated ? configuredKeysCount : 0;
 
-    // At least 1 API key validated enables Continue button in Free mode
-    const hasValidKeys = configuredKeysCount > 0;
+    // At least 1 API key or 1 connected OpenAI-compatible endpoint enables
+    // Continue in Free mode, so local models work with no cloud key.
+    const hasValidKeys = configuredKeysCount > 0 || hasValidEndpoint;
     const allowContinue = useMemo(() => {
         if (!hasHydrated) {
             return false;

@@ -2,6 +2,7 @@ import { useMemo } from "react";
 import { useStore } from "~/store";
 import { selectRunPrompt } from "~/store/slices/responseSlice";
 import { resolveEmbeddingsProvider } from "~/lib/embeddingsProvider";
+import { embeddingStatuses } from "~/lib/endpointStatus";
 
 /**
  * Extracts all store selectors and hydration-gated memos for the Review page.
@@ -24,6 +25,7 @@ export function useReviewPageState(hasHydrated: boolean) {
   const mode = useStore((state) => state.mode);
   const embeddingsPreference = useStore((state) => state.embeddingsProvider);
   const apiKeys = useStore((state) => state.apiKeys);
+  const endpoints = useStore((state) => state.endpoints);
   const setCurrentStep = useStore((state) => state.setCurrentStep);
   const resetStreamingState = useStore((state) => state.resetStreamingState);
   const setEmbeddings = useStore((state) => state.setEmbeddings);
@@ -31,17 +33,12 @@ export function useReviewPageState(hasHydrated: boolean) {
 
   // Provider used for agreement embeddings, or null when none is available.
   const embeddingsProvider = useMemo(() => {
-    const statuses = Object.fromEntries(
-      Object.entries(apiKeys).map(([provider, entry]) => [
-        provider,
-        entry?.status ?? "idle",
-      ]),
-    );
+    const statuses = embeddingStatuses(apiKeys, endpoints);
     return resolveEmbeddingsProvider({
       preference: embeddingsPreference,
       statuses,
     });
-  }, [apiKeys, embeddingsPreference]);
+  }, [apiKeys, endpoints, embeddingsPreference]);
 
   const viewResponses = useMemo(
     () => (hasHydrated ? responses : []),

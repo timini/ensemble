@@ -79,3 +79,27 @@ describe('store hydration', () => {
     vi.unstubAllGlobals();
   });
 });
+
+describe('serializeStoreState endpoints', () => {
+  it('removes plaintext endpoint keys while keeping the encrypted form', () => {
+    const input = {
+      apiKeys: { openai: null, anthropic: null, google: null, xai: null, deepseek: null, perplexity: null },
+      endpoints: [
+        {
+          id: 'openrouter',
+          presetId: 'openrouter',
+          label: 'OpenRouter',
+          baseURL: 'https://openrouter.ai/api/v1',
+          apiKey: 'sk-or-secret',
+          encryptedApiKey: 'iv:cipher',
+          embeddingModel: '',
+          status: 'valid',
+        },
+      ],
+    } as unknown as StoreState;
+
+    const serialized = serializeStoreState(input);
+    expect(serialized.endpoints[0]).toMatchObject({ apiKey: '', encryptedApiKey: 'iv:cipher', status: 'valid' });
+    expect(JSON.stringify(serialized)).not.toContain('sk-or-secret');
+  });
+});

@@ -9,7 +9,22 @@ import type { EmbeddingsProviderPreference } from '@ensemble-ai/shared-utils/pro
 
 export type { EmbeddingsProviderPreference };
 
-export type ProviderType = 'openai' | 'anthropic' | 'google' | 'xai' | 'deepseek' | 'perplexity';
+/**
+ * Providers a model can come from. `openai-compatible` covers every
+ * configured OpenAI-compatible endpoint; its model ids carry the endpoint id
+ * as a prefix (`ollama/llama3.2:3b`).
+ */
+export type ProviderType =
+  | 'openai'
+  | 'anthropic'
+  | 'google'
+  | 'xai'
+  | 'deepseek'
+  | 'perplexity'
+  | 'openai-compatible';
+
+/** Providers configured with a single API key (see apiKeySlice). Endpoints live in endpointsSlice. */
+export type ApiKeyProvider = Exclude<ProviderType, 'openai-compatible'>;
 export type ConsensusMethod = 'standard' | 'elo' | 'majority' | 'council';
 
 export interface ModelSelection {
@@ -32,7 +47,7 @@ export interface SavedEnsemble {
 export interface EnsembleSlice {
   selectedModels: ModelSelection[];
   summarizerModel: string | null;
-  /** `auto` picks OpenAI, then Google, from the valid keys. */
+  /** `auto` picks OpenAI, then Google, then an endpoint with an embedding model. */
   embeddingsProvider: EmbeddingsProviderPreference;
   savedEnsembles: SavedEnsemble[];
   currentEnsembleId: string | null;

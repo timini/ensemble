@@ -18,6 +18,7 @@ export function useRunEstimate(prompt: string): RunEstimate {
   const summarizerModel = useStore((state) => state.summarizerModel);
   const eloTopN = useStore((state) => state.eloTopN);
   const embeddingsProvider = useEmbeddingsProvider();
+  const endpoints = useStore((state) => state.endpoints);
 
   return useMemo(
     () =>
@@ -29,6 +30,7 @@ export function useRunEstimate(prompt: string): RunEstimate {
           summarizerModel,
           eloTopN,
           embeddingsProvider,
+          endpoints,
           prompt,
         }),
       ),
@@ -39,6 +41,7 @@ export function useRunEstimate(prompt: string): RunEstimate {
       summarizerModel,
       eloTopN,
       embeddingsProvider,
+      endpoints,
       prompt,
     ],
   );

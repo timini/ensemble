@@ -21,6 +21,11 @@ import {
   type ApiKeySlice,
 } from './slices/apiKeySlice';
 import {
+  createEndpointsSlice,
+  sanitizeEndpointsForPersist,
+  type EndpointsSlice,
+} from './slices/endpointsSlice';
+import {
   createEnsembleSlice,
   type EnsembleSlice,
 } from './slices/ensembleSlice';
@@ -35,8 +40,8 @@ import { markInterruptedStreams } from './slices/responseErrorState';
  *
  * Uses persistence middleware to sync state to localStorage under
  * 'ensemble-ai-store'. The whole store is written, after
- * sanitizeStateForPersist strips plaintext API keys (only the encrypted form
- * is kept). That includes the prompt, responses, embeddings and agreement
+ * sanitizeStateForPersist strips plaintext API keys, including the keys of
+ * OpenAI-compatible endpoints (only the encrypted form is kept). That includes the prompt, responses, embeddings and agreement
  * results, so the last run is still there after a reload or a later visit to
  * /review. A new run clears it: the prompt page calls startRun on submit,
  * which resets the results and records the run's prompt (runPrompt).
@@ -50,6 +55,7 @@ export type StoreState = ThemeSlice &
   WorkflowSlice &
   ModeSlice &
   ApiKeySlice &
+  EndpointsSlice &
   EnsembleSlice &
   ResponseSlice;
 
@@ -88,6 +94,7 @@ const sanitizeStateForPersist = (state: StoreState): StoreState => {
     }
   });
 
+  sanitized.endpoints = sanitizeEndpointsForPersist(state.endpoints ?? []);
   sanitized.encryptionInitialized = false;
 
   return sanitized;
@@ -103,6 +110,7 @@ export const useStore = create<StoreState>()(
       ...createWorkflowSlice(...a),
       ...createModeSlice(...a),
       ...createApiKeySlice(...a),
+      ...createEndpointsSlice(...a),
       ...createEnsembleSlice(...a),
       ...createResponseSlice(...a),
     }),
@@ -119,6 +127,7 @@ export type { Theme } from './slices/themeSlice';
 export type { Language } from './slices/languageSlice';
 export type { WorkflowStep } from './slices/workflowSlice';
 export type { OperatingMode } from './slices/modeSlice';
-export type { ProviderType, ModelSelection, SavedEnsemble } from './slices/ensembleSlice';
+export type { ProviderType, ApiKeyProvider, ModelSelection, SavedEnsemble } from './slices/ensembleSlice';
+export type { EndpointEntry } from './slices/endpointsSlice';
 export type { ModelResponse, ManualResponse, AgreementStats } from './slices/responseSlice';
 export type { ResponseErrorKind, ResponseErrorDetails } from './slices/responseErrorState';

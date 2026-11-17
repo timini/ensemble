@@ -21,6 +21,10 @@ interface StreamProviderOptions {
   onChunk?: (chunk: string) => void;
 }
 
+/**
+ * Server key for a provider. OpenAI-compatible endpoints are configured in
+ * the browser only, so the server has no key for them and refuses them.
+ */
 function getProviderApiKey(provider: ProviderName): string | null {
   switch (provider) {
     case "openai":

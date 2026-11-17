@@ -1,5 +1,8 @@
 import { describe, expect, it, vi } from "vitest";
-import type { ProviderName } from "@ensemble-ai/shared-utils/providers";
+import type { ProviderName as AnyProviderName } from "@ensemble-ai/shared-utils/providers";
+
+/** Providers the server calls with its own keys. Endpoints are browser-only. */
+type ProviderName = Exclude<AnyProviderName, "openai-compatible">;
 
 vi.mock("server-only", () => ({}));
 

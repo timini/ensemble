@@ -7,6 +7,9 @@ import { withSentryConfig } from "@sentry/nextjs";
 
 /** @type {import("next").NextConfig} */
 const config = {
+    // NEXT_DIST_DIR lets the E2E suite run a Free-mode dev server next to the
+    // mock-mode one without sharing a build directory.
+    distDir: process.env.NEXT_DIST_DIR || ".next",
     output: "standalone",
     transpilePackages: ["@ensemble-ai/shared-utils", "@ai-ensemble/component-library"],
     webpack: (config) => {

@@ -64,7 +64,7 @@ The `final_answers` schema (the majority vote extraction call) is the exception.
 
 ### listAvailableModels and listAvailableTextModels
 
-Return a static list of 13 models across all six providers, using real provider ids (GPT-6 Astra, Claude Opus 5.5, Gemini 4 Carbon, Grok 4.7, DeepSeek V4 Pro, Perplexity Fast and others). With `providerFilter` set, only that provider's models are returned. `listAvailableTextModels` returns the display names.
+Return a static list of 16 models across all seven providers, using real provider ids (GPT-6 Astra, Claude Opus 5.5, Gemini 4 Carbon, Grok 4.7, DeepSeek V4 Pro, Perplexity Fast and others). The `openai-compatible` models are qualified with the `ollama` endpoint id (`ollama/llama3.2:3b`, `ollama/qwen2.5:7b`, `ollama/gemma3:4b`); in mock mode the app offers them under the id of each configured endpoint (`src/lib/endpointModels.ts`). With `providerFilter` set, only that provider's models are returned. `listAvailableTextModels` returns the display names.
 
 ## Configuration
 

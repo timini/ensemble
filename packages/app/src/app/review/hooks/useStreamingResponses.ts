@@ -8,6 +8,7 @@ import {
 import { initializeProviders } from "~/providers";
 import { FALLBACK_MODELS } from "~/lib/models";
 import { formatModelLabelFromId } from "~/lib/providerModels";
+import { endpointModelName } from "~/lib/endpointModels";
 import { logger } from "~/lib/logger";
 import { toResponseError } from "~/lib/responseErrors";
 
@@ -54,10 +55,12 @@ export function useStreamingResponses({
     initializeProviders();
     const registry = ProviderRegistry.getInstance();
 
-    const displayName = model.model
-      ? (FALLBACK_MODELS.find((m) => m.id === model.model)?.name ??
-        formatModelLabelFromId(model.model))
-      : "Unknown Model";
+    const displayName = !model.model
+      ? "Unknown Model"
+      : model.provider === "openai-compatible"
+        ? endpointModelName(model.model, useStore.getState().endpoints)
+        : (FALLBACK_MODELS.find((m) => m.id === model.model)?.name ??
+          formatModelLabelFromId(model.model));
     startStreaming(model.id, model.provider, displayName);
 
     // Initialize buffer
@@ -89,10 +92,17 @@ export function useStreamingResponses({
       // Use getState() to get fresh API keys, avoiding stale closure issues
       const currentApiKeys = useStore.getState().apiKeys;
       const apiKey =
-        currentApiKeys[model.provider as keyof typeof currentApiKeys]?.key;
+        model.provider === "openai-compatible"
+          ? null
+          : currentApiKeys[model.provider]?.key;
 
-      // For Free mode, we need an API key
-      if (clientMode === "free" && !apiKey) {
+      // For Free mode, we need an API key. OpenAI-compatible endpoints may
+      // need none; their client reports an unconfigured endpoint itself.
+      if (
+        clientMode === "free" &&
+        model.provider !== "openai-compatible" &&
+        !apiKey
+      ) {
         throw new Error(`Missing API key for ${model.provider}.`);
       }
 

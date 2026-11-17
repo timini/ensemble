@@ -5,13 +5,14 @@ import { useEmbeddingsProviderSetting } from "../useEmbeddingsProviderSetting";
 
 const originalMockMode = process.env.NEXT_PUBLIC_MOCK_MODE;
 
-const statuses = (openai: string, google: string) => ({
+const statuses = (openai: string, google: string, endpoint = "idle") => ({
   openai,
   anthropic: "valid",
   google,
   xai: "idle",
   deepseek: "idle",
   perplexity: "idle",
+  "openai-compatible": endpoint,
 });
 
 describe("useEmbeddingsProviderSetting", () => {
@@ -29,8 +30,20 @@ describe("useEmbeddingsProviderSetting", () => {
       useEmbeddingsProviderSetting(statuses("invalid", "valid")),
     );
     expect(result.current.value).toBe("auto");
-    expect(result.current.available).toEqual({ openai: false, google: true });
+    expect(result.current.available).toEqual({
+      openai: false,
+      google: true,
+      "openai-compatible": false,
+    });
     expect(result.current.activeProvider).toBe("google");
+  });
+
+  it("uses an endpoint embedding model when no cloud key can embed", () => {
+    const { result } = renderHook(() =>
+      useEmbeddingsProviderSetting(statuses("idle", "invalid", "valid")),
+    );
+    expect(result.current.available["openai-compatible"]).toBe(true);
+    expect(result.current.activeProvider).toBe("openai-compatible");
   });
 
   it("stores the override", () => {
@@ -63,7 +76,11 @@ describe("useEmbeddingsProviderSetting", () => {
     const { result } = renderHook(() =>
       useEmbeddingsProviderSetting(statuses("idle", "idle")),
     );
-    expect(result.current.available).toEqual({ openai: false, google: false });
+    expect(result.current.available).toEqual({
+      openai: false,
+      google: false,
+      "openai-compatible": false,
+    });
     expect(result.current.activeProvider).toBeNull();
   });
 });

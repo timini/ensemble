@@ -22,6 +22,10 @@ import {
   type ApiKeySlice,
 } from '~/store/slices/apiKeySlice';
 import {
+  createEndpointsSlice,
+  type EndpointsSlice,
+} from '~/store/slices/endpointsSlice';
+import {
   createEnsembleSlice,
   type EnsembleSlice,
 } from '~/store/slices/ensembleSlice';
@@ -37,6 +41,7 @@ type TestStore = ThemeSlice &
   WorkflowSlice &
   ModeSlice &
   ApiKeySlice &
+  EndpointsSlice &
   EnsembleSlice &
   ResponseSlice;
 
@@ -76,6 +81,7 @@ function createTestStore(storage: Storage) {
         ...createWorkflowSlice(...a),
         ...createModeSlice(...a),
         ...createApiKeySlice(...a),
+        ...createEndpointsSlice(...a),
         ...createEnsembleSlice(...a),
         ...createResponseSlice(...a),
       }),

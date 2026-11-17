@@ -223,6 +223,7 @@ export default function ReviewPage() {
           unpricedModels={runCost.unpricedModels}
           pricedCallCount={runCost.pricedCallCount}
           unpricedCallCount={runCost.unpricedCallCount}
+          localCallCount={runCost.localCallCount}
           priceDate={PRICE_TABLE_DATE}
         />
       )}

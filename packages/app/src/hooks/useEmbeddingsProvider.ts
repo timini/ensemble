@@ -4,6 +4,7 @@ import {
   resolveEmbeddingsProvider,
   type EmbeddingProvider,
 } from "~/lib/embeddingsProvider";
+import { embeddingStatuses } from "~/lib/endpointStatus";
 
 /**
  * Provider used for agreement embeddings with the current keys and
@@ -12,17 +13,13 @@ import {
 export function useEmbeddingsProvider(): EmbeddingProvider | null {
   const embeddingsPreference = useStore((state) => state.embeddingsProvider);
   const apiKeys = useStore((state) => state.apiKeys);
+  const endpoints = useStore((state) => state.endpoints);
 
   return useMemo(() => {
-    const statuses = Object.fromEntries(
-      Object.entries(apiKeys).map(([provider, entry]) => [
-        provider,
-        entry?.status ?? "idle",
-      ]),
-    );
+    const statuses = embeddingStatuses(apiKeys, endpoints);
     return resolveEmbeddingsProvider({
       preference: embeddingsPreference,
       statuses,
     });
-  }, [apiKeys, embeddingsPreference]);
+  }, [apiKeys, endpoints, embeddingsPreference]);
 }

@@ -4,12 +4,21 @@ import {
   type ProviderName,
 } from '@ensemble-ai/shared-utils/providers';
 import { useStore } from '~/store';
+import { selectEndpointConfigs } from '~/store/slices/endpointsSlice';
 import {
   captureMockErrorScenarios,
   createMockErrorResolver,
 } from '~/lib/mockErrorScenarios';
 
-const PROVIDERS: ProviderName[] = ['openai', 'anthropic', 'google', 'xai', 'deepseek', 'perplexity'];
+const PROVIDERS: ProviderName[] = [
+  'openai',
+  'anthropic',
+  'google',
+  'xai',
+  'deepseek',
+  'perplexity',
+  'openai-compatible',
+];
 
 function tabStorage(): Storage | null {
   try {
@@ -54,7 +63,10 @@ export function initializeProviders(): void {
         createProviderClient({
           provider,
           mode: 'free',
-          getApiKey: () => getState().apiKeys[provider]?.key ?? null,
+          getApiKey: () =>
+            provider === 'openai-compatible' ? null : (getState().apiKeys[provider]?.key ?? null),
+          // OpenAI-compatible endpoints that passed their check, read at call time.
+          getEndpoints: () => selectEndpointConfigs(getState()),
         }),
       );
     }

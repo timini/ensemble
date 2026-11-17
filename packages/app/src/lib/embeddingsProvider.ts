@@ -8,9 +8,12 @@ import {
 export type { EmbeddingProvider, EmbeddingsProviderPreference };
 
 interface ResolveEmbeddingsProviderOptions {
-  /** Stored user preference (`auto`, `openai` or `google`). */
+  /** Stored user preference (`auto`, `openai`, `google` or `openai-compatible`). */
   preference: string;
-  /** Validation status per provider, as kept in the API key slice. */
+  /**
+   * Validation status per provider, as kept in the API key slice, plus
+   * `openai-compatible` (see embeddingStatuses in lib/endpointStatus.ts).
+   */
   statuses: Readonly<Record<string, string>>;
 }
 
@@ -40,10 +43,11 @@ export function getValidProviders(
  * Decide which provider computes embeddings for agreement scoring.
  *
  * The choice comes from the valid keys: the override when its key is valid,
- * then OpenAI, then Google. Returns null when no embedding provider is
+ * then OpenAI, then Google, then an OpenAI-compatible endpoint with an
+ * embedding model. Returns null when no embedding provider is
  * available. Mock mode follows the same rule (mock keys validate as valid),
- * so a mock run without an OpenAI or Google key shows the no-score message
- * as a Free run would.
+ * so a mock run without an OpenAI or Google key or an endpoint embedding
+ * model shows the no-score message as a Free run would.
  */
 export function resolveEmbeddingsProvider({
   preference,

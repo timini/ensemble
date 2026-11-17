@@ -28,6 +28,17 @@ function response(overrides: Partial<ModelResponse>): ModelResponse {
 }
 
 describe("embeddingModelRef", () => {
+  it("names the endpoint embedding model for openai-compatible", () => {
+    const endpoints = [
+      { id: "ollama", status: "valid" as const, embeddingModel: "nomic-embed-text" },
+    ];
+    expect(embeddingModelRef("openai-compatible", endpoints)).toEqual({
+      provider: "openai-compatible",
+      modelId: "ollama/nomic-embed-text",
+    });
+    expect(embeddingModelRef("openai-compatible")).toBeNull();
+  });
+
   it("maps the embeddings provider to the model the client calls", () => {
     expect(embeddingModelRef("openai")).toEqual({
       provider: "openai",

@@ -2,7 +2,8 @@
  * Config Page (T153-T156)
  *
  * Step 1 of the 4-step workflow: Mode Configuration
- * User selects operating mode (Free or Pro) and configures API keys if Free
+ * User selects operating mode (Free or Pro) and, in Free mode, configures
+ * API keys and OpenAI-compatible endpoints (local or hosted)
  */
 
 'use client';
@@ -14,8 +15,14 @@ import { WorkflowNavigator } from '@/components/organisms/WorkflowNavigator';
 import { ProgressSteps } from '@/components/molecules/ProgressSteps';
 import { InlineAlert } from '@/components/atoms/InlineAlert';
 import { EmbeddingsProviderSelector } from '@/components/molecules/EmbeddingsProviderSelector';
+import { EndpointConfiguration } from '@/components/organisms/EndpointConfiguration';
 import { useConfigPage } from './hooks/useConfigPage';
+import { useHasHydrated } from '~/hooks/useHasHydrated';
 import { useEmbeddingsProviderSetting } from './hooks/useEmbeddingsProviderSetting';
+import {
+  useEmbeddingProviderStatuses,
+  useEndpointConfiguration,
+} from './hooks/useEndpointConfiguration';
 
 export default function ConfigPage() {
   const {
@@ -34,7 +41,12 @@ export default function ConfigPage() {
     allowContinue,
     hydratedStatuses,
   } = useConfigPage();
-  const embeddings = useEmbeddingsProviderSetting(hydratedStatuses);
+  const hasHydrated = useHasHydrated();
+  const isFreeModeActive = displayMode === 'free' && webCryptoSupported;
+  const embeddings = useEmbeddingsProviderSetting(
+    useEmbeddingProviderStatuses(hydratedStatuses, hasHydrated),
+  );
+  const endpointConfig = useEndpointConfiguration(isFreeModeActive && hasHydrated);
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-6xl">
@@ -96,6 +108,14 @@ export default function ConfigPage() {
             configuredCountOverride={configuredCountOverride}
             onKeyChange={handleKeyChange}
             onToggleShow={handleToggleShow}
+          />
+
+          <EndpointConfiguration
+            endpoints={endpointConfig.items}
+            presets={endpointConfig.presets}
+            onAdd={endpointConfig.onAdd}
+            onChange={endpointConfig.onChange}
+            onRemove={endpointConfig.onRemove}
           />
 
           <div className="rounded-lg border border-border p-6">

@@ -2,7 +2,7 @@
 
 How the app talks to model providers. The code lives in `packages/shared-utils/src/providers/`; the app wires it up in `packages/app/src/providers/index.ts`.
 
-Supported providers (`ProviderName` in `packages/shared-utils/src/providers/types.ts`): `openai`, `anthropic`, `google`, `xai`, `deepseek`, `perplexity`.
+Supported providers (`ProviderName` in `packages/shared-utils/src/providers/types.ts`): `openai`, `anthropic`, `google`, `xai`, `deepseek`, `perplexity`, and `openai-compatible`, which covers every configured OpenAI-compatible endpoint (Ollama, LM Studio, llama.cpp, vLLM, OpenRouter, Groq, Together, custom URLs).
 
 ## Modes
 
@@ -73,11 +73,13 @@ One class per provider, each extending `BaseFreeClient` (`clients/base/BaseFreeC
 | xAI | `FreeXAIClient` | `openai` with `baseURL: https://api.x.ai/v1` |
 | DeepSeek | `FreeDeepSeekClient` | `openai` with `baseURL: https://api.deepseek.com` |
 | Perplexity | `FreePerplexityClient` | `fetch` to the Agent API, `https://api.perplexity.ai/v1/agent` |
+| OpenAI-compatible | `FreeOpenAICompatibleClient` (one server), routed by `OpenAICompatibleEndpointsClient` | `fetch` to `{baseURL}/models`, `/chat/completions` and `/embeddings` |
 
 Provider notes:
 
 - Perplexity: Sonar Chat Completions ended on 2026-09-27. The client sends `{ effort, input, stream: true }` to `POST /v1/agent` and reads the `response.output_text.delta` and `response.completed` server-sent events. Model ids are effort presets: `perplexity-fast`, `perplexity-low`, `perplexity-medium`. Saved `sonar`, `sonar-pro` and `sonar-reasoning-pro` selections map to `fast`, `fast` and `low`. `validateApiKey` calls `GET /v1/models`, which needs a valid key but runs no model. Temperature and seed are not forwarded.
 - Anthropic: Claude Opus 4.7 and later (all 5.x models included) reject a non-default `temperature`, so it is only sent to older models. `generateStructured` uses structured outputs (`output_config.format` with a JSON schema) because Opus 5.5 and Sonnet 5.5 return HTTP 400 for a forced `tool_choice`. Claude 3.x, Opus 4 and Sonnet 4 predate structured outputs and still get a forced tool call. `max_tokens` is 16000 for streaming and 8000 for structured output, since thinking tokens count against it on 5.5 models. Rules live in `clients/anthropic/anthropicModelRules.ts`.
+- OpenAI-compatible: the key is optional (`requiresApiKey = false` in `BaseFreeClient`), and no Authorization header is sent without one. Model ids are qualified with the endpoint id (`ollama/llama3.2:3b`); `OpenAICompatibleEndpointsClient` reads the connected endpoints from the store at call time and sends each call to the endpoint in the id, with the bare model id. The model list is every id from `GET /models`, unfiltered. Streaming asks for `stream_options.include_usage`. `generateStructured` tries `json_schema`, then `json_object`, then plain prompting, and extracts the JSON from the text. See "OpenAI-compatible endpoints" in [ARCHITECTURE.md](../../../docs/ARCHITECTURE.md).
 - OpenAI: the client never sets `reasoning_effort`, and models reject `temperature` when their effort is above `none`. It is dropped for models whose default effort is above `none`: the o-series, `gpt-5`, GPT-5.5 and later, the GPT-6 family, and the GPT-5.1 and GPT-5.2 `-codex` and `-pro` variants. Base `gpt-5.1` and `gpt-5.2` default to `none` and `-chat` variants are not reasoning models, so both still get `temperature` (`clients/openai/openAIModelRules.ts`).
 
 What `BaseFreeClient` does:
@@ -85,7 +87,7 @@ What `BaseFreeClient` does:
 - Reads the key through a `getApiKey()` callback. The app passes a callback that reads the decrypted key from the Zustand store.
 - `streamResponse` reports a missing key, races the provider stream against a client-side timeout (`StreamResponseOptions.timeoutMs`, default `DEFAULT_STREAM_TIMEOUT_MS`, 2 minutes), and drops chunks or completions that arrive after the timeout.
 - Every error passed to `onError` is a `ProviderError` (`src/providers/errors/providerError.ts`) with a sanitized message and a `kind`: `invalid_key` (401 or 403), `missing_key` (no key is set, so no request was sent), `rate_limited` (429, with `retryAfterSeconds` from `Retry-After`, `retry-after-ms` or Google's `RetryInfo`), `timeout`, `provider_unavailable` (5xx or a network failure) or `other`. `classifyProviderError` reads the status from the SDK error, an axios response or the message; each client's stream `catch` calls it with its label (for example "Anthropic API error").
-- `listAvailableTextModels` calls the provider's model list API when a key is present and falls back to the mock list on failure or when no key is set.
+- `listAvailableTextModels` calls the provider's model list API when a key is present and falls back to the mock list on failure or when no key is set. The OpenAI-compatible client returns an empty list instead, never mock models.
 - `generateStructured` delegates to each subclass. Perplexity does not implement it, so it throws "structured output is not yet implemented for Free mode".
 - `generateEmbeddings` throws `EmbeddingsNotSupportedError` unless the subclass sets `supportsEmbeddings` and implements `embedWithProvider`. When it does, it checks the key is present and calls the provider.
 
@@ -97,11 +99,12 @@ Code in `packages/shared-utils/src/providers/embeddings/`.
 |----------|-------|------|
 | OpenAI | `text-embedding-3-small` | `requestOpenAICompatibleEmbedding`: `POST {baseURL}/embeddings` with `{ model, input }` and an optional bearer key |
 | Google | `gemini-embedding-2` | `requestGeminiEmbedding`: `POST /v1beta/models/{model}:embedContent` with the `x-goog-api-key` header and `outputDimensionality: 768` (the model default is 3072) to keep the persisted store small |
+| OpenAI-compatible | the embedding model set on the endpoint, for example `nomic-embed-text` on Ollama | `requestOpenAICompatibleEmbedding` on the first connected endpoint with an embedding model |
 | Anthropic, xAI, DeepSeek, Perplexity | none | throw `EmbeddingsNotSupportedError` |
 
-`requestOpenAICompatibleEmbedding` takes a base URL, an optional key and a model id, so the OpenAI-compatible provider planned for M2 (Ollama, LM Studio, OpenRouter) can reuse it. Error messages from both helpers go through `sanitizeProviderErrorMessage`.
+`requestOpenAICompatibleEmbedding` takes a base URL, an optional key and a model id, so OpenAI and every OpenAI-compatible endpoint share it. Error messages from both helpers go through `sanitizeProviderErrorMessage`.
 
-Provider choice: `selectEmbeddingsProvider` (shared-utils) and `resolveEmbeddingsProvider` (`packages/app/src/lib/embeddingsProvider.ts`). The stored preference is `auto`, `openai` or `google`, set with the embeddings provider setting on `/config`. An override is used when its key is valid; otherwise OpenAI, then Google. With neither key valid there is no provider, and the review page shows "No agreement score" instead of a score. Mock mode follows the same rule: mock keys validate, so a mock run needs a mock OpenAI or Google key for a score, and the mock-mode E2E suite covers the no-provider message (`embeddings-unavailable.spec.ts`). If the embeddings calls fail for all but one answer, or the vectors cannot be compared, it shows "Agreement could not be scored". If some calls fail but at least two answers have embeddings, the score covers those answers and a note lists the answers left out.
+Provider choice: `selectEmbeddingsProvider` (shared-utils) and `resolveEmbeddingsProvider` (`packages/app/src/lib/embeddingsProvider.ts`). The stored preference is `auto`, `openai`, `google` or `openai-compatible`, set with the embeddings provider setting on `/config`. An override is used when its key is valid; otherwise OpenAI, then Google, then an OpenAI-compatible endpoint. `openai-compatible` counts as available only when a connected endpoint has an embedding model (`src/lib/endpointStatus.ts`). With none available there is no provider, and the review page shows "No agreement score" instead of a score. Mock mode follows the same rule: mock keys validate, so a mock run needs a mock OpenAI or Google key for a score, and the mock-mode E2E suite covers the no-provider message (`embeddings-unavailable.spec.ts`). If the embeddings calls fail for all but one answer, or the vectors cannot be compared, it shows "Agreement could not be scored". If some calls fail but at least two answers have embeddings, the score covers those answers and a note lists the answers left out.
 
 The store records which provider produced the embeddings (`embeddingsSource`). When `/review` mounts again (reload, back and forward) and the stored embeddings came from the provider now resolved, they are reused and no embeddings calls are made.
 
@@ -112,17 +115,17 @@ The review page computes the cosine similarity matrix and agreement statistics f
 `createProviderClient({ provider, mode, getApiKey })` (`factories/createProviderClient.ts`):
 
 - `mock`: returns `new MockProviderClient({ providerFilter: provider })`.
-- `free`: requires `getApiKey`, returns the matching `Free<Provider>Client`.
+- `free`: requires `getApiKey`, returns the matching `Free<Provider>Client`. For `openai-compatible` it requires `getEndpoints` instead and returns an `OpenAICompatibleEndpointsClient`.
 - anything else: throws `Provider mode '<mode>' not yet implemented.`
 
 `ProviderRegistry` (`registry/ProviderRegistry.ts`) is a singleton map keyed by provider and mode, with `register`, `getProvider`, `hasProvider`, `listProviders` and `clearAll`. `getProvider` throws if nothing is registered.
 
-The app's `initializeProviders()` (`packages/app/src/providers/index.ts`) registers a mock and a free client for each of the six providers. It is called from the root layout and again from a few hooks before use. Nothing is registered for `pro`.
+The app's `initializeProviders()` (`packages/app/src/providers/index.ts`) registers a mock and a free client for each of the seven providers. The free `openai-compatible` client gets the connected endpoints from `selectEndpointConfigs` in `store/slices/endpointsSlice.ts`. It is called from the root layout and again from a few hooks before use. Nothing is registered for `pro`.
 
 ## How the app uses it
 
-- `/config`: `src/lib/validation.ts` calls `validateApiKey` on the free client (or mock client in mock mode).
-- `/ensemble`: `src/lib/providerModels.ts` calls `listAvailableTextModels` to fill the model picker.
+- `/config`: `src/lib/validation.ts` calls `validateApiKey` on the free client (or mock client in mock mode). OpenAI-compatible endpoints are checked by `src/lib/endpointValidation.ts` (`GET /models`, which also counts the models; no request in mock mode) from `config/hooks/useEndpointConfiguration.ts`, 500 ms after an edit.
+- `/ensemble`: `src/lib/providerModels.ts` calls `listAvailableTextModels` to fill the model picker. `src/lib/endpointModels.ts` lists the models of connected endpoints and names them `llama3.2:3b (Ollama)`.
 - `/prompt` and `/review`: `streamResponse` is called once per selected model (`src/app/prompt/page.tsx`, `src/app/review/hooks/useStreamingResponses.ts`). If the client for the current mode is missing, the prompt page falls back to the mock client. `src/lib/embeddings.ts` does not: it throws, so no fake vectors reach the agreement score.
 - `/review`: `src/lib/embeddings.ts` calls `generateEmbeddings` on the provider chosen by `src/lib/embeddingsProvider.ts`; `src/app/review/hooks/useConsensusGeneration.ts` passes the summarizer model's client to the chosen consensus strategy (`standard`, `elo`, `majority`, `council`).
 
@@ -160,13 +163,14 @@ Separate from the browser clients, the app has a tRPC `provider` router (`src/se
 ## Security notes
 
 - Free-mode keys are encrypted with AES-256-GCM (Web Crypto) before they reach localStorage. The key is derived from browser and screen properties, so this guards against casual reading of localStorage, not against code running on the page.
-- Keys are sent straight to the provider from the browser. They never touch the Ensemble server.
+- Keys are sent straight to the provider from the browser. They never touch the Ensemble server. Endpoint keys are encrypted the same way and sent only to their endpoint.
 - Provider error messages pass through `sanitizeProviderErrorMessage` before display.
 
 ## Testing
 
 - Unit tests sit next to the clients (for example `FreeOpenAIClient.test.ts`) and run with Vitest in `packages/shared-utils`.
-- The mock-mode Playwright suite in `packages/e2e` starts the app with `npm run dev:mock`.
+- The mock-mode Playwright suite in `packages/e2e` starts the app with `npm run dev:mock`. `openai-compatible-mock.spec.ts` runs an ensemble on mock endpoint models.
+- The `local-endpoint` Playwright project starts a second app server in Free mode on port 3100 (its own build directory, `NEXT_DIST_DIR=.next-e2e-free`) and the fake OpenAI-compatible server in `packages/e2e/fixtures/fake-openai-server.mjs` on port 11499. Its test runs a 3-model ensemble with no cloud key, scores agreement with the fake server's embeddings and writes the consensus, all through the real client code. `npm run test:mock` runs it too.
 
 ## Related
 

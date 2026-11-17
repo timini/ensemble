@@ -225,6 +225,7 @@ export default function PromptPage() {
           unpricedModels={runEstimate.cost.unpricedModels}
           pricedCallCount={runEstimate.cost.pricedCallCount}
           unpricedCallCount={runEstimate.cost.unpricedCallCount}
+          localCallCount={runEstimate.cost.localCallCount}
           priceDate={PRICE_TABLE_DATE}
         />
       )}

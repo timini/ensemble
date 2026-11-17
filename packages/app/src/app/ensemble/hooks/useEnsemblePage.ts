@@ -3,11 +3,16 @@ import { useRouter } from 'next/navigation';
 import { useTranslation } from 'react-i18next';
 import { useStore } from '~/store';
 import { useStepNavigation } from '~/hooks/useStepNavigation';
-import type { ConsensusMethod, ProviderType } from '~/store/slices/ensembleSlice';
+import type { ApiKeyProvider, ConsensusMethod, ProviderType } from '~/store/slices/ensembleSlice';
 import type { OperatingMode } from '~/store/slices/modeSlice';
 import type { Provider, ValidationStatus } from '@/components/molecules/ApiKeyInput';
 import { validateApiKey, createDebouncedValidator } from '~/lib/validation';
-import { getHydratedStatus, createProviderStatusLabels } from '~/lib/providerStatus';
+import {
+    getHydratedStatus,
+    createProviderStatusLabels,
+    mapStatusToLabel,
+} from '~/lib/providerStatus';
+import { endpointsProviderStatus } from '~/lib/endpointStatus';
 import { useHasHydrated } from '~/hooks/useHasHydrated';
 import { useManualResponseModal } from '~/hooks/useManualResponseModal';
 import { useApiKeyModal } from './useApiKeyModal';
@@ -22,6 +27,7 @@ export function useEnsemblePage() {
 
     const mode = useStore((state) => state.mode);
     const apiKeys = useStore((state) => state.apiKeys);
+    const endpoints = useStore((state) => state.endpoints);
     const setApiKey = useStore((state) => state.setApiKey);
     const toggleApiKeyVisibility = useStore((state) => state.toggleApiKeyVisibility);
     const setApiKeyStatus = useStore((state) => state.setApiKeyStatus);
@@ -76,10 +82,17 @@ export function useEnsemblePage() {
         [hasHydrated, validationStatus],
     );
 
+    // Connected OpenAI-compatible endpoints; their models are listed live.
+    const connectedEndpoints = useMemo(
+        () => (hasHydrated ? endpoints.filter((e) => e.status === 'valid') : []),
+        [endpoints, hasHydrated],
+    );
+
     const availableModels = useAvailableModels({
         hasHydrated,
         mode: displayMode,
         hydratedStatuses,
+        endpoints: connectedEndpoints,
     });
 
     // Track selected model IDs for ModelSelectionList
@@ -87,13 +100,17 @@ export function useEnsemblePage() {
     const displayedSelectedModelIds = hasHydrated ? selectedModelIds : [];
 
     const providerStatus = useMemo(
-        () =>
-            createProviderStatusLabels({
+        () => ({
+            ...createProviderStatusLabels({
                 mode: displayMode,
                 statuses: validationStatus,
                 hasHydrated,
             }),
-        [displayMode, validationStatus, hasHydrated],
+            'openai-compatible': mapStatusToLabel(
+                hasHydrated ? endpointsProviderStatus(endpoints) : 'idle',
+            ),
+        }),
+        [displayMode, validationStatus, hasHydrated, endpoints],
     );
 
     // Store timeout IDs for debouncing
@@ -108,7 +125,7 @@ export function useEnsemblePage() {
 
     // Handler for validation status changes
     const handleValidationStatusChange = (provider: Provider, status: ValidationStatus) => {
-        setApiKeyStatus(provider as ProviderType, status);
+        setApiKeyStatus(provider as ApiKeyProvider, status);
     };
 
     // Create debounced validator using the reusable utility
@@ -236,7 +253,17 @@ export function useEnsemblePage() {
         isMockMode,
         handleModelToggle,
         handleSummarizerChange,
-        apiKeyModal,
+        apiKeyModal: {
+            ...apiKeyModal,
+            // Endpoints are set up on /config, not with a single key.
+            handleConfigureApiKey: (provider: ProviderType) => {
+                if (provider === 'openai-compatible') {
+                    router.push('/config');
+                    return;
+                }
+                apiKeyModal.handleConfigureApiKey(provider);
+            },
+        },
         sidebarModels,
         savedPresets,
         canSavePreset,

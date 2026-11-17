@@ -19,14 +19,26 @@ import type {
   ModelSelection,
 } from "~/store/slices/ensembleSlice";
 import { FALLBACK_MODELS } from "~/lib/models";
+import { endpointEmbeddingModelRef } from "~/lib/endpointStatus";
+import type { EndpointEntry } from "~/store/slices/endpointsSlice";
+
+type EndpointLike = Pick<EndpointEntry, "id" | "status" | "embeddingModel">;
 
 const EMBEDDING_MODELS: Record<string, string> = {
   openai: OPENAI_EMBEDDING_MODEL,
   google: GOOGLE_EMBEDDING_MODEL,
 };
 
-/** The embedding model the client calls for a provider, or null for none. */
-export function embeddingModelRef(provider: string | null): ModelRef | null {
+/**
+ * The embedding model the client calls for a provider, or null for none.
+ * For `openai-compatible` it is the embedding model of the endpoint the
+ * client uses, qualified with the endpoint id so local ones price at zero.
+ */
+export function embeddingModelRef(
+  provider: string | null,
+  endpoints: readonly EndpointLike[] = [],
+): ModelRef | null {
+  if (provider === "openai-compatible") return endpointEmbeddingModelRef(endpoints);
   const modelId = provider ? EMBEDDING_MODELS[provider] : undefined;
   return provider && modelId ? { provider, modelId } : null;
 }
@@ -49,6 +61,8 @@ export interface BuildEstimateInputOptions {
   summarizerModel: string | null;
   eloTopN: number;
   embeddingsProvider: string | null;
+  /** OpenAI-compatible endpoints, to name their embedding model. */
+  endpoints?: readonly EndpointLike[];
   prompt: string;
 }
 
@@ -65,7 +79,7 @@ export function buildEstimateInput(
     consensusMethod: options.consensusMethod,
     summarizer: summarizerRef(options.summarizerModel, options.selectedModels),
     eloTopN: options.eloTopN,
-    embeddings: embeddingModelRef(options.embeddingsProvider),
+    embeddings: embeddingModelRef(options.embeddingsProvider, options.endpoints),
     promptTokens: estimateTokensFromText(options.prompt),
   };
 }
@@ -81,6 +95,8 @@ export interface BuildRunCallUsageOptions {
   embeddings: { modelId: string }[];
   /** Provider that produced the embeddings. */
   embeddingsSource: string | null;
+  /** OpenAI-compatible endpoints, to name their embedding model. */
+  endpoints?: readonly EndpointLike[];
 }
 
 /**
@@ -111,7 +127,10 @@ export function buildRunCallUsage(
 
   calls.push(...options.consensusUsage);
 
-  const embeddingModel = embeddingModelRef(options.embeddingsSource);
+  const embeddingModel = embeddingModelRef(
+    options.embeddingsSource,
+    options.endpoints,
+  );
   if (embeddingModel) {
     for (const { modelId } of options.embeddings) {
       const text =

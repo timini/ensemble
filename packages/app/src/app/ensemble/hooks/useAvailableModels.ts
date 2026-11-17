@@ -7,17 +7,23 @@ import { toError } from '~/lib/errors';
 import { logger } from '~/lib/logger';
 import type { OperatingMode } from '~/store/slices/modeSlice';
 import { PROVIDERS } from '../page.constants';
+import { fetchEndpointModels, type EndpointLabel } from '~/lib/endpointModels';
 
 interface UseAvailableModelsOptions {
   hasHydrated: boolean;
   mode: OperatingMode;
   hydratedStatuses: Record<Provider, ValidationStatus>;
+  /** Connected OpenAI-compatible endpoints. Their models are listed live. */
+  endpoints?: readonly EndpointLabel[];
 }
+
+const NO_ENDPOINTS: readonly EndpointLabel[] = [];
 
 export function useAvailableModels({
   hasHydrated,
   mode,
   hydratedStatuses,
+  endpoints = NO_ENDPOINTS,
 }: UseAvailableModelsOptions): Model[] {
   const [availableModels, setAvailableModels] =
     useState<Model[]>(FALLBACK_MODELS);
@@ -33,7 +39,7 @@ export function useAvailableModels({
       const activeProviders = PROVIDERS.filter(provider => hydratedStatuses[provider] === 'valid');
       logger.debug('[useAvailableModels] Fetching models for:', activeProviders);
 
-      const overrides: Partial<Record<Provider, Model[]>> = {};
+      const overrides: Partial<Record<Provider | 'openai-compatible', Model[]>> = {};
 
       await Promise.all(
         PROVIDERS.map(async (provider) => {
@@ -58,6 +64,18 @@ export function useAvailableModels({
         }),
       );
 
+      try {
+        const endpointModels = await fetchEndpointModels(endpoints);
+        if (endpointModels.length > 0) {
+          overrides['openai-compatible'] = endpointModels;
+        }
+      } catch (error: unknown) {
+        console.warn(
+          'Failed to load OpenAI-compatible endpoint models',
+          toError(error, 'Failed to load endpoint models'),
+        );
+      }
+
       if (!active) return;
       if (Object.keys(overrides).length === 0) {
         setAvailableModels(FALLBACK_MODELS);
@@ -70,7 +88,7 @@ export function useAvailableModels({
     return () => {
       active = false;
     };
-  }, [hasHydrated, mode, hydratedStatuses]);
+  }, [hasHydrated, mode, hydratedStatuses, endpoints]);
 
   return availableModels;
 }

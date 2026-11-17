@@ -10,7 +10,8 @@ import {
 /**
  * State and handler for the embeddings provider setting on the config page.
  *
- * @param statuses - key validation status per provider
+ * @param statuses - key validation status per provider, with `openai-compatible`
+ *   valid when a connected endpoint has an embedding model
  */
 export function useEmbeddingsProviderSetting(
   statuses: Readonly<Record<string, string>>,
@@ -26,8 +27,9 @@ export function useEmbeddingsProviderSetting(
     () => ({
       openai: statuses.openai === "valid",
       google: statuses.google === "valid",
+      "openai-compatible": statuses["openai-compatible"] === "valid",
     }),
-    [statuses.openai, statuses.google],
+    [statuses],
   );
 
   const activeProvider = resolveEmbeddingsProvider({
