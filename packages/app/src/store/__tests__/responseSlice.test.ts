@@ -148,6 +148,17 @@ describe("responseSlice", () => {
     expect(store.getState().manualResponses).toHaveLength(0);
   });
 
+  it("clears every manual response and keeps the draft prompt", () => {
+    store.getState().setPrompt("Draft");
+    store.getState().addManualResponse("A", "One");
+    store.getState().addManualResponse("B", "Two");
+
+    store.getState().clearManualResponses();
+
+    expect(store.getState().manualResponses).toEqual([]);
+    expect(store.getState().prompt).toBe("Draft");
+  });
+
   it("sets embeddings", () => {
     const embeddings = [
       {

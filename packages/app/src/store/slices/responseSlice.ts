@@ -66,6 +66,11 @@ export interface ResponseSlice {
   ) => void;
   addManualResponse: (label: string, response: string) => void;
   removeManualResponse: (id: string) => void;
+  /**
+   * Drops every manual answer. Manual answers belong to one prompt, so a
+   * new comparison must not carry them over to the next run.
+   */
+  clearManualResponses: () => void;
   setEmbeddings: (
     embeddings: Array<{ modelId: string; embedding: number[] }>,
     source?: string | null,
@@ -213,6 +218,10 @@ export const createResponseSlice: StateCreator<ResponseSlice> = (set, get) => ({
     set((state) => ({
       manualResponses: state.manualResponses.filter((m) => m.id !== id),
     }));
+  },
+
+  clearManualResponses: () => {
+    set({ manualResponses: [] });
   },
 
   setEmbeddings: (embeddings, source = null) => {
