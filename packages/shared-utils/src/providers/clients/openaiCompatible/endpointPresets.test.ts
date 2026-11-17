@@ -2,6 +2,8 @@ import { describe, it, expect } from 'vitest';
 import {
   ENDPOINT_PRESETS,
   getEndpointPreset,
+  isLocalEndpoint,
+  isLoopbackURL,
   nextEndpointId,
   parseEndpointModelId,
   presetIdOfEndpoint,
@@ -65,5 +67,28 @@ describe('endpoint model ids', () => {
     expect(parseEndpointModelId('llama3')).toBeNull();
     expect(parseEndpointModelId('/llama3')).toBeNull();
     expect(parseEndpointModelId('ollama/')).toBeNull();
+  });
+
+  it('treats only loopback hosts as on this machine', () => {
+    for (const url of [
+      'http://localhost:11434/v1',
+      'http://LOCALHOST/v1',
+      'http://127.0.0.1:1234/v1',
+      'http://127.8.0.1/v1',
+      'http://[::1]:8080/v1',
+      'http://ollama.localhost/v1',
+    ]) {
+      expect(isLoopbackURL(url), url).toBe(true);
+    }
+    for (const url of ['https://openrouter.ai/api/v1', 'http://192.168.1.5:11434/v1', 'http://localhost.evil.com/v1', '', 'not a url']) {
+      expect(isLoopbackURL(url), url).toBe(false);
+    }
+  });
+
+  it('calls an endpoint local only when its preset is local and its URL is loopback', () => {
+    expect(isLocalEndpoint('ollama', 'http://localhost:11434/v1')).toBe(true);
+    expect(isLocalEndpoint('vllm', 'https://gpu.example.com/v1')).toBe(false);
+    expect(isLocalEndpoint('custom', 'http://localhost:4000/v1')).toBe(false);
+    expect(isLocalEndpoint('openrouter', 'http://localhost:4000/v1')).toBe(false);
   });
 });

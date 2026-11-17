@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { getModelPrice } from './prices';
 import { computeRunCost } from './runCost';
 import { estimateRun } from './estimateRun';
-import type { PriceTable } from './types';
+import type { EndpointLocation, PriceTable } from './types';
 
 const table: PriceTable = {
   source: 'test',
@@ -13,40 +13,57 @@ const table: PriceTable = {
   },
 };
 
+const endpoints: EndpointLocation[] = [
+  { id: 'ollama', baseURL: 'http://localhost:11434/v1' },
+  { id: 'lmstudio-2', baseURL: 'http://127.0.0.1:1234/v1' },
+  { id: 'llamacpp', baseURL: 'http://[::1]:8080/v1' },
+  { id: 'vllm', baseURL: 'http://localhost:8000/v1' },
+  { id: 'vllm-2', baseURL: 'https://gpu.example.com/v1' },
+  { id: 'ollama-2', baseURL: 'https://openrouter.ai/api/v1' },
+  { id: 'openrouter', baseURL: 'https://openrouter.ai/api/v1' },
+  { id: 'openrouter-2', baseURL: 'https://proxy.example.com/v1' },
+  { id: 'groq', baseURL: 'https://api.groq.com/openai/v1' },
+  { id: 'together', baseURL: 'https://api.together.ai/v1' },
+  { id: 'custom', baseURL: 'http://localhost:4000/v1' },
+];
+
+const price = (id: string) => getModelPrice('openai-compatible', id, table, endpoints);
+const LOCAL = { status: 'known', inputPerMillion: 0, outputPerMillion: 0, local: true };
+
 describe('OpenAI-compatible endpoint prices', () => {
-  it('prices local endpoints at zero and labels them local', () => {
+  it('prices local presets on a loopback URL at zero and labels them local', () => {
     for (const id of ['ollama/llama3.2:3b', 'lmstudio-2/qwen', 'llamacpp/model', 'vllm/meta-llama/x']) {
-      expect(getModelPrice('openai-compatible', id, table)).toEqual({
-        status: 'known',
-        inputPerMillion: 0,
-        outputPerMillion: 0,
-        local: true,
-      });
+      expect(price(id)).toEqual(LOCAL);
     }
   });
 
-  it('prices OpenRouter models by their OpenRouter id', () => {
-    expect(getModelPrice('openai-compatible', 'openrouter/anthropic/claude-opus-5.5', table)).toEqual({
+  it('leaves a local preset pointed at a remote host unpriced', () => {
+    expect(price('vllm-2/meta-llama/x')).toEqual({ status: 'unknown' });
+    expect(price('ollama-2/anthropic/claude-opus-5.5')).toEqual({ status: 'unknown' });
+  });
+
+  it('leaves a Custom endpoint unpriced even on localhost, since it may proxy a paid API', () => {
+    expect(price('custom/llama3')).toEqual({ status: 'unknown' });
+  });
+
+  it('prices OpenRouter models by their OpenRouter id when the URL is OpenRouter', () => {
+    expect(price('openrouter/anthropic/claude-opus-5.5')).toEqual({
       status: 'known',
       inputPerMillion: 4,
       outputPerMillion: 20,
     });
+    expect(price('openrouter-2/anthropic/claude-opus-5.5')).toEqual({ status: 'unknown' });
   });
 
-  it('prices Groq and Together models whose id is in the table', () => {
-    expect(getModelPrice('openai-compatible', 'groq/openai/gpt-oss-120b', table)).toMatchObject({
-      status: 'known',
-      inputPerMillion: 0.1,
-    });
-    expect(getModelPrice('openai-compatible', 'together/OpenAI/GPT-OSS-120B', table)).toMatchObject({
-      status: 'known',
-    });
+  it('leaves Groq and Together unpriced, since the table holds OpenRouter prices', () => {
+    expect(price('groq/openai/gpt-oss-120b')).toEqual({ status: 'unknown' });
+    expect(price('together/OpenAI/GPT-OSS-120B')).toEqual({ status: 'unknown' });
   });
 
-  it('leaves hosted models without a table entry, and Custom endpoints, unpriced', () => {
-    expect(getModelPrice('openai-compatible', 'groq/llama-3.3-70b-versatile', table)).toEqual({ status: 'unknown' });
-    expect(getModelPrice('openai-compatible', 'custom/llama3', table)).toEqual({ status: 'unknown' });
-    expect(getModelPrice('openai-compatible', 'not-qualified', table)).toEqual({ status: 'unknown' });
+  it('leaves unknown endpoints and unqualified ids unpriced', () => {
+    expect(price('ollama-9/llama3')).toEqual({ status: 'unknown' });
+    expect(price('not-qualified')).toEqual({ status: 'unknown' });
+    expect(getModelPrice('openai-compatible', 'ollama/llama3', table)).toEqual({ status: 'unknown' });
   });
 
   it('counts local calls in the run cost and the estimate', () => {
@@ -56,6 +73,7 @@ describe('OpenAI-compatible endpoint prices', () => {
         { provider: 'openai-compatible', modelId: 'custom/b', inputTokens: 10, outputTokens: 10, source: 'reported' },
       ],
       table,
+      endpoints,
     );
     expect(cost).toMatchObject({ totalUsd: 0, pricedCallCount: 1, localCallCount: 1, unpricedCallCount: 1 });
 
@@ -69,6 +87,7 @@ describe('OpenAI-compatible endpoint prices', () => {
       promptTokens: 20,
       eloTopN: 3,
       embeddings: { provider: 'openai-compatible', modelId: 'ollama/nomic-embed-text' },
+      endpoints,
       table,
     });
     expect(estimate.cost).toMatchObject({ lowUsd: 0, highUsd: 0, unpricedCallCount: 0, localCallCount: 5 });

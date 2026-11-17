@@ -5,8 +5,9 @@
  * provider name `openai-compatible`, and each model id is qualified with its
  * endpoint: `${endpointId}/${modelId}`, for example `ollama/llama3.2:3b` or
  * `openrouter/meta-llama/llama-3.1-8b-instruct`. Endpoint ids are the preset
- * id, then `${presetId}-2`, `${presetId}-3` and so on, so the preset (and so
- * whether the endpoint is local) can be read back from any model id.
+ * id, then `${presetId}-2`, `${presetId}-3` and so on, so the preset can be
+ * read back from any model id. Whether an endpoint is local also depends on
+ * its base URL, which the user can edit (see isLocalEndpoint).
  */
 
 export type EndpointPresetId =
@@ -21,15 +22,18 @@ export type EndpointPresetId =
 
 export interface EndpointPreset {
   id: EndpointPresetId;
-  /** Display name. A product name, so it is not translated. */
+  /** Display name. A product name, so it is not translated, except Custom, which the UI translates. */
   label: string;
   /** Default base URL, ending in `/v1`. Empty for Custom. */
   baseURL: string;
-  /** Runs on the user's machine: calls cost nothing. */
+  /** A server that usually runs on the user's machine. Only local at a loopback URL (isLocalEndpoint). */
   local: boolean;
   /** The hosted service rejects calls without a key. */
   requiresKey: boolean;
-  /** A suggested embedding model, when the server usually has one. */
+  /**
+   * A suggested embedding model. The endpoint is only used for embeddings
+   * once its check finds this model in the server's list.
+   */
   embeddingModel?: string;
 }
 
@@ -84,4 +88,51 @@ export function parseEndpointModelId(
   const slash = qualifiedId.indexOf('/');
   if (slash <= 0 || slash === qualifiedId.length - 1) return null;
   return { endpointId: qualifiedId.slice(0, slash), modelId: qualifiedId.slice(slash + 1) };
+}
+
+/**
+ * True when a base URL points at this machine: `localhost`, a `*.localhost`
+ * name, 127.0.0.0/8 or `::1`. Private network addresses do not count, since
+ * they may be a shared or paid server.
+ */
+export function isLoopbackURL(baseURL: string): boolean {
+  let host: string;
+  try {
+    host = new URL(baseURL.trim()).hostname.toLowerCase();
+  } catch {
+    return false;
+  }
+  if (host === 'localhost' || host.endsWith('.localhost')) return true;
+  if (host === '[::1]' || host === '::1') return true;
+  return /^127\.\d{1,3}\.\d{1,3}\.\d{1,3}$/.test(host);
+}
+
+/**
+ * True when an endpoint runs on the user's machine, so its calls cost
+ * nothing: a local preset (Ollama, LM Studio, llama.cpp, vLLM) at a loopback
+ * URL. A local preset pointed at another host may be paid, and a Custom
+ * endpoint on localhost may be a proxy to a paid API, so neither counts.
+ */
+export function isLocalEndpoint(presetId: string, baseURL: string): boolean {
+  return getEndpointPreset(presetId).local && isLoopbackURL(baseURL);
+}
+
+/** Host of a URL in lower case, or null when it does not parse. */
+export function hostOfURL(url: string): string | null {
+  try {
+    return new URL(url.trim()).hostname.toLowerCase();
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * True when the server's model list has the model, allowing for Ollama's
+ * `:latest` tag on either side (`nomic-embed-text` matches
+ * `nomic-embed-text:latest`).
+ */
+export function modelListIncludes(listed: readonly string[], modelId: string): boolean {
+  const wanted = modelId.trim().replace(/:latest$/, '');
+  if (!wanted) return false;
+  return listed.some((id) => id.replace(/:latest$/, '') === wanted);
 }

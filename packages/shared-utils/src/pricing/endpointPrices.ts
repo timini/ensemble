@@ -1,34 +1,40 @@
 import {
   getEndpointPreset,
+  hostOfURL,
+  isLocalEndpoint,
   parseEndpointModelId,
   presetIdOfEndpoint,
-  type EndpointPresetId,
 } from '../providers/clients/openaiCompatible/endpointPresets';
-import type { ModelPrice, PriceTable } from './types';
-
-/**
- * Hosted endpoints whose model ids use OpenRouter's `vendor/model` form, so a
- * table entry can be found by its OpenRouter id. For Groq and Together this
- * is the OpenRouter list price of the same model, which can differ a little
- * from the host's own price; models with no entry stay unpriced.
- */
-const PRICED_BY_OPENROUTER_ID: readonly EndpointPresetId[] = ['openrouter', 'groq', 'together'];
+import type { EndpointLocation, ModelPrice, PriceTable } from './types';
 
 /**
  * Price of a model on an OpenAI-compatible endpoint, from its qualified id
- * (`ollama/llama3.2:3b`). Local presets cost nothing and are marked `local`.
- * OpenRouter, Groq and Together use the price table where it has the model.
- * Everything else, including Custom endpoints, is unknown.
+ * (`ollama/llama3.2:3b`) and the configured endpoints.
+ *
+ * - A local preset at a loopback URL (isLocalEndpoint) costs nothing and is
+ *   marked `local`.
+ * - OpenRouter at its own host uses the price table, which holds OpenRouter
+ *   prices, where it has the model.
+ * - Everything else is unknown: endpoints not in `endpoints`, local presets
+ *   at other hosts, Custom endpoints, and Groq and Together, whose own prices
+ *   the table does not have.
  */
-export function getEndpointModelPrice(qualifiedId: string, table: PriceTable): ModelPrice {
+export function getEndpointModelPrice(
+  qualifiedId: string,
+  table: PriceTable,
+  endpoints: readonly EndpointLocation[] = [],
+): ModelPrice {
   const parsed = parseEndpointModelId(qualifiedId);
   if (!parsed) return { status: 'unknown' };
+  const endpoint = endpoints.find((e) => e.id === parsed.endpointId);
+  if (!endpoint) return { status: 'unknown' };
 
   const preset = getEndpointPreset(presetIdOfEndpoint(parsed.endpointId));
-  if (preset.local) {
+  if (isLocalEndpoint(preset.id, endpoint.baseURL)) {
     return { status: 'known', inputPerMillion: 0, outputPerMillion: 0, local: true };
   }
-  if (!PRICED_BY_OPENROUTER_ID.includes(preset.id)) return { status: 'unknown' };
+  if (preset.id !== 'openrouter') return { status: 'unknown' };
+  if (hostOfURL(endpoint.baseURL) !== hostOfURL(preset.baseURL)) return { status: 'unknown' };
 
   const wanted = parsed.modelId.toLowerCase();
   const entry = Object.values(table.models).find((e) => e.openRouterId.toLowerCase() === wanted);

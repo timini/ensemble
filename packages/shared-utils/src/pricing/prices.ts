@@ -1,5 +1,5 @@
 import { PRICE_TABLE } from './priceTable';
-import type { ModelPrice, PriceTable } from './types';
+import type { EndpointLocation, ModelPrice, PriceTable } from './types';
 import { getEndpointModelPrice } from './endpointPrices';
 
 /**
@@ -22,14 +22,16 @@ export function priceKeyCandidates(provider: string, modelId: string): string[] 
  * Look up the price of a model in USD per million tokens. Returns
  * `{ status: 'unknown' }` when the table has no entry; callers must show the
  * cost as unknown rather than guess. OpenAI-compatible endpoint models are
- * priced by getEndpointModelPrice (local models cost 0 and are marked local).
+ * priced by getEndpointModelPrice from the configured `endpoints`; without
+ * them they are unknown.
  */
 export function getModelPrice(
   provider: string,
   modelId: string,
   table: PriceTable = PRICE_TABLE,
+  endpoints: readonly EndpointLocation[] = [],
 ): ModelPrice {
-  if (provider === 'openai-compatible') return getEndpointModelPrice(modelId, table);
+  if (provider === 'openai-compatible') return getEndpointModelPrice(modelId, table, endpoints);
   for (const key of priceKeyCandidates(provider, modelId)) {
     const entry = table.models[key];
     if (entry) {

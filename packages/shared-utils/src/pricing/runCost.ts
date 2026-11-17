@@ -1,7 +1,7 @@
 import type { TokenUsage } from '../providers/types';
 import { costOfTokens, getModelPrice } from './prices';
 import { PRICE_TABLE } from './priceTable';
-import type { PriceTable } from './types';
+import type { EndpointLocation, PriceTable } from './types';
 
 /** Rough characters per token for English text. Used only when a provider reports no usage. */
 const CHARS_PER_TOKEN = 4;
@@ -40,8 +40,15 @@ export interface RunCost {
   localCallCount: number;
 }
 
-/** Price the calls of a finished run with the price table. */
-export function computeRunCost(calls: CallUsage[], table: PriceTable = PRICE_TABLE): RunCost {
+/**
+ * Price the calls of a finished run with the price table. `endpoints` are the
+ * configured OpenAI-compatible endpoints; their models are unpriced without it.
+ */
+export function computeRunCost(
+  calls: CallUsage[],
+  table: PriceTable = PRICE_TABLE,
+  endpoints: readonly EndpointLocation[] = [],
+): RunCost {
   const result: RunCost = {
     totalUsd: 0,
     estimated: false,
@@ -57,7 +64,7 @@ export function computeRunCost(calls: CallUsage[], table: PriceTable = PRICE_TAB
       result.estimated = true;
       result.estimatedCallCount += 1;
     }
-    const price = getModelPrice(call.provider, call.modelId, table);
+    const price = getModelPrice(call.provider, call.modelId, table, endpoints);
     if (price.status === 'known' && price.local) result.localCallCount += 1;
     const usd = costOfTokens(price, call.inputTokens, call.outputTokens);
     if (usd === null) {

@@ -20,7 +20,7 @@ export type ModelPrice =
       status: 'known';
       inputPerMillion: number;
       outputPerMillion: number;
-      /** A model on the user's own machine (Ollama, LM Studio, ...): it costs nothing. */
+      /** A model on a local server at a loopback URL (see isLocalEndpoint): it costs nothing. */
       local?: true;
     }
   | { status: 'unknown' };
@@ -29,4 +29,13 @@ export type ModelPrice =
 export interface ModelRef {
   provider: string;
   modelId: string;
+}
+
+/**
+ * Where an OpenAI-compatible endpoint is, for pricing its models. The id is
+ * the prefix of the endpoint's model ids (`ollama` in `ollama/llama3.2:3b`).
+ */
+export interface EndpointLocation {
+  id: string;
+  baseURL: string;
 }

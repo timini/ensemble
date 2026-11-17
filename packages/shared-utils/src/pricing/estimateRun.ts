@@ -1,7 +1,7 @@
 import type { ConsensusMethod } from '@ensemble-ai/consensus-core';
 import { countConsensusCalls, type ConsensusPhase, type ConsensusPhaseCalls } from './consensusCalls';
 import { getModelPrice } from './prices';
-import type { ModelRef, PriceTable } from './types';
+import type { EndpointLocation, ModelRef, PriceTable } from './types';
 import { PRICE_TABLE } from './priceTable';
 
 interface Range {
@@ -37,6 +37,8 @@ export interface EstimateRunInput {
   /** Embedding model for the agreement score, or null when there is none. */
   embeddings: ModelRef | null;
   promptTokens: number;
+  /** OpenAI-compatible endpoints, to price their models. */
+  endpoints?: readonly EndpointLocation[];
   table?: PriceTable;
 }
 
@@ -101,7 +103,7 @@ export function estimateRun(input: EstimateRunInput): RunEstimate {
   };
   const charge = (model: ModelRef | null, calls: number, tokens: Tokens) => {
     if (!model || calls <= 0) return;
-    const price = getModelPrice(model.provider, model.modelId, table);
+    const price = getModelPrice(model.provider, model.modelId, table, input.endpoints);
     if (price.status !== 'known') {
       const id = `${model.provider}/${model.modelId}`;
       if (!cost.unpricedModels.includes(id)) cost.unpricedModels.push(id);
