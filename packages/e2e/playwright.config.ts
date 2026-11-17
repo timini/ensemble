@@ -133,11 +133,15 @@ export default defineConfig({
                 },
                 {
                   // Own build directory so it can run next to the mock server.
-                  command: `cd ../app && npx cross-env NEXT_PUBLIC_MOCK_MODE=false NEXT_DIST_DIR=.next-e2e-free next dev --turbo -p ${LOCAL_ENDPOINT_APP_PORT}`,
+                  // NEXT_PUBLIC_OLLAMA_URL points Ollama detection at the fake server.
+                  command: `cd ../app && npx cross-env NEXT_PUBLIC_MOCK_MODE=false NEXT_PUBLIC_OLLAMA_URL=http://localhost:${FAKE_OPENAI_PORT} NEXT_DIST_DIR=.next-e2e-free next dev --turbo -p ${LOCAL_ENDPOINT_APP_PORT}`,
                   url: `http://localhost:${LOCAL_ENDPOINT_APP_PORT}`,
                   reuseExistingServer: !process.env.CI,
                   timeout: 180 * 1000,
-                  env: { NEXT_PUBLIC_MOCK_MODE: 'false' },
+                  env: {
+                    NEXT_PUBLIC_MOCK_MODE: 'false',
+                    NEXT_PUBLIC_OLLAMA_URL: `http://localhost:${FAKE_OPENAI_PORT}`,
+                  },
                 },
               ]
             : []),

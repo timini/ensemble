@@ -6,6 +6,8 @@
  *
  * Endpoints (all under /v1, with permissive CORS like a local server
  * configured for browser access):
+ *   GET  /api/tags             the same models in Ollama's own format, so the
+ *                              app's Ollama detection finds this server
  *   GET  /v1/models            three chat models and one embedding model
  *   POST /v1/chat/completions  streamed (SSE) or plain answers; json_schema is
  *                              rejected with 400 so clients fall back to json_object
@@ -155,6 +157,11 @@ const server = http.createServer(async (req, res) => {
   const path = new URL(req.url ?? '/', 'http://localhost').pathname;
   if (!path.startsWith('/__')) counts[`${req.method} ${path}`] = (counts[`${req.method} ${path}`] ?? 0) + 1;
 
+  if (req.method === 'GET' && path === '/api/tags') {
+    return sendJson(res, 200, {
+      models: [...Object.keys(ANSWERS), EMBEDDING_MODEL].map((name) => ({ name, model: name, size: 1 })),
+    });
+  }
   if (req.method === 'GET' && path === '/v1/models') {
     return sendJson(res, 200, {
       object: 'list',
