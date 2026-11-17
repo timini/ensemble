@@ -115,6 +115,17 @@
       "unpriced": "No price for {{models}}. Those calls are not in the cost.",
       "estimateSource": "Range assumes short to long answers. Prices from OpenRouter, {{date}}.",
       "priceSource": "Prices from OpenRouter, {{date}}."
+    },
+    "majorityVoteBreakdown": {
+      "title": "Majority vote",
+      "winner": "{{answer}} won with {{votes}} of {{total}} votes.",
+      "tie": "Tie between {{answers}} with {{votes}} votes each. The consensus comes from the LLM majority method.",
+      "noShortAnswers": "The answers are not short (a number, option letter, yes or no, or short phrase), so there is no vote. The consensus comes from the LLM majority method.",
+      "extractionFailed": "Short answers could not be extracted, so there is no vote. The consensus comes from the LLM majority method.",
+      "votes_one": "{{count}} vote",
+      "votes_other": "{{count}} votes",
+      "abstained": "No short answer: {{models}}",
+      "and": "and"
     }
   },
   "organisms": {
@@ -183,7 +194,7 @@
         },
         "majority": {
           "title": "Majority Voting",
-          "description": "Favors the majority position across responses. Works with 2+ models."
+          "description": "Counts votes when the answers are short (a number, letter or yes/no), otherwise favors the majority position. Works with 2+ models."
         },
         "council": {
           "title": "Council Debate",

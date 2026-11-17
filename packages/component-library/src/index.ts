@@ -98,6 +98,12 @@ export {
   type RunCostSummaryProps,
   type RunCostCalls,
 } from './components/molecules/RunCostSummary';
+export {
+  MajorityVoteBreakdown,
+  type MajorityVoteBreakdownProps,
+  type MajorityVoteOption,
+  type MajorityVoteOutcome,
+} from './components/molecules/MajorityVoteBreakdown';
 
 // Organisms (Level 3: Complex UI sections)
 export { ModeSelector, type ModeSelectorProps, type Mode as ModeType } from './components/organisms/ModeSelector';
