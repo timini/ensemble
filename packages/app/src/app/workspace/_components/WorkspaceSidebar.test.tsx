@@ -36,6 +36,45 @@ describe("WorkspaceSidebar", () => {
     expect(item).toHaveTextContent("High agreement");
   });
 
+  it("shows the stored run time, not the time the page loaded", () => {
+    // Last week, so it must not be listed under Today.
+    const startedAt = Date.now() - 5 * 86_400_000;
+    useStore.setState({ runStartedAt: startedAt });
+    render(
+      <WorkspaceSidebar
+        runPrompt="What is 6 times 7?"
+        agreement={{ status: "pending" }}
+        onNewQuestion={() => undefined}
+        onDone={() => undefined}
+      />,
+    );
+    expect(
+      screen.queryByRole("region", { name: "Today" }),
+    ).not.toBeInTheDocument();
+    const weekday = new Intl.DateTimeFormat("en", { weekday: "short" }).format(
+      startedAt,
+    );
+    expect(screen.getByTestId("history-item")).toHaveTextContent(weekday);
+  });
+
+  it("lists a run with no stored time with no date or time", () => {
+    useStore.setState({ runStartedAt: null });
+    render(
+      <WorkspaceSidebar
+        runPrompt="Older run"
+        agreement={{ status: "pending" }}
+        onNewQuestion={() => undefined}
+        onDone={() => undefined}
+      />,
+    );
+    expect(
+      screen.queryByRole("region", { name: "Today" }),
+    ).not.toBeInTheDocument();
+    expect(screen.getByTestId("history-item").textContent).not.toMatch(
+      /\d{1,2}:\d{2}/,
+    );
+  });
+
   it("shows no history without a run", () => {
     render(
       <WorkspaceSidebar

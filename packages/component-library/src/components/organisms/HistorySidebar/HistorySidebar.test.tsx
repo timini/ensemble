@@ -39,6 +39,15 @@ describe('HistorySidebar', () => {
     expect(props.onSelect).toHaveBeenCalledWith('r3');
   });
 
+  it('lists a run with no known time without a visible date heading or time', () => {
+    setup({ items: [{ id: 'u1', prompt: 'Stored before run times were kept' }] });
+    const region = screen.getByRole('region', { name: 'Runs with no date' });
+    const row = within(region).getByTestId('history-item');
+    expect(row).toHaveTextContent('Stored before run times were kept');
+    expect(row.textContent).not.toMatch(/\d{1,2}:\d{2}/);
+    expect(screen.queryByRole('region', { name: 'Today' })).not.toBeInTheDocument();
+  });
+
   it('marks the open run as current and shows its agreement level to screen readers', () => {
     setup({ activeId: 'r2' });
     const row = screen.getByText(/30-year fixed/).closest('button');

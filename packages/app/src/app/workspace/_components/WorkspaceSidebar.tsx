@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import { HistorySidebar } from "@/components/organisms/HistorySidebar";
 import {
   agreementLevel,
@@ -37,15 +36,16 @@ export function WorkspaceSidebar({
   const savedEnsembles = useStore((state) => state.savedEnsembles);
   const loadEnsemble = useStore((state) => state.loadEnsemble);
   const deleteEnsemble = useStore((state) => state.deleteEnsemble);
-  // The store keeps no run time yet; the run is from this visit or earlier today.
-  const [seenAt] = useState(() => Date.now());
+  // Null for a run stored before run times were kept: it is listed with no
+  // date or time rather than an invented one.
+  const runStartedAt = useStore((state) => state.runStartedAt);
 
   const items = runPrompt
     ? [
         {
           id: RUN_ID,
           prompt: runPrompt,
-          createdAt: seenAt,
+          createdAt: runStartedAt ?? undefined,
           level:
             agreement.status === "ready"
               ? agreementLevel(agreement.score ?? 0, agreement.thresholds)

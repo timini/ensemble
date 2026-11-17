@@ -594,6 +594,7 @@
       "today": "Today",
       "week": "Previous 7 days",
       "older": "Older",
+      "undated": "Runs with no date",
       "empty": "No questions yet. Your runs are saved in this browser.",
       "noMatches": "Nothing matches \"{{query}}\".",
       "delete": "Delete \"{{prompt}}\"",

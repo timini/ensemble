@@ -9,8 +9,12 @@ import { groupHistory, historyTime } from './historyGroups';
 export interface HistoryItem {
   id: string;
   prompt: string;
-  /** Epoch milliseconds. */
-  createdAt: number;
+  /**
+   * When the run started, in epoch milliseconds. Leave it out when the time
+   * is not known: the run is then listed last, with no date group heading
+   * and no time, rather than with a made-up one.
+   */
+  createdAt?: number;
   /** Agreement level of the run, when it was scored. */
   level?: AgreementLevel;
 }
@@ -116,7 +120,7 @@ export function HistorySidebar(props: HistorySidebarProps) {
 
       {groups.map(({ group, items: rows }) => (
         <section key={group} aria-labelledby={`${base}-${group}`}>
-          <h2 id={`${base}-${group}`} className={LABEL}>{t(`${key}.${group}`)}</h2>
+          <h2 id={`${base}-${group}`} className={group === 'undated' ? 'sr-only' : LABEL}>{t(`${key}.${group}`)}</h2>
           <ul>
             {rows.map((item) => {
               const active = item.id === activeId;
@@ -131,9 +135,11 @@ export function HistorySidebar(props: HistorySidebarProps) {
                     <span aria-hidden="true" className={cn('size-2 shrink-0 rounded-full', item.level ? DOT[item.level] : 'bg-border')} />
                     {item.level && <span className="sr-only">{t(`molecules.agreementSummary.levels.${item.level}.label`)}:</span>}
                     <span className="flex-1 truncate">{item.prompt}</span>
-                    <span className="text-caption tabular-nums text-muted-foreground group-hover:invisible">
-                      {historyTime(item.createdAt, group, i18n.language || 'en')}
-                    </span>
+                    {group !== 'undated' && item.createdAt !== undefined && (
+                      <span className="text-caption tabular-nums text-muted-foreground group-hover:invisible">
+                        {historyTime(item.createdAt, group, i18n.language || 'en')}
+                      </span>
+                    )}
                   </button>
                   <button type="button" onClick={() => props.onDelete(item.id)} aria-label={t(`${key}.delete`, { prompt: item.prompt })} className={DELETE}>
                     <Trash2 className="size-3.5" aria-hidden="true" />

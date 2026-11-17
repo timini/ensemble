@@ -594,6 +594,7 @@
       "today": "Aujourd'hui",
       "week": "7 derniers jours",
       "older": "Plus ancien",
+      "undated": "Exécutions sans date",
       "empty": "Aucune question pour l'instant. Vos exécutions sont enregistrées dans ce navigateur.",
       "noMatches": "Rien ne correspond à « {{query}} ».",
       "delete": "Supprimer « {{prompt}} »",

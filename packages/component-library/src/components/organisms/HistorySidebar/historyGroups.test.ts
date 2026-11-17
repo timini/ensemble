@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { groupHistory, historyTime } from './historyGroups';
 import { NOW, sampleHistory } from './fixtures';
+import type { HistoryItem } from './HistorySidebar';
 
 describe('groupHistory', () => {
   it('sorts newest first into today, the previous 7 days and older', () => {
@@ -9,6 +10,13 @@ describe('groupHistory', () => {
     expect(groups[0].items.map((i) => i.id)).toEqual(['r1', 'r2']);
     expect(groups[1].items.map((i) => i.id)).toEqual(['r3', 'r4']);
     expect(groups[2].items.map((i) => i.id)).toEqual(['r5']);
+  });
+
+  it('puts runs with no time last, in their own undated group', () => {
+    const undated: HistoryItem = { id: 'u1', prompt: 'No time kept' };
+    const groups = groupHistory([undated, sampleHistory[0]], NOW);
+    expect(groups.map((g) => g.group)).toEqual(['today', 'undated']);
+    expect(groups[1].items).toEqual([undated]);
   });
 
   it('leaves out empty groups', () => {
