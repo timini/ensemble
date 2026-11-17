@@ -22,7 +22,6 @@ export function useConsensusGeneration() {
     const eloTopN = useStore((state) => state.eloTopN);
     const mode = useStore((state) => state.mode);
     const addConsensusUsage = useStore((state) => state.addConsensusUsage);
-    const clearConsensusUsage = useStore((state) => state.clearConsensusUsage);
 
     const generateConsensus = async (
         responses: { modelId: string; modelName: string; content: string }[],
@@ -45,7 +44,9 @@ export function useConsensusGeneration() {
 
         setIsGenerating(true);
         setError(null);
-        clearConsensusUsage();
+        // Consensus usage is not cleared here: a regenerate (for example after
+        // a summarizer change) adds to the calls earlier attempts already
+        // billed. resetStreamingState clears it when a new run starts.
 
         try {
             // Resolve Dependencies

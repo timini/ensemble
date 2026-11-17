@@ -11,7 +11,7 @@
       "features": "Fonctionnalités",
       "about": "À propos",
       "github": "GitHub",
-      "copyright": "\u00a9 {{year}} IA Ensemble"
+      "copyright": "© {{year}} IA Ensemble"
     },
     "steps": {
       "config": "Config",
@@ -94,11 +94,22 @@
     "runCostSummary": {
       "calls_one": "{{count}} appel de modèle",
       "calls_other": "{{count}} appels de modèles",
-      "breakdown": "{{answers}} réponses, {{consensus}} appels de consensus, {{embeddings}} appels d'embeddings",
+      "answers_one": "{{count}} réponse",
+      "answers_other": "{{count}} réponses",
+      "consensusCalls_one": "{{value}} appel de consensus",
+      "consensusCalls_other": "{{value}} appels de consensus",
+      "embeddingCalls_one": "{{count}} appel d'embeddings",
+      "embeddingCalls_other": "{{count}} appels d'embeddings",
+      "breakdown": "{{answers}}, {{consensus}}, {{embeddings}}",
       "range": "{{min}} à {{max}}",
       "estimatedRange": "Coût estimé : {{low}} à {{high}}",
+      "estimatedRangePartial": "Coût estimé : {{low}} à {{high}}, plus les appels sans prix",
+      "estimatedUnknown": "Coût estimé : inconnu",
       "actual": "Coût : {{cost}}",
       "actualEstimated": "Coût estimé : {{cost}}",
+      "actualPartial": "Coût : au moins {{cost}}",
+      "actualEstimatedPartial": "Coût estimé : au moins {{cost}}",
+      "actualUnknown": "Coût : inconnu",
       "estimatedNote": "Certains fournisseurs n'ont pas indiqué le nombre de tokens : ces appels sont estimés d'après la longueur du texte.",
       "consensusUnavailable": "Cette méthode de consensus demande au moins 3 réponses, elle ne sera donc pas lancée.",
       "unpriced": "Pas de prix pour {{models}}. Ces appels ne sont pas comptés dans le coût.",

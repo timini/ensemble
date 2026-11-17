@@ -77,7 +77,7 @@ test.describe('Prompt Page', () => {
     // 2 embedding calls.
     await expect(page.getByTestId('run-cost-calls')).toHaveText('5 model calls');
     await expect(page.getByTestId('run-cost-breakdown')).toHaveText(
-      '2 answers, 1 consensus calls, 2 embedding calls',
+      '2 answers, 1 consensus call, 2 embedding calls',
     );
     await expect(page.getByTestId('run-cost-amount')).toContainText('Estimated cost: $');
   });

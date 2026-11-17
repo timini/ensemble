@@ -37,9 +37,9 @@ Full description: [packages/app/docs/PROVIDER_ARCHITECTURE.md](../app/docs/PROVI
 - `priceTable.ts` is generated; do not edit it by hand. Refresh it with `npm run prices:refresh` (public OpenRouter model lists, no key). The mapping from OpenRouter ids lives in `openRouterMapping.ts` and is tested against fixtures in `src/pricing/__fixtures__/`.
 - `getModelPrice(provider, modelId)` gives USD per million input and output tokens, or `{ status: 'unknown' }`. It also accepts Anthropic ids with dots and Gemini ids with a `models/` prefix.
 - `estimateRun(input)` returns call counts by kind (answers, consensus, embeddings) and a cost range before a run. `countConsensusCalls` mirrors the strategy packages; see the call counts in [docs/ARCHITECTURE.md](../../docs/ARCHITECTURE.md#pricing).
-- `computeRunCost(calls)` prices finished calls and flags the total as estimated when any call's tokens came from text length.
+- `computeRunCost(calls)` prices finished calls and flags the total as estimated when any call's tokens came from text length. It and `estimateRun` also count priced and unpriced calls, so a caller can tell a full cost from a lower bound or an unknown one.
 - `withUsageTracking(provider, name, record)` wraps an `AIProvider` and reports the tokens of every completed call.
-- Provider clients pass `{ inputTokens, outputTokens }` to `onComplete` as a fourth argument when the stream reports usage.
+- Provider clients pass `{ inputTokens, outputTokens }` to `onComplete` as a fourth argument when the stream reports usage, and set `usage` on the result of `generateStructured`. Reasoning tokens count as output, including xAI's, which sit outside `completion_tokens`.
 
 ## Similarity (`src/similarity/`)
 

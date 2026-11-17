@@ -19,6 +19,13 @@ export interface RunCostCalls {
 interface CommonProps {
   /** `provider/model` ids with no price; their calls are left out of the cost. */
   unpricedModels?: string[];
+  /** Calls with a price, counted in the cost. */
+  pricedCallCount: number;
+  /**
+   * Calls with no price. When above zero the cost is shown as a lower bound,
+   * or as unknown when no call has a price.
+   */
+  unpricedCallCount: number;
   /** Date of the price table, shown as the source of the prices. */
   priceDate?: string;
   className?: string;
@@ -55,6 +62,14 @@ export function formatUsd(value: number, locale: string): string {
   }).format(value);
 }
 
+/** How much of the run the price table covers. */
+type Coverage = 'all' | 'partial' | 'none';
+
+function coverageOf(priced: number, unpriced: number): Coverage {
+  if (unpriced === 0) return 'all';
+  return priced === 0 ? 'none' : 'partial';
+}
+
 /**
  * RunCostSummary molecule shows the model calls and cost of a run.
  *
@@ -62,10 +77,15 @@ export function formatUsd(value: number, locale: string): string {
  * - `actual`: after a run, the cost from the token counts the providers
  *   reported, labelled as estimated when some counts came from text length.
  *
+ * Calls with no price are never shown as free: when some calls have no
+ * price the cost is a lower bound, and when none has a price it is unknown.
+ *
  * @example
  * ```tsx
- * <RunCostSummary variant="estimate" calls={calls} consensusAvailable lowUsd={0.1} highUsd={1.2} />
- * <RunCostSummary variant="actual" callCount={7} totalUsd={0.04} estimated={false} />
+ * <RunCostSummary variant="estimate" calls={calls} consensusAvailable lowUsd={0.1} highUsd={1.2}
+ *   pricedCallCount={7} unpricedCallCount={0} />
+ * <RunCostSummary variant="actual" callCount={7} totalUsd={0.04} estimated={false}
+ *   pricedCallCount={7} unpricedCallCount={0} />
  * ```
  */
 export const RunCostSummary = React.forwardRef<HTMLDivElement, RunCostSummaryProps>(
@@ -74,23 +94,29 @@ export const RunCostSummary = React.forwardRef<HTMLDivElement, RunCostSummaryPro
     const usd = (value: number) => formatUsd(value, i18n.language || 'en');
     const isEstimate = props.variant === 'estimate';
     const unpriced = props.unpricedModels ?? [];
+    const coverage = coverageOf(props.pricedCallCount, props.unpricedCallCount);
 
     let calls: number;
     let amount: string;
     if (props.variant === 'estimate') {
       calls = props.calls.total;
-      amount = t('molecules.runCostSummary.estimatedRange', {
-        low: usd(props.lowUsd),
-        high: usd(props.highUsd),
-      });
+      amount =
+        coverage === 'none'
+          ? t('molecules.runCostSummary.estimatedUnknown')
+          : t(
+              coverage === 'partial'
+                ? 'molecules.runCostSummary.estimatedRangePartial'
+                : 'molecules.runCostSummary.estimatedRange',
+              { low: usd(props.lowUsd), high: usd(props.highUsd) },
+            );
     } else {
       calls = props.callCount;
-      amount = t(
-        props.estimated
-          ? 'molecules.runCostSummary.actualEstimated'
-          : 'molecules.runCostSummary.actual',
-        { cost: usd(props.totalUsd) },
-      );
+      const key = {
+        all: props.estimated ? 'actualEstimated' : 'actual',
+        partial: props.estimated ? 'actualEstimatedPartial' : 'actualPartial',
+        none: 'actualUnknown',
+      }[coverage];
+      amount = t(`molecules.runCostSummary.${key}`, { cost: usd(props.totalUsd) });
     }
 
     return (
@@ -114,15 +140,20 @@ export const RunCostSummary = React.forwardRef<HTMLDivElement, RunCostSummaryPro
           {props.variant === 'estimate' && (
             <Text as="p" className="text-sm text-muted-foreground" data-testid="run-cost-breakdown">
               {t('molecules.runCostSummary.breakdown', {
-                answers: props.calls.answers,
-                consensus:
-                  props.calls.consensusMin < props.calls.consensus
-                    ? t('molecules.runCostSummary.range', {
-                        min: props.calls.consensusMin,
-                        max: props.calls.consensus,
-                      })
-                    : props.calls.consensus,
-                embeddings: props.calls.embeddings,
+                answers: t('molecules.runCostSummary.answers', { count: props.calls.answers }),
+                consensus: t('molecules.runCostSummary.consensusCalls', {
+                  count: props.calls.consensus,
+                  value:
+                    props.calls.consensusMin < props.calls.consensus
+                      ? t('molecules.runCostSummary.range', {
+                          min: props.calls.consensusMin,
+                          max: props.calls.consensus,
+                        })
+                      : props.calls.consensus,
+                }),
+                embeddings: t('molecules.runCostSummary.embeddingCalls', {
+                  count: props.calls.embeddings,
+                }),
               })}
             </Text>
           )}
@@ -131,7 +162,7 @@ export const RunCostSummary = React.forwardRef<HTMLDivElement, RunCostSummaryPro
               {t('molecules.runCostSummary.consensusUnavailable')}
             </Text>
           )}
-          {props.variant === 'actual' && props.estimated && (
+          {props.variant === 'actual' && props.estimated && coverage !== 'none' && (
             <Text as="p" className="text-sm text-muted-foreground" data-testid="run-cost-estimated-note">
               {t('molecules.runCostSummary.estimatedNote')}
             </Text>

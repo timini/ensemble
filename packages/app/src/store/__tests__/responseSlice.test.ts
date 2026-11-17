@@ -86,7 +86,7 @@ describe("responseSlice", () => {
     expect(store.getState().responses[0]?.usage).toBeNull();
   });
 
-  it("records consensus call usage and clears it", () => {
+  it("keeps consensus call usage until the run is reset", () => {
     const call = {
       provider: "openai",
       modelId: "gpt-4o",
@@ -98,10 +98,6 @@ describe("responseSlice", () => {
     store.getState().addConsensusUsage(call);
     expect(store.getState().consensusUsage).toHaveLength(2);
 
-    store.getState().clearConsensusUsage();
-    expect(store.getState().consensusUsage).toEqual([]);
-
-    store.getState().addConsensusUsage(call);
     store.getState().resetStreamingState();
     expect(store.getState().consensusUsage).toEqual([]);
   });

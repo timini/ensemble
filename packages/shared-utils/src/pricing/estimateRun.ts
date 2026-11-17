@@ -57,6 +57,10 @@ export interface RunEstimate {
     highUsd: number;
     /** `provider/model` ids with no price. Their calls are not in the cost. */
     unpricedModels: string[];
+    /** Planned calls with a price, counted in the range. */
+    pricedCallCount: number;
+    /** Planned calls with no price. When above zero the range is a lower bound. */
+    unpricedCallCount: number;
   };
 }
 
@@ -67,6 +71,8 @@ type Tokens = (scale: 'low' | 'high') => { input: number; output: number };
  * starts. Call counts follow the strategy packages (see countConsensusCalls).
  * The cost range comes from ESTIMATE_TOKENS and the price table; models with
  * no price are listed in `unpricedModels` and left out rather than guessed.
+ * `pricedCallCount` and `unpricedCallCount` tell a full range from a lower
+ * bound, and a lower bound from no price at all.
  */
 export function estimateRun(input: EstimateRunInput): RunEstimate {
   const { models, promptTokens: p, eloTopN } = input;
@@ -82,15 +88,23 @@ export function estimateRun(input: EstimateRunInput): RunEstimate {
     eloTopN,
   });
 
-  const cost = { lowUsd: 0, highUsd: 0, unpricedModels: [] as string[] };
+  const cost = {
+    lowUsd: 0,
+    highUsd: 0,
+    unpricedModels: [] as string[],
+    pricedCallCount: 0,
+    unpricedCallCount: 0,
+  };
   const charge = (model: ModelRef | null, calls: number, tokens: Tokens) => {
     if (!model || calls <= 0) return;
     const price = getModelPrice(model.provider, model.modelId, table);
     if (price.status !== 'known') {
       const id = `${model.provider}/${model.modelId}`;
       if (!cost.unpricedModels.includes(id)) cost.unpricedModels.push(id);
+      cost.unpricedCallCount += calls;
       return;
     }
+    cost.pricedCallCount += calls;
     const usd = (scale: 'low' | 'high') => {
       const t = tokens(scale);
       return (calls * (t.input * price.inputPerMillion + t.output * price.outputPerMillion)) / 1e6;

@@ -42,6 +42,8 @@ describe('computeRunCost', () => {
     expect(cost.callCount).toBe(2);
     expect(cost.estimatedCallCount).toBe(0);
     expect(cost.unpricedModels).toEqual([]);
+    expect(cost.pricedCallCount).toBe(2);
+    expect(cost.unpricedCallCount).toBe(0);
   });
 
   it('marks the total as estimated when any call has no reported usage', () => {
@@ -55,5 +57,14 @@ describe('computeRunCost', () => {
     const cost = computeRunCost([call('xai', 10, 10, 'reported'), call('xai', 10, 10, 'reported')], table);
     expect(cost.totalUsd).toBe(0);
     expect(cost.unpricedModels).toEqual(['xai/x']);
+    expect(cost.pricedCallCount).toBe(0);
+    expect(cost.unpricedCallCount).toBe(2);
+  });
+
+  it('counts priced and unpriced calls when only some have a price', () => {
+    const cost = computeRunCost([call('openai', 1000, 500, 'reported'), call('xai', 10, 10, 'reported')], table);
+    expect(cost.totalUsd).toBeCloseTo(0.002, 12);
+    expect(cost.pricedCallCount).toBe(1);
+    expect(cost.unpricedCallCount).toBe(1);
   });
 });

@@ -19,6 +19,8 @@ export const EstimateStandard: Story = {
     consensusAvailable: true,
     lowUsd: 0.0021,
     highUsd: 0.034,
+    pricedCallCount: 7,
+    unpricedCallCount: 0,
     priceDate: '2026-11-16',
   },
 };
@@ -31,6 +33,8 @@ export const EstimateCouncil: Story = {
     consensusAvailable: true,
     lowUsd: 0.12,
     highUsd: 1.85,
+    pricedCallCount: 66,
+    unpricedCallCount: 0,
     priceDate: '2026-11-16',
   },
 };
@@ -43,10 +47,12 @@ export const EstimateConsensusUnavailable: Story = {
     consensusAvailable: false,
     lowUsd: 0.001,
     highUsd: 0.01,
+    pricedCallCount: 4,
+    unpricedCallCount: 0,
   },
 };
 
-/** Some models have no price in the table. */
+/** Some models have no price in the table, so the range is a lower bound. */
 export const EstimateWithUnpricedModels: Story = {
   args: {
     variant: 'estimate',
@@ -54,6 +60,8 @@ export const EstimateWithUnpricedModels: Story = {
     consensusAvailable: true,
     lowUsd: 0.0004,
     highUsd: 0.004,
+    pricedCallCount: 4,
+    unpricedCallCount: 1,
     unpricedModels: ['perplexity/perplexity-fast'],
   },
 };
@@ -65,17 +73,48 @@ export const ActualReported: Story = {
     callCount: 7,
     totalUsd: 0.0123,
     estimated: false,
+    pricedCallCount: 7,
+    unpricedCallCount: 0,
     priceDate: '2026-11-16',
   },
 };
 
-/** After a run where some calls were estimated from text length. */
+/** After a run where some calls were estimated from text length and some have no price. */
 export const ActualEstimated: Story = {
   args: {
     variant: 'actual',
     callCount: 7,
     totalUsd: 0.0123,
     estimated: true,
+    pricedCallCount: 5,
+    unpricedCallCount: 2,
     unpricedModels: ['openai/text-embedding-3-small'],
+  },
+};
+
+/** No selected model has a price, so the cost is unknown rather than $0. */
+export const EstimateAllUnpriced: Story = {
+  args: {
+    variant: 'estimate',
+    calls: { answers: 3, consensus: 1, consensusMin: 1, embeddings: 0, total: 4 },
+    consensusAvailable: true,
+    lowUsd: 0,
+    highUsd: 0,
+    pricedCallCount: 0,
+    unpricedCallCount: 4,
+    unpricedModels: ['perplexity/perplexity-fast', 'perplexity/perplexity-pro'],
+  },
+};
+
+/** After a run where no model had a price. */
+export const ActualAllUnpriced: Story = {
+  args: {
+    variant: 'actual',
+    callCount: 4,
+    totalUsd: 0,
+    estimated: true,
+    pricedCallCount: 0,
+    unpricedCallCount: 4,
+    unpricedModels: ['perplexity/perplexity-fast'],
   },
 };

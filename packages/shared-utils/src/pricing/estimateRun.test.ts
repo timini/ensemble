@@ -54,6 +54,8 @@ describe('estimateRun', () => {
         expect(estimate.cost.lowUsd).toBeGreaterThan(0);
         expect(estimate.cost.highUsd).toBeGreaterThan(estimate.cost.lowUsd);
         expect(estimate.cost.unpricedModels).toEqual([]);
+        expect(estimate.cost.unpricedCallCount).toBe(0);
+        expect(estimate.cost.pricedCallCount).toBe(estimate.calls.total);
       });
     }
   }
@@ -92,6 +94,26 @@ describe('estimateRun', () => {
     });
     expect(estimate.cost.unpricedModels).toEqual(['xai/unknown-model', 'google/no-price']);
     expect(estimate.cost.lowUsd).toBeGreaterThan(0);
+    // Priced: answer from openai/a and the summary. Unpriced: the xai answer
+    // and two embedding calls.
+    expect(estimate.cost.pricedCallCount).toBe(2);
+    expect(estimate.cost.unpricedCallCount).toBe(3);
+  });
+
+  it('counts no priced calls when no model has a price', () => {
+    const unknown: ModelRef = { provider: 'xai', modelId: 'unknown-model' };
+    const estimate = estimateRun({
+      models: [unknown, unknown, unknown],
+      consensusMethod: 'standard',
+      summarizer: unknown,
+      eloTopN: 3,
+      embeddings: null,
+      promptTokens: 100,
+      table,
+    });
+    expect(estimate.cost.pricedCallCount).toBe(0);
+    expect(estimate.cost.unpricedCallCount).toBe(4);
+    expect(estimate.cost.lowUsd).toBe(0);
   });
 
   it('uses the first model as summarizer when none is set', () => {
@@ -130,6 +152,12 @@ describe('estimateRun', () => {
   it('returns zero calls and zero cost with no models', () => {
     const estimate = run('standard', 0);
     expect(estimate.calls.total).toBe(0);
-    expect(estimate.cost).toEqual({ lowUsd: 0, highUsd: 0, unpricedModels: [] });
+    expect(estimate.cost).toEqual({
+      lowUsd: 0,
+      highUsd: 0,
+      unpricedModels: [],
+      pricedCallCount: 0,
+      unpricedCallCount: 0,
+    });
   });
 });

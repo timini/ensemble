@@ -32,6 +32,10 @@ export interface RunCost {
   estimatedCallCount: number;
   /** `provider/model` ids with no price. Their calls are not in the total. */
   unpricedModels: string[];
+  /** Calls with a price, counted in the total. */
+  pricedCallCount: number;
+  /** Calls with no price. When above zero the total is a lower bound. */
+  unpricedCallCount: number;
 }
 
 /** Price the calls of a finished run with the price table. */
@@ -42,6 +46,8 @@ export function computeRunCost(calls: CallUsage[], table: PriceTable = PRICE_TAB
     callCount: calls.length,
     estimatedCallCount: 0,
     unpricedModels: [],
+    pricedCallCount: 0,
+    unpricedCallCount: 0,
   };
   for (const call of calls) {
     if (call.source === 'estimated') {
@@ -56,8 +62,10 @@ export function computeRunCost(calls: CallUsage[], table: PriceTable = PRICE_TAB
     if (usd === null) {
       const id = `${call.provider}/${call.modelId}`;
       if (!result.unpricedModels.includes(id)) result.unpricedModels.push(id);
+      result.unpricedCallCount += 1;
     } else {
       result.totalUsd += usd;
+      result.pricedCallCount += 1;
     }
   }
   return result;

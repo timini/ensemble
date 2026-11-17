@@ -88,7 +88,6 @@ export interface ResponseSlice {
   calculateAgreement: () => void;
   setMetaAnalysis: (analysis: string) => void;
   addConsensusUsage: (call: CallUsage) => void;
-  clearConsensusUsage: () => void;
   clearResponses: () => void;
   resetStreamingState: () => void;
 }
@@ -230,10 +229,6 @@ export const createResponseSlice: StateCreator<ResponseSlice> = (set, get) => ({
 
   addConsensusUsage: (call) => {
     set((state) => ({ consensusUsage: [...state.consensusUsage, call] }));
-  },
-
-  clearConsensusUsage: () => {
-    set({ consensusUsage: [] });
   },
 
   resetStreamingState: () => {

@@ -11,7 +11,7 @@
       "features": "Features",
       "about": "About",
       "github": "GitHub",
-      "copyright": "\u00a9 {{year}} Ensemble AI"
+      "copyright": "© {{year}} Ensemble AI"
     },
     "steps": {
       "config": "Config",
@@ -94,11 +94,22 @@
     "runCostSummary": {
       "calls_one": "{{count}} model call",
       "calls_other": "{{count}} model calls",
-      "breakdown": "{{answers}} answers, {{consensus}} consensus calls, {{embeddings}} embedding calls",
+      "answers_one": "{{count}} answer",
+      "answers_other": "{{count}} answers",
+      "consensusCalls_one": "{{value}} consensus call",
+      "consensusCalls_other": "{{value}} consensus calls",
+      "embeddingCalls_one": "{{count}} embedding call",
+      "embeddingCalls_other": "{{count}} embedding calls",
+      "breakdown": "{{answers}}, {{consensus}}, {{embeddings}}",
       "range": "{{min}} to {{max}}",
       "estimatedRange": "Estimated cost: {{low}} to {{high}}",
+      "estimatedRangePartial": "Estimated cost: {{low}} to {{high}}, plus calls with no price",
+      "estimatedUnknown": "Estimated cost: unknown",
       "actual": "Cost: {{cost}}",
       "actualEstimated": "Estimated cost: {{cost}}",
+      "actualPartial": "Cost: at least {{cost}}",
+      "actualEstimatedPartial": "Estimated cost: at least {{cost}}",
+      "actualUnknown": "Cost: unknown",
       "estimatedNote": "Some providers did not report token counts, so those calls are estimated from text length.",
       "consensusUnavailable": "This consensus method needs at least 3 answers, so it will not run.",
       "unpriced": "No price for {{models}}. Those calls are not in the cost.",

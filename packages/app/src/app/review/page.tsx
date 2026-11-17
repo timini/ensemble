@@ -205,6 +205,8 @@ export default function ReviewPage() {
           totalUsd={runCost.totalUsd}
           estimated={runCost.estimated}
           unpricedModels={runCost.unpricedModels}
+          pricedCallCount={runCost.pricedCallCount}
+          unpricedCallCount={runCost.unpricedCallCount}
           priceDate={PRICE_TABLE_DATE}
         />
       )}

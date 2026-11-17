@@ -41,8 +41,8 @@ import {
  * The prompt and response data are cleared by an inline script in
  * src/app/layout.tsx when /review is opened by a fresh navigation (navigation
  * type "navigate"). It resets the prompt, responses, manual responses,
- * embeddings, similarity matrix, agreement stats and meta analysis in
- * localStorage before the store hydrates. Reloads, back/forward loads and
+ * embeddings, similarity matrix, agreement stats, meta analysis and consensus
+ * usage in localStorage before the store hydrates. Reloads, back/forward loads and
  * client-side navigation keep the persisted data.
  */
 
