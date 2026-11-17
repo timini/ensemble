@@ -102,14 +102,14 @@ export function useStreamingResponses({
           // Buffer the chunk instead of updating store immediately
           streamBuffers.current[modelId] += chunk;
         },
-        (fullResponse, responseTime, tokenCount) => {
+        (_fullResponse, responseTime, tokenCount, usage) => {
           // Clear interval and flush remaining buffer
           if (flushIntervals.current[modelId]) {
             clearInterval(flushIntervals.current[modelId]);
             delete flushIntervals.current[modelId];
           }
           flushBuffer(modelId);
-          completeResponse(model.id, responseTime, tokenCount);
+          completeResponse(model.id, responseTime, tokenCount, usage);
         },
         (error) => {
           logger.error(`[useStreamingResponses] Error for ${modelId}:`, error);

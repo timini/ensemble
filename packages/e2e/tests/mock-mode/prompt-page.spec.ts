@@ -69,6 +69,19 @@ test.describe('Prompt Page', () => {
     await expect(page.getByTestId('workflow-navigator')).toBeVisible();
   });
 
+  test('shows the model calls and estimated cost before submitting', async ({ page }) => {
+    const summary = page.getByTestId('run-cost-summary');
+    await expect(summary).toBeVisible();
+    await expect(summary).toHaveAttribute('data-variant', 'estimate');
+    // Standard consensus with 2 models: 2 answers, 1 synthesis call and
+    // 2 embedding calls.
+    await expect(page.getByTestId('run-cost-calls')).toHaveText('5 model calls');
+    await expect(page.getByTestId('run-cost-breakdown')).toHaveText(
+      '2 answers, 1 consensus calls, 2 embedding calls',
+    );
+    await expect(page.getByTestId('run-cost-amount')).toContainText('Estimated cost: $');
+  });
+
   test('displays ensemble configuration summary', async ({ page }) => {
     // Check for ensemble configuration summary
     await expect(page.getByTestId('ensemble-configuration-summary')).toBeVisible();

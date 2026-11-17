@@ -26,7 +26,12 @@ export interface AIProvider {
     prompt: string,
     model: string,
     onChunk: (chunk: string) => void,
-    onComplete: (fullResponse: string, responseTime: number, tokenCount?: number) => void,
+    onComplete: (
+      fullResponse: string,
+      responseTime: number,
+      tokenCount?: number,
+      usage?: TokenUsage, // { inputTokens, outputTokens } when the provider reports them
+    ) => void,
     onError: (error: Error) => void,
     options?: StreamResponseOptions, // { temperature?, seed? }
   ): Promise<void>;
@@ -132,7 +137,8 @@ void client.streamResponse(
   prompt,
   selection.model,
   (chunk) => appendStreamChunk(selection.id, chunk),
-  (_full, responseTime, tokenCount) => completeResponse(selection.id, responseTime, tokenCount),
+  (_full, responseTime, tokenCount, usage) =>
+    completeResponse(selection.id, responseTime, tokenCount, usage),
   (error) => setError(selection.id, error.message),
 );
 ```

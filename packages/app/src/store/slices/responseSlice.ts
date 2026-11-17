@@ -10,14 +10,16 @@
  * navigation keep the persisted data.
  */
 
-import type { StateCreator } from 'zustand';
+import type { StateCreator } from "zustand";
+import type { TokenUsage } from "@ensemble-ai/shared-utils/providers";
+import type { CallUsage } from "@ensemble-ai/shared-utils/pricing";
 import {
   agreementStatistics,
   similarityMatrix as buildSimilarityMatrix,
-} from '@ensemble-ai/shared-utils/similarity';
-import { toError } from '~/lib/errors';
-import { logger } from '~/lib/logger';
-import type { ProviderType } from './ensembleSlice';
+} from "@ensemble-ai/shared-utils/similarity";
+import { toError } from "~/lib/errors";
+import { logger } from "~/lib/logger";
+import type { ProviderType } from "./ensembleSlice";
 
 export interface ModelResponse {
   modelId: string;
@@ -28,6 +30,11 @@ export interface ModelResponse {
   isComplete: boolean;
   responseTime: number | null;
   tokenCount: number | null;
+  /**
+   * Input and output tokens reported by the provider, or null when it
+   * reported none. Missing in runs persisted before usage was recorded.
+   */
+  usage?: TokenUsage | null;
   error: string | null;
 }
 
@@ -55,11 +62,22 @@ export interface ResponseSlice {
   similarityMatrix: number[][] | null;
   agreementStats: AgreementStats | null;
   metaAnalysis: string | null;
+  /** Token usage of each consensus call in the current run. */
+  consensusUsage: CallUsage[];
 
   setPrompt: (prompt: string) => void;
-  startStreaming: (modelId: string, provider: ProviderType, model: string) => void;
+  startStreaming: (
+    modelId: string,
+    provider: ProviderType,
+    model: string,
+  ) => void;
   appendStreamChunk: (modelId: string, chunk: string) => void;
-  completeResponse: (modelId: string, responseTime: number, tokenCount?: number) => void;
+  completeResponse: (
+    modelId: string,
+    responseTime: number,
+    tokenCount?: number,
+    usage?: TokenUsage,
+  ) => void;
   setError: (modelId: string, error: string) => void;
   addManualResponse: (label: string, response: string) => void;
   removeManualResponse: (id: string) => void;
@@ -69,6 +87,8 @@ export interface ResponseSlice {
   ) => void;
   calculateAgreement: () => void;
   setMetaAnalysis: (analysis: string) => void;
+  addConsensusUsage: (call: CallUsage) => void;
+  clearConsensusUsage: () => void;
   clearResponses: () => void;
   resetStreamingState: () => void;
 }
@@ -82,6 +102,7 @@ export const createResponseSlice: StateCreator<ResponseSlice> = (set, get) => ({
   similarityMatrix: null,
   agreementStats: null,
   metaAnalysis: null,
+  consensusUsage: [],
 
   setPrompt: (prompt) => {
     set({ prompt });
@@ -108,11 +129,12 @@ export const createResponseSlice: StateCreator<ResponseSlice> = (set, get) => ({
         modelId,
         provider,
         model,
-        response: '',
+        response: "",
         isStreaming: true,
         isComplete: false,
         responseTime: null,
         tokenCount: null,
+        usage: null,
         error: null,
       };
 
@@ -129,7 +151,7 @@ export const createResponseSlice: StateCreator<ResponseSlice> = (set, get) => ({
     });
   },
 
-  completeResponse: (modelId, responseTime, tokenCount) => {
+  completeResponse: (modelId, responseTime, tokenCount, usage) => {
     set((state) => {
       const responses = state.responses.map((r) =>
         r.modelId === modelId
@@ -139,6 +161,7 @@ export const createResponseSlice: StateCreator<ResponseSlice> = (set, get) => ({
               isComplete: true,
               responseTime,
               tokenCount: tokenCount ?? null,
+              usage: usage ?? null,
             }
           : r,
       );
@@ -186,7 +209,9 @@ export const createResponseSlice: StateCreator<ResponseSlice> = (set, get) => ({
     }
 
     try {
-      const matrix = buildSimilarityMatrix(embeddings.map((entry) => entry.embedding));
+      const matrix = buildSimilarityMatrix(
+        embeddings.map((entry) => entry.embedding),
+      );
       set({
         similarityMatrix: matrix,
         agreementStats: agreementStatistics(upperTriangle(matrix)),
@@ -194,7 +219,7 @@ export const createResponseSlice: StateCreator<ResponseSlice> = (set, get) => ({
     } catch (error: unknown) {
       // Mismatched or zero vectors cannot be compared. Show no score rather
       // than a wrong one.
-      logger.error('Unable to calculate agreement', toError(error));
+      logger.error("Unable to calculate agreement", toError(error));
       set({ similarityMatrix: null, agreementStats: null });
     }
   },
@@ -203,8 +228,17 @@ export const createResponseSlice: StateCreator<ResponseSlice> = (set, get) => ({
     set({ metaAnalysis: analysis });
   },
 
+  addConsensusUsage: (call) => {
+    set((state) => ({ consensusUsage: [...state.consensusUsage, call] }));
+  },
+
+  clearConsensusUsage: () => {
+    set({ consensusUsage: [] });
+  },
+
   resetStreamingState: () => {
     set({
+      consensusUsage: [],
       responses: [],
       embeddings: [],
       embeddingsSource: null,

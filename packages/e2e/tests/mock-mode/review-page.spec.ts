@@ -97,6 +97,15 @@ test.describe('Review Page', () => {
     });
   });
 
+  test('shows the cost of the run once the answers finish', async ({ page }) => {
+    const summary = page.getByTestId('run-cost-summary');
+    await expect(summary).toBeVisible({ timeout: 30000 });
+    await expect(summary).toHaveAttribute('data-variant', 'actual');
+    // Mock providers report no token usage, so the cost is labelled estimated.
+    await expect(page.getByTestId('run-cost-amount')).toContainText('Estimated cost: $');
+    await expect(page.getByTestId('run-cost-estimated-note')).toBeVisible();
+  });
+
   test('shows agreement analysis once responses have embeddings', async ({ page }) => {
     await expect(page.getByTestId('agreement-analysis')).toBeVisible({ timeout: 30000 });
     await expect(page.getByTestId('agreement-unavailable')).toHaveCount(0);

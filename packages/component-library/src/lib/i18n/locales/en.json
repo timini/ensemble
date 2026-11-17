@@ -90,6 +90,20 @@
       "active": "Agreement will use {{provider}} embeddings.",
       "noneTitle": "No agreement score",
       "noneDescription": "Add a valid OpenAI or Google API key to score agreement between answers."
+    },
+    "runCostSummary": {
+      "calls_one": "{{count}} model call",
+      "calls_other": "{{count}} model calls",
+      "breakdown": "{{answers}} answers, {{consensus}} consensus calls, {{embeddings}} embedding calls",
+      "range": "{{min}} to {{max}}",
+      "estimatedRange": "Estimated cost: {{low}} to {{high}}",
+      "actual": "Cost: {{cost}}",
+      "actualEstimated": "Estimated cost: {{cost}}",
+      "estimatedNote": "Some providers did not report token counts, so those calls are estimated from text length.",
+      "consensusUnavailable": "This consensus method needs at least 3 answers, so it will not run.",
+      "unpriced": "No price for {{models}}. Those calls are not in the cost.",
+      "estimateSource": "Range assumes short to long answers. Prices from OpenRouter, {{date}}.",
+      "priceSource": "Prices from OpenRouter, {{date}}."
     }
   },
   "organisms": {

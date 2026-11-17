@@ -1,0 +1,126 @@
+/**
+ * Glue between the store and the shared pricing code: builds the input of
+ * the pre-run estimate and the list of calls priced after a run.
+ */
+import {
+  GOOGLE_EMBEDDING_MODEL,
+  OPENAI_EMBEDDING_MODEL,
+} from "@ensemble-ai/shared-utils/providers";
+import {
+  estimateTokensFromText,
+  usageFromText,
+  type CallUsage,
+  type EstimateRunInput,
+  type ModelRef,
+} from "@ensemble-ai/shared-utils/pricing";
+import type { ModelResponse } from "~/store";
+import type {
+  ConsensusMethod,
+  ModelSelection,
+} from "~/store/slices/ensembleSlice";
+import { FALLBACK_MODELS } from "~/lib/models";
+
+const EMBEDDING_MODELS: Record<string, string> = {
+  openai: OPENAI_EMBEDDING_MODEL,
+  google: GOOGLE_EMBEDDING_MODEL,
+};
+
+/** The embedding model the client calls for a provider, or null for none. */
+export function embeddingModelRef(provider: string | null): ModelRef | null {
+  const modelId = provider ? EMBEDDING_MODELS[provider] : undefined;
+  return provider && modelId ? { provider, modelId } : null;
+}
+
+function summarizerRef(
+  summarizerModel: string | null,
+  selectedModels: ModelSelection[],
+): ModelRef | null {
+  if (!summarizerModel) return null;
+  const provider =
+    selectedModels.find((m) => m.model === summarizerModel)?.provider ??
+    FALLBACK_MODELS.find((m) => m.id === summarizerModel)?.provider;
+  return provider ? { provider, modelId: summarizerModel } : null;
+}
+
+export interface BuildEstimateInputOptions {
+  selectedModels: ModelSelection[];
+  manualResponseCount: number;
+  consensusMethod: ConsensusMethod;
+  summarizerModel: string | null;
+  eloTopN: number;
+  embeddingsProvider: string | null;
+  prompt: string;
+}
+
+/** Input for estimateRun from the current ensemble settings and prompt. */
+export function buildEstimateInput(
+  options: BuildEstimateInputOptions,
+): EstimateRunInput {
+  return {
+    models: options.selectedModels.map((m) => ({
+      provider: m.provider,
+      modelId: m.model,
+    })),
+    manualResponseCount: options.manualResponseCount,
+    consensusMethod: options.consensusMethod,
+    summarizer: summarizerRef(options.summarizerModel, options.selectedModels),
+    eloTopN: options.eloTopN,
+    embeddings: embeddingModelRef(options.embeddingsProvider),
+    promptTokens: estimateTokensFromText(options.prompt),
+  };
+}
+
+export interface BuildRunCallUsageOptions {
+  prompt: string;
+  responses: ModelResponse[];
+  selectedModels: ModelSelection[];
+  consensusUsage: CallUsage[];
+  /** Answers that have an embedding. */
+  embeddings: { modelId: string }[];
+  /** Provider that produced the embeddings. */
+  embeddingsSource: string | null;
+}
+
+/**
+ * Every call of a finished run with its tokens: the answers (reported usage,
+ * or estimated from text length), the consensus calls and the embedding
+ * calls. Embedding APIs report usage but the clients do not return it, so
+ * embedding calls are always estimated.
+ */
+export function buildRunCallUsage(
+  options: BuildRunCallUsageOptions,
+): CallUsage[] {
+  const { prompt, responses, selectedModels } = options;
+  const calls: CallUsage[] = [];
+
+  for (const response of responses) {
+    if (!response.isComplete || response.error) continue;
+    const modelId =
+      selectedModels.find((m) => m.id === response.modelId)?.model ??
+      response.model;
+    const reported = response.usage;
+    calls.push({
+      provider: response.provider,
+      modelId,
+      ...(reported ?? usageFromText(prompt, response.response)),
+      source: reported ? "reported" : "estimated",
+    });
+  }
+
+  calls.push(...options.consensusUsage);
+
+  const embeddingModel = embeddingModelRef(options.embeddingsSource);
+  if (embeddingModel) {
+    for (const { modelId } of options.embeddings) {
+      const text = responses.find((r) => r.modelId === modelId)?.response ?? "";
+      calls.push({
+        ...embeddingModel,
+        inputTokens: estimateTokensFromText(text),
+        outputTokens: 0,
+        source: "estimated",
+      });
+    }
+  }
+
+  return calls;
+}

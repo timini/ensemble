@@ -5,28 +5,31 @@
  * User enters their prompt and submits to the ensemble
  */
 
-'use client';
+"use client";
 
-import { useRouter } from 'next/navigation';
-import { useState, useEffect, useMemo } from 'react';
-import { useTranslation } from 'react-i18next';
-import { useStore } from '~/store';
-import { useStepNavigation } from '~/hooks/useStepNavigation';
-import { PageHero } from '@/components/organisms/PageHero';
-import { EnsembleConfigurationSummary } from '@/components/organisms/EnsembleConfigurationSummary';
-import { WorkflowNavigator } from '@/components/organisms/WorkflowNavigator';
-import { PromptTips } from '@/components/organisms/PromptTips';
-import { PromptInputWithHint } from '@/components/organisms/PromptInputWithHint';
-import { ProgressSteps } from '@/components/molecules/ProgressSteps';
-import { ResponseCard } from '@/components/molecules/ResponseCard';
+import { useRouter } from "next/navigation";
+import { useState, useEffect, useMemo } from "react";
+import { useTranslation } from "react-i18next";
+import { useStore } from "~/store";
+import { useStepNavigation } from "~/hooks/useStepNavigation";
+import { PageHero } from "@/components/organisms/PageHero";
+import { EnsembleConfigurationSummary } from "@/components/organisms/EnsembleConfigurationSummary";
+import { WorkflowNavigator } from "@/components/organisms/WorkflowNavigator";
+import { PromptTips } from "@/components/organisms/PromptTips";
+import { PromptInputWithHint } from "@/components/organisms/PromptInputWithHint";
+import { ProgressSteps } from "@/components/molecules/ProgressSteps";
+import { ResponseCard } from "@/components/molecules/ResponseCard";
+import { RunCostSummary } from "@/components/molecules/RunCostSummary";
+import { PRICE_TABLE_DATE } from "@ensemble-ai/shared-utils/pricing";
+import { useRunEstimate } from "~/hooks/useRunEstimate";
 import {
   ProviderRegistry,
   type AIProvider,
-} from '@ensemble-ai/shared-utils/providers';
-import { FALLBACK_MODELS } from '~/lib/models';
-import { toError } from '~/lib/errors';
-import { logger } from '~/lib/logger';
-import type { ConsensusMethod } from '~/store/slices/ensembleSlice';
+} from "@ensemble-ai/shared-utils/providers";
+import { FALLBACK_MODELS } from "~/lib/models";
+import { toError } from "~/lib/errors";
+import { logger } from "~/lib/logger";
+import type { ConsensusMethod } from "~/store/slices/ensembleSlice";
 
 export default function PromptPage() {
   const { t } = useTranslation();
@@ -56,7 +59,8 @@ export default function PromptPage() {
   const setCurrentStep = useStore((state) => state.setCurrentStep);
   const completeStep = useStore((state) => state.completeStep);
 
-  const [localPrompt, setLocalPrompt] = useState(prompt ?? '');
+  const [localPrompt, setLocalPrompt] = useState(prompt ?? "");
+  const runEstimate = useRunEstimate(localPrompt);
 
   const selectedModelIds = useMemo(
     () => selectedModels.map((m) => m.model),
@@ -68,12 +72,12 @@ export default function PromptPage() {
     if (selectedModelIds.length > 0) {
       return selectedModelIds[0]!;
     }
-    return t('organisms.ensembleConfigurationSummary.noSummarizer');
+    return t("organisms.ensembleConfigurationSummary.noSummarizer");
   }, [selectedModelIds, summarizerModel, t]);
 
   // Sync local state with Zustand when component mounts or prompt changes
   useEffect(() => {
-    setLocalPrompt(prompt ?? '');
+    setLocalPrompt(prompt ?? "");
   }, [prompt]);
 
   const handlePromptChange = (value: string) => {
@@ -87,12 +91,12 @@ export default function PromptPage() {
     resetStreamingState();
 
     const registry = ProviderRegistry.getInstance();
-    const clientMode: 'mock' | 'free' | 'pro' =
-      process.env.NEXT_PUBLIC_MOCK_MODE === 'true'
-        ? 'mock'
-        : mode === 'pro'
-          ? 'pro'
-          : 'free';
+    const clientMode: "mock" | "free" | "pro" =
+      process.env.NEXT_PUBLIC_MOCK_MODE === "true"
+        ? "mock"
+        : mode === "pro"
+          ? "pro"
+          : "free";
 
     const currentPrompt = localPrompt.trim();
 
@@ -107,8 +111,8 @@ export default function PromptPage() {
       try {
         providerClient = registry.getProvider(selection.provider, clientMode);
       } catch (error: unknown) {
-        if (registry.hasProvider(selection.provider, 'mock')) {
-          providerClient = registry.getProvider(selection.provider, 'mock');
+        if (registry.hasProvider(selection.provider, "mock")) {
+          providerClient = registry.getProvider(selection.provider, "mock");
         } else {
           throw toError(
             error,
@@ -122,8 +126,8 @@ export default function PromptPage() {
           currentPrompt,
           selection.model,
           (chunk: string) => appendStreamChunk(selection.id, chunk),
-          (_fullResponse: string, responseTime: number, tokenCount?: number) => {
-            completeResponse(selection.id, responseTime, tokenCount);
+          (_fullResponse, responseTime, tokenCount, usage) => {
+            completeResponse(selection.id, responseTime, tokenCount, usage);
           },
           (error: Error) => {
             logger.error(
@@ -143,9 +147,9 @@ export default function PromptPage() {
         });
     });
 
-    completeStep('prompt');
-    setCurrentStep('review');
-    router.push('/review');
+    completeStep("prompt");
+    setCurrentStep("review");
+    router.push("/review");
   };
 
   const handleSummarizerChange = (modelId: string) => {
@@ -153,8 +157,8 @@ export default function PromptPage() {
   };
 
   const handleBack = () => {
-    setCurrentStep('ensemble');
-    router.push('/ensemble');
+    setCurrentStep("ensemble");
+    router.push("/ensemble");
   };
 
   // Validate: prompt must not be empty
@@ -164,7 +168,7 @@ export default function PromptPage() {
   const modelNames = selectedModelIds;
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-6xl">
+    <div className="container mx-auto max-w-6xl px-4 py-8">
       <ProgressSteps
         currentStep={currentStep}
         fallbackStep="prompt"
@@ -172,8 +176,8 @@ export default function PromptPage() {
       />
 
       <PageHero
-        title={t('pages.prompt.title')}
-        description={t('pages.prompt.description')}
+        title={t("pages.prompt.title")}
+        description={t("pages.prompt.description")}
       />
 
       <div className="mt-8 space-y-8">
@@ -203,7 +207,7 @@ export default function PromptPage() {
         {manualResponses.length > 0 && (
           <div data-testid="manual-responses-preview" className="space-y-4">
             <h3 className="text-lg font-semibold">
-              {t('organisms.ensembleSidebar.manualResponses')}
+              {t("organisms.ensembleSidebar.manualResponses")}
             </h3>
             <div className="space-y-4">
               {manualResponses.map((manual) => (
@@ -222,13 +226,26 @@ export default function PromptPage() {
         )}
       </div>
 
+      {selectedModels.length > 0 && (
+        <RunCostSummary
+          className="mt-8"
+          variant="estimate"
+          calls={runEstimate.calls}
+          consensusAvailable={runEstimate.consensusAvailable}
+          lowUsd={runEstimate.cost.lowUsd}
+          highUsd={runEstimate.cost.highUsd}
+          unpricedModels={runEstimate.cost.unpricedModels}
+          priceDate={PRICE_TABLE_DATE}
+        />
+      )}
+
       <div className="mt-12">
         <WorkflowNavigator
           currentStep={currentStep}
           onContinue={handleSubmit}
           onBack={handleBack}
           continueDisabled={!isValid}
-          continueLabel={t('pages.prompt.generateButton')}
+          continueLabel={t("pages.prompt.generateButton")}
         />
       </div>
     </div>

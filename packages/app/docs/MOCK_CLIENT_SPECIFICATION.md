@@ -81,7 +81,7 @@ When `enableErrors` is true, `streamResponse` fails with `Rate limit exceeded. P
 
 - Output ignores the prompt and has no structure.
 - Embeddings and agreement scores are not meaningful in mock mode.
-- Token counts and costs are estimates only.
+- The mock client reports no `usage`, so the review page labels the run cost as estimated from text length. The `costPer1kTokens` values in its model list are not used for pricing; the shared price table is.
 - No timeout or network error simulation.
 
 ## Related

@@ -24,6 +24,9 @@ import { useConsensusStatus } from "./hooks/useConsensusStatus";
 import { useConsensusTrigger } from "./hooks/useConsensusTrigger";
 import { ResponsesSection } from "./_components/ResponsesSection";
 import { AgreementSection } from "./_components/AgreementSection";
+import { RunCostSummary } from "@/components/molecules/RunCostSummary";
+import { PRICE_TABLE_DATE } from "@ensemble-ai/shared-utils/pricing";
+import { useRunCost } from "~/hooks/useRunCost";
 
 const MAX_EXPANDED_CARDS = 3;
 
@@ -53,8 +56,17 @@ export default function ReviewPage() {
     viewSimilarityMatrix,
   } = useReviewPageState(hasHydrated);
 
-  const { completedResponses, pairwiseComparisons, overallAgreement, averageConfidence } =
-    useReviewAnalytics(viewResponses, viewAgreementStats, viewSimilarityMatrix, viewEmbeddings);
+  const {
+    completedResponses,
+    pairwiseComparisons,
+    overallAgreement,
+    averageConfidence,
+  } = useReviewAnalytics(
+    viewResponses,
+    viewAgreementStats,
+    viewSimilarityMatrix,
+    viewEmbeddings,
+  );
 
   const { retryModel } = useStreamingResponses({ hasHydrated, prompt, mode });
 
@@ -128,6 +140,12 @@ export default function ReviewPage() {
 
   const displayPrompt = hasHydrated ? (prompt ?? "") : "";
 
+  const runCost = useRunCost(
+    viewResponses,
+    viewEmbeddings,
+    viewEmbeddingsSource,
+  );
+
   return (
     <div className="container mx-auto max-w-6xl px-4 py-8">
       <ProgressSteps
@@ -178,7 +196,20 @@ export default function ReviewPage() {
         onBack={handleBack}
       />
 
-      {/* 5. Action Buttons */}
+      {/* 5. Cost of the run (updates as consensus calls finish) */}
+      {runCost && (
+        <RunCostSummary
+          className="mt-8"
+          variant="actual"
+          callCount={runCost.callCount}
+          totalUsd={runCost.totalUsd}
+          estimated={runCost.estimated}
+          unpricedModels={runCost.unpricedModels}
+          priceDate={PRICE_TABLE_DATE}
+        />
+      )}
+
+      {/* 6. Action Buttons */}
       <div className="mt-12 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <WorkflowNavigator
           currentStep="review"

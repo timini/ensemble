@@ -8,6 +8,7 @@ import { CouncilConsensus } from '@ensemble-ai/consensus-council';
 import type { ConsensusModelResponse } from '@ensemble-ai/consensus-core';
 import type { CouncilParticipant } from '@ensemble-ai/consensus-council';
 import { ProviderRegistry, type ProviderName } from '@ensemble-ai/shared-utils/providers';
+import { withUsageTracking } from '@ensemble-ai/shared-utils/pricing';
 import { FALLBACK_MODELS } from '~/lib/models';
 import { logger } from '~/lib/logger';
 
@@ -20,6 +21,8 @@ export function useConsensusGeneration() {
     const consensusMethod = useStore((state) => state.consensusMethod);
     const eloTopN = useStore((state) => state.eloTopN);
     const mode = useStore((state) => state.mode);
+    const addConsensusUsage = useStore((state) => state.addConsensusUsage);
+    const clearConsensusUsage = useStore((state) => state.clearConsensusUsage);
 
     const generateConsensus = async (
         responses: { modelId: string; modelName: string; content: string }[],
@@ -42,6 +45,7 @@ export function useConsensusGeneration() {
 
         setIsGenerating(true);
         setError(null);
+        clearConsensusUsage();
 
         try {
             // Resolve Dependencies
@@ -64,7 +68,11 @@ export function useConsensusGeneration() {
                     throw new Error(`Cannot determine provider for summarizer model: ${effectiveSummarizerModelId}`);
                 }
             }
-            const providerClient = registry.getProvider(providerName, clientMode);
+            // Every consensus call goes through a tracked provider so the
+            // review page can show what the run cost.
+            const trackedProvider = (name: ProviderName) =>
+                withUsageTracking(registry.getProvider(name, clientMode), name, addConsensusUsage);
+            const providerClient = trackedProvider(providerName);
 
             const consensusResponses: ConsensusModelResponse[] = responses.map(r => ({
                 modelId: r.modelId,
@@ -97,7 +105,7 @@ export function useConsensusGeneration() {
                     return {
                         modelId: m.id,
                         modelName: m.model,
-                        provider: registry.getProvider(pName, clientMode),
+                        provider: trackedProvider(pName),
                         modelApiId: m.model,
                     };
                 });
