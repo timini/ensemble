@@ -110,6 +110,8 @@ The store records which provider produced the embeddings (`embeddingsSource`). W
 
 The review page computes the cosine similarity matrix and agreement statistics from these vectors with `shared-utils/similarity`. Only mock mode uses the mock client's hash-based vectors.
 
+The high, medium and low labels depend on the embedding model. `src/lib/agreementCalibration.ts` looks up the model in use (`openai/text-embedding-3-small`, `google/gemini-embedding-2`, or the endpoint preset and embedding model, such as `ollama/nomic-embed-text`) in the committed `src/data/agreement-calibration.json`, written by `ensemble-eval calibrate-agreement` from benchmark runs (see `packages/eval/docs/BENCHMARKS.md`). A model with no entry keeps the original mapping, (cosine + 1) / 2 above 0.8 high and from 0.5 medium, and the analysis shows an "Uncalibrated" badge. The file has no entries yet.
+
 ## Factory and registry
 
 `createProviderClient({ provider, mode, getApiKey })` (`factories/createProviderClient.ts`):

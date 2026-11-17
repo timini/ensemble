@@ -16,7 +16,7 @@ The app's `tsconfig.json` also maps the bare `@ensemble-ai/shared-utils` import 
 |--------|----------|
 | `@ensemble-ai/shared-utils` | Everything below |
 | `@ensemble-ai/shared-utils/providers` | `AIProvider` and related types, `ProviderRegistry`, `createProviderClient`, `MockProviderClient`, the six `Free*Client` classes, `FreeOpenAICompatibleClient`, `OpenAICompatibleEndpointsClient` and the endpoint presets and helpers (`ENDPOINT_PRESETS`, `toEndpointModelId`, `parseEndpointModelId`, `isLocalEndpoint`, `isLoopbackURL`, `modelListIncludes`), the local server helpers (`detectOllama`, `pickEmbeddingModel`, `isEmbeddingModelId`, `ollamaPullCommand`, `isLocalNetworkBlockLikely`, `OLLAMA_DEFAULT_URL`, `DEFAULT_OLLAMA_EMBEDDING_MODEL`), `sanitizeProviderErrorMessage`, `ProviderError`, `classifyProviderError`, `DEFAULT_STREAM_TIMEOUT_MS` |
-| `@ensemble-ai/shared-utils/similarity` | `cosineSimilarity`, `similarityMatrix`, `agreementStatistics`, `normalizeSimilarity` |
+| `@ensemble-ai/shared-utils/similarity` | `cosineSimilarity`, `similarityMatrix`, `agreementStatistics`, `normalizeSimilarity`, `resolveAgreementCalibration`, `agreementLevel`, `displayThresholds`, `embeddingModelKey` |
 | `@ensemble-ai/shared-utils/security` | `encrypt`, `decrypt`, `deriveKey`, `isWebCryptoAvailable` |
 | `@ensemble-ai/shared-utils/pricing` | `getModelPrice`, `PRICE_TABLE`, `estimateRun`, `countConsensusCalls`, `computeRunCost`, `withUsageTracking`, `estimateTokensFromText` |
 | `@ensemble-ai/shared-utils/consensus` | Re-exports from `@ensemble-ai/consensus-core` and the four strategy packages (kept for backward compatibility; new code can import those packages directly) |
@@ -37,9 +37,9 @@ Full description: [packages/app/docs/PROVIDER_ARCHITECTURE.md](../app/docs/PROVI
 
 ## Pricing (`src/pricing/`)
 
-- `priceTable.ts` is generated; do not edit it by hand. Refresh it with `npm run prices:refresh` (public OpenRouter model lists, no key). The mapping from OpenRouter ids lives in `openRouterMapping.ts` and is tested against fixtures in `src/pricing/__fixtures__/`.
+- `priceTable.ts` is generated; do not edit it by hand. Refresh it with `npm run prices:refresh` (public OpenRouter model lists, no key). The mapping from OpenRouter ids lives in `openRouterMapping.ts` and is tested against fixtures in `src/pricing/__fixtures__/`. First-party vendors map to their provider (`anthropic/claude-opus-5-5`); open-weight vendors (Meta Llama, Qwen, Mistral, Microsoft, IBM Granite, NVIDIA, AllenAI) are kept as `openrouter/<OpenRouter id>`, for models called through OpenRouter.
 - `getModelPrice(provider, modelId)` gives USD per million input and output tokens, or `{ status: 'unknown' }`. It also accepts Anthropic ids with dots and Gemini ids with a `models/` prefix. OpenAI-compatible model ids are priced by `getEndpointModelPrice` from the configured endpoints (`{ id, baseURL }`, the fourth argument; `estimateRun` takes them as `endpoints`, `computeRunCost` as its third argument): a local preset at a loopback URL (`isLocalEndpoint`) costs 0 and is marked `local`, OpenRouter at `openrouter.ai` uses the table entry with the same OpenRouter id when there is one, and the rest (Groq, Together, Custom, local presets at other hosts, endpoints not passed in) are unknown. `estimateRun` and `computeRunCost` report `localCallCount`.
-- `estimateRun(input)` returns call counts by kind (answers, consensus, embeddings) and a cost range before a run. `countConsensusCalls` mirrors the strategy packages; see the call counts in [docs/ARCHITECTURE.md](../../docs/ARCHITECTURE.md#pricing).
+- `estimateRun(input)` returns call counts by kind (answers, consensus, embeddings) and a cost range before a run. Its token assumptions (`ESTIMATE_TOKENS`) are the defaults in `tokenAssumptions.ts`, replaced field by field by a fit in the generated `tokenCalibration.ts` (`ensemble-eval calibrate-tokens`) when one is committed; `ESTIMATE_TOKENS_CALIBRATED` says which. None is committed yet. `countConsensusCalls` mirrors the strategy packages; see the call counts in [docs/ARCHITECTURE.md](../../docs/ARCHITECTURE.md#pricing).
 - `computeRunCost(calls)` prices finished calls and flags the total as estimated when any call's tokens came from text length. It and `estimateRun` also count priced and unpriced calls, so a caller can tell a full cost from a lower bound or an unknown one.
 - `withUsageTracking(provider, name, record)` wraps an `AIProvider` and reports the tokens of every completed call.
 - Provider clients pass `{ inputTokens, outputTokens }` to `onComplete` as a fourth argument when the stream reports usage, and set `usage` on the result of `generateStructured`. Reasoning tokens count as output, including xAI's, which sit outside `completion_tokens`.
@@ -59,6 +59,8 @@ similarityMatrix([v1, v2, v3]);            // n x n, diagonal is 1
 agreementStatistics([0.85, 0.92, 0.78]);   // { mean, median, min, max, stddev }
 normalizeSimilarity(0.4);                  // maps -1..1 to 0..1, clamped
 ```
+
+Agreement labels (`calibration.ts`): `resolveAgreementCalibration(file, 'openai/text-embedding-3-small')` returns the cosine cut-offs fitted for that embedding model, or `DEFAULT_AGREEMENT_THRESHOLDS` (the original (v+1)/2 mapping) with `calibrated: false`. `agreementLevel(cosine, thresholds)` gives `high`, `medium` or `low`; `displayThresholds` converts the cut-offs to the 0 to 1 scale the UI shows.
 
 These functions are correct for any vectors. The vectors the app feeds them today are placeholders (see Providers above).
 

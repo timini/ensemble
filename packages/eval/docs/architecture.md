@@ -6,6 +6,8 @@ The eval pipeline asks whether ensemble consensus strategies beat a single model
 
 In `quick-eval` the ensemble is the same model sampled N times at a non-zero temperature. The `benchmark` command takes any list of models (`--models`), so it can run an ensemble of different models, for example three open models through OpenRouter or a local Ollama.
 
+The `matrix` command (`npm run bench:matrix`) runs the M3 benchmark matrix from `bench/matrix.json` on top of the same runner: three open models alone and as an ensemble, plus a cached premium reference, on four datasets, with a cost estimate before any spend, resume, and a summary for the app's `/benchmarks` page. Its method, results format and the two calibration commands (`calibrate-agreement`, `calibrate-tokens`) are described in [BENCHMARKS.md](./BENCHMARKS.md).
+
 ## Model specs
 
 Models are written as `provider:model`:
@@ -176,6 +178,8 @@ At 30 questions per dataset only large drops (roughly 15 percentage points or mo
 
 Costs come from the shared price table in `shared-utils` (`@ensemble-ai/shared-utils/pricing`), using the token usage the provider reported, or an estimate from text length (`costFromTextLength`) when it reported none. Models on a local server (an Ollama, LM Studio, llama.cpp or vLLM preset at a loopback URL) cost $0. OpenRouter models use OpenRouter prices from the table. Models the table does not have get no cost. A total that includes any call with no price is shown as a lower bound (`>= $0.0123 (4 unpriced calls)`), or as `unknown` when nothing in it was priced, in both `quick-eval` output and the `analyze` cost table; it is never shown as free. Consensus calls are priced the same way (`consensusMetrics.costUsd`), so a strategy's cost is the ensemble answers plus its own consensus calls. Judge calls are not priced.
 
+Each response also records its token usage (`usage`: input and output tokens, `reported` or `estimated`), and consensus metrics record `inputTokens`, `outputTokens` and `calls`. `calibrate-tokens` fits the cost estimate's token assumptions from these.
+
 ## CLI reference
 
 Run from `packages/eval`:
@@ -199,6 +203,13 @@ node --import tsx bin/ensemble-eval.mjs benchmark gsm8k \
 node --import tsx bin/ensemble-eval.mjs benchmark simpleqa --models ollama:llama3.2 \
   --judge google:gemini-2.5-flash --mode free --output results/simpleqa.json
 node --import tsx bin/ensemble-eval.mjs analyze results/gsm8k.json --report results/gsm8k.md
+
+# Benchmark matrix (see BENCHMARKS.md): estimate, mock dry run, real run
+npm run bench:matrix
+npm run bench:matrix:dry-run
+npm run bench:matrix -- --yes --publish
+npm run calibrate:agreement -- --results results/<run-id> --embedding openai:text-embedding-3-small
+npm run calibrate:tokens -- --results results/<run-id>
 
 # Refresh the baseline file with a live run
 npm run eval:regenerate-baseline  # quick-eval --sample 30 --no-cache --baseline baselines/quick-eval.json
@@ -230,9 +241,13 @@ packages/eval/
 │   └── ensemble/               committed, raw ensemble responses
 ├── baselines/
 │   └── quick-eval.json         committed, regression reference
+├── bench/
+│   └── matrix.json             the benchmark matrix config
 ├── datasets/                   gitignored, HF downloads
 ├── docs/
-│   └── architecture.md         this file
+│   ├── architecture.md         this file
+│   └── BENCHMARKS.md           benchmark matrix method, formats, calibration
+├── results/                    matrix runs (<run-id>/) and the reference cache, committed after paid runs
 ├── reports/
 ├── src/
 │   ├── commands/
@@ -241,8 +256,13 @@ packages/eval/
 │   │   ├── quickEvalRunner.ts  single and ensemble runs per dataset
 │   │   ├── quickEvalOutput.ts  results formatting
 │   │   ├── quickEvalBaseline.ts regression detection
+│   │   ├── matrix.ts           benchmark matrix command
+│   │   ├── calibrateAgreement.ts agreement threshold fit
+│   │   ├── calibrateTokens.ts  token assumption fit
 │   │   └── generateCache.ts    cache generation
 │   ├── lib/
+│   │   ├── matrix/             matrix config, plan, estimate, runner, summary
+│   │   ├── calibration/        answer pairs, threshold and token fits, embedder
 │   │   ├── baselineCache.ts    single-model result cache
 │   │   ├── ensembleCache.ts    ensemble response cache
 │   │   ├── benchmarkRunner.ts  question execution and cache lookup

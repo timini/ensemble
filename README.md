@@ -8,6 +8,7 @@ Ensemble sends one prompt to 2 to 6 models in parallel, streams every answer sid
 - Roadmap: [docs/ROADMAP.md](./docs/ROADMAP.md)
 - Architecture: [docs/ARCHITECTURE.md](./docs/ARCHITECTURE.md)
 - Benchmark study (February 2026): [report/report.pdf](./report/report.pdf)
+- Benchmark method and matrix (M3): [packages/eval/docs/BENCHMARKS.md](./packages/eval/docs/BENCHMARKS.md), shown in the app at `/benchmarks`
 - Write-up: https://timini.github.io/devblog/ensemble/
 
 ## Status
@@ -102,7 +103,15 @@ Free-mode E2E tests read `TEST_OPENAI_API_KEY`, `TEST_ANTHROPIC_API_KEY`, `TEST_
 GOOGLE_API_KEY=... node --import tsx packages/eval/bin/ensemble-eval.mjs quick-eval
 ```
 
-See [packages/eval/docs/architecture.md](./packages/eval/docs/architecture.md). The plan to move benchmarks onto cheap open and local models, with sound statistics, is milestone M3 in the roadmap.
+The M3 benchmark matrix (three open models alone and as an ensemble, against a premium reference, on GSM8K, MMLU-Pro, GPQA and TruthfulQA) is one command. It prints a cost estimate and spends only with `--yes`:
+
+```bash
+npm run bench:matrix --workspace=packages/eval                 # estimate only
+npm run bench:matrix:dry-run --workspace=packages/eval         # whole pipeline with the mock provider
+OPENROUTER_API_KEY=... npm run bench:matrix --workspace=packages/eval -- --yes --publish
+```
+
+The method, results format, calibration scripts and how to regenerate the report are in [packages/eval/docs/BENCHMARKS.md](./packages/eval/docs/BENCHMARKS.md). No paid run has been made yet, so `/benchmarks` says the benchmarks have not been run. The rest of the eval CLI is described in [packages/eval/docs/architecture.md](./packages/eval/docs/architecture.md).
 
 ## Deployment
 
