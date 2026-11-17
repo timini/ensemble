@@ -79,6 +79,26 @@ describe('estimateRun', () => {
     expect(estimate.calls.embeddings).toBe(0);
   });
 
+  it('prices the council summary with each top branch and its rebuttal', () => {
+    // Participants have no price, so only the summary by model b is counted.
+    const unknown: ModelRef = { provider: 'xai', modelId: 'unknown-model' };
+    const estimate = estimateRun({
+      models: [unknown, unknown, unknown],
+      consensusMethod: 'council',
+      summarizer,
+      eloTopN: 3,
+      embeddings: null,
+      promptTokens: 100,
+      table,
+    });
+    const { answer, critique, overhead } = ESTIMATE_TOKENS;
+    const expected = (a: number, c: number) =>
+      ((overhead + 100 + 3 * (a + c)) * 3 + a * 6) / 1_000_000;
+    expect(estimate.cost.pricedCallCount).toBe(1);
+    expect(estimate.cost.lowUsd).toBeCloseTo(expected(answer.low, critique.low), 12);
+    expect(estimate.cost.highUsd).toBeCloseTo(expected(answer.high, critique.high), 12);
+  });
+
   it('lists models without a price and leaves them out of the cost', () => {
     const estimate = estimateRun({
       models: [

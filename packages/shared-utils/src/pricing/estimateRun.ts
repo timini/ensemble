@@ -80,7 +80,8 @@ export function estimateRun(input: EstimateRunInput): RunEstimate {
   const n = models.length;
   const r = n + (input.manualResponseCount ?? 0);
   const summarizer = input.summarizer ?? models[0] ?? null;
-  const ranked = input.consensusMethod === 'elo' || input.consensusMethod === 'council';
+  const council = input.consensusMethod === 'council';
+  const ranked = input.consensusMethod === 'elo' || council;
   const count = countConsensusCalls({
     method: input.consensusMethod,
     modelCount: n,
@@ -129,7 +130,11 @@ export function estimateRun(input: EstimateRunInput): RunEstimate {
       ? (s) => ({ input: O + p + 2 * A[s], output: V[s] })
       : (s) => ({ input: O + p + r * A[s], output: V[s] }),
     judge: (s) => ({ input: O + p + 2 * A[s], output: V[s] }),
-    summary: (s) => ({ input: O + p + (ranked ? topK : r) * A[s], output: A[s] }),
+    // Council summarises the top branches with their rebuttals.
+    summary: (s) => ({
+      input: O + p + (ranked ? topK : r) * A[s] + (council ? topK * C[s] : 0),
+      output: A[s],
+    }),
     critique: (s) => ({ input: O + p + A[s], output: C[s] }),
     rebuttal: (s) => ({ input: O + p + A[s] + (r - 1) * C[s], output: C[s] }),
     judgment: (s) => ({ input: O + p + A[s] + r * C[s], output: V[s] }),
