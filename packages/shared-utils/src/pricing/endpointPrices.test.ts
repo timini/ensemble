@@ -10,6 +10,7 @@ const table: PriceTable = {
   models: {
     'openai/gpt-oss-120b': { inputPerMillion: 0.1, outputPerMillion: 0.5, openRouterId: 'openai/gpt-oss-120b' },
     'anthropic/claude-opus-5-5': { inputPerMillion: 4, outputPerMillion: 20, openRouterId: 'anthropic/claude-opus-5.5' },
+    'openrouter/qwen/qwen3.5-9b': { inputPerMillion: 0.17, outputPerMillion: 0.25, openRouterId: 'qwen/qwen3.5-9b' },
   },
 };
 
@@ -53,6 +54,14 @@ describe('OpenAI-compatible endpoint prices', () => {
       outputPerMillion: 20,
     });
     expect(price('openrouter-2/anthropic/claude-opus-5.5')).toEqual({ status: 'unknown' });
+  });
+
+  it('prices open-weight OpenRouter models from their openrouter/ entries', () => {
+    expect(price('openrouter/qwen/qwen3.5-9b')).toEqual({
+      status: 'known',
+      inputPerMillion: 0.17,
+      outputPerMillion: 0.25,
+    });
   });
 
   it('leaves Groq and Together unpriced, since the table holds OpenRouter prices', () => {

@@ -3,27 +3,24 @@ import { countConsensusCalls, type ConsensusPhase, type ConsensusPhaseCalls } fr
 import { getModelPrice } from './prices';
 import type { EndpointLocation, ModelRef, PriceTable } from './types';
 import { PRICE_TABLE } from './priceTable';
-
-interface Range {
-  low: number;
-  high: number;
-}
+import {
+  applyTokenCalibration,
+  DEFAULT_ESTIMATE_TOKENS,
+  type EstimateTokens,
+} from './tokenAssumptions';
+import { TOKEN_CALIBRATION } from './tokenCalibration';
 
 /**
- * Token assumptions behind the cost range. Answer length is unknown before a
- * run, so the low end assumes short answers and the high end long ones
- * (including hidden reasoning tokens, which are billed as output).
+ * Token assumptions behind the cost range: the committed calibration
+ * (tokenCalibration.ts) over the hand-set defaults (tokenAssumptions.ts).
  */
-export const ESTIMATE_TOKENS = {
-  /** Output tokens of one answer, synthesis or summary. */
-  answer: { low: 200, high: 2000 } as Range,
-  /** Output tokens of a vote, ranking or judge verdict. */
-  verdict: { low: 20, high: 400 } as Range,
-  /** Output tokens of a council critique or rebuttal. */
-  critique: { low: 100, high: 800 } as Range,
-  /** Instruction tokens added to each consensus prompt. */
-  overhead: 300,
-};
+export const ESTIMATE_TOKENS: EstimateTokens = applyTokenCalibration(
+  DEFAULT_ESTIMATE_TOKENS,
+  TOKEN_CALIBRATION,
+);
+
+/** True when ESTIMATE_TOKENS come from a fit of recorded usage. */
+export const ESTIMATE_TOKENS_CALIBRATED = TOKEN_CALIBRATION !== null;
 
 export interface EstimateRunInput {
   /** Models that answer the prompt, one call each. */

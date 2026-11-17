@@ -22,10 +22,27 @@ const VENDOR_TO_PROVIDER: Record<string, string> = {
 };
 
 /**
+ * Vendors of open-weight models that people run through OpenRouter (and
+ * that the benchmark matrix uses). Their entries are keyed
+ * `openrouter/<OpenRouter id>`; getEndpointModelPrice finds them by
+ * `openRouterId` for models called through an OpenRouter endpoint.
+ */
+const OPEN_WEIGHT_VENDORS = new Set([
+  'meta-llama',
+  'qwen',
+  'mistralai',
+  'microsoft',
+  'ibm-granite',
+  'nvidia',
+  'allenai',
+]);
+
+/**
  * Map an OpenRouter id such as `anthropic/claude-opus-5.5` to our provider
- * and model id (`anthropic`, `claude-opus-5-5`). Returns null for vendors we
- * do not call and for variants such as `:batch` or `:free`, whose prices do
- * not apply to direct API calls.
+ * and model id (`anthropic`, `claude-opus-5-5`). Open-weight vendors map to
+ * provider `openrouter` with the full OpenRouter id as model id. Returns null
+ * for other vendors and for variants such as `:batch` or `:free`, whose
+ * prices do not apply to direct API calls.
  */
 export function mapOpenRouterId(
   openRouterId: string,
@@ -33,7 +50,9 @@ export function mapOpenRouterId(
   const slash = openRouterId.indexOf('/');
   if (slash <= 0 || openRouterId.includes(':')) return null;
 
-  const provider = VENDOR_TO_PROVIDER[openRouterId.slice(0, slash)];
+  const vendor = openRouterId.slice(0, slash);
+  if (OPEN_WEIGHT_VENDORS.has(vendor)) return { provider: 'openrouter', modelId: openRouterId };
+  const provider = VENDOR_TO_PROVIDER[vendor];
   if (!provider) return null;
 
   let modelId = openRouterId.slice(slash + 1);

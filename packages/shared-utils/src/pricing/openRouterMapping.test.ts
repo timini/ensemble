@@ -36,6 +36,19 @@ describe('mapOpenRouterId', () => {
     });
   });
 
+  it('keys open-weight models by their OpenRouter id, so OpenRouter endpoints can price them', () => {
+    expect(mapOpenRouterId('meta-llama/llama-3.1-8b-instruct')).toEqual({
+      provider: 'openrouter',
+      modelId: 'meta-llama/llama-3.1-8b-instruct',
+    });
+    expect(mapOpenRouterId('qwen/qwen3.5-9b')).toEqual({ provider: 'openrouter', modelId: 'qwen/qwen3.5-9b' });
+    expect(mapOpenRouterId('mistralai/ministral-8b-2512')).toEqual({
+      provider: 'openrouter',
+      modelId: 'mistralai/ministral-8b-2512',
+    });
+    expect(mapOpenRouterId('qwen/qwen3.5-9b:free')).toBeNull();
+  });
+
   it('skips variants and vendors we do not call', () => {
     expect(mapOpenRouterId('openai/gpt-6-astra:batch')).toBeNull();
     expect(mapOpenRouterId('google/gemma-4-31b-it:free')).toBeNull();
