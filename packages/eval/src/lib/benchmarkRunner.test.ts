@@ -245,4 +245,32 @@ describe('BenchmarkRunner', () => {
     expect(run.consensusEvaluation?.results.majority?.correct).toBe(true);
     expect(run.evaluation?.accuracy).toBeCloseTo(2 / 3);
   });
+  it('scores an unreadable mechanical vote wrong without counting it as an error', async () => {
+    const provider: AIProvider = {
+      ...buildProvider(),
+      generateStructured: async () => ({
+        parsed: { reasoning: 'r', answer: 'not sure' } as never,
+        raw: '',
+        responseTimeMs: 1,
+      }),
+    };
+    const output = createBenchmarkFile('gsm8k', 'mock', ['openai:gpt-4o'], ['majority'], 1);
+    const runner = new BenchmarkRunner({
+      mode: 'mock',
+      registry: buildRegistry(provider),
+      models: Array.from({ length: 3 }, () => ({ provider: 'openai' as const, model: 'gpt-4o' })),
+      strategies: ['majority'],
+      evaluator: new MechanicalEvaluator('numeric'),
+      summarizer: null,
+      protocol: 'structured',
+    });
+    await runner.run({
+      questions: [{ id: 'q1', prompt: 'Q', groundTruth: '4', answer: { kind: 'numeric' } }],
+      output,
+      outputPath: '/dev/null',
+    });
+    const majority = output.runs[0].consensusEvaluation?.results.majority;
+    expect(majority).toMatchObject({ correct: false, predicted: null });
+    expect(majority?.failure).toBeUndefined();
+  });
 });

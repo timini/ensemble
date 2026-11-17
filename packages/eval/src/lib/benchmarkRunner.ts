@@ -10,7 +10,7 @@ import {
 } from './evaluation.js';
 import { writeJsonFile } from './io.js';
 import { EnsembleRunner } from './ensembleRunner.js';
-import { mechanicalMajority } from './mechanicalMajority.js';
+import { mechanicalMajority, UNREADABLE_VOTE } from './mechanicalMajority.js';
 import type { AnswerProtocol } from './methodology.js';
 import type { RetryOptions } from './retryable.js';
 import type {
@@ -190,6 +190,11 @@ export class BenchmarkRunner {
 
     if (vote) {
       result.outputs.majority = vote.text;
+      result.metrics.majority = { tokenCount: 0, durationMs: 0, costUsd: 0, mechanical: true };
+    } else if (mechanical && firstSuccessful) {
+      // Replies came back but none had a readable answer. The vote has no
+      // answer, which is scored wrong; it is not a failed call.
+      result.outputs.majority = UNREADABLE_VOTE;
       result.metrics.majority = { tokenCount: 0, durationMs: 0, costUsd: 0, mechanical: true };
     }
     return result;

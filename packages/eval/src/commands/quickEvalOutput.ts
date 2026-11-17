@@ -1,11 +1,12 @@
 import type { PromptRunResult, StrategyName } from '../types.js';
 import {
-  toPercent, toDelta, sumTokens, sumCost,
+  toPercent, toDelta, sumTokens, sumCost, countUnpriced,
   avgDurationMs, formatMs, computeAccuracy, sumStrategyMetrics, type AccuracyCount,
 } from './quickEvalHelpers.js';
 import {
   comparePaired, formatInterval, formatPValue, pairSingleWithStrategy, withInterval,
 } from '../lib/pairedStats.js';
+import { formatCostUsd } from '../lib/analysisHelpers.js';
 
 export interface DatasetResult {
   dataset: string;
@@ -42,7 +43,7 @@ export function printResults(
   const allEnsembleRuns = allDatasetResults.flatMap((d) => d.ensembleRuns);
   const singleAcc = computeAccuracy(allSingleRuns);
   const singleTokens = sumTokens(allSingleRuns);
-  const singleCost = sumCost(allSingleRuns);
+  const singleCost = formatCostUsd(sumCost(allSingleRuns), countUnpriced(allSingleRuns));
   const singleAvgTime = avgDurationMs(allSingleRuns);
 
   w(`\n${'='.repeat(70)}\n`);
@@ -73,23 +74,24 @@ export function printResults(
   w(`  ${'-'.repeat(66)}\n\n`);
 
   const ensembleModelCost = sumCost(allEnsembleRuns);
+  const ensembleUnpriced = countUnpriced(allEnsembleRuns);
   const modelTokens = sumTokens(allEnsembleRuns);
 
   w(`  ${'Single (1x)'.padEnd(16)} ${accuracyText(singleAcc)}\n`);
-  w(`  ${''.padEnd(16)} tokens: ${singleTokens.toLocaleString()}  avg: ${formatMs(singleAvgTime)}/q  cost: $${singleCost.toFixed(4)}\n`);
+  w(`  ${''.padEnd(16)} tokens: ${singleTokens.toLocaleString()}  avg: ${formatMs(singleAvgTime)}/q  cost: ${singleCost}\n`);
 
   for (const strategy of strategies) {
     const stratAcc = computeAccuracy(allEnsembleRuns, strategy);
     const sm = sumStrategyMetrics(allEnsembleRuns, strategy);
     const stratTokens = modelTokens + sm.tokenCount;
     // Strategy cost: the ensemble's answers plus this strategy's consensus calls.
-    const stratCost = ensembleModelCost + (sm.costUsd ?? 0);
+    const stratCost = formatCostUsd(ensembleModelCost + sm.costUsd, ensembleUnpriced + sm.unpriced);
     w(`  ${`${strategy} (${ensembleSize}x)`.padEnd(16)} ${accuracyText(stratAcc)}\n`);
-    w(`  ${''.padEnd(16)} tokens: ${stratTokens.toLocaleString()}  avg: ${formatMs(sm.durationMs)}/q  cost: $${stratCost.toFixed(4)}\n`);
+    w(`  ${''.padEnd(16)} tokens: ${stratTokens.toLocaleString()}  avg: ${formatMs(sm.durationMs)}/q  cost: ${stratCost}\n`);
     w(`  ${''.padEnd(16)} delta vs single: ${toDelta(stratAcc.accuracy - singleAcc.accuracy)}  ${mcNemarText(allSingleRuns, allEnsembleRuns, strategy)}\n`);
   }
 
-  w('\n  Costs come from the shared price table; local models cost $0 and unpriced models count as $0.\n');
+  w('\n  Costs come from the shared price table; local models cost $0. Totals with unpriced calls are lower bounds (">=") or unknown.\n');
   w(`  Wall clock: ${Math.round(durationMs / 1000)}s\n`);
   w(`${'='.repeat(70)}\n`);
 }

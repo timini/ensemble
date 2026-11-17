@@ -5,7 +5,7 @@ import type {
   ModelSpec,
 } from '../types.js';
 import { extractChoiceLetter, extractNumericAnswer } from './parsers.js';
-import { answersMatch, extractFinalAnswer, type AnswerKind } from './finalAnswer.js';
+import { answersMatch, choicesFromPrompt, extractFinalAnswer, type AnswerKind, type AnswerSpec } from './finalAnswer.js';
 import type { AnswerProtocol } from './methodology.js';
 import { formatModelSpec, sameModel } from './modelSpecs.js';
 
@@ -244,7 +244,9 @@ const MECHANICAL_NAMES: Record<Exclude<AnswerKind, 'text'>, 'mcq' | 'numeric' | 
 
 /**
  * Scores a structured final answer with no LLM: reads the answer
- * (extractFinalAnswer) and compares it for its kind (answersMatch).
+ * (extractFinalAnswer) and compares it for its kind (answersMatch). For
+ * choice answers the option letters come from the prompt's answer
+ * instruction, so a letter outside the options is not read as an answer.
  */
 export class MechanicalEvaluator {
   readonly name: 'mcq' | 'numeric' | 'exact-match';
@@ -253,8 +255,9 @@ export class MechanicalEvaluator {
     this.name = MECHANICAL_NAMES[kind];
   }
 
-  evaluate(response: string, groundTruth: string): EvaluationResult {
-    const spec = { kind: this.kind };
+  evaluate(response: string, groundTruth: string, prompt?: string): EvaluationResult {
+    const choices = this.kind === 'choice' ? choicesFromPrompt(prompt) : undefined;
+    const spec: AnswerSpec = choices ? { kind: this.kind, choices } : { kind: this.kind };
     const predicted = extractFinalAnswer(response, spec);
     const expected = groundTruth.trim();
     return { correct: answersMatch(predicted, expected, spec), expected, predicted };
@@ -275,7 +278,9 @@ const STRUCTURED_KIND: Partial<Record<BenchmarkDatasetName, Exclude<AnswerKind, 
 /** True when scoring this dataset under this protocol calls an LLM judge. */
 export function datasetNeedsJudge(datasetName: BenchmarkDatasetName, protocol: AnswerProtocol): boolean {
   if (protocol === 'structured') return STRUCTURED_KIND[datasetName] === undefined;
-  return datasetName !== 'gsm8k' && datasetName !== 'math500';
+  // Legacy scoring uses the LLM judge for every dataset, GSM8K and MATH-500 included,
+  // as the committed single-baseline caches were scored.
+  return true;
 }
 
 /**

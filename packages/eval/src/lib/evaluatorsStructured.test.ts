@@ -1,7 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import type { AIProvider } from '@ensemble-ai/shared-utils/providers';
+import { answerInstruction } from './finalAnswer.js';
 import {
   LLMJudgeExactMatchEvaluator,
+  LLMJudgeNumericEvaluator,
   MechanicalEvaluator,
   assertIndependentJudge,
   createEvaluatorForDataset,
@@ -33,6 +35,13 @@ describe('structured protocol evaluators', () => {
     expect(datasetNeedsJudge('truthfulqa', 'legacy')).toBe(true);
     expect(createEvaluatorForDataset('truthfulqa', judge)).not.toBeInstanceOf(MechanicalEvaluator);
   });
+
+  it('legacy GSM8K and MATH-500 keep the LLM judge, as the committed caches were scored', () => {
+    for (const name of ['gsm8k', 'math500'] as const) {
+      expect(datasetNeedsJudge(name, 'legacy')).toBe(true);
+      expect(createEvaluatorForDataset(name, judge, { protocol: 'legacy' })).toBeInstanceOf(LLMJudgeNumericEvaluator);
+    }
+  });
 });
 
 describe('MechanicalEvaluator', () => {
@@ -51,6 +60,14 @@ describe('MechanicalEvaluator', () => {
 
     const yesno = new MechanicalEvaluator('yesno');
     expect(yesno.evaluate('Final answer: no', 'no').correct).toBe(true);
+  });
+
+  it('rejects letters outside the options named in the prompt', () => {
+    const mcq = new MechanicalEvaluator('choice');
+    const prompt = `Q\n\n${answerInstruction({ kind: 'choice', choices: ['A', 'B', 'C', 'D'] })}`;
+    expect(mcq.evaluate('Final answer: F', 'F', prompt).correct).toBe(false);
+    expect(mcq.evaluate('Final answer: D', 'D', prompt).correct).toBe(true);
+    expect(mcq.evaluate('A careful reading shows the answer is D', 'A', prompt).correct).toBe(false);
   });
 
   it('marks unreadable answers wrong with no prediction', () => {

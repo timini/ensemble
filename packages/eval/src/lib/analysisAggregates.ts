@@ -15,6 +15,8 @@ export interface AccuracyCounter {
 export interface CostCounter {
   tokens: number;
   costUsd: number;
+  /** Calls with no price, which costUsd leaves out. */
+  unpriced: number;
 }
 
 export interface AgreementCounter {
@@ -60,10 +62,12 @@ function incrementCost(
   key: string,
   tokens: number,
   costUsd: number,
+  unpriced: number,
 ): void {
-  const row = map.get(key) ?? { tokens: 0, costUsd: 0 };
+  const row = map.get(key) ?? { tokens: 0, costUsd: 0, unpriced: 0 };
   row.tokens += tokens;
   row.costUsd += costUsd;
+  row.unpriced += unpriced;
   map.set(key, row);
 }
 
@@ -127,6 +131,7 @@ export function collectAnalysisAggregates(runs: PromptRunResult[]): AnalysisAggr
         `${response.provider}:${response.model}`,
         response.tokenCount ?? 0,
         response.estimatedCostUsd ?? 0,
+        response.estimatedCostUsd === undefined ? 1 : 0,
       );
     }
 
@@ -158,6 +163,7 @@ export function collectAnalysisAggregates(runs: PromptRunResult[]): AnalysisAggr
         strategy,
         runCost.tokens + (metrics?.tokenCount ?? 0),
         runCost.costUsd + (metrics?.costUsd ?? 0),
+        runCost.unpriced + (metrics && metrics.costUsd === undefined ? 1 : 0),
       );
     }
 

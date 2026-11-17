@@ -5,6 +5,7 @@ import {
   toDelta,
   sumTokens,
   sumCost,
+  countUnpriced,
   avgDurationMs,
   formatMs,
   computeAccuracy,
@@ -71,6 +72,19 @@ describe('quickEvalHelpers', () => {
         },
       ];
       expect(sumCost(runs)).toBeCloseTo(0.003);
+    });
+
+    it('counts successful responses with no price separately', () => {
+      const runs: PromptRunResult[] = [
+        {
+          prompt: 'q1', responses: [
+            { provider: 'google', model: 'm', content: '', responseTimeMs: 0, estimatedCostUsd: 0 },
+            { provider: 'google', model: 'm', content: '', responseTimeMs: 0 },
+            { provider: 'google', model: 'm', content: '', responseTimeMs: 0, error: 'boom' },
+          ], consensus: {},
+        },
+      ];
+      expect(countUnpriced(runs)).toBe(1);
     });
   });
 
@@ -175,6 +189,8 @@ describe('quickEvalHelpers', () => {
     it('sums consensus costs per strategy', () => {
       expect(sumStrategyMetrics([failed, failed], 'majority')).toMatchObject({ tokenCount: 20, costUsd: 0.004 });
       expect(sumStrategyMetrics([failed], 'standard').costUsd).toBe(0);
+      const unpriced = { ...failed, consensusMetrics: { majority: { tokenCount: 1, durationMs: 1 } } };
+      expect(sumStrategyMetrics([failed, unpriced], 'majority')).toMatchObject({ costUsd: 0.002, unpriced: 1 });
     });
   });
 });

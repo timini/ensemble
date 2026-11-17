@@ -1,12 +1,9 @@
 import type { AnalysisSummary } from './analysisTypes.js';
+import { formatCostUsd } from './analysisHelpers.js';
 import { formatInterval, formatPValue } from './pairedStats.js';
 
 function toPercent(value: number): string {
   return `${(value * 100).toFixed(2)}%`;
-}
-
-function toUsd(value: number): string {
-  return `$${value.toFixed(4)}`;
 }
 
 function linesForAccuracyTable(title: string, rows: AnalysisSummary['modelAccuracy']): string[] {
@@ -116,12 +113,12 @@ export function createMarkdownReport(
   lines.push('| --- | ---: | ---: | ---: |');
   for (const row of analysis.costAnalysis) {
     lines.push(
-      `| ${row.label} | ${row.totalTokens} | ${toUsd(row.totalEstimatedCostUsd)} | ${toUsd(row.averageCostPerQuestionUsd)} |`,
+      `| ${row.label} | ${row.totalTokens} | ${formatCostUsd(row.totalEstimatedCostUsd, row.unpricedCalls)} | ${formatCostUsd(row.averageCostPerQuestionUsd, row.unpricedCalls)} |`,
     );
   }
   lines.push('');
   lines.push(
-    '_Costs come from the shared price table (local models cost $0, unpriced models count as $0). A strategy costs the ensemble answers plus its own consensus calls. Judge calls are not included._',
+    '_Costs come from the shared price table, and local models cost $0. A total that includes calls with no price is shown as a lower bound (">=") or as unknown. A strategy costs the ensemble answers plus its own consensus calls. Judge calls are not included._',
   );
   lines.push('');
 

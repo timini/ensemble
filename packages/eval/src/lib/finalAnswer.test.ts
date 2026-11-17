@@ -3,6 +3,7 @@ import {
   answerInstruction,
   answerSchema,
   answersMatch,
+  choicesFromPrompt,
   extractFinalAnswer,
   formatStructuredContent,
   type AnswerSpec,
@@ -35,6 +36,15 @@ describe('answerInstruction', () => {
   });
 });
 
+describe('choicesFromPrompt', () => {
+  it('reads the option letters back from the answer instruction', () => {
+    expect(choicesFromPrompt(`Question?\n\n${answerInstruction(choice4)}`)).toEqual(['A', 'B', 'C', 'D']);
+    expect(choicesFromPrompt(answerInstruction({ kind: 'choice', choices: ['A', 'B'] }))).toEqual(['A', 'B']);
+    expect(choicesFromPrompt('Question with no instruction')).toBeUndefined();
+    expect(choicesFromPrompt(undefined)).toBeUndefined();
+  });
+});
+
 describe('extractFinalAnswer', () => {
   it('reads the answer field of a JSON object', () => {
     expect(extractFinalAnswer('{"reasoning":"x","answer":"C"}', choice4)).toBe('C');
@@ -63,6 +73,18 @@ describe('extractFinalAnswer', () => {
     expect(extractFinalAnswer('Final answer: F', choice4)).toBeNull();
   });
 
+  it('does not read a leading article or pronoun as an option', () => {
+    const choice10: AnswerSpec = { kind: 'choice', choices: 'ABCDEFGHIJ'.split('') };
+    expect(extractFinalAnswer('A careful reading shows the answer is D', choice4)).toBe('D');
+    expect(extractFinalAnswer('A careful reading shows nothing useful.', choice4)).toBeNull();
+    expect(extractFinalAnswer('I think so.', choice10)).toBeNull();
+    expect(extractFinalAnswer('Final answer: I think it is B', choice10)).toBe('B');
+    expect(extractFinalAnswer('Final answer: A good choice is C', choice4)).toBe('C');
+    expect(extractFinalAnswer('Final answer: (B) Paris', choice4)).toBe('B');
+    expect(extractFinalAnswer('Final answer: B. Paris', choice4)).toBe('B');
+    expect(extractFinalAnswer('{"answer":"I"}', choice10)).toBe('I');
+  });
+
   it('returns null when nothing can be read', () => {
     expect(extractFinalAnswer('', choice4)).toBeNull();
     expect(extractFinalAnswer('I am not sure.', { kind: 'numeric' })).toBeNull();
@@ -86,6 +108,22 @@ describe('answersMatch', () => {
     expect(answersMatch('10^\\circ', '10', { kind: 'math' })).toBe(true);
     expect(answersMatch('x+1', 'x+2', { kind: 'math' })).toBe(false);
     expect(answersMatch(null, 'A', choice4)).toBe(false);
+  });
+
+  it('normalises boxed answers, assignments, brace-less fractions and escaped dollars', () => {
+    const math: AnswerSpec = { kind: 'math' };
+    expect(answersMatch('\\boxed{65}', '65', math)).toBe(true);
+    expect(answersMatch('\\boxed{\\frac{1}{2}}', '\\frac12', math)).toBe(true);
+    expect(answersMatch('x = 3', '3', math)).toBe(true);
+    expect(answersMatch('k=\\frac{1}{2}', '\\frac{1}{2}', math)).toBe(true);
+    expect(answersMatch('\\frac12', '\\frac{1}{2}', math)).toBe(true);
+    expect(answersMatch('\\frac1{2}', '\\frac{1}{2}', math)).toBe(true);
+    expect(answersMatch('\\frac{3}4', '\\frac{3}{4}', math)).toBe(true);
+    expect(answersMatch('\\$5', '5', math)).toBe(true);
+    expect(answersMatch('\\text{(C)}', '(C)', math)).toBe(true);
+    expect(answersMatch('\\sqrt2', '\\sqrt{2}', math)).toBe(true);
+    expect(answersMatch('x = 4', '3', math)).toBe(false);
+    expect(answersMatch('\\frac12', '\\frac{1}{3}', math)).toBe(false);
   });
 
   it('compares text case- and punctuation-insensitively', () => {

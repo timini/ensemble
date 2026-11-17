@@ -20,6 +20,17 @@ export function sumTokens(runs: PromptRunResult[]): number {
   return total;
 }
 
+/** Successful responses with no price, which sumCost leaves out. */
+export function countUnpriced(runs: PromptRunResult[]): number {
+  let count = 0;
+  for (const run of runs) {
+    for (const r of run.responses) {
+      if (!r.error && r.estimatedCostUsd === undefined) count += 1;
+    }
+  }
+  return count;
+}
+
 export function sumCost(runs: PromptRunResult[]): number {
   let total = 0;
   for (const run of runs) {
@@ -41,25 +52,33 @@ export function formatMs(ms: number): string {
   return `${(ms / 1000).toFixed(1)}s`;
 }
 
+export interface StrategyMetricsTotal extends ConsensusStrategyMetrics {
+  costUsd: number;
+  /** Questions whose consensus calls had no price, which costUsd leaves out. */
+  unpriced: number;
+}
+
 /** Sum per-strategy consensus metrics across runs. */
 export function sumStrategyMetrics(
   runs: PromptRunResult[],
   strategy: StrategyName,
-): ConsensusStrategyMetrics {
+): StrategyMetricsTotal {
   let tokenCount = 0;
   let durationSum = 0;
   let costUsd = 0;
+  let unpriced = 0;
   let count = 0;
   for (const run of runs) {
     const m = run.consensusMetrics?.[strategy];
     if (m) {
       tokenCount += m.tokenCount;
       durationSum += m.durationMs;
-      costUsd += m.costUsd ?? 0;
+      if (m.costUsd === undefined) unpriced += 1;
+      else costUsd += m.costUsd;
       count += 1;
     }
   }
-  return { tokenCount, durationMs: count > 0 ? durationSum / count : 0, costUsd };
+  return { tokenCount, durationMs: count > 0 ? durationSum / count : 0, costUsd, unpriced };
 }
 
 export interface AccuracyCount {

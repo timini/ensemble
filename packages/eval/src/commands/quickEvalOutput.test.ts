@@ -45,4 +45,23 @@ describe('printResults', () => {
     expect(text).toContain('cost: $0.0330');
     expect(text).not.toMatch(/[\u2013\u2014]/);
   });
+  it('never shows unpriced calls as free', () => {
+    const out: string[] = [];
+    vi.spyOn(process.stdout, 'write').mockImplementation((s) => {
+      out.push(String(s));
+      return true;
+    });
+    const unpriced = (r: PromptRunResult): PromptRunResult => ({
+      ...r,
+      responses: r.responses.map(({ estimatedCostUsd: _cost, ...rest }) => rest),
+    });
+    const singleRuns = [unpriced(run('q1', true, null))];
+    const ensembleRuns = [run('q1', true, true), unpriced(run('q2', true, true))];
+    printResults('openai:m', 3, ['majority'], [{ dataset: 'arc', singleRuns, ensembleRuns }], 1000);
+    const text = out.join('');
+
+    expect(text).toContain('cost: unknown (1 unpriced call)');
+    expect(text).toContain('cost: >= $0.0210 (1 unpriced call)');
+    expect(text).not.toContain('cost: $0.0000');
+  });
 });

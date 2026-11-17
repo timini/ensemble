@@ -116,12 +116,14 @@ export function buildCostRows(
       totalTokens: values.tokens,
       totalEstimatedCostUsd: values.costUsd,
       averageCostPerQuestionUsd: safeRatio(values.costUsd, runs.length),
+      unpricedCalls: values.unpriced,
     })),
     ...[...strategyCosts.entries()].map(([label, values]) => ({
       label: `strategy:${label}`,
       totalTokens: values.tokens,
       totalEstimatedCostUsd: values.costUsd,
       averageCostPerQuestionUsd: safeRatio(values.costUsd, runs.length),
+      unpricedCalls: values.unpriced,
     })),
   ];
 

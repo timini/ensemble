@@ -66,6 +66,16 @@ function answerDescription(spec: AnswerSpec): string {
   }
 }
 
+/**
+ * Option letters named by the choice instruction in a structured prompt
+ * (see answerInstruction), or undefined when the prompt has none.
+ */
+export function choicesFromPrompt(prompt: string | undefined): string[] | undefined {
+  const match = prompt?.match(/the letter of the single best option \(([A-Z](?:, [A-Z])*(?: or [A-Z])?)\)/);
+  if (!match) return undefined;
+  return match[1].split(/, | or /);
+}
+
 /** Instruction appended to every prompt in a structured run. */
 export function answerInstruction(spec: AnswerSpec): string {
   return (
@@ -122,13 +132,41 @@ function lastBoxed(text: string): string | null {
   return null;
 }
 
-function toChoice(value: string | null, spec: AnswerSpec): string | null {
-  if (!value) return null;
-  const direct = value.trim().match(/^\(?([A-Za-z])\)?(?:[.):\s]|$)/);
-  const letter = (direct?.[1] ?? extractChoiceLetter(value))?.toUpperCase() ?? null;
+/** A marked value that is just an option letter: "B", "(B)", "B.", "b)". */
+const BARE_LETTER = /^\(?([A-Za-z])\)?[.):]?$/;
+/** A marked value that starts with a labelled option letter: "(B) Paris", "B. Paris", "B) Paris". */
+const LABELLED_LETTER = /^(?:\(([A-Za-z])\)|([A-Za-z])[.)])\s/;
+
+function inRange(letter: string | null, spec: AnswerSpec): string | null {
   if (!letter) return null;
-  if (spec.choices?.length && !spec.choices.includes(letter)) return null;
-  return letter;
+  const upper = letter.toUpperCase();
+  if (spec.choices?.length && !spec.choices.includes(upper)) return null;
+  return upper;
+}
+
+/**
+ * Option letter from a short marked answer (the JSON field or the
+ * "Final answer:" line). A leading one-letter word only counts when it is
+ * the whole value or is labelled like an option, so "I think it is B" and
+ * "A good choice is C" do not read as I or A.
+ */
+function choiceFromMarked(value: string, spec: AnswerSpec): string | null {
+  const trimmed = value.trim();
+  const bare = trimmed.match(BARE_LETTER);
+  if (bare) return inRange(bare[1], spec);
+  const labelled = trimmed.match(LABELLED_LETTER);
+  if (labelled) return inRange(labelled[1] ?? labelled[2], spec);
+  const parsed = inRange(extractChoiceLetter(trimmed), spec);
+  if (parsed) return parsed;
+  // Last standalone capital letter that is a valid option ("I think it is B").
+  // A capital followed by a lower-case word is the article "A" or the pronoun "I".
+  const capitals = [...trimmed.matchAll(/\b([A-Z])\b(?!\s+[a-z])/g)];
+  return inRange(capitals.length > 0 ? capitals[capitals.length - 1][1] : null, spec);
+}
+
+/** Option letter from unmarked free text: only explicit patterns such as "answer is X" or "(X) is correct". */
+function choiceFromText(text: string, spec: AnswerSpec): string | null {
+  return inRange(extractChoiceLetter(text), spec);
 }
 
 function toYesNo(value: string | null): string | null {
@@ -148,7 +186,7 @@ export function extractFinalAnswer(text: string, spec: AnswerSpec): string | nul
 
   switch (spec.kind) {
     case 'choice':
-      return toChoice(marked, spec) ?? (marked ? null : toChoice(text, spec));
+      return marked ? choiceFromMarked(marked, spec) : choiceFromText(text, spec);
     case 'numeric':
       return (marked ? extractNumericAnswer(marked) : null) ?? extractNumericAnswer(text);
     case 'yesno':
@@ -170,17 +208,47 @@ function toNumber(value: string): number | null {
   return null;
 }
 
+/** Replace each `\\name{...}` with its contents, allowing nested braces. */
+function unwrapCommand(value: string, name: string): string {
+  const open = `\\${name}{`;
+  let result = value;
+  for (let start = result.indexOf(open); start !== -1; start = result.indexOf(open)) {
+    let depth = 0;
+    let end = -1;
+    for (let i = start + open.length - 1; i < result.length; i += 1) {
+      if (result[i] === '{') depth += 1;
+      else if (result[i] === '}') {
+        depth -= 1;
+        if (depth === 0) {
+          end = i;
+          break;
+        }
+      }
+    }
+    if (end === -1) break;
+    result = result.slice(0, start) + result.slice(start + open.length, end) + result.slice(end + 1);
+  }
+  return result;
+}
+
 /** Normalise a LaTeX answer for string comparison. */
 export function normalizeMath(value: string): string {
-  return value
-    .replace(/\$/g, '')
+  let result = value.replace(/\\\$/g, '').replace(/\$/g, '');
+  for (const name of ['boxed', 'text', 'textbf', 'mathrm', 'mbox']) result = unwrapCommand(result, name);
+  return result
     .replace(/\\(?:left|right)\b/g, '')
     .replace(/\\[!,;: ]/g, '')
     .replace(/\\[dt]frac/g, '\\frac')
+    // \frac12, \frac1{2} and \frac{1}2 all mean \frac{1}{2}.
+    .replace(/\\frac\s*(\d)\s*(\d)/g, '\\frac{$1}{$2}')
+    .replace(/\\frac\s*(\d)\s*\{/g, '\\frac{$1}{')
+    .replace(/\\frac\{([^{}]*)\}\s*(\d)/g, '\\frac{$1}{$2}')
+    .replace(/\\sqrt\s*(\d)/g, '\\sqrt{$1}')
     .replace(/\^\{?\\circ\}?/g, '')
-    .replace(/\\text\{\s*([^}]*)\}/g, '$1')
     .replace(/\s+/g, '')
     .replace(/\.$/, '')
+    // A single-variable assignment such as "x=3" or "k=\frac{1}{2}" is its value.
+    .replace(/^[a-z]=(?!.*=)/i, '')
     .toLowerCase();
 }
 

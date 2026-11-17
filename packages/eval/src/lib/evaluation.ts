@@ -3,6 +3,7 @@ import type {
   ConsensusEvaluation,
   EvaluationResult,
   PromptEvaluation,
+  PromptRunResult,
   ProviderResponse,
   StrategyName,
 } from '../types.js';
@@ -63,6 +64,55 @@ async function evaluateWithTimeout(
   }
 }
 
+/**
+ * Result keys for each response, in order: `provider:model`, then
+ * `provider:model#2` and so on for repeats of the same model.
+ */
+export function keyedResponses(responses: ProviderResponse[]): Array<{ key: string; response: ProviderResponse }> {
+  const keyOccurrences: Record<string, number> = {};
+  return responses.map((response) => {
+    const baseKey = `${response.provider}:${response.model}`;
+    const occurrence = (keyOccurrences[baseKey] ?? 0) + 1;
+    keyOccurrences[baseKey] = occurrence;
+    return { key: occurrence === 1 ? baseKey : `${baseKey}#${occurrence}`, response };
+  });
+}
+
+/**
+ * Score failed responses that a stored run left unscored. Older caches
+ * skipped responses that errored or timed out, so they had no result and
+ * dropped out of accuracy. Each such response is added as wrong, with its
+ * failure, and accuracy is recomputed. Runs with no ground truth, or with no
+ * evaluation and no `evaluatorName` to record, are returned unchanged.
+ */
+export function scoreUnscoredResponses(
+  run: PromptRunResult,
+  evaluatorName?: PromptEvaluation['evaluator'],
+): PromptRunResult {
+  const groundTruth = run.evaluation?.groundTruth ?? run.groundTruth ?? '';
+  const name = run.evaluation?.evaluator ?? evaluatorName;
+  if (!groundTruth.trim() || !name) return run;
+  const entries = keyedResponses(run.responses);
+  const existing = run.evaluation?.results ?? {};
+  if (entries.every(({ key }) => existing[key])) return run;
+
+  const results: Record<string, EvaluationResult> = { ...existing };
+  for (const { key, response } of entries) {
+    if (results[key]) continue;
+    results[key] = failedResult(groundTruth, failureOf(response.error ?? 'no answer was scored'));
+  }
+  const values = Object.values(results);
+  return {
+    ...run,
+    evaluation: {
+      evaluator: name,
+      groundTruth,
+      accuracy: values.length === 0 ? 0 : values.filter((r) => r.correct).length / values.length,
+      results,
+    },
+  };
+}
+
 export async function evaluateResponses(
   evaluator: EvaluatorLike | null,
   responses: ProviderResponse[],
@@ -76,15 +126,7 @@ export async function evaluateResponses(
   const fnStart = Date.now();
 
   // Phase 1: compute deduplication keys (synchronous, preserves order)
-  const keyOccurrences: Record<string, number> = {};
-  const entries: Array<{ key: string; response: ProviderResponse }> = [];
-  for (const response of responses) {
-    const baseKey = `${response.provider}:${response.model}`;
-    const occurrence = (keyOccurrences[baseKey] ?? 0) + 1;
-    keyOccurrences[baseKey] = occurrence;
-    const key = occurrence === 1 ? baseKey : `${baseKey}#${occurrence}`;
-    entries.push({ key, response });
-  }
+  const entries = keyedResponses(responses);
 
   process.stderr.write(`  [evaluateResponses] start: ${entries.length} entries, evaluator=${evaluator.name}\n`);
 

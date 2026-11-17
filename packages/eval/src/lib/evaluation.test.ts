@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
-import { evaluateConsensusStrategies, evaluateResponses, failureOf } from './evaluation.js';
-import type { ProviderResponse } from '../types.js';
+import { evaluateConsensusStrategies, evaluateResponses, failureOf, scoreUnscoredResponses } from './evaluation.js';
+import type { PromptRunResult, ProviderResponse } from '../types.js';
 
 describe('evaluateResponses', () => {
   const responses: ProviderResponse[] = [
@@ -195,5 +195,56 @@ describe('evaluateConsensusStrategies', () => {
       standard: { correct: true, expected: 'A', predicted: 'A' },
     });
     expect(evaluator.evaluate).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('scoreUnscoredResponses', () => {
+  const errored: ProviderResponse = {
+    provider: 'google', model: 'm', content: '', responseTimeMs: 0,
+    error: 'Streaming timeout for google after 120s',
+  };
+
+  it('scores a cached response that errored and has no result as a wrong timeout', () => {
+    const run: PromptRunResult = {
+      prompt: 'Q', responses: [errored], consensus: {},
+      evaluation: { evaluator: 'mcq', groundTruth: 'B', accuracy: 0, results: {} },
+    };
+    const scored = scoreUnscoredResponses(run);
+    expect(scored.evaluation?.results['google:m']).toEqual({
+      correct: false, expected: 'B', predicted: null, failure: 'timeout',
+    });
+    expect(scored.evaluation?.accuracy).toBe(0);
+  });
+
+  it('creates the evaluation when the run has none, using the given evaluator name', () => {
+    const run: PromptRunResult = { prompt: 'Q', groundTruth: '4', responses: [errored], consensus: {} };
+    expect(scoreUnscoredResponses(run)).toBe(run);
+    const scored = scoreUnscoredResponses(run, 'numeric');
+    expect(scored.evaluation).toMatchObject({ evaluator: 'numeric', groundTruth: '4', accuracy: 0 });
+    expect(scored.evaluation?.results['google:m']?.failure).toBe('timeout');
+  });
+
+  it('keeps existing results and recomputes accuracy', () => {
+    const ok: ProviderResponse = { provider: 'google', model: 'm', content: 'B', responseTimeMs: 1 };
+    const run: PromptRunResult = {
+      prompt: 'Q', responses: [ok, errored], consensus: {},
+      evaluation: {
+        evaluator: 'mcq', groundTruth: 'B', accuracy: 1,
+        results: { 'google:m': { correct: true, expected: 'B', predicted: 'B' } },
+      },
+    };
+    const scored = scoreUnscoredResponses(run);
+    expect(scored.evaluation?.results['google:m']?.correct).toBe(true);
+    expect(scored.evaluation?.results['google:m#2']?.failure).toBe('timeout');
+    expect(scored.evaluation?.accuracy).toBe(0.5);
+  });
+
+  it('returns a fully scored run unchanged', () => {
+    const ok: ProviderResponse = { provider: 'google', model: 'm', content: 'B', responseTimeMs: 1 };
+    const run: PromptRunResult = {
+      prompt: 'Q', responses: [ok], consensus: {},
+      evaluation: { evaluator: 'mcq', groundTruth: 'B', accuracy: 1, results: { 'google:m': { correct: true, expected: 'B', predicted: 'B' } } },
+    };
+    expect(scoreUnscoredResponses(run)).toBe(run);
   });
 });

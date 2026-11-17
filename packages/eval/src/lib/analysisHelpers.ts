@@ -57,20 +57,36 @@ export function collectModelResults(run: PromptRunResult): Record<string, Evalua
   return Object.fromEntries(firstByModel.entries());
 }
 
+/**
+ * A cost total as text. When any call in it had no price the total is a
+ * lower bound, or unknown when nothing was priced, so an unpriced model is
+ * never shown as free.
+ */
+export function formatCostUsd(costUsd: number, unpricedCalls: number): string {
+  const amount = `$${costUsd.toFixed(4)}`;
+  if (unpricedCalls === 0) return amount;
+  const note = `${unpricedCalls} unpriced call${unpricedCalls === 1 ? '' : 's'}`;
+  return costUsd > 0 ? `>= ${amount} (${note})` : `unknown (${note})`;
+}
+
 export function responseCostTotals(run: PromptRunResult): {
   tokens: number;
   costUsd: number;
+  /** Successful responses with no price. */
+  unpriced: number;
 } {
   let tokens = 0;
   let costUsd = 0;
+  let unpriced = 0;
   for (const response of run.responses) {
     if (response.error) {
       continue;
     }
     tokens += response.tokenCount ?? 0;
-    costUsd += response.estimatedCostUsd ?? 0;
+    if (response.estimatedCostUsd === undefined) unpriced += 1;
+    else costUsd += response.estimatedCostUsd;
   }
-  return { tokens, costUsd };
+  return { tokens, costUsd, unpriced };
 }
 
 export function safeRatio(numerator: number, denominator: number): number {

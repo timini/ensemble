@@ -86,4 +86,18 @@ describe('baselineCache', () => {
       expect((await loadCachedBaseline('google:gemini-3-flash-preview', 'arc'))?.size).toBeGreaterThan(0);
     });
   });
+  describe('committed legacy caches', () => {
+    it('scores responses the cache left unscored (errors and timeouts) as wrong', async () => {
+      const { loadCachedBaseline } = await import('./baselineCache.js');
+      const cache = await loadCachedBaseline('google:gemini-3-flash-preview', 'gpqa');
+      expect(cache).not.toBeNull();
+      const runs = [...cache!.values()];
+      for (const run of runs) {
+        expect(Object.keys(run.evaluation?.results ?? {})).toHaveLength(run.responses.length);
+      }
+      const failed = runs.filter((run) => Object.values(run.evaluation?.results ?? {}).some((r) => r.failure));
+      expect(failed.length).toBeGreaterThan(0);
+      for (const run of failed) expect(run.evaluation?.results['google:gemini-3-flash-preview']?.correct).toBe(false);
+    });
+  });
 });

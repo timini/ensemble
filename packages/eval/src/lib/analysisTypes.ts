@@ -64,6 +64,8 @@ export interface CostRow {
   totalTokens: number;
   totalEstimatedCostUsd: number;
   averageCostPerQuestionUsd: number;
+  /** Calls with no price, which the totals leave out. */
+  unpricedCalls: number;
 }
 
 export interface ChartBundle {

@@ -18,6 +18,7 @@ import { fileURLToPath } from 'node:url';
 import { fileExists, readJsonFile, writeJsonFile } from './io.js';
 import type { PromptRunResult } from '../types.js';
 import type { AnswerProtocol } from './methodology.js';
+import { scoreUnscoredResponses } from './evaluation.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -44,7 +45,9 @@ function cachePath(model: string, dataset: string, protocol: AnswerProtocol): st
 
 /**
  * Load pre-computed single baseline results as a Map<questionId, PromptRunResult>.
- * Returns null if no cache file exists.
+ * Returns null if no cache file exists. Responses the cache left unscored
+ * (older caches skipped errors and timeouts) are scored wrong with their
+ * failure, so the single model's failures count as the ensemble's do.
  */
 export async function loadCachedBaseline(
   model: string,
@@ -56,8 +59,9 @@ export async function loadCachedBaseline(
   try {
     const file = await readJsonFile<BaselineCacheFile>(path);
     const map = new Map<string, PromptRunResult>();
+    const evaluatorName = file.entries.find((entry) => entry.result.evaluation)?.result.evaluation?.evaluator;
     for (const entry of file.entries) {
-      map.set(entry.questionId, entry.result);
+      map.set(entry.questionId, scoreUnscoredResponses(entry.result, evaluatorName));
     }
     return map;
   } catch {

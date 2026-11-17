@@ -93,4 +93,33 @@ describe('createMarkdownReport', () => {
     expect(markdown).toContain('Answer protocol: structured');
     expect(markdown).not.toMatch(/[\u2013\u2014]/);
   });
+  it('shows costs with unpriced calls as a lower bound or unknown, never as free', () => {
+    const runs: PromptRunResult[] = [
+      {
+        questionId: 'q1', prompt: 'p', groundTruth: 'A',
+        responses: [
+          { provider: 'openai', model: 'priced', content: 'A', responseTimeMs: 1, estimatedCostUsd: 0.001 },
+          { provider: 'openai-compatible', model: 'openrouter/unpriced', content: 'A', responseTimeMs: 1 },
+        ],
+        consensus: { standard: 'A' },
+        consensusMetrics: { standard: { tokenCount: 5, durationMs: 1 } },
+        evaluation: {
+          evaluator: 'mcq', groundTruth: 'A', accuracy: 1,
+          results: {
+            'openai:priced': { correct: true, expected: 'A', predicted: 'A' },
+            'openai-compatible:openrouter/unpriced': { correct: true, expected: 'A', predicted: 'A' },
+          },
+        },
+        consensusEvaluation: {
+          evaluator: 'mcq', groundTruth: 'A', results: { standard: { correct: true, expected: 'A', predicted: 'A' } },
+        },
+      },
+    ];
+    const analysis = analyzeBenchmarkRuns(runs, { bootstrapIterations: 10 });
+    expect(analysis.costAnalysis.find((row) => row.label === 'strategy:standard')?.unpricedCalls).toBe(2);
+    const markdown = createMarkdownReport('results.json', analysis);
+    expect(markdown).toContain('| openai-compatible:openrouter/unpriced | 0 | unknown (1 unpriced call) |');
+    expect(markdown).toContain('| openai:priced | 0 | $0.0010 | $0.0010 |');
+    expect(markdown).toContain('| strategy:standard | 5 | >= $0.0010 (2 unpriced calls) |');
+  });
 });

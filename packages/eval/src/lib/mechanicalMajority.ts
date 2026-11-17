@@ -1,6 +1,13 @@
 import type { ProviderResponse } from '../types.js';
 import { answersMatch, extractFinalAnswer, isMechanical, type AnswerSpec } from './finalAnswer.js';
 
+/**
+ * Output recorded for a mechanical vote when replies came back but none had
+ * a readable answer. It has no answer, so it is scored wrong, and it is not
+ * counted as a failed call.
+ */
+export const UNREADABLE_VOTE = 'Final answer:';
+
 export interface MechanicalVote {
   /** The winning answer as first written. */
   answer: string;
