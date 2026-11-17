@@ -37,6 +37,12 @@ describe('BenchmarkResultsTable', () => {
     expect(within(rowById('single:b')).getByTestId('benchmark-result-p')).toHaveTextContent('Not tested');
   });
 
+  it('formats cost in the reader\'s language', () => {
+    renderWithI18n(<BenchmarkResultsTable title="GSM8K" n={200} rows={rows} />, { language: 'fr' });
+    const usd = new Intl.NumberFormat('fr', { style: 'currency', currency: 'USD' }).format(3).replace(/\s/g, ' ');
+    expect(within(rowById('reference')).getByTestId('benchmark-result-cost')).toHaveTextContent(`au moins ${usd}`);
+  });
+
   it('shows cost, marks a lower bound and counts failures', () => {
     renderWithI18n(<BenchmarkResultsTable title="GSM8K" n={200} rows={rows} />);
     expect(within(rowById('single:a')).getByTestId('benchmark-result-cost')).toHaveTextContent('$0.12');

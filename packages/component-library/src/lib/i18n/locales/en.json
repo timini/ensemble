@@ -73,7 +73,8 @@
         "title": "Pro Mode",
         "description": "Buy credits to get access to the latest models across all providers.",
         "buttonText": "Go Pro"
-      }
+      },
+      "comingSoon": "Coming Soon"
     },
     "responseCard": {
       "manual": "Manual",
@@ -232,7 +233,7 @@
     "benchmarksNotRun": {
       "title": "Benchmarks not run yet",
       "description": "No measured results are published. This page shows numbers only after the benchmark matrix has been run. Until then it shows the method and what a run will cost.",
-      "estimate": "Estimated cost of a full run: ${{low}} to ${{high}} for {{calls}} model calls.",
+      "estimate": "Estimated cost of a full run: {{low}} to {{high}} for {{calls}} model calls.",
       "commandLabel": "Run it yourself:"
     }
   },

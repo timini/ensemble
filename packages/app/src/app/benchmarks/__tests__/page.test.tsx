@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { render, screen, within } from "@testing-library/react";
-import "~/lib/i18n";
+import i18n from "~/lib/i18n";
 import type { BenchmarkSummary } from "~/lib/benchmarks";
 import { complete } from "~/lib/__tests__/benchmarkSummaryFixture";
 
@@ -25,7 +25,10 @@ function show(summary: BenchmarkSummary) {
   render(<BenchmarksPage />);
 }
 
-afterEach(() => vi.unstubAllEnvs());
+afterEach(async () => {
+  vi.unstubAllEnvs();
+  await i18n.changeLanguage("en");
+});
 
 describe("BenchmarksPage", () => {
   it("shows one table per dataset with the best single model and p-values", () => {
@@ -49,6 +52,18 @@ describe("BenchmarksPage", () => {
     expect(
       screen.queryByTestId("benchmarks-mock-notice"),
     ).not.toBeInTheDocument();
+  });
+
+  it("formats the run cost in the reader's language", async () => {
+    await i18n.changeLanguage("fr");
+    show(complete);
+    const usd = new Intl.NumberFormat("fr", {
+      style: "currency",
+      currency: "USD",
+    })
+      .format(9.5)
+      .replace(/\s/g, " ");
+    expect(screen.getByTestId("benchmarks-run-info")).toHaveTextContent(usd);
   });
 
   it("flags a dataset below 200 questions", () => {

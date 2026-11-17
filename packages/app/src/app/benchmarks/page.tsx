@@ -15,6 +15,7 @@ import { PageHero } from "@/components/organisms/PageHero";
 import { BenchmarkMethod } from "@/components/organisms/BenchmarkMethod";
 import { BenchmarkResultsTable } from "@/components/organisms/BenchmarkResultsTable";
 import { BenchmarksNotRun } from "@/components/molecules/BenchmarksNotRun";
+import { formatUsd } from "@/components/molecules/RunCostSummary";
 import { InlineAlert } from "@/components/atoms/InlineAlert";
 import { Heading } from "@/components/atoms/Heading";
 import { Text } from "@/components/atoms/Text";
@@ -33,7 +34,7 @@ import {
 function Results({ summary }: { summary: BenchmarkSummary }) {
   const { t, i18n } = useTranslation("common");
   const date = new Date(summary.generatedAt).toLocaleDateString(i18n.language);
-  const total = `$${(summary.totalCostUsd ?? 0).toFixed(2)}`;
+  const total = formatUsd(summary.totalCostUsd ?? 0, i18n.language || "en");
   return (
     <section className="mt-8 space-y-6" data-testid="benchmarks-results">
       <Heading level={2} size="xl">

@@ -5,6 +5,7 @@ import { Card, CardContent } from '../../atoms/Card';
 import { Heading } from '../../atoms/Heading';
 import { Text } from '../../atoms/Text';
 import { AccuracyInterval } from '../../molecules/AccuracyInterval';
+import { formatUsd } from '../../molecules/RunCostSummary/runCostFormat';
 import { cn } from '../../../lib/utils';
 
 /** One configuration's result on one dataset. */
@@ -52,7 +53,8 @@ const formatP = (p: number) => (p < 0.001 ? '<0.001' : p.toFixed(3));
  */
 export const BenchmarkResultsTable = React.forwardRef<HTMLDivElement, BenchmarkResultsTableProps>(
   ({ title, n, rows, className }, ref) => {
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
+    const usd = (value: number) => formatUsd(value, i18n.language || 'en');
     const k = (key: string) => `organisms.benchmarkResultsTable.${key}`;
 
     const pCell = (row: BenchmarkResultRow) => {
@@ -103,8 +105,8 @@ export const BenchmarkResultsTable = React.forwardRef<HTMLDivElement, BenchmarkR
                     <td className="py-3 align-top tabular-nums">
                       <div data-testid="benchmark-result-cost">
                         {row.costIncomplete
-                          ? t(k('costLowerBound'), { cost: `$${row.costUsd.toFixed(2)}` })
-                          : `$${row.costUsd.toFixed(2)}`}
+                          ? t(k('costLowerBound'), { cost: usd(row.costUsd) })
+                          : usd(row.costUsd)}
                       </div>
                       {row.failures > 0 && (
                         <div className="text-xs text-muted-foreground" data-testid="benchmark-result-failures">

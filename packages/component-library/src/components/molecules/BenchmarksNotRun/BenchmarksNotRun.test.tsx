@@ -27,6 +27,18 @@ describe('BenchmarksNotRun', () => {
     expect(screen.getByTestId('benchmarks-not-run-command-command')).toHaveTextContent(command);
   });
 
+  it('formats the estimate in the reader\'s language', () => {
+    renderWithI18n(
+      <BenchmarksNotRun command={command} estimate={{ lowUsd: 2.183, highUsd: 18.27, calls: 3990 }} />,
+      { language: 'fr' },
+    );
+    const usd = (value: number) =>
+      new Intl.NumberFormat('fr', { style: 'currency', currency: 'USD' }).format(value).replace(/\s/g, ' ');
+    expect(screen.getByTestId('benchmarks-not-run-estimate')).toHaveTextContent(
+      `Coût estimé d'une exécution complète : ${usd(2.18)} à ${usd(18.27)} pour 3990 appels de modèles.`,
+    );
+  });
+
   it('translates into French', () => {
     renderWithI18n(<BenchmarksNotRun command={command} estimate={null} />, { language: 'fr' });
     expect(screen.getByTestId('benchmarks-not-run')).toHaveTextContent('Benchmarks pas encore lancés');

@@ -1,9 +1,11 @@
 import { useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import type { Provider, ValidationStatus } from '@/components/molecules/ApiKeyInput';
 import type { StoreState } from '~/store';
 import type { OperatingMode } from '~/store/slices/modeSlice';
 import { toError } from '~/lib/errors';
 import { logger } from '~/lib/logger';
+import { apiKeyItem } from '~/lib/apiKeyItems';
 
 interface UseApiKeyModalOptions {
   safeApiKeys: StoreState['apiKeys'];
@@ -29,6 +31,7 @@ export function useApiKeyModal({
   toggleApiKeyVisibility,
   onValidationStatusChange,
 }: UseApiKeyModalOptions) {
+  const { t } = useTranslation('common');
   const [selectedProvider, setSelectedProvider] = useState<Provider | null>(null);
   const [configModalOpen, setConfigModalOpen] = useState(false);
 
@@ -36,29 +39,14 @@ export function useApiKeyModal({
     if (!selectedProvider) return [];
 
     return [
-      {
-        provider: selectedProvider,
-        label: `${selectedProvider.charAt(0).toUpperCase() + selectedProvider.slice(1)} API Key`,
-        value: safeApiKeys[selectedProvider]?.key ?? '',
-        placeholder: {
-          openai: 'sk-...',
-          anthropic: 'sk-ant-...',
-          google: 'AIza...',
-          xai: 'xai-...',
-          deepseek: 'sk-...',
-          perplexity: 'pplx-...',
-        }[selectedProvider] ?? 'sk-...',
-        helperText:
-          hydratedStatuses[selectedProvider] === 'valid'
-            ? 'API key configured'
-            : hydratedStatuses[selectedProvider] === 'validating'
-            ? 'Validating...'
-            : `Enter your ${selectedProvider} API key`,
-        validationStatus: hydratedStatuses[selectedProvider],
-        showKey: safeApiKeys[selectedProvider]?.visible ?? false,
-      },
+      apiKeyItem(
+        selectedProvider,
+        safeApiKeys[selectedProvider],
+        hydratedStatuses[selectedProvider],
+        t,
+      ),
     ];
-  }, [hydratedStatuses, safeApiKeys, selectedProvider]);
+  }, [hydratedStatuses, safeApiKeys, selectedProvider, t]);
 
   const handleConfigureApiKey = (provider: Provider) => {
     setSelectedProvider(provider);

@@ -74,7 +74,7 @@ export const ModeSelectionCard = React.forwardRef<HTMLDivElement, ModeSelectionC
             onClick={onClick}
             disabled={disabled}
           >
-            {comingSoon ? 'Coming Soon' : t(`molecules.modeSelectionCard.${mode}.buttonText`)}
+            {comingSoon ? t('molecules.modeSelectionCard.comingSoon') : t(`molecules.modeSelectionCard.${mode}.buttonText`)}
           </Button>
         </CardContent>
       </Card>

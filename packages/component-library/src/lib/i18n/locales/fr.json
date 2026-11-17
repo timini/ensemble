@@ -73,7 +73,8 @@
         "title": "Mode Pro",
         "description": "Achetez des crédits pour accéder aux derniers modèles de tous les fournisseurs.",
         "buttonText": "Passer au Pro"
-      }
+      },
+      "comingSoon": "Bientôt disponible"
     },
     "responseCard": {
       "manual": "Manuel",
@@ -232,7 +233,7 @@
     "benchmarksNotRun": {
       "title": "Benchmarks pas encore lancés",
       "description": "Aucun résultat mesuré n'est publié. Cette page n'affiche des chiffres qu'après l'exécution de la matrice de benchmarks. En attendant, elle présente la méthode et le coût d'une exécution.",
-      "estimate": "Coût estimé d'une exécution complète : {{low}} $ à {{high}} $ pour {{calls}} appels de modèles.",
+      "estimate": "Coût estimé d'une exécution complète : {{low}} à {{high}} pour {{calls}} appels de modèles.",
       "commandLabel": "Lancez-la vous-même :"
     }
   },

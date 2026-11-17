@@ -13,8 +13,9 @@ import { toError } from '~/lib/errors';
 import { getHydratedStatus } from '~/lib/providerStatus';
 import { logger } from '~/lib/logger';
 import { endpointsProviderStatus } from '~/lib/endpointStatus';
+import { API_KEY_PROVIDERS, apiKeyItem } from '~/lib/apiKeyItems';
 
-const PROVIDERS: Provider[] = ['openai', 'anthropic', 'google', 'xai', 'deepseek', 'perplexity'];
+const PROVIDERS: Provider[] = API_KEY_PROVIDERS;
 
 export function useConfigPage() {
     const { t } = useTranslation('common');
@@ -151,69 +152,10 @@ export function useConfigPage() {
             return [];
         }
 
-        return [
-            {
-                provider: 'openai' as Provider,
-                label: 'OpenAI API Key',
-                value: apiKeys.openai?.key ?? '',
-                placeholder: 'sk-...',
-                helperText: hydratedStatuses.openai === 'valid' ? 'API key configured' : hydratedStatuses.openai === 'validating' ? 'Validating...' : hydratedStatuses.openai === 'invalid' ? 'Invalid API key' : 'Enter your OpenAI API key',
-                error: apiKeys.openai?.error,
-                validationStatus: hydratedStatuses.openai,
-                showKey: apiKeys.openai?.visible ?? false,
-            },
-            {
-                provider: 'anthropic' as Provider,
-                label: 'Anthropic API Key',
-                value: apiKeys.anthropic?.key ?? '',
-                placeholder: 'sk-ant-...',
-                helperText: hydratedStatuses.anthropic === 'valid' ? 'API key configured' : hydratedStatuses.anthropic === 'validating' ? 'Validating...' : hydratedStatuses.anthropic === 'invalid' ? 'Invalid API key' : 'Enter your Anthropic API key',
-                error: apiKeys.anthropic?.error,
-                validationStatus: hydratedStatuses.anthropic,
-                showKey: apiKeys.anthropic?.visible ?? false,
-            },
-            {
-                provider: 'google' as Provider,
-                label: 'Google (Gemini) API Key',
-                value: apiKeys.google?.key ?? '',
-                placeholder: 'AIza...',
-                helperText: hydratedStatuses.google === 'valid' ? 'API key configured' : hydratedStatuses.google === 'validating' ? 'Validating...' : hydratedStatuses.google === 'invalid' ? 'Invalid API key' : 'Enter your Google AI API key',
-                error: apiKeys.google?.error,
-                validationStatus: hydratedStatuses.google,
-                showKey: apiKeys.google?.visible ?? false,
-            },
-            {
-                provider: 'xai' as Provider,
-                label: 'xAI (Grok) API Key',
-                value: apiKeys.xai?.key ?? '',
-                placeholder: 'xai-...',
-                helperText: hydratedStatuses.xai === 'valid' ? 'API key configured' : hydratedStatuses.xai === 'validating' ? 'Validating...' : hydratedStatuses.xai === 'invalid' ? 'Invalid API key' : 'Enter your xAI API key',
-                error: apiKeys.xai?.error,
-                validationStatus: hydratedStatuses.xai,
-                showKey: apiKeys.xai?.visible ?? false,
-            },
-            {
-                provider: 'deepseek' as Provider,
-                label: 'DeepSeek API Key',
-                value: apiKeys.deepseek?.key ?? '',
-                placeholder: 'sk-...',
-                helperText: hydratedStatuses.deepseek === 'valid' ? 'API key configured' : hydratedStatuses.deepseek === 'validating' ? 'Validating...' : hydratedStatuses.deepseek === 'invalid' ? 'Invalid API key' : 'Enter your DeepSeek API key',
-                error: apiKeys.deepseek?.error,
-                validationStatus: hydratedStatuses.deepseek,
-                showKey: apiKeys.deepseek?.visible ?? false,
-            },
-            {
-                provider: 'perplexity' as Provider,
-                label: 'Perplexity API Key',
-                value: apiKeys.perplexity?.key ?? '',
-                placeholder: 'pplx-...',
-                helperText: hydratedStatuses.perplexity === 'valid' ? 'API key configured' : hydratedStatuses.perplexity === 'validating' ? 'Validating...' : hydratedStatuses.perplexity === 'invalid' ? 'Invalid API key' : 'Enter your Perplexity API key',
-                error: apiKeys.perplexity?.error,
-                validationStatus: hydratedStatuses.perplexity,
-                showKey: apiKeys.perplexity?.visible ?? false,
-            },
-        ];
-    }, [apiKeys, hydratedStatuses, isFreeModeActive]);
+        return API_KEY_PROVIDERS.map((provider) =>
+            apiKeyItem(provider, apiKeys[provider], hydratedStatuses[provider], t),
+        );
+    }, [apiKeys, hydratedStatuses, isFreeModeActive, t]);
 
     const displayApiKeyItems = useMemo(() => {
         if (hasHydrated) {

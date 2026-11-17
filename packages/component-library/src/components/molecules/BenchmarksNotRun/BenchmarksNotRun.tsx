@@ -4,6 +4,7 @@ import { InlineAlert } from '../../atoms/InlineAlert';
 import { CommandSnippet } from '../../atoms/CommandSnippet';
 import { Text } from '../../atoms/Text';
 import { cn } from '../../../lib/utils';
+import { formatUsd } from '../RunCostSummary/runCostFormat';
 
 /** Cost estimate of a full benchmark run. */
 export interface BenchmarkRunEstimate {
@@ -33,7 +34,8 @@ export interface BenchmarksNotRunProps {
  */
 export const BenchmarksNotRun = React.forwardRef<HTMLDivElement, BenchmarksNotRunProps>(
   ({ command, estimate, className }, ref) => {
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
+    const usd = (value: number) => formatUsd(value, i18n.language || 'en');
     return (
       <div ref={ref} data-testid="benchmarks-not-run" className={cn('space-y-3', className)}>
         <InlineAlert variant="info" role="status">
@@ -42,8 +44,8 @@ export const BenchmarksNotRun = React.forwardRef<HTMLDivElement, BenchmarksNotRu
           {estimate && (
             <p className="mt-1" data-testid="benchmarks-not-run-estimate">
               {t('molecules.benchmarksNotRun.estimate', {
-                low: estimate.lowUsd.toFixed(2),
-                high: estimate.highUsd.toFixed(2),
+                low: usd(estimate.lowUsd),
+                high: usd(estimate.highUsd),
                 calls: estimate.calls,
               })}
             </p>

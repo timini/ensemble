@@ -407,5 +407,14 @@
         "council": "Ensemble, council"
       }
     }
+  },
+  "apiKeys": {
+    "label": "{{provider}} API Key",
+    "helper": {
+      "idle": "Enter your {{provider}} API key",
+      "validating": "Validating...",
+      "valid": "API key configured",
+      "invalid": "Invalid API key"
+    }
   }
 }
