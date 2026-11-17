@@ -131,13 +131,11 @@ describe("endpointsSlice", () => {
   it("strips plaintext keys before persisting", () => {
     store.getState().addEndpoint("groq");
     store.setState({
-      endpoints: store
-        .getState()
-        .endpoints.map((e) => ({
-          ...e,
-          apiKey: "gsk",
-          encryptedApiKey: "enc:gsk",
-        })),
+      endpoints: store.getState().endpoints.map((e) => ({
+        ...e,
+        apiKey: "gsk",
+        encryptedApiKey: "enc:gsk",
+      })),
     });
     const persisted = sanitizeEndpointsForPersist(store.getState().endpoints);
     expect(persisted[0]).toMatchObject({
@@ -182,5 +180,24 @@ describe("endpointsSlice", () => {
       status: "valid",
       embeddingModelFound: undefined,
     });
+  });
+
+  it("adds an endpoint with a found base URL and embedding model", () => {
+    store.getState().addEndpoint("ollama", {
+      baseURL: "http://127.0.0.1:11434/v1",
+      embeddingModel: "embeddinggemma:latest",
+    });
+    expect(store.getState().endpoints[0]).toMatchObject({
+      id: "ollama",
+      baseURL: "http://127.0.0.1:11434/v1",
+      embeddingModel: "embeddinggemma:latest",
+      status: "idle",
+    });
+  });
+
+  it("remembers that the Ollama offer was dismissed", () => {
+    expect(store.getState().ollamaOfferDismissed).toBe(false);
+    store.getState().dismissOllamaOffer();
+    expect(store.getState().ollamaOfferDismissed).toBe(true);
   });
 });

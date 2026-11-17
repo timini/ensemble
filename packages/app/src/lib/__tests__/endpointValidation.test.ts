@@ -101,4 +101,58 @@ describe("checkEndpoint", () => {
       errorCode: "unreachable",
     });
   });
+
+  it("suggests an installed embedding model when the set one is missing", async () => {
+    process.env.NEXT_PUBLIC_MOCK_MODE = "false";
+    const fetchImpl = vi.fn().mockResolvedValue(
+      json({
+        data: [{ id: "llama3.2:3b" }, { id: "embeddinggemma:latest" }],
+      }),
+    );
+    expect(
+      await checkEndpoint(
+        { ...endpoint, embeddingModel: "nomic-embed-text" },
+        fetchImpl,
+      ),
+    ).toEqual({
+      status: "valid",
+      modelCount: 2,
+      embeddingModelFound: false,
+      suggestedEmbeddingModel: "embeddinggemma:latest",
+    });
+  });
+
+  it("calls a network failure unreachable when the page runs on this machine", async () => {
+    process.env.NEXT_PUBLIC_MOCK_MODE = "false";
+    const fetchImpl = vi
+      .fn()
+      .mockRejectedValue(new TypeError("Failed to fetch"));
+    expect(
+      await checkEndpoint(endpoint, fetchImpl, {
+        pageOrigin: "http://localhost:3000",
+      }),
+    ).toEqual({ status: "invalid", errorCode: "unreachable" });
+  });
+
+  it("says the browser may block a local server called from a hosted page", async () => {
+    process.env.NEXT_PUBLIC_MOCK_MODE = "false";
+    const fetchImpl = vi.fn().mockRejectedValue(new TypeError("Load failed"));
+    expect(
+      await checkEndpoint(endpoint, fetchImpl, {
+        pageOrigin: "https://ensemble.example.app",
+      }),
+    ).toEqual({ status: "invalid", errorCode: "localBlocked" });
+  });
+
+  it("keeps the server's message when a hosted page reaches a local server that refuses", async () => {
+    process.env.NEXT_PUBLIC_MOCK_MODE = "false";
+    const fetchImpl = vi
+      .fn()
+      .mockResolvedValue(json({ error: "forbidden" }, 403));
+    const result = await checkEndpoint(endpoint, fetchImpl, {
+      pageOrigin: "https://ensemble.example.app",
+    });
+    expect(result.status).toBe("invalid");
+    expect(result.error).toMatch(/403/);
+  });
 });

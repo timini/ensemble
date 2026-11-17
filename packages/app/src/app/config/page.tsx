@@ -6,23 +6,26 @@
  * API keys and OpenAI-compatible endpoints (local or hosted)
  */
 
-'use client';
+"use client";
 
-import { PageHero } from '@/components/organisms/PageHero';
-import { ModeSelector } from '@/components/organisms/ModeSelector';
-import { ApiKeyConfiguration } from '@/components/organisms/ApiKeyConfiguration';
-import { WorkflowNavigator } from '@/components/organisms/WorkflowNavigator';
-import { ProgressSteps } from '@/components/molecules/ProgressSteps';
-import { InlineAlert } from '@/components/atoms/InlineAlert';
-import { EmbeddingsProviderSelector } from '@/components/molecules/EmbeddingsProviderSelector';
-import { EndpointConfiguration } from '@/components/organisms/EndpointConfiguration';
-import { useConfigPage } from './hooks/useConfigPage';
-import { useHasHydrated } from '~/hooks/useHasHydrated';
-import { useEmbeddingsProviderSetting } from './hooks/useEmbeddingsProviderSetting';
+import { PageHero } from "@/components/organisms/PageHero";
+import { ModeSelector } from "@/components/organisms/ModeSelector";
+import { ApiKeyConfiguration } from "@/components/organisms/ApiKeyConfiguration";
+import { WorkflowNavigator } from "@/components/organisms/WorkflowNavigator";
+import { ProgressSteps } from "@/components/molecules/ProgressSteps";
+import { InlineAlert } from "@/components/atoms/InlineAlert";
+import { EmbeddingsProviderSelector } from "@/components/molecules/EmbeddingsProviderSelector";
+import { EndpointConfiguration } from "@/components/organisms/EndpointConfiguration";
+import { OllamaDetectedNotice } from "@/components/molecules/OllamaDetectedNotice";
+import { LOCAL_MODELS_GUIDE_URL, LOCAL_RUN_COMMAND } from "~/lib/localModels";
+import { useOllamaDetection } from "./hooks/useOllamaDetection";
+import { useConfigPage } from "./hooks/useConfigPage";
+import { useHasHydrated } from "~/hooks/useHasHydrated";
+import { useEmbeddingsProviderSetting } from "./hooks/useEmbeddingsProviderSetting";
 import {
   useEmbeddingProviderStatuses,
   useEndpointConfiguration,
-} from './hooks/useEndpointConfiguration';
+} from "./hooks/useEndpointConfiguration";
 
 export default function ConfigPage() {
   const {
@@ -42,14 +45,20 @@ export default function ConfigPage() {
     hydratedStatuses,
   } = useConfigPage();
   const hasHydrated = useHasHydrated();
-  const isFreeModeActive = displayMode === 'free' && webCryptoSupported;
+  const isFreeModeActive = displayMode === "free" && webCryptoSupported;
   const embeddings = useEmbeddingsProviderSetting(
     useEmbeddingProviderStatuses(hydratedStatuses, hasHydrated),
   );
-  const endpointConfig = useEndpointConfiguration(isFreeModeActive && hasHydrated);
+  const endpointConfig = useEndpointConfiguration(
+    isFreeModeActive && hasHydrated,
+  );
+  const ollamaOffer = useOllamaDetection({
+    enabled: isFreeModeActive && hasHydrated,
+    hasValidKey: Object.values(hydratedStatuses).includes("valid"),
+  });
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-6xl">
+    <div className="container mx-auto max-w-6xl px-4 py-8">
       <ProgressSteps
         currentStep={currentStep}
         fallbackStep="config"
@@ -57,8 +66,8 @@ export default function ConfigPage() {
       />
 
       <PageHero
-        title={t('pages.config.title')}
-        description={t('pages.config.description')}
+        title={t("pages.config.title")}
+        description={t("pages.config.description")}
       />
 
       <div className="mt-8">
@@ -74,31 +83,33 @@ export default function ConfigPage() {
           <div className="mt-6">
             <InlineAlert variant="error">
               <p className="font-semibold">
-                {t('pages.config.webCryptoUnsupportedTitle')}
+                {t("pages.config.webCryptoUnsupportedTitle")}
               </p>
               <p className="mt-1">
-                {t('pages.config.webCryptoUnsupportedDescription')}
+                {t("pages.config.webCryptoUnsupportedDescription")}
               </p>
             </InlineAlert>
           </div>
         )}
       </div>
 
-      {displayMode === 'free' && (
+      {displayMode === "free" && (
         <div className="mt-8 space-y-6">
           <InlineAlert variant="info">
             <div>
               <p className="text-base font-semibold">
-                {t('pages.config.securityNoticeTitle')}
+                {t("pages.config.securityNoticeTitle")}
               </p>
               <p className="mt-1">
-                {t('pages.config.securityNoticeDescription')}
+                {t("pages.config.securityNoticeDescription")}
               </p>
               <ul className="mt-3 list-disc space-y-1 pl-5">
-                <li>{t('pages.config.securityNoticeBulletNeverLeavesBrowser')}</li>
-                <li>{t('pages.config.securityNoticeBulletAesEncryption')}</li>
-                <li>{t('pages.config.securityNoticeBulletNoServerStorage')}</li>
-                <li>{t('pages.config.securityNoticeBulletDirectApiCalls')}</li>
+                <li>
+                  {t("pages.config.securityNoticeBulletNeverLeavesBrowser")}
+                </li>
+                <li>{t("pages.config.securityNoticeBulletAesEncryption")}</li>
+                <li>{t("pages.config.securityNoticeBulletNoServerStorage")}</li>
+                <li>{t("pages.config.securityNoticeBulletDirectApiCalls")}</li>
               </ul>
             </div>
           </InlineAlert>
@@ -110,12 +121,16 @@ export default function ConfigPage() {
             onToggleShow={handleToggleShow}
           />
 
+          {ollamaOffer && <OllamaDetectedNotice {...ollamaOffer} />}
+
           <EndpointConfiguration
             endpoints={endpointConfig.items}
             presets={endpointConfig.presets}
             onAdd={endpointConfig.onAdd}
             onChange={endpointConfig.onChange}
             onRemove={endpointConfig.onRemove}
+            guideUrl={LOCAL_MODELS_GUIDE_URL}
+            localRunCommand={LOCAL_RUN_COMMAND}
           />
 
           <div className="rounded-lg border border-border p-6">
@@ -134,7 +149,7 @@ export default function ConfigPage() {
           currentStep={currentStep}
           onContinue={handleContinue}
           continueDisabled={!allowContinue}
-          continueLabel={t('common.next')}
+          continueLabel={t("common.next")}
         />
       </div>
     </div>

@@ -4,6 +4,7 @@ import {
   embeddingStatuses,
   endpointsProviderStatus,
   endpointEmbeddingModelRef,
+  ollamaEmbeddingPullCommand,
 } from "../endpointStatus";
 import type { EndpointEntry } from "~/store/slices/endpointsSlice";
 
@@ -59,7 +60,11 @@ describe("embeddings from endpoints", () => {
     ).toBe(false);
     expect(
       canEmbedWithEndpoints([
-        endpoint({ status: "valid", embeddingModel: "nomic-embed-text", embeddingModelFound: undefined }),
+        endpoint({
+          status: "valid",
+          embeddingModel: "nomic-embed-text",
+          embeddingModelFound: undefined,
+        }),
       ]),
     ).toBe(false);
   });
@@ -101,5 +106,53 @@ describe("embeddings from endpoints", () => {
       modelId: "ollama/nomic-embed-text",
     });
     expect(endpointEmbeddingModelRef([])).toBeNull();
+  });
+
+  it("gives the pull command for a connected Ollama without an embedding model", () => {
+    expect(
+      ollamaEmbeddingPullCommand([
+        endpoint({
+          status: "valid",
+          embeddingModel: "",
+          embeddingModelFound: false,
+        }),
+      ]),
+    ).toBe("ollama pull nomic-embed-text");
+    expect(
+      ollamaEmbeddingPullCommand([
+        endpoint({
+          status: "valid",
+          embeddingModel: "embeddinggemma",
+          embeddingModelFound: false,
+        }),
+      ]),
+    ).toBe("ollama pull embeddinggemma");
+  });
+
+  it("gives no pull command when Ollama can embed, is not connected or is not Ollama", () => {
+    expect(
+      ollamaEmbeddingPullCommand([
+        endpoint({
+          status: "valid",
+          embeddingModel: "nomic-embed-text",
+          embeddingModelFound: true,
+        }),
+      ]),
+    ).toBeUndefined();
+    expect(
+      ollamaEmbeddingPullCommand([
+        endpoint({ status: "invalid", embeddingModelFound: false }),
+      ]),
+    ).toBeUndefined();
+    expect(
+      ollamaEmbeddingPullCommand([
+        endpoint({
+          id: "lmstudio",
+          presetId: "lmstudio",
+          status: "valid",
+          embeddingModelFound: false,
+        }),
+      ]),
+    ).toBeUndefined();
   });
 });

@@ -54,9 +54,18 @@ export interface EndpointEntry {
 
 export interface EndpointsSlice {
   endpoints: EndpointEntry[];
+  /** The user closed the offer to add a running Ollama. Persisted. */
+  ollamaOfferDismissed: boolean;
 
-  /** Add an endpoint from a preset and return its id. */
-  addEndpoint: (presetId: EndpointPresetId) => string;
+  /**
+   * Add an endpoint from a preset and return its id. `overrides` replaces the
+   * preset's base URL or embedding model (for example with what detection found).
+   */
+  addEndpoint: (
+    presetId: EndpointPresetId,
+    overrides?: Partial<Pick<EndpointEntry, "baseURL" | "embeddingModel">>,
+  ) => string;
+  dismissOllamaOffer: () => void;
   /**
    * Change the base URL or embedding model. A new base URL needs a new check;
    * a new embedding model needs one before it is used.
@@ -126,8 +135,11 @@ export const createEndpointsSlice: StateCreator<EndpointsSlice> = (
 
   return {
     endpoints: [],
+    ollamaOfferDismissed: false,
 
-    addEndpoint: (presetId) => {
+    dismissOllamaOffer: () => set({ ollamaOfferDismissed: true }),
+
+    addEndpoint: (presetId, overrides) => {
       const preset = getEndpointPreset(presetId);
       const id = nextEndpointId(
         preset.id,
@@ -137,10 +149,11 @@ export const createEndpointsSlice: StateCreator<EndpointsSlice> = (
         id,
         presetId: preset.id,
         label: labelFor(preset.id, id),
-        baseURL: preset.baseURL,
+        baseURL: overrides?.baseURL ?? preset.baseURL,
         apiKey: "",
         encryptedApiKey: null,
-        embeddingModel: preset.embeddingModel ?? "",
+        embeddingModel:
+          overrides?.embeddingModel ?? preset.embeddingModel ?? "",
         status: "idle",
       };
       set((state) => ({ endpoints: [...state.endpoints, entry] }));

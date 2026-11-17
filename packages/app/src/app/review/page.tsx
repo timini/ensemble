@@ -32,11 +32,16 @@ import { MajorityVoteBreakdown } from "@/components/molecules/MajorityVoteBreakd
 import { toMajorityVoteBreakdownProps } from "~/lib/majorityVote";
 import { PRICE_TABLE_DATE } from "@ensemble-ai/shared-utils/pricing";
 import { useRunCost } from "~/hooks/useRunCost";
+import { useStore } from "~/store";
+import { ollamaEmbeddingPullCommand } from "~/lib/endpointStatus";
 
 const MAX_EXPANDED_CARDS = 3;
 
 export default function ReviewPage() {
   const { t } = useTranslation();
+  const ollamaPullCommand = useStore((state) =>
+    ollamaEmbeddingPullCommand(state.endpoints),
+  );
   const hasHydrated = useHasHydrated();
   const handleProgressStepClick = useStepNavigation();
 
@@ -199,6 +204,7 @@ export default function ReviewPage() {
         responseCount={agreementAnswers.length}
         averageConfidence={averageConfidence}
         excludedModels={excludedModels}
+        ollamaPullCommand={ollamaPullCommand}
       />
 
       {/* 4. Individual Responses Section (matches wireframe order - at bottom) */}

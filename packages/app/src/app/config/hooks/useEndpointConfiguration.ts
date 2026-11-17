@@ -10,13 +10,30 @@ import type {
   EndpointInputValue,
 } from "@/components/molecules/EndpointInput";
 import type { EndpointPresetOption } from "@/components/organisms/EndpointConfiguration";
-import { useStore } from "~/store";
+import { useStore, type EndpointEntry } from "~/store";
 import { checkEndpoint } from "~/lib/endpointValidation";
 import { canEmbedWithEndpoints } from "~/lib/endpointStatus";
 import { toError } from "~/lib/errors";
 import { logger } from "~/lib/logger";
 
 const CHECK_DEBOUNCE_MS = 500;
+
+/**
+ * Use the embedding model the server has in place of the one set when the
+ * endpoint runs on this machine and the user has not typed their own (the
+ * field is empty or still the preset's suggestion). Hosted endpoints are left
+ * alone, since their embedding calls may cost money.
+ */
+function shouldUseSuggestedModel(
+  endpoint: EndpointEntry,
+  suggested: string | undefined,
+): suggested is string {
+  if (!suggested) return false;
+  const preset = getEndpointPreset(endpoint.presetId);
+  if (!isLocalEndpoint(preset.id, endpoint.baseURL)) return false;
+  const current = endpoint.embeddingModel.trim();
+  return current === "" || current === preset.embeddingModel;
+}
 
 const PRESET_OPTIONS: EndpointPresetOption[] = ENDPOINT_PRESETS.map(
   ({ id, label }) => ({ id, label }),
@@ -54,14 +71,25 @@ export function useEndpointConfiguration(enabled: boolean) {
         current.embeddingModel !== endpoint.embeddingModel
       )
         return;
-      setEndpointStatus(id, result.status, {
+      const details = {
         error: result.error,
         errorCode: result.errorCode,
         modelCount: result.modelCount,
         embeddingModelFound: result.embeddingModelFound,
+      };
+      if (shouldUseSuggestedModel(current, result.suggestedEmbeddingModel)) {
+        updateEndpoint(id, { embeddingModel: result.suggestedEmbeddingModel });
+        setEndpointStatus(id, result.status, {
+          ...details,
+          embeddingModelFound: true,
+        });
+        return;
+      }
+      setEndpointStatus(id, result.status, {
+        ...details,
       });
     },
-    [setEndpointStatus],
+    [setEndpointStatus, updateEndpoint],
   );
 
   const scheduleCheck = useCallback(

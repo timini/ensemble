@@ -30,11 +30,11 @@ Consensus methods offered on `/ensemble`: `standard`, `elo`, `majority`, `counci
 - **Pro**. Shown on `/config` as "Coming soon" and disabled. `createProviderClient` throws "not yet implemented" for this mode. Not built yet, see [docs/ROADMAP.md](../../docs/ROADMAP.md).
 - **Mock** (developer only). Set `NEXT_PUBLIC_MOCK_MODE=true` (or run `npm run dev:mock`). Every provider call uses `MockProviderClient`, which streams lorem ipsum. Used by the mock-mode Playwright suite in `packages/e2e`.
 
-Supported providers: OpenAI, Anthropic, Google, xAI, DeepSeek, Perplexity.
+Supported providers: OpenAI, Anthropic, Google, xAI, DeepSeek, Perplexity, and any number of OpenAI-compatible endpoints (Ollama, LM Studio, llama.cpp, vLLM, OpenRouter, Groq, Together, custom). On first run `/config` looks for a running Ollama and offers to add it; see [docs/LOCAL_MODELS.md](../../docs/LOCAL_MODELS.md).
 
 ### Agreement scores
 
-The review page computes cosine similarity between response embeddings from OpenAI (`text-embedding-3-small`) or Google (`gemini-embedding-2`). The provider is picked from the valid keys, OpenAI first, and can be overridden on `/config`. Without an OpenAI or Google key the page says there is no agreement score instead of showing one. Mock mode uses hash-based vectors, so its scores are not semantic.
+The review page computes cosine similarity between response embeddings from OpenAI (`text-embedding-3-small`), Google (`gemini-embedding-2`) or an OpenAI-compatible endpoint with an embedding model (for example `nomic-embed-text` on Ollama). The provider is picked from the valid keys, OpenAI first, then Google, then an endpoint, and can be overridden on `/config`. Without any of them the page says there is no agreement score instead of showing one, and gives the `ollama pull` command when a connected Ollama has no embedding model. Mock mode uses hash-based vectors, so its scores are not semantic.
 
 ## Scripts
 
@@ -49,6 +49,7 @@ Run from `packages/app` (or with `--workspace=packages/app` from the repo root).
 | `apphosting:build` | Builds the consensus and shared-utils packages, then the app (used by Firebase App Hosting) |
 | `start` | Copies static assets into `.next/standalone` and runs the standalone server |
 | `preview` | `next build && next start` |
+| `local` | `bin/ensemble-local.mjs`: builds the workspace if needed and serves the app on `http://localhost:3000` for local models (also `npm run local` at the root, and the `ensemble-local` bin) |
 | `check` | `next lint && tsc --noEmit` |
 | `lint`, `lint:fix` | `next lint` |
 | `typecheck` | `tsc --noEmit` |

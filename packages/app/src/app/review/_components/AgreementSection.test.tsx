@@ -31,6 +31,28 @@ describe("AgreementSection", () => {
     expect(screen.queryByTestId("agreement-analysis")).not.toBeInTheDocument();
   });
 
+  it("gives the ollama pull command when Ollama has no embedding model", () => {
+    const { rerender } = render(
+      <AgreementSection {...baseProps} status="unavailable" />,
+    );
+    expect(
+      screen.queryByTestId("agreement-ollama-pull"),
+    ).not.toBeInTheDocument();
+    rerender(
+      <AgreementSection
+        {...baseProps}
+        status="unavailable"
+        ollamaPullCommand="ollama pull nomic-embed-text"
+      />,
+    );
+    expect(screen.getByTestId("agreement-unavailable")).toHaveTextContent(
+      "Your Ollama server has no embedding model",
+    );
+    expect(
+      screen.getByTestId("agreement-ollama-pull-command"),
+    ).toHaveTextContent("ollama pull nomic-embed-text");
+  });
+
   it("says when embeddings failed instead of showing a score", () => {
     render(<AgreementSection {...baseProps} status="error" />);
     expect(

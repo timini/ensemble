@@ -8,11 +8,21 @@ vi.mock("~/lib/endpointValidation", () => ({
     async (endpoint: { baseURL: string; embeddingModel: string }) =>
       endpoint.baseURL.includes("down")
         ? { status: "invalid", error: "Failed to fetch" }
-        : {
-            status: "valid",
-            modelCount: 2,
-            embeddingModelFound: endpoint.embeddingModel === "nomic-embed-text",
-          },
+        : endpoint.baseURL.includes("gemma")
+          ? {
+              status: "valid",
+              modelCount: 2,
+              embeddingModelFound: endpoint.embeddingModel === "embeddinggemma",
+              ...(endpoint.embeddingModel === "embeddinggemma"
+                ? {}
+                : { suggestedEmbeddingModel: "embeddinggemma" }),
+            }
+          : {
+              status: "valid",
+              modelCount: 2,
+              embeddingModelFound:
+                endpoint.embeddingModel === "nomic-embed-text",
+            },
   ),
 }));
 
@@ -93,12 +103,71 @@ describe("useEndpointConfiguration", () => {
       embeddingModelFound: true,
     });
     act(() => result.current.onChange("ollama", "embeddingModel", "missing"));
-    expect(useStore.getState().endpoints[0]?.embeddingModelFound).toBeUndefined();
+    expect(
+      useStore.getState().endpoints[0]?.embeddingModelFound,
+    ).toBeUndefined();
     await act(async () => {
       await vi.advanceTimersByTimeAsync(600);
     });
     expect(useStore.getState().endpoints[0]).toMatchObject({
       status: "valid",
+      embeddingModelFound: false,
+    });
+  });
+
+  it("switches a local endpoint to the embedding model it has when the default is missing", async () => {
+    const { result } = renderHook(() => useEndpointConfiguration(true));
+    act(() => result.current.onAdd("ollama"));
+    act(() =>
+      result.current.onChange(
+        "ollama",
+        "baseURL",
+        "http://localhost:1/gemma/v1",
+      ),
+    );
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(600);
+    });
+    expect(useStore.getState().endpoints[0]).toMatchObject({
+      status: "valid",
+      embeddingModel: "embeddinggemma",
+      embeddingModelFound: true,
+    });
+  });
+
+  it("keeps an embedding model the user typed, even when the server lacks it", async () => {
+    const { result } = renderHook(() => useEndpointConfiguration(true));
+    act(() => result.current.onAdd("ollama"));
+    act(() =>
+      result.current.onChange(
+        "ollama",
+        "baseURL",
+        "http://localhost:1/gemma/v1",
+      ),
+    );
+    act(() =>
+      result.current.onChange("ollama", "embeddingModel", "mxbai-embed-large"),
+    );
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(600);
+    });
+    expect(useStore.getState().endpoints[0]).toMatchObject({
+      embeddingModel: "mxbai-embed-large",
+      embeddingModelFound: false,
+    });
+  });
+
+  it("does not pick an embedding model on a hosted endpoint", async () => {
+    const { result } = renderHook(() => useEndpointConfiguration(true));
+    act(() => result.current.onAdd("custom"));
+    act(() =>
+      result.current.onChange("custom", "baseURL", "https://gemma.example/v1"),
+    );
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(600);
+    });
+    expect(useStore.getState().endpoints[0]).toMatchObject({
+      embeddingModel: "",
       embeddingModelFound: false,
     });
   });

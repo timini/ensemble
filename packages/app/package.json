@@ -3,6 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
+  "bin": {
+    "ensemble-local": "./bin/ensemble-local.mjs"
+  },
   "scripts": {
     "apphosting:build": "cd ../.. && npm run build --workspace=packages/consensus-core && npm run build --workspace=packages/consensus-standard && npm run build --workspace=packages/consensus-elo && npm run build --workspace=packages/consensus-majority && npm run build --workspace=packages/consensus-council && npm run build --workspace=packages/shared-utils && cd packages/app && next build && node scripts/flatten-standalone.mjs",
     "build": "next build && node scripts/flatten-standalone.mjs",
@@ -22,7 +25,8 @@
     "test:ui": "vitest --ui",
     "firebase:test-user:ensure": "node scripts/ensure-firebase-test-user.mjs",
     "typecheck": "tsc --noEmit",
-    "prepare": "husky"
+    "prepare": "husky",
+    "local": "node bin/ensemble-local.mjs"
   },
   "dependencies": {
     "@ai-ensemble/component-library": "*",

@@ -1,4 +1,7 @@
-import { toEndpointModelId } from "@ensemble-ai/shared-utils/providers";
+import {
+  ollamaPullCommand,
+  toEndpointModelId,
+} from "@ensemble-ai/shared-utils/providers";
 import type { ModelRef } from "@ensemble-ai/shared-utils/pricing";
 import type { ValidationStatus } from "@/components/molecules/ApiKeyInput";
 import type { EndpointEntry } from "~/store/slices/endpointsSlice";
@@ -76,4 +79,25 @@ export function endpointEmbeddingModelRef(
     provider: "openai-compatible",
     modelId: toEndpointModelId(endpoint.id, endpoint.embeddingModel.trim()),
   };
+}
+
+/**
+ * The `ollama pull` command for the first connected Ollama endpoint whose
+ * embedding model is not installed, or undefined when there is none.
+ */
+export function ollamaEmbeddingPullCommand(
+  endpoints: readonly Pick<
+    EndpointEntry,
+    "presetId" | "status" | "embeddingModel" | "embeddingModelFound"
+  >[],
+): string | undefined {
+  const endpoint = endpoints.find(
+    (e) =>
+      e.presetId === "ollama" &&
+      e.status === "valid" &&
+      e.embeddingModelFound !== true,
+  );
+  if (!endpoint) return undefined;
+  const model = endpoint.embeddingModel.trim();
+  return model ? ollamaPullCommand(model) : ollamaPullCommand();
 }

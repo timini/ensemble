@@ -28,7 +28,8 @@
     "test:unit": "npm run test:unit --workspaces --if-present",
     "typecheck": "npm run typecheck --workspaces --if-present",
     "prepare": "husky",
-    "start": "npm run start --workspace=@ai-ensemble/app"
+    "start": "npm run start --workspace=@ai-ensemble/app",
+    "local": "node packages/app/bin/ensemble-local.mjs"
   },
   "devDependencies": {
     "fta-cli": "^3.0.0",

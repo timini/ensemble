@@ -1,7 +1,10 @@
 import {
   FreeOpenAICompatibleClient,
   MockProviderClient,
+  OpenAICompatibleHttpError,
+  isLocalNetworkBlockLikely,
   modelListIncludes,
+  pickEmbeddingModel,
   redactSensitiveData,
   type OpenAICompatibleEndpointConfig,
 } from "@ensemble-ai/shared-utils/providers";
@@ -17,19 +20,48 @@ export interface EndpointCheckResult {
   modelCount?: number;
   /** True when the embedding model is in the endpoint's model list. */
   embeddingModelFound?: boolean;
+  /**
+   * An embedding model the server has, offered when the set one is not in
+   * its list (for example embeddinggemma when nomic-embed-text was never
+   * pulled).
+   */
+  suggestedEmbeddingModel?: string;
+}
+
+export interface CheckEndpointOptions {
+  /** Origin of the page making the call. Defaults to window.location.origin. */
+  pageOrigin?: string;
 }
 
 const isMockMode = () => process.env.NEXT_PUBLIC_MOCK_MODE === "true";
 
+function currentOrigin(): string {
+  return typeof window === "undefined" ? "" : window.location.origin;
+}
+
+/**
+ * True when the request never got an HTTP answer: fetch rejects with a
+ * TypeError when the server is down, CORS fails, or the browser blocks the
+ * call (mixed content, local network permission).
+ */
+function isNetworkFailure(error: unknown): boolean {
+  return (
+    error instanceof TypeError && !(error instanceof OpenAICompatibleHttpError)
+  );
+}
+
 /**
  * Check an OpenAI-compatible endpoint with `GET {baseURL}/models`, count its
  * models and look for its embedding model in the list. The key may be
- * empty. In mock mode no request is sent: every endpoint with a base URL
+ * empty. A failed request with no HTTP answer is `unreachable`, or
+ * `localBlocked` when a page that is not on this machine called a server
+ * that is, since browsers can block those calls (docs/LOCAL_MODELS.md). In mock mode no request is sent: every endpoint with a base URL
  * connects, offers the mock models and can embed.
  */
 export async function checkEndpoint(
   endpoint: OpenAICompatibleEndpointConfig,
   fetchImpl?: typeof fetch,
+  options: CheckEndpointOptions = {},
 ): Promise<EndpointCheckResult> {
   if (!endpoint.baseURL.trim()) {
     return { status: "invalid", errorCode: "baseUrlRequired" };
@@ -39,7 +71,11 @@ export async function checkEndpoint(
     const models = new MockProviderClient({
       providerFilter: "openai-compatible",
     }).listAvailableModels();
-    return { status: "valid", modelCount: models.length, embeddingModelFound: true };
+    return {
+      status: "valid",
+      modelCount: models.length,
+      embeddingModelFound: true,
+    };
   }
 
   const client = new FreeOpenAICompatibleClient(
@@ -52,12 +88,29 @@ export async function checkEndpoint(
   );
   try {
     const models = await client.listModels(endpoint.apiKey);
+    const embeddingModelFound = modelListIncludes(
+      models,
+      endpoint.embeddingModel ?? "",
+    );
+    const suggested = embeddingModelFound
+      ? undefined
+      : pickEmbeddingModel(models);
     return {
       status: "valid",
       modelCount: models.length,
-      embeddingModelFound: modelListIncludes(models, endpoint.embeddingModel ?? ""),
+      embeddingModelFound,
+      ...(suggested ? { suggestedEmbeddingModel: suggested } : {}),
     };
   } catch (error: unknown) {
+    if (isNetworkFailure(error)) {
+      const origin = options.pageOrigin ?? currentOrigin();
+      return {
+        status: "invalid",
+        errorCode: isLocalNetworkBlockLikely(endpoint.baseURL, origin)
+          ? "localBlocked"
+          : "unreachable",
+      };
+    }
     const message = redactSensitiveData(
       error instanceof Error ? error.message : String(error),
     ).trim();

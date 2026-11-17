@@ -6,6 +6,7 @@ import {
   type PairwiseComparison,
 } from "@/components/organisms/AgreementAnalysis";
 import { InlineAlert } from "@/components/atoms/InlineAlert";
+import { CommandSnippet } from "@/components/atoms/CommandSnippet";
 import type { EmbeddingsStatus } from "../hooks/useResponseEmbeddings";
 
 export interface AgreementSectionProps {
@@ -18,6 +19,11 @@ export interface AgreementSectionProps {
   averageConfidence: number;
   /** Answers left out of the score because their embedding failed. */
   excludedModels?: string[];
+  /**
+   * Shown when there is no score because a connected Ollama has no
+   * embedding model: the exact command that installs one.
+   */
+  ollamaPullCommand?: string;
 }
 
 /**
@@ -31,6 +37,7 @@ export function AgreementSection({
   responseCount,
   averageConfidence,
   excludedModels = [],
+  ollamaPullCommand,
 }: AgreementSectionProps) {
   const { t } = useTranslation();
 
@@ -58,6 +65,15 @@ export function AgreementSection({
         <InlineAlert variant="warning">
           <p className="font-semibold">{t(`pages.review.${key}Title`)}</p>
           <p className="mt-1">{t(`pages.review.${key}Description`)}</p>
+          {effectiveStatus === "unavailable" && ollamaPullCommand && (
+            <div className="mt-2 space-y-2">
+              <p>{t("pages.review.agreementOllamaPull")}</p>
+              <CommandSnippet
+                command={ollamaPullCommand}
+                data-testid="agreement-ollama-pull"
+              />
+            </div>
+          )}
         </InlineAlert>
       </div>
     );
