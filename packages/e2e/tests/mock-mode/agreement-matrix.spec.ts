@@ -1,12 +1,12 @@
 /**
  * Agreement analysis for 2 to 6 answers (T180).
  *
- * Every pair of answers gets one row, so n answers give n(n-1)/2 rows. The
- * stats show the number of answers and comparisons, and every model in the
- * run appears in the comparisons.
+ * Every pair of answers gets one row, so n answers give n(n-1)/2 rows, each
+ * with a score from 0 to 1, and every model in the run appears in the pairs.
+ * The overall score shows as a number from 0 to 100.
  */
 import { test, expect } from '@playwright/test';
-import { startMockRun } from './runHelpers';
+import { agreement, startMockRun } from './runHelpers';
 
 const MODELS = [
   { id: 'gpt-6-astra', name: 'GPT-6 Astra' },
@@ -27,22 +27,19 @@ test.describe('Agreement analysis for 2 to 6 answers', () => {
       const models = MODELS.slice(0, count);
       await startMockRun(page, { models: models.map((m) => m.id) });
 
-      const analysis = page.getByTestId('agreement-analysis');
-      await expect(analysis).toBeVisible({ timeout: 60_000 });
-      await expect(page.getByTestId('agreement-response-count')).toHaveText(String(count));
-      await expect(page.getByTestId('agreement-comparison-count')).toHaveText(String(pairs));
+      const summary = agreement(page);
+      await expect(summary).toHaveAttribute('data-status', 'ready', { timeout: 60_000 });
 
-      const rows = analysis.getByTestId('pairwise-comparison');
+      const rows = summary.getByTestId('agreement-pair');
       await expect(rows).toHaveCount(pairs);
       for (const row of await rows.all()) {
-        await expect(row.getByTestId('pairwise-similarity')).toHaveText(/^\d{1,3}%$/);
+        await expect(row).toHaveText(/(0|1)\.\d{2}$/);
       }
-
-      const comparisons = analysis.getByTestId('pairwise-comparisons');
       for (const model of models) {
-        await expect(comparisons).toContainText(model.name);
+        await expect(rows.filter({ hasText: model.name }).first()).toBeAttached();
       }
-      await expect(page.getByTestId('agreement-overall')).toHaveText(/^\d{1,3}%$/);
+      await expect(summary.getByTestId('agreement-ring-value')).toHaveText(/^\d{1,3}$/);
+      await expect(summary.getByTestId('agreement-level')).toHaveAttribute('data-level', /high|medium|low/);
     });
   }
 });

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { FALLBACK_MODELS } from '../models';
-import { PRESETS } from '~/app/ensemble/page.constants';
+import { PRESETS } from '~/lib/ensembleConstants';
 
 // Ids that providers have retired or replaced. None of them should appear in
 // the fallback list or the built-in presets.

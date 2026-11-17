@@ -49,7 +49,7 @@ test.describe('Benchmarks Page', () => {
   });
 
   test('footer link opens the page', async ({ page }) => {
-    await page.goto('/config');
+    await page.goto('/about');
     await page.getByTestId('site-footer').getByRole('link', { name: /benchmarks/i }).click();
     await expect(page).toHaveURL('/benchmarks');
     await expect(page.getByTestId('benchmarks-page')).toBeVisible();

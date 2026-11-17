@@ -2,11 +2,15 @@
  * Error scenarios when every model fails (T226). The single-model cases
  * (401, 429, 503, timeout) are in provider-errors.spec.ts.
  *
- * Each card explains its own error, the page says why there is no consensus,
- * and no agreement score is shown, since there is nothing to compare.
+ * Each card explains its own error, the workspace says why there is no
+ * consensus, and no agreement score is shown, since there is nothing to
+ * compare.
  */
 import { test, expect } from '@playwright/test';
-import { responseCard, startMockRun } from './runHelpers';
+import { agreement, answerCard, consensus, startMockRun, waitForConsensus } from './runHelpers';
+
+const errorKind = (page: import('@playwright/test').Page, model: string) =>
+  answerCard(page, model).getByTestId('response-error');
 
 test.describe('Provider errors on every model', () => {
   test.setTimeout(90_000);
@@ -17,14 +21,16 @@ test.describe('Provider errors on every model', () => {
       mockErrors: 'gpt-6-astra:401,gpt-6-luna:429,claude-haiku-5-5:timeout',
     });
 
-    await expect(responseCard(page, 'gpt-6-astra')).toHaveAttribute('data-error-kind', 'invalid_key', { timeout: 15_000 });
-    await expect(responseCard(page, 'gpt-6-luna')).toHaveAttribute('data-error-kind', 'rate_limited', { timeout: 15_000 });
-    await expect(responseCard(page, 'claude-haiku-5-5')).toHaveAttribute('data-error-kind', 'timeout', { timeout: 15_000 });
+    await expect(errorKind(page, 'gpt-6-astra')).toHaveAttribute('data-error-kind', 'invalid_key', { timeout: 15_000 });
+    await expect(errorKind(page, 'gpt-6-luna')).toHaveAttribute('data-error-kind', 'rate_limited', { timeout: 15_000 });
+    await expect(errorKind(page, 'claude-haiku-5-5')).toHaveAttribute('data-error-kind', 'timeout', {
+      timeout: 15_000,
+    });
 
-    const insufficient = page.getByTestId('consensus-insufficient');
-    await expect(insufficient).toContainText('0 of 3');
-    await expect(page.getByTestId('consensus-card')).toHaveCount(0);
-    await expect(page.getByTestId('agreement-analysis')).toHaveCount(0);
+    await expect(page.getByTestId('consensus-insufficient')).toContainText('0 of 3');
+    await expect(consensus(page)).toHaveAttribute('data-status', 'unavailable');
+    await expect(agreement(page)).toHaveAttribute('data-status', 'unavailable');
+    await expect(page.getByTestId('agreement-pair')).toHaveCount(0);
     await expect(page.getByTestId('retry-button')).toHaveCount(3);
   });
 
@@ -34,18 +40,22 @@ test.describe('Provider errors on every model', () => {
       mockErrors: 'gpt-6-astra:503:once,gpt-6-luna:503:once',
     });
 
-    const astra = responseCard(page, 'gpt-6-astra');
-    const luna = responseCard(page, 'gpt-6-luna');
-    await expect(astra).toHaveAttribute('data-error-kind', 'provider_unavailable', { timeout: 15_000 });
-    await expect(luna).toHaveAttribute('data-error-kind', 'provider_unavailable', { timeout: 15_000 });
-    await expect(page.getByTestId('consensus-card')).toHaveCount(0);
+    const astra = answerCard(page, 'gpt-6-astra');
+    const luna = answerCard(page, 'gpt-6-luna');
+    await expect(errorKind(page, 'gpt-6-astra')).toHaveAttribute('data-error-kind', 'provider_unavailable', {
+      timeout: 15_000,
+    });
+    await expect(errorKind(page, 'gpt-6-luna')).toHaveAttribute('data-error-kind', 'provider_unavailable', {
+      timeout: 15_000,
+    });
+    await expect(consensus(page)).toHaveAttribute('data-status', 'unavailable');
 
     await astra.getByTestId('retry-button').click();
     await expect(astra).toHaveAttribute('data-status', 'complete', { timeout: 30_000 });
     await luna.getByTestId('retry-button').click();
     await expect(luna).toHaveAttribute('data-status', 'complete', { timeout: 30_000 });
 
-    await expect(page.getByTestId('consensus-card')).toHaveAttribute('data-status', 'success', { timeout: 30_000 });
-    await expect(page.getByTestId('agreement-analysis')).toBeVisible({ timeout: 30_000 });
+    await waitForConsensus(page);
+    await expect(agreement(page)).toHaveAttribute('data-status', 'ready', { timeout: 30_000 });
   });
 });

@@ -17,11 +17,19 @@ import type { TokenUsage } from "@ensemble-ai/shared-utils/providers";
 import type { CallUsage } from "@ensemble-ai/shared-utils/pricing";
 import { agreementFromEmbeddings } from "./agreementState";
 import type { MajorityVoteRecord } from "~/lib/majorityVote";
-import type { ProviderType } from "./ensembleSlice";
+import type { ModelSelection, ProviderType } from "./ensembleSlice";
 import type { ResponseErrorDetails } from "./responseErrorState";
-import type { AgreementStats, ManualResponse, ModelResponse } from "./responseTypes";
+import type {
+  AgreementStats,
+  ManualResponse,
+  ModelResponse,
+} from "./responseTypes";
 
-export type { AgreementStats, ManualResponse, ModelResponse } from "./responseTypes";
+export type {
+  AgreementStats,
+  ManualResponse,
+  ModelResponse,
+} from "./responseTypes";
 
 export interface ResponseSlice {
   /** Prompt draft on /prompt, saved as the user types. */
@@ -31,6 +39,12 @@ export interface ResponseSlice {
    * draft so editing the next prompt never relabels the last run's answers.
    */
   runPrompt: string | null;
+  /**
+   * Models the current run was started with, so editing the ensemble for
+   * the next question never changes the run on screen (retries, consensus
+   * and cost keep using these). Empty when there is no run.
+   */
+  runModels: ModelSelection[];
   responses: ModelResponse[];
   manualResponses: ManualResponse[];
   embeddings: Array<{ modelId: string; embedding: number[] }>;
@@ -45,8 +59,8 @@ export interface ResponseSlice {
   majorityVote: MajorityVoteRecord | null;
 
   setPrompt: (prompt: string) => void;
-  /** Starts a new run: clears the previous results and records its prompt. */
-  startRun: (prompt: string) => void;
+  /** Starts a new run: clears the previous results and records its prompt and models. */
+  startRun: (prompt: string, models?: ModelSelection[]) => void;
   startStreaming: (
     modelId: string,
     provider: ProviderType,
@@ -103,6 +117,22 @@ export function selectRunPrompt(state: {
   return state.responses.length > 0 ? state.prompt : null;
 }
 
+/**
+ * Models of the run on screen. Runs stored before runModels existed have
+ * model answers but no models recorded, and use the current selection, as
+ * they always did. A run of manual answers alone has no models.
+ */
+export function selectRunModels(state: {
+  runModels?: ModelSelection[];
+  selectedModels: ModelSelection[];
+  responses: unknown[];
+}): ModelSelection[] {
+  if (state.runModels && state.runModels.length > 0) return state.runModels;
+  return state.responses.length > 0 ? state.selectedModels : NO_MODELS;
+}
+
+const NO_MODELS: ModelSelection[] = [];
+
 /** Fields of an answer when its stream starts or restarts. */
 const STREAM_START = {
   response: "",
@@ -119,6 +149,7 @@ const STREAM_START = {
 export const createResponseSlice: StateCreator<ResponseSlice> = (set, get) => ({
   prompt: null,
   runPrompt: null,
+  runModels: [],
   responses: [],
   manualResponses: [],
   embeddings: [],
@@ -135,9 +166,9 @@ export const createResponseSlice: StateCreator<ResponseSlice> = (set, get) => ({
 
   // The draft takes the submitted (trimmed) text too, so the two never
   // differ by whitespace alone.
-  startRun: (prompt) => {
+  startRun: (prompt, models = []) => {
     get().resetStreamingState();
-    set({ runPrompt: prompt, prompt });
+    set({ runPrompt: prompt, prompt, runModels: models });
   },
 
   // A new answer, and a restart (retry), start from an empty answer.
@@ -251,6 +282,7 @@ export const createResponseSlice: StateCreator<ResponseSlice> = (set, get) => ({
   resetStreamingState: () => {
     set({
       runPrompt: null,
+      runModels: [],
       consensusUsage: [],
       majorityVote: null,
       responses: [],

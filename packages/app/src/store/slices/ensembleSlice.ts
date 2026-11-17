@@ -85,12 +85,19 @@ export const createEnsembleSlice: StateCreator<EnsembleSlice> = (set) => ({
     });
   },
 
+  // The summarizer is stored as a model id (setSummarizer); older code
+  // stored the selection id, so both clear it.
   removeModel: (modelId) => {
-    set((state) => ({
-      selectedModels: state.selectedModels.filter((m) => m.id !== modelId),
-      summarizerModel:
-        state.summarizerModel === modelId ? null : state.summarizerModel,
-    }));
+    set((state) => {
+      const removed = state.selectedModels.find((m) => m.id === modelId);
+      const clears =
+        state.summarizerModel === modelId ||
+        state.summarizerModel === removed?.model;
+      return {
+        selectedModels: state.selectedModels.filter((m) => m.id !== modelId),
+        summarizerModel: clears ? null : state.summarizerModel,
+      };
+    });
   },
 
   setSummarizer: (modelId) => {

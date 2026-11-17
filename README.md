@@ -35,7 +35,7 @@ npm run build --workspace=packages/shared-utils   # the app imports its dist bun
 npm run dev                                        # app in Free mode on http://localhost:3000
 ```
 
-Open the app, enter at least one provider key or add an OpenAI-compatible endpoint on the config page, pick two or more models and ask a question.
+Open the app, add at least one provider key or an OpenAI-compatible endpoint in settings, pick two or more models in the composer and ask a question.
 
 To use the production build with local models, run `npm run local` instead (http://localhost:3000; see [docs/LOCAL_MODELS.md](./docs/LOCAL_MODELS.md)).
 

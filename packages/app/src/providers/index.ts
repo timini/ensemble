@@ -30,6 +30,11 @@ function tabStorage(): Storage | null {
 
 const isMockMode = () => process.env.NEXT_PUBLIC_MOCK_MODE === 'true';
 
+// The query is read once per page load. initializeProviders runs again before
+// every stream; reading it again would bring back `once` scenarios that
+// already fired while the URL still carries them (the workspace keeps it).
+let mockErrorsCaptured = false;
+
 export function initializeProviders(): void {
   const registry = ProviderRegistry.getInstance();
   const getState = () => useStore.getState();
@@ -37,8 +42,9 @@ export function initializeProviders(): void {
   // Mock mode only: `?mockErrors=...` simulates provider failures (see
   // lib/mockErrorScenarios.ts). Never active in Free or Pro mode.
   const storage = tabStorage();
-  if (isMockMode() && storage) {
+  if (isMockMode() && storage && !mockErrorsCaptured) {
     captureMockErrorScenarios(window.location.search, storage);
+    mockErrorsCaptured = true;
   }
 
   PROVIDERS.forEach((provider) => {

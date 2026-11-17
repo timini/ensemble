@@ -44,13 +44,13 @@ test.describe('About Page', () => {
     await expect(firstLink).toHaveAttribute('rel', 'noopener noreferrer');
   });
 
-  test('displays bottom CTA with config link and features link', async ({ page }) => {
+  test('displays bottom CTA with workspace link and features link', async ({ page }) => {
     const cta = page.getByTestId('about-bottom-cta');
     await expect(cta).toBeVisible();
 
-    // Primary CTA links to /config
+    // Primary CTA links to the workspace
     const configLink = cta.getByRole('link', { name: /see it in action/i });
-    await expect(configLink).toHaveAttribute('href', '/config');
+    await expect(configLink).toHaveAttribute('href', '/workspace');
 
     // Secondary link to /features
     const featuresLink = page.getByTestId('features-cta-link');
@@ -58,7 +58,7 @@ test.describe('About Page', () => {
   });
 
   test('header About link navigates to about page', async ({ page }) => {
-    await page.goto('/config');
+    await page.goto('/features');
     await page.getByRole('navigation', { name: /main/i }).getByRole('link', { name: /about/i }).click();
     await expect(page).toHaveURL('/about');
     await expect(page.getByTestId('about-page')).toBeVisible();

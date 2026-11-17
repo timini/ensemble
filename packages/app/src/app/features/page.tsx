@@ -58,7 +58,7 @@ export default function FeaturesPage() {
         {/* Primary CTA after hero */}
         <div className="mt-8 text-center" data-testid="features-hero-cta">
           <Button asChild size="lg">
-            <Link href="/config">
+            <Link href="/workspace">
               {t("app.getStarted")}
               <ArrowRight className="h-4 w-4" />
             </Link>
@@ -123,7 +123,7 @@ export default function FeaturesPage() {
           {/* Secondary CTA after workflow steps */}
           <div className="mt-8 text-center" data-testid="features-workflow-cta">
             <Button asChild variant="outline" size="lg">
-              <Link href="/config">
+              <Link href="/workspace">
                 {t("app.tryItNow")}
                 <ArrowRight className="h-4 w-4" />
               </Link>
@@ -172,7 +172,7 @@ export default function FeaturesPage() {
       >
         <div>
           <Button asChild size="lg">
-            <Link href="/config">
+            <Link href="/workspace">
               {t("app.getStarted")}
               <ArrowRight className="h-4 w-4" />
             </Link>

@@ -406,6 +406,44 @@
         "elo": "Ensemble, classement ELO",
         "council": "Ensemble, conseil"
       }
+    },
+    "workspace": {
+      "title": "Interrogez plusieurs modèles à la fois.",
+      "subtitle": "Voyez où ils s'accordent, et obtenez une réponse que vous pouvez vérifier.",
+      "examplesHeading": "Essayez",
+      "examples": [
+        "Peut-on laisser du riz cuit dehors toute la nuit ?",
+        "Que permet en général une clause de résiliation dans un bail ?",
+        "Combien d'heures de sommeil faut-il à un adulte, et pourquoi ?"
+      ],
+      "setupTitle": "Connectez un modèle pour commencer",
+      "setupBody": "Ajoutez une clé API ou un modèle local. Une seule clé suffit : OpenRouter donne accès à tous les fournisseurs. Les clés sont chiffrées dans ce navigateur et jamais envoyées à notre serveur.",
+      "setupAction": "Ajouter une clé ou un modèle local",
+      "runPrompt": "Réponses à",
+      "benchmarks": "Benchmarks",
+      "settings": {
+        "title": "Réglages",
+        "keys": "Clés API",
+        "securityNote": "Les clés sont chiffrées dans ce navigateur et envoyées seulement à chaque fournisseur, jamais au serveur d'Ensemble.",
+        "endpoints": "Serveurs locaux et hébergés",
+        "embeddings": "Score d'accord",
+        "appearance": "Apparence",
+        "data": "Données",
+        "clearData": "Effacer les clés, les préréglages et la dernière question",
+        "clearConfirm": "Cela supprime de ce navigateur toutes les clés, serveurs, préréglages et la dernière question.",
+        "clearConfirmYes": "Tout effacer",
+        "clearCancel": "Annuler",
+        "webCryptoTitle": "Ce navigateur ne peut pas chiffrer les clés",
+        "webCryptoBody": "Le mode gratuit a besoin de l'API Web Crypto pour chiffrer vos clés localement. Utilisez un navigateur récent."
+      },
+      "savePreset": {
+        "title": "Enregistrer les modèles en préréglage",
+        "description": "Les modèles, la méthode et le modèle de synthèse sont enregistrés dans ce navigateur. Un nom existant est remplacé.",
+        "name": "Nom",
+        "placeholder": "Trois modèles de pointe",
+        "save": "Enregistrer",
+        "cancel": "Annuler"
+      }
     }
   },
   "apiKeys": {

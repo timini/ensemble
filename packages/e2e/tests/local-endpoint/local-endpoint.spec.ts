@@ -1,5 +1,5 @@
 /**
- * Free mode with only an OpenAI-compatible endpoint (M2).
+ * Free mode with only an OpenAI-compatible endpoint (M2), in the workspace.
  *
  * The app runs in Free mode (real provider clients, no mock) against the fake
  * OpenAI-compatible server in fixtures/fake-openai-server.mjs, which stands in
@@ -23,50 +23,50 @@ async function fakeServerCounts(page: Page): Promise<Record<string, number>> {
   return (await response.json()) as Record<string, number>;
 }
 
-/** From a configured /config page: pick 3 endpoint models, run, and check the scores. */
+/** From settings with a connected endpoint: pick 3 endpoint models, run, and check the scores. */
 async function runThreeModelEnsemble(page: Page) {
+  const sheet = page.getByTestId('settings-sheet');
+
   await test.step('Continue with no cloud key', async () => {
     // No cloud key, yet the endpoint embedding model scores agreement.
-    await expect(page.getByTestId('embeddings-provider-active')).toContainText('OpenAI-compatible endpoint');
-    await page.getByRole('button', { name: 'Next', exact: true }).click();
-    await expect(page).toHaveURL(/\/ensemble/);
+    await expect(sheet.getByTestId('embeddings-provider-active')).toContainText('OpenAI-compatible endpoint');
+    await sheet.getByTestId('settings-sheet-close').click();
+    await expect(sheet).toBeHidden();
+    await expect(page.getByTestId('workspace-setup')).toHaveCount(0);
   });
 
   await test.step('Pick three endpoint models and a summarizer', async () => {
+    await page.getByTestId('model-picker-trigger').click();
     for (const model of MODELS) {
-      await page.getByTestId(`model-card-${model}`).click();
+      await page.locator(`[data-testid="model-picker-option"][data-model-id="${model}"]`).click();
     }
-    await page.getByTestId(`summarizer-button-${MODELS[0]}`).click();
-    await page.getByRole('button', { name: 'Next', exact: true }).click();
-    await expect(page).toHaveURL(/\/prompt/);
+    await page.keyboard.press('Escape');
+    await page.getByTestId('method-menu-trigger').click();
+    await page.getByTestId('method-menu-summarizer').selectOption(MODELS[0]!);
+    await page.keyboard.press('Escape');
   });
 
-  await test.step('Show the run as free before submitting', async () => {
-    await page.getByTestId('prompt-textarea').fill('What is the capital of France?');
-    await expect(page.getByTestId('run-cost-amount')).toHaveText('Estimated cost: $0.00 to $0.00');
-    await expect(page.getByTestId('run-cost-local')).toBeVisible();
-    await page.getByRole('button', { name: /generate responses/i }).click();
-    await expect(page).toHaveURL(/\/review/);
+  await test.step('Show the run as free before asking', async () => {
+    await page.getByTestId('composer-prompt').fill('What is the capital of France?');
+    await expect(page.getByTestId('method-menu-trigger')).toContainText('free');
+    await page.getByTestId('composer-submit').click();
   });
 
   await test.step('Score agreement with real embeddings from the endpoint', async () => {
-    const analysis = page.getByTestId('agreement-analysis');
-    await expect(analysis).toBeVisible({ timeout: 60_000 });
-    await expect(page.getByTestId('agreement-response-count')).toHaveText('3');
-    await expect(page.getByTestId('agreement-comparison-count')).toHaveText('3');
-
-    const similarities = await analysis.getByTestId('pairwise-similarity').allTextContents();
-    expect(similarities).toHaveLength(3);
+    const summary = page.getByTestId('agreement-summary');
+    await expect(summary).toHaveAttribute('data-status', 'ready', { timeout: 60_000 });
+    const pairs = summary.getByTestId('agreement-pair');
+    await expect(pairs).toHaveCount(3);
+    const scores = (await pairs.allTextContents()).map((text) => text.trim().slice(-4));
     // The two identical answers agree fully; the unrelated one does not.
-    expect(similarities).toContain('100%');
-    expect(similarities.filter((value) => value !== '100%')).toHaveLength(2);
+    expect(scores).toContain('1.00');
+    expect(scores.filter((value) => value !== '1.00')).toHaveLength(2);
   });
 
-  await test.step('Write the consensus with the endpoint summarizer', async () => {
-    await expect(page.getByTestId('consensus-card')).toHaveAttribute('data-status', 'success', {
-      timeout: 60_000,
-    });
-    await expect(page.getByTestId('run-cost-local')).toBeVisible();
+  await test.step('Write the consensus with the endpoint summarizer, at no cost', async () => {
+    const consensus = page.getByTestId('consensus-answer');
+    await expect(consensus).toHaveAttribute('data-status', 'success', { timeout: 60_000 });
+    await expect(consensus.getByTestId('run-cost-amount')).toContainText('$0.00');
   });
 
   const counts = await fakeServerCounts(page);
@@ -84,7 +84,7 @@ test.describe('Free mode with a local OpenAI-compatible endpoint', () => {
   test('detects a running Ollama and runs a 3-model ensemble from one click', async ({ page }) => {
     await test.step('Offer the running Ollama with its installed models', async () => {
       await page.goto('/config');
-      await page.locator('[data-mode="free"]').click();
+      await expect(page.getByTestId('settings-sheet')).toBeVisible();
 
       const notice = page.getByTestId('ollama-notice');
       await expect(notice).toHaveAttribute('data-state', 'found', { timeout: 15_000 });
@@ -113,7 +113,7 @@ test.describe('Free mode with a local OpenAI-compatible endpoint', () => {
 
   test('picks the embedding model the server has when the suggested one is missing', async ({ page }) => {
     await page.goto('/config');
-    await page.locator('[data-mode="free"]').click();
+    await expect(page.getByTestId('settings-sheet')).toBeVisible();
     await page.getByTestId('ollama-notice-dismiss').click();
     await expect(page.getByTestId('ollama-notice')).toHaveCount(0);
 
@@ -130,12 +130,11 @@ test.describe('Free mode with a local OpenAI-compatible endpoint', () => {
   });
 
   test('keeps the offer away after it is dismissed', async ({ page }) => {
-    await page.goto('/config');
-    await page.locator('[data-mode="free"]').click();
+    await page.goto('/workspace');
+    // On first run the offer sits under the composer, with no settings to open.
     await expect(page.getByTestId('ollama-notice')).toHaveAttribute('data-state', 'found', { timeout: 15_000 });
     await page.getByTestId('ollama-notice-dismiss').click();
-    await page.reload();
-    await page.locator('[data-mode="free"]').click();
+    await page.goto('/config');
     await expect(page.getByTestId('endpoint-configuration')).toBeVisible();
     // Give detection time to run; the dismissed offer must not come back.
     await page.waitForTimeout(2_000);

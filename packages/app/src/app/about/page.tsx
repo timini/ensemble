@@ -177,7 +177,7 @@ export default function AboutPage() {
       >
         <div>
           <Button asChild size="lg">
-            <Link href="/config">
+            <Link href="/workspace">
               {t("app.seeItInAction")}
               <ArrowRight className="h-4 w-4" />
             </Link>

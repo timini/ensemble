@@ -81,27 +81,27 @@ test.describe('Features Page', () => {
     expect(count).toBeGreaterThanOrEqual(6);
   });
 
-  test('displays hero CTA linking to config', async ({ page }) => {
+  test('displays hero CTA linking to the workspace', async ({ page }) => {
     const cta = page.getByTestId('features-hero-cta');
     await expect(cta).toBeVisible();
     const link = cta.getByRole('link');
-    await expect(link).toHaveAttribute('href', '/config');
+    await expect(link).toHaveAttribute('href', '/workspace');
   });
 
-  test('displays workflow CTA linking to config', async ({ page }) => {
+  test('displays workflow CTA linking to the workspace', async ({ page }) => {
     const cta = page.getByTestId('features-workflow-cta');
     await expect(cta).toBeVisible();
     const link = cta.getByRole('link');
-    await expect(link).toHaveAttribute('href', '/config');
+    await expect(link).toHaveAttribute('href', '/workspace');
   });
 
-  test('displays bottom CTA with config link and about link', async ({ page }) => {
+  test('displays bottom CTA with workspace link and about link', async ({ page }) => {
     const cta = page.getByTestId('features-bottom-cta');
     await expect(cta).toBeVisible();
 
-    // Primary CTA links to /config
+    // Primary CTA links to the workspace
     const configLink = cta.getByRole('link', { name: /get started/i });
-    await expect(configLink).toHaveAttribute('href', '/config');
+    await expect(configLink).toHaveAttribute('href', '/workspace');
 
     // Secondary link to /about
     const aboutLink = page.getByTestId('about-cta-link');
@@ -109,7 +109,7 @@ test.describe('Features Page', () => {
   });
 
   test('header Features link navigates to features page', async ({ page }) => {
-    await page.goto('/config');
+    await page.goto('/about');
     await page.getByRole('navigation', { name: /main/i }).getByRole('link', { name: /features/i }).click();
     await expect(page).toHaveURL('/features');
     await expect(page.getByTestId('features-page')).toBeVisible();

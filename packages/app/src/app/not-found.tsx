@@ -23,7 +23,7 @@ export default function NotFound() {
       </Text>
       <div className="flex flex-col gap-4 sm:flex-row">
         <Button asChild size="lg">
-          <Link href="/config">
+          <Link href="/workspace">
             {t("app.getStarted")}
             <ArrowRight className="ml-2 h-4 w-4" />
           </Link>

@@ -24,38 +24,42 @@ npm run test:ui --workspace=packages/e2e     # Playwright UI
 cd packages/e2e
 npx playwright test --headed --project=mock-mode
 npx playwright test --debug --project=mock-mode
-npx playwright test tests/mock-mode/config-page.spec.ts --project=mock-mode
+npx playwright test tests/mock-mode/workspace.spec.ts --project=mock-mode
 npx playwright show-report
 ```
 
-## Mock-mode tests (135 tests)
+## Mock-mode tests (108 tests)
+
+The app's working screen is `/workspace`; the old wizard routes redirect into it. Shared steps (keys in the settings sheet, picking models in the composer, asking, adding an answer by hand) are in `tests/mock-mode/runHelpers.ts`.
 
 | File | Tests | Covers |
 |---|---|---|
 | `about-page.spec.ts` | 8 | About page content |
-| `agreement-matrix.spec.ts` | 5 | Agreement analysis for 2, 3, 4, 5 and 6 answers (T180) |
-| `config-page.spec.ts` | 11 | Mode selection, API key entry, embeddings provider |
-| `consensus-presets-mock.spec.ts` | 2 | Consensus methods, majority vote breakdown |
-| `ensemble-page.spec.ts` | 17 | Model selection, summarizer |
+| `agreement-matrix.spec.ts` | 5 | Agreement pairs and score for 2, 3, 4, 5 and 6 answers (T180) |
+| `benchmarks-page.spec.ts` | 5 | Benchmarks page, not-run state, links to it |
+| `consensus-methods.spec.ts` | 3 | Method menu: Ranked and Council need 3 answers, standard consensus, majority vote breakdown |
+| `embeddings-unavailable.spec.ts` | 2 | No embedding calls planned and no agreement score without an embeddings provider |
 | `features-page.spec.ts` | 12 | Features page content |
-| `full-workflow-mock.spec.ts` | 3 | Full journey across the four pages |
-| `language-persistence.spec.ts` | 9 | EN and FR switching |
-| `manual-responses.spec.ts` | 3 | Manual answers added on `/prompt` and on `/review`, scored in agreement and consensus (T179) |
-| `model-id-api-call.spec.ts` | 2 | Model ids passed to provider calls |
+| `language-persistence.spec.ts` | 8 | EN and FR switching in settings, kept across reloads, pages and sessions |
+| `legacy-routes.spec.ts` | 7 | `/`, `/config`, `/ensemble`, `/prompt` and `/review` land in the workspace with the right part open, query kept |
+| `manual-responses.spec.ts` | 4 | Answers added by hand before, during and after a run, scored in agreement and consensus; New question drops them (T179) |
 | `not-found-page.spec.ts` | 6 | 404 page |
+| `openai-compatible-mock.spec.ts` | 2 | A run on Ollama endpoint models with no keys; removing an endpoint |
 | `presets.spec.ts` | 5 | Saved ensembles: save, load, replace, delete, kept in localStorage (T178) |
-| `prompt-page.spec.ts` | 17 | Prompt input, validation, navigation, cost estimate |
 | `provider-errors.spec.ts` | 5 | One model failing with 401, 429, 503 or a timeout, and retry (T226) |
 | `provider-errors-all.spec.ts` | 2 | Every model failing, then recovering on retry (T226) |
-| `review-page.spec.ts` | 16 | Responses, consensus, cost, navigation |
-| `review-persistence.spec.ts` | 5 | Last run kept after a reload |
+| `run-persistence.spec.ts` | 4 | Last run kept after a reload, interrupted streams, a new run replaces the old one |
 | `theme-persistence.spec.ts` | 7 | Light and dark themes |
+| `workspace-settings.spec.ts` | 7 | Settings sheet: sections, how keys are kept, key count, embeddings provider, clearing data |
+| `workspace.spec.ts` | 16 | First visit, model picker (keys gate models, limit of 6, ids stored), composer, cost before and after, a full run, New question |
+
+The `local-endpoint` project (`tests/local-endpoint/local-endpoint.spec.ts`, 3 tests) runs with `test:mock`: Free mode against a fake Ollama, from detection to a 3-model run with real agreement scores at no cost.
 
 Error scenarios are simulated with the mock-only `?mockErrors=` query parameter (`packages/app/src/lib/mockErrorScenarios.ts`), so they run in CI without keys.
 
 ## Free-mode tests (6 tests)
 
-`consensus-presets.spec.ts`, `free-mode.spec.ts` (2), `google-only.spec.ts`, `happy-path.spec.ts`, `perplexity-only.spec.ts`.
+`consensus-presets.spec.ts`, `free-mode.spec.ts` (2), `google-only.spec.ts`, `happy-path.spec.ts`, `perplexity-only.spec.ts`. They drive the workspace with the same steps as the mock suite (`tests/free-mode/helpers.ts`).
 
 ## CI
 

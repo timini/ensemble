@@ -6,6 +6,7 @@ import { describe, it, expect, beforeEach } from "vitest";
 import { createStore, type StoreApi } from "zustand/vanilla";
 import {
   createResponseSlice,
+  selectRunModels,
   selectRunPrompt,
   type ModelResponse,
   type ResponseSlice,
@@ -69,12 +70,10 @@ describe("responseSlice", () => {
 
   it("stores the input and output tokens reported for a response", () => {
     store.getState().startStreaming("model-1", "openai", "gpt-4o");
-    store
-      .getState()
-      .completeResponse("model-1", 5000, 150, {
-        inputTokens: 50,
-        outputTokens: 100,
-      });
+    store.getState().completeResponse("model-1", 5000, 150, {
+      inputTokens: 50,
+      outputTokens: 100,
+    });
 
     expect(store.getState().responses[0]?.usage).toEqual({
       inputTokens: 50,
@@ -396,6 +395,58 @@ describe("runPrompt", () => {
     store.getState().startRun("Q");
     store.getState().clearResponses();
     expect(store.getState().runPrompt).toBeNull();
+  });
+});
+
+describe("runModels", () => {
+  const astra = { id: "a", provider: "openai" as const, model: "gpt-6-astra" };
+  const luna = { id: "l", provider: "openai" as const, model: "gpt-6-luna" };
+
+  it("records the models a run was started with", () => {
+    const store = createStore<ResponseSlice>()(createResponseSlice);
+    store.getState().startRun("Q", [astra, luna]);
+    expect(store.getState().runModels).toEqual([astra, luna]);
+  });
+
+  it("is cleared when the run is reset", () => {
+    const store = createStore<ResponseSlice>()(createResponseSlice);
+    store.getState().startRun("Q", [astra]);
+    store.getState().resetStreamingState();
+    expect(store.getState().runModels).toEqual([]);
+  });
+
+  it("keeps the run's models when the ensemble changes after the run", () => {
+    expect(
+      selectRunModels({
+        runModels: [astra],
+        selectedModels: [luna],
+        responses: [],
+      }),
+    ).toEqual([astra]);
+  });
+
+  it("falls back to the selection for a run stored before runModels existed", () => {
+    const answers = [{} as ModelResponse];
+    expect(
+      selectRunModels({
+        runModels: undefined,
+        selectedModels: [luna],
+        responses: answers,
+      }),
+    ).toEqual([luna]);
+    expect(
+      selectRunModels({
+        runModels: [],
+        selectedModels: [luna],
+        responses: answers,
+      }),
+    ).toEqual([luna]);
+  });
+
+  it("has no models for a run of manual answers alone", () => {
+    expect(
+      selectRunModels({ runModels: [], selectedModels: [luna], responses: [] }),
+    ).toEqual([]);
   });
 });
 

@@ -25,7 +25,7 @@ Modes:
 
 npm workspaces monorepo:
 
-- `packages/app/`: Next.js 15 App Router app. Routes: `/` (redirects to `/config` today), `/config`, `/ensemble`, `/prompt`, `/review`, `/features`, `/about`, `/benchmarks`, `/test-components` (dev only), `/api/trpc/[trpc]`.
+- `packages/app/`: Next.js 15 App Router app. Routes: `/` (redirects to `/workspace` until the landing page), `/workspace` (the one working screen), `/config`, `/ensemble`, `/prompt` and `/review` (redirect into the workspace with the matching panel open), `/features`, `/about`, `/benchmarks`, `/test-components` (dev only), `/api/trpc/[trpc]`.
 - `packages/component-library/`: 63 atomic-design components (atoms, molecules, organisms) developed in Storybook. The app imports its source via a tsconfig alias.
 - `packages/shared-utils/`: provider clients, registry, factory, similarity maths, Web Crypto helpers. Exports from `dist`; rebuild after changes with `npm run build --workspace=packages/shared-utils`.
 - `packages/consensus-core`, `consensus-standard`, `consensus-majority`, `consensus-elo`, `consensus-council`: consensus strategies.

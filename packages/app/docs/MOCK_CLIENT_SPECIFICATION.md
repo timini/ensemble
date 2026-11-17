@@ -8,7 +8,7 @@
 - **Fallbacks in other modes.** The prompt page falls back to the mock client if no client is registered for the current mode. Embeddings never fall back to it outside mock mode.
 - **Inside the free clients.** `BaseFreeClient` keeps a mock instance for the static model metadata and for model lists when no key is set or the provider's list call fails. It is not used for embeddings.
 
-Mock mode is not offered on `/config`. It is controlled only by the env var, which is read at build time, so a build made with `NEXT_PUBLIC_MOCK_MODE=true` serves mock responses.
+Mock mode is not offered in the app's settings. It is controlled only by the env var, which is read at build time, so a build made with `NEXT_PUBLIC_MOCK_MODE=true` serves mock responses.
 
 ## Behavior
 
@@ -88,13 +88,13 @@ When `enableErrors` is true, `streamResponse` fails with a simulated 429 with pr
 - `timeout`: one chunk is sent, then the stream stalls until `options.timeoutMs` (default 2 s in mock) and fails with a `timeout` `ProviderError`.
 - `generateStructured` rejects with the same kind.
 
-In the app (mock mode only), `src/lib/mockErrorScenarios.ts` feeds this from the `mockErrors` query parameter on any page, for example `/config?mockErrors=gpt-6-luna:401,gpt-6-astra:timeout`. The value is kept in sessionStorage for the tab; `mockErrors=` clears it. Kinds can be written as `401`, `403`, `429`, `500`, `502`, `503`, `timeout` or the kind names. Adding `:once` (`gpt-6-luna:429:once`) fails only the first call, so a retry succeeds. The mock-mode E2E tests in `packages/e2e/tests/mock-mode/provider-errors.spec.ts` use it.
+In the app (mock mode only), `src/lib/mockErrorScenarios.ts` feeds this from the `mockErrors` query parameter on any page, for example `/config?mockErrors=gpt-6-luna:401,gpt-6-astra:timeout` (the redirect into the workspace keeps it). The value is read once per page load and kept in sessionStorage for the tab; `mockErrors=` clears it. Kinds can be written as `401`, `403`, `429`, `500`, `502`, `503`, `timeout` or the kind names. Adding `:once` (`gpt-6-luna:429:once`) fails only the first call, so a retry succeeds. The mock-mode E2E tests in `packages/e2e/tests/mock-mode/provider-errors.spec.ts` use it.
 
 ## Limitations
 
 - Output ignores the prompt and has no structure.
 - Embeddings and agreement scores are not meaningful in mock mode. The embeddings provider is still picked from the configured keys, as in Free mode, so without an OpenAI or Google key there is no score.
-- The mock client reports no `usage`, so the review page labels the run cost as estimated from text length. The `costPer1kTokens` values in its model list are not used for pricing; the shared price table is.
+- The mock client reports no `usage`, so the workspace labels the run cost as estimated from text length. The `costPer1kTokens` values in its model list are not used for pricing; the shared price table is.
 - Network errors other than the scenarios above (DNS, CORS, dropped connections) are not simulated.
 
 ## Related

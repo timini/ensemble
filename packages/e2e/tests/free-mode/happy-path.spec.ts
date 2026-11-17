@@ -1,19 +1,17 @@
 /**
  * Free Mode Happy Path E2E Test
  *
- * The complete sunny-day journey with all 5 providers:
- * 1. Config: Select Free mode, enter all 5 API keys
- * 2. Ensemble: Select one model per provider (5 total)
- * 3. Prompt: Verify Standard summarisation is selected, enter prompt, submit
- * 4. Review: Verify all 5 responses complete, agreement analysis loads,
- *    and consensus card loads with meaningful content
+ * The complete sunny-day journey with all 5 providers in the workspace:
+ * enter all 5 keys in settings, pick one model per provider, ask with the
+ * Standard method, then check every answer, the agreement score and the
+ * consensus.
  *
  * Requires all 5 TEST_*_API_KEY env vars to be set.
  * Skips gracefully when any key is missing.
  */
 
 import { test, expect } from '@playwright/test';
-import { fillAndValidateKey, selectModel } from './helpers';
+import { answerCards, ask, configureKeys, selectModel } from './helpers';
 
 const OPENAI_API_KEY = process.env.TEST_OPENAI_API_KEY;
 const ANTHROPIC_API_KEY = process.env.TEST_ANTHROPIC_API_KEY;
@@ -35,28 +33,28 @@ const TIMEOUT = {
 } as const;
 
 /** Provider API keys keyed by data-provider attribute value. */
-const API_KEYS: Record<string, string | undefined> = {
-  openai: OPENAI_API_KEY,
-  anthropic: ANTHROPIC_API_KEY,
-  google: GOOGLE_API_KEY,
-  xai: XAI_API_KEY,
-  perplexity: PERPLEXITY_API_KEY,
-};
+const API_KEYS: Array<[string, string | undefined]> = [
+  ['openai', OPENAI_API_KEY],
+  ['anthropic', ANTHROPIC_API_KEY],
+  ['google', GOOGLE_API_KEY],
+  ['xai', XAI_API_KEY],
+  ['perplexity', PERPLEXITY_API_KEY],
+];
 
-/** Provider prefixes used for model selection and response card matching. */
+/** Model id prefixes, one per provider. */
 const PROVIDERS = [
-  { modelPrefix: 'gpt', responsePrefix: 'response-card-openai-', label: 'OpenAI' },
-  { modelPrefix: 'claude', responsePrefix: 'response-card-anthropic-', label: 'Anthropic' },
-  { modelPrefix: 'gemini', responsePrefix: 'response-card-google-', label: 'Google' },
-  { modelPrefix: 'grok', responsePrefix: 'response-card-xai-', label: 'XAI' },
-  { modelPrefix: 'perplexity', responsePrefix: 'response-card-perplexity-', label: 'Perplexity' },
+  { modelPrefix: 'gpt', label: 'OpenAI' },
+  { modelPrefix: 'claude', label: 'Anthropic' },
+  { modelPrefix: 'gemini', label: 'Google' },
+  { modelPrefix: 'grok', label: 'XAI' },
+  { modelPrefix: 'perplexity', label: 'Perplexity' },
 ];
 
 test.describe('Free Mode — Happy Path', () => {
   test.skip(!hasAllKeys, 'Skipping — one or more TEST_*_API_KEY env vars not set (need all 5 providers)');
 
   test.beforeEach(async ({ page }) => {
-    await page.goto('/');
+    await page.goto('/workspace');
     await page.evaluate(() => localStorage.clear());
     await page.reload();
   });
@@ -66,111 +64,45 @@ test.describe('Free Mode — Happy Path', () => {
   }) => {
     test.setTimeout(TIMEOUT.TEST);
 
-    // ==========================================
-    // STEP 1: Config Page — enter all 5 API keys
-    // ==========================================
-    await test.step('Configure Free mode with all 5 API keys', async () => {
-      await page.goto('/config');
-
-      await page.locator('[data-mode="free"]').click();
-      await expect(page.locator('[data-mode="free"]')).toHaveAttribute(
-        'data-selected',
-        'true',
-      );
-
-      let count = 1;
-      for (const [provider, key] of Object.entries(API_KEYS)) {
-        if (key) {
-          await fillAndValidateKey(page, provider, key, count++);
-        }
-      }
-
-      await expect(
-        page.getByRole('button', { name: 'Next', exact: true }),
-      ).toBeEnabled();
-      await page.getByRole('button', { name: 'Next', exact: true }).click();
+    await test.step('Enter all 5 API keys in settings', async () => {
+      await configureKeys(page, API_KEYS.map(([p, k]) => [p, k!]), TIMEOUT.API_VALIDATION);
     });
 
-    // ==========================================
-    // STEP 2: Ensemble Page — select 5 models
-    // ==========================================
-    await test.step('Select one model per provider', async () => {
-      await expect(page).toHaveURL('/ensemble');
-      await expect(page.getByTestId('model-selection-list')).toBeVisible();
-
+    await test.step('Pick one model per provider', async () => {
       for (const { modelPrefix } of PROVIDERS) {
         await selectModel(page, modelPrefix, TIMEOUT.MODEL_VISIBLE);
       }
-
-      const selectedCards = page.locator(
-        '[data-testid^="model-card-"][data-selected="true"]',
-      );
-      await expect(selectedCards).toHaveCount(5);
-
-      await page.getByRole('button', { name: 'Next', exact: true }).click();
+      await page.keyboard.press('Escape');
+      await expect(page.getByTestId('model-chip')).toHaveCount(5);
     });
 
-    // ==========================================
-    // STEP 3: Prompt Page — Standard mode, enter prompt
-    // ==========================================
-    await test.step('Verify Standard summarisation and submit prompt', async () => {
-      await expect(page).toHaveURL('/prompt');
-
-      // Standard summarisation should be selected by default
-      await expect(page.getByTestId('preset-standard')).toBeChecked();
-
-      await page.getByTestId('prompt-textarea').fill(
-        'What are the main benefits of exercise? Give a short answer.',
-      );
-
-      await page.getByRole('button', { name: /generate responses/i }).click();
-      await expect(page).toHaveURL('/review');
+    await test.step('Standard is the default method; ask', async () => {
+      await expect(page.getByTestId('method-menu-trigger')).toContainText('Standard');
+      await ask(page, 'What are the main benefits of exercise? Give a short answer.');
     });
 
-    // ==========================================
-    // STEP 4: Review Page — verify everything loads
-    // ==========================================
-    await test.step('Verify all 5 provider responses complete', async () => {
-      for (const { responsePrefix, label } of PROVIDERS) {
-        const card = page.locator(`[data-testid^="${responsePrefix}"]`).first();
+    await test.step('All 5 provider answers complete', async () => {
+      for (const { modelPrefix, label } of PROVIDERS) {
+        const card = answerCards(page, modelPrefix).first();
         await expect(card).toBeVisible({ timeout: TIMEOUT.RESPONSE_VISIBLE });
-        await expect(card).toHaveAttribute('data-status', 'complete', {
-          timeout: TIMEOUT.RESPONSE_COMPLETE,
-        });
-
+        await expect(card).toHaveAttribute('data-status', 'complete', { timeout: TIMEOUT.RESPONSE_COMPLETE });
         const text = await card.textContent();
-        expect(
-          text && text.length > 10,
-          `${label} response should have real content`,
-        ).toBe(true);
+        expect(text && text.length > 10, `${label} response should have real content`).toBe(true);
       }
+      await expect(page.locator('[data-testid="answer-card"][data-status="error"]')).toHaveCount(0);
     });
 
-    await test.step('Verify no error responses', async () => {
-      const errorCards = page.locator('[data-status="error"]');
-      await expect(errorCards).toHaveCount(0);
+    await test.step('The agreement score loads', async () => {
+      const agreement = page.getByTestId('agreement-summary');
+      await expect(agreement).toHaveAttribute('data-status', 'ready', { timeout: TIMEOUT.AGREEMENT_VISIBLE });
+      await expect(agreement.getByTestId('agreement-pair')).toHaveCount(10);
     });
 
-    await test.step('Verify agreement analysis loads', async () => {
-      await expect(page.getByTestId('agreement-analysis')).toBeVisible({
-        timeout: TIMEOUT.AGREEMENT_VISIBLE,
-      });
-
-      const analysis = page.getByTestId('agreement-analysis');
-      await expect(analysis).toContainText(/%/);
-    });
-
-    await test.step('Verify consensus card loads', async () => {
-      await expect(page.getByTestId('consensus-card')).toBeVisible({
-        timeout: TIMEOUT.CONSENSUS_VISIBLE,
-      });
-
-      const consensusCard = page.getByTestId('consensus-card');
-      const text = await consensusCard.textContent();
-      expect(
-        text && text.length > 50,
-        'Consensus should have substantial content',
-      ).toBe(true);
+    await test.step('The consensus loads', async () => {
+      const consensus = page.getByTestId('consensus-answer');
+      await expect(consensus).toHaveAttribute('data-status', 'success', { timeout: TIMEOUT.CONSENSUS_VISIBLE });
+      const text = await consensus.textContent();
+      expect(text && text.length > 50, 'Consensus should have substantial content').toBe(true);
     });
   });
 });

@@ -406,6 +406,44 @@
         "elo": "Ensemble, ELO ranking",
         "council": "Ensemble, council"
       }
+    },
+    "workspace": {
+      "title": "Ask several models at once.",
+      "subtitle": "See where they agree, and get one answer you can check.",
+      "examplesHeading": "Try one",
+      "examples": [
+        "Is it safe to leave cooked rice out overnight?",
+        "What does a break clause in a UK tenancy usually allow?",
+        "How many hours of sleep does an adult need, and why?"
+      ],
+      "setupTitle": "Connect a model to start",
+      "setupBody": "Add one API key or a local model. One key is enough: OpenRouter reaches every provider. Keys are encrypted in this browser and never sent to our server.",
+      "setupAction": "Add a key or local model",
+      "runPrompt": "Answers to",
+      "benchmarks": "Benchmarks",
+      "settings": {
+        "title": "Settings",
+        "keys": "API keys",
+        "securityNote": "Keys are encrypted in this browser and sent only to each provider, never to Ensemble's server.",
+        "endpoints": "Local and hosted endpoints",
+        "embeddings": "Agreement score",
+        "appearance": "Appearance",
+        "data": "Data",
+        "clearData": "Clear keys, presets and the last run",
+        "clearConfirm": "This removes every key, endpoint, preset and the last run from this browser.",
+        "clearConfirmYes": "Clear everything",
+        "clearCancel": "Cancel",
+        "webCryptoTitle": "This browser cannot encrypt keys",
+        "webCryptoBody": "Free mode needs the Web Crypto API to encrypt your keys locally. Use a current browser."
+      },
+      "savePreset": {
+        "title": "Save models as a preset",
+        "description": "The models, method and summarizer are saved in this browser. Saving under an existing name replaces it.",
+        "name": "Name",
+        "placeholder": "Three frontier models",
+        "save": "Save preset",
+        "cancel": "Cancel"
+      }
     }
   },
   "apiKeys": {

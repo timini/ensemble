@@ -8,34 +8,35 @@ For where the product is going, see [docs/PRODUCT_VISION.md](../../docs/PRODUCT_
 
 ## Routes
 
-The main workflow is four steps. Each step is a page under `src/app/`.
+The app has one working screen, `/workspace` (`src/app/workspace/`): the composer on top (question, model chips, consensus method with calls and cost, options), then the agreement score and consensus answer, then every answer in columns (tabs on phones). History and presets sit in a sidebar, keys and appearance in a settings sheet. The old four-step wizard routes redirect into it.
 
 | Route | Purpose |
 |-------|---------|
-| `/` | Redirects to `/config` |
-| `/config` | Step 1. Pick a mode, enter provider API keys and add OpenAI-compatible endpoints (Ollama, LM Studio, OpenRouter and others) |
-| `/ensemble` | Step 2. Pick models, the summarizer and the consensus method; save or load presets |
-| `/prompt` | Step 3. Enter the prompt; submitting starts streaming from every selected model |
-| `/review` | Step 4. Responses, agreement analysis and the consensus answer |
+| `/` | Redirects to `/workspace` (until the landing page lands) |
+| `/workspace` | The workspace. `?panel=settings` opens settings, `?panel=models` the model picker, `?panel=prompt` focuses the question |
+| `/config` | Redirects to `/workspace?panel=settings` (API keys, OpenAI-compatible endpoints such as Ollama, LM Studio and OpenRouter, embeddings provider, theme, language) |
+| `/ensemble` | Redirects to `/workspace?panel=models` |
+| `/prompt` | Redirects to `/workspace?panel=prompt` |
+| `/review` | Redirects to `/workspace`, which shows the last run |
 | `/about` | Static explainer with a flow diagram |
 | `/features` | Static features page |
 | `/benchmarks` | Benchmark results from `src/data/benchmark-summary.json` (accuracy with Wilson intervals, McNemar p-values, cost), or a "not run yet" state with the estimate and method |
 | `/test-components` | Dev page that renders component-library buttons (404 in production unless `NEXT_PUBLIC_MOCK_MODE=true`) |
 | `/api/trpc/[trpc]` | tRPC endpoint (see Server below) |
 
-Consensus methods offered on `/ensemble`: `standard`, `elo`, `majority`, `council`. `standard`, `elo` and `council` are LLM-driven. `majority` first extracts a short final answer from each response with one structured call and counts the votes. On a tie, on long-form answers or when extraction fails, it falls back to the LLM rank-and-synthesize method.
+Consensus methods offered in the composer's method menu, each with its calls and cost before the run: `standard`, `elo`, `majority`, `council`. `standard`, `elo` and `council` are LLM-driven. `majority` first extracts a short final answer from each response with one structured call and counts the votes. On a tie, on long-form answers or when extraction fails, it falls back to the LLM rank-and-synthesize method.
 
 ## Modes
 
 - **Free** (default, the only mode users can pick). The user pastes their own provider keys. Keys are encrypted with AES-256-GCM (Web Crypto) and stored in localStorage. Requests go directly from the browser to each provider using the vendor SDKs with `dangerouslyAllowBrowser`. There is no server in the loop.
-- **Pro**. Shown on `/config` as "Coming soon" and disabled. `createProviderClient` throws "not yet implemented" for this mode. Not built yet, see [docs/ROADMAP.md](../../docs/ROADMAP.md).
+- **Pro**. Not offered in the UI yet. `createProviderClient` throws "not yet implemented" for this mode. Not built yet, see [docs/ROADMAP.md](../../docs/ROADMAP.md).
 - **Mock** (developer only). Set `NEXT_PUBLIC_MOCK_MODE=true` (or run `npm run dev:mock`). Every provider call uses `MockProviderClient`, which streams lorem ipsum. Used by the mock-mode Playwright suite in `packages/e2e`.
 
-Supported providers: OpenAI, Anthropic, Google, xAI, DeepSeek, Perplexity, and any number of OpenAI-compatible endpoints (Ollama, LM Studio, llama.cpp, vLLM, OpenRouter, Groq, Together, custom). On first run `/config` looks for a running Ollama and offers to add it; see [docs/LOCAL_MODELS.md](../../docs/LOCAL_MODELS.md).
+Supported providers: OpenAI, Anthropic, Google, xAI, DeepSeek, Perplexity, and any number of OpenAI-compatible endpoints (Ollama, LM Studio, llama.cpp, vLLM, OpenRouter, Groq, Together, custom). On first run the workspace looks for a running Ollama and offers to add it; see [docs/LOCAL_MODELS.md](../../docs/LOCAL_MODELS.md).
 
 ### Agreement scores
 
-The review page computes cosine similarity between response embeddings from OpenAI (`text-embedding-3-small`), Google (`gemini-embedding-2`) or an OpenAI-compatible endpoint with an embedding model (for example `nomic-embed-text` on Ollama). The provider is picked from the valid keys, OpenAI first, then Google, then an endpoint, and can be overridden on `/config`. Without any of them the page says there is no agreement score instead of showing one, and gives the `ollama pull` command when a connected Ollama has no embedding model. Mock mode uses hash-based vectors, so its scores are not semantic.
+The workspace computes cosine similarity between response embeddings from OpenAI (`text-embedding-3-small`), Google (`gemini-embedding-2`) or an OpenAI-compatible endpoint with an embedding model (for example `nomic-embed-text` on Ollama). The provider is picked from the valid keys, OpenAI first, then Google, then an endpoint, and can be overridden in settings. Without any of them the agreement card says there is no score instead of showing one, links to settings, and gives the `ollama pull` command when a connected Ollama has no embedding model. Mock mode uses hash-based vectors, so its scores are not semantic.
 
 ## Scripts
 

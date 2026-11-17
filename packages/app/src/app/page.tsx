@@ -1,36 +1,10 @@
-'use client';
-
-import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { useTranslation } from 'react-i18next';
+import { redirect } from "next/navigation";
+import { WORKSPACE_PATH } from "~/lib/workspaceRoutes";
 
 /**
- * Landing page
- *
- * Automatically redirects to /config (Step 1 of workflow)
- * Shows loading message while redirecting
+ * `/` opens the workspace until the landing page (roadmap M4) replaces this
+ * redirect.
  */
 export default function Home() {
-  const router = useRouter();
-  const { t } = useTranslation();
-
-  useEffect(() => {
-    // Redirect to config page after brief delay
-    const timer = setTimeout(() => {
-      router.push('/config');
-    }, 100);
-
-    return () => clearTimeout(timer);
-  }, [router]);
-
-  return (
-    <main className="flex min-h-screen items-center justify-center bg-[var(--color-background)]">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold text-[var(--color-foreground)] mb-4">
-          {t('app.name')}
-        </h1>
-        <p className="text-[var(--color-muted)]">{t('common.loading')}</p>
-      </div>
-    </main>
-  );
+  redirect(WORKSPACE_PATH);
 }

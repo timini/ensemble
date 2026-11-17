@@ -67,6 +67,28 @@ describe('ensembleSlice', () => {
     expect(store.getState().summarizerModel).toBeNull();
   });
 
+  it('clears the summarizer when its model, chosen by model id, is removed', () => {
+    store.getState().addModel('openai', 'gpt-4o');
+    store.getState().addModel('openai', 'gpt-4o-mini');
+    const [first] = store.getState().selectedModels;
+
+    store.getState().setSummarizer('gpt-4o');
+    store.getState().removeModel(first!.id);
+
+    expect(store.getState().summarizerModel).toBeNull();
+  });
+
+  it('keeps the summarizer when another model is removed', () => {
+    store.getState().addModel('openai', 'gpt-4o');
+    store.getState().addModel('openai', 'gpt-4o-mini');
+    const second = store.getState().selectedModels[1]!;
+
+    store.getState().setSummarizer('gpt-4o');
+    store.getState().removeModel(second.id);
+
+    expect(store.getState().summarizerModel).toBe('gpt-4o');
+  });
+
   it('sets embeddings provider', () => {
     store.getState().setEmbeddingsProvider('google');
     expect(store.getState().embeddingsProvider).toBe('google');

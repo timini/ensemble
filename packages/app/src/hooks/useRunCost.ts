@@ -6,7 +6,7 @@ import {
 } from "@ensemble-ai/shared-utils/pricing";
 import { useStore, type ModelResponse } from "~/store";
 import { buildRunCallUsage, endpointLocations } from "~/lib/runCost";
-import { selectRunPrompt } from "~/store/slices/responseSlice";
+import { selectRunModels, selectRunPrompt } from "~/store/slices/responseSlice";
 
 /**
  * Cost of the current run so far: answers, consensus calls and embedding
@@ -19,7 +19,7 @@ export function useRunCost(
   embeddingsSource: string | null,
 ): RunCost | null {
   const prompt = useStore(selectRunPrompt);
-  const selectedModels = useStore((state) => state.selectedModels);
+  const selectedModels = useStore(selectRunModels);
   const consensusUsage = useStore((state) => state.consensusUsage);
   const manualResponses = useStore((state) => state.manualResponses);
   const endpoints = useStore((state) => state.endpoints);

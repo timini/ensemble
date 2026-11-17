@@ -28,8 +28,8 @@ This is the setup the M2 milestone targets: three local models, real agreement s
    ```
 
    The first run builds the app, which takes a few minutes. Later runs start in seconds.
-4. Open http://localhost:3000/config and choose Free mode. Ensemble finds Ollama and offers to add it, listing the installed models. Click **Add Ollama**.
-5. Click **Next**, pick the three models and one of them as the summarizer, and ask a question. The answers, the agreement score (from `nomic-embed-text`) and the consensus all come from your machine. The cost shows as $0.00.
+4. Open http://localhost:3000. Ensemble finds Ollama and offers to add it under the question box, listing the installed models. Click **Add Ollama**.
+5. Click **Choose models**, pick the three models (the method menu sets which one writes the consensus) and ask a question. The answers, the agreement score (from `nomic-embed-text`) and the consensus all come from your machine. The cost shows as $0.00.
 
 This flow (finding Ollama, adding it, a 3-model ensemble with an agreement score) is verified end to end against a fake Ollama server in the local-endpoint E2E suite, not yet against a real Ollama install.
 
@@ -133,8 +133,8 @@ Agreement scores need an embedding model. With Ollama the recommended one is `no
 Ensemble calls embeddings through the OpenAI-compatible endpoint (`POST /v1/embeddings`). How the model is chosen:
 
 - When Ensemble checks a local endpoint (`GET /v1/models`) and the embedding model in the field is missing, it switches to an embedding model the server has (`nomic-embed-text`, then `embeddinggemma`, `qwen3-embedding`, `mxbai-embed-large` and others, then any model with `embed` in its name). It never replaces a model you typed yourself, and never changes hosted endpoints.
-- When an endpoint is the only embedding provider (no OpenAI or Google key), the automatic embeddings setting uses it. You can also pick "OpenAI-compatible endpoint" explicitly on the configuration page.
-- When Ollama has no embedding model, the endpoint card, the Ollama offer and the review page show the exact command: `ollama pull nomic-embed-text`. After pulling, open the configuration page again (or reload it): on load Ensemble checks again any local endpoint that lacked its embedding model, and any endpoint that could not be reached or was blocked by the browser.
+- When an endpoint is the only embedding provider (no OpenAI or Google key), the automatic embeddings setting uses it. You can also pick "OpenAI-compatible endpoint" explicitly in settings.
+- When Ollama has no embedding model, the endpoint card, the Ollama offer and the agreement card show the exact command: `ollama pull nomic-embed-text`. After pulling, reload the page: on load Ensemble checks again any local endpoint that lacked its embedding model, and any endpoint that could not be reached or was blocked by the browser.
 
 Other servers: LM Studio lists embedding models such as `text-embedding-nomic-embed-text-v1.5` once loaded. llama.cpp serves embeddings only from a server started with `--embeddings`, usually a second `llama-server` on another port added as a second endpoint. OpenRouter's embedding models are not in its `/models` list, so Ensemble does not use them yet; use a local embedding model or an OpenAI or Google key.
 

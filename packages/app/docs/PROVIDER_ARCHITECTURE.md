@@ -12,7 +12,7 @@ Supported providers (`ProviderName` in `packages/shared-utils/src/providers/type
 |------|--------|--------------------|
 | `mock` | Built. Developer only, enabled with `NEXT_PUBLIC_MOCK_MODE=true` | `MockProviderClient` streams lorem ipsum in the browser. No network calls |
 | `free` | Built. The only mode users can select | Browser calls each provider directly with the user's key, using the vendor SDKs with `dangerouslyAllowBrowser: true` |
-| `pro` | Not built yet. Disabled on `/config` | `createProviderClient` throws `Provider mode 'pro' not yet implemented.` See [ROADMAP](../../../docs/ROADMAP.md) |
+| `pro` | Not built yet. Not offered in the UI | `createProviderClient` throws `Provider mode 'pro' not yet implemented.` See [ROADMAP](../../../docs/ROADMAP.md) |
 
 The store's user-facing mode is only `'free' | 'pro'`. The app picks `mock` when `NEXT_PUBLIC_MOCK_MODE === 'true'`, regardless of the stored mode.
 
@@ -104,11 +104,11 @@ Code in `packages/shared-utils/src/providers/embeddings/`.
 
 `requestOpenAICompatibleEmbedding` takes a base URL, an optional key and a model id, so OpenAI and every OpenAI-compatible endpoint share it. Error messages from both helpers go through `sanitizeProviderErrorMessage`.
 
-Provider choice: `selectEmbeddingsProvider` (shared-utils) and `resolveEmbeddingsProvider` (`packages/app/src/lib/embeddingsProvider.ts`). The stored preference is `auto`, `openai`, `google` or `openai-compatible`, set with the embeddings provider setting on `/config`. An override is used when its key is valid; otherwise OpenAI, then Google, then an OpenAI-compatible endpoint. `openai-compatible` counts as available only when a connected endpoint has an embedding model that its server lists (`src/lib/endpointStatus.ts`). With none available there is no provider, and the review page shows "No agreement score" instead of a score. Mock mode follows the same rule: mock keys validate, so a mock run needs a mock OpenAI or Google key for a score, and the mock-mode E2E suite covers the no-provider message (`embeddings-unavailable.spec.ts`). If the embeddings calls fail for all but one answer, or the vectors cannot be compared, it shows "Agreement could not be scored". If some calls fail but at least two answers have embeddings, the score covers those answers and a note lists the answers left out.
+Provider choice: `selectEmbeddingsProvider` (shared-utils) and `resolveEmbeddingsProvider` (`packages/app/src/lib/embeddingsProvider.ts`). The stored preference is `auto`, `openai`, `google` or `openai-compatible`, set with the embeddings provider setting in the workspace's settings sheet. An override is used when its key is valid; otherwise OpenAI, then Google, then an OpenAI-compatible endpoint. `openai-compatible` counts as available only when a connected endpoint has an embedding model that its server lists (`src/lib/endpointStatus.ts`). With none available there is no provider, and the agreement card shows "No agreement score" with a link to settings instead of a score. Mock mode follows the same rule: mock keys validate, so a mock run needs a mock OpenAI or Google key for a score, and the mock-mode E2E suite covers the no-provider message (`embeddings-unavailable.spec.ts`). If the embeddings calls fail for all but one answer, or the vectors cannot be compared, the card says the answers could not be scored. If some calls fail but at least two answers have embeddings, the score covers those answers and the card lists the answers left out.
 
-The store records which provider produced the embeddings (`embeddingsSource`). When `/review` mounts again (reload, back and forward) and the stored embeddings came from the provider now resolved, they are reused and no embeddings calls are made.
+The store records which provider produced the embeddings (`embeddingsSource`). When the workspace mounts again (reload, back and forward) and the stored embeddings came from the provider now resolved, they are reused and no embeddings calls are made.
 
-The review page computes the cosine similarity matrix and agreement statistics from these vectors with `shared-utils/similarity`. Only mock mode uses the mock client's hash-based vectors.
+The workspace computes the cosine similarity matrix and agreement statistics from these vectors with `shared-utils/similarity`. Only mock mode uses the mock client's hash-based vectors.
 
 The high, medium and low labels depend on the embedding model. `src/lib/agreementCalibration.ts` looks up the model in use (`openai/text-embedding-3-small`, `google/gemini-embedding-2`, or the endpoint preset and embedding model, such as `ollama/nomic-embed-text`) in the committed `src/data/agreement-calibration.json`, written by `ensemble-eval calibrate-agreement` from benchmark runs (see `packages/eval/docs/BENCHMARKS.md`). A model with no entry keeps the original mapping, (cosine + 1) / 2 above 0.8 high and from 0.5 medium, and the analysis shows an "Uncalibrated" badge. The file has no entries yet.
 
@@ -126,12 +126,14 @@ The app's `initializeProviders()` (`packages/app/src/providers/index.ts`) regist
 
 ## How the app uses it
 
-- `/config`: `src/lib/validation.ts` calls `validateApiKey` on the free client (or mock client in mock mode). OpenAI-compatible endpoints are checked by `src/lib/endpointValidation.ts` (`GET /models`, which also counts the models; no request in mock mode) from `config/hooks/useEndpointConfiguration.ts`, 500 ms after an edit.
-- `/ensemble`: `src/lib/providerModels.ts` calls `listAvailableTextModels` to fill the model picker. `src/lib/endpointModels.ts` lists the models of connected endpoints and names them `llama3.2:3b (Ollama)`.
-- `/prompt` and `/review`: `streamResponse` is called once per selected model (`src/app/prompt/page.tsx`, `src/app/review/hooks/useStreamingResponses.ts`). If the client for the current mode is missing, the prompt page falls back to the mock client. `src/lib/embeddings.ts` does not: it throws, so no fake vectors reach the agreement score.
-- `/review`: `src/lib/embeddings.ts` calls `generateEmbeddings` on the provider chosen by `src/lib/embeddingsProvider.ts`; `src/app/review/hooks/useConsensusGeneration.ts` passes the summarizer model's client to the chosen consensus strategy (`standard`, `elo`, `majority`, `council`).
+Everything below happens on `/workspace` (`src/app/workspace/`).
 
-Example, simplified from the prompt page:
+- Settings sheet: `src/lib/validation.ts` calls `validateApiKey` on the free client (or mock client in mock mode), from `hooks/useApiKeySettings.ts`. OpenAI-compatible endpoints are checked by `src/lib/endpointValidation.ts` (`GET /models`, which also counts the models; no request in mock mode) from `hooks/useEndpointConfiguration.ts`, 500 ms after an edit.
+- Composer: `src/lib/providerModels.ts` calls `listAvailableTextModels` to fill the model picker. `src/lib/endpointModels.ts` lists the models of connected endpoints, grouped by endpoint in the picker and named `llama3.2:3b (Ollama)` elsewhere.
+- Asking: `streamResponse` is called once per model of the run (`hooks/useStreamingResponses.ts`). If the client for the current mode is missing, the model's answer fails with an error and a retry. `src/lib/embeddings.ts` throws too, so no fake vectors reach the agreement score.
+- Agreement and consensus: `src/lib/embeddings.ts` calls `generateEmbeddings` on the provider chosen by `src/lib/embeddingsProvider.ts`; `hooks/useConsensusGeneration.ts` passes the summarizer model's client to the chosen consensus strategy (`standard`, `elo`, `majority`, `council`).
+
+Example, simplified from `useStreamingResponses`:
 
 ```typescript
 import { ProviderRegistry } from '@ensemble-ai/shared-utils/providers';
@@ -152,11 +154,11 @@ void client.streamResponse(
 );
 ```
 
-### Errors on the review page
+### Errors in the workspace
 
-The response slice stores each failed answer's message, `errorKind` and `retryAfterSeconds`. `ResponseCard` shows the error through the `ResponseErrorNotice` molecule: a plain explanation per kind (EN and FR), the provider message and a retry button. Retry restarts only that model (`useStreamingResponses.retryModel`), and clears the consensus so it runs again once every answer is back. A consensus still running when the retry starts finishes, but its result is dropped (`useConsensusGeneration.restart`), since it leaves out the retried model. Consensus calls already made stay in the run cost.
+The response slice stores each failed answer's message, `errorKind` and `retryAfterSeconds`. `AnswerCard` shows the error through the `ResponseErrorNotice` molecule: a plain explanation per kind (EN and FR), the provider message and a retry button. Retry restarts only that model (`useStreamingResponses.retryModel`), and clears the consensus so it runs again once every answer is back. A consensus still running when the retry starts finishes, but its result is dropped (`useConsensusGeneration.restart`), since it leaves out the retried model. Consensus calls already made stay in the run cost.
 
-One failed model does not fail the run. Agreement (`useReviewAnalytics`) and consensus (`useConsensusTrigger`) use only answers without an error, plus any manual answers. `RunExclusionNote` names the failed models and, once the run has finished, says how many answers were used. It mentions the agreement score only when an embeddings provider is available. When fewer than 2 answers succeeded (manual answers count), it explains why there is no consensus and the consensus card is hidden. After a consensus error the trigger does not fire again until a retry, so a failing summarizer is not called in a loop.
+One failed model does not fail the run. Agreement (`useRunAnalytics`) and consensus (`useConsensusTrigger`) use only answers without an error, plus any manual answers. `RunExclusionNote` names the failed models and, once the run has finished, says how many answers were used. It mentions the agreement score only when an embeddings provider is available. When fewer than 2 answers succeeded (manual answers count), it explains why there is no consensus, the consensus card says the method needs more answers, and the agreement card says there are too few answers to compare. After a consensus error the trigger does not fire again until a retry, so a failing summarizer is not called in a loop.
 
 ## Server-side provider path
 

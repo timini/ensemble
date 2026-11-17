@@ -9,7 +9,6 @@ import { usePathname } from 'next/navigation';
 import { useTranslation } from 'react-i18next';
 import { TRPCReactProvider } from '~/trpc/react';
 import { useStore } from '~/store';
-import { useSyncStepWithRoute } from '~/hooks/useSyncStepWithRoute';
 import { EnsembleHeader } from '@/components/molecules/EnsembleHeader';
 import { Footer } from '@/components/molecules/Footer';
 import { SettingsModal } from '@/components/organisms/SettingsModal';
@@ -37,14 +36,14 @@ export default function RootLayout({
   const { i18n, t } = useTranslation('common');
   const pathname = usePathname();
   const [settingsOpen, setSettingsOpen] = useState(false);
+  // The workspace has its own frame (AppShell) and settings sheet.
+  const isWorkspace = pathname?.startsWith('/workspace') ?? false;
   const [hasHydrated, setHasHydrated] = useState(false);
 
   const fallbackTheme: Theme = 'light';
   const fallbackLanguage: Language = 'en';
   const resolvedTheme = hasHydrated ? theme : fallbackTheme;
   const resolvedLanguage = hasHydrated ? language : fallbackLanguage;
-
-  useSyncStepWithRoute();
 
   // Initialize providers once on mount
   useEffect(() => {
@@ -91,6 +90,7 @@ export default function RootLayout({
       </head>
       <body>
         <TRPCReactProvider>
+          {isWorkspace ? children : (<>
           <a
             href="#main-content"
             className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-md focus:bg-primary focus:px-4 focus:py-2 focus:text-primary-foreground focus:ring-2 focus:ring-ring focus:ring-offset-2"
@@ -120,6 +120,7 @@ export default function RootLayout({
             }}
             onDone={() => setSettingsOpen(false)}
           />
+          </>)}
         </TRPCReactProvider>
       </body>
     </html>
