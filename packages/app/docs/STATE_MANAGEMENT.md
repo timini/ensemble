@@ -88,14 +88,14 @@ Components that read persisted state use `useHasHydrated()` (`src/hooks/useHasHy
 
 ### OpenAI-compatible endpoints (`endpointsSlice.ts`)
 
-- State: `endpoints`, an ordered list of `{ id, presetId, label, baseURL, apiKey, encryptedApiKey, embeddingModel, status, error?, modelCount? }`. The `id` is the preset id, then `ollama-2` and so on, and prefixes the endpoint's model ids (`ollama/llama3.2:3b`).
+- State: `endpoints`, an ordered list of `{ id, presetId, label, baseURL, apiKey, encryptedApiKey, embeddingModel, status, error?, errorCode?, modelCount?, embeddingModelFound? }`. `errorCode` is a check failure with no server message (`baseUrlRequired`, `unreachable`), translated by `EndpointInput`. `embeddingModelFound` says whether the last check saw the embedding model in the server's model list. The `id` is the preset id, then `ollama-2` and so on, and prefixes the endpoint's model ids (`ollama/llama3.2:3b`).
 - Actions:
   - `addEndpoint(presetId)`: adds an endpoint with the preset's base URL and suggested embedding model, and returns its id.
-  - `updateEndpoint(id, { baseURL?, embeddingModel? })`: a new base URL resets the status to `idle`, so the config page checks it again.
+  - `updateEndpoint(id, { baseURL?, embeddingModel? })`: a new base URL resets the status to `idle`, so the config page checks it again. A new embedding model clears `embeddingModelFound`, and the config page checks again to look it up.
   - `setEndpointApiKey(id, key)`: trims and encrypts like `setApiKey`; an empty key clears it. Resets the status.
-  - `setEndpointStatus(id, status, { error?, modelCount? })`, `removeEndpoint(id)`
+  - `setEndpointStatus(id, status, { error?, errorCode?, modelCount?, embeddingModelFound? })`, `removeEndpoint(id)`
   - `initializeEndpointKeys()`: decrypts persisted keys and resets checks a reload cut off.
-- `selectEndpointConfigs(state)` gives the provider client the connected endpoints with their keys.
+- `selectEndpointConfigs(state)` gives the provider client the connected endpoints with their keys, and with their embedding model only when `embeddingModelFound` is true.
 - Checks are not slice actions. `src/lib/endpointValidation.ts` does them and `config/hooks/useEndpointConfiguration.ts` reports back through `setEndpointStatus`.
 
 ### Ensemble (`ensembleSlice.ts`)
