@@ -61,6 +61,21 @@ interface BenchmarkRunnerConfig {
   protocol?: AnswerProtocol;
   /** OpenAI-compatible endpoints, for pricing their models. */
   endpoints?: EndpointLocation[];
+  /** Limit for one model call (ms). The request is aborted when it passes. Default: the client's. */
+  callTimeoutMs?: number;
+  /** Limit for one summarizer call (ms). Default: the client's (120 s for streams). */
+  consensusTimeoutMs?: number;
+  /**
+   * Answers kept from an earlier attempt (questionId to responses, in model
+   * order). A model whose kept answer succeeded is not called again; the
+   * others are. Used to repair failed entries of a run.
+   */
+  priorResponses?: Map<string, ProviderResponse[]>;
+}
+
+/** True for an answer worth keeping: no error and some text. */
+export function isUsableResponse(response: ProviderResponse | undefined): response is ProviderResponse {
+  return Boolean(response && !response.error && response.content.trim());
 }
 
 interface RunBenchmarkOptions {
@@ -84,6 +99,9 @@ export class BenchmarkRunner {
   private readonly questionTimeoutMs: number | undefined;
   private readonly protocol: AnswerProtocol;
   private readonly endpoints: EndpointLocation[];
+  private readonly retry: RetryOptions | undefined;
+  private readonly consensusTimeoutMs: number | undefined;
+  private readonly priorResponses: Map<string, ProviderResponse[]> | undefined;
 
   constructor(config: BenchmarkRunnerConfig) {
     this.mode = config.mode;
@@ -98,12 +116,16 @@ export class BenchmarkRunner {
     this.questionTimeoutMs = config.questionTimeoutMs;
     this.protocol = config.protocol ?? 'legacy';
     this.endpoints = config.endpoints ?? [];
+    this.retry = config.retry;
+    this.consensusTimeoutMs = config.consensusTimeoutMs;
+    this.priorResponses = config.priorResponses;
     this.ensembleRunner = new EnsembleRunner(config.registry, config.mode, {
       requestDelayMs: config.requestDelayMs,
       temperature: config.temperature,
       retry: config.retry,
       onRateLimit: config.limiter ? () => config.limiter!.notifyRateLimit() : undefined,
       endpoints: this.endpoints,
+      ...(config.callTimeoutMs !== undefined ? { callTimeoutMs: config.callTimeoutMs } : {}),
     });
   }
 
@@ -165,6 +187,7 @@ export class BenchmarkRunner {
   private async consensusFor(
     question: BenchmarkQuestion,
     responses: ProviderResponse[],
+    signal?: AbortSignal,
   ): Promise<ConsensusGenerationResult> {
     const spec = this.protocol === 'structured' ? question.answer : undefined;
     const vote = spec && this.strategies.includes('majority') ? mechanicalMajority(responses, spec) : null;
@@ -185,6 +208,11 @@ export class BenchmarkRunner {
           this.registry.getProvider(summarizerTarget.provider, this.mode),
           summarizerTarget.model,
           { provider: summarizerTarget.provider, endpoints: this.endpoints },
+          {
+            ...(this.consensusTimeoutMs !== undefined ? { timeoutMs: this.consensusTimeoutMs } : {}),
+            ...(this.retry ? { retry: this.retry } : {}),
+            ...(signal ? { signal } : {}),
+          },
         )
       : { outputs: {}, metrics: {} };
 
@@ -200,21 +228,35 @@ export class BenchmarkRunner {
     return result;
   }
 
-  private async runQuestion(question: BenchmarkQuestion): Promise<PromptRunResult> {
+  /** Responses for a question: cached, kept from an earlier attempt, or fresh calls. */
+  private async responsesFor(question: BenchmarkQuestion, signal?: AbortSignal): Promise<ProviderResponse[]> {
+    const cachedResponses = this.ensembleResponseCache?.get(question.id);
+    if (cachedResponses) return cachedResponses;
+    const answerSpec = this.protocol === 'structured' ? question.answer : undefined;
+    const options = { ...(answerSpec ? { answer: answerSpec } : {}), ...(signal ? { signal } : {}) };
+    const prior = this.priorResponses?.get(question.id) ?? [];
+    const kept = this.models.map((spec, i) => {
+      const response = prior[i];
+      return isUsableResponse(response) && response.provider === spec.provider && response.model === spec.model
+        ? response
+        : undefined;
+    });
+    const toCall = this.models.filter((_, i) => !kept[i]);
+    const fresh = toCall.length > 0 ? await this.ensembleRunner.runPrompt(question.prompt, toCall, options) : [];
+    let next = 0;
+    return kept.map((response) => response ?? fresh[next++]!);
+  }
+
+  private async runQuestion(question: BenchmarkQuestion, signal?: AbortSignal): Promise<PromptRunResult> {
     const questionStart = Date.now();
     const qElapsed = () => ((Date.now() - questionStart) / 1000).toFixed(1);
 
-    const cachedResponses = this.ensembleResponseCache?.get(question.id);
-    const answerSpec = this.protocol === 'structured' ? question.answer : undefined;
-    const responses = cachedResponses ?? await this.ensembleRunner.runPrompt(
-      question.prompt,
-      this.models,
-      answerSpec ? { answer: answerSpec } : {},
-    );
+    const responses = await this.responsesFor(question, signal);
     const responsesMs = Date.now() - questionStart;
+    if (signal?.aborted) throw signal.reason instanceof Error ? signal.reason : new Error(String(signal.reason));
 
     const consensusStart = Date.now();
-    const consensusResult = await this.consensusFor(question, responses);
+    const consensusResult = await this.consensusFor(question, responses, signal);
     const consensusMs = Date.now() - consensusStart;
     const consensus = consensusResult.outputs;
     const consensusMetrics = Object.keys(consensusResult.metrics).length > 0
@@ -279,8 +321,11 @@ export class BenchmarkRunner {
       const settled = await Promise.allSettled(
         pendingQuestions.map(async (question) => {
           const dispatchTime = Date.now();
+          // Aborted when the question runs out of time, which cancels its
+          // requests and retries so the task ends and frees its limiter slot.
+          const controller = new AbortController();
           const runFn = async () => {
-            const result = await this.runQuestion(question);
+            const result = await this.runQuestion(question, controller.signal);
             return result;
           };
           const executeWithOptionalTimeout = async (): Promise<PromptRunResult> => {
@@ -291,7 +336,11 @@ export class BenchmarkRunner {
             // and clear it on completion to avoid dangling handles.
             let timer: ReturnType<typeof setTimeout>;
             const timeoutPromise = new Promise<never>((_, reject) => {
-              timer = setTimeout(() => reject(new Error(`Question ${question.id} timed out after ${this.questionTimeoutMs}ms`)), this.questionTimeoutMs);
+              timer = setTimeout(() => {
+                const error = new Error(`Question ${question.id} timed out after ${this.questionTimeoutMs}ms`);
+                controller.abort(error);
+                reject(error);
+              }, this.questionTimeoutMs);
               timer.unref();
             });
             try {
@@ -339,7 +388,7 @@ export class BenchmarkRunner {
         }
       }
       if (timedOut > 0) {
-        process.stderr.write(`  [timeout] ${timedOut} question(s) timed out and count as wrong (note: zombie tasks may still hold limiter slots)\n`);
+        process.stderr.write(`  [timeout] ${timedOut} question(s) timed out and count as wrong; their requests were aborted\n`);
       }
       output.updatedAt = new Date().toISOString();
       await writeJsonFile(outputPath, output);

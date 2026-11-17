@@ -8,14 +8,21 @@ import { dirname, join } from 'node:path';
 import { ProviderRegistry } from '@ensemble-ai/shared-utils/providers';
 import { assertValidResumedOutput, createBenchmarkFile } from '../../commands/benchmarkOutput.js';
 import { loadBenchmarkQuestions } from '../benchmarkDatasets.js';
-import { BenchmarkRunner } from '../benchmarkRunner.js';
+import { BenchmarkRunner, isUsableResponse } from '../benchmarkRunner.js';
 import { createEvaluatorForDataset, datasetNeedsJudge } from '../evaluators.js';
 import { isMechanical } from '../finalAnswer.js';
 import { fileExists, readJsonFile, writeJsonFile } from '../io.js';
 import { prepareQuestions } from '../methodology.js';
 import { endpointsOf } from '../modelSpecs.js';
 import { registerProviders } from '../providers.js';
-import type { BenchmarkQuestion, BenchmarkResultsFile, EvalMode, StrategyName } from '../../types.js';
+import type {
+  BenchmarkQuestion,
+  BenchmarkResultsFile,
+  EvalMode,
+  PromptRunResult,
+  ProviderResponse,
+  StrategyName,
+} from '../../types.js';
 import type { MatrixConfig } from './config.js';
 import { estimateJob, formatEstimate, totalEstimate, type MatrixEstimate } from './estimate.js';
 import { planJobs, runDirOf, type MatrixJob } from './plan.js';
@@ -39,8 +46,41 @@ export interface MatrixRunOptions {
   skipDownload?: boolean;
   /** Questions run at once per job. Results are written after each batch. */
   concurrency?: number;
+  /**
+   * Run again the entries of an existing run that failed (an error, a
+   * timeout, an empty answer or a failed consensus), keeping every answer
+   * that succeeded. Entries that still fail after their retries count as
+   * wrong, as before.
+   */
+  retryFailed?: boolean;
   log?: (line: string) => void;
   now?: () => Date;
+}
+
+/**
+ * True when a stored run needs another attempt: the question failed or timed
+ * out, a model call failed or came back empty, or a consensus strategy failed.
+ */
+export function isFailedRun(run: PromptRunResult): boolean {
+  if (run.failure) return true;
+  if (run.responses.some((response) => !isUsableResponse(response))) return true;
+  const failedResult = (results: Record<string, { failure?: unknown } | undefined> | undefined) =>
+    Object.values(results ?? {}).some((result) => Boolean(result?.failure));
+  return failedResult(run.evaluation?.results) || failedResult(run.consensusEvaluation?.results);
+}
+
+/**
+ * Take the failed runs out of a results file so they run again, and return
+ * their usable answers so those models are not called again.
+ */
+export function takeFailedRuns(output: BenchmarkResultsFile): Map<string, ProviderResponse[]> {
+  const prior = new Map<string, ProviderResponse[]>();
+  output.runs = output.runs.filter((run) => {
+    if (!isFailedRun(run)) return true;
+    if (run.questionId) prior.set(run.questionId, run.responses);
+    return false;
+  });
+  return prior;
 }
 
 export interface MatrixRunResult {
@@ -111,7 +151,8 @@ export async function runMatrix(options: MatrixRunOptions): Promise<MatrixRunRes
     const questions = questionsByDataset.get(job.dataset)!;
     const file = await existingResults(job, mode, questions.length);
     existing.set(job, file);
-    const done = new Set((file?.runs ?? []).map((run) => run.questionId));
+    const kept = (file?.runs ?? []).filter((run) => !options.retryFailed || !isFailedRun(run));
+    const done = new Set(kept.map((run) => run.questionId));
     const promptTokens = Math.ceil(questions.reduce((s, q) => s + q.prompt.length, 0) / Math.max(1, questions.length) / 4);
     estimates.push(estimateJob({
       job,
@@ -185,6 +226,8 @@ async function runJob(
   const output = resumed ?? createBenchmarkFile(
     job.dataset, mode, job.models.map((m) => m.spec), job.strategies, questions.length,
   );
+  const priorResponses = ctx.retryFailed ? takeFailedRuns(output) : new Map<string, ProviderResponse[]>();
+  if (ctx.retryFailed) ctx.log(`${job.dataset} ${job.kind}: ${priorResponses.size} failed entr${priorResponses.size === 1 ? 'y' : 'ies'} to run again.`);
   output.answerProtocol = config.protocol;
   if (config.protocol === 'structured') output.optionSeed = config.optionSeed;
   const working = job.cachePath ?? job.outputPath;
@@ -200,6 +243,16 @@ async function runJob(
     endpoints: ctx.endpoints,
     parallelQuestions: true,
     questionTimeoutMs: config.questionTimeoutMs,
+    callTimeoutMs: config.callTimeoutMs,
+    consensusTimeoutMs: config.consensusTimeoutMs,
+    retry: {
+      maxRetries: config.maxRetries,
+      onRetry: (error, attempt) => {
+        const message = error instanceof Error ? error.message : String(error);
+        process.stderr.write(`  [retry ${attempt}/${config.maxRetries}] ${message}\n`);
+      },
+    },
+    priorResponses,
   });
   const done = new Set(output.runs.map((run) => run.questionId));
   const pending = questions.filter((q) => !done.has(q.id));

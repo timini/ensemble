@@ -36,6 +36,11 @@ describe('matrix command', () => {
     expect(options.publishPath).toBe(resolve('/tmp/x/summary.json'));
   });
 
+  it('passes --retry-failed', async () => {
+    await run(['--run-id', '2026-11-17-m3-matrix', '--retry-failed', '--yes']);
+    expect(vi.mocked(runMatrix).mock.calls[0]![0]).toMatchObject({ retryFailed: true, runId: '2026-11-17-m3-matrix' });
+  });
+
   it('publishes a free run to the app summary', async () => {
     await run(['--publish']);
     expect(vi.mocked(runMatrix).mock.calls[0]![0].publishPath).toBe(DEFAULT_PUBLISH_PATH);

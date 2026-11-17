@@ -14,7 +14,7 @@ import {
 import { isProviderError } from '@ensemble-ai/shared-utils/providers';
 import type { EvalMode, ModelSpec, ProviderResponse } from '../types.js';
 import { answerSchema, formatStructuredContent, type AnswerSpec } from './finalAnswer.js';
-import { isRateLimitOrServerError, retryable, type RetryOptions } from './retryable.js';
+import { isRateLimitOrServerError, isTransientError, retryable, type RetryOptions } from './retryable.js';
 
 export interface EnsembleRunnerOptions {
   requestDelayMs?: number;
@@ -24,11 +24,19 @@ export interface EnsembleRunnerOptions {
   onRateLimit?: () => void;
   /** OpenAI-compatible endpoints in use, so their models can be priced (local ones cost 0). */
   endpoints?: EndpointLocation[];
+  /**
+   * Limit for one model call, in ms. The request is aborted when it passes
+   * and the attempt counts as a transient failure (retried when retry is set).
+   * Defaults to the client's own limit (120 s for streams, none for structured calls).
+   */
+  callTimeoutMs?: number;
 }
 
 export interface RunPromptOptions {
   /** Ask for a structured final answer of this shape (see finalAnswer.ts). */
   answer?: AnswerSpec;
+  /** Aborts every call of this prompt, retries included (the question ran out of time). */
+  signal?: AbortSignal;
 }
 
 function sleep(ms: number): Promise<void> {
@@ -64,9 +72,24 @@ function priceResponse(
     : { ...recorded, estimatedCostUsd: cost, costFromTextLength: true };
 }
 
-type StreamResult = Pick<ProviderResponse, 'content' | 'responseTimeMs' | 'tokenCount' | 'error' | 'answerSource'> & {
+type StreamResult = Pick<ProviderResponse, 'content' | 'responseTimeMs' | 'tokenCount' | 'error' | 'answerSource' | 'structuredFallback'> & {
   usage?: TokenUsage;
+  /** The error object behind `error`, kept so retries can read its kind and Retry-After. */
+  cause?: unknown;
 };
+
+function failed(error: unknown, content = ''): StreamResult {
+  return { content, responseTimeMs: 0, error: error instanceof Error ? error.message : String(error), cause: error };
+}
+
+/**
+ * A call that returned no text is a failed call, whatever the provider said.
+ * Scoring it as an answer would count an outage as a wrong answer.
+ */
+function emptyAsError(result: StreamResult, model: string): StreamResult {
+  if (result.error || result.content.trim()) return result;
+  return failed(new Error(`Empty response from ${model}: the call returned no text.`));
+}
 
 const NO_FALLBACK_KINDS = new Set(['invalid_key', 'missing_key', 'rate_limited', 'timeout', 'provider_unavailable']);
 
@@ -77,7 +100,9 @@ const NO_FALLBACK_KINDS = new Set(['invalid_key', 'missing_key', 'rate_limited',
  */
 function shouldFallBackToText(error: unknown): boolean {
   if (isProviderError(error) && NO_FALLBACK_KINDS.has(error.kind)) return false;
-  if (isRateLimitOrServerError(error)) return false;
+  // Network failures and empty completions are retried as they are; a plain
+  // reply would hide them.
+  if (isRateLimitOrServerError(error) || isTransientError(error)) return false;
   const message = error instanceof Error ? error.message : String(error);
   return !/timed?\s?out|timeout|ETIMEDOUT|aborted|api key|unauthori[sz]ed|\b40[13]\b/i.test(message);
 }
@@ -97,11 +122,16 @@ async function structuredModelResponse(
   streamOptions?: StreamResponseOptions,
 ): Promise<StreamResult> {
   try {
+    const structuredOptions = {
+      ...(streamOptions?.temperature !== undefined ? { temperature: streamOptions.temperature } : {}),
+      ...(streamOptions?.timeoutMs !== undefined ? { timeoutMs: streamOptions.timeoutMs } : {}),
+      ...(streamOptions?.signal ? { signal: streamOptions.signal } : {}),
+    };
     const result = await client.generateStructured<{ reasoning?: unknown; answer?: unknown }>(
       prompt,
       model,
       answerSchema(spec),
-      streamOptions?.temperature !== undefined ? { temperature: streamOptions.temperature } : undefined,
+      Object.keys(structuredOptions).length > 0 ? structuredOptions : undefined,
     );
     const usage = result.usage;
     const tokenCount = result.tokenCount ?? (usage ? usage.inputTokens + usage.outputTokens : undefined);
@@ -116,11 +146,11 @@ async function structuredModelResponse(
       ...(usage ? { usage } : {}),
     };
   } catch (error) {
-    if (!shouldFallBackToText(error)) {
-      return { content: '', responseTimeMs: 0, error: error instanceof Error ? error.message : String(error) };
-    }
+    if (!shouldFallBackToText(error)) return failed(error);
+    // Kept with the answer, so a run shows why it was read as free text.
+    const reason = error instanceof Error ? error.message : String(error);
     const fallback = await streamModelResponse(client, prompt, model, streamOptions);
-    return fallback.error ? fallback : { ...fallback, answerSource: 'text' };
+    return fallback.error ? fallback : { ...fallback, answerSource: 'text', structuredFallback: reason };
   }
 }
 
@@ -158,21 +188,12 @@ async function streamModelResponse(
           });
         },
         (error) => {
-          safeResolve({
-            content,
-            responseTimeMs: 0,
-            error: error.message,
-          });
+          safeResolve(failed(error, content));
         },
         streamOptions,
       )
       .catch((error: unknown) => {
-        const message = error instanceof Error ? error.message : String(error);
-        safeResolve({
-          content,
-          responseTimeMs: 0,
-          error: message,
-        });
+        safeResolve(failed(error, content));
       });
   });
 }
@@ -190,12 +211,15 @@ export class EnsembleRunner {
   ) {
     this.requestDelayMs = Math.max(0, options?.requestDelayMs ?? 0);
     this.retryOptions = options?.retry
-      ? { ...options.retry, onRateLimit: options.onRateLimit }
+      ? { isRetryable: isTransientError, ...options.retry, onRateLimit: options.onRateLimit }
       : options?.onRateLimit
-        ? { onRateLimit: options.onRateLimit }
+        ? { isRetryable: isTransientError, onRateLimit: options.onRateLimit }
         : undefined;
-    this.streamOptions =
-      options?.temperature !== undefined ? { temperature: options.temperature } : undefined;
+    const streamOptions: StreamResponseOptions = {
+      ...(options?.temperature !== undefined ? { temperature: options.temperature } : {}),
+      ...(options?.callTimeoutMs !== undefined ? { timeoutMs: options.callTimeoutMs } : {}),
+    };
+    this.streamOptions = Object.keys(streamOptions).length > 0 ? streamOptions : undefined;
     this.endpoints = options?.endpoints ?? [];
   }
 
@@ -204,10 +228,17 @@ export class EnsembleRunner {
     models: ModelSpec[],
     options: RunPromptOptions = {},
   ): Promise<ProviderResponse[]> {
-    const call = (client: AIProvider, model: string) =>
-      options.answer
-        ? structuredModelResponse(client, prompt, model, options.answer, this.streamOptions)
-        : streamModelResponse(client, prompt, model, this.streamOptions);
+    const streamOptions = options.signal ? { ...this.streamOptions, signal: options.signal } : this.streamOptions;
+    const call = async (client: AIProvider, model: string) =>
+      emptyAsError(
+        options.answer
+          ? await structuredModelResponse(client, prompt, model, options.answer, streamOptions)
+          : await streamModelResponse(client, prompt, model, streamOptions),
+        model,
+      );
+    const retryOptions = this.retryOptions && options.signal
+      ? { ...this.retryOptions, signal: options.signal }
+      : this.retryOptions;
 
     const tasks = models.map(async ({ provider, model }, index) => {
       // Stagger model requests: model 0 starts immediately, model 1 after requestDelayMs,
@@ -220,25 +251,21 @@ export class EnsembleRunner {
       }
 
       const client = this.registry.getProvider(provider, this.mode);
-      const result: StreamResult = this.retryOptions
+      const result: StreamResult = retryOptions
         ? await retryable(
             async () => {
               const r = await call(client, model);
-              if (r.error && isRateLimitOrServerError(new Error(r.error))) {
-                throw new Error(r.error);
-              }
+              // Throw transient failures so retryable tries again. Others are
+              // returned as they are and recorded as failed answers.
+              const cause = r.cause ?? (r.error ? new Error(r.error) : undefined);
+              if (r.error && (isTransientError(cause) || isRateLimitOrServerError(cause))) throw cause;
               return r;
             },
-            this.retryOptions,
-          ).catch((error: unknown): StreamResult => ({
-            content: '',
-            responseTimeMs: 0,
-            tokenCount: undefined,
-            error: error instanceof Error ? error.message : String(error),
-          }))
+            retryOptions,
+          ).catch((error: unknown): StreamResult => failed(error))
         : await call(client, model);
 
-      const { usage: _usage, ...response } = result;
+      const { usage: _usage, cause: _cause, ...response } = result;
       return {
         provider,
         model,

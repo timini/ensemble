@@ -35,7 +35,9 @@ All four datasets are scored mechanically, with no LLM judge (`src/lib/methodolo
 - Multiple-choice options are shuffled with a fixed seed and the permutation is recorded, so position bias does not favour any answer letter and runs are reproducible.
 - Every model is asked for a structured final answer (`generateStructured` with a JSON schema). Servers without strict JSON schema support fall back to `json_object`, then to a plain reply with a `Final answer:` line.
 - The final answer is read and compared mechanically: letters for multiple choice, numbers by value for GSM8K.
-- A call that fails or times out (300 s per question) counts as wrong. It is not dropped from the sample.
+- Transient failures are retried with exponential backoff and jitter (`maxRetries`, default 4): network errors such as `fetch failed` or `ECONNRESET`, 429 (waiting for `Retry-After` when given), 5xx, per-call timeouts and empty replies. An empty reply, or an error the server sends inside a 200 response, is a failed call, never an answer.
+- Each model call has a limit (`callTimeoutMs`, default 180 s) and each summarizer call another (`consensusTimeoutMs`, default 300 s). The request is aborted when its limit passes. A question as a whole has an outer limit (`questionTimeoutMs`, default 900 s, at least the two together); when it passes, all of its requests are aborted.
+- A call that still fails after its retries, or a question that times out, counts as wrong. It is not dropped from the sample, and failures are reported in their own column.
 - Mechanical majority counts the final answers and needs no LLM call. Standard consensus is one call to the summarizer, whose answer is scored like any other.
 
 ### Statistics
@@ -111,10 +113,13 @@ Options of `ensemble-eval matrix`:
 | `--sample <n>`, `--datasets <list>` | override the config, for dry runs |
 | `--concurrency <n>` | questions run at once per job (default 8) |
 | `--skip-download` | fail instead of downloading a dataset |
+| `--retry-failed` | with an existing `--run-id`, run again the entries that failed, timed out, came back empty or lost their consensus; answers that succeeded are kept and not paid for again |
 
 ### Resume and cache
 
 Results are written after every batch of questions. Running the same command again with the same `--run-id` skips the questions already answered, and the estimate shows only what is left. The reference answers are kept in a shared cache keyed by model, dataset, sample, seeds, protocol and temperature, so a later run (a new run id, or changed open models) reuses them instead of paying again.
+
+`--retry-failed` repairs a run that hit an outage. Each failed entry is taken out and run again; within it, a model whose answer succeeded is not called again. The estimate counts the failed entries as pending. Scoring does not change: what still fails after the retries counts as wrong.
 
 ## Results format
 

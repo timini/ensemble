@@ -21,6 +21,7 @@ import { CouncilConsensus } from '@ensemble-ai/consensus-council';
 import type { CouncilParticipant } from '@ensemble-ai/consensus-council';
 import type { ConsensusStrategyMetrics, ProviderResponse, StrategyName } from '../types.js';
 import { explodeList } from './modelSpecs.js';
+import { isTransientError, retryable, type RetryOptions } from './retryable.js';
 
 const VALID_STRATEGIES: StrategyName[] = ['standard', 'elo', 'majority', 'council'];
 const VALID_STRATEGY_SET = new Set<StrategyName>(VALID_STRATEGIES);
@@ -43,6 +44,16 @@ export interface ConsensusPricing {
   endpoints?: EndpointLocation[];
 }
 
+/** Limits and retries for the summarizer's calls. */
+export interface ConsensusCallOptions {
+  /** Limit for one summarizer call, in ms; the request is aborted when it passes. Default: the client's (120 s for streams). */
+  timeoutMs?: number;
+  /** Retries for transient failures (network, 429, 5xx, timeouts, empty replies). None by default. */
+  retry?: RetryOptions;
+  /** Aborts every summarizer call (the question ran out of time). */
+  signal?: AbortSignal;
+}
+
 /**
  * Wraps an AIProvider to count tokens and cost across all calls. Cost uses
  * the usage the provider reported, or a text-length estimate, priced with
@@ -54,7 +65,11 @@ class TokenCountingProvider implements AIProvider {
   inputTokens = 0;
   outputTokens = 0;
   calls = 0;
-  constructor(private inner: AIProvider, private pricing?: ConsensusPricing) {}
+  constructor(
+    private inner: AIProvider,
+    private pricing?: ConsensusPricing,
+    private callOptions: ConsensusCallOptions = {},
+  ) {}
   get totalTokens() { return this._totalTokens; }
   get costUsd() { return this._costUsd; }
 
@@ -68,6 +83,28 @@ class TokenCountingProvider implements AIProvider {
     if (cost !== null) this._costUsd = (this._costUsd ?? 0) + cost;
   }
 
+  private withLimits<T extends StreamResponseOptions | GenerateStructuredOptions>(options?: T): T | undefined {
+    const { timeoutMs, signal } = this.callOptions;
+    if (timeoutMs === undefined && !signal) return options;
+    return {
+      ...(timeoutMs !== undefined ? { timeoutMs } : {}),
+      ...(signal ? { signal } : {}),
+      ...options,
+    } as T;
+  }
+
+  private retryOptions(): RetryOptions | undefined {
+    const { retry, signal } = this.callOptions;
+    if (!retry) return undefined;
+    return { isRetryable: isTransientError, ...retry, ...(signal ? { signal } : {}) };
+  }
+
+  /**
+   * Streams through the inner client. With retry options, a transient
+   * failure (or an empty reply) is retried before onError is called, so the
+   * strategy sees only the final outcome. Chunks of a failed attempt have
+   * already been passed on; the strategies here use only the final text.
+   */
   async streamResponse(
     prompt: string, model: string,
     onChunk: (chunk: string) => void,
@@ -75,15 +112,37 @@ class TokenCountingProvider implements AIProvider {
     onError: (error: Error) => void,
     options?: StreamResponseOptions,
   ): Promise<void> {
-    return this.inner.streamResponse(prompt, model, onChunk, (full, time, tokens, usage) => {
-      this._totalTokens += tokens ?? 0;
-      this.addCost(model, usage ?? usageFromText(prompt, full));
-      onComplete(full, time, tokens, usage);
-    }, onError, options);
+    const attempt = () => new Promise<{ full: string; time: number; tokens?: number; usage?: TokenUsage }>((resolve, reject) => {
+      this.inner.streamResponse(
+        prompt, model, onChunk,
+        (full, time, tokens, usage) => {
+          if (!full.trim()) {
+            reject(new Error(`Empty response from ${model}: the summarizer returned no text.`));
+            return;
+          }
+          resolve({ full, time, tokens, usage });
+        },
+        reject,
+        this.withLimits(options),
+      ).catch(reject);
+    });
+    const retry = this.retryOptions();
+    let result: Awaited<ReturnType<typeof attempt>>;
+    try {
+      result = retry ? await retryable(attempt, retry) : await attempt();
+    } catch (error) {
+      onError(error instanceof Error ? error : new Error(String(error)));
+      return;
+    }
+    this._totalTokens += result.tokens ?? 0;
+    this.addCost(model, result.usage ?? usageFromText(prompt, result.full));
+    onComplete(result.full, result.time, result.tokens, result.usage);
   }
 
   async generateStructured<T>(prompt: string, model: string, schema: JsonSchema, options?: GenerateStructuredOptions): Promise<StructuredResponse<T>> {
-    const result = await this.inner.generateStructured<T>(prompt, model, schema, options);
+    const call = () => this.inner.generateStructured<T>(prompt, model, schema, this.withLimits(options));
+    const retry = this.retryOptions();
+    const result = retry ? await retryable(call, retry) : await call();
     this._totalTokens += result.tokenCount
       ?? (result.usage ? result.usage.inputTokens + result.usage.outputTokens : 0);
     this.addCost(model, result.usage ?? usageFromText(prompt, result.raw));
@@ -142,6 +201,7 @@ export async function generateConsensus(
   summarizerClient: AIProvider,
   summarizerModel: string,
   pricing?: ConsensusPricing,
+  callOptions: ConsensusCallOptions = {},
 ): Promise<ConsensusGenerationResult> {
   const consensusResponses = toConsensusResponses(responses);
   if (consensusResponses.length === 0) {
@@ -159,7 +219,7 @@ export async function generateConsensus(
     name: StrategyName,
     fn: (counter: TokenCountingProvider) => Promise<string>,
   ): Promise<void> => {
-    const counter = new TokenCountingProvider(summarizerClient, pricing);
+    const counter = new TokenCountingProvider(summarizerClient, pricing, callOptions);
     const start = Date.now();
     process.stderr.write(`  [consensus] ${name} start\n`);
     return fn(counter).then((result) => {

@@ -16,5 +16,8 @@
   "ensembleStrategies": ["majority", "standard"],
   "reference": { "id": "reference", "label": "Claude Sonnet 5.5", "spec": "openrouter:anthropic/claude-sonnet-5.5" },
   "budgetUsd": 20,
-  "questionTimeoutMs": 300000
+  "questionTimeoutMs": 900000,
+  "callTimeoutMs": 180000,
+  "consensusTimeoutMs": 300000,
+  "maxRetries": 4
 }

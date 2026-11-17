@@ -113,6 +113,8 @@ export interface ProviderResponse {
    * a plain reply with a "Final answer:" line. Unset on legacy runs.
    */
   answerSource?: 'structured' | 'text';
+  /** Why the structured call failed when the answer fell back to a plain reply. */
+  structuredFallback?: string;
   error?: string;
 }
 

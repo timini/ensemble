@@ -36,7 +36,14 @@ export interface MatrixConfig {
   /** Premium model run once as a reference and cached. */
   reference: MatrixModel;
   budgetUsd: number;
+  /** Outer limit for one question, retries and consensus included. Must cover callTimeoutMs plus consensusTimeoutMs. */
   questionTimeoutMs: number;
+  /** Limit for one model call; the request is aborted when it passes and the call is retried. */
+  callTimeoutMs: number;
+  /** Limit for one summarizer call (the standard consensus); aborted and retried like model calls. */
+  consensusTimeoutMs: number;
+  /** Retries per call for transient failures (network, 429, 5xx, timeouts, empty replies). */
+  maxRetries: number;
 }
 
 export interface MatrixOverrides {
@@ -123,8 +130,21 @@ export function parseMatrixConfig(raw: unknown, overrides: MatrixOverrides = {})
     ensembleStrategies: parseStrategies(Array.isArray(strategies) ? strategies.map(String) : ['majority', 'standard']),
     reference: model(config.reference, 'reference'),
     budgetUsd: budget,
-    questionTimeoutMs: int(config, 'questionTimeoutMs', 300_000, 1),
+    ...timeouts(config),
   };
+}
+
+function timeouts(config: Raw): Pick<MatrixConfig, 'questionTimeoutMs' | 'callTimeoutMs' | 'consensusTimeoutMs' | 'maxRetries'> {
+  const callTimeoutMs = int(config, 'callTimeoutMs', 180_000, 1);
+  const consensusTimeoutMs = int(config, 'consensusTimeoutMs', 300_000, 1);
+  const questionTimeoutMs = int(config, 'questionTimeoutMs', 900_000, 1);
+  if (questionTimeoutMs < callTimeoutMs + consensusTimeoutMs) {
+    throw new Error(
+      'Matrix config: "questionTimeoutMs" must be at least callTimeoutMs plus consensusTimeoutMs, '
+      + 'or a question times out while its calls are still allowed to run.',
+    );
+  }
+  return { questionTimeoutMs, callTimeoutMs, consensusTimeoutMs, maxRetries: int(config, 'maxRetries', 4, 0) };
 }
 
 /** Key of a model in a run's evaluation results (`openai-compatible:openrouter/qwen/qwen3.5-9b`). */

@@ -7,6 +7,10 @@ export interface RetryOptions {
   onRetry?: (error: unknown, attempt: number) => void;
   /** Called when a rate-limit error is detected, even before the internal retry. */
   onRateLimit?: () => void;
+  /** Upper bound for one wait between attempts, Retry-After included. Default 60 s. */
+  maxDelayMs?: number;
+  /** Stops retrying once aborted (the question ran out of time). */
+  signal?: AbortSignal;
 }
 
 interface ResolvedRetryOptions {
@@ -17,6 +21,8 @@ interface ResolvedRetryOptions {
   isRetryable: (error: unknown) => boolean;
   onRetry: ((error: unknown, attempt: number) => void) | undefined;
   onRateLimit: (() => void) | undefined;
+  maxDelayMs: number;
+  signal: AbortSignal | undefined;
 }
 
 function getStatusFromError(error: unknown): number | undefined {
@@ -76,11 +82,80 @@ function resolveOptions(options?: RetryOptions): ResolvedRetryOptions {
     isRetryable: options?.isRetryable ?? isRateLimitOrServerError,
     onRetry: options?.onRetry,
     onRateLimit: options?.onRateLimit,
+    maxDelayMs: options?.maxDelayMs ?? 60_000,
+    signal: options?.signal,
   };
 }
 
-function sleep(ms: number): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, ms));
+const TRANSIENT_KINDS = new Set(['rate_limited', 'provider_unavailable', 'timeout']);
+
+const TRANSIENT_MESSAGE_PATTERN =
+  /fetch failed|failed to fetch|econnreset|econnrefused|etimedout|enotfound|eai_again|epipe|socket hang up|und_err|network error|terminated|other side closed|empty response|overloaded|provider_unavailable|timed? ?out|timeout/i;
+
+/** True when the call was cancelled on purpose (question timeout), which is never retried. */
+function isAbort(error: unknown): boolean {
+  if (error instanceof Error && error.name === 'AbortError') return true;
+  const message = error instanceof Error ? error.message : String(error);
+  return /was aborted/i.test(message);
+}
+
+/**
+ * True for failures worth another attempt: 429 and 5xx, network errors
+ * (fetch failed, ECONNRESET and similar), per-call timeouts and empty
+ * completions. Key errors, bad requests and deliberate aborts are not.
+ */
+export function isTransientError(error: unknown): boolean {
+  if (error == null) return false;
+  if (isAbort(error)) return false;
+  const kind = (error as { kind?: unknown }).kind;
+  if (typeof kind === 'string' && TRANSIENT_KINDS.has(kind)) return true;
+  if (isRateLimitOrServerError(error)) return true;
+  const status = getStatusFromError(error);
+  if (status !== undefined && status >= 400 && status < 500) return false;
+  const message = error instanceof Error ? error.message : String(error);
+  const cause = error instanceof Error && error.cause instanceof Error ? ` ${error.cause.message} ${(error.cause as { code?: unknown }).code ?? ''}` : '';
+  return TRANSIENT_MESSAGE_PATTERN.test(`${message}${cause}`);
+}
+
+/** Delay the server asked for (Retry-After), in ms, if the error carries one. */
+export function retryAfterMsOf(error: unknown): number | undefined {
+  if (error == null || typeof error !== 'object') return undefined;
+  const seconds = (error as { retryAfterSeconds?: unknown }).retryAfterSeconds;
+  if (typeof seconds === 'number' && Number.isFinite(seconds) && seconds >= 0) return seconds * 1000;
+  return undefined;
+}
+
+/**
+ * Wait before attempt `attempt + 1`: exponential backoff with jitter, or the
+ * server's Retry-After when that is longer, capped at maxDelayMs.
+ */
+export function backoffDelayMs(
+  attempt: number,
+  options: Pick<RetryOptions, 'baseDelayMs' | 'maxJitterMs' | 'maxDelayMs'>,
+  error?: unknown,
+  random: () => number = Math.random,
+): number {
+  const base = (options.baseDelayMs ?? 2000) * Math.pow(2, attempt) + random() * (options.maxJitterMs ?? 500);
+  const delay = Math.max(base, retryAfterMsOf(error) ?? 0);
+  return Math.min(delay, options.maxDelayMs ?? 60_000);
+}
+
+function sleep(ms: number, signal?: AbortSignal): Promise<void> {
+  return new Promise((resolve) => {
+    if (signal?.aborted) {
+      resolve();
+      return;
+    }
+    const onAbort = () => {
+      clearTimeout(timer);
+      resolve();
+    };
+    const timer = setTimeout(() => {
+      signal?.removeEventListener('abort', onAbort);
+      resolve();
+    }, ms);
+    signal?.addEventListener('abort', onAbort, { once: true });
+  });
 }
 
 export async function retryable<T>(
@@ -120,17 +195,19 @@ export async function retryable<T>(
         if (timedOut) {
           throw buildTimeoutError();
         }
-        if (i === opts.maxRetries || !opts.isRetryable(error)) {
+        if (i === opts.maxRetries || opts.signal?.aborted || !opts.isRetryable(error)) {
           throw error;
         }
         if (isRateLimitOnly(error)) {
           opts.onRateLimit?.();
         }
         opts.onRetry?.(error, i + 1);
-        const delay = opts.baseDelayMs * Math.pow(2, i) + Math.random() * opts.maxJitterMs;
-        await sleep(delay);
+        await sleep(backoffDelayMs(i, opts, error), opts.signal);
         if (timedOut) {
           throw buildTimeoutError();
+        }
+        if (opts.signal?.aborted) {
+          throw error;
         }
       }
     }

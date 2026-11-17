@@ -30,6 +30,20 @@ describe('parseMatrixConfig', () => {
     expect(() => parseMatrixConfig({ ...committed, sample: 0 })).toThrow(/sample/i);
   });
 
+  it('reads call, consensus and question limits and retries, with defaults', () => {
+    expect(parseMatrixConfig(committed)).toMatchObject({
+      callTimeoutMs: 180_000, consensusTimeoutMs: 300_000, questionTimeoutMs: 900_000, maxRetries: 4,
+    });
+    const { callTimeoutMs: _c, consensusTimeoutMs: _s, questionTimeoutMs: _q, maxRetries: _r, ...bare } = committed;
+    expect(parseMatrixConfig(bare)).toMatchObject({
+      callTimeoutMs: 180_000, consensusTimeoutMs: 300_000, questionTimeoutMs: 900_000, maxRetries: 4,
+    });
+  });
+
+  it('rejects a question limit shorter than one call plus the consensus', () => {
+    expect(() => parseMatrixConfig({ ...committed, questionTimeoutMs: 300_000 })).toThrow(/questionTimeoutMs/);
+  });
+
   it('applies overrides for sample and datasets', () => {
     const config = parseMatrixConfig(committed, { sample: 5, datasets: ['gsm8k'] });
     expect(config.sample).toBe(5);
