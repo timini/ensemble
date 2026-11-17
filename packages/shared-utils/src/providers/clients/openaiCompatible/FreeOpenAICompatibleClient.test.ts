@@ -278,6 +278,16 @@ describe('FreeOpenAICompatibleClient', () => {
       expect(bodyOf(local).provider).toBeUndefined();
     });
 
+    it('tries the next format when OpenRouter has no host for the requested parameters', async () => {
+      const fetchMock = vi
+        .fn()
+        .mockResolvedValueOnce(json({ error: { message: 'No endpoints found that can handle the requested parameters.' } }, 404))
+        .mockResolvedValueOnce(json({ choices: [{ message: { content: '{"answer":"4"}' } }] }));
+      const result = await makeClient(fetchMock).generateStructured<{ answer: string }>('q', 'm', schema);
+      expect(result.parsed).toEqual({ answer: '4' });
+      expect(bodyOf(fetchMock, 1).response_format).toEqual({ type: 'json_object' });
+    });
+
     it('aborts the request when the stream times out', async () => {
       const { fetchMock, signals } = hangingFetch();
       const onError = vi.fn();
