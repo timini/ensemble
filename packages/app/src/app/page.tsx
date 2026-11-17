@@ -1,10 +1,14 @@
-import { redirect } from "next/navigation";
-import { WORKSPACE_PATH } from "~/lib/workspaceRoutes";
+import type { Metadata } from "next";
+import { PAGE_METADATA } from "~/lib/siteMetadata";
+import { Landing } from "./_components/Landing";
 
-/**
- * `/` opens the workspace until the landing page (roadmap M4) replaces this
- * redirect.
- */
+export const metadata: Metadata = {
+  title: { absolute: PAGE_METADATA.home.title },
+  description: PAGE_METADATA.home.description,
+  openGraph: PAGE_METADATA.home,
+};
+
+/** `/`: the landing page. The workspace is at /workspace. */
 export default function Home() {
-  redirect(WORKSPACE_PATH);
+  return <Landing />;
 }

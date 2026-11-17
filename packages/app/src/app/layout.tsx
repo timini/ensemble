@@ -1,127 +1,50 @@
-'use client';
+import "~/styles/globals.css";
 
-import '~/styles/globals.css';
-import '~/lib/i18n'; // Initialize i18next
-
-import { useEffect, useState } from 'react';
-import { Geist, Geist_Mono, Instrument_Serif } from 'next/font/google';
-import { usePathname } from 'next/navigation';
-import { useTranslation } from 'react-i18next';
-import { TRPCReactProvider } from '~/trpc/react';
-import { useStore } from '~/store';
-import { EnsembleHeader } from '@/components/molecules/EnsembleHeader';
-import { Footer } from '@/components/molecules/Footer';
-import { SettingsModal } from '@/components/organisms/SettingsModal';
-import type { Theme, Language } from '@/components/organisms/SettingsModal';
-import { initializeProviders } from '~/providers';
-import { toError } from '~/lib/errors';
-import { logger } from '~/lib/logger';
+import type { Metadata } from "next";
+import { Geist, Geist_Mono, Instrument_Serif } from "next/font/google";
+import { RootShell } from "./_components/RootShell";
+import { SITE_DESCRIPTION, SITE_NAME } from "~/lib/siteMetadata";
 
 // tokens.css reads these variables in --font-sans, --font-mono and --font-display.
-const sans = Geist({ subsets: ['latin'], variable: '--font-sans-loaded' });
-const mono = Geist_Mono({ subsets: ['latin'], variable: '--font-mono-loaded' });
+const sans = Geist({ subsets: ["latin"], variable: "--font-sans-loaded" });
+const mono = Geist_Mono({ subsets: ["latin"], variable: "--font-mono-loaded" });
 const display = Instrument_Serif({
-  subsets: ['latin'],
-  weight: '400',
-  variable: '--font-display-loaded',
+  subsets: ["latin"],
+  weight: "400",
+  variable: "--font-display-loaded",
 });
 const fontVariables = `${sans.variable} ${mono.variable} ${display.variable}`;
 
+export const metadata: Metadata = {
+  title: { default: SITE_NAME, template: `%s | ${SITE_NAME}` },
+  description: SITE_DESCRIPTION,
+  applicationName: SITE_NAME,
+  icons: { icon: "/favicon.ico" },
+  openGraph: {
+    type: "website",
+    siteName: SITE_NAME,
+    title: SITE_NAME,
+    description: SITE_DESCRIPTION,
+  },
+  twitter: { card: "summary", title: SITE_NAME, description: SITE_DESCRIPTION },
+};
+
+/**
+ * Root layout. A server component so pages can export metadata; the theme,
+ * language and page frame live in the client RootShell. `light` and `en` are
+ * the defaults until the stored choices load.
+ */
 export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
-  const { theme, language, setTheme, setLanguage } = useStore();
-  const initializeEncryption = useStore((state) => state.initializeEncryption);
-  const initializeEndpointKeys = useStore((state) => state.initializeEndpointKeys);
-  const { i18n, t } = useTranslation('common');
-  const pathname = usePathname();
-  const [settingsOpen, setSettingsOpen] = useState(false);
-  // The workspace has its own frame (AppShell) and settings sheet.
-  const isWorkspace = pathname?.startsWith('/workspace') ?? false;
-  const [hasHydrated, setHasHydrated] = useState(false);
-
-  const fallbackTheme: Theme = 'light';
-  const fallbackLanguage: Language = 'en';
-  const resolvedTheme = hasHydrated ? theme : fallbackTheme;
-  const resolvedLanguage = hasHydrated ? language : fallbackLanguage;
-
-  // Initialize providers once on mount
-  useEffect(() => {
-    initializeProviders();
-  }, []);
-  useEffect(() => {
-    void initializeEncryption();
-    void initializeEndpointKeys();
-  }, [initializeEncryption, initializeEndpointKeys]);
-  useEffect(() => {
-    setHasHydrated(true);
-  }, []);
-
-  // Apply theme to document on mount and when theme changes
-  useEffect(() => {
-    document.documentElement.classList.remove('light', 'dark');
-    document.documentElement.classList.add(resolvedTheme);
-  }, [resolvedTheme]);
-
-  // Sync language with i18next
-  useEffect(() => {
-    i18n.changeLanguage(language).catch((error: unknown) => {
-      logger.error(
-        'Failed to change language:',
-        toError(error, 'Unable to change language'),
-      );
-    });
-  }, [language, i18n]);
-
-  // Ensure html lang attribute always reflects current language (hydration-safe)
-  useEffect(() => {
-    document.documentElement.setAttribute('lang', resolvedLanguage);
-  }, [resolvedLanguage]);
-
   return (
-    <html lang={resolvedLanguage} className={`${fontVariables} ${resolvedTheme}`}>
-      <head>
-        <title>Ensemble AI</title>
-        <meta
-          name="description"
-          content="Make better decisions with multiple AI perspectives"
-        />
-        <link rel="icon" href="/favicon.ico" />
-      </head>
+    <html
+      lang="en"
+      className={`${fontVariables} light`}
+      suppressHydrationWarning
+    >
       <body>
-        <TRPCReactProvider>
-          {isWorkspace ? children : (<>
-          <a
-            href="#main-content"
-            className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-md focus:bg-primary focus:px-4 focus:py-2 focus:text-primary-foreground focus:ring-2 focus:ring-ring focus:ring-offset-2"
-          >
-            {t('accessibility.skipToMainContent')}
-          </a>
-          <EnsembleHeader onSettingsClick={() => setSettingsOpen(true)} currentPath={pathname} />
-          <main id="main-content">
-            {children}
-          </main>
-          <Footer />
-          <SettingsModal
-            open={settingsOpen}
-            onOpenChange={setSettingsOpen}
-            theme={resolvedTheme as Theme}
-            onThemeChange={(newTheme) => setTheme(newTheme)}
-            language={resolvedLanguage as Language}
-            onLanguageChange={(newLang) => {
-              // Only allow supported languages (en, fr)
-              if (newLang === 'en' || newLang === 'fr') {
-                setLanguage(newLang);
-              }
-            }}
-            onClearData={() => {
-              localStorage.removeItem('ensemble-ai-store');
-              window.location.reload();
-            }}
-            onDone={() => setSettingsOpen(false)}
-          />
-          </>)}
-        </TRPCReactProvider>
+        <RootShell>{children}</RootShell>
       </body>
     </html>
   );

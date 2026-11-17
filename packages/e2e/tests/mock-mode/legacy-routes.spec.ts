@@ -6,12 +6,6 @@ import { test, expect } from '@playwright/test';
 import { configureKeys, startMockRun, waitForConsensus } from './runHelpers';
 
 test.describe('Old wizard routes', () => {
-  test('/ opens the workspace', async ({ page }) => {
-    await page.goto('/');
-    await expect(page).toHaveURL(/\/workspace$/);
-    await expect(page.getByTestId('composer')).toBeVisible();
-  });
-
   test('/config opens the settings sheet', async ({ page }) => {
     await page.goto('/config');
     await expect(page).toHaveURL(/\/workspace\?panel=settings$/);
