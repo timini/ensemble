@@ -23,5 +23,12 @@ Captured for review of the M4 wireframes and visual refresh, at 375, 768 and 144
 | `cl-method` | Same, method menu open (375 and 1440 px) | Consensus methods with calls, cost and summarizer |
 | `cl-models` | Same, model picker open (375 and 1440 px) | Inline model picker |
 | `cl-history` | Same, history open at 375 px | History and presets in a bottom sheet |
+| `landing` | App `/`, mock mode | Landing page with the recorded example run |
+| `features` | App `/features` | Features page, top of the page |
+| `about` | App `/about` | About page, top of the page |
+| `onboarding-key` | App `/workspace`, first visit, a working key typed | Onboarding sheet, own key path, key checked |
+| `onboarding-key-invalid` | Same, a key the provider rejects | Onboarding sheet with the key error, Start disabled |
+| `onboarding-local` | Same, local models chosen | Onboarding sheet, local path, no server found (mock mode does not detect Ollama) |
+| `settings` | App `/workspace`, settings open, no keys | Settings sheet, top |
 
 The `app-*` captures show the app's workspace wired to the store in mock mode, so answers and the consensus are placeholder text and their length is not realistic. The `cl-*` captures show the workspace components in Storybook with sample data, before the app is wired to them.
