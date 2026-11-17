@@ -34,3 +34,6 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# local captures (review copies live in packages/app/docs/screenshots/m4)
+/screenshots

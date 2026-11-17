@@ -1,32 +1,49 @@
 # Wireframes
 
-Clickable wireframes for the Ensemble AI workflow. This is a standalone Next.js 15 app (React 19, Tailwind CSS 3.4, shadcn/ui-style components), first generated with v0. It is the UX reference for layout and flow; the real UI lives in `packages/component-library` and `packages/app`.
+Reference layouts for Ensemble AI after the M4 redesign: a landing page, one workspace screen and its sheets, the benchmarks page and an account placeholder. This is a standalone Next.js 15 app (React 19, Tailwind CSS 3.4). It is the UX source of truth for layout and flow; the real UI lives in `packages/component-library` and `packages/app`.
 
-It is not part of the root npm workspaces and its `package.json` still has the v0 default name `my-v0-project`. Install and run it from this folder.
+It uses the component library's visual system directly: `app/globals.css` imports `../component-library/src/styles/tokens.css` and `tailwind.config.ts` uses `../component-library/src/styles/tailwindPreset.ts`. Fonts (Geist, Geist Mono, Instrument Serif) load through `next/font`, as in the app. What you see here is the real palette, type and spacing, not a sketch.
 
-## Pages
+All data is static (`lib/sample-run.ts`); nothing calls a provider. Copy is English only; the app adds French.
 
-| Route | Contents |
-|-------|----------|
-| `/` | Redirects to `/config` |
-| `/config` | Mode selection and API key entry |
-| `/ensemble` | Model and summarizer selection |
-| `/prompt` | Prompt entry |
-| `/review` | Responses, agreement and consensus layout |
-
-Pages are in `app/`. Shared pieces (`ensemble-header`, `footer`, `progress-steps`) are in `components/`, with primitives in `components/ui/`. All data is static; nothing calls a provider.
-
-## Scripts
+It is not part of the root npm workspaces. Install and run it from this folder.
 
 ```bash
 npm install
-npm run dev          # http://localhost:3000
+npm run dev          # http://localhost:3100
 npm run build
-npm run start
 npm run lint
-npm run screenshot   # needs the dev server running; writes screenshots/*-Page.png
+npm run screenshot   # needs the dev server; writes screenshots/<page>-<width>-<theme>.png at 375, 768 and 1440 px
 ```
 
-`screenshots/` holds the current captures of the four pages.
+## Information architecture
 
-Colours in the wireframes use raw Tailwind palette classes (for example `bg-blue-600`). The component library uses semantic tokens instead; see [packages/component-library/docs/TAILWIND_DESIGN_SYSTEM.md](../component-library/docs/TAILWIND_DESIGN_SYSTEM.md).
+| Route | Contents |
+|-------|----------|
+| `/` | Landing: one sentence, a recorded example run (agreement score, consensus, three answers), three ways in (own keys, local models, Pro), what the score means, how it works. |
+| `/workspace` | The one working screen. Composer on top (prompt, inline model chips, consensus method dropdown with calls and cost, a menu with manual answer, summarizer and save as preset). Agreement panel and consensus answer next, then the individual answers: columns from 768 px, swipeable tabs below. History and presets in a left sidebar from 1024 px, in a sheet below. |
+| `/benchmarks` | Method and a results table with confidence intervals, with an honest "not run yet" state. |
+| `/account` | Placeholder for Pro (roadmap M5): sign-in, credits, usage. |
+| `/states` | Index of every page and workspace state, for reviewers. |
+| `/config`, `/ensemble`, `/prompt`, `/review` | Redirect into the workspace with the matching panel open, as the app will. |
+
+Workspace states are set in the URL so each has a link:
+
+| Param | Values | Shows |
+|-------|--------|-------|
+| `state` | `new`, `ready`, `running`, `done` (default) | First visit (opens onboarding), empty composer, answers streaming, finished run |
+| `sheet` | `onboarding`, `settings`, `manual`, `history` | Onboarding (keys, local or Pro; one key is enough, OpenRouter reaches every provider), settings (keys, local endpoints, embeddings provider, theme, language), manual answer, history on small screens |
+| `menu` | `models`, `method`, `options` | Model picker, consensus method dropdown, composer options |
+| `path` | `keys`, `local` | Which onboarding option is selected |
+| `theme` | `light`, `dark` | Forces a theme; otherwise the system setting is used |
+
+Sheets are side panels from 768 px and bottom sheets below.
+
+## Layout
+
+- `app/`: routes.
+- `components/ui/`: small primitives (button, sheet, field, logo, model mark, agreement ring).
+- `components/landing/`, `components/workspace/`, `components/sheets/`: page sections.
+- `lib/params.ts`: reads and builds the workspace URL state.
+
+Screenshots of the final wireframes and the app in the new visual system are in `packages/app/docs/screenshots/m4/`.

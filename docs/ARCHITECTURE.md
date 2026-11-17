@@ -19,7 +19,7 @@ npm workspaces monorepo. Node 18+.
 | `packages/eval` | `@ensemble-ai/eval` | Benchmark CLI (`bin/ensemble-eval.mjs`): matrix, quick-eval, benchmark, baseline, compare, analyze, calibrate-agreement, calibrate-tokens and more |
 | `packages/eval-baseline` | (Python) | lm-eval baseline runner |
 | `packages/e2e` | `@ai-ensemble/e2e` | Playwright suites: `mock-mode`, `local-endpoint` (Free mode against a fake Ollama in `fixtures/fake-openai-server.mjs`, which serves `/api/tags` and the OpenAI-compatible API: Ollama detection, embedding model choice and a 3-model run with real agreement scores; runs with `test:mock`), `free-mode`, `pro-mode` (placeholder). `spikes/local-network-access.mjs` is the browser spike behind [LOCAL_MODELS.md](./LOCAL_MODELS.md). |
-| `packages/wireframes` | | Standalone Next app with the reference UX. Not in the root workspaces; install it separately. |
+| `packages/wireframes` | | Standalone Next app with the reference UX for the M4 workspace (landing, `/workspace` with its sheets, `/benchmarks`, `/account`; `/states` lists every state). Uses the component library's tokens and Tailwind preset. Not in the root workspaces; install it separately. |
 
 Other folders: `report/` (LaTeX benchmark study), `specs/001-we-need-to/` (original spec and task list), `.specify/` (constitution), `infra/terraform/` (Firebase and App Hosting), `.github/workflows/` (CI, deploy, eval).
 
@@ -139,6 +139,7 @@ Changes from today, by milestone:
 | Pricing table in shared-utils, used for estimates and actual cost (done) | M1 |
 | `FreeOpenAICompatibleClient` with configurable base URL and optional key, several endpoints with presets (done); Ollama detection, local embeddings, `npm run local` (done) | M2 |
 | Eval harness accepts the OpenAI-compatible provider; methodology fixes (done) | M3 |
+| Shared visual system: every token in `component-library/src/styles/tokens.css`, mapped by `tailwindPreset.ts` for the library, the app and the wireframes (done); wireframes for the new layout (done) | M4 |
 | Single workspace route replacing the four wizard pages; history in IndexedDB | M4 |
 | Client Firebase Auth, `ProAPIClient` over `streamTextEvents`, Firestore, credit ledger, Stripe routes | M5 |
 | Shares with Firestore TTL, synced history | M6 |
