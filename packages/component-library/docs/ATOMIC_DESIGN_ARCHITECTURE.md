@@ -8,27 +8,27 @@ This library groups components using [Atomic Design](https://bradfrost.com/blog/
 
 Basic building blocks that cannot be broken down further without losing meaning. Single responsibility, controlled through props, little or no internal state.
 
-Current atoms (22), in `src/components/atoms/`:
+Current atoms (27), in `src/components/atoms/`:
 
-Avatar, Badge, Button, Card, Dialog, Heading, Icon, InlineAlert, Input, Label, Link, LoadingSpinner, Markdown, ModelLogo, Progress, ProviderLogo, Rating, Select, Separator, Tag, Text, Textarea
+AgreementRing, Avatar, Badge, Button, Card, CommandSnippet, Dialog, EndpointLogo, Heading, Icon, InlineAlert, Input, Label, Link, LoadingSpinner, Logo, Markdown, ModelLogo, Progress, ProviderLogo, Rating, Select, Separator, Sheet, Tag, Text, Textarea
 
-Dialog and Select wrap Radix primitives. Markdown wraps `react-markdown` with `remark-gfm`. ProviderLogo and ModelLogo use `@lobehub/icons`.
+Dialog, Sheet and Select wrap Radix primitives. Markdown wraps `react-markdown` with `remark-gfm`. ProviderLogo and ModelLogo use `@lobehub/icons`.
 
 ### Molecules
 
 Small combinations of atoms with one focused purpose.
 
-Current molecules (11), in `src/components/molecules/`:
+Current molecules (27), in `src/components/molecules/`:
 
-ApiKeyInput, ConsensusPresetSelector, EmbeddingsProviderSelector, EnsembleHeader, Footer, ModelCard, ModeSelectionCard, ProgressSteps, PromptInput, ResponseCard, SummarizerIndicator
+AccuracyInterval, AgreementSummary, AnswerCard, ApiKeyInput, BenchmarksNotRun, ComposerOptions, ConsensusAnswer, ConsensusPresetSelector, EmbeddingsProviderSelector, EndpointEmbeddingField, EndpointInput, EnsembleHeader, Footer, LocalServerHelp, MajorityVoteBreakdown, MethodMenu, ModelCard, ModelChip, ModelPicker, ModeSelectionCard, OllamaDetectedNotice, ProgressSteps, PromptInput, ResponseCard, ResponseErrorNotice, RunCostSummary, SummarizerIndicator
 
 ### Organisms
 
 Larger sections made of molecules and atoms. They may hold UI state, but app state (Zustand, provider calls) stays in `packages/app` and is passed in as props and callbacks.
 
-Current organisms (16), in `src/components/organisms/`:
+Current organisms (24), in `src/components/organisms/`:
 
-AgreementAnalysis, ApiKeyConfiguration, ApiKeyConfigurationModal, ConsensusCard, EnsembleConfigurationSummary, EnsembleManagementPanel, EnsembleSidebar, ManualResponseModal, ModelSelectionList, ModeSelector, PageHero, PromptCard, PromptInputWithHint, PromptTips, SettingsModal, WorkflowNavigator
+AgreementAnalysis, AnswerColumns, ApiKeyConfiguration, ApiKeyConfigurationModal, AppShell, BenchmarkMethod, BenchmarkResultsTable, Composer, ConsensusCard, ConsensusPanel, EndpointConfiguration, EnsembleConfigurationSummary, EnsembleManagementPanel, EnsembleSidebar, HistorySidebar, ManualResponseModal, ModelSelectionList, ModeSelector, PageHero, PromptCard, PromptInputWithHint, PromptTips, SettingsModal, WorkflowNavigator
 
 ### Foundations
 

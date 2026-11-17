@@ -88,19 +88,21 @@ export function AnswerCard(props: AnswerCardProps) {
         </span>
         <div className="min-w-0 flex-1">
           <p className="truncate text-label font-medium">{modelName}</p>
-          {source && <p className="truncate text-caption text-muted-foreground">{source}</p>}
+          <p className="truncate text-caption text-muted-foreground">
+            {source}
+            {status === 'complete' && meta.length > 0 && (
+              <span data-testid="answer-card-meta" className="tabular-nums">
+                {source ? ' · ' : ''}
+                {meta.join(' · ')}
+              </span>
+            )}
+          </p>
         </div>
-        {status === 'streaming' || status === 'waiting' ? (
+        {(status === 'streaming' || status === 'waiting') && (
           <span data-testid="answer-card-status" className="inline-flex shrink-0 items-center gap-1.5 text-caption text-primary">
             <span className="size-1.5 animate-pulse rounded-full bg-primary" aria-hidden="true" />
             {t(`molecules.answerCard.${status}`)}
           </span>
-        ) : (
-          meta.length > 0 && (
-            <span data-testid="answer-card-meta" className="shrink-0 text-caption tabular-nums text-muted-foreground">
-              {meta.join(' · ')}
-            </span>
-          )
         )}
       </header>
       <div className="flex-1 px-4 py-4">

@@ -122,4 +122,8 @@ describe('MajorityVoteBreakdown', () => {
       '42 l’emporte avec 3 voix sur 4.',
     );
   });
+  it('hides the decorative icon from assistive technology', () => {
+    renderWithI18n(<MajorityVoteBreakdown outcome="no-short-answers" options={[]} totalResponses={2} />);
+    expect(screen.queryByRole('img')).not.toBeInTheDocument();
+  });
 });

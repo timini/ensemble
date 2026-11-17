@@ -6,17 +6,32 @@ The package is not built or published. It points `main` and `types` at `src/inde
 
 ## Components
 
-### Atoms (24)
+### Atoms (27)
 
-Avatar, Badge, Button, Card, CommandSnippet, Dialog, EndpointLogo, Heading, Icon, InlineAlert, Input, Label, Link, LoadingSpinner, Markdown, ModelLogo, Progress, ProviderLogo, Rating, Select, Separator, Tag, Text, Textarea
+AgreementRing, Avatar, Badge, Button, Card, CommandSnippet, Dialog, EndpointLogo, Heading, Icon, InlineAlert, Input, Label, Link, LoadingSpinner, Logo, Markdown, ModelLogo, Progress, ProviderLogo, Rating, Select, Separator, Sheet, Tag, Text, Textarea
 
-### Molecules (20)
+### Molecules (27)
 
-AccuracyInterval, ApiKeyInput, BenchmarksNotRun, ConsensusPresetSelector, EmbeddingsProviderSelector, EndpointEmbeddingField, EndpointInput, EnsembleHeader, Footer, LocalServerHelp, MajorityVoteBreakdown, ModelCard, ModeSelectionCard, OllamaDetectedNotice, ProgressSteps, PromptInput, ResponseCard, ResponseErrorNotice, RunCostSummary, SummarizerIndicator
+AccuracyInterval, AgreementSummary, AnswerCard, ApiKeyInput, BenchmarksNotRun, ComposerOptions, ConsensusAnswer, ConsensusPresetSelector, EmbeddingsProviderSelector, EndpointEmbeddingField, EndpointInput, EnsembleHeader, Footer, LocalServerHelp, MajorityVoteBreakdown, MethodMenu, ModelCard, ModelChip, ModelPicker, ModeSelectionCard, OllamaDetectedNotice, ProgressSteps, PromptInput, ResponseCard, ResponseErrorNotice, RunCostSummary, SummarizerIndicator
 
-### Organisms (19)
+### Organisms (24)
 
-AgreementAnalysis, ApiKeyConfiguration, ApiKeyConfigurationModal, BenchmarkMethod, BenchmarkResultsTable, ConsensusCard, EndpointConfiguration, EnsembleConfigurationSummary, EnsembleManagementPanel, EnsembleSidebar, ManualResponseModal, ModelSelectionList, ModeSelector, PageHero, PromptCard, PromptInputWithHint, PromptTips, SettingsModal, WorkflowNavigator
+AgreementAnalysis, AnswerColumns, ApiKeyConfiguration, ApiKeyConfigurationModal, AppShell, BenchmarkMethod, BenchmarkResultsTable, Composer, ConsensusCard, ConsensusPanel, EndpointConfiguration, EnsembleConfigurationSummary, EnsembleManagementPanel, EnsembleSidebar, HistorySidebar, ManualResponseModal, ModelSelectionList, ModeSelector, PageHero, PromptCard, PromptInputWithHint, PromptTips, SettingsModal, WorkflowNavigator
+
+### M4 workspace
+
+The single workspace screen of the M4 redesign is built from these parts. `Organisms/AppShell` has `WorkspaceEmpty`, `WorkspaceRunning` and `WorkspaceDone` stories that assemble them with sample data.
+
+| Component | Role |
+|-----------|------|
+| `AppShell` | Header (history toggle, logo, links, settings, account slot), history sidebar from 1024 px or a sheet below, main content with a skip link |
+| `HistorySidebar` | Past runs grouped by date with their agreement level, search, delete, presets |
+| `Composer` | Prompt, model chips (`ModelChip`) with the inline `ModelPicker`, `MethodMenu` with calls and cost per method from `estimateRun` and the summarizer choice, `ComposerOptions` (manual answer, save preset), Ctrl or Cmd + Enter |
+| `ConsensusPanel` | `AgreementSummary` (score ring, level, calibrated or uncalibrated label, pair scores) next to `ConsensusAnswer` (answer, majority vote, compact `RunCostSummary`) |
+| `AnswerColumns` | `AnswerCard` per model: columns from 768 px, swipeable tabs with arrow key support below, streaming, waiting and error states with a retry per model |
+| `Sheet` | Radix dialog shown as a side panel from 768 px and a bottom sheet below; traps focus, closes on Escape |
+
+The older wizard components (`ResponseCard`, `ConsensusCard`, `AgreementAnalysis`, `PromptCard` and others) stay until the app stops using them.
 
 There is no templates level. `src/components/foundations/ColorPalette.stories.tsx` documents the colour tokens.
 
@@ -25,7 +40,9 @@ Every component has a `.stories.tsx` and a `.test.tsx` next to it.
 ### Utilities
 
 - `cn()` in `src/lib/utils.ts`: `clsx` plus `tailwind-merge`
-- `src/lib/i18n/`: i18next config and EN/FR locale files used by components and Storybook
+- `src/lib/i18n/`: i18next config and EN/FR locale files used by components, tests and Storybook
+- `src/lib/usePopover.ts`: open state, outside click and Escape handling for the composer menus
+- `src/lib/rovingFocus.ts`: arrow key, Home and End focus movement in lists
 - `src/lib/test-utils/i18n-test-wrapper.tsx`: wraps components in the i18n provider for tests
 
 ## Scripts

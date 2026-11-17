@@ -131,7 +131,7 @@ export const RunCostSummary = React.forwardRef<HTMLDivElement, RunCostSummaryPro
         data-variant={props.variant}
         className={cn('flex gap-3 rounded-lg border border-border bg-muted/30 px-4 py-3', props.className)}
       >
-        <Icon className="mt-0.5 text-muted-foreground">
+        <Icon className="mt-0.5 text-muted-foreground" aria-hidden="true">
           <Coins />
         </Icon>
         <div className="space-y-1">

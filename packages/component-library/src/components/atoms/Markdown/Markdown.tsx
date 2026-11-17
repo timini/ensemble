@@ -41,21 +41,17 @@ export const Markdown = React.forwardRef<HTMLDivElement, MarkdownProps>(
                 ref={ref}
                 data-testid={testId}
                 className={cn(
-                    'prose prose-sm dark:prose-invert max-w-none',
-                    // Headings
-                    'prose-headings:font-semibold prose-headings:text-foreground',
-                    // Paragraphs
-                    'prose-p:text-foreground/80 prose-p:leading-relaxed',
-                    // Lists
-                    'prose-ul:list-disc prose-ol:list-decimal prose-li:text-foreground/80',
-                    // Links
-                    'prose-a:text-primary hover:prose-a:text-primary/80',
-                    // Code
-                    'prose-code:bg-muted prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-code:text-sm prose-code:before:content-none prose-code:after:content-none',
-                    // Blockquotes
-                    'prose-blockquote:border-l-primary prose-blockquote:bg-primary/10 prose-blockquote:py-1',
-                    // Tables
-                    'prose-table:border-collapse prose-th:bg-muted prose-th:p-2 prose-td:p-2 prose-td:border prose-td:border-border',
+                    // The app has no typography plugin, so block spacing and
+                    // element styles are set here with arbitrary variants.
+                    'max-w-none break-words [&>*+*]:mt-3',
+                    '[&_h1]:text-heading [&_h2]:text-lead [&_h2]:font-semibold [&_h3]:font-semibold [&_h1]:text-foreground [&_h2]:text-foreground',
+                    '[&_ul]:list-disc [&_ol]:list-decimal [&_ul]:pl-5 [&_ol]:pl-5 [&_li+li]:mt-1 [&_li>ul]:mt-1',
+                    '[&_a]:text-primary [&_a]:underline [&_a]:underline-offset-2 hover:[&_a]:text-primary/80',
+                    '[&_strong]:font-semibold',
+                    '[&_code]:rounded [&_code]:bg-muted [&_code]:px-1 [&_code]:py-0.5 [&_code]:font-mono [&_code]:text-[0.9em]',
+                    '[&_pre]:overflow-x-auto [&_pre]:rounded-lg [&_pre]:bg-muted [&_pre]:p-3 [&_pre_code]:bg-transparent [&_pre_code]:p-0',
+                    '[&_blockquote]:border-l-2 [&_blockquote]:border-primary [&_blockquote]:pl-3 [&_blockquote]:text-muted-foreground',
+                    '[&_table]:w-full [&_table]:border-collapse [&_th]:bg-muted [&_th]:p-2 [&_th]:text-left [&_td]:border [&_td]:border-border [&_td]:p-2',
                     className
                 )}
             >

@@ -12,5 +12,11 @@ Captured for review of the M4 wireframes and visual refresh, at 375, 768 and 144
 | `wf-settings` | Wireframes `/workspace?sheet=settings` | Settings sheet |
 | `app-config` | App `/config`, mock mode | Today's wizard in the new tokens |
 | `app-review` | App `/review`, mock mode | Today's review page in the new tokens |
+| `cl-empty` | Storybook `Organisms/AppShell/WorkspaceEmpty` | First visit: composer alone |
+| `cl-running` | Storybook `Organisms/AppShell/WorkspaceRunning` | Answers streaming, agreement and consensus waiting |
+| `cl-workspace` | Storybook `Organisms/AppShell/WorkspaceDone` | Finished run built from the component library |
+| `cl-method` | Same, method menu open (375 and 1440 px) | Consensus methods with calls, cost and summarizer |
+| `cl-models` | Same, model picker open (375 and 1440 px) | Inline model picker |
+| `cl-history` | Same, history open at 375 px | History and presets in a bottom sheet |
 
-The `app-*` captures show the existing pages restyled by the token change only; the workspace itself is built in later M4 steps.
+The `app-*` captures show the existing pages restyled by the token change only. The `cl-*` captures show the workspace components in Storybook with sample data, before the app is wired to them.

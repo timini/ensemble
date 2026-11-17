@@ -9,7 +9,7 @@ npm workspaces monorepo. Node 18+.
 | Package | npm name | Purpose |
 |---|---|---|
 | `packages/app` | `@ai-ensemble/app` | Next.js 15 App Router app (React 19, Tailwind 3.4, Zustand 5, tRPC 11, TanStack Query 5, i18next) |
-| `packages/component-library` | `@ai-ensemble/component-library` | 63 atomic-design components (24 atoms, 20 molecules, 19 organisms), Storybook 9, Vitest. The app imports its source through a tsconfig alias. |
+| `packages/component-library` | `@ai-ensemble/component-library` | 78 atomic-design components (27 atoms, 27 molecules, 24 organisms), including the M4 workspace parts (`AppShell`, `HistorySidebar`, `Composer`, `ConsensusPanel`, `AnswerColumns`, `Sheet`), Storybook 9, Vitest. The app imports its source through a tsconfig alias. |
 | `packages/shared-utils` | `@ensemble-ai/shared-utils` | Provider clients, provider registry and factory, similarity maths, Web Crypto helpers. Exports from `dist`, so build it after changes. |
 | `packages/consensus-core` | `@ensemble-ai/consensus-core` | `ConsensusStrategy` and `AIProvider` types shared by the strategies |
 | `packages/consensus-standard` | `@ensemble-ai/consensus-standard` | One summarizer call merges all answers |

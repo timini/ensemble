@@ -10,6 +10,14 @@ describe('Markdown', () => {
       expect(screen.getByTestId('markdown')).toHaveTextContent('Hello');
     });
 
+    it('spaces blocks and styles lists without the typography plugin', () => {
+      render(<Markdown>{'One\n\nTwo'}</Markdown>);
+      const root = screen.getByTestId('markdown');
+      expect(root.querySelectorAll('p')).toHaveLength(2);
+      expect(root.className).toContain('[&>*+*]:mt-3');
+      expect(root.className).toContain('[&_ul]:list-disc');
+    });
+
     it('renders headings', () => {
       render(<Markdown>{'# Title\n\n## Subtitle'}</Markdown>);
       expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Title');

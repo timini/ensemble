@@ -21,7 +21,8 @@ const DOT: Partial<Record<AnswerCardProps['status'], string>> = {
 
 /**
  * AnswerColumns organism: every model's answer side by side. From 768 px the
- * answers sit in columns. Below that they are swipeable tabs: one answer per
+ * answers sit in columns at least 18rem wide, scrolling sideways when they
+ * do not all fit, so no answer is left alone on a second row. Below that they are swipeable tabs: one answer per
  * screen with scroll snapping, and a tab bar that follows the swipe and
  * supports the arrow keys, Home and End.
  *
@@ -98,7 +99,7 @@ export function AnswerColumns({ answers, className }: AnswerColumnsProps) {
         ref={track}
         onScroll={onScroll}
         data-testid="answer-columns-track"
-        className="-mx-gutter flex snap-x snap-mandatory overflow-x-auto [scrollbar-width:none] md:mx-0 md:grid md:snap-none md:grid-cols-[repeat(auto-fit,minmax(18rem,1fr))] md:gap-4 md:overflow-visible [&::-webkit-scrollbar]:hidden"
+        className="-mx-gutter flex snap-x snap-mandatory overflow-x-auto max-md:[scrollbar-width:none] md:mx-0 md:grid md:auto-cols-[minmax(18rem,1fr)] md:grid-flow-col md:gap-4 md:pb-2 max-md:[&::-webkit-scrollbar]:hidden"
       >
         {answers.map(({ id, ...answer }, i) => (
           <div
@@ -106,7 +107,7 @@ export function AnswerColumns({ answers, className }: AnswerColumnsProps) {
             id={`${base}-panel-${i}`}
             role="tabpanel"
             aria-label={answer.modelName}
-            className="w-full shrink-0 snap-center px-gutter md:px-0"
+            className="w-full shrink-0 snap-center px-gutter md:snap-start md:px-0"
           >
             <AnswerCard {...answer} />
           </div>
