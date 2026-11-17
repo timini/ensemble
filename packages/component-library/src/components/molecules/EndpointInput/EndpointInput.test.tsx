@@ -44,6 +44,40 @@ describe('EndpointInput', () => {
     expect(screen.getByTestId('endpoint-ollama-status')).toHaveTextContent('Could not connect: Failed to fetch');
   });
 
+  it('translates the error of a check that failed before reaching the server', () => {
+    render(
+      <EndpointInput
+        endpoint={{ ...ollama, status: 'invalid', errorCode: 'baseUrlRequired' }}
+        onChange={vi.fn()}
+        onRemove={vi.fn()}
+      />,
+    );
+    expect(screen.getByTestId('endpoint-ollama-status')).toHaveTextContent('Could not connect: Base URL is required.');
+  });
+
+  it('warns when the embedding model is not in the server list', () => {
+    const { rerender } = render(
+      <EndpointInput endpoint={{ ...ollama, embeddingModelFound: false }} onChange={vi.fn()} onRemove={vi.fn()} />,
+    );
+    expect(screen.getByTestId('endpoint-ollama-embedding-missing')).toHaveTextContent(
+      'nomic-embed-text is not in this server',
+    );
+    rerender(<EndpointInput endpoint={{ ...ollama, embeddingModelFound: true }} onChange={vi.fn()} onRemove={vi.fn()} />);
+    expect(screen.queryByTestId('endpoint-ollama-embedding-missing')).not.toBeInTheDocument();
+  });
+
+  it('translates the name of a Custom endpoint and keeps its number', () => {
+    render(
+      <EndpointInput
+        endpoint={{ ...ollama, id: 'custom-2', presetId: 'custom', label: 'Custom 2', local: false }}
+        onChange={vi.fn()}
+        onRemove={vi.fn()}
+      />,
+    );
+    expect(screen.getByText('Custom 2')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Remove Custom 2' })).toBeInTheDocument();
+  });
+
   it('labels the key as required for hosted endpoints and hides it by default', () => {
     render(
       <EndpointInput

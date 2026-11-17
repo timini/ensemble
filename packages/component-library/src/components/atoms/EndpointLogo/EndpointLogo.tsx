@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { useTranslation } from 'react-i18next';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { Cpu, Server } from 'lucide-react';
 import OllamaMono from '@lobehub/icons/es/Ollama/components/Mono';
@@ -49,6 +50,17 @@ const ICONS: Record<EndpointLogoPreset, IconComponent> = {
   custom: ServerIcon,
 };
 
+/** Product names for the accessible label. Custom is translated instead. */
+const PRODUCT_NAMES: Record<Exclude<EndpointLogoPreset, 'custom'>, string> = {
+  ollama: 'Ollama',
+  lmstudio: 'LM Studio',
+  llamacpp: 'llama.cpp',
+  vllm: 'vLLM',
+  openrouter: 'OpenRouter',
+  groq: 'Groq',
+  together: 'Together AI',
+};
+
 export interface EndpointLogoProps
   extends Omit<React.HTMLAttributes<HTMLSpanElement>, 'children'>,
     VariantProps<typeof endpointLogoVariants> {
@@ -68,7 +80,10 @@ export interface EndpointLogoProps
  */
 export const EndpointLogo = React.forwardRef<HTMLSpanElement, EndpointLogoProps>(
   ({ className, size, preset, ...props }, ref) => {
+    const { t } = useTranslation();
     const Icon = ICONS[preset] ?? ServerIcon;
+    const name =
+      PRODUCT_NAMES[preset as keyof typeof PRODUCT_NAMES] ?? t('molecules.endpointInput.customLabel');
     const iconRef = React.useRef<HTMLSpanElement>(null);
     // lobehub icons carry a <title>; drop it so the label is not read twice.
     React.useEffect(() => {
@@ -79,7 +94,7 @@ export const EndpointLogo = React.forwardRef<HTMLSpanElement, EndpointLogoProps>
         ref={ref}
         className={cn(endpointLogoVariants({ size }), className)}
         role="img"
-        aria-label={`${preset} logo`}
+        aria-label={t('atoms.endpointLogo.label', { name })}
         data-testid={`endpoint-logo-${preset}`}
         data-preset={preset}
         data-size={size || 'default'}

@@ -30,8 +30,13 @@ describe('EndpointLogo', () => {
 
   it('applies the size and an accessible label', () => {
     render(<EndpointLogo preset="ollama" size="lg" />);
-    const logo = screen.getByRole('img', { name: 'ollama logo' });
+    const logo = screen.getByRole('img', { name: 'Ollama logo' });
     expect(logo).toHaveAttribute('data-size', 'lg');
+  });
+
+  it('names the Custom logo with the translated label', () => {
+    render(<EndpointLogo preset="custom" />);
+    expect(screen.getByRole('img', { name: 'Custom logo' })).toBeInTheDocument();
   });
 });
 

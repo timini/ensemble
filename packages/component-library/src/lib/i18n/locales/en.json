@@ -36,6 +36,9 @@
     "rating": {
       "star": "{{count}} star",
       "star_other": "{{count}} stars"
+    },
+    "endpointLogo": {
+      "label": "{{name}} logo"
     }
   },
   "molecules": {
@@ -180,6 +183,12 @@
         "valid_one": "Connected. {{count}} model available.",
         "valid_other": "Connected. {{count}} models available.",
         "invalid": "Could not connect: {{error}}"
+      },
+      "customLabel": "Custom",
+      "embeddingModelMissing": "{{model}} is not in this server's model list, so it is not used for agreement scores.",
+      "errors": {
+        "baseUrlRequired": "Base URL is required.",
+        "unreachable": "Could not reach the endpoint."
       }
     }
   },

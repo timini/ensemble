@@ -39,6 +39,20 @@ describe('EndpointConfiguration', () => {
     expect(onAdd).toHaveBeenCalledWith('openrouter');
   });
 
+  it('translates the Custom preset label', () => {
+    render(
+      <EndpointConfiguration
+        endpoints={[]}
+        presets={[{ id: 'custom', label: 'ignored' }]}
+        onAdd={vi.fn()}
+        onChange={vi.fn()}
+        onRemove={vi.fn()}
+      />,
+    );
+    expect(screen.getByTestId('add-endpoint-custom')).toHaveTextContent('Custom');
+    expect(screen.getByTestId('add-endpoint-custom')).not.toHaveTextContent('ignored');
+  });
+
   it('lists the endpoints and passes edits and removals with the endpoint id', async () => {
     const user = userEvent.setup();
     const onChange = vi.fn();

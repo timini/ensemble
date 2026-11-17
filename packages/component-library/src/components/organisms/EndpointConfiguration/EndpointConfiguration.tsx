@@ -11,7 +11,7 @@ import {
 /** A preset the user can add an endpoint from. */
 export interface EndpointPresetOption {
   id: EndpointLogoPreset;
-  /** Product name, shown as is. */
+  /** Product name, shown as is. The Custom preset shows its translated name instead. */
   label: string;
 }
 
@@ -92,7 +92,7 @@ export function EndpointConfiguration({
           >
             <Plus className="h-3 w-3" aria-hidden="true" />
             <EndpointLogo preset={preset.id} size="sm" aria-hidden="true" />
-            {preset.label}
+            {preset.id === 'custom' ? t('molecules.endpointInput.customLabel') : preset.label}
           </button>
         ))}
       </div>

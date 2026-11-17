@@ -3,6 +3,7 @@ import * as React from 'react';
 import { EndpointInput, type EndpointInputValue } from './EndpointInput';
 
 const ollama: EndpointInputValue = {
+  embeddingModelFound: true,
   id: 'ollama',
   presetId: 'ollama',
   label: 'Ollama',
@@ -39,6 +40,16 @@ export const Unreachable: Story = {
   args: { endpoint: { ...ollama, id: 'lmstudio', presetId: 'lmstudio', label: 'LM Studio', baseURL: 'http://localhost:1234/v1', embeddingModel: '', status: 'invalid', error: 'Failed to fetch' } },
 };
 
+/** Connected, but the embedding model is not in the server's list (not pulled yet). */
+export const EmbeddingModelMissing: Story = {
+  args: { endpoint: { ...ollama, embeddingModelFound: false } },
+};
+
+/** A local preset pointed at a remote host: no Local badge, since it may be paid. */
+export const LocalPresetRemoteHost: Story = {
+  args: { endpoint: { ...ollama, id: 'vllm', presetId: 'vllm', label: 'vLLM', baseURL: 'https://gpu.example.com/v1', local: false } },
+};
+
 /** A hosted router that needs a key. */
 export const HostedNeedsKey: Story = {
   args: {
@@ -54,6 +65,11 @@ export const HostedNeedsKey: Story = {
       requiresKey: true,
     },
   },
+};
+
+/** No base URL: the check fails before any request. */
+export const BaseUrlMissing: Story = {
+  args: { endpoint: { ...ollama, baseURL: '', status: 'invalid', errorCode: 'baseUrlRequired' } },
 };
 
 /** A custom URL, not checked yet. */

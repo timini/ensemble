@@ -12,20 +12,30 @@ export type EndpointValidationStatus = 'idle' | 'validating' | 'valid' | 'invali
 /** The fields of an endpoint the user can edit. */
 export type EndpointField = 'baseURL' | 'apiKey' | 'embeddingModel';
 
+/** Check failures that happen before the server answers. They are translated here. */
+export type EndpointErrorCode = 'baseUrlRequired' | 'unreachable';
+
 /** One configured OpenAI-compatible endpoint, as shown in the form. */
 export interface EndpointInputValue {
   /** Endpoint id, unique among the configured endpoints. */
   id: string;
   /** Preset it was made from; picks the logo. */
   presetId: EndpointLogoPreset;
-  /** Display name, such as "Ollama" or "OpenRouter". */
+  /** Display name, such as "Ollama" or "OpenRouter 2". For Custom the translated name is shown instead. */
   label: string;
   baseURL: string;
   apiKey: string;
   embeddingModel: string;
   status: EndpointValidationStatus;
-  /** Error from the last check, shown when status is `invalid`. */
+  /** Error from the server in the last check, shown when status is `invalid`. */
   error?: string;
+  /** A check failure without a server message. Shown translated, in place of `error`. */
+  errorCode?: EndpointErrorCode;
+  /**
+   * Whether the last check found the embedding model in the server's model
+   * list. When false a hint says it will not be used for agreement scores.
+   */
+  embeddingModelFound?: boolean;
   /** Models the endpoint listed in the last check. */
   modelCount?: number;
   /** Runs on the user's machine. Shows a Local badge. */
@@ -50,6 +60,13 @@ const STATUS_CLASS: Record<EndpointValidationStatus, string> = {
   invalid: 'text-destructive',
 };
 
+/** The shown name: the label, or the translated Custom name with the endpoint's number. */
+function displayName(endpoint: EndpointInputValue, customLabel: string): string {
+  if (endpoint.presetId !== 'custom') return endpoint.label;
+  const n = /-(\d+)$/.exec(endpoint.id)?.[1];
+  return n ? `${customLabel} ${n}` : customLabel;
+}
+
 /**
  * EndpointInput molecule: the form for one OpenAI-compatible endpoint (base
  * URL, optional API key, optional embedding model) with its connection
@@ -70,6 +87,10 @@ export function EndpointInput({ endpoint, onChange, onRemove, className }: Endpo
   const [showKey, setShowKey] = React.useState(false);
   const prefix = 'molecules.endpointInput';
   const testId = `endpoint-${endpoint.id}`;
+  const name = displayName(endpoint, t(`${prefix}.customLabel`));
+  const errorText = endpoint.errorCode ? t(`${prefix}.errors.${endpoint.errorCode}`) : (endpoint.error ?? '');
+  const embeddingMissing =
+    endpoint.status === 'valid' && endpoint.embeddingModel.trim() !== '' && endpoint.embeddingModelFound === false;
   const ids = {
     baseURL: React.useId(),
     apiKey: React.useId(),
@@ -80,7 +101,7 @@ export function EndpointInput({ endpoint, onChange, onRemove, className }: Endpo
     endpoint.status === 'valid'
       ? t(`${prefix}.status.valid`, { count: endpoint.modelCount ?? 0 })
       : endpoint.status === 'invalid'
-        ? t(`${prefix}.status.invalid`, { error: endpoint.error ?? '' })
+        ? t(`${prefix}.status.invalid`, { error: errorText })
         : t(`${prefix}.status.${endpoint.status}`);
 
   return (
@@ -92,7 +113,7 @@ export function EndpointInput({ endpoint, onChange, onRemove, className }: Endpo
       <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-2">
           <EndpointLogo preset={endpoint.presetId} size="sm" />
-          <span className="font-medium text-foreground">{endpoint.label}</span>
+          <span className="font-medium text-foreground">{name}</span>
           {endpoint.local && (
             <Badge variant="secondary" data-testid={`${testId}-local`}>
               {t(`${prefix}.local`)}
@@ -102,7 +123,7 @@ export function EndpointInput({ endpoint, onChange, onRemove, className }: Endpo
         <button
           type="button"
           onClick={onRemove}
-          aria-label={t(`${prefix}.remove`, { name: endpoint.label })}
+          aria-label={t(`${prefix}.remove`, { name })}
           data-testid={`${testId}-remove`}
           className="rounded p-1 text-muted-foreground hover:bg-accent hover:text-destructive"
         >
@@ -155,6 +176,11 @@ export function EndpointInput({ endpoint, onChange, onRemove, className }: Endpo
             data-testid={`${testId}-embedding-model`}
           />
           <p className="text-xs text-muted-foreground">{t(`${prefix}.embeddingModelHelp`)}</p>
+          {embeddingMissing && (
+            <p className="text-xs text-muted-foreground" data-testid={`${testId}-embedding-missing`}>
+              {t(`${prefix}.embeddingModelMissing`, { model: endpoint.embeddingModel.trim() })}
+            </p>
+          )}
         </div>
       </div>
 

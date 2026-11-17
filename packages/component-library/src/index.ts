@@ -96,6 +96,7 @@ export {
   type EndpointInputValue,
   type EndpointField,
   type EndpointValidationStatus,
+  type EndpointErrorCode,
 } from './components/molecules/EndpointInput';
 export {
   ConsensusPresetSelector,

@@ -36,6 +36,9 @@
     "rating": {
       "star": "{{count}} étoile",
       "star_other": "{{count}} étoiles"
+    },
+    "endpointLogo": {
+      "label": "Logo {{name}}"
     }
   },
   "molecules": {
@@ -180,6 +183,12 @@
         "valid_one": "Connecté. {{count}} modèle disponible.",
         "valid_other": "Connecté. {{count}} modèles disponibles.",
         "invalid": "Connexion impossible : {{error}}"
+      },
+      "customLabel": "Personnalisé",
+      "embeddingModelMissing": "{{model}} ne figure pas dans la liste des modèles de ce serveur ; il ne sert donc pas aux scores d'accord.",
+      "errors": {
+        "baseUrlRequired": "L'URL de base est obligatoire.",
+        "unreachable": "Point de terminaison injoignable."
       }
     }
   },
