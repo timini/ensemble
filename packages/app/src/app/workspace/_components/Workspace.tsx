@@ -1,19 +1,18 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { AppShell } from "@/components/organisms/AppShell";
 import { Composer } from "@/components/organisms/Composer";
 import { useStore } from "~/store";
 import { useHasHydrated } from "~/hooks/useHasHydrated";
-import { readWorkspacePanel, workspaceHref } from "~/lib/workspaceRoutes";
 import { useApiKeySettings } from "../hooks/useApiKeySettings";
 import { useEndpointConfiguration } from "../hooks/useEndpointConfiguration";
 import { useOllamaDetection } from "../hooks/useOllamaDetection";
 import { useWorkspaceComposer } from "../hooks/useWorkspaceComposer";
 import { useWorkspaceRun } from "../hooks/useWorkspaceRun";
 import { useNewQuestion } from "../hooks/useNewQuestion";
+import { useWorkspacePanel } from "../hooks/useWorkspacePanel";
 import { SettingsSheet } from "./SettingsSheet";
 import { ManualAnswerDialog } from "./ManualAnswerDialog";
 import { SavePresetDialog } from "./SavePresetDialog";
@@ -36,11 +35,9 @@ const STORE_KEY = "ensemble-ai-store";
  */
 export function Workspace() {
   const { t } = useTranslation("common");
-  const router = useRouter();
-  const params = useSearchParams();
   const hasHydrated = useHasHydrated();
-  const panel = readWorkspacePanel(params.get("panel"));
-  const [settingsOpen, setSettingsOpen] = useState(false);
+  const { settingsOpen, setSettingsOpen, onSettingsChange } =
+    useWorkspacePanel(hasHydrated);
   const [manualOpen, setManualOpen] = useState(false);
   const [presetOpen, setPresetOpen] = useState(false);
   const [historyOpen, setHistoryOpen] = useState(false);
@@ -58,33 +55,6 @@ export function Workspace() {
   const run = useWorkspaceRun({ onOpenSettings: () => setSettingsOpen(true) });
   const newQuestion = useNewQuestion();
   const saveEnsemble = useStore((state) => state.saveEnsemble);
-
-  // Open the part of the workspace the URL names, once the store is loaded.
-  useEffect(() => {
-    if (!hasHydrated || !panel) return;
-    if (panel === "settings") setSettingsOpen(true);
-    const target =
-      panel === "models"
-        ? "model-picker-trigger"
-        : panel === "prompt"
-          ? "composer-prompt"
-          : null;
-    const element =
-      target &&
-      document.querySelector<HTMLElement>(`[data-testid="${target}"]`);
-    if (element) {
-      element.focus();
-      if (panel === "models") element.click();
-    }
-  }, [hasHydrated, panel]);
-
-  const onSettingsChange = (open: boolean) => {
-    setSettingsOpen(open);
-    if (!open && panel)
-      router.replace(
-        workspaceHref(undefined, Object.fromEntries(params.entries())),
-      );
-  };
 
   const ask = () => {
     run.startRun(composer.prompt);
