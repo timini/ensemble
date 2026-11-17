@@ -1,6 +1,7 @@
 import type { ProviderMode, ProviderName } from '@ensemble-ai/shared-utils/providers';
 
-export type EvalProvider = ProviderName;
+/** Providers the eval CLI can call. OpenAI-compatible endpoints need a base URL and are not supported here yet. */
+export type EvalProvider = Exclude<ProviderName, 'openai-compatible'>;
 export type EvalMode = Extract<ProviderMode, 'mock' | 'free'>;
 export type StrategyName = 'standard' | 'elo' | 'majority' | 'council';
 export type BenchmarkDatasetName = 'gsm8k' | 'truthfulqa' | 'gpqa' | 'hle' | 'math500' | 'mmlu_pro' | 'simpleqa' | 'arc' | 'hellaswag' | 'hallumix';
