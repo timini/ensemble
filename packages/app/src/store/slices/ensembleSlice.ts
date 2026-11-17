@@ -149,7 +149,9 @@ export const createEnsembleSlice: StateCreator<EnsembleSlice> = (set) => ({
 
       return {
         selectedModels: ensemble.models,
-        summarizerModel: ensemble.summarizer,
+        // A preset saved with no summarizer stores ''; treat it as unset so
+        // the first model of the run summarises, as before saving.
+        summarizerModel: ensemble.summarizer || null,
         currentEnsembleId: ensembleId,
         consensusMethod: ensemble.consensusMethod ?? 'standard',
         eloTopN: ensemble.eloTopN ?? 3,

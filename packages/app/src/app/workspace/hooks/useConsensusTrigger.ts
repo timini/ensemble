@@ -1,5 +1,9 @@
 import { useEffect } from "react";
-import type { ModelResponse, ManualResponse } from "~/store/slices/responseSlice";
+import type {
+  ModelResponse,
+  ManualResponse,
+} from "~/store/slices/responseSlice";
+import { summarizerOrFallback } from "~/lib/summarizerChoice";
 
 /**
  * Triggers consensus generation when all model responses have completed.
@@ -40,8 +44,10 @@ export function useConsensusTrigger({
     if (!hasHydrated || metaAnalysis || isGenerating || error) return;
 
     // selectedModels[].model is an API identifier (e.g., "gpt-4o"), not a display name
-    const effectiveSummarizerId =
-      summarizerModel ?? selectedModels[0]?.model;
+    const effectiveSummarizerId = summarizerOrFallback(
+      summarizerModel,
+      selectedModels[0]?.model,
+    );
 
     if (!effectiveSummarizerId) return;
 

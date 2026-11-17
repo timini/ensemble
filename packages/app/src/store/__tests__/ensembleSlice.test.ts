@@ -130,6 +130,16 @@ describe('ensembleSlice', () => {
     expect(store.getState().currentEnsembleId).toBe(ensembleId);
   });
 
+  it('loads a preset saved with no summarizer as unset, not as an empty id', () => {
+    store.getState().addModel('openai', 'gpt-4o');
+    expect(store.getState().summarizerModel).toBeNull();
+    store.getState().saveEnsemble('No summarizer', '');
+    expect(store.getState().savedEnsembles[0]?.summarizer).toBe('');
+
+    store.getState().loadEnsemble(store.getState().savedEnsembles[0]!.id);
+    expect(store.getState().summarizerModel).toBeNull();
+  });
+
   it('deletes an ensemble', () => {
     store.getState().addModel('openai', 'gpt-4o');
     store.getState().saveEnsemble('Test', 'Description');

@@ -25,6 +25,7 @@ import { useConsensusTrigger } from "./useConsensusTrigger";
 import { useConsensusStatus } from "./useConsensusStatus";
 import { useModelRetry } from "./useModelRetry";
 import { useAddManualAnswer } from "./useAddManualAnswer";
+import { summarizerOrFallback } from "~/lib/summarizerChoice";
 
 /**
  * The run on the workspace, wired from the M1 to M3 hooks: streaming,
@@ -95,7 +96,7 @@ export function useWorkspaceRun({
   );
 
   const summarizerName = useMemo(() => {
-    const id = run.summarizerModel ?? runModels[0]?.model;
+    const id = summarizerOrFallback(run.summarizerModel, runModels[0]?.model);
     if (!id) return undefined;
     if (id.includes("/")) return endpointModelName(id, endpoints);
     return (

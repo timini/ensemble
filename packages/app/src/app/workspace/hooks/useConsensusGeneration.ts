@@ -13,6 +13,7 @@ import { FALLBACK_MODELS } from '~/lib/models';
 import { logger } from '~/lib/logger';
 import { toMajorityVoteRecord } from '~/lib/majorityVote';
 import { selectRunModels } from '~/store/slices/responseSlice';
+import { summarizerOrFallback } from '~/lib/summarizerChoice';
 
 export function useConsensusGeneration() {
     const [isGenerating, setIsGenerating] = useState(false);
@@ -35,7 +36,7 @@ export function useConsensusGeneration() {
         summarizerOverride?: string
     ) => {
         // Use override if provided, otherwise fall back to store value
-        const effectiveSummarizerModelId = summarizerOverride ?? summarizerModelId;
+        const effectiveSummarizerModelId = summarizerOrFallback(summarizerOverride, summarizerModelId ?? undefined);
 
         if (!effectiveSummarizerModelId) {
             setError('No summarizer model selected');

@@ -27,7 +27,11 @@ const failed = (modelId: string) =>
 
 function trigger(
   responses: ModelResponse[],
-  extra: { error?: string | null } = {},
+  extra: {
+    error?: string | null;
+    summarizerModel?: string | null;
+    selectedModels?: { id: string; provider: "openai"; model: string }[];
+  } = {},
 ) {
   const generateConsensus = vi.fn().mockResolvedValue(undefined);
   renderHook(() =>
@@ -36,8 +40,9 @@ function trigger(
       responses,
       manualResponses: [],
       metaAnalysis: null,
-      summarizerModel: "gpt",
-      selectedModels: [],
+      summarizerModel:
+        extra.summarizerModel === undefined ? "gpt" : extra.summarizerModel,
+      selectedModels: extra.selectedModels ?? [],
       prompt: "Q",
       generateConsensus,
       isGenerating: false,
@@ -57,6 +62,15 @@ describe("useConsensusTrigger", () => {
 
   it("does not run with fewer than two successful answers", () => {
     expect(trigger([answer("a"), failed("b")])).not.toHaveBeenCalled();
+  });
+
+  it("falls back to the first model when a loaded preset has an empty summarizer", () => {
+    const generate = trigger([answer("a"), answer("b")], {
+      summarizerModel: "",
+      selectedModels: [{ id: "a", provider: "openai", model: "gpt-4o" }],
+    });
+    expect(generate).toHaveBeenCalledTimes(1);
+    expect(generate.mock.calls[0]![2]).toBe("gpt-4o");
   });
 
   it("does not run again after consensus failed", () => {
