@@ -9,11 +9,14 @@ import { Info } from 'lucide-react';
 export interface SaveEnsembleSectionProps {
   currentEnsembleName: string;
   onSavePreset: (name: string) => void;
+  /** Disables saving, for example when no models are selected. */
+  saveDisabled?: boolean;
 }
 
 export function SaveEnsembleSection({
   currentEnsembleName,
   onSavePreset,
+  saveDisabled = false,
 }: SaveEnsembleSectionProps) {
   const { t } = useTranslation();
   const [ensembleName, setEnsembleName] = React.useState(currentEnsembleName);
@@ -23,7 +26,7 @@ export function SaveEnsembleSection({
   }, [currentEnsembleName]);
 
   const handleSave = () => {
-    if (ensembleName.trim()) {
+    if (ensembleName.trim() && !saveDisabled) {
       onSavePreset(ensembleName.trim());
     }
   };
@@ -41,13 +44,15 @@ export function SaveEnsembleSection({
             value={ensembleName}
             onChange={(e) => setEnsembleName(e.target.value)}
             className="mt-1"
+            data-testid="ensemble-name-input"
           />
         </div>
         <Button
           variant="outline"
           className="w-full text-sm bg-transparent"
           onClick={handleSave}
-          disabled={!ensembleName.trim()}
+          disabled={saveDisabled || !ensembleName.trim()}
+          data-testid="save-ensemble-button"
         >
           {t('organisms.ensembleSidebar.saveButton')}
         </Button>

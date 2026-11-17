@@ -77,7 +77,11 @@ export const AgreementAnalysis = React.forwardRef<HTMLDivElement, AgreementAnaly
           <div className="flex items-center justify-between mb-6">
             <Heading level={3} size="lg">{t('organisms.agreementAnalysis.title')}</Heading>
             <div className="text-right">
-              <div className={cn('text-2xl font-bold', agreementLevel.color)} data-agreement-level={agreementLevel.level}>
+              <div
+                className={cn('text-2xl font-bold', agreementLevel.color)}
+                data-agreement-level={agreementLevel.level}
+                data-testid="agreement-overall"
+              >
                 {formatPercentage(overallAgreement)}%
               </div>
               <Text variant="small" color="muted">{t('organisms.agreementAnalysis.overallAgreement')}</Text>
@@ -88,9 +92,9 @@ export const AgreementAnalysis = React.forwardRef<HTMLDivElement, AgreementAnaly
           {/* Pairwise Comparisons */}
           <div className="mb-6">
             <Heading level={4} size="lg" className="mb-4">{t('organisms.agreementAnalysis.pairwiseComparisons')}</Heading>
-            <div className="space-y-3">
+            <div className="space-y-3" data-testid="pairwise-comparisons">
               {pairwiseComparisons.map((comparison, index) => (
-                <div key={index} className="flex items-center justify-between">
+                <div key={index} className="flex items-center justify-between" data-testid="pairwise-comparison">
                   <div className="flex items-center space-x-3">
                     <Text as="span" variant="small">{comparison.model1}</Text>
                     <Text as="span" variant="small" className="text-muted-foreground">{t('organisms.agreementAnalysis.vs')}</Text>
@@ -103,7 +107,7 @@ export const AgreementAnalysis = React.forwardRef<HTMLDivElement, AgreementAnaly
                         style={{ width: `${formatPercentage(comparison.similarity)}%` }}
                       />
                     </div>
-                    <Text as="span" variant="small" className="font-medium">
+                    <Text as="span" variant="small" className="font-medium" data-testid="pairwise-similarity">
                       {formatPercentage(comparison.similarity)}%
                     </Text>
                     <Text as="span" variant="caption" color="muted">
@@ -118,11 +122,11 @@ export const AgreementAnalysis = React.forwardRef<HTMLDivElement, AgreementAnaly
           {/* Statistics Grid */}
           <div className="grid grid-cols-3 gap-8 text-center" data-testid="agreement-stats" role="group">
             <div>
-              <div className="text-2xl font-bold text-primary">{responseCount}</div>
+              <div className="text-2xl font-bold text-primary" data-testid="agreement-response-count">{responseCount}</div>
               <Text variant="small" color="muted">{t('organisms.agreementAnalysis.responsesAnalyzed')}</Text>
             </div>
             <div>
-              <div className="text-2xl font-bold text-primary">{comparisonCount}</div>
+              <div className="text-2xl font-bold text-primary" data-testid="agreement-comparison-count">{comparisonCount}</div>
               <Text variant="small" color="muted">{t('organisms.agreementAnalysis.comparisons')}</Text>
             </div>
             <div>

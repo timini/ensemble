@@ -185,3 +185,14 @@ export const ContinueButtonDisabled: Story = {
     continueDisabled: true,
   },
 };
+
+// Save disabled because no models are selected
+export const SaveDisabled: Story = {
+  args: {
+    selectedModels: [],
+    presets: mockPresets,
+    currentEnsembleName: 'My ensemble',
+    showDeleteButtons: true,
+    saveDisabled: true,
+  },
+};

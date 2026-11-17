@@ -81,9 +81,9 @@ describe('EnsembleSidebar', () => {
         />
       );
 
-      expect(screen.getByText('Quick presets')).toBeInTheDocument();
+      expect(screen.getByText('Saved ensembles')).toBeInTheDocument();
       expect(
-        screen.getByText('Start from a curated ensemble tuned for common workflows.')
+        screen.getByText('Load an ensemble you saved earlier. It restores the models, summarizer and consensus method.')
       ).toBeInTheDocument();
     });
 
@@ -419,6 +419,51 @@ describe('EnsembleSidebar', () => {
       expect(
         screen.getByText('Save your favourite model combinations to load them instantly later.')
       ).toBeInTheDocument();
+    });
+  });
+
+  describe('preset and save test ids', () => {
+    it('marks each preset row and its buttons', () => {
+      render(
+        <EnsembleSidebar
+          selectedModels={[]}
+          presets={mockPresets}
+          currentEnsembleName=""
+          showDeleteButtons={true}
+          onLoadPreset={vi.fn()}
+          onSavePreset={vi.fn()}
+          onDeletePreset={vi.fn()}
+          onAddManualResponse={vi.fn()}
+        />
+      );
+
+      const rows = screen.getAllByTestId('saved-preset');
+      expect(rows).toHaveLength(2);
+      expect(rows[0]).toHaveAttribute('data-preset-id', 'preset-1');
+      expect(screen.getAllByTestId('use-preset-button')).toHaveLength(2);
+      expect(screen.getAllByTestId('delete-preset-button')).toHaveLength(2);
+      expect(screen.getByTestId('ensemble-name-input')).toBeInTheDocument();
+      expect(screen.getByTestId('save-ensemble-button')).toBeInTheDocument();
+    });
+
+    it('disables saving when saveDisabled is set, even with a name', async () => {
+      const user = userEvent.setup();
+      const onSavePreset = vi.fn();
+      render(
+        <EnsembleSidebar
+          selectedModels={[]}
+          presets={[]}
+          currentEnsembleName=""
+          saveDisabled={true}
+          onLoadPreset={vi.fn()}
+          onSavePreset={onSavePreset}
+          onDeletePreset={vi.fn()}
+          onAddManualResponse={vi.fn()}
+        />
+      );
+
+      await user.type(screen.getByTestId('ensemble-name-input'), 'My ensemble');
+      expect(screen.getByTestId('save-ensemble-button')).toBeDisabled();
     });
   });
 
@@ -1033,8 +1078,8 @@ describe('EnsembleSidebar', () => {
       expect(screen.getByText('Review your current selections before saving or continuing.')).toBeInTheDocument();
       expect(screen.getByText('Selected Models (2)')).toBeInTheDocument();
       expect(screen.getByText('Summarizer')).toBeInTheDocument();
-      expect(screen.getByText('Quick presets')).toBeInTheDocument();
-      expect(screen.getByText('Start from a curated ensemble tuned for common workflows.')).toBeInTheDocument();
+      expect(screen.getByText('Saved ensembles')).toBeInTheDocument();
+      expect(screen.getByText('Load an ensemble you saved earlier. It restores the models, summarizer and consensus method.')).toBeInTheDocument();
       expect(screen.getByText('Save current ensemble')).toBeInTheDocument();
       expect(screen.getByText('Ensemble Name')).toBeInTheDocument();
       expect(screen.getByPlaceholderText('e.g. Research Ensemble')).toBeInTheDocument();
@@ -1067,8 +1112,8 @@ describe('EnsembleSidebar', () => {
       expect(screen.getByText('Vérifiez vos sélections actuelles avant d\'enregistrer ou de continuer.')).toBeInTheDocument();
       expect(screen.getByText('Modèles Sélectionnés (2)')).toBeInTheDocument();
       expect(screen.getByText('Synthétiseur')).toBeInTheDocument();
-      expect(screen.getByText('Préréglages rapides')).toBeInTheDocument();
-      expect(screen.getByText('Démarrez à partir d\'un ensemble organisé et optimisé pour les flux de travail courants.')).toBeInTheDocument();
+      expect(screen.getByText('Ensembles enregistrés')).toBeInTheDocument();
+      expect(screen.getByText('Chargez un ensemble enregistré plus tôt. Les modèles, le synthétiseur et la méthode de consensus sont restaurés.')).toBeInTheDocument();
       expect(screen.getByText('Enregistrer l\'ensemble actuel')).toBeInTheDocument();
       expect(screen.getByText('Nom de l\'Ensemble')).toBeInTheDocument();
       expect(screen.getByPlaceholderText('par ex. Ensemble de Recherche')).toBeInTheDocument();

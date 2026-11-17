@@ -33,7 +33,12 @@ export function QuickPresetsSection({
       ) : (
         <div className="space-y-3">
           {presets.map((preset) => (
-            <div key={preset.id} className="border border-border rounded-lg p-3 relative">
+            <div
+              key={preset.id}
+              className="border border-border rounded-lg p-3 relative"
+              data-testid="saved-preset"
+              data-preset-id={preset.id}
+            >
               <div className="flex items-center justify-between mb-2">
                 <Heading level={5} size="sm">{preset.name}</Heading>
                 <div className="flex items-center gap-2">
@@ -42,6 +47,7 @@ export function QuickPresetsSection({
                     size="sm"
                     className="text-xs bg-transparent"
                     onClick={() => onLoadPreset(preset.id)}
+                    data-testid="use-preset-button"
                   >
                     {t('organisms.ensembleSidebar.usePreset')}
                   </Button>
@@ -51,6 +57,7 @@ export function QuickPresetsSection({
                       size="sm"
                       className="text-xs text-destructive hover:text-destructive hover:bg-destructive/10"
                       onClick={() => onDeletePreset(preset.id)}
+                      data-testid="delete-preset-button"
                       aria-label={t('organisms.ensembleSidebar.deletePreset', { name: preset.name })}
                     >
                       <Trash2 className="w-3 h-3" />
