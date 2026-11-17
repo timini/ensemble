@@ -109,13 +109,13 @@ Done when: the agreement score changes when answers change in meaning, and a use
 
 Goal: Ensemble works with no cloud keys at all.
 
-- [ ] `FreeOpenAICompatibleClient` in `shared-utils` (clone of `FreeDeepSeekClient`): configurable base URL, optional key, unfiltered model list, embeddings via `/v1/embeddings`.
-- [ ] Add it to the `ProviderName` unions, the factory, the store, the config UI, logos and i18n (about 16 files, listed in [ARCHITECTURE.md](./ARCHITECTURE.md)).
-- [ ] Presets in settings for Ollama (`http://localhost:11434/v1`), LM Studio (`:1234/v1`), llama.cpp, vLLM, OpenRouter, Groq and Together. Several endpoints can be configured at once.
-- [ ] Detect a running Ollama automatically and offer it on first run.
-- [ ] Spike: can the hosted HTTPS site call `http://localhost` in Chrome, Safari and Firefox, given CORS (`OLLAMA_ORIGINS`) and Chrome's local network access permission? Document the result. If it is unreliable, ship a one-command local run (`npx`) for local-model users and say so in the UI.
-- [ ] Local embeddings: `nomic-embed-text` through Ollama, or an in-browser model if the spike shows it is needed.
-- [ ] Setup guide in `docs/LOCAL_MODELS.md`.
+- [x] `FreeOpenAICompatibleClient` in `shared-utils` (clone of `FreeDeepSeekClient`): configurable base URL, optional key, unfiltered model list, embeddings via `/v1/embeddings`.
+- [x] Add it to the `ProviderName` unions, the factory, the store, the config UI, logos and i18n (about 16 files, listed in [ARCHITECTURE.md](./ARCHITECTURE.md)).
+- [x] Presets in settings for Ollama (`http://localhost:11434/v1`), LM Studio (`:1234/v1`), llama.cpp, vLLM, OpenRouter, Groq and Together. Several endpoints can be configured at once.
+- [x] Detect a running Ollama automatically and offer it on first run.
+- [x] Spike: can the hosted HTTPS site call `http://localhost` in Chrome, Safari and Firefox, given CORS (`OLLAMA_ORIGINS`) and Chrome's local network access permission? Document the result. If it is unreliable, ship a one-command local run (`npx`) for local-model users and say so in the UI.
+- [x] Local embeddings: `nomic-embed-text` through Ollama, or an in-browser model if the spike shows it is needed.
+- [x] Setup guide in `docs/LOCAL_MODELS.md`.
 
 Done when: a user with only Ollama installed can run a 3-model ensemble with real agreement scores and no API keys.
 
@@ -123,15 +123,15 @@ Done when: a user with only Ollama installed can run a 3-model ensemble with rea
 
 Goal: a reproducible answer to "does an ensemble beat its best member?", for under $20 in total.
 
-- [ ] Add the OpenAI-compatible provider to the eval harness (`eval/src/lib/modelSpecs.ts`, `providers.ts`, `types.ts`), with an empty key allowed for local servers.
-- [ ] Fix the methodology:
+- [x] Add the OpenAI-compatible provider to the eval harness (`eval/src/lib/modelSpecs.ts`, `providers.ts`, `types.ts`), with an empty key allowed for local servers.
+- [x] Fix the methodology:
   - shuffle multiple-choice options with a fixed seed
   - ask every model for a structured final answer and extract it mechanically, so most datasets need no LLM judge
   - fall back to `json_object` or regex where a server lacks strict JSON schema support
   - count timeouts and errors as wrong instead of dropping them
   - use n of at least 200 per dataset, paired McNemar tests, Wilson intervals in every report (the statistics code exists in `eval/src/lib`)
   - use a different model for judging than for generating, where a judge is still needed
-- [ ] Fix cost tracking to use the real pricing table from M1.
+- [x] Fix cost tracking to use the real pricing table from M1.
 - [ ] Calibrate the agreement score. Real embedding cosines sit in a narrow band (roughly 0.1 to 0.9 for `text-embedding-3-small`), and the current `(v+1)/2` mapping makes unrelated answers look like moderate agreement. Fit per-embedding-model thresholds from benchmark runs (agree vs disagree pairs) and update the labels.
 - [ ] Calibrate the token assumptions in `estimateRun` from recorded usage, including hidden reasoning tokens.
 - [ ] Benchmark matrix on GSM8K, MMLU-Pro, GPQA and TruthfulQA (shuffled), all through OpenRouter or local Ollama:
@@ -139,7 +139,7 @@ Goal: a reproducible answer to "does an ensemble beat its best member?", for und
   - the same three as an ensemble, with mechanical majority and standard consensus
   - one premium model as a reference, run once and cached
 - [ ] Commit raw results under `packages/eval/results/` so `report/generate_figures.py` can be re-run. Regenerate the report.
-- [ ] Publish a results page in the app (`/about` or `/benchmarks`) with the numbers and their confidence intervals.
+- [ ] Publish a results page in the app (page built at `/benchmarks` with an honest not-run state; real numbers come from the paid run) (`/about` or `/benchmarks`) with the numbers and their confidence intervals.
 
 Done when: the results page shows the comparison with confidence intervals, and anyone can reproduce it with one command. The landing page copy is then set from these results, as the vision document requires.
 
