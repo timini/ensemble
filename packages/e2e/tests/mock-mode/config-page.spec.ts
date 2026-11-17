@@ -153,6 +153,12 @@ test.describe('Config Page', () => {
     const selector = page.getByTestId('embeddings-provider-selector');
     await expect(selector).toBeVisible();
     await expect(page.getByTestId('embeddings-provider-option-auto')).toBeChecked();
+    // No OpenAI or Google key yet: no provider, as in Free mode.
+    await expect(page.getByTestId('embeddings-provider-none')).toBeVisible();
+    await expect(page.getByTestId('embeddings-provider-google-missing')).toBeVisible();
+
+    await page.locator('[data-provider="openai"] input').fill('sk-test-openai-key');
+    await page.locator('[data-provider="google"] input').fill('test-google-key');
     await expect(page.getByTestId('embeddings-provider-active')).toContainText('OpenAI');
 
     await page.getByTestId('embeddings-provider-option-google').check();

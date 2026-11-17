@@ -19,22 +19,20 @@ export function useEmbeddingsProviderSetting(
   const setEmbeddingsProvider = useStore(
     (state) => state.setEmbeddingsProvider,
   );
-  const mockMode = process.env.NEXT_PUBLIC_MOCK_MODE === "true";
 
   const value = normalizeEmbeddingsPreference(stored);
 
   const available = useMemo<Record<EmbeddingProvider, boolean>>(
     () => ({
-      openai: mockMode || statuses.openai === "valid",
-      google: mockMode || statuses.google === "valid",
+      openai: statuses.openai === "valid",
+      google: statuses.google === "valid",
     }),
-    [mockMode, statuses.openai, statuses.google],
+    [statuses.openai, statuses.google],
   );
 
   const activeProvider = resolveEmbeddingsProvider({
     preference: value,
     statuses,
-    mockMode,
   });
 
   const onChange = (next: EmbeddingsProviderPreference) => {

@@ -20,7 +20,6 @@ describe("resolveEmbeddingsProvider", () => {
       resolveEmbeddingsProvider({
         preference: "auto",
         statuses: statuses(["openai", "google"]),
-        mockMode: false,
       }),
     ).toBe("openai");
   });
@@ -30,7 +29,6 @@ describe("resolveEmbeddingsProvider", () => {
       resolveEmbeddingsProvider({
         preference: "auto",
         statuses: statuses(["google", "anthropic"]),
-        mockMode: false,
       }),
     ).toBe("google");
   });
@@ -40,7 +38,6 @@ describe("resolveEmbeddingsProvider", () => {
       resolveEmbeddingsProvider({
         preference: "google",
         statuses: statuses(["openai", "google"]),
-        mockMode: false,
       }),
     ).toBe("google");
   });
@@ -50,26 +47,17 @@ describe("resolveEmbeddingsProvider", () => {
       resolveEmbeddingsProvider({
         preference: "auto",
         statuses: statuses(["anthropic"]),
-        mockMode: false,
       }),
     ).toBeNull();
   });
 
-  it("always has a provider in mock mode", () => {
-    expect(
-      resolveEmbeddingsProvider({
-        preference: "auto",
-        statuses: statuses([]),
-        mockMode: true,
-      }),
-    ).toBe("openai");
+  it("ignores the override when its key is not valid", () => {
     expect(
       resolveEmbeddingsProvider({
         preference: "google",
-        statuses: statuses([]),
-        mockMode: true,
+        statuses: statuses(["openai"]),
       }),
-    ).toBe("google");
+    ).toBe("openai");
   });
 });
 

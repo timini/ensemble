@@ -93,7 +93,7 @@ In the app (mock mode only), `src/lib/mockErrorScenarios.ts` feeds this from the
 ## Limitations
 
 - Output ignores the prompt and has no structure.
-- Embeddings and agreement scores are not meaningful in mock mode.
+- Embeddings and agreement scores are not meaningful in mock mode. The embeddings provider is still picked from the configured keys, as in Free mode, so without an OpenAI or Google key there is no score.
 - The mock client reports no `usage`, so the review page labels the run cost as estimated from text length. The `costPer1kTokens` values in its model list are not used for pricing; the shared price table is.
 - Network errors other than the scenarios above (DNS, CORS, dropped connections) are not simulated.
 

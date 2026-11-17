@@ -57,4 +57,13 @@ describe("useEmbeddingsProviderSetting", () => {
     );
     expect(result.current.activeProvider).toBeNull();
   });
+
+  it("follows the keys in mock mode too, so the no-provider message can be tested", () => {
+    process.env.NEXT_PUBLIC_MOCK_MODE = "true";
+    const { result } = renderHook(() =>
+      useEmbeddingsProviderSetting(statuses("idle", "idle")),
+    );
+    expect(result.current.available).toEqual({ openai: false, google: false });
+    expect(result.current.activeProvider).toBeNull();
+  });
 });

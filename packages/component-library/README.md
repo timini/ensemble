@@ -20,7 +20,7 @@ AgreementAnalysis, ApiKeyConfiguration, ApiKeyConfigurationModal, ConsensusCard,
 
 There is no templates level. `src/components/foundations/ColorPalette.stories.tsx` documents the colour tokens.
 
-Most components have a `.stories.tsx` and a `.test.tsx` next to them. Exceptions today: Dialog and Markdown have neither; PromptCard has a test but no story.
+Every component has a `.stories.tsx` and a `.test.tsx` next to it.
 
 ### Utilities
 

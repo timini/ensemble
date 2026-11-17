@@ -40,7 +40,6 @@ export function useReviewPageState(hasHydrated: boolean) {
     return resolveEmbeddingsProvider({
       preference: embeddingsPreference,
       statuses,
-      mockMode: process.env.NEXT_PUBLIC_MOCK_MODE === "true",
     });
   }, [apiKeys, embeddingsPreference]);
 

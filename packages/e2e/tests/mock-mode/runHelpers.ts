@@ -9,6 +9,8 @@ interface RunOptions {
   models: string[];
   prompt?: string;
   mockErrors?: string;
+  /** Providers to configure keys for. Defaults to OpenAI plus the models' providers. */
+  keyProviders?: string[];
 }
 
 /** Provider of a mock model id, from its prefix. */
@@ -26,14 +28,20 @@ function providerOf(model: string): string {
 }
 
 /**
- * Configure a mock key for OpenAI and for every provider the models need,
- * then select the models on /ensemble. Leaves the page on /ensemble.
+ * Configure a mock key for OpenAI and for every provider the models need
+ * (or for `keyProviders` when given), then select the models on /ensemble.
+ * Leaves the page on /ensemble.
  */
-export async function selectMockModels(page: Page, models: string[], mockErrors?: string) {
+export async function selectMockModels(
+  page: Page,
+  models: string[],
+  mockErrors?: string,
+  keyProviders?: string[],
+) {
   const query = mockErrors ? `?mockErrors=${encodeURIComponent(mockErrors)}` : '';
   await page.goto(`/config${query}`);
   await page.locator('[data-mode="free"]').click();
-  const providers = [...new Set(['openai', ...models.map(providerOf)])];
+  const providers = keyProviders ?? [...new Set(['openai', ...models.map(providerOf)])];
   for (const [index, provider] of providers.entries()) {
     await page.locator(`[data-provider="${provider}"] input`).fill(`sk-test-${provider}-key`);
     const label = index === 0 ? /1 API key configured/i : new RegExp(`${index + 1} API keys configured`, 'i');
@@ -47,8 +55,11 @@ export async function selectMockModels(page: Page, models: string[], mockErrors?
   }
 }
 
-export async function startMockRun(page: Page, { models, prompt = 'What is 6 times 7?', mockErrors }: RunOptions) {
-  await selectMockModels(page, models, mockErrors);
+export async function startMockRun(
+  page: Page,
+  { models, prompt = 'What is 6 times 7?', mockErrors, keyProviders }: RunOptions,
+) {
+  await selectMockModels(page, models, mockErrors, keyProviders);
   await page.getByRole('button', { name: 'Next', exact: true }).click();
   await expect(page).toHaveURL(/\/prompt/);
 

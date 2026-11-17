@@ -23,7 +23,6 @@ export function useEmbeddingsProvider(): EmbeddingProvider | null {
     return resolveEmbeddingsProvider({
       preference: embeddingsPreference,
       statuses,
-      mockMode: process.env.NEXT_PUBLIC_MOCK_MODE === "true",
     });
   }, [apiKeys, embeddingsPreference]);
 }

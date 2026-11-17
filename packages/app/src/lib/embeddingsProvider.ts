@@ -12,8 +12,6 @@ interface ResolveEmbeddingsProviderOptions {
   preference: string;
   /** Validation status per provider, as kept in the API key slice. */
   statuses: Readonly<Record<string, string>>;
-  /** True when NEXT_PUBLIC_MOCK_MODE is on. */
-  mockMode: boolean;
 }
 
 /**
@@ -41,19 +39,18 @@ export function getValidProviders(
 /**
  * Decide which provider computes embeddings for agreement scoring.
  *
- * In mock mode the mock client serves every provider, so the preference (or
- * OpenAI) is used. Otherwise the choice comes from the valid keys: the
- * override when its key is valid, then OpenAI, then Google. Returns null when
- * no embedding provider is available.
+ * The choice comes from the valid keys: the override when its key is valid,
+ * then OpenAI, then Google. Returns null when no embedding provider is
+ * available. Mock mode follows the same rule (mock keys validate as valid),
+ * so a mock run without an OpenAI or Google key shows the no-score message
+ * as a Free run would.
  */
 export function resolveEmbeddingsProvider({
   preference,
   statuses,
-  mockMode,
 }: ResolveEmbeddingsProviderOptions): EmbeddingProvider | null {
-  const normalized = normalizeEmbeddingsPreference(preference);
-  if (mockMode) {
-    return normalized === "auto" ? EMBEDDING_PROVIDERS[0] : normalized;
-  }
-  return selectEmbeddingsProvider(normalized, getValidProviders(statuses));
+  return selectEmbeddingsProvider(
+    normalizeEmbeddingsPreference(preference),
+    getValidProviders(statuses),
+  );
 }
