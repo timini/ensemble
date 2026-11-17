@@ -59,6 +59,17 @@ describe("useApiKeySettings", () => {
     expect(result.current.canRun).toBe(true);
   });
 
+  it("validates a typed key once, through the debounce only", async () => {
+    const { result } = renderHook(() => useApiKeySettings());
+    await act(async () => {
+      result.current.onKeyChange("openai", "sk-test");
+      await vi.waitFor(() => {
+        expect(useStore.getState().apiKeys.openai?.status).toBe("valid");
+      });
+    });
+    expect(validateApiKey).not.toHaveBeenCalled();
+  });
+
   it("can run with a connected endpoint and no key", () => {
     useStore.setState({
       endpoints: [{ id: "ollama", status: "valid" }],

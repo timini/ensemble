@@ -44,6 +44,9 @@ export function useApiKeySettings() {
   const setApiKeyStatus = useStore((state) => state.setApiKeyStatus);
   const hasHydrated = useHasHydrated();
   const timeoutRefs = useRef({ ...EMPTY_TIMEOUTS });
+  // Keys being typed: the debounced validator checks them, so the
+  // stored-key effect below must not validate them a second time.
+  const typedRef = useRef(new Set<Provider>());
   const { resetAutoHideTimer } = useApiKeyAutoHide();
   const [webCryptoSupported, setWebCryptoSupported] = useState(true);
 
@@ -80,6 +83,7 @@ export function useApiKeySettings() {
     if (!webCryptoSupported) return;
     API_KEY_PROVIDERS.forEach((provider) => {
       const key = apiKeys[provider]?.key ?? "";
+      if (typedRef.current.has(provider)) return;
       if (key.length > 0 && validationStatus[provider] === "idle") {
         void validateApiKey({
           provider,
@@ -107,7 +111,11 @@ export function useApiKeySettings() {
         toError(error, `Unable to store ${provider} API key`),
       );
     });
-    debouncedValidate(provider, value, "free", onStatusChange);
+    typedRef.current.add(provider);
+    debouncedValidate(provider, value, "free", (p, status, error) => {
+      if (status !== "validating") typedRef.current.delete(p);
+      onStatusChange(p, status, error);
+    });
     resetAutoHideTimer();
   };
 

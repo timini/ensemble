@@ -77,13 +77,14 @@ Components that read persisted state use `useHasHydrated()` (`src/hooks/useHasHy
 
 - State: `apiKeys` with one entry per provider (`openai`, `anthropic`, `google`, `xai`, `deepseek`, `perplexity`), each `null` or `{ encrypted, key, visible, status, error? }`; `encryptionInitialized`
 - Actions:
-  - `setApiKey(provider, key)`: trims, encrypts with `encrypt()` from `@ensemble-ai/shared-utils/security`, stores both. An empty key clears the entry.
+  - `setApiKey(provider, key)`: trims, encrypts with `encrypt()` from `@ensemble-ai/shared-utils/security`, stores both. A new key starts at status `idle`; setting the same key again keeps its status, so a late encryption write cannot undo a finished validation. An empty key clears the entry.
   - `getApiKey(provider)`: returns the plaintext `key` or `null`.
   - `toggleApiKeyVisibility(provider)`, `hideAllApiKeys()`
   - `setApiKeyStatus(provider, status, error?)`
   - `initializeEncryption()`: decrypts persisted keys once per session.
   - `clearApiKeys()`
 - Validation is not a slice action. It lives in `src/lib/validation.ts` and reports back through `setApiKeyStatus`.
+- A status of `validating` is persisted as `idle`, so a key whose check was cut off by a reload is checked again on the next load. `useApiKeySettings` validates stored `idle` keys on load and typed keys once, 500 ms after the last edit.
 - Encryption is AES-256-GCM with a key derived from browser and screen properties (`packages/shared-utils/src/security/encryption.ts`). The plaintext key is held in memory while the app runs.
 
 ### OpenAI-compatible endpoints (`endpointsSlice.ts`)

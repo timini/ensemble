@@ -39,6 +39,42 @@ describe('apiKeySlice', () => {
     });
   });
 
+  it('keeps the validation status when the same key is set again', async () => {
+    await store.getState().setApiKey('openai', 'sk-test');
+    store.getState().setApiKeyStatus('openai', 'valid');
+
+    await store.getState().setApiKey('openai', ' sk-test ');
+
+    expect(store.getState().apiKeys.openai?.status).toBe('valid');
+  });
+
+  it('does not overwrite a newer validation status when encryption finishes late', async () => {
+    await store.getState().setApiKey('openai', 'sk-test');
+    let finishEncrypt: ((value: string) => void) | undefined;
+    encryptMock.mockImplementationOnce(
+      () =>
+        new Promise<string>((resolve) => {
+          finishEncrypt = resolve;
+        }),
+    );
+
+    const pending = store.getState().setApiKey('openai', 'sk-test');
+    store.getState().setApiKeyStatus('openai', 'valid');
+    finishEncrypt?.('enc:sk-test');
+    await pending;
+
+    expect(store.getState().apiKeys.openai?.status).toBe('valid');
+  });
+
+  it('resets the status when the key changes', async () => {
+    await store.getState().setApiKey('openai', 'sk-test');
+    store.getState().setApiKeyStatus('openai', 'valid');
+
+    await store.getState().setApiKey('openai', 'sk-other');
+
+    expect(store.getState().apiKeys.openai?.status).toBe('idle');
+  });
+
   it('preserves visibility toggles when updating API keys', async () => {
     store.setState({
       apiKeys: {

@@ -88,7 +88,9 @@ const sanitizeStateForPersist = (state: StoreState): StoreState => {
           encrypted: entry.encrypted,
           key: '',
           visible: false,
-          status: entry.status,
+          // A validation in flight dies with the page; store it as idle so
+          // the next load validates the key again instead of waiting forever.
+          status: entry.status === 'validating' ? 'idle' : entry.status,
         },
       };
     }

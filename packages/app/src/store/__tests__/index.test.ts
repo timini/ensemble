@@ -32,6 +32,15 @@ describe('serializeStoreState', () => {
     expect(serialized.apiKeys.openai?.visible).toBe(false);
     expect(serialized.encryptionInitialized).toBe(false);
   });
+
+  it('stores a key still being validated as idle, so the next load checks it again', () => {
+    const input = createStateWithApiKey();
+    input.apiKeys.openai = { ...input.apiKeys.openai!, status: 'validating' };
+
+    const serialized = serializeStoreState(input);
+
+    expect(serialized.apiKeys.openai?.status).toBe('idle');
+  });
 });
 
 describe('store hydration', () => {

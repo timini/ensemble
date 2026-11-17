@@ -49,6 +49,8 @@ test.describe('Settings sheet', () => {
     await expect
       .poll(() => page.evaluate(() => JSON.parse(localStorage.getItem('ensemble-ai-store') ?? '{}').apiKeys?.openai))
       .toMatchObject({ key: '', encrypted: expect.any(String), status: 'valid' });
+    // Reload only once validation has settled in the page as well.
+    await expect(sheet.locator('div[data-provider="openai"]')).toHaveAttribute('data-validation-status', 'valid');
     await page.reload();
     await expect(page.getByTestId('workspace-setup')).toHaveCount(0);
     sheet = await openSettings(page);
@@ -72,6 +74,9 @@ test.describe('Settings sheet', () => {
     await sheet.locator('[data-provider="openai"] input').fill('sk-test-openai-key');
     await sheet.locator('[data-provider="google"] input').fill('test-google-key');
     await expect(sheet.getByTestId('embeddings-provider-active')).toContainText('OpenAI');
+    // The Google option is enabled only once its key has validated.
+    await expect(sheet.locator('div[data-provider="google"]')).toHaveAttribute('data-validation-status', 'valid');
+    await expect(sheet.getByTestId('embeddings-provider-option-google')).toBeEnabled();
 
     await sheet.getByTestId('embeddings-provider-option-google').check();
     await expect(sheet.getByTestId('embeddings-provider-active')).toContainText('Google');

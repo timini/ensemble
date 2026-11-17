@@ -139,17 +139,25 @@ export const createApiKeySlice: StateCreator<ApiKeySlice> = (set, get) => ({
 
     try {
       const encrypted = await encrypt(trimmedKey);
-      set((state) => ({
-        apiKeys: {
-          ...state.apiKeys,
-          [provider]: {
-            key: trimmedKey,
-            encrypted,
-            visible: previousVisibility,
-            status: 'idle',
+      set((state) => {
+        // Read the entry after encryption: a validation may have finished
+        // meanwhile. The same key keeps its status, so a repeated set does
+        // not start a second validation.
+        const current = state.apiKeys[provider];
+        const sameKey = current?.key === trimmedKey;
+        return {
+          apiKeys: {
+            ...state.apiKeys,
+            [provider]: {
+              key: trimmedKey,
+              encrypted,
+              visible: current?.visible ?? previousVisibility,
+              status: sameKey ? current.status : 'idle',
+              ...(sameKey && current.error ? { error: current.error } : {}),
+            },
           },
-        },
-      }));
+        };
+      });
     } catch (error: unknown) {
       const normalizedError = toError(
         error,
