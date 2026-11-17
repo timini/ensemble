@@ -13,12 +13,13 @@ The main workflow is four steps. Each step is a page under `src/app/`.
 | Route | Purpose |
 |-------|---------|
 | `/` | Redirects to `/config` |
-| `/config` | Step 1. Pick a mode and enter provider API keys |
+| `/config` | Step 1. Pick a mode, enter provider API keys and add OpenAI-compatible endpoints (Ollama, LM Studio, OpenRouter and others) |
 | `/ensemble` | Step 2. Pick models, the summarizer and the consensus method; save or load presets |
 | `/prompt` | Step 3. Enter the prompt; submitting starts streaming from every selected model |
 | `/review` | Step 4. Responses, agreement analysis and the consensus answer |
 | `/about` | Static explainer with a flow diagram |
 | `/features` | Static features page |
+| `/benchmarks` | Benchmark results from `src/data/benchmark-summary.json` (accuracy with Wilson intervals, McNemar p-values, cost), or a "not run yet" state with the estimate and method |
 | `/test-components` | Dev page that renders component-library buttons (404 in production unless `NEXT_PUBLIC_MOCK_MODE=true`) |
 | `/api/trpc/[trpc]` | tRPC endpoint (see Server below) |
 
