@@ -426,9 +426,9 @@ Ready to proceed to **Phase 2: UI Integration with Mock API Clients**
 - [X] T175 Write E2E test tests/e2e/full-workflow-mock.spec.ts (chromium only, Mock mode) testing complete user journey: Config → Ensemble → Prompt → Review with 3 test scenarios (commit: 20917f7)
 - [X] T176 Test theme persistence: Verify light/dark theme selection persists across page refreshes with 7 E2E tests (commit: 20917f7)
 - [X] T177 Test language persistence: Verify EN/FR language selection persists across page refreshes with 9 E2E tests (commit: 20917f7)
-- [ ] T178 Test preset management: Verify ensemble presets can be saved, loaded, deleted, and persist to localStorage
-- [ ] T179 Test manual response: Verify manual responses can be added in Prompt page and Review page
-- [ ] T180 Test agreement analysis: Verify similarity matrix displays correctly for 2, 3, 4, 5, 6 responses
+- [x] T178 Test preset management: Verify ensemble presets can be saved, loaded, deleted, and persist to localStorage (done in M1: `packages/e2e/tests/mock-mode/presets.spec.ts`; the sidebar presets were placeholders and are now wired to `savedEnsembles`)
+- [x] T179 Test manual response: Verify manual responses can be added in Prompt page and Review page (done in M1: `packages/e2e/tests/mock-mode/manual-responses.spec.ts`; manual answers are now also scored in the agreement analysis)
+- [x] T180 Test agreement analysis: Verify similarity matrix displays correctly for 2, 3, 4, 5, 6 responses (done in M1: `packages/e2e/tests/mock-mode/agreement-matrix.spec.ts`)
 - [ ] T181 Run accessibility audit on all 4 pages: `npm run test:e2e -- --project=accessibility`
 - [ ] T182 Fix any accessibility violations (WCAG 2.1 AA compliance required per plan.md)
 - [ ] T183 Run screenshot testing: `npx tsx scripts/screenshot-stories.ts` and review visual diffs from Phase 1 baseline (git diff screenshots/)
@@ -488,7 +488,7 @@ Ready to proceed to **Phase 2: UI Integration with Mock API Clients**
 
 - [ ] T224 Write E2E test tests/e2e/full-workflow-free.spec.ts (chromium only, Mock providers for CI; optional manual run with real API keys in .env.local) testing complete Free mode workflow
 - [ ] T225 Run security audit: Verify API keys encrypted in localStorage, not exposed in network traces, not exposed in error logs
-- [ ] T226 Test error scenarios: 401 (invalid key), 429 (rate limit), 503 (service unavailable), network timeout
+- [x] T226 Test error scenarios: 401 (invalid key), 429 (rate limit), 503 (service unavailable), network timeout (done in M1 with simulated errors in mock mode: `packages/e2e/tests/mock-mode/provider-errors.spec.ts` and `provider-errors-all.spec.ts`; a rejected real key is covered by `free-mode/free-mode.spec.ts`)
 - [ ] T227 Test streaming latency: Verify <100ms p95 latency from API chunk receipt to UI display (FR-058)
 - [ ] T228 Create docs/API_KEY_SECURITY.md documenting encryption approach, browser-derived keys, security best practices
 - [ ] T229 Update README.md with Free mode quickstart (how to obtain API keys, .env.local setup)

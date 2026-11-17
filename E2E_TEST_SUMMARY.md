@@ -1,6 +1,6 @@
 # E2E Test Suite Summary
 
-Last checked against the code: 2026-11-15.
+Last checked against the code: 2026-11-17.
 
 ## Suites
 
@@ -28,22 +28,30 @@ npx playwright test tests/mock-mode/config-page.spec.ts --project=mock-mode
 npx playwright show-report
 ```
 
-## Mock-mode tests (105 tests)
+## Mock-mode tests (135 tests)
 
 | File | Tests | Covers |
 |---|---|---|
 | `about-page.spec.ts` | 8 | About page content |
-| `config-page.spec.ts` | 10 | Mode selection, API key entry |
-| `consensus-presets-mock.spec.ts` | 1 | Consensus presets |
-| `ensemble-page.spec.ts` | 17 | Model selection (2 to 6), summarizer |
+| `agreement-matrix.spec.ts` | 5 | Agreement analysis for 2, 3, 4, 5 and 6 answers (T180) |
+| `config-page.spec.ts` | 11 | Mode selection, API key entry, embeddings provider |
+| `consensus-presets-mock.spec.ts` | 2 | Consensus methods, majority vote breakdown |
+| `ensemble-page.spec.ts` | 17 | Model selection, summarizer |
 | `features-page.spec.ts` | 12 | Features page content |
 | `full-workflow-mock.spec.ts` | 3 | Full journey across the four pages |
 | `language-persistence.spec.ts` | 9 | EN and FR switching |
+| `manual-responses.spec.ts` | 3 | Manual answers added on `/prompt` and on `/review`, scored in agreement and consensus (T179) |
 | `model-id-api-call.spec.ts` | 2 | Model ids passed to provider calls |
 | `not-found-page.spec.ts` | 6 | 404 page |
-| `prompt-page.spec.ts` | 16 | Prompt input, validation, navigation |
-| `review-page.spec.ts` | 14 | Responses, consensus, navigation |
+| `presets.spec.ts` | 5 | Saved ensembles: save, load, replace, delete, kept in localStorage (T178) |
+| `prompt-page.spec.ts` | 17 | Prompt input, validation, navigation, cost estimate |
+| `provider-errors.spec.ts` | 5 | One model failing with 401, 429, 503 or a timeout, and retry (T226) |
+| `provider-errors-all.spec.ts` | 2 | Every model failing, then recovering on retry (T226) |
+| `review-page.spec.ts` | 16 | Responses, consensus, cost, navigation |
+| `review-persistence.spec.ts` | 5 | Last run kept after a reload |
 | `theme-persistence.spec.ts` | 7 | Light and dark themes |
+
+Error scenarios are simulated with the mock-only `?mockErrors=` query parameter (`packages/app/src/lib/mockErrorScenarios.ts`), so they run in CI without keys.
 
 ## Free-mode tests (6 tests)
 
