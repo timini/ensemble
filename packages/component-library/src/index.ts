@@ -73,6 +73,7 @@ export { ApiKeyInput, type ApiKeyInputProps, type Provider, type ValidationStatu
 export { ModelCard, type ModelCardProps } from './components/molecules/ModelCard';
 export { PromptInput, type PromptInputProps } from './components/molecules/PromptInput';
 export { ResponseCard, PROVIDER_NAMES, type ResponseCardProps, type ResponseStatus, type ResponseType } from './components/molecules/ResponseCard';
+export { ResponseErrorNotice, type ResponseErrorNoticeProps, type ResponseErrorKind } from './components/molecules/ResponseErrorNotice';
 export { ModeSelectionCard, type ModeSelectionCardProps, type Mode } from './components/molecules/ModeSelectionCard';
 export { EnsembleHeader } from './components/molecules/EnsembleHeader';
 export { Footer, type FooterProps } from './components/molecules/Footer';

@@ -10,9 +10,9 @@ The package is not built or published. It points `main` and `types` at `src/inde
 
 Avatar, Badge, Button, Card, Dialog, Heading, Icon, InlineAlert, Input, Label, Link, LoadingSpinner, Markdown, ModelLogo, Progress, ProviderLogo, Rating, Select, Separator, Tag, Text, Textarea
 
-### Molecules (13)
+### Molecules (14)
 
-ApiKeyInput, ConsensusPresetSelector, EmbeddingsProviderSelector, EnsembleHeader, Footer, MajorityVoteBreakdown, ModelCard, ModeSelectionCard, ProgressSteps, PromptInput, ResponseCard, RunCostSummary, SummarizerIndicator
+ApiKeyInput, ConsensusPresetSelector, EmbeddingsProviderSelector, EnsembleHeader, Footer, MajorityVoteBreakdown, ModelCard, ModeSelectionCard, ProgressSteps, PromptInput, ResponseCard, ResponseErrorNotice, RunCostSummary, SummarizerIndicator
 
 ### Organisms (16)
 

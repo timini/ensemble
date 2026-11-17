@@ -126,6 +126,35 @@
       "votes_other": "{{count}} votes",
       "abstained": "No short answer: {{models}}",
       "and": "and"
+    },
+    "responseErrorNotice": {
+      "retry": "Retry this model",
+      "invalid_key": {
+        "title": "API key rejected",
+        "description": "The provider did not accept your API key. Check the key on the configuration page, then retry."
+      },
+      "rate_limited": {
+        "title": "Rate limit reached",
+        "description": "The provider is limiting requests on your key. Wait a moment, then retry.",
+        "descriptionWithDelay_one": "The provider is limiting requests on your key. Try again in {{count}} second.",
+        "descriptionWithDelay_other": "The provider is limiting requests on your key. Try again in {{count}} seconds."
+      },
+      "timeout": {
+        "title": "No answer in time",
+        "description": "The model did not finish before the time limit. The provider may be slow or stuck."
+      },
+      "provider_unavailable": {
+        "title": "Provider unavailable",
+        "description": "The provider is down or could not be reached. Retry in a few minutes."
+      },
+      "interrupted": {
+        "title": "Answer interrupted",
+        "description": "The page was reloaded while this answer was streaming, so it is incomplete."
+      },
+      "other": {
+        "title": "This model failed",
+        "description": "The provider returned an error. The details are below."
+      }
     }
   },
   "organisms": {

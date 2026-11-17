@@ -126,6 +126,35 @@
       "votes_other": "{{count}} voix",
       "abstained": "Pas de réponse courte : {{models}}",
       "and": "et"
+    },
+    "responseErrorNotice": {
+      "retry": "Réessayer ce modèle",
+      "invalid_key": {
+        "title": "Clé API refusée",
+        "description": "Le fournisseur n'a pas accepté votre clé API. Vérifiez la clé sur la page de configuration, puis réessayez."
+      },
+      "rate_limited": {
+        "title": "Limite de requêtes atteinte",
+        "description": "Le fournisseur limite les requêtes sur votre clé. Patientez un instant, puis réessayez.",
+        "descriptionWithDelay_one": "Le fournisseur limite les requêtes sur votre clé. Réessayez dans {{count}} seconde.",
+        "descriptionWithDelay_other": "Le fournisseur limite les requêtes sur votre clé. Réessayez dans {{count}} secondes."
+      },
+      "timeout": {
+        "title": "Pas de réponse à temps",
+        "description": "Le modèle n'a pas terminé avant la limite de temps. Le fournisseur est peut-être lent ou bloqué."
+      },
+      "provider_unavailable": {
+        "title": "Fournisseur indisponible",
+        "description": "Le fournisseur est en panne ou injoignable. Réessayez dans quelques minutes."
+      },
+      "interrupted": {
+        "title": "Réponse interrompue",
+        "description": "La page a été rechargée pendant la réponse, elle est donc incomplète."
+      },
+      "other": {
+        "title": "Ce modèle a échoué",
+        "description": "Le fournisseur a renvoyé une erreur. Les détails sont ci-dessous."
+      }
     }
   },
   "organisms": {

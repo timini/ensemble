@@ -113,14 +113,16 @@ export const CompleteCollapsed: Story = {
   },
 };
 
-// Error states
+// Error states, one per error kind. Each offers a retry for that model only.
 export const ErrorNetwork: Story = {
   args: {
     modelName: 'GPT-4',
     provider: 'openai',
     status: 'error',
     responseType: 'ai',
-    error: 'Network error: Unable to connect to API',
+    errorKind: 'provider_unavailable',
+    error: 'OpenAI API error: 503 The server is overloaded.',
+    onRetry: () => undefined,
   },
 };
 
@@ -130,7 +132,10 @@ export const ErrorRateLimit: Story = {
     provider: 'anthropic',
     status: 'error',
     responseType: 'ai',
-    error: 'Rate limit exceeded. Please try again later.',
+    errorKind: 'rate_limited',
+    retryAfterSeconds: 30,
+    error: 'Anthropic API error: 429 Rate limit reached.',
+    onRetry: () => undefined,
   },
 };
 
@@ -140,7 +145,42 @@ export const ErrorInvalidKey: Story = {
     provider: 'google',
     status: 'error',
     responseType: 'ai',
-    error: 'Invalid API key',
+    errorKind: 'invalid_key',
+    error: 'Google API error: [401 Unauthorized] API key not valid.',
+    onRetry: () => undefined,
+  },
+};
+
+export const ErrorTimeout: Story = {
+  args: {
+    modelName: 'Grok 4.7',
+    provider: 'xai',
+    status: 'error',
+    responseType: 'ai',
+    errorKind: 'timeout',
+    error: 'Streaming timeout for xai after 120s. The API may be unresponsive.',
+    onRetry: () => undefined,
+  },
+};
+
+export const ErrorInterrupted: Story = {
+  args: {
+    modelName: 'DeepSeek V4 Pro',
+    provider: 'deepseek',
+    status: 'error',
+    responseType: 'ai',
+    errorKind: 'interrupted',
+    onRetry: () => undefined,
+  },
+};
+
+export const ErrorOther: Story = {
+  args: {
+    modelName: 'GPT-4',
+    provider: 'openai',
+    status: 'error',
+    responseType: 'ai',
+    error: 'OpenAI API error: 400 Unknown model.',
   },
 };
 
