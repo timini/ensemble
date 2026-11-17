@@ -11,6 +11,7 @@ export default defineConfig({
       include: [
         'src/providers/**/*.{ts,js}',
         'src/similarity/**/*.{ts,js}',
+        'src/pricing/**/*.{ts,js}',
       ],
       exclude: [
         'node_modules/',

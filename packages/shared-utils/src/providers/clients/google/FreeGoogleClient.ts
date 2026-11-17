@@ -1,10 +1,11 @@
 import { GoogleGenerativeAI, type ResponseSchema } from '@google/generative-ai';
 import axios from 'axios';
 import { BaseFreeClient, type StreamOptions, type StructuredOptions } from '../base/BaseFreeClient';
-import type { StructuredResponse, ValidationResult } from '../../types';
+import type { StructuredResponse, TokenUsage, ValidationResult } from '../../types';
 import { extractAxiosErrorMessage } from '../../utils/extractAxiosError';
 import { hasNonTextModality } from '../../utils/modelFilters';
 import { sanitizeProviderErrorMessage } from '../../utils/sanitizeSensitiveData';
+import { fromGeminiUsage } from '../../utils/usage';
 import { requestGeminiEmbedding } from '../../embeddings/geminiEmbeddings';
 import { GOOGLE_EMBEDDING_MODEL } from '../../embeddings/models';
 
@@ -124,6 +125,7 @@ export class FreeGoogleClient extends BaseFreeClient {
     const startTime = Date.now();
     let fullResponse = '';
     let tokenCount = 0;
+    let usage: TokenUsage | undefined;
 
     try {
       const genAI = this.createClient(options.apiKey);
@@ -145,9 +147,15 @@ export class FreeGoogleClient extends BaseFreeClient {
         if (chunk.usageMetadata?.totalTokenCount) {
           tokenCount = chunk.usageMetadata.totalTokenCount;
         }
+        usage = fromGeminiUsage(chunk.usageMetadata) ?? usage;
       }
 
-      options.onComplete(fullResponse, Date.now() - startTime, tokenCount > 0 ? tokenCount : undefined);
+      options.onComplete(
+        fullResponse,
+        Date.now() - startTime,
+        tokenCount > 0 ? tokenCount : undefined,
+        usage,
+      );
     } catch (error) {
       // Extract error message from Google SDK error
       const errorMessage = sanitizeProviderErrorMessage(

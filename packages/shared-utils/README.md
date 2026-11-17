@@ -18,6 +18,7 @@ The app's `tsconfig.json` also maps the bare `@ensemble-ai/shared-utils` import 
 | `@ensemble-ai/shared-utils/providers` | `AIProvider` and related types, `ProviderRegistry`, `createProviderClient`, `MockProviderClient`, the six `Free*Client` classes, `sanitizeProviderErrorMessage` |
 | `@ensemble-ai/shared-utils/similarity` | `cosineSimilarity`, `similarityMatrix`, `agreementStatistics`, `normalizeSimilarity` |
 | `@ensemble-ai/shared-utils/security` | `encrypt`, `decrypt`, `deriveKey`, `isWebCryptoAvailable` |
+| `@ensemble-ai/shared-utils/pricing` | `getModelPrice`, `PRICE_TABLE`, `estimateRun`, `countConsensusCalls`, `computeRunCost`, `withUsageTracking`, `estimateTokensFromText` |
 | `@ensemble-ai/shared-utils/consensus` | Re-exports from `@ensemble-ai/consensus-core` and the four strategy packages (kept for backward compatibility; new code can import those packages directly) |
 
 ## Providers (`src/providers/`)
@@ -30,6 +31,15 @@ The app's `tsconfig.json` also maps the bare `@ensemble-ai/shared-utils` import 
 - Perplexity has no `generateStructured` implementation.
 
 Full description: [packages/app/docs/PROVIDER_ARCHITECTURE.md](../app/docs/PROVIDER_ARCHITECTURE.md).
+
+## Pricing (`src/pricing/`)
+
+- `priceTable.ts` is generated; do not edit it by hand. Refresh it with `npm run prices:refresh` (public OpenRouter model lists, no key). The mapping from OpenRouter ids lives in `openRouterMapping.ts` and is tested against fixtures in `src/pricing/__fixtures__/`.
+- `getModelPrice(provider, modelId)` gives USD per million input and output tokens, or `{ status: 'unknown' }`. It also accepts Anthropic ids with dots and Gemini ids with a `models/` prefix.
+- `estimateRun(input)` returns call counts by kind (answers, consensus, embeddings) and a cost range before a run. `countConsensusCalls` mirrors the strategy packages; see the call counts in [docs/ARCHITECTURE.md](../../docs/ARCHITECTURE.md#pricing).
+- `computeRunCost(calls)` prices finished calls and flags the total as estimated when any call's tokens came from text length.
+- `withUsageTracking(provider, name, record)` wraps an `AIProvider` and reports the tokens of every completed call.
+- Provider clients pass `{ inputTokens, outputTokens }` to `onComplete` as a fourth argument when the stream reports usage.
 
 ## Similarity (`src/similarity/`)
 
@@ -66,7 +76,7 @@ npm run lint        # eslint, zero warnings allowed
 npm run clean       # rm -rf dist
 ```
 
-Tests sit next to the code (`*.test.ts`) and in `src/providers/__tests__/`. Coverage is measured for `src/providers` and `src/similarity` only. Thresholds are currently lowered to 65% lines and statements, 75% functions and branches (`vitest.config.ts`).
+Tests sit next to the code (`*.test.ts`) and in `src/providers/__tests__/`. Coverage is measured for `src/providers`, `src/similarity` and `src/pricing`. Thresholds are currently lowered to 65% lines and statements, 75% functions and branches (`vitest.config.ts`).
 
 ## Dependency note
 

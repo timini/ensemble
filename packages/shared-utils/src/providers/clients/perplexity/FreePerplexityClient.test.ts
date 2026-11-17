@@ -152,7 +152,10 @@ describe('FreePerplexityClient', () => {
 
       expect(onError).not.toHaveBeenCalled();
       expect(onChunk.mock.calls.map((call) => call[0])).toEqual(['Hello', ' world']);
-      expect(onComplete).toHaveBeenCalledWith('Hello world', expect.any(Number), 10);
+      expect(onComplete).toHaveBeenCalledWith('Hello world', expect.any(Number), 10, {
+        inputTokens: 4,
+        outputTokens: 6,
+      });
 
       const { url, init, body } = requestOf();
       expect(url).toBe('https://api.perplexity.ai/v1/agent');
@@ -178,7 +181,7 @@ describe('FreePerplexityClient', () => {
       await client.streamResponse('q', 'perplexity-low', vi.fn(), onComplete, onError);
 
       expect(onError).not.toHaveBeenCalled();
-      expect(onComplete).toHaveBeenCalledWith('Hi', expect.any(Number), undefined);
+      expect(onComplete).toHaveBeenCalledWith('Hi', expect.any(Number), undefined, undefined);
     });
 
     it('reports an error event from the stream', async () => {

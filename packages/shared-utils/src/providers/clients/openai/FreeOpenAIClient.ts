@@ -1,8 +1,9 @@
 import OpenAI from 'openai';
 import { BaseFreeClient, type StreamOptions, type StructuredOptions } from '../base/BaseFreeClient';
-import type { StructuredResponse, ValidationResult } from '../../types';
+import type { StructuredResponse, TokenUsage, ValidationResult } from '../../types';
 import { hasNonTextModality } from '../../utils/modelFilters';
 import { sanitizeProviderErrorMessage } from '../../utils/sanitizeSensitiveData';
+import { fromChatCompletionUsage, type ChatCompletionUsage } from '../../utils/usage';
 import { openAISamplingParams } from './openAIModelRules';
 import { requestOpenAICompatibleEmbedding } from '../../embeddings/openAICompatibleEmbeddings';
 import { OPENAI_BASE_URL, OPENAI_EMBEDDING_MODEL } from '../../embeddings/models';
@@ -117,6 +118,7 @@ export class FreeOpenAIClient extends BaseFreeClient {
     const startTime = Date.now();
     let fullResponse = '';
     let tokenCount = 0;
+    let usage: TokenUsage | undefined;
 
     const stream = await client.chat.completions.create({
       model: options.model,
@@ -131,11 +133,12 @@ export class FreeOpenAIClient extends BaseFreeClient {
 
     for await (const chunk of stream as AsyncIterable<{
       choices?: { delta?: { content?: unknown }; finish_reason?: string | null }[];
-      usage?: { total_tokens?: number };
+      usage?: ChatCompletionUsage | null;
     }>) {
       if (chunk.usage?.total_tokens) {
         tokenCount = chunk.usage.total_tokens;
       }
+      usage = fromChatCompletionUsage(chunk.usage) ?? usage;
 
       const choice = chunk.choices?.[0];
       const deltaContent = choice?.delta?.content;
@@ -161,6 +164,11 @@ export class FreeOpenAIClient extends BaseFreeClient {
       }
     }
 
-    options.onComplete(fullResponse, Date.now() - startTime, tokenCount > 0 ? tokenCount : undefined);
+    options.onComplete(
+      fullResponse,
+      Date.now() - startTime,
+      tokenCount > 0 ? tokenCount : undefined,
+      usage,
+    );
   }
 }

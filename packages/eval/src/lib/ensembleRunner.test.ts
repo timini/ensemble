@@ -12,7 +12,12 @@ function buildProvider(args: {
     prompt: string,
     model: string,
     onChunk: (chunk: string) => void,
-    onComplete: (fullResponse: string, responseTime: number, tokenCount?: number) => void,
+    onComplete: (
+      fullResponse: string,
+      responseTime: number,
+      tokenCount?: number,
+      usage?: { inputTokens: number; outputTokens: number },
+    ) => void,
     onError: (error: Error) => void,
     options?: StreamResponseOptions,
   ) => Promise<void>;
@@ -42,10 +47,10 @@ function buildRegistry(providers: Record<EvalProvider, AIProvider>): ProviderReg
 }
 
 describe('EnsembleRunner', () => {
-  it('collects responses, estimates costs, and keeps failed model runs', async () => {
+  it('collects responses, prices reported usage from the shared table, and keeps failed runs', async () => {
     const openaiProvider = buildProvider({
       onStream: async (_prompt, _model, _onChunk, onComplete) => {
-        onComplete('openai answer', 40, 1200);
+        onComplete('openai answer', 40, 1200, { inputTokens: 200, outputTokens: 1000 });
       },
       models: [{ id: 'gpt-4o', costPer1kTokens: 0.01 }],
     });
@@ -81,12 +86,41 @@ describe('EnsembleRunner', () => {
       responseTimeMs: 40,
       tokenCount: 1200,
     });
-    expect(results[0].estimatedCostUsd).toBeCloseTo(0.012, 10);
+    // gpt-4o in the shared price table: $2.50 input, $10 output per million tokens.
+    expect(results[0].estimatedCostUsd).toBeCloseTo((200 * 2.5 + 1000 * 10) / 1e6, 12);
+    expect(results[0].costFromTextLength).toBeUndefined();
+    // No price for an unknown model id: no cost rather than a guess.
+    expect(results[1].estimatedCostUsd).toBeUndefined();
     expect(results[1]).toMatchObject({
       provider: 'anthropic',
       model: 'claude',
       error: 'provider error',
     });
+  });
+
+  it('estimates tokens from text length when the provider reports no usage', async () => {
+    const provider = buildProvider({
+      onStream: async (_prompt, _model, _onChunk, onComplete) => {
+        onComplete('openai answer', 40, 1200);
+      },
+    });
+    const runner = new EnsembleRunner(
+      buildRegistry({
+        openai: provider,
+        anthropic: provider,
+        google: provider,
+        xai: provider,
+        deepseek: provider,
+        perplexity: provider,
+      }),
+      'mock',
+    );
+
+    const [result] = await runner.runPrompt('Test prompt', [{ provider: 'openai', model: 'gpt-4o' }]);
+
+    // 'Test prompt' is 11 characters (3 tokens), 'openai answer' 13 (4 tokens).
+    expect(result.estimatedCostUsd).toBeCloseTo((3 * 2.5 + 4 * 10) / 1e6, 12);
+    expect(result.costFromTextLength).toBe(true);
   });
 
   it('supports configurable delay between starting model calls', async () => {

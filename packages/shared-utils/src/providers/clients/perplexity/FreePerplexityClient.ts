@@ -1,5 +1,6 @@
 import { BaseFreeClient, type StreamOptions } from '../base/BaseFreeClient';
-import type { ValidationResult } from '../../types';
+import type { TokenUsage, ValidationResult } from '../../types';
+import { fromResponsesUsage } from '../../utils/usage';
 import { sanitizeProviderErrorMessage } from '../../utils/sanitizeSensitiveData';
 import {
   PERPLEXITY_API_BASE,
@@ -57,6 +58,7 @@ export class FreePerplexityClient extends BaseFreeClient {
     const startTime = Date.now();
     let fullResponse = '';
     let tokenCount: number | undefined;
+    let usage: TokenUsage | undefined;
 
     try {
       // Effort presets fix their own sampling, so temperature and seed are
@@ -85,6 +87,7 @@ export class FreePerplexityClient extends BaseFreeClient {
           options.onChunk(event.delta);
         } else if (event.type === 'response.completed') {
           tokenCount = event.response?.usage?.total_tokens ?? undefined;
+          usage = fromResponsesUsage(event.response?.usage);
         } else if (event.type === 'response.failed' || event.type === 'error') {
           throw new Error(
             event.response?.error?.message ??
@@ -95,7 +98,7 @@ export class FreePerplexityClient extends BaseFreeClient {
         }
       }
 
-      options.onComplete(fullResponse, Date.now() - startTime, tokenCount || undefined);
+      options.onComplete(fullResponse, Date.now() - startTime, tokenCount || undefined, usage);
     } catch (error) {
       const errorMessage = sanitizeProviderErrorMessage(
         error instanceof Error ? error.message : String(error),

@@ -163,7 +163,8 @@ export class FreeAnthropicClient extends BaseFreeClient {
   protected override async streamWithProvider(options: StreamOptions): Promise<void> {
     const startTime = Date.now();
     let fullResponse = '';
-    let tokenCount = 0;
+    let inputTokens = 0;
+    let outputTokens = 0;
 
     try {
       const client = this.createClient(options.apiKey);
@@ -181,17 +182,24 @@ export class FreeAnthropicClient extends BaseFreeClient {
           const text = event.delta.text;
           fullResponse += text;
           options.onChunk(text);
+        } else if (event.type === 'message_start') {
+          // Input tokens are reported once, at the start of the message.
+          inputTokens = event.message.usage?.input_tokens ?? 0;
         } else if (event.type === 'message_delta' && event.usage) {
-          // usage.output_tokens is in message_delta
+          // output_tokens in message_delta is the running total, not an increment.
           if (event.usage.output_tokens) {
-            tokenCount += event.usage.output_tokens;
+            outputTokens = event.usage.output_tokens;
           }
-        } else if (event.type === 'message_stop') {
-          // Final usage might be here or accumulated
         }
       }
 
-      options.onComplete(fullResponse, Date.now() - startTime, tokenCount > 0 ? tokenCount : undefined);
+      const tokenCount = inputTokens + outputTokens;
+      options.onComplete(
+        fullResponse,
+        Date.now() - startTime,
+        tokenCount > 0 ? tokenCount : undefined,
+        tokenCount > 0 ? { inputTokens, outputTokens } : undefined,
+      );
     } catch (error) {
       // Extract error message from Anthropic SDK error
       const errorMessage = sanitizeProviderErrorMessage(

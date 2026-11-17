@@ -61,7 +61,7 @@ export interface AgentStreamEvent {
   response?: {
     status?: string;
     error?: { message?: string } | null;
-    usage?: { total_tokens?: number } | null;
+    usage?: { input_tokens?: number; output_tokens?: number; total_tokens?: number } | null;
   };
 }
 

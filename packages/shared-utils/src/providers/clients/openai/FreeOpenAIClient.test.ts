@@ -215,6 +215,25 @@ describe('FreeOpenAIClient sampling parameters', () => {
     mocks.openAiChatCreate.mockReset();
   });
 
+  it('reports input and output tokens from the final stream chunk', async () => {
+    mocks.openAiChatCreate.mockResolvedValueOnce({
+      async *[Symbol.asyncIterator]() {
+        yield { choices: [{ delta: { content: 'Hi' } }] };
+        yield {
+          choices: [],
+          usage: { prompt_tokens: 12, completion_tokens: 30, total_tokens: 42 },
+        };
+      },
+    });
+    const client = new FreeOpenAIClient('openai', () => 'sk-test');
+    const onComplete = vi.fn();
+    await client.streamResponse('hi', 'gpt-6-astra', vi.fn(), onComplete, vi.fn());
+    expect(onComplete).toHaveBeenCalledWith('Hi', expect.any(Number), 42, {
+      inputTokens: 12,
+      outputTokens: 30,
+    });
+  });
+
   it.each(['gpt-6-astra', 'gpt-6-luna', 'gpt-5.6-terra', 'gpt-5', 'o3-mini', 'o4-mini'])(
     'omits temperature for reasoning model %s when streaming',
     async (model) => {

@@ -1,9 +1,10 @@
 import type {
   AIProvider,
-  ModelMetadata,
   ProviderRegistry,
   StreamResponseOptions,
+  TokenUsage,
 } from '@ensemble-ai/shared-utils/providers';
+import { costOfTokens, getModelPrice, usageFromText } from '@ensemble-ai/shared-utils/pricing';
 import type { EvalMode, ModelSpec, ProviderResponse } from '../types.js';
 import { isRateLimitOrServerError, retryable, type RetryOptions } from './retryable.js';
 
@@ -19,30 +20,39 @@ function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-function estimateCostUsd(
-  tokenCount: number | undefined,
-  metadata: ModelMetadata | null,
-): number | undefined {
-  if (!metadata || tokenCount === undefined || tokenCount <= 0) {
-    return undefined;
-  }
-
-  return (tokenCount / 1000) * metadata.costPer1kTokens;
+/**
+ * Price one answer with the shared price table. Uses the usage the provider
+ * reported, or estimates tokens from prompt and answer length when it
+ * reported none. Returns no cost for failed calls or models with no price.
+ */
+function priceResponse(
+  provider: string,
+  model: string,
+  prompt: string,
+  result: StreamResult,
+): Pick<ProviderResponse, 'estimatedCostUsd' | 'costFromTextLength'> {
+  if (result.error) return {};
+  const usage = result.usage ?? usageFromText(prompt, result.content);
+  const cost = costOfTokens(getModelPrice(provider, model), usage.inputTokens, usage.outputTokens);
+  if (cost === null) return {};
+  return result.usage ? { estimatedCostUsd: cost } : { estimatedCostUsd: cost, costFromTextLength: true };
 }
+
+type StreamResult = Pick<ProviderResponse, 'content' | 'responseTimeMs' | 'tokenCount' | 'error'> & {
+  usage?: TokenUsage;
+};
 
 async function streamModelResponse(
   client: AIProvider,
   prompt: string,
   model: string,
   streamOptions?: StreamResponseOptions,
-): Promise<Pick<ProviderResponse, 'content' | 'responseTimeMs' | 'tokenCount' | 'error'>> {
+): Promise<StreamResult> {
   return new Promise((resolve) => {
     let content = '';
     let settled = false;
 
-    const safeResolve = (
-      value: Pick<ProviderResponse, 'content' | 'responseTimeMs' | 'tokenCount' | 'error'>,
-    ) => {
+    const safeResolve = (value: StreamResult) => {
       if (settled) {
         return;
       }
@@ -57,11 +67,12 @@ async function streamModelResponse(
         (chunk) => {
           content += chunk;
         },
-        (fullResponse, responseTime, tokenCount) => {
+        (fullResponse, responseTime, tokenCount, usage) => {
           safeResolve({
             content: fullResponse || content,
             responseTimeMs: responseTime,
             tokenCount,
+            ...(usage ? { usage } : {}),
           });
         },
         (error) => {
@@ -116,10 +127,6 @@ export class EnsembleRunner {
       }
 
       const client = this.registry.getProvider(provider, this.mode);
-      const metadata =
-        client.listAvailableModels().find((candidate) => candidate.id === model) ?? null;
-
-      type StreamResult = Pick<ProviderResponse, 'content' | 'responseTimeMs' | 'tokenCount' | 'error'>;
       const result: StreamResult = this.retryOptions
         ? await retryable(
             async () => {
@@ -138,13 +145,12 @@ export class EnsembleRunner {
           }))
         : await streamModelResponse(client, prompt, model, this.streamOptions);
 
-      const estimatedCostUsd = estimateCostUsd(result.tokenCount, metadata);
-
+      const { usage: _usage, ...response } = result;
       return {
         provider,
         model,
-        ...result,
-        ...(estimatedCostUsd === undefined ? {} : { estimatedCostUsd }),
+        ...response,
+        ...priceResponse(provider, model, prompt, result),
       } satisfies ProviderResponse;
     });
 

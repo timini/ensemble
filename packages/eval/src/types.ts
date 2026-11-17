@@ -52,7 +52,10 @@ export interface ProviderResponse {
   content: string;
   responseTimeMs: number;
   tokenCount?: number;
+  /** Cost from the shared price table (packages/shared-utils/src/pricing). */
   estimatedCostUsd?: number;
+  /** True when the provider reported no usage and tokens were estimated from text length. */
+  costFromTextLength?: boolean;
   error?: string;
 }
 

@@ -196,7 +196,9 @@ describe('FreeAnthropicClient', () => {
     it('omits temperature for Claude 5.5 and allows room for thinking', async () => {
       mocks.messagesCreate.mockResolvedValueOnce(
         streamOf([
+          { type: 'message_start', message: { usage: { input_tokens: 5, output_tokens: 1 } } },
           { type: 'content_block_delta', delta: { type: 'text_delta', text: 'Hi' } },
+          { type: 'message_delta', usage: { output_tokens: 2 } },
           { type: 'message_delta', usage: { output_tokens: 3 } },
           { type: 'message_stop' },
         ]),
@@ -212,7 +214,11 @@ describe('FreeAnthropicClient', () => {
 
       expect(onError).not.toHaveBeenCalled();
       expect(onChunk).toHaveBeenCalledWith('Hi');
-      expect(onComplete).toHaveBeenCalledWith('Hi', expect.any(Number), 3);
+      // output_tokens in message_delta is a running total, so the last one counts.
+      expect(onComplete).toHaveBeenCalledWith('Hi', expect.any(Number), 8, {
+        inputTokens: 5,
+        outputTokens: 3,
+      });
       const request = lastRequest();
       expect(request).toMatchObject({ model: 'claude-opus-5-5', stream: true });
       expect(request).not.toHaveProperty('temperature');

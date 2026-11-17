@@ -30,6 +30,10 @@
     "./consensus/*": {
       "types": "./dist/consensus/*.d.ts",
       "import": "./dist/consensus/*.js"
+    },
+    "./pricing": {
+      "types": "./dist/pricing/index.d.ts",
+      "import": "./dist/pricing/index.js"
     }
   },
   "scripts": {
@@ -39,7 +43,8 @@
     "test:ui": "vitest --ui",
     "typecheck": "tsc --noEmit",
     "lint": "eslint . --max-warnings 0",
-    "clean": "rm -rf dist"
+    "clean": "rm -rf dist",
+    "prices:refresh": "tsx scripts/refresh-prices.ts"
   },
   "keywords": [
     "similarity",

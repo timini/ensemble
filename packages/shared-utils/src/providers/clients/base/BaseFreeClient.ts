@@ -5,6 +5,7 @@ import type {
   ProviderName,
   StreamResponseOptions,
   StructuredResponse,
+  TokenUsage,
   ValidationResult,
 } from '../../types';
 import { MockProviderClient } from '../mock/MockProviderClient';
@@ -13,7 +14,12 @@ import { EmbeddingsNotSupportedError } from '../../embeddings/errors';
 
 export interface StreamHandlers {
   onChunk: (chunk: string) => void;
-  onComplete: (fullResponse: string, responseTime: number, tokenCount?: number) => void;
+  onComplete: (
+    fullResponse: string,
+    responseTime: number,
+    tokenCount?: number,
+    usage?: TokenUsage,
+  ) => void;
   onError: (error: Error) => void;
 }
 
@@ -61,7 +67,12 @@ export abstract class BaseFreeClient implements AIProvider {
     prompt: string,
     model: string,
     onChunk: (chunk: string) => void,
-    onComplete: (fullResponse: string, responseTime: number, tokenCount?: number) => void,
+    onComplete: (
+      fullResponse: string,
+      responseTime: number,
+      tokenCount?: number,
+      usage?: TokenUsage,
+    ) => void,
     onError: (error: Error) => void,
     options?: StreamResponseOptions,
   ): Promise<void> {
