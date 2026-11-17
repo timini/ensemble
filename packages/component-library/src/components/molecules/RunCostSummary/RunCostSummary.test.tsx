@@ -190,6 +190,16 @@ describe('RunCostSummary', () => {
       expect(formatUsd(1.856, 'en')).toBe('$1.86');
       expect(formatUsd(0, 'en')).toBe('$0.00');
     });
+
+    it('keeps trailing zeros so amounts read as money', () => {
+      expect(formatUsd(0.9, 'en')).toBe('$0.90');
+      expect(formatUsd(0.5, 'en')).toBe('$0.50');
+      expect(formatUsd(0.0012, 'en')).toBe('$0.0012');
+    });
+
+    it('switches to cents when two significant digits would round up to a dollar', () => {
+      expect(formatUsd(0.996, 'en')).toBe('$1.00');
+    });
   });
 
   describe('internationalization', () => {

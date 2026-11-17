@@ -50,14 +50,18 @@ export interface RunCostActualProps extends CommonProps {
 
 export type RunCostSummaryProps = RunCostEstimateProps | RunCostActualProps;
 
-/** Format a USD amount: two significant digits below one dollar, cents above. */
+/**
+ * Format a USD amount: exactly two significant digits below one dollar
+ * ($0.012, $0.90), cents from there up. Amounts that would round to a
+ * dollar at two significant digits use cents too.
+ */
 export function formatUsd(value: number, locale: string): string {
-  const small = value > 0 && value < 1;
+  const small = value > 0 && value < 0.995;
   return new Intl.NumberFormat(locale, {
     style: 'currency',
     currency: 'USD',
     ...(small
-      ? { maximumSignificantDigits: 2 }
+      ? { minimumSignificantDigits: 2, maximumSignificantDigits: 2 }
       : { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
   }).format(value);
 }
