@@ -131,4 +131,37 @@ describe('consensus', () => {
     expect(sufficient.metrics.majority).toBeDefined();
     expect(sufficient.metrics.majority!.tokenCount).toBe(40);
   });
+
+  it('counts the tokens of the structured extraction call in a decisive majority vote', async () => {
+    const provider: AIProvider = {
+      ...buildProvider(async () => {
+        throw new Error('a decisive vote makes no streaming call');
+      }),
+      generateStructured: async () => {
+        const parsed = {
+          answers: [
+            { id: 'R1', kind: 'number', answer: '42' },
+            { id: 'R2', kind: 'number', answer: '42.0' },
+            { id: 'R3', kind: 'number', answer: '41' },
+          ],
+        };
+        return {
+          parsed: parsed as never,
+          raw: JSON.stringify(parsed),
+          responseTimeMs: 5,
+          usage: { inputTokens: 120, outputTokens: 30 },
+        };
+      },
+    };
+    const responses: ProviderResponse[] = [
+      { provider: 'openai', model: 'a', content: '42', responseTimeMs: 5 },
+      { provider: 'anthropic', model: 'b', content: '42.0', responseTimeMs: 6 },
+      { provider: 'google', model: 'c', content: '41', responseTimeMs: 7 },
+    ];
+
+    const result = await generateConsensus(['majority'], 'Q', responses, provider, 'judge-model');
+
+    expect(result.outputs.majority).toBe('42');
+    expect(result.metrics.majority!.tokenCount).toBe(150);
+  });
 });

@@ -35,10 +35,10 @@ The ensemble is the same model sampled N times at a non-zero temperature, not a 
 ## Per-question steps
 
 1. **Ensemble generation.** N calls (default 5) to the same model at temperature 0.7. The responses are shared by all strategies. Loaded from `.cache/ensemble/` when a matching cache file exists.
-2. **Consensus.** Each selected strategy turns the N responses into one answer using a consensus model (`--consensus-model`). All four strategies are LLM-driven:
+2. **Consensus.** Each selected strategy turns the N responses into one answer using a consensus model (`--consensus-model`). All four use LLM calls; majority uses them only to extract answers unless its vote falls back:
    - `standard`: the consensus model summarizes the responses.
    - `elo`: pairwise LLM comparisons produce Elo ratings; the top responses are synthesized.
-   - `majority`: the consensus model ranks the responses and synthesizes an answer from the top ones. It is not a mechanical vote count over extracted answers.
+   - `majority`: one structured call to the consensus model extracts a short final answer from each response. The answers are normalised and counted. When one answer has the most votes (at least 2), that bare answer is the consensus text; a numeric winner is given as its canonical value (`1/2` becomes `0.5`). On a tie, when most answers are long-form, or when extraction fails, the consensus model ranks the responses and synthesizes an answer from the top ones. That is 1 to 3 calls in all, and the reported `tokenCount` includes the extraction call. Majority results saved before the mechanical vote was added used only the rank-and-synthesize method and are not comparable with newer results. Consensus outputs are not cached, so rerunning `quick-eval` on cached ensembles gives the new behaviour.
    - `council`: extra LLM rounds of critique, rebuttal and judgment.
 3. **Evaluation.** Each individual response and each consensus answer is scored with an LLM judge (`--judge-model`) using `generateStructured` (see `src/lib/evaluators.ts`):
    - GSM8K, MATH-500: numeric judge (a regex numeric evaluator exists for when no judge is configured)

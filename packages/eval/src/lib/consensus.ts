@@ -39,8 +39,11 @@ class TokenCountingProvider implements AIProvider {
     }, onError, options);
   }
 
-  generateStructured<T>(prompt: string, model: string, schema: JsonSchema, options?: GenerateStructuredOptions): Promise<StructuredResponse<T>> {
-    return this.inner.generateStructured(prompt, model, schema, options);
+  async generateStructured<T>(prompt: string, model: string, schema: JsonSchema, options?: GenerateStructuredOptions): Promise<StructuredResponse<T>> {
+    const result = await this.inner.generateStructured<T>(prompt, model, schema, options);
+    this._totalTokens += result.tokenCount
+      ?? (result.usage ? result.usage.inputTokens + result.usage.outputTokens : 0);
+    return result;
   }
   generateEmbeddings(text: string) { return this.inner.generateEmbeddings(text); }
   validateApiKey(apiKey: string) { return this.inner.validateApiKey(apiKey); }
