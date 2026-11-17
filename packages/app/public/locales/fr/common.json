@@ -420,6 +420,8 @@
       "setupBody": "Ajoutez une clé API ou un modèle local. Une seule clé suffit : OpenRouter donne accès à tous les fournisseurs. Les clés sont chiffrées dans ce navigateur et jamais envoyées à notre serveur.",
       "setupAction": "Ajouter une clé ou un modèle local",
       "runPrompt": "Réponses à",
+      "runningStatus_one": "Réponses reçues : {{done}} sur {{count}}. L'accord et le consensus suivent.",
+      "runningStatus_other": "Réponses reçues : {{done}} sur {{count}}. L'accord et le consensus suivent.",
       "benchmarks": "Benchmarks",
       "settings": {
         "title": "Réglages",

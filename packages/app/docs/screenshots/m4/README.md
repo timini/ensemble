@@ -14,7 +14,7 @@ Captured for review of the M4 wireframes and visual refresh, at 375, 768 and 144
 | `app-ready` | Same, after adding keys | Example questions under the composer |
 | `app-models` | Same, picker open | Inline model picker, models of providers with a working key |
 | `app-method` | Same, method menu open | Calls and cost of each method before asking, summarizer choice |
-| `app-running` | Same, about a second after asking | Answers streaming; agreement and consensus waiting |
+| `app-running` | Same, about a second after asking | Answers streaming. Below 1024 px one status row stands in for the agreement and consensus cards until every answer is in |
 | `app-done` | Same, finished run | Agreement score and pairs, consensus with cost, answers |
 | `app-settings` | Same, settings open (`/config` lands here) | Keys, endpoints, embeddings, appearance, data |
 | `cl-empty` | Storybook `Organisms/AppShell/WorkspaceEmpty` | First visit: composer alone |

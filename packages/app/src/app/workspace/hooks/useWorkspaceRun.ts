@@ -142,6 +142,8 @@ export function useWorkspaceRun({
     hasRun,
     prompt: run.prompt,
     running: run.viewResponses.some((r) => r.isStreaming),
+    /** Answers finished (including manual ones) out of all answers of the run. */
+    progress: { done, total },
     /** Starts a run of the current ensemble, dropping any consensus still running for the old one. */
     startRun: (prompt: string) => {
       consensus.restart();

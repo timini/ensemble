@@ -420,6 +420,8 @@
       "setupBody": "Add one API key or a local model. One key is enough: OpenRouter reaches every provider. Keys are encrypted in this browser and never sent to our server.",
       "setupAction": "Add a key or local model",
       "runPrompt": "Answers to",
+      "runningStatus_one": "{{done}} of {{count}} answer in. Agreement and consensus follow.",
+      "runningStatus_other": "{{done}} of {{count}} answers in. Agreement and consensus follow.",
       "benchmarks": "Benchmarks",
       "settings": {
         "title": "Settings",
