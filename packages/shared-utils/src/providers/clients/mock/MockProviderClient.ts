@@ -15,7 +15,7 @@ import type {
   ValidationResult,
   ProviderName,
 } from '../../types.js';
-import { ProviderError, type ProviderErrorKind } from '../../errors/providerError.js';
+import { ProviderError, type ProviderErrorKind } from '../../errors/providerError';
 
 /** Provider failures the mock client can simulate. */
 export type MockErrorScenario = Exclude<ProviderErrorKind, 'other'>;
@@ -23,16 +23,20 @@ export type MockErrorScenario = Exclude<ProviderErrorKind, 'other'>;
 /** Scenario per model id. The key `*` applies to every model. */
 export type MockErrorScenarios = Partial<Record<string, MockErrorScenario>>;
 
+/** Returns the scenario for one call to `model`, or undefined to succeed. */
+export type MockErrorResolver = (model: string) => MockErrorScenario | undefined;
+
 export interface MockClientConfig {
   enableErrors?: boolean;
   errorProbability?: number;
   timeoutAfterMs?: number;
   providerFilter?: ProviderName;
   /**
-   * Simulated failures, as a fixed map or a function read at call time (so
-   * a test or the app's mock mode can change them between calls).
+   * Simulated failures: a fixed map, or a function asked for the model's
+   * scenario at the start of each call (so a test or the app's mock mode can
+   * change them between calls, or fail a model only once).
    */
-  errorScenarios?: MockErrorScenarios | (() => MockErrorScenarios);
+  errorScenarios?: MockErrorScenarios | MockErrorResolver;
 }
 
 interface MockClientResolvedConfig {
@@ -40,7 +44,7 @@ interface MockClientResolvedConfig {
   errorProbability: number;
   timeoutAfterMs: number;
   providerFilter?: ProviderName;
-  errorScenarios?: MockErrorScenarios | (() => MockErrorScenarios);
+  errorScenarios?: MockErrorScenarios | MockErrorResolver;
 }
 
 /** Default client-side timeout for a simulated `timeout` scenario. */
@@ -107,8 +111,8 @@ export class MockProviderClient implements AIProvider {
 
   private scenarioFor(model: string): MockErrorScenario | undefined {
     const source = this.config.errorScenarios;
-    const scenarios = typeof source === 'function' ? source() : source;
-    return scenarios?.[model] ?? scenarios?.['*'];
+    if (typeof source === 'function') return source(model);
+    return source?.[model] ?? source?.['*'];
   }
 
   async streamResponse(

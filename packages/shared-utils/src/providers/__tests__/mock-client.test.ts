@@ -85,7 +85,7 @@ describe('MockProviderClient', () => {
     });
 
     it('times out after timeoutMs for a simulated timeout', async () => {
-      const client = new MockProviderClient({ errorScenarios: () => ({ 'gpt-6-luna': 'timeout' }) });
+      const client = new MockProviderClient({ errorScenarios: (model) => (model === 'gpt-6-luna' ? 'timeout' : undefined) });
       const onError = vi.fn();
       const onComplete = vi.fn();
       const started = Date.now();
