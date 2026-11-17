@@ -95,7 +95,7 @@ Components that read persisted state use `useHasHydrated()` (`src/hooks/useHasHy
   - `eloTopN` (default `3`)
   - `savedEnsembles: { id, name, description, models, summarizer, consensusMethod, eloTopN }[]`
   - `currentEnsembleId`
-- Actions: `addModel(provider, model)`, `removeModel(modelId)`, `setSummarizer(modelId)`, `setEmbeddingsProvider(preference)`, `setConsensusMethod(method)`, `setEloTopN(n)`, `saveEnsemble(name, description)`, `loadEnsemble(id)`, `deleteEnsemble(id)`, `clearSelection()`
+- Actions: `addModel(provider, model)`, `removeModel(modelId)`, `setSummarizer(modelId)`, `setEmbeddingsProvider(preference)`, `setConsensusMethod(method)`, `setEloTopN(n)`, `saveEnsemble(name, description)` (saving under an existing name replaces that ensemble and keeps its id), `loadEnsemble(id)`, `deleteEnsemble(id)`, `clearSelection()`
 
 ### Responses (`responseSlice.ts`)
 

@@ -132,4 +132,54 @@ describe('ensembleSlice', () => {
     expect(state.summarizerModel).toBeNull();
     expect(state.currentEnsembleId).toBeNull();
   });
+
+  it('replaces a saved ensemble when saving under the same name', () => {
+    store.getState().addModel('openai', 'gpt-4o');
+    store.getState().saveEnsemble('Pair', 'first');
+    const firstId = store.getState().savedEnsembles[0]!.id;
+
+    store.getState().addModel('anthropic', 'claude-3-5-sonnet');
+    store.getState().saveEnsemble('  Pair ', 'second');
+
+    const { savedEnsembles, currentEnsembleId } = store.getState();
+    expect(savedEnsembles).toHaveLength(1);
+    expect(savedEnsembles[0]?.id).toBe(firstId);
+    expect(savedEnsembles[0]?.name).toBe('Pair');
+    expect(savedEnsembles[0]?.description).toBe('second');
+    expect(savedEnsembles[0]?.models).toHaveLength(2);
+    expect(currentEnsembleId).toBe(firstId);
+  });
+
+  it('gives ensembles saved in the same millisecond different ids', () => {
+    store.getState().addModel('openai', 'gpt-4o');
+    store.getState().saveEnsemble('One', '');
+    store.getState().saveEnsemble('Two', '');
+
+    const ids = store.getState().savedEnsembles.map((e) => e.id);
+    expect(new Set(ids).size).toBe(2);
+  });
+
+  it('restores the consensus method and top N when loading', () => {
+    store.getState().addModel('openai', 'gpt-4o');
+    store.getState().setConsensusMethod('elo');
+    store.getState().setEloTopN(4);
+    store.getState().saveEnsemble('Elo pair', '');
+    const id = store.getState().savedEnsembles[0]!.id;
+
+    store.getState().clearSelection();
+    store.getState().loadEnsemble(id);
+
+    expect(store.getState().consensusMethod).toBe('elo');
+    expect(store.getState().eloTopN).toBe(4);
+  });
+
+  it('keeps the current selection when a saved ensemble is deleted', () => {
+    store.getState().addModel('openai', 'gpt-4o');
+    store.getState().saveEnsemble('Test', '');
+    const id = store.getState().savedEnsembles[0]!.id;
+
+    store.getState().deleteEnsemble(id);
+
+    expect(store.getState().selectedModels).toHaveLength(1);
+  });
 });

@@ -4,6 +4,10 @@ import type { StoreState } from '~/store';
 
 export const PROVIDERS: Provider[] = ['openai', 'anthropic', 'google', 'xai', 'deepseek', 'perplexity'];
 
+/**
+ * Curated ensembles. Not shown in the app today: the sidebar lists the
+ * user's saved ensembles. Kept for the M4 presets sidebar.
+ */
 export const PRESETS: Preset[] = [
   {
     id: 'research-synthesis',
@@ -40,4 +44,3 @@ export const EMPTY_API_KEYS: StoreState['apiKeys'] = {
   perplexity: null,
 };
 
-export const DEFAULT_ENSEMBLE_NAME = '';

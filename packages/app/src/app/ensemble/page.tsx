@@ -30,7 +30,8 @@ export default function EnsemblePage() {
     handleSummarizerChange,
     apiKeyModal,
     sidebarModels,
-    PRESETS,
+    savedPresets,
+    canSavePreset,
     currentEnsembleName,
     handleLoadPreset,
     handleSavePreset,
@@ -96,8 +97,9 @@ export default function EnsemblePage() {
           <EnsembleSidebar
             selectedModels={sidebarModels}
             summarizerId={displayedSummarizer}
-            presets={PRESETS}
+            presets={savedPresets}
             currentEnsembleName={currentEnsembleName}
+            showDeleteButtons
             onLoadPreset={handleLoadPreset}
             onSavePreset={handleSavePreset}
             onDeletePreset={handleDeletePreset}
@@ -105,8 +107,7 @@ export default function EnsemblePage() {
             manualResponses={viewManualResponses}
             onRemoveModel={handleModelToggle}
             onClearAll={clearSelection}
-            showQuickPresets={false}
-            showSaveEnsemble={false}
+            saveDisabled={!canSavePreset}
             onContinue={handleContinue}
             continueDisabled={!isValid}
           />

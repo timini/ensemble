@@ -11,15 +11,33 @@ interface RunOptions {
   mockErrors?: string;
 }
 
-export async function startMockRun(page: Page, { models, prompt = 'What is 6 times 7?', mockErrors }: RunOptions) {
+/** Provider of a mock model id, from its prefix. */
+const PROVIDER_BY_PREFIX: Array<[string, string]> = [
+  ['gpt', 'openai'],
+  ['claude', 'anthropic'],
+  ['gemini', 'google'],
+  ['grok', 'xai'],
+  ['deepseek', 'deepseek'],
+  ['perplexity', 'perplexity'],
+];
+
+function providerOf(model: string): string {
+  return PROVIDER_BY_PREFIX.find(([prefix]) => model.startsWith(prefix))?.[1] ?? 'openai';
+}
+
+/**
+ * Configure a mock key for OpenAI and for every provider the models need,
+ * then select the models on /ensemble. Leaves the page on /ensemble.
+ */
+export async function selectMockModels(page: Page, models: string[], mockErrors?: string) {
   const query = mockErrors ? `?mockErrors=${encodeURIComponent(mockErrors)}` : '';
   await page.goto(`/config${query}`);
   await page.locator('[data-mode="free"]').click();
-  await page.locator('[data-provider="openai"] input').fill('sk-test-openai-key');
-  await expect(page.getByText(/1 API key configured/i)).toBeVisible();
-  if (models.some((m) => m.startsWith('claude'))) {
-    await page.locator('[data-provider="anthropic"] input').fill('sk-ant-test-key');
-    await expect(page.getByText(/2 API keys configured/i)).toBeVisible();
+  const providers = [...new Set(['openai', ...models.map(providerOf)])];
+  for (const [index, provider] of providers.entries()) {
+    await page.locator(`[data-provider="${provider}"] input`).fill(`sk-test-${provider}-key`);
+    const label = index === 0 ? /1 API key configured/i : new RegExp(`${index + 1} API keys configured`, 'i');
+    await expect(page.getByText(label)).toBeVisible();
   }
   await page.getByRole('button', { name: 'Next', exact: true }).click();
   await expect(page).toHaveURL(/\/ensemble/);
@@ -27,6 +45,10 @@ export async function startMockRun(page: Page, { models, prompt = 'What is 6 tim
   for (const model of models) {
     await page.getByTestId(`model-card-${model}`).click();
   }
+}
+
+export async function startMockRun(page: Page, { models, prompt = 'What is 6 times 7?', mockErrors }: RunOptions) {
+  await selectMockModels(page, models, mockErrors);
   await page.getByRole('button', { name: 'Next', exact: true }).click();
   await expect(page).toHaveURL(/\/prompt/);
 

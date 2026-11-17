@@ -96,10 +96,15 @@ export const createEnsembleSlice: StateCreator<EnsembleSlice> = (set) => ({
 
   saveEnsemble: (name, description) => {
     set((state) => {
-      const id = `ensemble-${Date.now()}`;
-      const newEnsemble: SavedEnsemble = {
+      const trimmedName = name.trim();
+      // Saving under an existing name replaces that ensemble, keeping its id.
+      const existing = state.savedEnsembles.find((e) => e.name === trimmedName);
+      const id =
+        existing?.id ??
+        `ensemble-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+      const ensemble: SavedEnsemble = {
         id,
-        name,
+        name: trimmedName,
         description,
         models: state.selectedModels,
         summarizer: state.summarizerModel ?? '',
@@ -107,7 +112,9 @@ export const createEnsembleSlice: StateCreator<EnsembleSlice> = (set) => ({
         eloTopN: state.eloTopN,
       };
       return {
-        savedEnsembles: [...state.savedEnsembles, newEnsemble],
+        savedEnsembles: existing
+          ? state.savedEnsembles.map((e) => (e.id === id ? ensemble : e))
+          : [...state.savedEnsembles, ensemble],
         currentEnsembleId: id,
       };
     });

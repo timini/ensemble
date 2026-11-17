@@ -1,5 +1,4 @@
 import { useCallback, useState } from 'react';
-import type { TFunction } from 'i18next';
 
 interface ManualResponseFormData {
   response: string;
@@ -21,8 +20,12 @@ interface ManualResponseModalHook {
   handleCancel: () => void;
 }
 
+/**
+ * State of the manual response dialog. On submit it adds the answer as
+ * "Name (Provider)", using `defaultLabel` when no name is given.
+ */
 export function useManualResponseModal(
-  t: TFunction<'common'>,
+  defaultLabel: string,
   addManualResponse: (label: string, response: string) => void,
 ): ManualResponseModalHook {
   const [isOpen, setIsOpen] = useState(false);
@@ -43,11 +46,7 @@ export function useManualResponseModal(
 
   const handleSubmit = useCallback(
     (data: ManualResponseFormData) => {
-      const labelBase =
-        data.modelName.trim() ||
-        t('organisms.manualResponseModal.title', {
-          defaultValue: 'Manual Response',
-        });
+      const labelBase = data.modelName.trim() || defaultLabel;
       const providerSuffix = data.modelProvider.trim()
         ? ` (${data.modelProvider.trim()})`
         : '';
@@ -55,7 +54,7 @@ export function useManualResponseModal(
       addManualResponse(`${labelBase}${providerSuffix}`, data.response.trim());
       closeModal();
     },
-    [addManualResponse, closeModal, t],
+    [addManualResponse, closeModal, defaultLabel],
   );
 
   const handleOpenChange = useCallback(

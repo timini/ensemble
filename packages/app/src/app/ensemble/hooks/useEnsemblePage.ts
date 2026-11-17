@@ -9,15 +9,11 @@ import type { Provider, ValidationStatus } from '@/components/molecules/ApiKeyIn
 import { validateApiKey, createDebouncedValidator } from '~/lib/validation';
 import { getHydratedStatus, createProviderStatusLabels } from '~/lib/providerStatus';
 import { useHasHydrated } from '~/hooks/useHasHydrated';
-import { useManualResponseModal } from './useManualResponseModal';
+import { useManualResponseModal } from '~/hooks/useManualResponseModal';
 import { useApiKeyModal } from './useApiKeyModal';
 import { useAvailableModels } from './useAvailableModels';
-import {
-    EMPTY_API_KEYS,
-    PRESETS,
-    DEFAULT_ENSEMBLE_NAME,
-} from '../page.constants';
-import { logger } from '~/lib/logger';
+import { EMPTY_API_KEYS } from '../page.constants';
+import { savedEnsembleName, toSidebarPresets } from '../savedPresets';
 
 export function useEnsemblePage() {
     const { t } = useTranslation('common');
@@ -37,6 +33,11 @@ export function useEnsemblePage() {
     const addManualResponse = useStore((state) => state.addManualResponse);
     const manualResponses = useStore((state) => state.manualResponses);
     const clearSelection = useStore((state) => state.clearSelection);
+    const savedEnsembles = useStore((state) => state.savedEnsembles);
+    const currentEnsembleId = useStore((state) => state.currentEnsembleId);
+    const saveEnsemble = useStore((state) => state.saveEnsemble);
+    const loadEnsemble = useStore((state) => state.loadEnsemble);
+    const deleteEnsemble = useStore((state) => state.deleteEnsemble);
     const hasHydrated = useHasHydrated();
     const displayMode: OperatingMode = hasHydrated ? mode : 'free';
     const safeApiKeys = hasHydrated ? apiKeys : EMPTY_API_KEYS;
@@ -51,11 +52,11 @@ export function useEnsemblePage() {
 
     const isMockMode = process.env.NEXT_PUBLIC_MOCK_MODE === 'true';
 
-    // Presets matching wireframe design
-    const currentEnsembleName = DEFAULT_ENSEMBLE_NAME;
-
     // Modal state for API key configuration
-    const manualModal = useManualResponseModal(t, addManualResponse);
+    const manualModal = useManualResponseModal(
+        t('organisms.manualResponseModal.title'),
+        addManualResponse,
+    );
 
     // Validation status derived from store
     const validationStatus = useMemo(
@@ -170,17 +171,25 @@ export function useEnsemblePage() {
         router.push('/config');
     };
 
-    // Placeholder handlers for EnsembleManagementPanel
+    // Saved ensembles (presets), persisted with the rest of the store.
+    const viewSavedEnsembles = hasHydrated ? savedEnsembles : [];
+    const savedPresets = toSidebarPresets(viewSavedEnsembles, availableModels);
+    const currentEnsembleName = hasHydrated
+        ? savedEnsembleName(savedEnsembles, currentEnsembleId)
+        : '';
+    const canSavePreset = hasHydrated && selectedModels.length > 0;
+
     const handleLoadPreset = (presetId: string) => {
-        logger.debug('Load preset:', presetId);
+        loadEnsemble(presetId);
     };
 
     const handleSavePreset = (name: string) => {
-        logger.debug('Save preset:', name);
+        if (!canSavePreset) return;
+        saveEnsemble(name, '');
     };
 
     const handleDeletePreset = (presetId: string) => {
-        logger.debug('Delete preset:', presetId);
+        deleteEnsemble(presetId);
     };
 
     const apiKeyModal = useApiKeyModal({
@@ -229,7 +238,8 @@ export function useEnsemblePage() {
         handleSummarizerChange,
         apiKeyModal,
         sidebarModels,
-        PRESETS,
+        savedPresets,
+        canSavePreset,
         currentEnsembleName,
         handleLoadPreset,
         handleSavePreset,
