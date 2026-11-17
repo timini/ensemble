@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef } from "react";
 import {
   ENDPOINT_PRESETS,
   getEndpointPreset,
+  isLocalEndpoint,
   type EndpointPresetId,
 } from "@ensemble-ai/shared-utils/providers";
 import type {
@@ -24,7 +25,9 @@ const PRESET_OPTIONS: EndpointPresetOption[] = ENDPOINT_PRESETS.map(
 /**
  * State and handlers for the OpenAI-compatible endpoints on the config page.
  * An endpoint is checked (`GET /models`) when it is added, 500 ms after an
- * edit, and on load when its status is idle.
+ * edit of its base URL, key or embedding model, and on load when its status
+ * is idle or its embedding model has not been looked up yet. It shows as
+ * Local only when its preset is local and its base URL is loopback.
  *
  * @param enabled - false outside Free mode, or before the store has hydrated
  */
@@ -47,12 +50,15 @@ export function useEndpointConfiguration(enabled: boolean) {
       const current = useStore.getState().endpoints.find((e) => e.id === id);
       if (
         current?.baseURL !== endpoint.baseURL ||
-        current.apiKey !== endpoint.apiKey
+        current.apiKey !== endpoint.apiKey ||
+        current.embeddingModel !== endpoint.embeddingModel
       )
         return;
       setEndpointStatus(id, result.status, {
         error: result.error,
+        errorCode: result.errorCode,
         modelCount: result.modelCount,
+        embeddingModelFound: result.embeddingModelFound,
       });
     },
     [setEndpointStatus],
@@ -72,7 +78,11 @@ export function useEndpointConfiguration(enabled: boolean) {
   useEffect(() => {
     if (!enabled) return;
     endpoints
-      .filter((e) => e.status === "idle")
+      .filter(
+        (e) =>
+          e.status === "idle" ||
+          (e.status === "valid" && e.embeddingModelFound === undefined),
+      )
       .forEach((e) => scheduleCheck(e.id));
   }, [enabled, endpoints, scheduleCheck]);
 
@@ -94,8 +104,10 @@ export function useEndpointConfiguration(enabled: boolean) {
           embeddingModel: endpoint.embeddingModel,
           status: endpoint.status,
           error: endpoint.error,
+          errorCode: endpoint.errorCode,
           modelCount: endpoint.modelCount,
-          local: preset.local,
+          embeddingModelFound: endpoint.embeddingModelFound,
+          local: isLocalEndpoint(preset.id, endpoint.baseURL),
           requiresKey: preset.requiresKey,
         };
       }),
@@ -119,7 +131,7 @@ export function useEndpointConfiguration(enabled: boolean) {
       return;
     }
     updateEndpoint(id, { [field]: value });
-    if (field === "baseURL") scheduleCheck(id);
+    scheduleCheck(id);
   };
 
   const onRemove = (id: string) => {
@@ -138,7 +150,7 @@ export function useEndpointConfiguration(enabled: boolean) {
 
 /**
  * Key statuses for the embeddings setting, plus `openai-compatible`: valid
- * when a connected endpoint has an embedding model.
+ * when a connected endpoint has an embedding model the server lists.
  *
  * @param statuses - hydrated key validation status per provider
  * @param enabled - false before the store has hydrated

@@ -17,6 +17,7 @@ function endpoint(patch: Partial<EndpointEntry>): EndpointEntry {
     encryptedApiKey: null,
     embeddingModel: "",
     status: "idle",
+    embeddingModelFound: true,
     ...patch,
   };
 }
@@ -46,6 +47,23 @@ describe("endpointsProviderStatus", () => {
 });
 
 describe("embeddings from endpoints", () => {
+  it("needs the check to have found the embedding model on the server", () => {
+    expect(
+      canEmbedWithEndpoints([
+        endpoint({
+          status: "valid",
+          embeddingModel: "nomic-embed-text",
+          embeddingModelFound: false,
+        }),
+      ]),
+    ).toBe(false);
+    expect(
+      canEmbedWithEndpoints([
+        endpoint({ status: "valid", embeddingModel: "nomic-embed-text", embeddingModelFound: undefined }),
+      ]),
+    ).toBe(false);
+  });
+
   it("needs a connected endpoint with an embedding model", () => {
     expect(canEmbedWithEndpoints([endpoint({ status: "valid" })])).toBe(false);
     expect(

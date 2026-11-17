@@ -20,6 +20,7 @@ import {
   type OpenAICompatibleEndpointConfig,
 } from "@ensemble-ai/shared-utils/providers";
 import type { ValidationStatus } from "@/components/molecules/ApiKeyInput";
+import type { EndpointErrorCode } from "@/components/molecules/EndpointInput";
 import { toError } from "~/lib/errors";
 import { logger } from "~/lib/logger";
 
@@ -37,9 +38,18 @@ export interface EndpointEntry {
   /** Embedding model on this server, used for agreement scores. */
   embeddingModel: string;
   status: ValidationStatus;
+  /** Server error from the last check. */
   error?: string;
+  /** Check failure with no server message, translated by the UI. */
+  errorCode?: EndpointErrorCode;
   /** Models listed by the last successful check. */
   modelCount?: number;
+  /**
+   * Whether the last check found the embedding model in the server's list.
+   * Unset until a check runs with the current embedding model. Only a found
+   * model is used for embeddings.
+   */
+  embeddingModelFound?: boolean;
 }
 
 export interface EndpointsSlice {
@@ -47,7 +57,10 @@ export interface EndpointsSlice {
 
   /** Add an endpoint from a preset and return its id. */
   addEndpoint: (presetId: EndpointPresetId) => string;
-  /** Change the base URL or embedding model. A new base URL needs a new check. */
+  /**
+   * Change the base URL or embedding model. A new base URL needs a new check;
+   * a new embedding model needs one before it is used.
+   */
   updateEndpoint: (
     id: string,
     patch: Partial<Pick<EndpointEntry, "baseURL" | "embeddingModel">>,
@@ -57,23 +70,30 @@ export interface EndpointsSlice {
   setEndpointStatus: (
     id: string,
     status: ValidationStatus,
-    details?: { error?: string; modelCount?: number },
+    details?: Pick<
+      EndpointEntry,
+      "error" | "errorCode" | "modelCount" | "embeddingModelFound"
+    >,
   ) => void;
   /** Decrypt persisted keys after the store loads, and reset unfinished checks. */
   initializeEndpointKeys: () => Promise<void>;
 }
 
-/** Endpoints for the provider client: connected ones only, with decrypted keys. */
+/**
+ * Endpoints for the provider client: connected ones only, with decrypted
+ * keys. The embedding model is passed on only when the check found it, so
+ * the client never sends embeddings to a model the server does not have.
+ */
 export function selectEndpointConfigs(
   state: Pick<EndpointsSlice, "endpoints">,
 ): OpenAICompatibleEndpointConfig[] {
   return state.endpoints
     .filter((endpoint) => endpoint.status === "valid")
-    .map(({ id, baseURL, apiKey, embeddingModel }) => ({
+    .map(({ id, baseURL, apiKey, embeddingModel, embeddingModelFound }) => ({
       id,
       baseURL,
       apiKey,
-      embeddingModel,
+      embeddingModel: embeddingModelFound ? embeddingModel : "",
     }));
 }
 
@@ -128,16 +148,25 @@ export const createEndpointsSlice: StateCreator<EndpointsSlice> = (
     },
 
     updateEndpoint: (id, patch) =>
-      patchEndpoint(id, (entry) =>
-        patch.baseURL !== undefined && patch.baseURL !== entry.baseURL
-          ? {
-              ...patch,
-              status: "idle",
-              error: undefined,
-              modelCount: undefined,
-            }
-          : patch,
-      ),
+      patchEndpoint(id, (entry) => {
+        if (patch.baseURL !== undefined && patch.baseURL !== entry.baseURL) {
+          return {
+            ...patch,
+            status: "idle",
+            error: undefined,
+            errorCode: undefined,
+            modelCount: undefined,
+            embeddingModelFound: undefined,
+          };
+        }
+        if (
+          patch.embeddingModel !== undefined &&
+          patch.embeddingModel !== entry.embeddingModel
+        ) {
+          return { ...patch, embeddingModelFound: undefined };
+        }
+        return patch;
+      }),
 
     setEndpointApiKey: async (id, key) => {
       const trimmed = key.trim();
@@ -147,6 +176,7 @@ export const createEndpointsSlice: StateCreator<EndpointsSlice> = (
           encryptedApiKey: null,
           status: "idle",
           error: undefined,
+          errorCode: undefined,
         }));
         return;
       }
@@ -157,6 +187,7 @@ export const createEndpointsSlice: StateCreator<EndpointsSlice> = (
           encryptedApiKey,
           status: "idle",
           error: undefined,
+          errorCode: undefined,
         }));
       } catch (error: unknown) {
         const normalized = toError(
@@ -177,7 +208,9 @@ export const createEndpointsSlice: StateCreator<EndpointsSlice> = (
       patchEndpoint(id, () => ({
         status,
         error: details?.error,
+        errorCode: details?.errorCode,
         modelCount: details?.modelCount,
+        embeddingModelFound: details?.embeddingModelFound,
       })),
 
     initializeEndpointKeys: async () => {

@@ -4,10 +4,15 @@ import { useStore } from "~/store";
 import { useEndpointConfiguration } from "../useEndpointConfiguration";
 
 vi.mock("~/lib/endpointValidation", () => ({
-  checkEndpoint: vi.fn(async (endpoint: { baseURL: string }) =>
-    endpoint.baseURL.includes("down")
-      ? { status: "invalid", error: "Failed to fetch" }
-      : { status: "valid", modelCount: 2 },
+  checkEndpoint: vi.fn(
+    async (endpoint: { baseURL: string; embeddingModel: string }) =>
+      endpoint.baseURL.includes("down")
+        ? { status: "invalid", error: "Failed to fetch" }
+        : {
+            status: "valid",
+            modelCount: 2,
+            embeddingModelFound: endpoint.embeddingModel === "nomic-embed-text",
+          },
   ),
 }));
 
@@ -65,6 +70,36 @@ describe("useEndpointConfiguration", () => {
     expect(useStore.getState().endpoints[0]).toMatchObject({
       status: "invalid",
       error: "Failed to fetch",
+    });
+  });
+
+  it("shows the Local badge only for a local preset at a loopback URL", () => {
+    const { result } = renderHook(() => useEndpointConfiguration(true));
+    act(() => result.current.onAdd("vllm"));
+    expect(result.current.items[0]).toMatchObject({ local: true });
+    act(() =>
+      result.current.onChange("vllm", "baseURL", "https://gpu.example.com/v1"),
+    );
+    expect(result.current.items[0]).toMatchObject({ local: false });
+  });
+
+  it("checks again after the embedding model changes", async () => {
+    const { result } = renderHook(() => useEndpointConfiguration(true));
+    act(() => result.current.onAdd("ollama"));
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(600);
+    });
+    expect(useStore.getState().endpoints[0]).toMatchObject({
+      embeddingModelFound: true,
+    });
+    act(() => result.current.onChange("ollama", "embeddingModel", "missing"));
+    expect(useStore.getState().endpoints[0]?.embeddingModelFound).toBeUndefined();
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(600);
+    });
+    expect(useStore.getState().endpoints[0]).toMatchObject({
+      status: "valid",
+      embeddingModelFound: false,
     });
   });
 

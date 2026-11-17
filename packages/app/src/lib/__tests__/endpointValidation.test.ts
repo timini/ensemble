@@ -29,7 +29,29 @@ describe("checkEndpoint", () => {
     expect(await checkEndpoint(endpoint, fetchImpl)).toEqual({
       status: "valid",
       modelCount: 2,
+      embeddingModelFound: false,
     });
+  });
+
+  it("says whether the embedding model is listed, allowing Ollama's :latest tag", async () => {
+    process.env.NEXT_PUBLIC_MOCK_MODE = "false";
+    const fetchImpl = vi
+      .fn()
+      .mockImplementation(async () =>
+        json({ data: [{ id: "llama3" }, { id: "nomic-embed-text:latest" }] }),
+      );
+    expect(
+      await checkEndpoint(
+        { ...endpoint, embeddingModel: "nomic-embed-text" },
+        fetchImpl,
+      ),
+    ).toMatchObject({ status: "valid", embeddingModelFound: true });
+    expect(
+      await checkEndpoint(
+        { ...endpoint, embeddingModel: "mxbai-embed-large" },
+        fetchImpl,
+      ),
+    ).toMatchObject({ status: "valid", embeddingModelFound: false });
   });
 
   it("reports the error of an endpoint that fails", async () => {
@@ -56,7 +78,7 @@ describe("checkEndpoint", () => {
     const fetchImpl = vi.fn();
     expect(
       await checkEndpoint({ ...endpoint, baseURL: " " }, fetchImpl),
-    ).toMatchObject({ status: "invalid" });
+    ).toEqual({ status: "invalid", errorCode: "baseUrlRequired" });
     expect(fetchImpl).not.toHaveBeenCalled();
   });
 
@@ -66,7 +88,17 @@ describe("checkEndpoint", () => {
     expect(await checkEndpoint(endpoint, fetchImpl)).toEqual({
       status: "valid",
       modelCount: 3,
+      embeddingModelFound: true,
     });
     expect(fetchImpl).not.toHaveBeenCalled();
+  });
+
+  it("gives a code, not English text, when the request fails without a message", async () => {
+    process.env.NEXT_PUBLIC_MOCK_MODE = "false";
+    const fetchImpl = vi.fn().mockRejectedValue(new Error(""));
+    expect(await checkEndpoint(endpoint, fetchImpl)).toEqual({
+      status: "invalid",
+      errorCode: "unreachable",
+    });
   });
 });

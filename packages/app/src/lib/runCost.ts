@@ -10,6 +10,7 @@ import {
   estimateTokensFromText,
   usageFromText,
   type CallUsage,
+  type EndpointLocation,
   type EstimateRunInput,
   type ModelRef,
 } from "@ensemble-ai/shared-utils/pricing";
@@ -19,10 +20,20 @@ import type {
   ModelSelection,
 } from "~/store/slices/ensembleSlice";
 import { FALLBACK_MODELS } from "~/lib/models";
-import { endpointEmbeddingModelRef } from "~/lib/endpointStatus";
-import type { EndpointEntry } from "~/store/slices/endpointsSlice";
+import {
+  endpointEmbeddingModelRef,
+  type EndpointLike,
+} from "~/lib/endpointStatus";
 
-type EndpointLike = Pick<EndpointEntry, "id" | "status" | "embeddingModel">;
+/** An endpoint as pricing needs it: its embedding model and its base URL. */
+type PricedEndpoint = EndpointLike & { baseURL: string };
+
+/** The id and base URL of each endpoint, which decide how its models are priced. */
+export function endpointLocations(
+  endpoints: readonly Pick<PricedEndpoint, "id" | "baseURL">[] = [],
+): EndpointLocation[] {
+  return endpoints.map(({ id, baseURL }) => ({ id, baseURL }));
+}
 
 const EMBEDDING_MODELS: Record<string, string> = {
   openai: OPENAI_EMBEDDING_MODEL,
@@ -61,8 +72,8 @@ export interface BuildEstimateInputOptions {
   summarizerModel: string | null;
   eloTopN: number;
   embeddingsProvider: string | null;
-  /** OpenAI-compatible endpoints, to name their embedding model. */
-  endpoints?: readonly EndpointLike[];
+  /** OpenAI-compatible endpoints, to name their embedding model and price their models. */
+  endpoints?: readonly PricedEndpoint[];
   prompt: string;
 }
 
@@ -81,6 +92,7 @@ export function buildEstimateInput(
     eloTopN: options.eloTopN,
     embeddings: embeddingModelRef(options.embeddingsProvider, options.endpoints),
     promptTokens: estimateTokensFromText(options.prompt),
+    endpoints: endpointLocations(options.endpoints),
   };
 }
 
@@ -98,6 +110,7 @@ export interface BuildRunCallUsageOptions {
   /** OpenAI-compatible endpoints, to name their embedding model. */
   endpoints?: readonly EndpointLike[];
 }
+
 
 /**
  * Every call of a finished run with its tokens: the answers (reported usage,

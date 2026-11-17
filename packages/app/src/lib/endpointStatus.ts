@@ -3,7 +3,10 @@ import type { ModelRef } from "@ensemble-ai/shared-utils/pricing";
 import type { ValidationStatus } from "@/components/molecules/ApiKeyInput";
 import type { EndpointEntry } from "~/store/slices/endpointsSlice";
 
-type EndpointLike = Pick<EndpointEntry, "id" | "status" | "embeddingModel">;
+export type EndpointLike = Pick<
+  EndpointEntry,
+  "id" | "status" | "embeddingModel" | "embeddingModelFound"
+>;
 
 /**
  * One status for the `openai-compatible` provider from all its endpoints:
@@ -20,19 +23,23 @@ export function endpointsProviderStatus(
 }
 
 /**
- * The endpoint used for embeddings: the first connected one with an
- * embedding model, matching OpenAICompatibleEndpointsClient, which only sees
- * connected endpoints.
+ * The endpoint used for embeddings: the first connected one whose embedding
+ * model the check found on the server. This matches
+ * OpenAICompatibleEndpointsClient, which only sees connected endpoints and
+ * only their found embedding models (selectEndpointConfigs).
  */
 export function embeddingsEndpoint(
   endpoints: readonly EndpointLike[],
 ): EndpointLike | undefined {
   return endpoints.find(
-    (endpoint) => endpoint.status === "valid" && endpoint.embeddingModel.trim(),
+    (endpoint) =>
+      endpoint.status === "valid" &&
+      endpoint.embeddingModelFound === true &&
+      endpoint.embeddingModel.trim() !== "",
   );
 }
 
-/** True when a connected endpoint has an embedding model. */
+/** True when a connected endpoint has an embedding model the server lists. */
 export function canEmbedWithEndpoints(
   endpoints: readonly EndpointLike[],
 ): boolean {

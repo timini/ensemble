@@ -30,7 +30,12 @@ function response(overrides: Partial<ModelResponse>): ModelResponse {
 describe("embeddingModelRef", () => {
   it("names the endpoint embedding model for openai-compatible", () => {
     const endpoints = [
-      { id: "ollama", status: "valid" as const, embeddingModel: "nomic-embed-text" },
+      {
+        id: "ollama",
+        status: "valid" as const,
+        embeddingModel: "nomic-embed-text",
+        embeddingModelFound: true,
+      },
     ];
     expect(embeddingModelRef("openai-compatible", endpoints)).toEqual({
       provider: "openai-compatible",
@@ -74,7 +79,31 @@ describe("buildEstimateInput", () => {
       eloTopN: 3,
       embeddings: { provider: "openai", modelId: "text-embedding-3-small" },
       promptTokens: 100,
+      endpoints: [],
     });
+  });
+
+  it("passes the endpoint base URLs on, so pricing can tell local from remote", () => {
+    const input = buildEstimateInput({
+      selectedModels: [],
+      manualResponseCount: 0,
+      consensusMethod: "standard",
+      summarizerModel: null,
+      eloTopN: 3,
+      embeddingsProvider: null,
+      endpoints: [
+        {
+          id: "vllm",
+          baseURL: "https://gpu.example.com/v1",
+          status: "valid",
+          embeddingModel: "",
+        },
+      ],
+      prompt: "",
+    });
+    expect(input.endpoints).toEqual([
+      { id: "vllm", baseURL: "https://gpu.example.com/v1" },
+    ]);
   });
 
   it("leaves the summarizer to the default when none is set or its provider is unknown", () => {

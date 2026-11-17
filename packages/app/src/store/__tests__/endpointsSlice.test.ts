@@ -149,7 +149,10 @@ describe("endpointsSlice", () => {
   it("gives the client only connected endpoints, with their keys", () => {
     store.getState().addEndpoint("ollama");
     store.getState().addEndpoint("groq");
-    store.getState().setEndpointStatus("ollama", "valid", { modelCount: 1 });
+    store.getState().setEndpointStatus("ollama", "valid", {
+      modelCount: 1,
+      embeddingModelFound: true,
+    });
     expect(selectEndpointConfigs(store.getState())).toEqual([
       {
         id: "ollama",
@@ -158,5 +161,26 @@ describe("endpointsSlice", () => {
         embeddingModel: "nomic-embed-text",
       },
     ]);
+  });
+
+  it("withholds an embedding model the server does not list", () => {
+    store.getState().addEndpoint("ollama");
+    store.getState().setEndpointStatus("ollama", "valid", {
+      modelCount: 1,
+      embeddingModelFound: false,
+    });
+    expect(selectEndpointConfigs(store.getState())[0]?.embeddingModel).toBe("");
+  });
+
+  it("forgets whether the embedding model was found when it changes", () => {
+    store.getState().addEndpoint("ollama");
+    store.getState().setEndpointStatus("ollama", "valid", {
+      embeddingModelFound: true,
+    });
+    store.getState().updateEndpoint("ollama", { embeddingModel: "other" });
+    expect(store.getState().endpoints[0]).toMatchObject({
+      status: "valid",
+      embeddingModelFound: undefined,
+    });
   });
 });

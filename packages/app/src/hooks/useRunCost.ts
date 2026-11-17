@@ -1,16 +1,17 @@
 import { useMemo } from "react";
 import {
   computeRunCost,
+  PRICE_TABLE,
   type RunCost,
 } from "@ensemble-ai/shared-utils/pricing";
 import { useStore, type ModelResponse } from "~/store";
-import { buildRunCallUsage } from "~/lib/runCost";
+import { buildRunCallUsage, endpointLocations } from "~/lib/runCost";
 import { selectRunPrompt } from "~/store/slices/responseSlice";
 
 /**
  * Cost of the current run so far: answers, consensus calls and embedding
- * calls, priced with the shared table. Returns null until every answer has
- * finished.
+ * calls, priced with the shared table. Endpoint models are priced from
+ * their endpoint's base URL. Returns null until every answer has finished.
  */
 export function useRunCost(
   responses: ModelResponse[],
@@ -37,6 +38,8 @@ export function useRunCost(
         embeddingsSource,
         endpoints,
       }),
+      PRICE_TABLE,
+      endpointLocations(endpoints),
     );
   }, [
     prompt,
