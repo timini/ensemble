@@ -17,8 +17,11 @@ import type {
 } from '../../types.js';
 import { ProviderError, type ProviderErrorKind } from '../../errors/providerError';
 
-/** Provider failures the mock client can simulate. */
-export type MockErrorScenario = Exclude<ProviderErrorKind, 'other'>;
+/**
+ * Provider failures the mock client can simulate. A missing key is not
+ * simulated: the mock client needs no key.
+ */
+export type MockErrorScenario = Exclude<ProviderErrorKind, 'other' | 'missing_key'>;
 
 /** Scenario per model id. The key `*` applies to every model. */
 export type MockErrorScenarios = Partial<Record<string, MockErrorScenario>>;

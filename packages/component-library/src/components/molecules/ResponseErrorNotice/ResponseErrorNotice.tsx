@@ -10,6 +10,7 @@ import { RotateCcw } from 'lucide-react';
  */
 export type ResponseErrorKind =
   | 'invalid_key'
+  | 'missing_key'
   | 'rate_limited'
   | 'timeout'
   | 'provider_unavailable'

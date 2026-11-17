@@ -4,7 +4,8 @@ import { sanitizeProviderErrorMessage } from '../utils/sanitizeSensitiveData';
 /**
  * What went wrong with a provider call, in terms the UI can act on.
  *
- * - `invalid_key`: the provider rejected the key (401 or 403), or no key is set
+ * - `invalid_key`: the provider rejected the key (401 or 403)
+ * - `missing_key`: no key is set for the provider, so no request was sent
  * - `rate_limited`: 429; `retryAfterSeconds` is set when the provider said
  * - `timeout`: the client gave up waiting (see DEFAULT_STREAM_TIMEOUT_MS)
  * - `provider_unavailable`: 5xx or a network failure
@@ -12,6 +13,7 @@ import { sanitizeProviderErrorMessage } from '../utils/sanitizeSensitiveData';
  */
 export type ProviderErrorKind =
   | 'invalid_key'
+  | 'missing_key'
   | 'rate_limited'
   | 'timeout'
   | 'provider_unavailable'
@@ -91,7 +93,7 @@ function kindOf(error: unknown, status: number | undefined, message: string): Pr
   const name = error instanceof Error ? error.name : '';
   if (name === 'APIConnectionTimeoutError' || /timed? ?out/i.test(message)) return 'timeout';
   if (name === 'APIConnectionError') return 'provider_unavailable';
-  if (/missing api key/i.test(message)) return 'invalid_key';
+  if (/missing api key/i.test(message)) return 'missing_key';
   if (/failed to fetch|fetch failed|networkerror|load failed|econnrefused|econnreset|enotfound|network error/i.test(message)) {
     return 'provider_unavailable';
   }

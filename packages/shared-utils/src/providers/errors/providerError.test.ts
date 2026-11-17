@@ -44,9 +44,9 @@ describe('classifyProviderError', () => {
     expect(classifyProviderError(error).kind).toBe('provider_unavailable');
   });
 
-  it('treats a missing API key as an invalid key', () => {
+  it('treats a missing API key as missing_key, not a rejected key', () => {
     const error = new Error('Missing API key for openai. Configure an API key on the configuration page.');
-    expect(classifyProviderError(error).kind).toBe('invalid_key');
+    expect(classifyProviderError(error).kind).toBe('missing_key');
   });
 
   it.each(['Failed to fetch', 'fetch failed', 'NetworkError when attempting to fetch resource.', 'connect ECONNREFUSED 127.0.0.1:443'])(

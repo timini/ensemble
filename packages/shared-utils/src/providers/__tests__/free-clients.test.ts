@@ -657,13 +657,13 @@ describe('Free mode provider clients', () => {
       expect(onError.mock.calls[0][0]).toMatchObject({ kind: 'rate_limited', status: 429, provider: 'openai' });
     });
 
-    it('reports a missing key as invalid_key', async () => {
+    it('reports a missing key as missing_key', async () => {
       const client = new FreeOpenAIClient('openai', () => null);
       const onError = vi.fn();
 
       await client.streamResponse('prompt', 'gpt-4o', vi.fn(), vi.fn(), onError);
 
-      expect(onError.mock.calls[0][0]).toMatchObject({ kind: 'invalid_key' });
+      expect(onError.mock.calls[0][0]).toMatchObject({ kind: 'missing_key' });
     });
 
     it('should complete normally when stream finishes before timeout', async () => {

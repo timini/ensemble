@@ -6,6 +6,7 @@ import { renderWithI18n } from '../../../lib/test-utils/i18n-test-wrapper';
 describe('ResponseErrorNotice', () => {
   it.each([
     ['invalid_key', 'API key rejected'],
+    ['missing_key', 'No API key'],
     ['rate_limited', 'Rate limit reached'],
     ['timeout', 'No answer in time'],
     ['provider_unavailable', 'Provider unavailable'],
@@ -45,9 +46,21 @@ describe('ResponseErrorNotice', () => {
     expect(screen.queryByTestId('retry-button')).not.toBeInTheDocument();
   });
 
+  it('says no key is set, not that a key was rejected, for missing_key', () => {
+    render(<ResponseErrorNotice kind="missing_key" />);
+    const description = screen.getByTestId('response-error-description');
+    expect(description).toHaveTextContent('No API key is set for this provider');
+    expect(description).not.toHaveTextContent(/did not accept/i);
+  });
+
   it('renders French text', () => {
     renderWithI18n(<ResponseErrorNotice kind="invalid_key" onRetry={vi.fn()} />, { language: 'fr' });
     expect(screen.getByTestId('response-error-title')).toHaveTextContent('Clé API refusée');
     expect(screen.getByTestId('retry-button')).toHaveTextContent('Réessayer');
+  });
+
+  it('renders French text for a missing key', () => {
+    renderWithI18n(<ResponseErrorNotice kind="missing_key" />, { language: 'fr' });
+    expect(screen.getByTestId('response-error-title')).toHaveTextContent('Aucune clé API');
   });
 });

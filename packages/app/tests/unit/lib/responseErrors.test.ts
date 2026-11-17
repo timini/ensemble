@@ -19,7 +19,7 @@ describe("toResponseError", () => {
     ).toBe("other");
     expect(
       toResponseError(new Error("Missing API key for openai.")).details.kind,
-    ).toBe("invalid_key");
+    ).toBe("missing_key");
     expect(toResponseError(new TypeError("Failed to fetch")).details.kind).toBe(
       "provider_unavailable",
     );

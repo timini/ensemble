@@ -10,7 +10,7 @@ const meta = {
   argTypes: {
     kind: {
       control: 'select',
-      options: ['invalid_key', 'rate_limited', 'timeout', 'provider_unavailable', 'interrupted', 'other'],
+      options: ['invalid_key', 'missing_key', 'rate_limited', 'timeout', 'provider_unavailable', 'interrupted', 'other'],
     },
   },
 } satisfies Meta<typeof ResponseErrorNotice>;
@@ -21,6 +21,11 @@ type Story = StoryObj<typeof meta>;
 /** The provider rejected the key (401 or 403). */
 export const InvalidKey: Story = {
   args: { kind: 'invalid_key', detail: 'OpenAI API error: 401 Incorrect API key provided.' },
+};
+
+/** No key is set for the provider, so no request was sent. */
+export const MissingKey: Story = {
+  args: { kind: 'missing_key', detail: 'Missing API key for openai. Configure an API key on the configuration page.' },
 };
 
 /** 429 with a Retry-After header. */

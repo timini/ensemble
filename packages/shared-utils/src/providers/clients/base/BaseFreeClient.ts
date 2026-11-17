@@ -87,7 +87,7 @@ export abstract class BaseFreeClient implements AIProvider {
       onError(
         new ProviderError(
           `Missing API key for ${this.provider}. Configure an API key on the configuration page.`,
-          'invalid_key',
+          'missing_key',
           { provider: this.provider },
         ),
       );

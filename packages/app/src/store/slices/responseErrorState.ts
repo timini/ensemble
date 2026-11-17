@@ -10,6 +10,7 @@ import type { ModelResponse } from "./responseTypes";
  */
 export type ResponseErrorKind =
   | "invalid_key"
+  | "missing_key"
   | "rate_limited"
   | "timeout"
   | "provider_unavailable"
