@@ -129,4 +129,102 @@ describe("useStreamingResponses", () => {
     expect(streamResponse).not.toHaveBeenCalled();
     expect(useStore.getState().runPrompt).toBe("Q");
   });
+
+  it("ignores a stream from a run that was reset, so it cannot touch the next run", async () => {
+    type Callbacks = {
+      onChunk: (c: string) => void;
+      onComplete: (full: string, ms: number) => void;
+      onError: (e: Error) => void;
+    };
+    const calls: Callbacks[] = [];
+    streamResponse.mockImplementation(
+      (
+        _prompt: string,
+        _model: string,
+        onChunk: Callbacks["onChunk"],
+        onComplete: Callbacks["onComplete"],
+        onError: Callbacks["onError"],
+      ) => {
+        calls.push({ onChunk, onComplete, onError });
+        return new Promise(() => undefined);
+      },
+    );
+    useStore.setState({ selectedModels: [models[0]!] } as never);
+    vi.useFakeTimers();
+    try {
+      const { result } = renderHook(() =>
+        useStreamingResponses({ mode: "free" }),
+      );
+      act(() => {
+        result.current.startRun("First");
+      });
+      // New question, then a second run with the same model.
+      act(() => {
+        useStore.getState().resetStreamingState();
+      });
+      act(() => {
+        result.current.startRun("Second");
+      });
+      expect(calls).toHaveLength(2);
+      const [first, second] = calls as [Callbacks, Callbacks];
+
+      act(() => {
+        first.onChunk("stale ");
+        second.onChunk("fresh");
+        vi.advanceTimersByTime(100);
+        first.onComplete("stale", 1);
+        first.onError(new Error("stale failure"));
+      });
+      let answer = useStore.getState().responses[0]!;
+      expect(answer.response).toBe("fresh");
+      expect(answer.isComplete).toBe(false);
+      expect(answer.error).toBeNull();
+
+      // The second run's flush timer still runs after the first stream ended.
+      act(() => {
+        second.onChunk(" answer");
+        vi.advanceTimersByTime(100);
+      });
+      expect(useStore.getState().responses[0]!.response).toBe("fresh answer");
+
+      act(() => {
+        second.onComplete("fresh answer", 2);
+      });
+      answer = useStore.getState().responses[0]!;
+      expect(answer.isComplete).toBe(true);
+      expect(answer.responseTime).toBe(2);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("ignores a stream that ends after New question with no new run", async () => {
+    let complete: ((full: string, ms: number) => void) | undefined;
+    let chunk: ((c: string) => void) | undefined;
+    streamResponse.mockImplementation(
+      (
+        _p: string,
+        _m: string,
+        onChunk: (c: string) => void,
+        onComplete: (full: string, ms: number) => void,
+      ) => {
+        chunk = onChunk;
+        complete = onComplete;
+        return new Promise(() => undefined);
+      },
+    );
+    useStore.setState({ selectedModels: [models[0]!] } as never);
+    const { result } = renderHook(() =>
+      useStreamingResponses({ mode: "free" }),
+    );
+    act(() => {
+      result.current.startRun("Q");
+    });
+    act(() => {
+      useStore.getState().resetStreamingState();
+      chunk!("late");
+      complete!("late", 1);
+    });
+    expect(useStore.getState().responses).toEqual([]);
+  });
 });

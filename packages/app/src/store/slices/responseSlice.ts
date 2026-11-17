@@ -45,6 +45,11 @@ export interface ResponseSlice {
    * and cost keep using these). Empty when there is no run.
    */
   runModels: ModelSelection[];
+  /**
+   * When the current run was started (ms since the epoch), or null when
+   * there is no run or it was stored before this field existed.
+   */
+  runStartedAt: number | null;
   responses: ModelResponse[];
   manualResponses: ManualResponse[];
   embeddings: Array<{ modelId: string; embedding: number[] }>;
@@ -59,7 +64,10 @@ export interface ResponseSlice {
   majorityVote: MajorityVoteRecord | null;
 
   setPrompt: (prompt: string) => void;
-  /** Starts a new run: clears the previous results and records its prompt and models. */
+  /**
+   * Starts a new run: clears the previous results and records its prompt,
+   * models and start time.
+   */
   startRun: (prompt: string, models?: ModelSelection[]) => void;
   startStreaming: (
     modelId: string,
@@ -150,6 +158,7 @@ export const createResponseSlice: StateCreator<ResponseSlice> = (set, get) => ({
   prompt: null,
   runPrompt: null,
   runModels: [],
+  runStartedAt: null,
   responses: [],
   manualResponses: [],
   embeddings: [],
@@ -168,7 +177,12 @@ export const createResponseSlice: StateCreator<ResponseSlice> = (set, get) => ({
   // differ by whitespace alone.
   startRun: (prompt, models = []) => {
     get().resetStreamingState();
-    set({ runPrompt: prompt, prompt, runModels: models });
+    set({
+      runPrompt: prompt,
+      prompt,
+      runModels: models,
+      runStartedAt: Date.now(),
+    });
   },
 
   // A new answer, and a restart (retry), start from an empty answer.
@@ -283,6 +297,7 @@ export const createResponseSlice: StateCreator<ResponseSlice> = (set, get) => ({
     set({
       runPrompt: null,
       runModels: [],
+      runStartedAt: null,
       consensusUsage: [],
       majorityVote: null,
       responses: [],

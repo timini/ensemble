@@ -36,6 +36,12 @@ function displayNameOf(model: ModelSelection): string {
  * one model of the run again. Chunks are buffered and flushed to the store
  * every 100 ms. Nothing starts on mount: a stored run is shown as it was,
  * and an answer cut off by a reload is marked interrupted with a retry.
+ *
+ * Each stream has its own buffer and flush timer, and writes to the store
+ * only while it is still the latest stream for its model in the run it was
+ * started for. A stream left over from a run that was reset (New question)
+ * or replaced (a new run or a retry) is ignored, so it can never mix text
+ * into a newer answer or mark it complete.
  */
 export function useStreamingResponses({ mode }: UseStreamingResponsesProps) {
   const startStreaming = useStore((state) => state.startStreaming);
@@ -43,23 +49,10 @@ export function useStreamingResponses({ mode }: UseStreamingResponsesProps) {
   const completeResponse = useStore((state) => state.completeResponse);
   const setError = useStore((state) => state.setError);
 
-  const streamBuffers = useRef<Record<string, string>>({});
-  const flushIntervals = useRef<Record<string, NodeJS.Timeout>>({});
-
-  const flushBuffer = (modelId: string) => {
-    const buffer = streamBuffers.current[modelId];
-    if (buffer) {
-      appendStreamChunk(modelId, buffer);
-      streamBuffers.current[modelId] = "";
-    }
-  };
-
-  const stopFlushing = (modelId: string) => {
-    if (flushIntervals.current[modelId]) {
-      clearInterval(flushIntervals.current[modelId]);
-      delete flushIntervals.current[modelId];
-    }
-  };
+  /** Latest stream token per model id. */
+  const latestStream = useRef<Record<string, object>>({});
+  /** Flush timers of the streams still running, cleared on unmount. */
+  const flushIntervals = useRef<Set<NodeJS.Timeout>>(new Set());
 
   const streamModel = async (modelId: string) => {
     const state = useStore.getState();
@@ -71,16 +64,39 @@ export function useStreamingResponses({ mode }: UseStreamingResponsesProps) {
     const registry = ProviderRegistry.getInstance();
     startStreaming(model.id, model.provider, displayNameOf(model));
 
-    streamBuffers.current[modelId] = "";
-    stopFlushing(modelId);
-    flushIntervals.current[modelId] = setInterval(
-      () => flushBuffer(modelId),
-      100,
-    );
+    const token = {};
+    latestStream.current[modelId] = token;
+    const runStartedAt = state.runStartedAt;
+    const isCurrent = () =>
+      latestStream.current[modelId] === token &&
+      useStore.getState().runStartedAt === runStartedAt;
+
+    let buffer = "";
+    let interval: NodeJS.Timeout | null = null;
+    const stopFlushing = () => {
+      if (interval) {
+        clearInterval(interval);
+        flushIntervals.current.delete(interval);
+        interval = null;
+      }
+    };
+    const flushBuffer = () => {
+      if (!isCurrent()) {
+        stopFlushing();
+        return;
+      }
+      if (buffer) {
+        appendStreamChunk(modelId, buffer);
+        buffer = "";
+      }
+    };
+    interval = setInterval(flushBuffer, 100);
+    flushIntervals.current.add(interval);
 
     const fail = (error: Error) => {
+      stopFlushing();
+      if (!isCurrent()) return;
       logger.error(`[useStreamingResponses] Error for ${modelId}:`, error);
-      stopFlushing(modelId);
       const failure = toResponseError(error);
       setError(model.id, failure.message, failure.details);
     };
@@ -115,11 +131,12 @@ export function useStreamingResponses({ mode }: UseStreamingResponsesProps) {
         prompt,
         model.model,
         (chunk) => {
-          streamBuffers.current[modelId] += chunk;
+          if (isCurrent()) buffer += chunk;
         },
         (_fullResponse, responseTime, tokenCount, usage) => {
-          stopFlushing(modelId);
-          flushBuffer(modelId);
+          flushBuffer();
+          stopFlushing();
+          if (!isCurrent()) return;
           completeResponse(model.id, responseTime, tokenCount, usage);
         },
         fail,
@@ -142,9 +159,8 @@ export function useStreamingResponses({ mode }: UseStreamingResponsesProps) {
   useEffect(() => {
     const intervals = flushIntervals.current;
     return () => {
-      Object.values(intervals).forEach((interval) => {
-        if (interval) clearInterval(interval);
-      });
+      intervals.forEach((interval) => clearInterval(interval));
+      intervals.clear();
     };
   }, []);
 

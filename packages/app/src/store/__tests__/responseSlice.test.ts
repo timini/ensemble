@@ -398,6 +398,21 @@ describe("runPrompt", () => {
   });
 });
 
+describe("runStartedAt", () => {
+  it("records when a run starts and clears it on reset", () => {
+    const store = createStore<ResponseSlice>()(createResponseSlice);
+    expect(store.getState().runStartedAt).toBeNull();
+    const before = Date.now();
+    store.getState().startRun("Q");
+    const startedAt = store.getState().runStartedAt;
+    expect(startedAt).not.toBeNull();
+    expect(startedAt!).toBeGreaterThanOrEqual(before);
+    expect(startedAt!).toBeLessThanOrEqual(Date.now());
+    store.getState().resetStreamingState();
+    expect(store.getState().runStartedAt).toBeNull();
+  });
+});
+
 describe("runModels", () => {
   const astra = { id: "a", provider: "openai" as const, model: "gpt-6-astra" };
   const luna = { id: "l", provider: "openai" as const, model: "gpt-6-luna" };
