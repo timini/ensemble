@@ -92,16 +92,16 @@ Done when: a clean clone builds, CI is green, and the idle bill is near zero.
 
 Goal: everything the UI shows is real.
 
-- [ ] Real embeddings: implement `generateEmbeddings` for OpenAI, Google and the OpenAI-compatible provider. Pick the embedding provider automatically from the user's keys, with a setting to override it. Remove the hash fallback outside mock mode. If no embedding provider is available, say so in the UI instead of showing a score.
-- [ ] Merge the three cosine similarity implementations (`app/src/store/slices/responseSlice.ts`, `shared-utils/src/similarity`, `component-library/src/lib/similarity.ts`) into the shared-utils one.
-- [ ] Real pricing: a pricing table in `shared-utils`, refreshed by a script (the OpenRouter models API publishes prices). Use it for the cost estimate before a run and the actual cost after it.
-- [ ] Before each run, show the number of model calls and estimated cost for the selected consensus method (for example: council with 5 models is 56 extra calls).
-- [ ] Majority consensus: add a mechanical vote for short answers (number, letter, yes/no) using structured output, and fall back to the LLM method for long answers.
-- [ ] Error handling per model card: invalid key, rate limit, timeout, provider down. One failed model must not fail the run.
-- [ ] Remove the localStorage wipe on `/review` and keep the last run. Full history comes in M4.
-- [ ] Perplexity: Sonar chat completions ended on 2026-09-27. Move `FreePerplexityClient` to the current Sonar or Agent API for validation and streaming.
-- [ ] Anthropic: Claude 5.5 models reject a forced `tool_choice` and non-default `temperature`. Use `tool_choice: auto` with a strict tool (or structured output) and drop `temperature`, so majority, ELO and council work with Anthropic keys.
-- [ ] Finish the open Free-mode test tasks from the old list: presets (T178), manual response (T179), agreement for 2 to 6 responses (T180), error scenarios (T226).
+- [x] Real embeddings: implement `generateEmbeddings` for OpenAI, Google and the OpenAI-compatible provider. Pick the embedding provider automatically from the user's keys, with a setting to override it. Remove the hash fallback outside mock mode. If no embedding provider is available, say so in the UI instead of showing a score. (OpenAI and Google done. The OpenAI-compatible provider reuses `requestOpenAICompatibleEmbedding` in M2.)
+- [x] Merge the three cosine similarity implementations (`app/src/store/slices/responseSlice.ts`, `shared-utils/src/similarity`, `component-library/src/lib/similarity.ts`) into the shared-utils one.
+- [x] Real pricing: a pricing table in `shared-utils`, refreshed by a script (the OpenRouter models API publishes prices). Use it for the cost estimate before a run and the actual cost after it.
+- [x] Before each run, show the number of model calls and estimated cost for the selected consensus method (for example: council with 5 models is 56 extra calls).
+- [x] Majority consensus: add a mechanical vote for short answers (number, letter, yes/no) using structured output, and fall back to the LLM method for long answers.
+- [x] Error handling per model card: invalid key, rate limit, timeout, provider down. One failed model must not fail the run.
+- [x] Remove the localStorage wipe on `/review` and keep the last run. Full history comes in M4.
+- [x] Perplexity: Sonar chat completions ended on 2026-09-27. Move `FreePerplexityClient` to the current Sonar or Agent API for validation and streaming.
+- [x] Anthropic: Claude 5.5 models reject a forced `tool_choice` and non-default `temperature`. Use `tool_choice: auto` with a strict tool (or structured output) and drop `temperature`, so majority, ELO and council work with Anthropic keys.
+- [x] Finish the open Free-mode test tasks from the old list: presets (T178), manual response (T179), agreement for 2 to 6 responses (T180), error scenarios (T226).
 
 Done when: the agreement score changes when answers change in meaning, and a user sees the cost before and after every run.
 
@@ -132,6 +132,8 @@ Goal: a reproducible answer to "does an ensemble beat its best member?", for und
   - use n of at least 200 per dataset, paired McNemar tests, Wilson intervals in every report (the statistics code exists in `eval/src/lib`)
   - use a different model for judging than for generating, where a judge is still needed
 - [ ] Fix cost tracking to use the real pricing table from M1.
+- [ ] Calibrate the agreement score. Real embedding cosines sit in a narrow band (roughly 0.1 to 0.9 for `text-embedding-3-small`), and the current `(v+1)/2` mapping makes unrelated answers look like moderate agreement. Fit per-embedding-model thresholds from benchmark runs (agree vs disagree pairs) and update the labels.
+- [ ] Calibrate the token assumptions in `estimateRun` from recorded usage, including hidden reasoning tokens.
 - [ ] Benchmark matrix on GSM8K, MMLU-Pro, GPQA and TruthfulQA (shuffled), all through OpenRouter or local Ollama:
   - three open 7B to 14B models from different families (for example Qwen, Llama, Gemma), each alone
   - the same three as an ensemble, with mechanical majority and standard consensus
