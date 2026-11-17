@@ -6,11 +6,20 @@ import { FreeGoogleClient } from '../clients/google/FreeGoogleClient';
 import { FreeXAIClient } from '../clients/xai/FreeXAIClient';
 import { FreeDeepSeekClient } from '../clients/deepseek/FreeDeepSeekClient';
 import { FreePerplexityClient } from '../clients/perplexity/FreePerplexityClient';
+import {
+  OpenAICompatibleEndpointsClient,
+  type OpenAICompatibleEndpointConfig,
+} from '../clients/openaiCompatible/OpenAICompatibleEndpointsClient';
 
 interface CreateProviderClientOptions {
   provider: ProviderName;
   mode: ProviderMode;
   getApiKey?: () => string | null;
+  /**
+   * Configured OpenAI-compatible endpoints, read at call time. Required for
+   * the `openai-compatible` provider in Free mode, which ignores getApiKey.
+   */
+  getEndpoints?: () => OpenAICompatibleEndpointConfig[];
   /** Simulated failures for mock clients (ignored in other modes). */
   mockErrorScenarios?: MockClientConfig['errorScenarios'];
 }
@@ -19,10 +28,18 @@ export function createProviderClient({
   provider,
   mode,
   getApiKey,
+  getEndpoints,
   mockErrorScenarios,
 }: CreateProviderClientOptions): AIProvider {
   if (mode === 'mock') {
     return new MockProviderClient({ providerFilter: provider, errorScenarios: mockErrorScenarios });
+  }
+
+  if (mode === 'free' && provider === 'openai-compatible') {
+    if (!getEndpoints) {
+      throw new Error('The openai-compatible provider requires a getEndpoints callback.');
+    }
+    return new OpenAICompatibleEndpointsClient(getEndpoints);
   }
 
   if (mode === 'free') {

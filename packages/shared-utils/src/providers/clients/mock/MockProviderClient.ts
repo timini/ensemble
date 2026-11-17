@@ -334,6 +334,32 @@ export class MockProviderClient implements AIProvider {
         costPer1kTokens: 0.003,
         modalities: ['text'],
       },
+      // OpenAI-compatible models, qualified with the `ollama` endpoint id as
+      // the app does for a configured Ollama endpoint. Local: no cost.
+      {
+        id: 'ollama/llama3.2:3b',
+        name: 'Llama 3.2 3B (Ollama)',
+        provider: 'openai-compatible',
+        contextWindow: 128000,
+        costPer1kTokens: 0,
+        modalities: ['text'],
+      },
+      {
+        id: 'ollama/qwen2.5:7b',
+        name: 'Qwen 2.5 7B (Ollama)',
+        provider: 'openai-compatible',
+        contextWindow: 32000,
+        costPer1kTokens: 0,
+        modalities: ['text'],
+      },
+      {
+        id: 'ollama/gemma3:4b',
+        name: 'Gemma 3 4B (Ollama)',
+        provider: 'openai-compatible',
+        contextWindow: 128000,
+        costPer1kTokens: 0,
+        modalities: ['text'],
+      },
     ];
 
     if (this.config.providerFilter) {

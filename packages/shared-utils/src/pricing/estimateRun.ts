@@ -61,6 +61,8 @@ export interface RunEstimate {
     pricedCallCount: number;
     /** Planned calls with no price. When above zero the range is a lower bound. */
     unpricedCallCount: number;
+    /** Planned calls to local models, which cost nothing. */
+    localCallCount: number;
   };
 }
 
@@ -95,6 +97,7 @@ export function estimateRun(input: EstimateRunInput): RunEstimate {
     unpricedModels: [] as string[],
     pricedCallCount: 0,
     unpricedCallCount: 0,
+    localCallCount: 0,
   };
   const charge = (model: ModelRef | null, calls: number, tokens: Tokens) => {
     if (!model || calls <= 0) return;
@@ -106,6 +109,7 @@ export function estimateRun(input: EstimateRunInput): RunEstimate {
       return;
     }
     cost.pricedCallCount += calls;
+    if (price.local) cost.localCallCount += calls;
     const usd = (scale: 'low' | 'high') => {
       const t = tokens(scale);
       return (calls * (t.input * price.inputPerMillion + t.output * price.outputPerMillion)) / 1e6;

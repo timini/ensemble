@@ -61,8 +61,17 @@ export abstract class BaseFreeClient implements AIProvider {
     this.mockClient = new MockProviderClient({ providerFilter: provider });
   }
 
+  /**
+   * False for servers that work without a key (local OpenAI-compatible
+   * servers). Calls then go out with an empty key instead of failing with
+   * `missing_key`.
+   */
+  protected readonly requiresApiKey: boolean = true;
+
   protected resolveApiKey(): string | null {
-    return this.getApiKey();
+    const key = this.getApiKey();
+    if (!key && !this.requiresApiKey) return '';
+    return key;
   }
 
   /** Default timeout for streaming operations (2 minutes) */
@@ -83,7 +92,7 @@ export abstract class BaseFreeClient implements AIProvider {
   ): Promise<void> {
     const apiKey = this.resolveApiKey();
 
-    if (!apiKey) {
+    if (apiKey === null || (this.requiresApiKey && !apiKey)) {
       onError(
         new ProviderError(
           `Missing API key for ${this.provider}. Configure an API key on the configuration page.`,
@@ -155,7 +164,7 @@ export abstract class BaseFreeClient implements AIProvider {
 
     const apiKey = this.resolveApiKey();
 
-    if (!apiKey) {
+    if (apiKey === null || (this.requiresApiKey && !apiKey)) {
       throw new Error(
         `Missing API key for ${this.provider}. Configure an API key on the configuration page.`,
       );
@@ -174,8 +183,8 @@ export abstract class BaseFreeClient implements AIProvider {
   }
 
   async listAvailableTextModels(): Promise<string[]> {
-    const apiKey = this.getApiKey();
-    if (!apiKey) {
+    const apiKey = this.resolveApiKey();
+    if (apiKey === null || (this.requiresApiKey && !apiKey)) {
       return this.mockClient.listAvailableTextModels();
     }
 
@@ -204,7 +213,7 @@ export abstract class BaseFreeClient implements AIProvider {
   ): Promise<StructuredResponse<T>> {
     const apiKey = this.resolveApiKey();
 
-    if (!apiKey) {
+    if (apiKey === null || (this.requiresApiKey && !apiKey)) {
       throw new Error(
         `Missing API key for ${this.provider}. Configure an API key on the configuration page.`,
       );

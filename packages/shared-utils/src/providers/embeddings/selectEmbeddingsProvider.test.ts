@@ -6,8 +6,15 @@ import {
 } from './selectEmbeddingsProvider.js';
 
 describe('selectEmbeddingsProvider', () => {
-  it('lists OpenAI before Google', () => {
-    expect(EMBEDDING_PROVIDERS).toEqual(['openai', 'google']);
+  it('lists OpenAI, then Google, then OpenAI-compatible endpoints', () => {
+    expect(EMBEDDING_PROVIDERS).toEqual(['openai', 'google', 'openai-compatible']);
+  });
+
+  it('uses an OpenAI-compatible endpoint when it is the only embedding provider', () => {
+    expect(selectEmbeddingsProvider('auto', ['anthropic', 'openai-compatible'])).toBe('openai-compatible');
+    expect(selectEmbeddingsProvider('openai-compatible', ['openai', 'openai-compatible'])).toBe(
+      'openai-compatible',
+    );
   });
 
   it('prefers OpenAI in auto mode when both keys are valid', () => {

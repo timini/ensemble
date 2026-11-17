@@ -51,7 +51,14 @@ export interface StructuredResponse<T> {
 
 export type ModelModality = 'text' | 'image' | 'audio' | 'video';
 
-export type ProviderName = 'openai' | 'anthropic' | 'google' | 'xai' | 'deepseek' | 'perplexity';
+export type ProviderName =
+  | 'openai'
+  | 'anthropic'
+  | 'google'
+  | 'xai'
+  | 'deepseek'
+  | 'perplexity'
+  | 'openai-compatible';
 
 export interface ModelMetadata {
   id: string;

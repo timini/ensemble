@@ -203,6 +203,7 @@ describe('estimateRun', () => {
       unpricedModels: [],
       pricedCallCount: 0,
       unpricedCallCount: 0,
+      localCallCount: 0,
     });
   });
 });

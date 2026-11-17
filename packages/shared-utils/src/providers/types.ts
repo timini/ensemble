@@ -1,4 +1,16 @@
-export type ProviderName = 'openai' | 'anthropic' | 'google' | 'xai' | 'deepseek' | 'perplexity';
+/**
+ * Provider names. `openai-compatible` covers every configured OpenAI-compatible
+ * endpoint (Ollama, LM Studio, OpenRouter and others); its model ids carry the
+ * endpoint id as a prefix (see clients/openaiCompatible/endpointPresets.ts).
+ */
+export type ProviderName =
+  | 'openai'
+  | 'anthropic'
+  | 'google'
+  | 'xai'
+  | 'deepseek'
+  | 'perplexity'
+  | 'openai-compatible';
 export type ProviderMode = 'mock' | 'free' | 'pro';
 export type ModelModality = 'text' | 'image' | 'audio' | 'video';
 

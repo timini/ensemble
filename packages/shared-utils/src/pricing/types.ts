@@ -20,6 +20,8 @@ export type ModelPrice =
       status: 'known';
       inputPerMillion: number;
       outputPerMillion: number;
+      /** A model on the user's own machine (Ollama, LM Studio, ...): it costs nothing. */
+      local?: true;
     }
   | { status: 'unknown' };
 

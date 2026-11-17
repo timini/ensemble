@@ -36,6 +36,8 @@ export interface RunCost {
   pricedCallCount: number;
   /** Calls with no price. When above zero the total is a lower bound. */
   unpricedCallCount: number;
+  /** Priced calls to local models, which cost nothing. */
+  localCallCount: number;
 }
 
 /** Price the calls of a finished run with the price table. */
@@ -48,17 +50,16 @@ export function computeRunCost(calls: CallUsage[], table: PriceTable = PRICE_TAB
     unpricedModels: [],
     pricedCallCount: 0,
     unpricedCallCount: 0,
+    localCallCount: 0,
   };
   for (const call of calls) {
     if (call.source === 'estimated') {
       result.estimated = true;
       result.estimatedCallCount += 1;
     }
-    const usd = costOfTokens(
-      getModelPrice(call.provider, call.modelId, table),
-      call.inputTokens,
-      call.outputTokens,
-    );
+    const price = getModelPrice(call.provider, call.modelId, table);
+    if (price.status === 'known' && price.local) result.localCallCount += 1;
+    const usd = costOfTokens(price, call.inputTokens, call.outputTokens);
     if (usd === null) {
       const id = `${call.provider}/${call.modelId}`;
       if (!result.unpricedModels.includes(id)) result.unpricedModels.push(id);

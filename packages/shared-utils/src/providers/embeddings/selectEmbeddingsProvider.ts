@@ -1,5 +1,10 @@
-/** Providers with an embeddings API, in the order auto selection tries them. */
-export const EMBEDDING_PROVIDERS = ['openai', 'google'] as const;
+/**
+ * Providers with an embeddings API, in the order auto selection tries them.
+ * `openai-compatible` counts only when an endpoint has an embedding model
+ * set (for example `nomic-embed-text` on Ollama); callers include it in
+ * `validProviders` only then.
+ */
+export const EMBEDDING_PROVIDERS = ['openai', 'google', 'openai-compatible'] as const;
 
 export type EmbeddingProvider = (typeof EMBEDDING_PROVIDERS)[number];
 
@@ -16,8 +21,9 @@ export function isEmbeddingProvider(provider: string): provider is EmbeddingProv
  *
  * An explicit preference wins when its key is valid. Otherwise the first
  * provider in EMBEDDING_PROVIDERS with a valid key is used (OpenAI, then
- * Google). Returns null when no embedding-capable key is available, so the UI
- * can say so instead of showing a score.
+ * Google, then an OpenAI-compatible endpoint with an embedding model).
+ * Returns null when no embedding-capable key is available, so the UI can say
+ * so instead of showing a score.
  *
  * @param preference - stored user preference; unknown values count as `auto`
  * @param validProviders - providers whose API key has been validated
