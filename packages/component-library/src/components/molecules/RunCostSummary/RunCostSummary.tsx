@@ -33,6 +33,8 @@ interface CommonProps {
   localCallCount?: number;
   /** Date of the price table, shown as the source of the prices. */
   priceDate?: string;
+  /** One caption line with the calls and the cost only, for card footers. */
+  compact?: boolean;
   className?: string;
 }
 
@@ -61,6 +63,8 @@ export type RunCostSummaryProps = RunCostEstimateProps | RunCostActualProps;
  * - `estimate`: before a run, the number of calls by kind and a cost range.
  * - `actual`: after a run, the cost from the token counts the providers
  *   reported, labelled as estimated when some counts came from text length.
+ *
+ * `compact` keeps only the calls and the cost on one caption line.
  *
  * Calls with no price are never shown as free: when some calls have no
  * price the cost is a lower bound, and when none has a price it is unknown.
@@ -102,6 +106,22 @@ export const RunCostSummary = React.forwardRef<HTMLDivElement, RunCostSummaryPro
         none: 'actualUnknown',
       }[coverage];
       amount = t(`molecules.runCostSummary.${key}`, { cost: usd(props.totalUsd) });
+    }
+
+    if (props.compact) {
+      return (
+        <div
+          ref={ref}
+          data-testid="run-cost-summary"
+          data-variant={props.variant}
+          data-compact="true"
+          className={cn('text-caption tabular-nums text-muted-foreground', props.className)}
+        >
+          <span data-testid="run-cost-calls">{t('molecules.runCostSummary.calls', { count: calls })}</span>
+          {' · '}
+          <span data-testid="run-cost-amount">{amount}</span>
+        </div>
+      );
     }
 
     return (

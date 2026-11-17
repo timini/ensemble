@@ -63,6 +63,9 @@ export {
   DialogTitle,
   DialogDescription,
 } from './components/atoms/Dialog';
+export { Sheet, type SheetProps } from './components/atoms/Sheet';
+export { Logo, type LogoProps } from './components/atoms/Logo';
+export { AgreementRing, type AgreementRingProps, type AgreementLevel } from './components/atoms/AgreementRing';
 export {
   Select,
   SelectGroup,
@@ -142,7 +145,34 @@ export {
   type BenchmarkRunEstimate,
 } from './components/molecules/BenchmarksNotRun';
 
+export { ModelChip, type ModelChipProps } from './components/molecules/ModelChip';
+export { ModelPicker, type ModelPickerProps, type ModelPickerOption } from './components/molecules/ModelPicker';
+export { MethodMenu, methodCostLabel, type MethodMenuProps, type SummarizerOption } from './components/molecules/MethodMenu';
+export { ComposerOptions, type ComposerOptionsProps } from './components/molecules/ComposerOptions';
+export { AnswerCard, type AnswerCardProps, type AnswerStatus } from './components/molecules/AnswerCard';
+export {
+  AgreementSummary,
+  agreementLevel,
+  type AgreementSummaryProps,
+  type AgreementPair,
+} from './components/molecules/AgreementSummary';
+export {
+  ConsensusAnswer,
+  type ConsensusAnswerProps,
+  type ConsensusAnswerStatus,
+} from './components/molecules/ConsensusAnswer';
+
 // Organisms (Level 3: Complex UI sections)
+export { Composer, type ComposerProps, type ComposerModel, type ComposerManualResponse } from './components/organisms/Composer';
+export { AnswerColumns, type AnswerColumnsProps, type AnswerColumnItem } from './components/organisms/AnswerColumns';
+export { ConsensusPanel, type ConsensusPanelProps } from './components/organisms/ConsensusPanel';
+export { AppShell, type AppShellProps } from './components/organisms/AppShell';
+export {
+  HistorySidebar,
+  type HistorySidebarProps,
+  type HistoryItem,
+  type HistoryPreset,
+} from './components/organisms/HistorySidebar';
 export { ModeSelector, type ModeSelectorProps, type Mode as ModeType } from './components/organisms/ModeSelector';
 export {
   EndpointConfiguration,

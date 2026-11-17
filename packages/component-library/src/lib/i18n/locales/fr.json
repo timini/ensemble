@@ -45,6 +45,16 @@
       "copy": "Copier",
       "copied": "Copié",
       "copyLabel": "Copier la commande"
+    },
+    "sheet": {
+      "close": "Fermer"
+    },
+    "logo": {
+      "name": "Ensemble",
+      "home": "Accueil Ensemble"
+    },
+    "agreementRing": {
+      "label": "Score d'accord {{score}} sur 100"
     }
   },
   "molecules": {
@@ -235,6 +245,101 @@
       "description": "Aucun résultat mesuré n'est publié. Cette page n'affiche des chiffres qu'après l'exécution de la matrice de benchmarks. En attendant, elle présente la méthode et le coût d'une exécution.",
       "estimate": "Coût estimé d'une exécution complète : {{low}} à {{high}} pour {{calls}} appels de modèles.",
       "commandLabel": "Lancez-la vous-même :"
+    },
+    "modelChip": {
+      "remove": "Retirer {{name}}",
+      "manual": "Ajoutée à la main"
+    },
+    "modelPicker": {
+      "add": "Ajouter un modèle",
+      "choose": "Choisir les modèles",
+      "search": "Rechercher un modèle",
+      "noMatches": "Aucun modèle ne correspond à « {{query}} ».",
+      "empty": "Aucun modèle pour l'instant. Ajoutez une clé ou un serveur local dans les réglages.",
+      "selected": "{{count}} sur {{max}} sélectionnés",
+      "limit": "{{max}} modèles au plus. Retirez-en un pour en ajouter un autre."
+    },
+    "methodMenu": {
+      "label": "Méthode",
+      "listLabel": "Méthode de consensus",
+      "calls_one": "{{count}} appel",
+      "calls_other": "{{count}} appels",
+      "costAbout": "environ {{cost}}",
+      "costRange": "{{low}} à {{high}}",
+      "costAtLeast": "au moins {{cost}}",
+      "costFree": "gratuit",
+      "costUnknown": "coût inconnu",
+      "unavailable": "Nécessite au moins 3 réponses",
+      "summarizer": "Fusionné par",
+      "note": "Les appels comprennent chaque réponse et le score d'accord.",
+      "methods": {
+        "standard": {
+          "name": "Standard",
+          "detail": "Un modèle fusionne toutes les réponses"
+        },
+        "elo": {
+          "name": "Classement",
+          "detail": "Les modèles classent les réponses, les meilleures sont fusionnées"
+        },
+        "majority": {
+          "name": "Majorité",
+          "detail": "Retient la réponse donnée par le plus de modèles"
+        },
+        "council": {
+          "name": "Conseil",
+          "detail": "Les modèles se critiquent, puis fusionnent"
+        }
+      }
+    },
+    "composerOptions": {
+      "label": "Plus d'options",
+      "manual": "Ajouter une réponse à la main",
+      "savePreset": "Enregistrer ces modèles comme préréglage"
+    },
+    "answerCard": {
+      "streaming": "En cours",
+      "waiting": "En attente",
+      "copy": "Copier",
+      "copied": "Copié",
+      "seconds": "{{value}} s"
+    },
+    "agreementSummary": {
+      "heading": "Accord",
+      "levels": {
+        "high": {
+          "label": "Accord élevé",
+          "meaning": "Les réponses disent la même chose. Le consensus est probablement fiable."
+        },
+        "medium": {
+          "label": "Accord partiel",
+          "meaning": "Les réponses se recoupent mais divergent par endroits. Lisez les désaccords."
+        },
+        "low": {
+          "label": "Accord faible",
+          "meaning": "Les réponses se contredisent. Ne vous fiez à aucune seule ; lisez-les toutes."
+        }
+      },
+      "pending": "Calculé quand toutes les réponses sont arrivées.",
+      "progress": "{{done}} réponses sur {{total}} pour l'instant.",
+      "unavailable": "Pas de score d'accord",
+      "unavailableHint": "Ajoutez un modèle d'embeddings dans les réglages (OpenAI, Google ou un serveur local) pour mesurer l'accord.",
+      "pairs": "Score de chaque paire",
+      "pair": "{{a}} et {{b}}",
+      "calibrated": "Calibré pour {{model}}",
+      "uncalibrated": "Non calibré",
+      "uncalibratedHint": "Calculé avec {{model}}. Les libellés utilisent les seuils par défaut tant que ce modèle n'est pas calibré."
+    },
+    "consensusAnswer": {
+      "heading": "Réponse de consensus",
+      "mergedBy": "{{method}}, fusionnée par {{model}}",
+      "awaiting": "Le consensus est rédigé quand les réponses sont arrivées.",
+      "generating": "Rédaction du consensus",
+      "failed": "Le consensus n'a pas pu être rédigé.",
+      "unavailable": "Cette méthode nécessite au moins 3 réponses, aucun consensus n'a donc été rédigé.",
+      "retry": "Réessayer",
+      "copy": "Copier",
+      "copied": "Copié",
+      "share": "Partager"
     }
   },
   "organisms": {
@@ -443,6 +548,41 @@
       "statistics": "L'exactitude a un intervalle de Wilson à 95 %. Chaque configuration est comparée au meilleur modèle ouvert seul sur les mêmes questions avec un test de McNemar apparié (binomial exact sous 25 paires discordantes).",
       "cost": "Le coût provient de la table de prix OpenRouter partagée et de l'usage de jetons déclaré par chaque fournisseur.",
       "docsLink": "Méthode complète et comment la reproduire"
+    },
+    "composer": {
+      "promptLabel": "Votre question",
+      "placeholder": "Posez une question où une erreur coûte cher",
+      "models": "Modèles",
+      "submit": "Demander",
+      "running": "En cours",
+      "shortcut": "{{keys}} pour demander",
+      "enter": "Entrée"
+    },
+    "answerColumns": {
+      "heading": "Réponses individuelles",
+      "tabs": "Réponses",
+      "swipe": "Balayez pour comparer"
+    },
+    "appShell": {
+      "history": "Historique et préréglages",
+      "showHistory": "Afficher l'historique",
+      "hideHistory": "Masquer l'historique",
+      "settings": "Réglages",
+      "skip": "Aller au contenu"
+    },
+    "historySidebar": {
+      "newQuestion": "Nouvelle question",
+      "search": "Rechercher dans l'historique",
+      "presets": "Préréglages",
+      "models_one": "{{count}} modèle",
+      "models_other": "{{count}} modèles",
+      "today": "Aujourd'hui",
+      "week": "7 derniers jours",
+      "older": "Plus ancien",
+      "empty": "Aucune question pour l'instant. Vos exécutions sont enregistrées dans ce navigateur.",
+      "noMatches": "Rien ne correspond à « {{query}} ».",
+      "delete": "Supprimer « {{prompt}} »",
+      "deletePreset": "Supprimer le préréglage {{name}}"
     }
   },
   "providers": {

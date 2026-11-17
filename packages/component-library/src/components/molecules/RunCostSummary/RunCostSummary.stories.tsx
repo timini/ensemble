@@ -132,3 +132,16 @@ export const ActualAllUnpriced: Story = {
     unpricedModels: ['perplexity/perplexity-fast'],
   },
 };
+
+/** One caption line for a card footer, as in the consensus panel. */
+export const Compact: Story = {
+  args: {
+    variant: 'actual',
+    compact: true,
+    callCount: 7,
+    totalUsd: 0.011,
+    estimated: false,
+    pricedCallCount: 7,
+    unpricedCallCount: 0,
+  },
+};

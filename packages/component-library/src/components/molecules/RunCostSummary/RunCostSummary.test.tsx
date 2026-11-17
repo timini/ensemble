@@ -208,6 +208,29 @@ describe('RunCostSummary', () => {
     });
   });
 
+  describe('compact', () => {
+    it('renders one line with the calls and the cost, without the notes', () => {
+      render(
+        <RunCostSummary
+          variant="actual"
+          compact
+          callCount={7}
+          totalUsd={0.011}
+          estimated
+          pricedCallCount={5}
+          unpricedCallCount={2}
+          unpricedModels={['ollama/x']}
+          priceDate="2026-11-01"
+        />,
+      );
+      const summary = screen.getByTestId('run-cost-summary');
+      expect(summary).toHaveAttribute('data-compact', 'true');
+      expect(summary).toHaveTextContent('7 model calls · Estimated cost: at least $0.011');
+      expect(screen.queryByTestId('run-cost-unpriced')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('run-cost-price-source')).not.toBeInTheDocument();
+    });
+  });
+
   describe('formatUsd', () => {
     it('keeps two significant digits below one dollar and cents above', () => {
       expect(formatUsd(0.0123, 'en')).toBe('$0.012');

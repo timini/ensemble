@@ -45,6 +45,16 @@
       "copy": "Copy",
       "copied": "Copied",
       "copyLabel": "Copy command"
+    },
+    "sheet": {
+      "close": "Close"
+    },
+    "logo": {
+      "name": "Ensemble",
+      "home": "Ensemble home"
+    },
+    "agreementRing": {
+      "label": "Agreement score {{score}} out of 100"
     }
   },
   "molecules": {
@@ -235,6 +245,101 @@
       "description": "No measured results are published. This page shows numbers only after the benchmark matrix has been run. Until then it shows the method and what a run will cost.",
       "estimate": "Estimated cost of a full run: {{low}} to {{high}} for {{calls}} model calls.",
       "commandLabel": "Run it yourself:"
+    },
+    "modelChip": {
+      "remove": "Remove {{name}}",
+      "manual": "Added by hand"
+    },
+    "modelPicker": {
+      "add": "Add model",
+      "choose": "Choose models",
+      "search": "Search models",
+      "noMatches": "No models match \"{{query}}\".",
+      "empty": "No models yet. Add a key or a local endpoint in settings.",
+      "selected": "{{count}} of {{max}} selected",
+      "limit": "Up to {{max}} models. Remove one to add another."
+    },
+    "methodMenu": {
+      "label": "Method",
+      "listLabel": "Consensus method",
+      "calls_one": "{{count}} call",
+      "calls_other": "{{count}} calls",
+      "costAbout": "about {{cost}}",
+      "costRange": "{{low}} to {{high}}",
+      "costAtLeast": "at least {{cost}}",
+      "costFree": "free",
+      "costUnknown": "cost unknown",
+      "unavailable": "Needs 3 or more answers",
+      "summarizer": "Merged by",
+      "note": "Calls include every answer and the agreement score.",
+      "methods": {
+        "standard": {
+          "name": "Standard",
+          "detail": "One model merges every answer"
+        },
+        "elo": {
+          "name": "Ranked",
+          "detail": "Models rank the answers, the best are merged"
+        },
+        "majority": {
+          "name": "Majority",
+          "detail": "Picks the answer most models give"
+        },
+        "council": {
+          "name": "Council",
+          "detail": "Models critique each other, then merge"
+        }
+      }
+    },
+    "composerOptions": {
+      "label": "More options",
+      "manual": "Add an answer by hand",
+      "savePreset": "Save models as a preset"
+    },
+    "answerCard": {
+      "streaming": "Streaming",
+      "waiting": "Waiting",
+      "copy": "Copy",
+      "copied": "Copied",
+      "seconds": "{{value}} s"
+    },
+    "agreementSummary": {
+      "heading": "Agreement",
+      "levels": {
+        "high": {
+          "label": "High agreement",
+          "meaning": "The answers say the same thing. The consensus is probably safe to use."
+        },
+        "medium": {
+          "label": "Mixed agreement",
+          "meaning": "The answers overlap but differ in places. Read where they disagree."
+        },
+        "low": {
+          "label": "Low agreement",
+          "meaning": "The answers disagree. Do not trust any single one; read them all."
+        }
+      },
+      "pending": "Scored when all answers are in.",
+      "progress": "{{done}} of {{total}} answers so far.",
+      "unavailable": "No agreement score",
+      "unavailableHint": "Add an embedding model in settings (OpenAI, Google or a local endpoint) to score agreement.",
+      "pairs": "Scores for each pair",
+      "pair": "{{a}} and {{b}}",
+      "calibrated": "Calibrated for {{model}}",
+      "uncalibrated": "Uncalibrated",
+      "uncalibratedHint": "Scored with {{model}}. The labels use default thresholds until this model is calibrated."
+    },
+    "consensusAnswer": {
+      "heading": "Consensus answer",
+      "mergedBy": "{{method}}, merged by {{model}}",
+      "awaiting": "The consensus is written when the answers are in.",
+      "generating": "Writing the consensus",
+      "failed": "The consensus could not be written.",
+      "unavailable": "This method needs at least 3 answers, so no consensus was written.",
+      "retry": "Try again",
+      "copy": "Copy",
+      "copied": "Copied",
+      "share": "Share"
     }
   },
   "organisms": {
@@ -443,6 +548,41 @@
       "statistics": "Accuracy has a 95% Wilson interval. Each configuration is compared with the best single open model on the same questions with a paired McNemar test (exact binomial below 25 discordant pairs).",
       "cost": "Cost comes from the shared OpenRouter price table and the token usage each provider reported.",
       "docsLink": "Full method and how to reproduce it"
+    },
+    "composer": {
+      "promptLabel": "Your question",
+      "placeholder": "Ask a question where being wrong costs something",
+      "models": "Models",
+      "submit": "Ask",
+      "running": "Running",
+      "shortcut": "{{keys}} to ask",
+      "enter": "Enter"
+    },
+    "answerColumns": {
+      "heading": "Individual answers",
+      "tabs": "Answers",
+      "swipe": "Swipe to compare"
+    },
+    "appShell": {
+      "history": "History and presets",
+      "showHistory": "Show history",
+      "hideHistory": "Hide history",
+      "settings": "Settings",
+      "skip": "Skip to content"
+    },
+    "historySidebar": {
+      "newQuestion": "New question",
+      "search": "Search history",
+      "presets": "Presets",
+      "models_one": "{{count}} model",
+      "models_other": "{{count}} models",
+      "today": "Today",
+      "week": "Previous 7 days",
+      "older": "Older",
+      "empty": "No questions yet. Your runs are saved in this browser.",
+      "noMatches": "Nothing matches \"{{query}}\".",
+      "delete": "Delete \"{{prompt}}\"",
+      "deletePreset": "Delete preset {{name}}"
     }
   },
   "providers": {
