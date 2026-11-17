@@ -14,6 +14,9 @@ describe('normaliseShortAnswer', () => {
             ['50%', '50'],
             ['**42**', '42'],
             ['1e3', '1000'],
+            ['2 million', '2,000,000'],
+            ['1.5 billion dollars', '1500000000'],
+            ['5k', '5000'],
         ])('treats %s and %s as the same answer', (a, b) => {
             expect(normaliseShortAnswer(a)).not.toBeNull();
             expect(normaliseShortAnswer(a)).toBe(normaliseShortAnswer(b));
@@ -22,6 +25,12 @@ describe('normaliseShortAnswer', () => {
         it('keeps different numbers apart', () => {
             expect(normaliseShortAnswer('42')).not.toBe(normaliseShortAnswer('43'));
             expect(normaliseShortAnswer('0.1')).not.toBe(normaliseShortAnswer('0.10001'));
+        });
+
+        it('does not ignore scale words as units', () => {
+            expect(normaliseShortAnswer('1 million')).toBe('num:1000000');
+            expect(normaliseShortAnswer('1 million')).not.toBe(normaliseShortAnswer('1 billion'));
+            expect(normaliseShortAnswer('1 million')).not.toBe(normaliseShortAnswer('1'));
         });
     });
 

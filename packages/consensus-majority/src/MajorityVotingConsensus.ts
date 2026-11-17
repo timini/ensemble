@@ -15,6 +15,7 @@ import {
     buildAnswerExtractionPrompt,
     parseAnswerExtraction,
     tallyVotes,
+    winningAnswerText,
     type MajorityVoteResult,
 } from './mechanicalVote';
 
@@ -104,7 +105,7 @@ export class MajorityVotingConsensus implements ConsensusStrategy {
 
         const vote = await this.mechanicalVote(responses, prompt);
         if (vote?.status === 'winner' && vote.winner) {
-            return { text: vote.winner.answer, method: 'vote', vote };
+            return { text: winningAnswerText(vote.winner), method: 'vote', vote };
         }
 
         const fallbackReason: MajorityFallbackReason = !vote

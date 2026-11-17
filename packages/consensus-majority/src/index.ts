@@ -5,7 +5,7 @@ export type {
     MajorityFallbackReason,
 } from './MajorityVotingConsensus';
 export { normaliseShortAnswer } from './answerNormalisation';
-export { tallyVotes } from './mechanicalVote';
+export { tallyVotes, winningAnswerText } from './mechanicalVote';
 export type {
     ExtractedAnswer,
     MajorityTally,

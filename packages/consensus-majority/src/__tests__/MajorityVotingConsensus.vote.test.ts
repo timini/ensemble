@@ -84,6 +84,22 @@ describe('MajorityVotingConsensus mechanical vote', () => {
         await expect(strategy.generateConsensus(responses, 0, 'Pick one')).resolves.toBe('B');
     });
 
+    it('returns the canonical number when a numeric answer wins', async () => {
+        const p = provider({
+            extracted: [
+                { id: 'R1', kind: 'number', answer: '1/2' },
+                { id: 'R2', kind: 'number', answer: '0.5' },
+                { id: 'R3', kind: 'number', answer: '1/3' },
+            ],
+        });
+        const strategy = new MajorityVotingConsensus(p, 'summarizer');
+
+        const outcome = await strategy.runConsensus(responses, 0, 'Half?');
+
+        expect(outcome.text).toBe('0.5');
+        expect(outcome.vote?.winner?.answer).toBe('1/2');
+    });
+
     it('falls back to the LLM method on a tie and still reports the vote', async () => {
         const p = provider({
             extracted: [

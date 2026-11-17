@@ -134,6 +134,15 @@ export function parseAnswerExtraction(
     }));
 }
 
+/**
+ * The consensus text for a winning tally. A numeric answer returns its
+ * canonical value ("1/2" gives "0.5", "1,000" gives "1000") so that scorers
+ * read the number the vote counted, not the first model's wording.
+ */
+export function winningAnswerText(tally: MajorityTally): string {
+    return tally.normalised.startsWith('num:') ? tally.normalised.slice(4) : tally.answer;
+}
+
 /** Count normalised votes and decide the winner, a tie, or no short answers. */
 export function tallyVotes(ballots: ExtractedAnswer[]): MajorityVoteResult {
     const tallies = new Map<string, MajorityTally>();
