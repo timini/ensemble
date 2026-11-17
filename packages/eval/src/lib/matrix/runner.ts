@@ -5,7 +5,7 @@
  */
 import { copyFile, mkdir } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
-import { ProviderRegistry } from '@ensemble-ai/shared-utils/providers';
+import { ProviderRegistry, type ProviderRouting } from '@ensemble-ai/shared-utils/providers';
 import { assertValidResumedOutput, createBenchmarkFile } from '../../commands/benchmarkOutput.js';
 import { loadBenchmarkQuestions } from '../benchmarkDatasets.js';
 import { BenchmarkRunner, isUsableResponse } from '../benchmarkRunner.js';
@@ -19,6 +19,7 @@ import type {
   BenchmarkQuestion,
   BenchmarkResultsFile,
   EvalMode,
+  ModelSpec,
   PromptRunResult,
   ProviderResponse,
   StrategyName,
@@ -70,17 +71,37 @@ export function isFailedRun(run: PromptRunResult): boolean {
 }
 
 /**
- * Take the failed runs out of a results file so they run again, and return
- * their usable answers so those models are not called again.
+ * The failed runs of a results file, by question id, with their answers so
+ * models whose answer succeeded are not called again. The runs stay in the
+ * file until their replacements are written, so an interrupted repair
+ * loses nothing.
  */
-export function takeFailedRuns(output: BenchmarkResultsFile): Map<string, ProviderResponse[]> {
+export function failedRunsOf(output: BenchmarkResultsFile): Map<string, ProviderResponse[]> {
   const prior = new Map<string, ProviderResponse[]>();
-  output.runs = output.runs.filter((run) => {
-    if (!isFailedRun(run)) return true;
-    if (run.questionId) prior.set(run.questionId, run.responses);
-    return false;
-  });
+  for (const run of output.runs) {
+    if (run.questionId && isFailedRun(run)) prior.set(run.questionId, run.responses);
+  }
   return prior;
+}
+
+/** How a run routes OpenRouter calls, as recorded in the manifest. */
+export function routingOf(config: MatrixConfig) {
+  const models = Object.fromEntries(
+    [...config.models, config.reference].filter((m) => m.routing).map((m) => [m.id, m.routing]),
+  );
+  return { requireParameters: config.requireParameters, ...(Object.keys(models).length > 0 ? { models } : {}) };
+}
+
+/** Routing for each model spec of the config (OpenRouter host preferences and require_parameters). */
+function routingLookup(config: MatrixConfig): (spec: ModelSpec) => ProviderRouting | undefined {
+  const all = [...config.models, config.reference];
+  return (spec) => {
+    const entry = all.find((m) => m.parsed.provider === spec.provider && m.parsed.model === spec.model);
+    return {
+      requireParameters: config.requireParameters,
+      ...(entry?.routing ? { provider: entry.routing } : {}),
+    };
+  };
 }
 
 export interface MatrixRunResult {
@@ -185,12 +206,21 @@ export async function runMatrix(options: MatrixRunOptions): Promise<MatrixRunRes
   const registry = new ProviderRegistry();
   registerProviders(registry, [...config.models, config.reference].map((m) => m.parsed.provider), mode, endpoints);
   const manifestPath = join(runDir, 'manifest.json');
-  const createdAt = (await fileExists(manifestPath))
-    ? (await readJsonFile<{ createdAt?: string }>(manifestPath)).createdAt ?? now().toISOString()
-    : now().toISOString();
+  const previous = (await fileExists(manifestPath))
+    ? await readJsonFile<{ createdAt?: string; config?: unknown; routing?: unknown; repairs?: unknown[] }>(manifestPath)
+    : null;
+  const createdAt = previous?.createdAt ?? now().toISOString();
+  // A repair keeps the routing and config the run started with, and records its own.
+  const routing = previous ? previous.routing ?? 'not recorded (run started before routing was recorded; require_parameters was not sent)' : routingOf(config);
+  const repairs = [
+    ...(previous?.repairs ?? []),
+    ...(options.retryFailed ? [{ at: now().toISOString(), routing: routingOf(config), config: options.rawConfig }] : []),
+  ];
   const writeManifest = (status: string) => writeJsonFile(manifestPath, {
     schemaVersion: 1, runId: options.runId, mode, status, createdAt, updatedAt: now().toISOString(),
-    config: options.rawConfig, estimate: { calls: estimate.calls, lowUsd: estimate.lowUsd, highUsd: estimate.highUsd },
+    config: previous?.config ?? options.rawConfig, routing,
+    ...(repairs.length > 0 ? { repairs } : {}),
+    estimate: { calls: estimate.calls, lowUsd: estimate.lowUsd, highUsd: estimate.highUsd },
     files: jobs.map((job) => ({ dataset: job.dataset, kind: job.kind, file: job.outputPath.slice(runDir.length + 1) })),
   });
   await writeManifest('running');
@@ -226,7 +256,8 @@ async function runJob(
   const output = resumed ?? createBenchmarkFile(
     job.dataset, mode, job.models.map((m) => m.spec), job.strategies, questions.length,
   );
-  const priorResponses = ctx.retryFailed ? takeFailedRuns(output) : new Map<string, ProviderResponse[]>();
+  const priorResponses = ctx.retryFailed ? failedRunsOf(output) : new Map<string, ProviderResponse[]>();
+  const rerunIds = new Set(priorResponses.keys());
   if (ctx.retryFailed) ctx.log(`${job.dataset} ${job.kind}: ${priorResponses.size} failed entr${priorResponses.size === 1 ? 'y' : 'ies'} to run again.`);
   output.answerProtocol = config.protocol;
   if (config.protocol === 'structured') output.optionSeed = config.optionSeed;
@@ -253,13 +284,14 @@ async function runJob(
       },
     },
     priorResponses,
+    routingFor: routingLookup(config),
   });
-  const done = new Set(output.runs.map((run) => run.questionId));
+  const done = new Set(output.runs.map((run) => run.questionId).filter((id) => !id || !rerunIds.has(id)));
   const pending = questions.filter((q) => !done.has(q.id));
   ctx.log(`${job.dataset} ${job.kind}: ${pending.length} of ${questions.length} question(s) to run.`);
   const size = Math.max(1, ctx.concurrency ?? 8);
   for (let i = 0; i < pending.length; i += size) {
-    await runner.run({ questions: pending.slice(i, i + size), outputPath: working, output });
+    await runner.run({ questions: pending.slice(i, i + size), outputPath: working, output, rerunIds });
     ctx.log(`  ${job.dataset} ${job.kind}: ${Math.min(i + size, pending.length)}/${pending.length}`);
   }
   if (pending.length === 0) await writeJsonFile(working, output);

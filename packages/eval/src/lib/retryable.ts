@@ -11,6 +11,17 @@ export interface RetryOptions {
   maxDelayMs?: number;
   /** Stops retrying once aborted (the question ran out of time). */
   signal?: AbortSignal;
+  /**
+   * Time (epoch ms) by which every attempt must be over. No retry starts
+   * when the wait plus attemptMs would pass it; the last error is thrown
+   * instead, so the caller records a failed call rather than running into
+   * an outer time limit.
+   */
+  deadline?: number;
+  /** Longest one attempt can take (its call time limit), used with deadline. */
+  attemptMs?: number;
+  /** Clock, for tests. */
+  now?: () => number;
 }
 
 interface ResolvedRetryOptions {
@@ -23,6 +34,9 @@ interface ResolvedRetryOptions {
   onRateLimit: (() => void) | undefined;
   maxDelayMs: number;
   signal: AbortSignal | undefined;
+  deadline: number | undefined;
+  attemptMs: number;
+  now: () => number;
 }
 
 function getStatusFromError(error: unknown): number | undefined {
@@ -84,6 +98,9 @@ function resolveOptions(options?: RetryOptions): ResolvedRetryOptions {
     onRateLimit: options?.onRateLimit,
     maxDelayMs: options?.maxDelayMs ?? 60_000,
     signal: options?.signal,
+    deadline: options?.deadline,
+    attemptMs: options?.attemptMs ?? 0,
+    now: options?.now ?? Date.now,
   };
 }
 
@@ -201,8 +218,13 @@ export async function retryable<T>(
         if (isRateLimitOnly(error)) {
           opts.onRateLimit?.();
         }
+        const delay = backoffDelayMs(i, opts, error);
+        if (opts.deadline !== undefined && opts.now() + delay + opts.attemptMs > opts.deadline) {
+          // Another attempt could not finish in time.
+          throw error;
+        }
         opts.onRetry?.(error, i + 1);
-        await sleep(backoffDelayMs(i, opts, error), opts.signal);
+        await sleep(delay, opts.signal);
         if (timedOut) {
           throw buildTimeoutError();
         }

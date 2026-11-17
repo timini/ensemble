@@ -120,6 +120,52 @@ describe('runMatrix', () => {
     expect(lines.join('\n')).toMatch(/1 failed entry to run again/);
   }, 30_000);
 
+  it('an interrupted retryFailed pass leaves the failed entries not yet rerun in the file', async () => {
+    await runMatrix({ ...base(), mode: 'mock', yes: false });
+    const runDir = join(dir, 'results/test-run');
+    const ensemblePath = join(runDir, 'gsm8k/ensemble.json');
+    const ensemble = JSON.parse(readFileSync(ensemblePath, 'utf8')) as BenchmarkResultsFile;
+    for (const run of ensemble.runs.slice(0, 2)) {
+      run.responses[1] = { ...run.responses[1]!, content: '', error: 'OpenAI-compatible API error: fetch failed' };
+    }
+    writeFileSync(ensemblePath, JSON.stringify(ensemble));
+    const secondFailed = ensemble.runs[1]!;
+
+    const interrupt = (line: string) => {
+      lines.push(line);
+      if (/gsm8k ensemble: 1\/2/.test(line)) throw new Error('interrupted');
+    };
+    await expect(runMatrix({ ...base(), log: interrupt, mode: 'mock', yes: false, retryFailed: true, concurrency: 1 }))
+      .rejects.toThrow(/interrupted/);
+
+    const after = JSON.parse(readFileSync(ensemblePath, 'utf8')) as BenchmarkResultsFile;
+    expect(after.runs).toHaveLength(3);
+    const first = after.runs.find((r) => r.questionId === ensemble.runs[0]!.questionId)!;
+    expect(isFailedRun(first)).toBe(false);
+    // The second failed entry was not rerun yet: it is still there, usable answers included.
+    const second = after.runs.find((r) => r.questionId === secondFailed.questionId)!;
+    expect(second.responses).toEqual(secondFailed.responses);
+    expect(isFailedRun(second)).toBe(true);
+
+    // The next repair pass picks it up.
+    await runMatrix({ ...base(), mode: 'mock', yes: false, retryFailed: true });
+    const repaired = JSON.parse(readFileSync(ensemblePath, 'utf8')) as BenchmarkResultsFile;
+    expect(repaired.runs.some(isFailedRun)).toBe(false);
+    expect(repaired.runs.find((r) => r.questionId === secondFailed.questionId)!.responses[0]).toEqual(secondFailed.responses[0]);
+  }, 30_000);
+
+  it('records the routing a run started with and the routing of each repair in the manifest', async () => {
+    await runMatrix({ ...base(), mode: 'mock', yes: false });
+    const manifestPath = join(dir, 'results/test-run/manifest.json');
+    expect(JSON.parse(readFileSync(manifestPath, 'utf8')).routing).toEqual({ requireParameters: true });
+    const repairConfig = parseMatrixConfig(raw, { datasets: ['gsm8k'], sample: 3, requireParameters: false });
+    await runMatrix({ ...base(), config: repairConfig, mode: 'mock', yes: false, retryFailed: true });
+    const manifest = JSON.parse(readFileSync(manifestPath, 'utf8')) as { routing: unknown; repairs: { routing: unknown }[] };
+    expect(manifest.routing).toEqual({ requireParameters: true });
+    expect(manifest.repairs).toHaveLength(1);
+    expect(manifest.repairs[0]!.routing).toEqual({ requireParameters: false });
+  }, 30_000);
+
   it('isFailedRun spots errors, empty answers and failed consensus', () => {
     const ok = {
       prompt: 'p', questionId: 'q', consensus: {},

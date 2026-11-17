@@ -86,6 +86,20 @@ describe('isTransientError and backoff', () => {
     expect(backoffDelayMs(0, options, { retryAfterSeconds: 600 }, () => 0)).toBe(60_000);
   });
 
+  it('stops retrying when the next attempt would end past the deadline', async () => {
+    let now = 0;
+    const fn = vi.fn().mockImplementation(async () => {
+      now += 400;
+      throw new Error('fetch failed');
+    });
+    await expect(retryable(fn, {
+      maxRetries: 4, baseDelayMs: 1, maxJitterMs: 0, deadline: 1_000, attemptMs: 400, now: () => now,
+      isRetryable: () => true,
+    })).rejects.toThrow(/fetch failed/);
+    // 400 ms used; a 400 ms attempt fits (ends at 801). At 800 ms, one more would end past 1000.
+    expect(fn).toHaveBeenCalledTimes(2);
+  });
+
   it('stops retrying once its signal aborts', async () => {
     const controller = new AbortController();
     const fn = vi.fn().mockImplementation(async () => {
@@ -109,8 +123,38 @@ describe('EnsembleRunner over a mocked OpenRouter', () => {
     const [response] = await runner.runPrompt('2+2?', [MODEL], { answer: NUMBER_SPEC });
     expect(response!.error).toMatch(/Empty response/);
     expect(response!.content).toBe('');
-    // Structured formats came back empty: the error is reported, not hidden behind a text fallback.
-    expect(fetchMock.mock.calls.every(([, init]) => !(JSON.parse((init as RequestInit).body as string) as { stream?: boolean }).stream)).toBe(true);
+  });
+
+  it('falls back to a plain reply when every structured format comes back empty', async () => {
+    const fetchMock = vi.fn().mockImplementation((_url: string, init: RequestInit) => {
+      const body = JSON.parse(init.body as string) as { stream?: boolean };
+      return Promise.resolve(body.stream
+        ? sse([{ choices: [{ delta: { content: 'Two plus two.\nFinal answer: 4' } }] }, '[DONE]'])
+        : completion(null));
+    });
+    const runner = new EnsembleRunner(registry(client(fetchMock)), 'free', { retry: FAST_RETRY });
+    const [response] = await runner.runPrompt('2+2?', [MODEL], { answer: NUMBER_SPEC });
+    expect(response!.error).toBeUndefined();
+    expect(response!.answerSource).toBe('text');
+    expect(response!.content).toMatch(/Final answer: 4/);
+    expect(response!.structuredFallback).toMatch(/Empty response/);
+    // json_schema, json_object and prompting, then one stream; no retry.
+    expect(fetchMock).toHaveBeenCalledTimes(4);
+  });
+
+  it('retries when the plain-reply fallback is empty too', async () => {
+    let streams = 0;
+    const fetchMock = vi.fn().mockImplementation((_url: string, init: RequestInit) => {
+      const body = JSON.parse(init.body as string) as { stream?: boolean };
+      if (!body.stream) return Promise.resolve(completion(null));
+      streams += 1;
+      return Promise.resolve(sse([{ choices: [{ delta: { content: streams === 1 ? '' : 'Final answer: 4' } }] }, '[DONE]']));
+    });
+    const runner = new EnsembleRunner(registry(client(fetchMock)), 'free', { retry: FAST_RETRY });
+    const [response] = await runner.runPrompt('2+2?', [MODEL], { answer: NUMBER_SPEC });
+    expect(response!.content).toMatch(/Final answer: 4/);
+    expect(response!.attempts).toBe(2);
+    expect(streams).toBe(2);
   });
 
   it('retries an empty completion and keeps the answer that follows', async () => {
@@ -155,6 +199,52 @@ describe('EnsembleRunner over a mocked OpenRouter', () => {
     } finally {
       vi.useRealTimers();
     }
+  });
+
+  it('waits for Retry-After on a 503', async () => {
+    vi.useFakeTimers();
+    try {
+      const fetchMock = vi.fn()
+        .mockResolvedValueOnce(json({ error: { message: 'overloaded' } }, 503, { 'Retry-After': '5' }))
+        .mockResolvedValueOnce(answer('4'));
+      const runner = new EnsembleRunner(registry(client(fetchMock)), 'free', { retry: FAST_RETRY });
+      const pending = runner.runPrompt('2+2?', [MODEL], { answer: NUMBER_SPEC });
+      await vi.advanceTimersByTimeAsync(4_900);
+      expect(fetchMock).toHaveBeenCalledTimes(1);
+      await vi.advanceTimersByTimeAsync(200);
+      const [response] = await pending;
+      expect(response!.content).toMatch(/Final answer: 4/);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('starts no retry that could not finish before the deadline', async () => {
+    const fetchMock = vi.fn().mockRejectedValue(new TypeError('fetch failed'));
+    const runner = new EnsembleRunner(registry(client(fetchMock)), 'free', {
+      retry: { maxRetries: 4, baseDelayMs: 1, maxJitterMs: 0 },
+      callTimeoutMs: 10_000,
+    });
+    const [response] = await runner.runPrompt('q', [MODEL], { answer: NUMBER_SPEC, deadline: Date.now() + 5_000 });
+    expect(response!.error).toMatch(/fetch failed/);
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('aborts a call still running at the deadline, records it as timed out and keeps the others', async () => {
+    const { fetchMock: hanging, signals } = hangingFetch();
+    const fetchMock = vi.fn().mockImplementation((url: string, init: RequestInit) => {
+      const body = JSON.parse(init.body as string) as { model: string };
+      return body.model === 'slow' ? hanging(url, init) : Promise.resolve(answer('4'));
+    });
+    const runner = new EnsembleRunner(registry(client(fetchMock)), 'free', { retry: FAST_RETRY });
+    const seen: number[] = [];
+    const responses = await runner.runPrompt('q', [{ ...MODEL, model: 'fast' }, { ...MODEL, model: 'slow' }], {
+      answer: NUMBER_SPEC, deadline: Date.now() + 30, onResponse: (i) => seen.push(i),
+    });
+    expect(responses[0]!.content).toMatch(/Final answer: 4/);
+    expect(responses[1]!.error).toMatch(/timed out at the question deadline/);
+    expect(signals.every((signal) => signal.aborted)).toBe(true);
+    expect(seen.sort()).toEqual([0, 1]);
   });
 
   it('gives up after its retries and records the error', async () => {
@@ -209,7 +299,7 @@ describe('summarizer calls', () => {
 });
 
 describe('BenchmarkRunner', () => {
-  it('aborts the requests of a question that times out, so nothing keeps running', async () => {
+  it('aborts the requests still running at the question limit, so nothing keeps running', async () => {
     const { fetchMock, signals } = hangingFetch();
     const output = createBenchmarkFile('gsm8k', 'free', ['openai-compatible:m'], [], 1);
     const runner = new BenchmarkRunner({
@@ -229,7 +319,10 @@ describe('BenchmarkRunner', () => {
       output,
       outputPath: '/dev/null',
     });
-    expect(output.runs[0]!.failure).toBe('timeout');
+    // Both calls were cut off at the answers' deadline and count as timed out.
+    const results = Object.values(output.runs[0]!.evaluation!.results);
+    expect(results.every((r) => !r.correct && r.failure === 'timeout')).toBe(true);
+    expect(output.runs[0]!.responses.every((r) => /timed out/.test(r.error ?? ''))).toBe(true);
     expect(signals).toHaveLength(2);
     expect(signals.every((signal) => signal.aborted)).toBe(true);
     // No retry starts after the abort.
@@ -261,5 +354,90 @@ describe('BenchmarkRunner', () => {
     expect((JSON.parse((fetchMock.mock.calls[0]![1] as RequestInit).body as string) as { model: string }).model).toBe('bad');
     expect(output.runs[0]!.responses[0]).toBe(kept);
     expect(output.runs[0]!.responses[1]!.content).toMatch(/Final answer: 4/);
+  });
+
+  const QUESTION = { id: 'q1', prompt: 'Q', groundTruth: '4', answer: NUMBER_SPEC };
+  const good = (model: string): ProviderResponse => ({
+    ...MODEL, model, content: 'Final answer: 4', responseTimeMs: 5, answerSource: 'structured', estimatedCostUsd: 0.001,
+  });
+
+  it('keeps answers kept from an earlier attempt when the summarizer times out', async () => {
+    const { fetchMock, signals } = hangingFetch();
+    const models = ['a', 'b', 'c'].map((model) => ({ ...MODEL, model }));
+    const kept = models.map((m) => good(m.model));
+    const output = createBenchmarkFile('gsm8k', 'free', models.map((m) => `openai-compatible:${m.model}`), ['standard'], 1);
+    const runner = new BenchmarkRunner({
+      mode: 'free',
+      registry: registry(client(fetchMock)),
+      models,
+      strategies: ['standard'],
+      evaluator: new MechanicalEvaluator('numeric'),
+      summarizer: models[0]!,
+      parallelQuestions: true,
+      questionTimeoutMs: 200,
+      consensusTimeoutMs: 1_000,
+      retry: FAST_RETRY,
+      protocol: 'structured',
+      priorResponses: new Map([['q1', kept]]),
+    });
+    await runner.run({ questions: [QUESTION], output, outputPath: '/dev/null' });
+    const run = output.runs[0]!;
+    expect(run.responses).toEqual(kept);
+    expect(Object.values(run.evaluation!.results).every((r) => r.correct)).toBe(true);
+    expect(run.consensusEvaluation!.results.standard!.correct).toBe(false);
+    expect(run.consensusEvaluation!.results.standard!.failure).toBeDefined();
+    expect(signals.length).toBeGreaterThan(0);
+    expect(signals.every((signal) => signal.aborted)).toBe(true);
+  });
+
+  it('keeps the answers that came back when the question limit cuts it off', async () => {
+    const fetchMock = vi.fn().mockImplementation(() => Promise.resolve(answer('4')));
+    let firstCall = true;
+    const evaluator = new MechanicalEvaluator('numeric');
+    const slowOnce = {
+      name: evaluator.name,
+      evaluate: (response: string, truth: string) => {
+        if (firstCall) {
+          firstCall = false;
+          return new Promise<never>(() => undefined);
+        }
+        return evaluator.evaluate(response, truth);
+      },
+    };
+    const models = [{ ...MODEL, model: 'a' }, { ...MODEL, model: 'b' }];
+    const output = createBenchmarkFile('gsm8k', 'free', models.map((m) => `openai-compatible:${m.model}`), [], 1);
+    const runner = new BenchmarkRunner({
+      mode: 'free', registry: registry(client(fetchMock)), models, strategies: [], evaluator: slowOnce,
+      summarizer: null, parallelQuestions: true, questionTimeoutMs: 50, retry: FAST_RETRY, protocol: 'structured',
+    });
+    await runner.run({ questions: [QUESTION], output, outputPath: '/dev/null' });
+    const run = output.runs[0]!;
+    expect(run.failure).toBe('timeout');
+    expect(run.responses.every((r) => !r.error && /Final answer: 4/.test(r.content))).toBe(true);
+    expect(Object.values(run.evaluation!.results).every((r) => r.correct)).toBe(true);
+  });
+
+  it('replaces a rerun entry in place and carries the cost of what it replaced', async () => {
+    const fetchMock = vi.fn().mockImplementation(() => Promise.resolve(answer('4')));
+    const models = [{ ...MODEL, model: 'a' }, { ...MODEL, model: 'b' }];
+    const output = createBenchmarkFile('gsm8k', 'free', models.map((m) => `openai-compatible:${m.model}`), [], 2);
+    const keptAnswer = good('a');
+    const failedAnswer: ProviderResponse = { ...MODEL, model: 'b', content: '', responseTimeMs: 0, error: 'fetch failed' };
+    output.runs.push(
+      { questionId: 'q1', prompt: 'Q', responses: [keptAnswer, failedAnswer], consensus: {},
+        consensusMetrics: { standard: { tokenCount: 1, durationMs: 1, costUsd: 0.002 } } },
+      { questionId: 'q0', prompt: 'Q0', responses: [good('a'), good('b')], consensus: {} },
+    );
+    const runner = new BenchmarkRunner({
+      mode: 'free', registry: registry(client(fetchMock)), models, strategies: [],
+      evaluator: new MechanicalEvaluator('numeric'), summarizer: null, parallelQuestions: true, protocol: 'structured',
+      priorResponses: new Map([['q1', [keptAnswer, failedAnswer]]]),
+    });
+    await runner.run({ questions: [QUESTION], output, outputPath: '/dev/null', rerunIds: new Set(['q1']) });
+    expect(output.runs.map((r) => r.questionId)).toEqual(['q1', 'q0']);
+    expect(output.runs[0]!.responses[0]).toBe(keptAnswer);
+    expect(output.runs[0]!.responses[1]!.content).toMatch(/Final answer: 4/);
+    expect(output.runs[0]!.priorAttemptCostUsd).toBeCloseTo(0.002, 10);
+    expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 });

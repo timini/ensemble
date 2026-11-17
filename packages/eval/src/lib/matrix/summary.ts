@@ -48,6 +48,12 @@ export interface DatasetSummary {
   spentUsd: number;
   /** True when some calls had no price, so spentUsd is a lower bound. */
   spentIncomplete: boolean;
+  /**
+   * Priced cost of earlier attempts that --retry-failed replaced (answers
+   * not kept and their consensus calls). Spent on top of spentUsd and not
+   * part of any configuration's cost. Absent when nothing was replaced.
+   */
+  retrySpendUsd?: number;
 }
 
 export interface MatrixSummary {
@@ -223,7 +229,13 @@ export function summarizeDataset(config: MatrixConfig, results: DatasetResults):
     rows,
     spentUsd,
     spentIncomplete,
+    ...retrySpend([...ensembleRuns, ...referenceRuns]),
   };
+}
+
+function retrySpend(runs: PromptRunResult[]): Pick<DatasetSummary, 'retrySpendUsd'> {
+  const usd = runs.reduce((sum, run) => sum + (run.priorAttemptCostUsd ?? 0), 0);
+  return usd > 0 ? { retrySpendUsd: usd } : {};
 }
 
 function methodOf(config: MatrixConfig): MatrixSummary['method'] {

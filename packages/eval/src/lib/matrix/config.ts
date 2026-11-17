@@ -17,6 +17,13 @@ export interface MatrixModel {
   /** Model spec as written in the config (`openrouter:qwen/qwen3.5-9b`). */
   spec: string;
   parsed: ModelSpec;
+  /**
+   * OpenRouter host preferences for this model, sent as OpenRouter's
+   * `provider` object (`{ "ignore": ["SomeHost"] }`, `{ "order": [...],
+   * "allow_fallbacks": false }`). Used to avoid a host that returns empty
+   * replies once the logs name it.
+   */
+  routing?: Record<string, unknown>;
 }
 
 export interface MatrixConfig {
@@ -36,19 +43,34 @@ export interface MatrixConfig {
   /** Premium model run once as a reference and cached. */
   reference: MatrixModel;
   budgetUsd: number;
-  /** Outer limit for one question, retries and consensus included. Must cover callTimeoutMs plus consensusTimeoutMs. */
+  /**
+   * Hard cap for one question, from when it gets a slot, retries and
+   * consensus included. Model calls must end by this limit minus
+   * consensusTimeoutMs and summarizer calls by the limit itself; a retry
+   * that could not finish in time is not started, and a call still running
+   * at its deadline is aborted and counts as wrong. Answers that came back
+   * are kept. It must fit at least one model call and one summarizer call.
+   */
   questionTimeoutMs: number;
   /** Limit for one model call; the request is aborted when it passes and the call is retried. */
   callTimeoutMs: number;
   /** Limit for one summarizer call (the standard consensus); aborted and retried like model calls. */
   consensusTimeoutMs: number;
-  /** Retries per call for transient failures (network, 429, 5xx, timeouts, empty replies). */
+  /** Retries per call for transient failures (network, 429, 5xx, timeouts, empty replies), within questionTimeoutMs. */
   maxRetries: number;
+  /**
+   * Ask OpenRouter to route structured calls only to hosts that honour
+   * response_format (`provider.require_parameters`). Default true. Runs made
+   * before 2026-11-17 evening did not send it; repair those with it off so
+   * every entry of a run is routed the same way.
+   */
+  requireParameters: boolean;
 }
 
 export interface MatrixOverrides {
   sample?: number;
   datasets?: string[];
+  requireParameters?: boolean;
 }
 
 type Raw = Record<string, unknown>;
@@ -71,7 +93,17 @@ function model(raw: unknown, where: string): MatrixModel {
   if (!raw || typeof raw !== 'object') throw new Error(`Matrix config: ${where} must be an object.`);
   const entry = raw as Raw;
   const spec = str(entry, 'spec');
-  return { id: str(entry, 'id'), label: str(entry, 'label'), spec, parsed: parseModelSpec(spec) };
+  const routing = entry.routing;
+  if (routing !== undefined && (!routing || typeof routing !== 'object' || Array.isArray(routing))) {
+    throw new Error(`Matrix config: ${where}.routing must be an object (OpenRouter provider preferences).`);
+  }
+  return {
+    id: str(entry, 'id'),
+    label: str(entry, 'label'),
+    spec,
+    parsed: parseModelSpec(spec),
+    ...(routing ? { routing: routing as Record<string, unknown> } : {}),
+  };
 }
 
 function datasets(values: unknown): BenchmarkDatasetName[] {
@@ -131,7 +163,15 @@ export function parseMatrixConfig(raw: unknown, overrides: MatrixOverrides = {})
     reference: model(config.reference, 'reference'),
     budgetUsd: budget,
     ...timeouts(config),
+    requireParameters: requireParameters(config, overrides),
   };
+}
+
+function requireParameters(config: Raw, overrides: MatrixOverrides): boolean {
+  if (overrides.requireParameters !== undefined) return overrides.requireParameters;
+  const value = config.requireParameters ?? true;
+  if (typeof value !== 'boolean') throw new Error('Matrix config: "requireParameters" must be true or false.');
+  return value;
 }
 
 function timeouts(config: Raw): Pick<MatrixConfig, 'questionTimeoutMs' | 'callTimeoutMs' | 'consensusTimeoutMs' | 'maxRetries'> {
@@ -141,7 +181,7 @@ function timeouts(config: Raw): Pick<MatrixConfig, 'questionTimeoutMs' | 'callTi
   if (questionTimeoutMs < callTimeoutMs + consensusTimeoutMs) {
     throw new Error(
       'Matrix config: "questionTimeoutMs" must be at least callTimeoutMs plus consensusTimeoutMs, '
-      + 'or a question times out while its calls are still allowed to run.',
+      + 'or a question has no room for one model call and one summary. Retries fit in what is left.',
     );
   }
   return { questionTimeoutMs, callTimeoutMs, consensusTimeoutMs, maxRetries: int(config, 'maxRetries', 4, 0) };

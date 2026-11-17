@@ -44,6 +44,23 @@ describe('parseMatrixConfig', () => {
     expect(() => parseMatrixConfig({ ...committed, questionTimeoutMs: 300_000 })).toThrow(/questionTimeoutMs/);
   });
 
+  it('reads per-model OpenRouter routing and requireParameters, with an override', () => {
+    const models = committed.models as Array<Record<string, unknown>>;
+    const config = parseMatrixConfig({
+      ...committed,
+      requireParameters: false,
+      reference: { ...(committed.reference as object), routing: { ignore: ['HostB'] } },
+      models: [{ ...models[0], routing: { order: ['HostA'] } }, ...models.slice(1)],
+    });
+    expect(config.requireParameters).toBe(false);
+    expect(config.reference.routing).toEqual({ ignore: ['HostB'] });
+    expect(config.models[0]!.routing).toEqual({ order: ['HostA'] });
+    expect(parseMatrixConfig(committed).requireParameters).toBe(true);
+    expect(parseMatrixConfig(committed, { requireParameters: false }).requireParameters).toBe(false);
+    expect(() => parseMatrixConfig({ ...committed, requireParameters: 'yes' })).toThrow(/requireParameters/);
+    expect(() => parseMatrixConfig({ ...committed, reference: { ...(committed.reference as object), routing: ['x'] } })).toThrow(/routing/);
+  });
+
   it('applies overrides for sample and datasets', () => {
     const config = parseMatrixConfig(committed, { sample: 5, datasets: ['gsm8k'] });
     expect(config.sample).toBe(5);
