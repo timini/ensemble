@@ -30,6 +30,11 @@ test.describe('Provider errors per model', () => {
     await expect(note).toContainText('2 of 3');
     await expect(page.getByTestId('consensus-card')).toHaveAttribute('data-status', 'success', { timeout: 30_000 });
     await expect(page.getByTestId('agreement-analysis')).toBeVisible({ timeout: 30_000 });
+
+    // The cost still shows, counting only the calls that ran: 2 answers,
+    // 1 consensus call and 2 embedding calls.
+    await expect(page.getByTestId('run-cost-calls')).toHaveText('5 model calls', { timeout: 30_000 });
+    await expect(page.getByTestId('run-cost-amount')).toContainText('$');
   });
 
   test('retrying a failed model reruns only that model', async ({ page }) => {
