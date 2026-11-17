@@ -507,6 +507,15 @@ describe('ResponseCard', () => {
   });
 
   describe('internationalization', () => {
+    it('shows the token count with a translated, pluralised label', () => {
+      const card = (count: number) => <ResponseCard modelName="GPT-4" provider="openai" status="complete" responseType="ai" content="Done" tokenCount={count} />;
+      const { unmount } = renderWithI18n(card(1), { language: 'en' });
+      expect(screen.getByText('1 token')).toBeInTheDocument();
+      unmount();
+      renderWithI18n(card(42), { language: 'fr' });
+      expect(screen.getByText('42 jetons')).toBeInTheDocument();
+    });
+
     it('renders manual badge in English', () => {
       renderWithI18n(<ResponseCard status="complete" responseType="manual" content="Manual response" />, { language: 'en' });
       expect(screen.getByText('Manual')).toBeInTheDocument();

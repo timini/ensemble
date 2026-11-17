@@ -35,3 +35,41 @@ describe("locale files", () => {
     expect(missing(frComponents, enComponents)).toEqual([]);
   });
 });
+
+function entries(value: unknown, prefix = ""): Array<[string, string]> {
+  if (typeof value === "string") return [[prefix, value]];
+  if (typeof value !== "object" || value === null) return [];
+  return Object.entries(value).flatMap(([key, child]) =>
+    entries(child, prefix ? `${prefix}.${key}` : key),
+  );
+}
+
+function placeholders(text: string): string {
+  return [...text.matchAll(/\{\{\s*(\w+)\s*\}\}/g)]
+    .map((m) => m[1])
+    .sort()
+    .join(",");
+}
+
+describe.each([
+  ["app common", enApp, frApp],
+  ["component library", enComponents, frComponents],
+])("%s strings", (_name, en, fr) => {
+  it("has no empty strings", () => {
+    const empty = [...entries(en), ...entries(fr)]
+      .filter(([, text]) => text.trim() === "")
+      .map(([key]) => key);
+    expect(empty).toEqual([]);
+  });
+
+  it("uses the same {{placeholders}} in EN and FR", () => {
+    const frByKey = new Map(entries(fr));
+    const mismatched = entries(en)
+      .filter(([key, text]) => {
+        const other = frByKey.get(key);
+        return other !== undefined && placeholders(other) !== placeholders(text);
+      })
+      .map(([key]) => key);
+    expect(mismatched).toEqual([]);
+  });
+});

@@ -2,6 +2,7 @@ import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { Tag } from './Tag';
+import { renderWithI18n } from '../../../lib/test-utils/i18n-test-wrapper';
 
 describe('Tag', () => {
   describe('rendering', () => {
@@ -142,5 +143,10 @@ describe('Tag', () => {
       const { container } = render(<Tag removable>Tag</Tag>);
       expect(container.firstChild).toMatchSnapshot();
     });
+  });
+
+  it('labels the remove button in French', () => {
+    renderWithI18n(<Tag removable onRemove={vi.fn()}>Rust</Tag>, { language: 'fr' });
+    expect(screen.getByRole('button', { name: 'Retirer' })).toBeInTheDocument();
   });
 });

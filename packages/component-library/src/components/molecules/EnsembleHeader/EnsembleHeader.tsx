@@ -54,7 +54,7 @@ export function EnsembleHeader({
             {text('title', 'Ensemble AI')}
           </span>
         </a>
-        <nav className="flex shrink-0 items-center gap-1" aria-label="Main navigation">
+        <nav className="flex shrink-0 items-center gap-1" aria-label={text('mainNavigation', 'Main navigation')}>
           {links.map(({ href, label }) => (
             <a
               key={href}
@@ -72,7 +72,7 @@ export function EnsembleHeader({
             type="button"
             onClick={onSettingsClick}
             className="focus-ring inline-flex size-10 items-center justify-center rounded-lg text-muted-foreground transition-colors duration-fast hover:bg-muted hover:text-foreground"
-            aria-label="Open settings"
+            aria-label={text('openSettings', 'Open settings')}
           >
             <Settings className="size-5" />
           </button>

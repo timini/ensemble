@@ -7,7 +7,9 @@
       "features": "Features",
       "benchmarks": "Benchmarks",
       "workspace": "Open workspace",
-      "home": "Ensemble AI home"
+      "home": "Ensemble AI home",
+      "mainNavigation": "Main navigation",
+      "openSettings": "Open settings"
     },
     "footer": {
       "getStarted": "Get Started",
@@ -58,6 +60,12 @@
     },
     "agreementRing": {
       "label": "Agreement score {{score}} out of 100"
+    },
+    "link": {
+      "opensInNewWindow": "Opens in new window"
+    },
+    "tag": {
+      "remove": "Remove"
     }
   },
   "molecules": {
@@ -96,7 +104,9 @@
       "expand": "Expand",
       "copy": "Copy",
       "rateResponse": "Rate response:",
-      "responseTime": "Response time: {{time}}"
+      "responseTime": "Response time: {{time}}",
+      "tokens_one": "{{count}} token",
+      "tokens_other": "{{count}} tokens"
     },
     "summarizerIndicator": {
       "label": "Summarizer Model:"
@@ -433,7 +443,8 @@
     },
     "apiKeyConfigurationModal": {
       "title": "Configure API Key",
-      "done": "Done"
+      "done": "Done",
+      "close": "Close"
     },
     "consensusCard": {
       "heading": "Consensus",
@@ -523,7 +534,8 @@
       "addManualResponse": "Add Manual Response",
       "manualResponsesNote": "Add reference answers or benchmark outputs to compare against live model responses.",
       "continueToPrompt": "Continue to Prompt",
-      "removeModel": "Remove {{name}}"
+      "removeModel": "Remove {{name}}",
+      "clearAll": "Clear all"
     },
     "manualResponseModal": {
       "title": "Manual Response",
@@ -541,7 +553,8 @@
       "heading": "Select Your Mode"
     },
     "modelSelectionList": {
-      "noModels": "No models available"
+      "noModels": "No models available",
+      "configure": "Configure"
     },
     "pageHero": {
       "breadcrumb": "Breadcrumb"

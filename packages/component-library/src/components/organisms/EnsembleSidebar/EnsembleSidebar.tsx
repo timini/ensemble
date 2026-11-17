@@ -135,7 +135,7 @@ export const EnsembleSidebar = React.forwardRef<HTMLDivElement, EnsembleSidebarP
                     onClick={onClearAll}
                     data-testid="clear-all-models"
                   >
-                    {t('common.clearAll', 'Clear All')}
+                    {t('organisms.ensembleSidebar.clearAll')}
                   </Button>
                 )}
               </div>

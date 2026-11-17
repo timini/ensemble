@@ -240,7 +240,7 @@ export const ResponseCard = React.forwardRef<HTMLDivElement, ResponseCardProps>(
                     )}
                     {tokenCount !== undefined && (
                       <span className="text-sm text-muted-foreground">
-                        {tokenCount} tokens
+                        {t('molecules.responseCard.tokens', { count: tokenCount })}
                       </span>
                     )}
                   </div>

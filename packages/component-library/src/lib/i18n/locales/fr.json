@@ -7,7 +7,9 @@
       "features": "Fonctionnalités",
       "benchmarks": "Benchmarks",
       "workspace": "Ouvrir l’espace de travail",
-      "home": "Accueil Ensemble AI"
+      "home": "Accueil Ensemble AI",
+      "mainNavigation": "Navigation principale",
+      "openSettings": "Ouvrir les paramètres"
     },
     "footer": {
       "getStarted": "Commencer",
@@ -58,6 +60,12 @@
     },
     "agreementRing": {
       "label": "Score d'accord {{score}} sur 100"
+    },
+    "link": {
+      "opensInNewWindow": "S'ouvre dans une nouvelle fenêtre"
+    },
+    "tag": {
+      "remove": "Retirer"
     }
   },
   "molecules": {
@@ -96,7 +104,9 @@
       "expand": "Développer",
       "copy": "Copier",
       "rateResponse": "Évaluer la réponse :",
-      "responseTime": "Temps de réponse : {{time}}"
+      "responseTime": "Temps de réponse : {{time}}",
+      "tokens_one": "{{count}} jeton",
+      "tokens_other": "{{count}} jetons"
     },
     "summarizerIndicator": {
       "label": "Modèle de synthèse :"
@@ -433,7 +443,8 @@
     },
     "apiKeyConfigurationModal": {
       "title": "Configurer la clé API",
-      "done": "Terminé"
+      "done": "Terminé",
+      "close": "Fermer"
     },
     "consensusCard": {
       "heading": "Consensus",
@@ -523,7 +534,8 @@
       "addManualResponse": "Ajouter une Réponse Manuelle",
       "manualResponsesNote": "Ajoutez des réponses de référence ou des résultats de référence à comparer avec les réponses des modèles en direct.",
       "continueToPrompt": "Continuer vers l'Invite",
-      "removeModel": "Retirer {{name}}"
+      "removeModel": "Retirer {{name}}",
+      "clearAll": "Tout retirer"
     },
     "manualResponseModal": {
       "title": "Réponse Manuelle",
@@ -541,7 +553,8 @@
       "heading": "Sélectionnez Votre Mode"
     },
     "modelSelectionList": {
-      "noModels": "Aucun modèle disponible"
+      "noModels": "Aucun modèle disponible",
+      "configure": "Configurer"
     },
     "pageHero": {
       "breadcrumb": "Fil d'Ariane"

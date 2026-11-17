@@ -61,7 +61,7 @@ export const ApiKeyConfigurationModal = React.forwardRef<
             <button
               onClick={() => onOpenChange(false)}
               className="p-2 hover:bg-accent rounded-full transition-colors"
-              aria-label="Close modal"
+              aria-label={t('organisms.apiKeyConfigurationModal.close')}
               data-testid="close-modal-button"
             >
               <svg
