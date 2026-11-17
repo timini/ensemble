@@ -199,3 +199,11 @@ export {
   type BenchmarkMethodProps,
   type BenchmarkMethodModel,
 } from './components/organisms/BenchmarkMethod';
+export { WaysIn, type WaysInProps } from './components/molecules/WaysIn';
+export { ScoreGuide, type ScoreGuideProps } from './components/molecules/ScoreGuide';
+export { HowItWorks, type HowItWorksProps } from './components/molecules/HowItWorks';
+export { OnboardingKeyField, ONBOARDING_KEY_PROVIDERS, type OnboardingKeyFieldProps, type OnboardingKeyProvider, type OnboardingKeyStatus } from './components/molecules/OnboardingKeyField';
+export { ExampleRun, type ExampleRunProps, type ExampleRunAnswer } from './components/organisms/ExampleRun';
+export { OnboardingSheet, type OnboardingSheetProps, type OnboardingPath, type OnboardingLocalProps } from './components/organisms/OnboardingSheet';
+export { PageIntro, type PageIntroProps } from './components/molecules/PageIntro';
+export { FeatureGrid, type FeatureGridProps, type FeatureGridItem } from './components/molecules/FeatureGrid';

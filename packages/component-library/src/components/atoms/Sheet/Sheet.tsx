@@ -20,6 +20,12 @@ export interface SheetProps {
   footer?: React.ReactNode;
   /** Defaults to `sheet`. */
   testId?: string;
+  /**
+   * What gets focus on open: the first control (default), or the panel
+   * itself, so a sheet that opens on its own does not light up a control or
+   * raise the keyboard on a phone. Tab still moves through the controls.
+   */
+  initialFocus?: 'first' | 'panel';
   className?: string;
 }
 
@@ -47,6 +53,7 @@ export function Sheet({
   children,
   footer,
   testId = 'sheet',
+  initialFocus = 'first',
   className,
 }: SheetProps) {
   const { t } = useTranslation();
@@ -57,6 +64,14 @@ export function Sheet({
         <DialogPrimitive.Content
           data-testid={testId}
           data-side={side}
+          onOpenAutoFocus={
+            initialFocus === 'panel'
+              ? (event) => {
+                  event.preventDefault();
+                  (event.currentTarget as HTMLElement | null)?.focus();
+                }
+              : undefined
+          }
           {...(description ? {} : { 'aria-describedby': undefined })}
           className={cn(
             'fixed inset-x-0 bottom-0 z-50 flex max-h-[92dvh] animate-rise-in flex-col rounded-t-2xl border border-border bg-popover text-popover-foreground shadow-lg focus:outline-none',

@@ -21,7 +21,7 @@ export function Footer({ githubUrl = 'https://github.com/timini/ensemble' }: Foo
 
   return (
     <footer className="border-t border-border bg-background" data-testid="site-footer">
-      <div className="max-w-6xl mx-auto px-6 py-8">
+      <div className="mx-auto max-w-6xl px-gutter py-8">
         <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex flex-wrap items-center gap-4">
             {navLinks.map(({ href, label }) => (

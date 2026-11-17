@@ -53,3 +53,6 @@ export const WithFooter: Story = {
 export const Mobile: Story = {
   globals: { viewport: { value: 'mobile1' } },
 };
+
+/** Opened on its own (as onboarding is): the panel takes focus, not the first control. */
+export const PanelFocus: Story = { args: { initialFocus: 'panel' } };

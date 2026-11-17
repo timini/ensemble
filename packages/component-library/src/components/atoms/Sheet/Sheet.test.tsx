@@ -33,6 +33,15 @@ describe('Sheet', () => {
     expect(screen.getByRole('dialog').contains(document.activeElement)).toBe(true);
   });
 
+  it('can focus the panel itself on open instead of the first control', () => {
+    renderWithI18n(
+      <Sheet open onOpenChange={() => undefined} title="Welcome" initialFocus="panel">
+        <input aria-label="Key" />
+      </Sheet>,
+    );
+    expect(document.activeElement).toBe(screen.getByTestId('sheet'));
+  });
+
   it('closes on Escape', () => {
     const onOpenChange = vi.fn();
     renderWithI18n(

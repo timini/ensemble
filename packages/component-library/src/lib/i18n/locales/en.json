@@ -4,7 +4,10 @@
       "title": "Ensemble AI",
       "tagline": "Ask several models, see where they agree.",
       "about": "About",
-      "features": "Features"
+      "features": "Features",
+      "benchmarks": "Benchmarks",
+      "workspace": "Open workspace",
+      "home": "Ensemble AI home"
     },
     "footer": {
       "getStarted": "Get Started",
@@ -356,6 +359,51 @@
       "light": "Light",
       "dark": "Dark",
       "language": "Language"
+    },
+    "waysIn": {
+      "keys": "Use your own keys",
+      "local": "Use local models",
+      "oneKey": "One key is enough to start. An OpenRouter key reaches every major provider.",
+      "pro": "Sign in for Pro, pay with credits",
+      "soon": "Coming soon"
+    },
+    "scoreGuide": {
+      "heading": "What the score tells you",
+      "body": "A single model sounds just as sure when it is right as when it is guessing. Asking several and measuring how closely they agree gives you a warning sign.",
+      "benchmarks": "See how we test it",
+      "levels": {
+        "high": "The models say the same thing. The consensus is probably safe to use.",
+        "medium": "They overlap but differ on details. Check the parts they disagree on.",
+        "low": "Stop and read the individual answers. No single answer should be trusted here."
+      }
+    },
+    "howItWorks": {
+      "heading": "How it works",
+      "steps": {
+        "ask": {
+          "title": "Ask once",
+          "body": "Pick two to six models, from cloud providers or your own machine, and write one question."
+        },
+        "compare": {
+          "title": "Compare side by side",
+          "body": "Every answer streams in next to the others, with its time and cost."
+        },
+        "read": {
+          "title": "Read the agreement",
+          "body": "A score from semantic embeddings shows how closely the answers match, and one merged answer sits on top."
+        }
+      }
+    },
+    "onboardingKeyField": {
+      "provider": "Provider",
+      "key": "API key",
+      "placeholder": "Paste your {{provider}} key",
+      "hint": "One key is enough. We pick the provider from the key where we can.",
+      "validating": "Checking the key with {{provider}}",
+      "valid": "The {{provider}} key works.",
+      "validOpenRouter": "The OpenRouter key works. It reaches models from every major provider.",
+      "invalid": "{{provider}} did not accept this key.",
+      "invalidWithReason": "{{provider}} did not accept this key: {{reason}}"
     }
   },
   "organisms": {
@@ -600,6 +648,48 @@
       "noMatches": "Nothing matches \"{{query}}\".",
       "delete": "Delete \"{{prompt}}\"",
       "deletePreset": "Delete preset {{name}}"
+    },
+    "exampleRun": {
+      "heading": "Example run",
+      "real": "Real answers",
+      "illustrative": "Illustrative example",
+      "models_one": "{{count}} model",
+      "models_other": "{{count}} models",
+      "calls_one": "{{count}} call",
+      "calls_other": "{{count}} calls",
+      "consensus": "Consensus",
+      "answers": "Individual answers",
+      "seconds": "{{value}} s",
+      "showAll": "Read the run in full",
+      "showLess": "Show less",
+      "uncalibratedHint": "Default thresholds.",
+      "source": "Recorded on {{date}} through {{via}}. Agreement scored with {{embedding}}; consensus written by {{summarizer}}.",
+      "sourceIllustrative": "Illustrative example, not a recorded run."
+    },
+    "onboardingSheet": {
+      "title": "How do you want to run models?",
+      "description": "Pick one. You can add more later in settings.",
+      "choose": "How to run models",
+      "keys": {
+        "title": "Use your own key",
+        "body": "Stored encrypted in this browser. Never sent to our server."
+      },
+      "local": {
+        "title": "Use local models",
+        "body": "Ollama, LM Studio or any OpenAI-compatible server. Nothing leaves your machine."
+      },
+      "pro": {
+        "title": "Sign in for Pro",
+        "body": "Credits instead of keys.",
+        "soon": "Coming soon"
+      },
+      "start": "Start asking",
+      "skip": "Skip for now",
+      "localConnected_one": "Connected to {{name}}. {{count}} model available.",
+      "localConnected_other": "Connected to {{name}}. {{count}} models available.",
+      "localNone": "No local server found yet. Start Ollama, or add another server in settings.",
+      "localOther": "Using LM Studio, llama.cpp or vLLM?",
+      "localSettings": "Add it in settings"
     }
   },
   "providers": {

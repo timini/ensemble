@@ -4,7 +4,10 @@
       "title": "IA Ensemble",
       "tagline": "Interrogez plusieurs modèles, voyez où ils s'accordent.",
       "about": "À propos",
-      "features": "Fonctionnalités"
+      "features": "Fonctionnalités",
+      "benchmarks": "Benchmarks",
+      "workspace": "Ouvrir l’espace de travail",
+      "home": "Accueil Ensemble AI"
     },
     "footer": {
       "getStarted": "Commencer",
@@ -356,6 +359,51 @@
       "light": "Clair",
       "dark": "Sombre",
       "language": "Langue"
+    },
+    "waysIn": {
+      "keys": "Utiliser vos propres clés",
+      "local": "Utiliser des modèles locaux",
+      "oneKey": "Une clé suffit pour commencer. Une clé OpenRouter donne accès à tous les grands fournisseurs.",
+      "pro": "Pro avec connexion et crédits",
+      "soon": "Bientôt"
+    },
+    "scoreGuide": {
+      "heading": "Ce que le score vous dit",
+      "body": "Un modèle seul paraît aussi sûr de lui quand il a raison que quand il devine. En interroger plusieurs et mesurer leur accord vous donne un signal d’alerte.",
+      "benchmarks": "Voir comment nous le testons",
+      "levels": {
+        "high": "Les modèles disent la même chose. Le consensus est probablement fiable.",
+        "medium": "Ils se recoupent mais diffèrent sur des détails. Vérifiez les points de désaccord.",
+        "low": "Arrêtez-vous et lisez chaque réponse. Aucune réponse seule ne mérite confiance ici."
+      }
+    },
+    "howItWorks": {
+      "heading": "Comment ça marche",
+      "steps": {
+        "ask": {
+          "title": "Posez une fois",
+          "body": "Choisissez de deux à six modèles, dans le cloud ou sur votre machine, et écrivez une question."
+        },
+        "compare": {
+          "title": "Comparez côte à côte",
+          "body": "Chaque réponse arrive à côté des autres, avec son temps et son coût."
+        },
+        "read": {
+          "title": "Lisez l’accord",
+          "body": "Un score issu d’embeddings sémantiques montre à quel point les réponses concordent, et une réponse fusionnée figure en tête."
+        }
+      }
+    },
+    "onboardingKeyField": {
+      "provider": "Fournisseur",
+      "key": "Clé API",
+      "placeholder": "Collez votre clé {{provider}}",
+      "hint": "Une clé suffit. Nous reconnaissons le fournisseur à partir de la clé quand c’est possible.",
+      "validating": "Vérification de la clé auprès de {{provider}}",
+      "valid": "La clé {{provider}} fonctionne.",
+      "validOpenRouter": "La clé OpenRouter fonctionne. Elle donne accès aux modèles de tous les grands fournisseurs.",
+      "invalid": "{{provider}} a refusé cette clé.",
+      "invalidWithReason": "{{provider}} a refusé cette clé : {{reason}}"
     }
   },
   "organisms": {
@@ -600,6 +648,48 @@
       "noMatches": "Rien ne correspond à « {{query}} ».",
       "delete": "Supprimer « {{prompt}} »",
       "deletePreset": "Supprimer le préréglage {{name}}"
+    },
+    "exampleRun": {
+      "heading": "Exemple de requête",
+      "real": "Réponses réelles",
+      "illustrative": "Exemple illustratif",
+      "models_one": "{{count}} modèle",
+      "models_other": "{{count}} modèles",
+      "calls_one": "{{count}} appel",
+      "calls_other": "{{count}} appels",
+      "consensus": "Consensus",
+      "answers": "Réponses individuelles",
+      "seconds": "{{value}} s",
+      "showAll": "Tout lire",
+      "showLess": "Réduire",
+      "uncalibratedHint": "Seuils par défaut.",
+      "source": "Enregistré le {{date}} via {{via}}. Accord mesuré avec {{embedding}} ; consensus rédigé par {{summarizer}}.",
+      "sourceIllustrative": "Exemple illustratif, pas une requête enregistrée."
+    },
+    "onboardingSheet": {
+      "title": "Comment voulez-vous utiliser les modèles ?",
+      "description": "Choisissez une option. Vous pourrez en ajouter d’autres dans les paramètres.",
+      "choose": "Comment utiliser les modèles",
+      "keys": {
+        "title": "Utiliser votre propre clé",
+        "body": "Chiffrée dans ce navigateur. Jamais envoyée à notre serveur."
+      },
+      "local": {
+        "title": "Utiliser des modèles locaux",
+        "body": "Ollama, LM Studio ou tout serveur compatible OpenAI. Rien ne quitte votre machine."
+      },
+      "pro": {
+        "title": "Se connecter à Pro",
+        "body": "Des crédits à la place des clés.",
+        "soon": "Bientôt"
+      },
+      "start": "Commencer",
+      "skip": "Plus tard",
+      "localConnected_one": "Connecté à {{name}}. {{count}} modèle disponible.",
+      "localConnected_other": "Connecté à {{name}}. {{count}} modèles disponibles.",
+      "localNone": "Aucun serveur local trouvé pour l’instant. Lancez Ollama ou ajoutez un autre serveur dans les paramètres.",
+      "localOther": "Vous utilisez LM Studio, llama.cpp ou vLLM ?",
+      "localSettings": "Ajoutez-le dans les paramètres"
     }
   },
   "providers": {
