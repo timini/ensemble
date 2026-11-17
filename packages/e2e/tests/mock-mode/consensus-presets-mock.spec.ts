@@ -83,4 +83,31 @@ test.describe('Consensus Presets (Mock Mode)', () => {
         const text = await consensusCard.textContent();
         expect(text?.length).toBeGreaterThan(20);
     });
+
+    test('shows the majority vote breakdown with a winner', async ({ page }) => {
+        test.setTimeout(90000);
+
+        await page.goto('/config');
+        await page.locator('[data-mode="free"]').click();
+        await fillAndValidateKey(page, 'openai', 'sk-test-openai-key', 1);
+        await page.getByRole('button', { name: 'Next', exact: true }).click();
+
+        await expect(page).toHaveURL(/\/ensemble/);
+        await page.getByTestId('model-card-gpt-6-astra').click();
+        await page.getByTestId('model-card-gpt-6-luna').click();
+        await page.getByRole('button', { name: 'Next', exact: true }).click();
+
+        await expect(page).toHaveURL(/\/prompt/);
+        await page.getByTestId('preset-majority').click();
+        await expect(page.getByTestId('preset-majority')).toBeChecked();
+        await page.getByTestId('prompt-textarea').fill('What is 6 times 7?');
+        await page.getByRole('button', { name: /generate responses/i }).click();
+
+        await expect(page).toHaveURL(/\/review/);
+        const breakdown = page.getByTestId('majority-vote-breakdown');
+        await expect(breakdown).toBeVisible({ timeout: 30000 });
+        await expect(breakdown).toHaveAttribute('data-outcome', 'winner');
+        await expect(page.getByTestId('majority-vote-summary')).toHaveText('42 won with 2 of 2 votes.');
+    });
 });
+

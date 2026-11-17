@@ -46,6 +46,20 @@ const LOREM_IPSUM_WORDS = [
   'nemo', 'enim', 'ipsam', 'quia', 'voluptas', 'aspernatur', 'aut', 'odit',
 ];
 
+/**
+ * Mock answers for the majority vote extraction call: one short answer per
+ * response label ([R1], [R2], ...) in the prompt. All agree on "42" except
+ * the last of three or more, so a mock run shows a winner and a dissent.
+ */
+function mockFinalAnswers(prompt: string): { id: string; kind: string; answer: string }[] {
+  const labels = [...new Set([...prompt.matchAll(/\[(R\d+)\]/g)].map((match) => match[1]!))];
+  return labels.map((id, index) => ({
+    id,
+    kind: 'number',
+    answer: labels.length >= 3 && index === labels.length - 1 ? '41' : '42',
+  }));
+}
+
 export class MockProviderClient implements AIProvider {
   private readonly config: MockClientResolvedConfig;
 
@@ -107,13 +121,18 @@ export class MockProviderClient implements AIProvider {
   }
 
   async generateStructured<T>(
-    _prompt: string,
+    prompt: string,
     _model: string,
     schema: JsonSchema,
     _options?: GenerateStructuredOptions,
   ): Promise<StructuredResponse<T>> {
     const delay = this.randomInt(50, 150);
     await new Promise((resolve) => setTimeout(resolve, delay));
+
+    if (schema.name === 'final_answers') {
+      const parsed = { answers: mockFinalAnswers(prompt) } as T;
+      return { parsed, raw: JSON.stringify(parsed), responseTimeMs: delay };
+    }
 
     // Build a deterministic response using the first enum value for each property
     const properties = (schema.schema as Record<string, unknown>).properties as

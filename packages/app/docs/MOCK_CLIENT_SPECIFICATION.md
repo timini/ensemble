@@ -60,6 +60,8 @@ Waits 100 to 300 ms and returns `{ valid: true }` for any input.
 
 Waits 50 to 150 ms and returns an object where each schema property that has an `enum` gets its first enum value. Other properties are left out.
 
+The `final_answers` schema (the majority vote extraction call) is the exception. The mock returns one answer of kind `number` for each response label (`[R1]`, `[R2]`, ...) in the prompt. Every answer is `42` except the last one when there are three or more, which is `41`. A mock majority run therefore ends with a vote winner.
+
 ### listAvailableModels and listAvailableTextModels
 
 Return a static list of 13 models across all six providers, using real provider ids (GPT-6 Astra, Claude Opus 5.5, Gemini 4 Carbon, Grok 4.7, DeepSeek V4 Pro, Perplexity Fast and others). With `providerFilter` set, only that provider's models are returned. `listAvailableTextModels` returns the display names.

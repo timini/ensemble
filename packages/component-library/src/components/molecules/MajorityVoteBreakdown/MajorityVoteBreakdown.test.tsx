@@ -95,6 +95,22 @@ describe('MajorityVoteBreakdown', () => {
     );
   });
 
+  it('counts only the votes cast in the winner summary, not abstentions', () => {
+    renderWithI18n(
+      <MajorityVoteBreakdown
+        outcome="winner"
+        totalResponses={4}
+        options={[
+          { answer: '42', votes: 2, models: ['GPT', 'Claude'] },
+          { answer: '41', votes: 1, models: ['Gemini'] },
+        ]}
+        abstainedModels={['Grok']}
+      />,
+    );
+
+    expect(screen.getByTestId('majority-vote-summary')).toHaveTextContent('42 won with 2 of 3 votes.');
+  });
+
   it('renders French text', () => {
     renderWithI18n(
       <MajorityVoteBreakdown outcome="winner" totalResponses={4} options={winnerOptions} />,

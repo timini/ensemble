@@ -61,7 +61,8 @@ export const MajorityVoteBreakdown = React.forwardRef<HTMLDivElement, MajorityVo
         ? t('molecules.majorityVoteBreakdown.winner', {
             answer: top.answer,
             votes: top.votes,
-            total: totalResponses,
+            // Votes cast: abstentions are answers, not votes.
+            total: options.reduce((sum, option) => sum + option.votes, 0),
           })
         : outcome === 'tie'
           ? t('molecules.majorityVoteBreakdown.tie', {

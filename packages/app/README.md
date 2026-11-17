@@ -22,7 +22,7 @@ The main workflow is four steps. Each step is a page under `src/app/`.
 | `/test-components` | Dev page that renders component-library buttons (404 in production unless `NEXT_PUBLIC_MOCK_MODE=true`) |
 | `/api/trpc/[trpc]` | tRPC endpoint (see Server below) |
 
-Consensus methods offered on `/ensemble`: `standard`, `elo`, `majority`, `council`. All four are LLM-driven. `majority` asks the summarizer to rank and synthesize; it is not a mechanical vote.
+Consensus methods offered on `/ensemble`: `standard`, `elo`, `majority`, `council`. `standard`, `elo` and `council` are LLM-driven. `majority` first extracts a short final answer from each response with one structured call and counts the votes. On a tie, on long-form answers or when extraction fails, it falls back to the LLM rank-and-synthesize method.
 
 ## Modes
 

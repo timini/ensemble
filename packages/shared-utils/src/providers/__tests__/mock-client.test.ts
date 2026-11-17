@@ -40,4 +40,24 @@ describe('MockProviderClient', () => {
     const textModels = await client.listAvailableTextModels();
     expect(textModels.length).toBeGreaterThan(0);
   });
+
+  it('returns one short answer per response label for the final_answers schema', async () => {
+    const client = new MockProviderClient();
+    const schema = {
+      name: 'final_answers',
+      schema: { type: 'object', properties: { answers: { type: 'array' } } },
+    };
+    const prompt = 'Responses:\n[R1]\nfoo\n\n---\n\n[R2]\nbar\n\n---\n\n[R3]\nbaz';
+
+    const result = await client.generateStructured<{ answers: { id: string; kind: string; answer: string }[] }>(
+      prompt,
+      'gpt-4o',
+      schema,
+    );
+
+    expect(result.parsed.answers.map((a) => a.id)).toEqual(['R1', 'R2', 'R3']);
+    expect(result.parsed.answers.every((a) => a.kind === 'number')).toBe(true);
+    // Most labels agree so a mock majority run reaches a vote winner.
+    expect(result.parsed.answers.map((a) => a.answer)).toEqual(['42', '42', '41']);
+  });
 });
