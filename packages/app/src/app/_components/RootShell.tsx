@@ -15,11 +15,12 @@ import type { Theme, Language } from "@/components/organisms/SettingsModal";
 import { initializeProviders } from "~/providers";
 import { toError } from "~/lib/errors";
 import { logger } from "~/lib/logger";
+import { hasAppShell } from "~/lib/workspaceRoutes";
 
 /**
  * Client side of the root layout: theme, language, provider set-up and key
  * decryption, and the header, footer and settings modal of the public pages.
- * The workspace has its own frame (AppShell) and settings sheet. The theme
+ * The workspace and the account page have their own frame (AppShell). The theme
  * class and `lang` are applied to <html> after the store loads.
  */
 export function RootShell({
@@ -33,8 +34,8 @@ export function RootShell({
   const { i18n, t } = useTranslation("common");
   const pathname = usePathname();
   const [settingsOpen, setSettingsOpen] = useState(false);
-  // The workspace has its own frame (AppShell) and settings sheet.
-  const isWorkspace = pathname?.startsWith("/workspace") ?? false;
+  // The workspace and /account have their own frame (AppShell).
+  const isWorkspace = hasAppShell(pathname);
   const [hasHydrated, setHasHydrated] = useState(false);
 
   const fallbackTheme: Theme = "light";

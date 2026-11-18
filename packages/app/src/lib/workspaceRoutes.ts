@@ -6,6 +6,16 @@
 
 export const WORKSPACE_PATH = "/workspace";
 
+/** Pages in the app frame (AppShell) rather than the public header and footer. */
+const APP_SHELL_PATHS = [WORKSPACE_PATH, "/account"];
+
+/** True for a page that draws its own AppShell: the workspace and /account. */
+export function hasAppShell(pathname: string | null): boolean {
+  return APP_SHELL_PATHS.some(
+    (path) => pathname === path || pathname?.startsWith(`${path}/`) === true,
+  );
+}
+
 /**
  * Part of the workspace to open from the URL (`?panel=`): the settings
  * sheet, the model picker, or the prompt (focused). No panel shows the

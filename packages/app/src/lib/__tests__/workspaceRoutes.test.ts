@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  hasAppShell,
   WORKSPACE_PATH,
   legacyRouteTarget,
   readWorkspacePanel,
@@ -49,5 +50,15 @@ describe("readWorkspacePanel", () => {
   it("ignores unknown or missing panels", () => {
     expect(readWorkspacePanel("nope")).toBeNull();
     expect(readWorkspacePanel(null)).toBeNull();
+  });
+});
+
+describe("hasAppShell", () => {
+  it("is true for the workspace and the account page, which draw their own frame", () => {
+    expect(hasAppShell("/workspace")).toBe(true);
+    expect(hasAppShell("/account")).toBe(true);
+    expect(hasAppShell("/")).toBe(false);
+    expect(hasAppShell("/accounting")).toBe(false);
+    expect(hasAppShell(null)).toBe(false);
   });
 });

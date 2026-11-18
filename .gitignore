@@ -17,6 +17,7 @@ junit.xml
 # Next.js
 .next/
 .next-e2e-free/
+.next-e2e-pro/
 out/
 build/
 dist/

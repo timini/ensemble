@@ -8,7 +8,7 @@ import { useAuth } from "~/app/_components/AuthProvider";
 import { AccountMenuContainer } from "~/app/_components/AccountMenuContainer";
 import { ProSignInCard } from "~/app/workspace/_components/ProPanels";
 import { useAccountDashboard } from "~/hooks/useAccountDashboard";
-import { WORKSPACE_PATH } from "~/lib/workspaceRoutes";
+import { WORKSPACE_PATH, workspaceHref } from "~/lib/workspaceRoutes";
 
 function WorkspaceNavLink() {
   const { t } = useTranslation("common");
@@ -77,6 +77,8 @@ export function AccountScreen() {
     <AppShell
       homeHref="/"
       nav={<WorkspaceNavLink />}
+      // Theme, language and mode live in the workspace's settings sheet.
+      onOpenSettings={() => window.location.assign(workspaceHref("settings"))}
       account={<AccountMenuContainer />}
     >
       <div
