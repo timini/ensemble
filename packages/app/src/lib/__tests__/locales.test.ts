@@ -67,7 +67,9 @@ describe.each([
     const mismatched = entries(en)
       .filter(([key, text]) => {
         const other = frByKey.get(key);
-        return other !== undefined && placeholders(other) !== placeholders(text);
+        return (
+          other !== undefined && placeholders(other) !== placeholders(text)
+        );
       })
       .map(([key]) => key);
     expect(mismatched).toEqual([]);

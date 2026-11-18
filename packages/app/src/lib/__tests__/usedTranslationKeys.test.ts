@@ -48,7 +48,9 @@ describe("translation keys used in code", () => {
       )) {
         const key = match[2]!;
         if (!has(enApp, key) && !has(enComponents, key)) {
-          missing.push(`${relative(resolve(__dirname, "../../../.."), path)}: ${key}`);
+          missing.push(
+            `${relative(resolve(__dirname, "../../../.."), path)}: ${key}`,
+          );
         }
       }
     }
