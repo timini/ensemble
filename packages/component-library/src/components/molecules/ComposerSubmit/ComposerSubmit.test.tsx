@@ -36,6 +36,16 @@ describe('ComposerSubmit', () => {
     expect(onStop).toHaveBeenCalledOnce();
   });
 
+  it('replaces the Stop element when the run ends, so the Stop click cannot submit the form', () => {
+    // React would otherwise reuse the <button> and switch its type to submit
+    // during the click, and the browser would then submit the composer.
+    const { rerender } = renderWithI18n(<ComposerSubmit running disabled={false} onStop={vi.fn()} />);
+    const stop = screen.getByTestId('composer-stop');
+    rerender(<ComposerSubmit running={false} disabled={false} onStop={vi.fn()} />);
+    expect(screen.getByTestId('composer-submit')).not.toBe(stop);
+    expect(stop).toHaveAttribute('type', 'button');
+  });
+
   it('keeps Ask when not running, even with a stop handler', () => {
     renderWithI18n(<ComposerSubmit running={false} disabled={false} onStop={vi.fn()} />);
     expect(screen.getByTestId('composer-submit')).toBeInTheDocument();

@@ -30,7 +30,9 @@ export function ComposerSubmit({ running, disabled, describedBy, onStop }: Compo
   if (running && onStop) {
     const stop = t('molecules.composerSubmit.stop');
     return (
-      <Button type="button" variant="outline" onClick={onStop} aria-label={stop} data-testid="composer-stop" className="gap-1.5 px-3 sm:px-4">
+      // Its own key: if React reused this element for Ask, the type would turn
+      // to submit during the Stop click and the browser would submit the form.
+      <Button key="stop" type="button" variant="outline" onClick={onStop} aria-label={stop} data-testid="composer-stop" className="gap-1.5 px-3 sm:px-4">
         <span className="hidden sm:inline" aria-hidden="true">
           {stop}
         </span>
@@ -42,6 +44,7 @@ export function ComposerSubmit({ running, disabled, describedBy, onStop }: Compo
   const label = running ? t('molecules.composerSubmit.running') : t('molecules.composerSubmit.submit');
   return (
     <Button
+      key="submit"
       type="submit"
       disabled={disabled}
       aria-describedby={describedBy}
