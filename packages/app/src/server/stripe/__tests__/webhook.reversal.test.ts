@@ -67,6 +67,24 @@ const disputed = signed({
   },
 });
 
+const disputeClosed = (status: string) =>
+  signed({
+    id: `evt_closed_${status}`,
+    object: "event",
+    type: "charge.dispute.closed",
+    data: {
+      object: {
+        id: "dp_1",
+        object: "dispute",
+        charge: "ch_1",
+        payment_intent: "pi_1",
+        amount: 500,
+        currency: "usd",
+        status,
+      },
+    },
+  });
+
 describe("handleStripeWebhook: refunds and disputes", () => {
   it("reverses the credits of a refunded charge", async () => {
     const d = deps();
@@ -132,5 +150,33 @@ describe("handleStripeWebhook: refunds and disputes", () => {
     d.recordReversal = vi.fn().mockRejectedValue(new Error("firestore down"));
     const { body, signature } = refunded();
     expect((await handleStripeWebhook(body, signature, d)).status).toBe(500);
+  });
+
+  // won: we won the chargeback. warning_closed: an inquiry closed without
+  // becoming a chargeback. Either way the buyer keeps nothing back.
+  it.each(["won", "warning_closed"])(
+    "restores the credits when a dispute closes as %s",
+    async (status) => {
+      const d = deps("restored");
+      const closed = disputeClosed(status);
+      expect(
+        (await handleStripeWebhook(closed.body, closed.signature, d)).body,
+      ).toEqual({ received: true, result: "restored" });
+      expect(d.recordReversal).toHaveBeenCalledWith({
+        eventId: `evt_closed_${status}`,
+        eventType: "charge.dispute.closed",
+        paymentIntentId: "pi_1",
+        source: { kind: "disputeWon", disputeId: "dp_1" },
+      });
+    },
+  );
+
+  it("leaves the credits reversed when a dispute is lost", async () => {
+    const d = deps();
+    const lost = disputeClosed("lost");
+    expect(
+      (await handleStripeWebhook(lost.body, lost.signature, d)).body,
+    ).toEqual({ received: true, result: "ignored" });
+    expect(d.recordReversal).not.toHaveBeenCalled();
   });
 });

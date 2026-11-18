@@ -23,7 +23,8 @@ export type WebhookResult =
   | "unpaid"
   | "ignored"
   | "rejected"
-  | "reversed";
+  | "reversed"
+  | "restored";
 
 export interface WebhookResponse {
   status: number;
@@ -35,8 +36,22 @@ const CREDIT_EVENTS = new Set([
   "checkout.session.async_payment_succeeded",
 ]);
 
-/** Events that take credits back: a refund, or a dispute opening. */
-const REVERSAL_EVENTS = new Set(["charge.refunded", "charge.dispute.created"]);
+/**
+ * Events that move the credits of a purchase: a refund or a dispute
+ * opening takes them back, a dispute closing in our favour restores them.
+ */
+const REVERSAL_EVENTS = new Set([
+  "charge.refunded",
+  "charge.dispute.created",
+  "charge.dispute.closed",
+]);
+
+/**
+ * Closed dispute statuses that leave the buyer nothing: a chargeback we
+ * won, or an inquiry that closed without becoming one. `lost` keeps the
+ * credits reversed.
+ */
+const DISPUTE_CLOSED_FOR_US = new Set(["won", "warning_closed"]);
 
 const ok = (result: WebhookResult): WebhookResponse => ({
   status: 200,
@@ -70,7 +85,7 @@ function purchaseFrom(
   };
 }
 
-/** The reversal a refund or dispute event asks for, or null without a PaymentIntent. */
+/** The reversal a refund or dispute event asks for, or null without a PaymentIntent or for a lost dispute. */
 function reversalFrom(event: Stripe.Event): ReversalInput | null {
   const base = { eventId: event.id, eventType: event.type };
   if (event.type === "charge.refunded") {
@@ -97,6 +112,18 @@ function reversalFrom(event: Stripe.Event): ReversalInput | null {
         disputeId: dispute.id,
         amountCents: dispute.amount,
       },
+    };
+  }
+  if (event.type === "charge.dispute.closed") {
+    const dispute = event.data.object;
+    const pi = dispute.payment_intent;
+    const paymentIntentId = typeof pi === "string" ? pi : pi?.id;
+    if (!paymentIntentId || !DISPUTE_CLOSED_FOR_US.has(dispute.status))
+      return null;
+    return {
+      ...base,
+      paymentIntentId,
+      source: { kind: "disputeWon", disputeId: dispute.id },
     };
   }
   return null;
@@ -132,7 +159,8 @@ async function handleReversal(
 /**
  * POST /api/stripe/webhook. Verifies the Stripe-Signature header against
  * the raw body, then credits paid Checkout Sessions and takes the credits
- * back when a charge is refunded or disputed. Idempotent: the ledger
+ * back when a charge is refunded or disputed, and restores them when a
+ * dispute closes in our favour. Idempotent: the ledger
  * entry is keyed on the session id and the event id is stored, so a
  * redelivery answers "duplicate". Errors while writing answer 500 so Stripe
  * retries; events that can never be credited answer 200 so it stops.

@@ -79,4 +79,48 @@ describe("Stripe refunds against Firestore", () => {
     const account = await getCreditAccount(db, DEFAULT_CREDIT_CONFIG, "buyer");
     expect(account.balanceMicros).toBe(0);
   });
+
+  it("gives the credits back when Stripe closes a dispute as won", async () => {
+    const paid = signed("evt_paid", "checkout.session.completed", {
+      id: "cs_dispute",
+      object: "checkout.session",
+      payment_status: "paid",
+      amount_total: 500,
+      currency: "usd",
+      client_reference_id: "buyer",
+      payment_intent: "pi_dispute",
+      metadata: { uid: "buyer", packId: "usd-5" },
+    });
+    await handleStripeWebhook(paid.body, paid.signature, deps);
+    const object = {
+      id: "dp_emulator",
+      object: "dispute",
+      charge: "ch_dispute",
+      payment_intent: "pi_dispute",
+      amount: 500,
+      currency: "usd",
+    };
+    const opened = signed("evt_opened", "charge.dispute.created", {
+      ...object,
+      status: "needs_response",
+    });
+    const closed = signed("evt_closed", "charge.dispute.closed", {
+      ...object,
+      status: "won",
+    });
+    const balance = async () =>
+      (await getCreditAccount(db, DEFAULT_CREDIT_CONFIG, "buyer"))
+        .balanceMicros;
+    expect(
+      (await handleStripeWebhook(opened.body, opened.signature, deps)).body,
+    ).toEqual({ received: true, result: "reversed" });
+    expect(await balance()).toBe(0);
+    const send = () => handleStripeWebhook(closed.body, closed.signature, deps);
+    expect((await send()).body).toEqual({ received: true, result: "restored" });
+    expect((await send()).body).toEqual({
+      received: true,
+      result: "duplicate",
+    });
+    expect(await balance()).toBe(5_000_000);
+  });
 });

@@ -24,7 +24,7 @@ export interface PurchaseItem {
   amountMicros: number;
   createdAtMs: number;
   packId?: string;
-  /** reversal: `refund` or `dispute`. */
+  /** reversal: `refund`, `dispute` or `dispute_won`. */
   reason?: string;
 }
 

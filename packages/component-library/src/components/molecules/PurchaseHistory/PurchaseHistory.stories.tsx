@@ -29,6 +29,16 @@ export const Dispute: Story = {
   args: { items: [{ id: 'd', kind: 'dispute', amount: '-$5.00', date: '10 Nov 2026', negative: true }] },
 };
 
+/** A dispute closed in our favour gave the credits back. */
+export const DisputeWon: Story = {
+  args: {
+    items: [
+      { id: 'w', kind: 'disputeWon', amount: '+$5.00', date: '14 Nov 2026' },
+      { id: 'd', kind: 'dispute', amount: '-$5.00', date: '10 Nov 2026', negative: true },
+    ],
+  },
+};
+
 /** More entries to load. */
 export const WithMore: Story = { args: { hasMore: true, onLoadMore: () => undefined } };
 

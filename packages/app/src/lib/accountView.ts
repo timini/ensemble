@@ -87,7 +87,9 @@ export function toPurchaseItems(
       e.type === "reversal"
         ? e.reason === "dispute"
           ? "dispute"
-          : "refund"
+          : e.reason === "dispute_won"
+            ? "disputeWon"
+            : "refund"
         : e.type;
     return {
       id: e.id,
