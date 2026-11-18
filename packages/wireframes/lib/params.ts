@@ -1,7 +1,8 @@
 // Workspace wireframe state lives in the URL so every state has a link.
 
 export type WorkspaceState = "new" | "ready" | "running" | "done"
-export type SheetName = "onboarding" | "settings" | "manual" | "history"
+export type SheetName = "onboarding" | "settings" | "manual" | "history" | "share"
+export type ShareState = "create" | "ready" | "error" | "limit"
 export type MenuName = "method" | "options" | "models"
 
 export interface WorkspaceParams {
@@ -11,6 +12,10 @@ export interface WorkspaceParams {
   path?: "keys" | "local"
   tab?: string
   theme?: string
+  /** Share dialog state when `sheet=share`. Defaults to `ready`. */
+  share?: ShareState
+  /** `1` when signed in, so history syncs to the account. Signed out otherwise. */
+  signedIn?: "1"
 }
 
 type Raw = Record<string, string | string[] | undefined>
@@ -21,7 +26,7 @@ const pick = <T extends string>(value: unknown, allowed: readonly T[]): T | unde
 /** Reads the workspace params. A first visit (`state=new`) opens onboarding unless another sheet is asked for. */
 export function readParams(raw: Raw): WorkspaceParams {
   const state = pick(raw.state, ["new", "ready", "running", "done"] as const) ?? "done"
-  const sheet = pick(raw.sheet, ["onboarding", "settings", "manual", "history"] as const)
+  const sheet = pick(raw.sheet, ["onboarding", "settings", "manual", "history", "share"] as const)
   return {
     state,
     sheet: sheet ?? (state === "new" && raw.sheet !== "none" ? "onboarding" : undefined),
@@ -29,6 +34,8 @@ export function readParams(raw: Raw): WorkspaceParams {
     path: pick(raw.path, ["keys", "local"] as const),
     tab: typeof raw.tab === "string" ? raw.tab : undefined,
     theme: pick(raw.theme, ["light", "dark"] as const),
+    share: pick(raw.share, ["create", "ready", "error", "limit"] as const),
+    signedIn: pick(raw.signedIn, ["1"] as const),
   }
 }
 

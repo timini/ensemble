@@ -105,3 +105,12 @@ export const levelLabel: Record<AgreementLevel, string> = {
   mixed: "Mixed agreement",
   low: "Low agreement",
 }
+
+// A shared link for the sample run. Links are public to anyone who has them
+// and expire 30 days after they are made.
+export const sharedRun = {
+  id: "k3v9q2tx",
+  url: "https://ensemble.example.app/s/k3v9q2tx",
+  created: "18 November 2026",
+  expires: "18 December 2026",
+}

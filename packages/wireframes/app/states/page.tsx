@@ -2,7 +2,7 @@ import Link from "next/link"
 import { SiteHeader } from "@/components/site-header"
 
 const groups: Array<[string, Array<[string, string]>]> = [
-  ["Public pages", [["Landing", "/"], ["Benchmarks", "/benchmarks"], ["Account: signed out", "/account?state=signedOut"], ["Account: new, no runs", "/account?state=empty"], ["Account: usage dashboard", "/account"], ["Account: low balance", "/account?state=low"], ["Account: negative after a refund", "/account?state=negative"]]],
+  ["Public pages", [["Landing", "/"], ["Benchmarks", "/benchmarks"], ["Account: signed out", "/account?state=signedOut"], ["Account: new, no runs", "/account?state=empty"], ["Account: usage dashboard", "/account"], ["Account: low balance", "/account?state=low"], ["Account: negative after a refund", "/account?state=negative"], ["Shared run, signed out visitor", "/s/k3v9q2tx"], ["Shared link expired or deleted", "/s/k3v9q2tx?state=missing"]]],
   ["Workspace", [
     ["First visit: onboarding, keys", "/workspace?state=new"],
     ["First visit: onboarding, local", "/workspace?state=new&path=local"],
@@ -15,6 +15,11 @@ const groups: Array<[string, Array<[string, string]>]> = [
     ["Manual answer sheet", "/workspace?sheet=manual"],
     ["Settings sheet", "/workspace?sheet=settings"],
     ["History sheet (below 1024 px)", "/workspace?sheet=history"],
+    ["Share: explain and create link", "/workspace?sheet=share&share=create"],
+    ["Share: link ready", "/workspace?sheet=share"],
+    ["Share: could not create link", "/workspace?sheet=share&share=error"],
+    ["Share: too many links", "/workspace?sheet=share&share=limit"],
+    ["Signed in, history synced", "/workspace?signedIn=1"],
   ]],
   ["Old routes (redirect)", [["/config", "/config"], ["/ensemble", "/ensemble"], ["/prompt", "/prompt"], ["/review", "/review"]]],
 ]

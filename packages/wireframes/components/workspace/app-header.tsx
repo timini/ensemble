@@ -21,9 +21,15 @@ export function AppHeader({ params }: { params: WorkspaceParams }) {
           <Link href={href(params, { sheet: "settings" })} aria-label="Settings" className={iconLink}>
             <Settings className="size-5" />
           </Link>
-          <Link href="/account" className="focus-ring hidden rounded-lg border border-border px-3 py-1.5 text-label font-medium hover:bg-muted sm:block">
-            Sign in
-          </Link>
+          {params.signedIn === "1" ? (
+            <Link href="/account" aria-label="Account" className="focus-ring inline-flex size-8 items-center justify-center rounded-full bg-primary text-caption font-semibold text-primary-foreground">
+              AL
+            </Link>
+          ) : (
+            <Link href="/account" className="focus-ring hidden rounded-lg border border-border px-3 py-1.5 text-label font-medium hover:bg-muted sm:block">
+              Sign in
+            </Link>
+          )}
         </div>
       </div>
     </header>

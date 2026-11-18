@@ -1,15 +1,27 @@
 import Link from "next/link"
-import { Layers, Plus, Search, Trash2 } from "lucide-react"
+import { Cloud, HardDrive, Layers, Plus, Search, Share2, Trash2 } from "lucide-react"
 import { LevelDot } from "@/components/ui/agreement-ring"
 import { history, levelLabel, presets } from "@/lib/sample-run"
 import { cn } from "@/lib/utils"
 
+const rowAction = "focus-ring invisible rounded-md p-1.5 text-muted-foreground focus-visible:visible group-hover:visible group-focus-within:visible"
 const row = "focus-ring flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-left text-label hover:bg-muted"
 
-/** History (IndexedDB in Free mode) and presets. The sidebar on desktop, a sheet on smaller screens. */
-export function HistoryPanel({ activeIndex = 0 }: { activeIndex?: number }) {
+export interface HistoryPanelProps {
+  activeIndex?: number
+  /** Opens the share dialog for a run. */
+  shareHref: string
+  /** Signed in, history syncs to the account. Signed out, it stays in this browser. */
+  signedIn?: boolean
+}
+
+/**
+ * History and presets. The sidebar on desktop, a sheet on smaller screens.
+ * Signed out it lives in IndexedDB; signed in it syncs to the account.
+ */
+export function HistoryPanel({ activeIndex = 0, shareHref, signedIn = false }: HistoryPanelProps) {
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex min-h-full flex-col gap-6">
       <div className="space-y-2">
         <Link href="/workspace?state=ready" className="focus-ring flex h-10 items-center justify-center gap-2 rounded-lg border border-border bg-card text-label font-medium shadow-sm hover:bg-muted">
           <Plus className="size-4" /> New question
@@ -43,21 +55,42 @@ export function HistoryPanel({ activeIndex = 0 }: { activeIndex?: number }) {
               const active = g === 0 && i === activeIndex
               return (
                 <li key={item.prompt} className="group relative">
-                  <button type="button" className={cn(row, "pr-9", active && "bg-accent text-accent-foreground hover:bg-accent")} aria-current={active || undefined}>
+                  <button type="button" className={cn(row, "pr-16", active && "bg-accent text-accent-foreground hover:bg-accent")} aria-current={active || undefined}>
                     <LevelDot level={item.level} />
                     <span className="sr-only">{levelLabel[item.level]}:</span>
                     <span className="flex-1 truncate">{item.prompt}</span>
                     <span className="text-caption text-muted-foreground group-hover:invisible">{item.when}</span>
                   </button>
-                  <button type="button" aria-label={`Delete "${item.prompt}"`} className="focus-ring invisible absolute right-1.5 top-1/2 -translate-y-1/2 rounded-md p-1.5 text-muted-foreground hover:text-destructive focus-visible:visible group-hover:visible">
-                    <Trash2 className="size-3.5" />
-                  </button>
+                  <div className="absolute right-1.5 top-1/2 flex -translate-y-1/2">
+                    <Link href={shareHref} aria-label={`Share "${item.prompt}"`} className={cn(rowAction, "hover:text-foreground")}>
+                      <Share2 className="size-3.5" />
+                    </Link>
+                    <button type="button" aria-label={`Delete "${item.prompt}"`} className={cn(rowAction, "hover:text-destructive")}>
+                      <Trash2 className="size-3.5" />
+                    </button>
+                  </div>
                 </li>
               )
             })}
           </ul>
         </section>
       ))}
+
+      <p className="mt-auto flex items-center gap-2 border-t border-border px-2.5 pt-3 text-caption text-muted-foreground">
+        {signedIn ? (
+          <>
+            <Cloud className="size-3.5 shrink-0" /> Synced to your account
+          </>
+        ) : (
+          <>
+            <HardDrive className="size-3.5 shrink-0" />
+            <span>
+              Only in this browser.{" "}
+              <Link href="/account?state=signedOut" className="focus-ring rounded font-medium text-primary hover:underline">Sign in to sync.</Link>
+            </span>
+          </>
+        )}
+      </p>
     </div>
   )
 }

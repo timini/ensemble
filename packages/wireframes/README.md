@@ -26,6 +26,7 @@ npm run screenshot   # needs the dev server; writes screenshots/<page>-<width>-<
 | `/workspace` | The one working screen. Composer on top (prompt, inline model chips, consensus method dropdown with calls and cost, a menu with manual answer, summarizer and save as preset). Agreement panel and consensus answer next, then the individual answers: columns from 768 px, swipeable tabs below. History and presets in a left sidebar from 1024 px, in a sheet below. |
 | `/benchmarks` | Method and a results table with confidence intervals, with an honest "not run yet" state. |
 | `/account` | Pro usage dashboard (FR-041) in the workspace frame: balance with buy buttons, usage by model over 30 days, purchases (refunds show as negative), recent runs. `?state=signedOut\|empty\|ready\|low\|negative`. |
+| `/s/[id]` | A shared run, read-only, for a visitor who is not signed in: prompt, model count, share and expiry dates, agreement, consensus, every answer in full, and a way to ask your own question. `?state=missing` shows the expired or deleted link. |
 | `/states` | Index of every page and workspace state, for reviewers. |
 | `/config`, `/ensemble`, `/prompt`, `/review` | Redirect into the workspace with the matching panel open, as the app will. |
 
@@ -34,9 +35,11 @@ Workspace states are set in the URL so each has a link:
 | Param | Values | Shows |
 |-------|--------|-------|
 | `state` | `new`, `ready`, `running`, `done` (default) | First visit (opens onboarding), empty composer, answers streaming, finished run |
-| `sheet` | `onboarding`, `settings`, `manual`, `history` | Onboarding (keys, local or Pro; one key is enough, OpenRouter reaches every provider), settings (keys, local endpoints, embeddings provider, theme, language), manual answer, history on small screens |
+| `sheet` | `onboarding`, `settings`, `manual`, `history`, `share` | Onboarding (keys, local or Pro; one key is enough, OpenRouter reaches every provider), settings (keys, local endpoints, embeddings provider, theme, language), manual answer, history on small screens, share a run as a link |
 | `menu` | `models`, `method`, `options` | Model picker, consensus method dropdown, composer options |
 | `path` | `keys`, `local` | Which onboarding option is selected |
+| `share` | `create`, `ready` (default), `error`, `limit` | Share dialog: what the link shows before it is made, the link with copy and delete, could not create it, too many links |
+| `signedIn` | `1` | Signed in: history syncs to the account and the header shows the account. Without it, history stays in this browser |
 | `theme` | `light`, `dark` | Forces a theme; otherwise the system setting is used |
 
 Sheets are side panels from 768 px and bottom sheets below.

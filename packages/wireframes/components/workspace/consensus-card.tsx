@@ -1,8 +1,11 @@
+import Link from "next/link"
 import { Copy, Share2 } from "lucide-react"
 import { consensus } from "@/lib/sample-run"
 
-/** The merged answer, with how it was made and what the run cost. */
-export function ConsensusCard({ pending = false }: { pending?: boolean }) {
+const action = "focus-ring inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-label hover:bg-muted disabled:opacity-50"
+
+/** The merged answer, with how it was made and what the run cost. Share opens the share dialog. */
+export function ConsensusCard({ pending = false, shareHref }: { pending?: boolean; shareHref?: string }) {
   return (
     <section aria-labelledby="consensus-h" className="flex flex-col rounded-2xl border border-primary/25 bg-card shadow-sm">
       <header className="flex flex-wrap items-center justify-between gap-2 px-5 pt-5">
@@ -23,8 +26,12 @@ export function ConsensusCard({ pending = false }: { pending?: boolean }) {
       <footer className="mt-auto flex flex-wrap items-center justify-between gap-x-2 gap-y-1 border-t border-border px-5 py-3">
         <p className="text-caption tabular-nums text-muted-foreground">{pending ? "Estimated 7 calls · about $0.01" : "7 calls · $0.011 · 6.2 s"}</p>
         <div className="flex gap-1">
-          <button type="button" disabled={pending} className="focus-ring inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-label hover:bg-muted disabled:opacity-50"><Copy className="size-4" /> Copy</button>
-          <button type="button" disabled={pending} className="focus-ring inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-label hover:bg-muted disabled:opacity-50"><Share2 className="size-4" /> Share</button>
+          <button type="button" disabled={pending} className={action}><Copy className="size-4" /> Copy</button>
+          {shareHref && !pending ? (
+            <Link href={shareHref} className={action}><Share2 className="size-4" /> Share</Link>
+          ) : (
+            <button type="button" disabled className={action}><Share2 className="size-4" /> Share</button>
+          )}
         </div>
       </footer>
     </section>
