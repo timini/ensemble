@@ -168,6 +168,50 @@ describe('runMatrix', () => {
     expect(manifest.repairs[0]!.routing).toEqual({ requireParameters: false, models });
   }, 30_000);
 
+  it('refuses to resume a run id whose result-affecting settings changed', async () => {
+    await runMatrix({ ...base(), mode: 'mock', yes: false });
+    const ensemblePath = join(dir, 'results/test-run/gsm8k/ensemble.json');
+    const before = readFileSync(ensemblePath, 'utf8');
+    const changed = parseMatrixConfig(
+      { ...raw, optionSeed: 7, temperature: 0.5, summarizer: 'llama' },
+      { datasets: ['gsm8k'], sample: 3 },
+    );
+    await expect(runMatrix({ ...base(), config: changed, mode: 'mock', yes: false }))
+      .rejects.toThrow(/optionSeed.*temperature.*summarizer|allow-config-change/s);
+    await expect(runMatrix({ ...base(), config: changed, mode: 'mock', yes: false, planOnly: true }))
+      .rejects.toThrow(/optionSeed/);
+    const protocol = parseMatrixConfig({ ...raw, protocol: 'legacy' }, { datasets: ['gsm8k'], sample: 3 });
+    await expect(runMatrix({ ...base(), config: protocol, mode: 'mock', yes: false })).rejects.toThrow(/protocol/);
+    expect(readFileSync(ensemblePath, 'utf8')).toBe(before);
+  }, 30_000);
+
+  it('resumes a changed run id with allowConfigChange and records the change in the manifest', async () => {
+    await runMatrix({ ...base(), mode: 'mock', yes: false });
+    const changed = parseMatrixConfig({ ...raw, optionSeed: 7 }, { datasets: ['gsm8k'], sample: 3 });
+    const result = await runMatrix({ ...base(), config: changed, mode: 'mock', yes: false, allowConfigChange: true });
+    expect(result.ran).toBe(true);
+    const manifest = JSON.parse(readFileSync(join(dir, 'results/test-run/manifest.json'), 'utf8')) as {
+      experiment: { optionSeed: number }; configChanges: { fields: string[] }[];
+    };
+    expect(manifest.experiment.optionSeed).toBe(1729);
+    expect(manifest.configChanges).toHaveLength(1);
+    expect(manifest.configChanges[0]!.fields).toEqual(['optionSeed']);
+    expect(lines.join('\n')).toMatch(/optionSeed/);
+  }, 30_000);
+
+  it('checks a run made before the settings were recorded against its stored config', async () => {
+    await runMatrix({ ...base(), mode: 'mock', yes: false });
+    const manifestPath = join(dir, 'results/test-run/manifest.json');
+    const manifest = JSON.parse(readFileSync(manifestPath, 'utf8')) as Record<string, unknown>;
+    delete manifest.experiment;
+    writeFileSync(manifestPath, JSON.stringify(manifest));
+    const changed = parseMatrixConfig({ ...raw, temperature: 1 }, { datasets: ['gsm8k'], sample: 3 });
+    await expect(runMatrix({ ...base(), config: changed, mode: 'mock', yes: false })).rejects.toThrow(/temperature/);
+    // An unchanged config and a routing-only repair still resume.
+    const repair = parseMatrixConfig(raw, { datasets: ['gsm8k'], sample: 3, requireParameters: false });
+    await expect(runMatrix({ ...base(), config: repair, mode: 'mock', yes: false, retryFailed: true })).resolves.toMatchObject({ ran: true });
+  }, 30_000);
+
   it('isFailedRun spots errors, empty answers and failed consensus', () => {
     const ok = {
       prompt: 'p', questionId: 'q', consensus: {},

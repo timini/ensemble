@@ -28,6 +28,7 @@ interface MatrixCommandOptions {
   concurrency: string;
   skipDownload?: boolean;
   retryFailed?: boolean;
+  allowConfigChange?: boolean;
   /** False with --no-require-parameters (commander sets true otherwise). */
   requireParameters?: boolean;
 }
@@ -55,6 +56,7 @@ export function createMatrixCommand(): Command {
     .option('--concurrency <n>', 'Questions run at once per job; results are saved after each batch', '8')
     .option('--skip-download', 'Fail instead of downloading a dataset that is not cached')
     .option('--retry-failed', 'Run again the failed, timed-out or empty entries of an existing run id; successful answers are kept')
+    .option('--allow-config-change', 'Resume an existing run id even though seeds, protocol, temperature, models, summarizer, strategies or reference changed')
     .option('--no-require-parameters', 'Do not ask OpenRouter for hosts that honour response_format (the routing of runs made before it was sent)')
     .action(async (options: MatrixCommandOptions) => {
       if (options.mode !== 'free' && options.mode !== 'mock') {
@@ -84,6 +86,7 @@ export function createMatrixCommand(): Command {
         ...(options.skipDownload ? { skipDownload: true } : {}),
         ...(options.force ? { force: true } : {}),
         ...(options.retryFailed ? { retryFailed: true } : {}),
+        ...(options.allowConfigChange ? { allowConfigChange: true } : {}),
         concurrency: positiveInt(options.concurrency, 'concurrency'),
       });
     });
