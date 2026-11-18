@@ -80,6 +80,8 @@ interface BenchmarkRunnerConfig {
   priorResponses?: Map<string, ProviderResponse[]>;
   /** Host routing per model, summarizer included (OpenRouter). */
   routingFor?: (spec: ModelSpec) => ProviderRouting | undefined;
+  /** Most output tokens per call (`max_tokens`): model answers and summarizer calls. Default: none sent. */
+  maxOutputTokens?: number;
 }
 
 /** Room left at the end of a question for scoring after the last call (ms). */
@@ -135,6 +137,7 @@ export class BenchmarkRunner {
   private readonly consensusTimeoutMs: number | undefined;
   private readonly priorResponses: Map<string, ProviderResponse[]> | undefined;
   private readonly routingFor: BenchmarkRunnerConfig['routingFor'];
+  private readonly maxOutputTokens: number | undefined;
 
   constructor(config: BenchmarkRunnerConfig) {
     this.mode = config.mode;
@@ -153,6 +156,7 @@ export class BenchmarkRunner {
     this.consensusTimeoutMs = config.consensusTimeoutMs;
     this.priorResponses = config.priorResponses;
     this.routingFor = config.routingFor;
+    this.maxOutputTokens = config.maxOutputTokens;
     this.ensembleRunner = new EnsembleRunner(config.registry, config.mode, {
       requestDelayMs: config.requestDelayMs,
       temperature: config.temperature,
@@ -161,6 +165,7 @@ export class BenchmarkRunner {
       endpoints: this.endpoints,
       ...(config.callTimeoutMs !== undefined ? { callTimeoutMs: config.callTimeoutMs } : {}),
       ...(config.routingFor ? { routingFor: config.routingFor } : {}),
+      ...(config.maxOutputTokens !== undefined ? { maxOutputTokens: config.maxOutputTokens } : {}),
     });
   }
 
@@ -256,6 +261,7 @@ export class BenchmarkRunner {
             ...(signal ? { signal } : {}),
             ...(deadline !== undefined ? { deadline } : {}),
             ...(this.routingFor?.(summarizerTarget) ? { routing: this.routingFor(summarizerTarget) } : {}),
+            ...(this.maxOutputTokens !== undefined ? { maxTokens: this.maxOutputTokens } : {}),
           },
         )
       : { outputs: {}, metrics: {} };

@@ -2,7 +2,7 @@
 
 This is the method behind the `/benchmarks` page: what is measured, how, what it costs, and how to reproduce it. The question it answers is "does an ensemble of open models beat its best member?", for under $20 in total.
 
-Status: the tooling is built and has been run end to end with the mock provider. No paid run has been made, so no results are committed and the page shows "benchmarks not run yet".
+Status: run `2026-11-17-m3-matrix` is committed and published on the page. The open-model part is complete. The reference has no results yet, so the page shows it as coming soon, and the agreement and token calibrations have not been fitted. See [Run log](#run-log).
 
 ## What is run
 
@@ -38,6 +38,8 @@ All four datasets are scored mechanically, with no LLM judge (`src/lib/methodolo
 - Transient failures are retried with exponential backoff and jitter (`maxRetries`, default 4): network errors such as `fetch failed` or `ECONNRESET`, 429 and 5xx (waiting for `Retry-After` when given), per-call timeouts and empty replies. An empty reply, or an error the server sends inside a 200 response, is a failed call, never an answer. Its error names the finish reasons, the OpenRouter host that served it, the response id and the completion tokens.
 - Each model call has a limit (`callTimeoutMs`, default 180 s) and each summarizer call another (`consensusTimeoutMs`, default 300 s). The request is aborted when its limit passes.
 - A question has a hard limit (`questionTimeoutMs`, default 900 s, counted from when it gets a slot). Retries fit inside it: model calls must end by the limit minus `consensusTimeoutMs`, the summary by the limit itself (less a few seconds for scoring). No retry starts that could not finish in time, and a call still running at its deadline is aborted and counts as a timeout. Answers that came back are kept and scored; a timeout never discards them.
+- Every call sends `max_tokens` (`maxOutputTokens`, default 4096): model answers, structured or plain, summarizer calls and judge calls. Without it OpenRouter reserves the model's maximum output (65536 tokens for some models) against the account balance for each request, and refuses with HTTP 402 ("requires more credits, or fewer max_tokens") once the balance is low, although the answer itself would be a few hundred tokens. The limit is an infrastructure setting, not an experiment setting: answers here need far fewer than 4096 tokens, so it does not change results. It is left out of the settings a resumed run must keep, and a run, or a `--retry-failed` repair, may change it without `--allow-config-change`. The manifest keeps the config of each repair, so the value used is on record.
+- HTTP 402 is not retried: the same request meets the same balance. The call counts as failed, like any other, and `--retry-failed` runs it again once the balance is topped up.
 - A call that still fails after its retries, or a question that times out, counts as wrong. It is not dropped from the sample, and failures are reported in their own column.
 - On OpenRouter, structured calls ask for hosts that honour `response_format` (`provider.require_parameters`). `requireParameters: false` in the config, or `--no-require-parameters`, turns that off; runs made before 2026-11-17 evening did not send it. A model entry can carry `routing`, sent as OpenRouter's `provider` object, for example `{ "ignore": ["SomeHost"] }` to avoid a host the logs show returning empty replies. The manifest records the routing a run started with and that of each repair.
 - Mechanical majority counts the final answers and needs no LLM call. Standard consensus is one call to the summarizer, whose answer is scored like any other.
@@ -50,6 +52,8 @@ The summary (`src/lib/matrix/summary.ts`) gives, per dataset and configuration:
 - a paired McNemar test against the **best single open model** on that dataset (the one with the highest accuracy), on the questions both answered: exact binomial below 25 discordant pairs, chi-squared with continuity correction above (`src/lib/pairedStats.ts`). The best single model itself has no test;
 - failures (calls that errored or timed out);
 - cost.
+
+The reference is shown only when every one of its calls on that dataset came back. Otherwise its row is left out and the dataset gets a `referencePending` note with how many questions it answered, how many failed and why (`out-of-credit` for HTTP 402, `refused` for a content filter or refusal, `other`). A premium model scored on part of the sample, with the rest counted wrong, would say nothing about that model. The page then shows the reference as coming soon. The counts and reasons stay in the run's own `summary.json`; the copy published to the app keeps only `answered`. What the reference's answers cost still counts in the dataset's `spentUsd`.
 
 Read the p-values as one test per row. With four datasets and several configurations, a single p below 0.05 is weak evidence; look for the same direction on several datasets. The reference is there to show how far the open models are from a premium model, not as a configuration to beat.
 
@@ -115,13 +119,14 @@ Options of `ensemble-eval matrix`:
 | `--sample <n>`, `--datasets <list>` | override the config, for dry runs |
 | `--concurrency <n>` | questions run at once per job (default 8) |
 | `--skip-download` | fail instead of downloading a dataset |
+| `--summarize-only` | with an existing `--run-id`, rebuild `summary.json` (and with `--publish`, the app summary) from the results files. No dataset download, no provider and no model call. The config is the last repair's, or the starting one when there was none |
 | `--retry-failed` | with an existing `--run-id`, run again the entries that failed, timed out, came back empty or lost their consensus; answers that succeeded are kept and not paid for again |
 
 ### Resume and cache
 
 Results are written after every batch of questions. Running the same command again with the same `--run-id` skips the questions already answered, and the estimate shows only what is left. The reference answers are kept in a shared cache keyed by model, dataset, sample, seeds, protocol and temperature, so a later run (a new run id, or changed open models) reuses them instead of paying again.
 
-`--retry-failed` repairs a run that hit an outage. Each failed entry is run again and replaced in place when its new result is written; until then the old entry stays in the file, so an interrupted repair loses nothing and the next one picks up where it stopped. Within an entry, a model whose answer succeeded is not called again. The estimate counts the failed entries as pending. Scoring does not change: what still fails after the retries counts as wrong. The priced cost of what a repair replaced (answers not kept, consensus calls) is stored as `priorAttemptCostUsd` on the entry and summed per dataset as `retrySpendUsd`, apart from the configuration costs, which stay the cost of the results. A failed attempt reports no usage, so its tokens are not priced; `attempts` on an answer says how many calls it took.
+`--retry-failed` repairs a run that hit an outage. Each failed entry is run again and replaced in place when its new result is written; until then the old entry stays in the file, so an interrupted repair loses nothing and the next one picks up where it stopped. Within an entry, a model whose answer succeeded is not called again. With `--plan-only` it prints how many entries of each dataset and job would run again, then the estimate, and makes no calls. The estimate counts the failed entries as pending. Scoring does not change: what still fails after the retries counts as wrong. The priced cost of what a repair replaced (answers not kept, consensus calls) is stored as `priorAttemptCostUsd` on the entry and summed per dataset as `retrySpendUsd`, apart from the configuration costs, which stay the cost of the results. A failed attempt reports no usage, so its tokens are not priced; `attempts` on an answer says how many calls it took.
 
 To repair a run made before require_parameters was sent with the same routing as its kept answers, add `--no-require-parameters`.
 
@@ -224,3 +229,16 @@ npm run build --workspace=packages/shared-utils
 ```
 
 This makes no calls. From the recorded usage it fits the answer range (10th and 90th percentile of billed output tokens per answer or one-call synthesis, so hidden reasoning tokens are included where the provider reports them) and the consensus overhead (median synthesis input less the prompt and the answers it was given). It writes `packages/shared-utils/src/pricing/tokenCalibration.ts`, which `estimateRun` reads over the hand-set defaults in `tokenAssumptions.ts`. Verdict and critique lengths are not fitted, because the matrix runs no ELO or council consensus. The committed module is `null`, so the defaults apply. Results from a mock run are refused for the default output, because their token counts are not real; pass `--output <scratch file>` to fit them anyway.
+
+## Run log
+
+### 2026-11-17-m3-matrix
+
+Started 2026-11-17 16:27 UTC, with three `--retry-failed` repairs (2026-11-17 20:26 and 22:25, 2026-11-18 13:35). The summary was rebuilt with `--summarize-only` on 2026-11-18, without calls.
+
+- Open models: complete on all four datasets (200 questions each, 198 for GPQA). Llama 3.1 8B timed out or failed on many questions (44 of 198 on GPQA, 24 of 200 on MMLU-Pro, 12 of 200 on GSM8K); those count as wrong.
+- Reference (Claude Sonnet 5.5): no usable results. On GSM8K 121 of 200 answers came back before the OpenRouter balance ran out; the other 79 got HTTP 402. MMLU-Pro got 402 on all 200. On GPQA every call was refused by the Amazon Bedrock host (`content_filter`, `refusal`); on TruthfulQA 168 got 402 and 32 were refused. The reference cache under `results/cache/free/` holds these failed entries and is not committed; a `--retry-failed` repair with credit runs them again (routing in `bench/matrix.json` now sends the reference to Anthropic only).
+- The last repair (2026-11-18 13:35) stopped when the balance ran out, so `manifest.json` still says `running`. It re-ran failed entries of GSM8K, MMLU-Pro and GPQA (over all repairs, 17, 35 and 31 ensemble entries carry a `priorAttemptCostUsd`, and 86 GSM8K reference entries). Their successful model answers were kept, but the standard consensus was called again, and where that call got HTTP 402 the entry now has a failed consensus: 33 of 198 on GPQA and 4 of 200 on MMLU-Pro. Before that repair, the summary of the then-current files had GPQA standard consensus at 149 of 198 (75.3%) with 2 failures; the committed files give 121 of 198 (61.1%) with 33 failures. The published numbers are the committed files', per the method. A repair that re-runs a consensus that had succeeded can lose it; see the PR for the follow-up.
+- Cost of the results: $1.56, of which $0.21 is the 121 GSM8K reference answers. Repairs replaced attempts that cost a further $0.15 (`retrySpendUsd`), $0.03 of it GSM8K reference answers. Failed attempts report no usage, so they are not priced.
+- Not done, needing a paid run or embedding calls: the reference, the agreement calibration. The token calibration makes no calls and has not been run yet either.
+

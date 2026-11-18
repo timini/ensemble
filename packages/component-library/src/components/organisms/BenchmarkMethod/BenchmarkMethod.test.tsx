@@ -36,6 +36,19 @@ describe('BenchmarkMethod', () => {
     expect(screen.getByTestId('benchmark-method-reference')).toHaveTextContent('Big Model (openrouter:big/big)');
   });
 
+  it('shows a reference with no results yet as coming soon', () => {
+    renderWithI18n(<BenchmarkMethod {...props} referencePending />);
+    expect(screen.getByTestId('benchmark-method-reference')).toHaveTextContent(
+      'Premium reference: Big Model (openrouter:big/big). Coming soon.',
+    );
+    expect(screen.getByTestId('benchmark-method-reference')).not.toHaveTextContent('cached');
+  });
+
+  it('shows a pending reference as coming soon in French', () => {
+    renderWithI18n(<BenchmarkMethod {...props} referencePending />, { language: 'fr' });
+    expect(screen.getByTestId('benchmark-method-reference')).toHaveTextContent('Bientôt disponible');
+  });
+
   it('explains the statistics and links the full method', () => {
     renderWithI18n(<BenchmarkMethod {...props} />);
     expect(screen.getByTestId('benchmark-method-statistics')).toHaveTextContent('Wilson');

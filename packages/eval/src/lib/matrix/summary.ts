@@ -54,6 +54,24 @@ export interface DatasetSummary {
    * part of any configuration's cost. Absent when nothing was replaced.
    */
   retrySpendUsd?: number;
+  /**
+   * Set when the reference has results but some of its calls failed. Its row
+   * is then left out: a premium model scored on part of the sample, with the
+   * rest counted wrong, would say nothing about that model.
+   */
+  referencePending?: ReferencePending;
+}
+
+/** Why a reference call failed, read from the stored error. */
+export type ReferenceFailureReason = 'out-of-credit' | 'refused' | 'other';
+
+export interface ReferencePending {
+  /** Questions the reference answered. */
+  answered: number;
+  /** Questions whose reference call failed or timed out. Absent in the published copy. */
+  failed?: number;
+  /** Absent in the published copy. */
+  reasons?: Array<{ reason: ReferenceFailureReason; count: number }>;
 }
 
 export interface MatrixSummary {
@@ -192,19 +210,29 @@ export function summarizeDataset(config: MatrixConfig, results: DatasetResults):
       { usd: allAnswers.usd + extra.usd, incomplete: allAnswers.incomplete || extra.incomplete },
     ));
   }
+  let referencePending: ReferencePending | undefined;
   if (results.reference) {
     const key = resultKeyOf(config.reference);
     const result = outcomes(referenceRuns, (run) => run.evaluation?.results?.[key]?.correct);
-    outcomeById.set('reference', result);
     const cost = answerCost(referenceRuns, (k) => k === key);
     spentUsd += cost.usd;
     spentIncomplete ||= cost.incomplete;
-    rows.push(row(
-      { id: 'reference', kind: 'reference', label: config.reference.label, models: [config.reference.spec] },
-      result,
-      failuresOf(referenceRuns, (run) => run.evaluation?.results?.[key]),
-      cost,
-    ));
+    const failures = failuresOf(referenceRuns, (run) => run.evaluation?.results?.[key]);
+    if (failures > 0) {
+      referencePending = {
+        answered: referenceRuns.length - failures,
+        failed: failures,
+        reasons: referenceFailureReasons(referenceRuns, key),
+      };
+    } else {
+      outcomeById.set('reference', result);
+      rows.push(row(
+        { id: 'reference', kind: 'reference', label: config.reference.label, models: [config.reference.spec] },
+        result,
+        failures,
+        cost,
+      ));
+    }
   }
 
   const singles = rows.filter((r) => r.kind === 'single' && r.n > 0);
@@ -230,7 +258,28 @@ export function summarizeDataset(config: MatrixConfig, results: DatasetResults):
     spentUsd,
     spentIncomplete,
     ...retrySpend([...ensembleRuns, ...referenceRuns]),
+    ...(referencePending ? { referencePending } : {}),
   };
+}
+
+/** Classify a stored error: HTTP 402 is out of credit, a content filter or refusal is a refusal. */
+export function referenceFailureReason(error: string | undefined): ReferenceFailureReason {
+  if (!error) return 'other';
+  if (/\b402\b|more credits/i.test(error)) return 'out-of-credit';
+  if (/content_filter|refusal/i.test(error)) return 'refused';
+  return 'other';
+}
+
+function referenceFailureReasons(runs: PromptRunResult[], key: string): ReferencePending['reasons'] {
+  const counts = new Map<ReferenceFailureReason, number>();
+  for (const run of runs) {
+    if (!run.evaluation?.results?.[key]?.failure) continue;
+    const error = run.failure === 'timeout' ? undefined : run.responses.find((r) => r.error)?.error;
+    const reason = referenceFailureReason(error);
+    counts.set(reason, (counts.get(reason) ?? 0) + 1);
+  }
+  const order: ReferenceFailureReason[] = ['out-of-credit', 'refused', 'other'];
+  return order.filter((reason) => counts.has(reason)).map((reason) => ({ reason, count: counts.get(reason)! }));
 }
 
 function retrySpend(runs: PromptRunResult[]): Pick<DatasetSummary, 'retrySpendUsd'> {
@@ -254,6 +303,22 @@ function methodOf(config: MatrixConfig): MatrixSummary['method'] {
     summarizer: config.summarizer.id,
     strategies: config.ensembleStrategies,
     reference: plain(config.reference),
+  };
+}
+
+/**
+ * The copy of a summary the app publishes. For a pending reference it keeps
+ * only how many questions were answered: the page shows the reference as
+ * coming soon, and the failure counts and reasons stay in the run's own
+ * summary.json.
+ */
+export function forPublication(summary: MatrixSummary): MatrixSummary {
+  return {
+    ...summary,
+    datasets: summary.datasets.map((d) => {
+      if (!d.referencePending) return d;
+      return { ...d, referencePending: { answered: d.referencePending.answered } };
+    }),
   };
 }
 

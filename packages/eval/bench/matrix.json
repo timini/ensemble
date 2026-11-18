@@ -39,14 +39,16 @@
     "label": "Claude Sonnet 5.5",
     "spec": "openrouter:anthropic/claude-sonnet-5.5",
     "routing": {
-      "ignore": [
-        "claude-on-aws"
-      ]
+      "order": [
+        "anthropic"
+      ],
+      "allow_fallbacks": false
     }
   },
   "budgetUsd": 20,
   "questionTimeoutMs": 900000,
   "callTimeoutMs": 180000,
   "consensusTimeoutMs": 300000,
-  "maxRetries": 4
+  "maxRetries": 4,
+  "maxOutputTokens": 4096
 }

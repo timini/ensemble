@@ -20,6 +20,21 @@ class MatrixFiguresTest(unittest.TestCase):
         self.assertIn("best", table)
         self.assertIn(r"\bottomrule", table)
 
+    def test_table_lists_the_failed_calls_of_each_row(self):
+        summary = matrix_figures.load_summary(FIXTURE)
+        row = summary["datasets"][0]["rows"][0]
+        row["failures"] = 37
+        table = matrix_figures.matrix_table(summary)
+        self.assertIn("Errors", table)
+        self.assertIn(" & 37 & ", table)
+
+    def test_p_values_round_half_up_like_the_app(self):
+        self.assertEqual(matrix_figures.format_p(0.0625), "0.063")
+        self.assertEqual(matrix_figures.format_p(0.12500000000000006), "0.125")
+        self.assertEqual(matrix_figures.format_p(1), "1.000")
+        self.assertEqual(matrix_figures.format_p(0.0004), "<0.001")
+        self.assertEqual(matrix_figures.format_p(None), "best")
+
     def test_configurations_are_ordered_singles_ensembles_reference(self):
         kinds = [k for _, _, k in matrix_figures.configurations(matrix_figures.load_summary(FIXTURE))]
         self.assertEqual(kinds, sorted(kinds, key=lambda k: matrix_figures.KIND_ORDER[k]))

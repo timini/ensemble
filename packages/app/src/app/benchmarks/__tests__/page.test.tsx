@@ -98,6 +98,54 @@ describe("BenchmarksPage", () => {
     expect(screen.queryByTestId("accuracy-interval")).not.toBeInTheDocument();
   });
 
+  it("shows a reference with no results as coming soon and the agreement score as uncalibrated", () => {
+    show(complete);
+    expect(
+      screen.getByTestId("benchmarks-reference-pending"),
+    ).toHaveTextContent(
+      "Premium reference (Claude Sonnet 5.5): Coming soon. A comparison with a premium model will be added.",
+    );
+    expect(screen.getByTestId("benchmark-method-reference")).toHaveTextContent(
+      "Coming soon",
+    );
+    expect(
+      screen.getByTestId("benchmarks-agreement-uncalibrated"),
+    ).toHaveTextContent("uncalibrated");
+    expect(screen.getByTestId("benchmarks-page")).not.toHaveTextContent(
+      /credit|not run|failed to run/i,
+    );
+  });
+
+  it("shows the reference as coming soon in French", async () => {
+    await i18n.changeLanguage("fr");
+    show(complete);
+    expect(
+      screen.getByTestId("benchmarks-reference-pending"),
+    ).toHaveTextContent("Bientôt disponible");
+  });
+
+  it("has no coming-soon note when every dataset has a reference row", () => {
+    const dataset = complete.datasets[0]!;
+    show({
+      ...complete,
+      datasets: [
+        {
+          ...dataset,
+          rows: [
+            ...dataset.rows,
+            { ...dataset.rows[0]!, id: "reference", kind: "reference" },
+          ],
+        },
+      ],
+    });
+    expect(
+      screen.queryByTestId("benchmarks-reference-pending"),
+    ).not.toBeInTheDocument();
+    expect(screen.getByTestId("benchmark-method-reference")).toHaveTextContent(
+      "run once and cached",
+    );
+  });
+
   it("shows not run yet for a not-run summary", () => {
     show({ ...complete, status: "not-run", datasets: [] });
     expect(screen.getByTestId("benchmarks-not-run")).toBeVisible();

@@ -121,14 +121,32 @@ function isAbort(error: unknown): boolean {
   return /was aborted/i.test(message);
 }
 
+const INSUFFICIENT_CREDITS_PATTERN = /\b402\b|requires more credits|insufficient credits|payment required/i;
+
+/**
+ * True for HTTP 402: the account cannot pay for the request (OpenRouter:
+ * "requires more credits, or fewer max_tokens"). Retrying sends the same
+ * request against the same balance, so it is never retried; the entry
+ * counts as failed and --retry-failed runs it again once credits are added.
+ */
+export function isInsufficientCreditsError(error: unknown): boolean {
+  if (error == null) return false;
+  if (getStatusFromError(error) === 402) return true;
+  if ((error as { kind?: unknown }).kind === 'insufficient_credits') return true;
+  const message = error instanceof Error ? error.message : String(error);
+  return INSUFFICIENT_CREDITS_PATTERN.test(message);
+}
+
 /**
  * True for failures worth another attempt: 429 and 5xx, network errors
  * (fetch failed, ECONNRESET and similar), per-call timeouts and empty
- * completions. Key errors, bad requests and deliberate aborts are not.
+ * completions. Key errors, bad requests, 402 (no credits) and deliberate
+ * aborts are not.
  */
 export function isTransientError(error: unknown): boolean {
   if (error == null) return false;
   if (isAbort(error)) return false;
+  if (isInsufficientCreditsError(error)) return false;
   const kind = (error as { kind?: unknown }).kind;
   if (typeof kind === 'string' && TRANSIENT_KINDS.has(kind)) return true;
   if (isRateLimitOrServerError(error)) return true;

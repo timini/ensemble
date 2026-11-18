@@ -14,6 +14,12 @@ const rowById = (id: string) =>
   screen.getAllByTestId('benchmark-result-row').find((row) => row.getAttribute('data-config-id') === id)!;
 
 describe('BenchmarkResultsTable', () => {
+  it('lets keyboard users reach the scrollable table', () => {
+    renderWithI18n(<BenchmarkResultsTable title="GSM8K" n={200} rows={rows} />);
+    const region = screen.getByRole('region', { name: 'GSM8K' });
+    expect(region).toHaveAttribute('tabindex', '0');
+  });
+
   it('shows the dataset name and question count', () => {
     renderWithI18n(<BenchmarkResultsTable title="GSM8K" n={200} rows={rows} />);
     expect(screen.getByTestId('benchmark-results-title')).toHaveTextContent('GSM8K');

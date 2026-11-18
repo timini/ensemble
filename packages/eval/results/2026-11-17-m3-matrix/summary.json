@@ -1,0 +1,598 @@
+{
+  "schemaVersion": 1,
+  "status": "complete",
+  "runId": "2026-11-17-m3-matrix",
+  "mode": "free",
+  "generatedAt": "2026-11-18T18:30:20.944Z",
+  "method": {
+    "matrix": "m3-matrix",
+    "description": "Three open 7B to 14B models from different families, alone and as an ensemble, against one premium reference. Model ids and prices checked against https://openrouter.ai/api/v1/models on 2026-11-17.",
+    "datasets": [
+      "gsm8k",
+      "mmlu_pro",
+      "gpqa",
+      "truthfulqa"
+    ],
+    "sample": 200,
+    "questionSeed": 42,
+    "optionSeed": 1729,
+    "protocol": "structured",
+    "temperature": 0,
+    "confidence": 0.95,
+    "models": [
+      {
+        "id": "qwen",
+        "label": "Qwen3.5 9B",
+        "spec": "openrouter:qwen/qwen3.5-9b"
+      },
+      {
+        "id": "llama",
+        "label": "Llama 3.1 8B Instruct",
+        "spec": "openrouter:meta-llama/llama-3.1-8b-instruct"
+      },
+      {
+        "id": "gemma",
+        "label": "Gemma 3 12B",
+        "spec": "openrouter:google/gemma-3-12b-it"
+      }
+    ],
+    "summarizer": "qwen",
+    "strategies": [
+      "majority",
+      "standard"
+    ],
+    "reference": {
+      "id": "reference",
+      "label": "Claude Sonnet 5.5",
+      "spec": "openrouter:anthropic/claude-sonnet-5.5"
+    }
+  },
+  "estimate": null,
+  "totalCostUsd": 1.5628516000000001,
+  "totalCostIncomplete": false,
+  "datasets": [
+    {
+      "dataset": "gsm8k",
+      "n": 200,
+      "bestSingleId": "single:gemma",
+      "rows": [
+        {
+          "id": "single:qwen",
+          "kind": "single",
+          "label": "Qwen3.5 9B",
+          "models": [
+            "openrouter:qwen/qwen3.5-9b"
+          ],
+          "n": 200,
+          "correct": 175,
+          "accuracy": 0.875,
+          "ciLower": 0.8219725542017575,
+          "ciUpper": 0.9138873523109037,
+          "failures": 0,
+          "vsBestSingle": {
+            "pValue": 0.04550012577451279,
+            "n10": 18,
+            "n01": 7,
+            "method": "chi-squared",
+            "n": 200
+          },
+          "costUsd": 0.04804466999999999,
+          "costIncomplete": false
+        },
+        {
+          "id": "single:llama",
+          "kind": "single",
+          "label": "Llama 3.1 8B Instruct",
+          "models": [
+            "openrouter:meta-llama/llama-3.1-8b-instruct"
+          ],
+          "n": 200,
+          "correct": 164,
+          "accuracy": 0.82,
+          "ciLower": 0.7608710482877304,
+          "ciUpper": 0.8670627386030737,
+          "failures": 12,
+          "vsBestSingle": {
+            "pValue": 0.00007232010013691337,
+            "n10": 25,
+            "n01": 3,
+            "method": "chi-squared",
+            "n": 200
+          },
+          "costUsd": 0.0018065999999999996,
+          "costIncomplete": false
+        },
+        {
+          "id": "single:gemma",
+          "kind": "single",
+          "label": "Gemma 3 12B",
+          "models": [
+            "openrouter:google/gemma-3-12b-it"
+          ],
+          "n": 200,
+          "correct": 186,
+          "accuracy": 0.93,
+          "ciLower": 0.8859335448866998,
+          "ciUpper": 0.9578524812478184,
+          "failures": 0,
+          "vsBestSingle": null,
+          "costUsd": 0.00732515,
+          "costIncomplete": false
+        },
+        {
+          "id": "ensemble:majority",
+          "kind": "ensemble",
+          "label": "Ensemble, mechanical majority",
+          "models": [
+            "openrouter:qwen/qwen3.5-9b",
+            "openrouter:meta-llama/llama-3.1-8b-instruct",
+            "openrouter:google/gemma-3-12b-it"
+          ],
+          "strategy": "majority",
+          "n": 200,
+          "correct": 191,
+          "accuracy": 0.955,
+          "ciLower": 0.9166926505845907,
+          "ciUpper": 0.9761507026507714,
+          "failures": 0,
+          "vsBestSingle": {
+            "pValue": 0.0625,
+            "n10": 0,
+            "n01": 5,
+            "method": "exact",
+            "n": 200
+          },
+          "costUsd": 0.05717642,
+          "costIncomplete": false
+        },
+        {
+          "id": "ensemble:standard",
+          "kind": "ensemble",
+          "label": "Ensemble, standard consensus",
+          "models": [
+            "openrouter:qwen/qwen3.5-9b",
+            "openrouter:meta-llama/llama-3.1-8b-instruct",
+            "openrouter:google/gemma-3-12b-it"
+          ],
+          "strategy": "standard",
+          "n": 200,
+          "correct": 191,
+          "accuracy": 0.955,
+          "ciLower": 0.9166926505845907,
+          "ciUpper": 0.9761507026507714,
+          "failures": 0,
+          "vsBestSingle": {
+            "pValue": 0.12500000000000006,
+            "n10": 1,
+            "n01": 6,
+            "method": "exact",
+            "n": 200
+          },
+          "costUsd": 0.24932559000000004,
+          "costIncomplete": false
+        }
+      ],
+      "spentUsd": 0.4599055900000001,
+      "spentIncomplete": false,
+      "retrySpendUsd": 0.04078134000000003,
+      "referencePending": {
+        "answered": 121,
+        "failed": 79,
+        "reasons": [
+          {
+            "reason": "out-of-credit",
+            "count": 79
+          }
+        ]
+      }
+    },
+    {
+      "dataset": "mmlu_pro",
+      "n": 200,
+      "bestSingleId": "single:qwen",
+      "rows": [
+        {
+          "id": "single:qwen",
+          "kind": "single",
+          "label": "Qwen3.5 9B",
+          "models": [
+            "openrouter:qwen/qwen3.5-9b"
+          ],
+          "n": 200,
+          "correct": 154,
+          "accuracy": 0.77,
+          "ciLower": 0.7069021536836682,
+          "ciUpper": 0.8229169790054478,
+          "failures": 0,
+          "vsBestSingle": null,
+          "costUsd": 0.12089315999999999,
+          "costIncomplete": false
+        },
+        {
+          "id": "single:llama",
+          "kind": "single",
+          "label": "Llama 3.1 8B Instruct",
+          "models": [
+            "openrouter:meta-llama/llama-3.1-8b-instruct"
+          ],
+          "n": 200,
+          "correct": 99,
+          "accuracy": 0.495,
+          "ciLower": 0.4264436879358269,
+          "ciUpper": 0.5637448466440043,
+          "failures": 24,
+          "vsBestSingle": {
+            "pValue": 1.0280443163424025e-11,
+            "n10": 59,
+            "n01": 4,
+            "method": "chi-squared",
+            "n": 200
+          },
+          "costUsd": 0.0032427999999999997,
+          "costIncomplete": false
+        },
+        {
+          "id": "single:gemma",
+          "kind": "single",
+          "label": "Gemma 3 12B",
+          "models": [
+            "openrouter:google/gemma-3-12b-it"
+          ],
+          "n": 200,
+          "correct": 124,
+          "accuracy": 0.62,
+          "ciLower": 0.5510518052815341,
+          "ciUpper": 0.6844233648025175,
+          "failures": 4,
+          "vsBestSingle": {
+            "pValue": 0.00005783785637147876,
+            "n10": 41,
+            "n01": 11,
+            "method": "chi-squared",
+            "n": 200
+          },
+          "costUsd": 0.019187849999999996,
+          "costIncomplete": false
+        },
+        {
+          "id": "ensemble:majority",
+          "kind": "ensemble",
+          "label": "Ensemble, mechanical majority",
+          "models": [
+            "openrouter:qwen/qwen3.5-9b",
+            "openrouter:meta-llama/llama-3.1-8b-instruct",
+            "openrouter:google/gemma-3-12b-it"
+          ],
+          "strategy": "majority",
+          "n": 200,
+          "correct": 149,
+          "accuracy": 0.745,
+          "ciLower": 0.6803557269148419,
+          "ciUpper": 0.8004060786734299,
+          "failures": 0,
+          "vsBestSingle": {
+            "pValue": 0.22656250000000008,
+            "n10": 8,
+            "n01": 3,
+            "method": "exact",
+            "n": 200
+          },
+          "costUsd": 0.14332381000000008,
+          "costIncomplete": false
+        },
+        {
+          "id": "ensemble:standard",
+          "kind": "ensemble",
+          "label": "Ensemble, standard consensus",
+          "models": [
+            "openrouter:qwen/qwen3.5-9b",
+            "openrouter:meta-llama/llama-3.1-8b-instruct",
+            "openrouter:google/gemma-3-12b-it"
+          ],
+          "strategy": "standard",
+          "n": 200,
+          "correct": 157,
+          "accuracy": 0.785,
+          "ciLower": 0.7229622779677406,
+          "ciUpper": 0.836291250981882,
+          "failures": 4,
+          "vsBestSingle": {
+            "pValue": 0.45312500000000017,
+            "n10": 2,
+            "n01": 5,
+            "method": "exact",
+            "n": 200
+          },
+          "costUsd": 0.35144942000000007,
+          "costIncomplete": false
+        }
+      ],
+      "spentUsd": 0.35144942000000007,
+      "spentIncomplete": false,
+      "retrySpendUsd": 0.05601664000000001,
+      "referencePending": {
+        "answered": 0,
+        "failed": 200,
+        "reasons": [
+          {
+            "reason": "out-of-credit",
+            "count": 200
+          }
+        ]
+      }
+    },
+    {
+      "dataset": "gpqa",
+      "n": 198,
+      "bestSingleId": "single:qwen",
+      "rows": [
+        {
+          "id": "single:qwen",
+          "kind": "single",
+          "label": "Qwen3.5 9B",
+          "models": [
+            "openrouter:qwen/qwen3.5-9b"
+          ],
+          "n": 198,
+          "correct": 135,
+          "accuracy": 0.6818181818181818,
+          "ciLower": 0.6139931120176021,
+          "ciUpper": 0.7427195167303735,
+          "failures": 11,
+          "vsBestSingle": null,
+          "costUsd": 0.19522765999999994,
+          "costIncomplete": false
+        },
+        {
+          "id": "single:llama",
+          "kind": "single",
+          "label": "Llama 3.1 8B Instruct",
+          "models": [
+            "openrouter:meta-llama/llama-3.1-8b-instruct"
+          ],
+          "n": 198,
+          "correct": 47,
+          "accuracy": 0.23737373737373738,
+          "ciLower": 0.18345209129564663,
+          "ciUpper": 0.3012963338461665,
+          "failures": 44,
+          "vsBestSingle": {
+            "pValue": 1.1102230246251565e-16,
+            "n10": 98,
+            "n01": 10,
+            "method": "chi-squared",
+            "n": 198
+          },
+          "costUsd": 0.003592599999999999,
+          "costIncomplete": false
+        },
+        {
+          "id": "single:gemma",
+          "kind": "single",
+          "label": "Gemma 3 12B",
+          "models": [
+            "openrouter:google/gemma-3-12b-it"
+          ],
+          "n": 198,
+          "correct": 72,
+          "accuracy": 0.36363636363636365,
+          "ciLower": 0.2998041980240797,
+          "ciUpper": 0.43266133041493876,
+          "failures": 18,
+          "vsBestSingle": {
+            "pValue": 3.084459354596447e-10,
+            "n10": 80,
+            "n01": 17,
+            "method": "chi-squared",
+            "n": 198
+          },
+          "costUsd": 0.02333895,
+          "costIncomplete": false
+        },
+        {
+          "id": "ensemble:majority",
+          "kind": "ensemble",
+          "label": "Ensemble, mechanical majority",
+          "models": [
+            "openrouter:qwen/qwen3.5-9b",
+            "openrouter:meta-llama/llama-3.1-8b-instruct",
+            "openrouter:google/gemma-3-12b-it"
+          ],
+          "strategy": "majority",
+          "n": 198,
+          "correct": 118,
+          "accuracy": 0.5959595959595959,
+          "ciLower": 0.5263971424856464,
+          "ciUpper": 0.6618678560202296,
+          "failures": 0,
+          "vsBestSingle": {
+            "pValue": 0.0029672438403683943,
+            "n10": 23,
+            "n01": 6,
+            "method": "chi-squared",
+            "n": 198
+          },
+          "costUsd": 0.2221592099999999,
+          "costIncomplete": false
+        },
+        {
+          "id": "ensemble:standard",
+          "kind": "ensemble",
+          "label": "Ensemble, standard consensus",
+          "models": [
+            "openrouter:qwen/qwen3.5-9b",
+            "openrouter:meta-llama/llama-3.1-8b-instruct",
+            "openrouter:google/gemma-3-12b-it"
+          ],
+          "strategy": "standard",
+          "n": 198,
+          "correct": 121,
+          "accuracy": 0.6111111111111112,
+          "ciLower": 0.5416941260219187,
+          "ciUpper": 0.6762969248796221,
+          "failures": 33,
+          "vsBestSingle": {
+            "pValue": 0.03983248623811697,
+            "n10": 27,
+            "n01": 13,
+            "method": "chi-squared",
+            "n": 198
+          },
+          "costUsd": 0.49496524,
+          "costIncomplete": false
+        }
+      ],
+      "spentUsd": 0.49496524,
+      "spentIncomplete": false,
+      "retrySpendUsd": 0.049662289999999984,
+      "referencePending": {
+        "answered": 0,
+        "failed": 198,
+        "reasons": [
+          {
+            "reason": "refused",
+            "count": 198
+          }
+        ]
+      }
+    },
+    {
+      "dataset": "truthfulqa",
+      "n": 200,
+      "bestSingleId": "single:qwen",
+      "rows": [
+        {
+          "id": "single:qwen",
+          "kind": "single",
+          "label": "Qwen3.5 9B",
+          "models": [
+            "openrouter:qwen/qwen3.5-9b"
+          ],
+          "n": 200,
+          "correct": 163,
+          "accuracy": 0.815,
+          "ciLower": 0.7554150990045956,
+          "ciUpper": 0.8627072224660397,
+          "failures": 4,
+          "vsBestSingle": null,
+          "costUsd": 0.09697301999999998,
+          "costIncomplete": false
+        },
+        {
+          "id": "single:llama",
+          "kind": "single",
+          "label": "Llama 3.1 8B Instruct",
+          "models": [
+            "openrouter:meta-llama/llama-3.1-8b-instruct"
+          ],
+          "n": 200,
+          "correct": 119,
+          "accuracy": 0.595,
+          "ciLower": 0.5257817756250817,
+          "ciUpper": 0.6606360673581259,
+          "failures": 2,
+          "vsBestSingle": {
+            "pValue": 1.846541622940734e-7,
+            "n10": 56,
+            "n01": 12,
+            "method": "chi-squared",
+            "n": 200
+          },
+          "costUsd": 0.0022801400000000004,
+          "costIncomplete": false
+        },
+        {
+          "id": "single:gemma",
+          "kind": "single",
+          "label": "Gemma 3 12B",
+          "models": [
+            "openrouter:google/gemma-3-12b-it"
+          ],
+          "n": 200,
+          "correct": 136,
+          "accuracy": 0.68,
+          "ciLower": 0.6124656796375308,
+          "ciUpper": 0.7407470754885467,
+          "failures": 0,
+          "vsBestSingle": {
+            "pValue": 0.00004898906960693061,
+            "n10": 34,
+            "n01": 7,
+            "method": "chi-squared",
+            "n": 200
+          },
+          "costUsd": 0.006944549999999997,
+          "costIncomplete": false
+        },
+        {
+          "id": "ensemble:majority",
+          "kind": "ensemble",
+          "label": "Ensemble, mechanical majority",
+          "models": [
+            "openrouter:qwen/qwen3.5-9b",
+            "openrouter:meta-llama/llama-3.1-8b-instruct",
+            "openrouter:google/gemma-3-12b-it"
+          ],
+          "strategy": "majority",
+          "n": 200,
+          "correct": 153,
+          "accuracy": 0.765,
+          "ciLower": 0.7015714617224318,
+          "ciUpper": 0.8184362055465153,
+          "failures": 0,
+          "vsBestSingle": {
+            "pValue": 0.05247879028320314,
+            "n10": 16,
+            "n01": 6,
+            "method": "exact",
+            "n": 200
+          },
+          "costUsd": 0.10619770999999992,
+          "costIncomplete": false
+        },
+        {
+          "id": "ensemble:standard",
+          "kind": "ensemble",
+          "label": "Ensemble, standard consensus",
+          "models": [
+            "openrouter:qwen/qwen3.5-9b",
+            "openrouter:meta-llama/llama-3.1-8b-instruct",
+            "openrouter:google/gemma-3-12b-it"
+          ],
+          "strategy": "standard",
+          "n": 200,
+          "correct": 163,
+          "accuracy": 0.815,
+          "ciLower": 0.7554150990045956,
+          "ciUpper": 0.8627072224660397,
+          "failures": 0,
+          "vsBestSingle": {
+            "pValue": 1,
+            "n10": 6,
+            "n01": 6,
+            "method": "exact",
+            "n": 200
+          },
+          "costUsd": 0.25653135,
+          "costIncomplete": false
+        }
+      ],
+      "spentUsd": 0.25653135,
+      "spentIncomplete": false,
+      "referencePending": {
+        "answered": 0,
+        "failed": 200,
+        "reasons": [
+          {
+            "reason": "out-of-credit",
+            "count": 168
+          },
+          {
+            "reason": "refused",
+            "count": 32
+          }
+        ]
+      }
+    }
+  ]
+}

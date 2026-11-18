@@ -111,7 +111,7 @@ npm run bench:matrix:dry-run --workspace=packages/eval         # whole pipeline 
 OPENROUTER_API_KEY=... npm run bench:matrix --workspace=packages/eval -- --yes --publish
 ```
 
-The method, results format, calibration scripts and how to regenerate the report are in [packages/eval/docs/BENCHMARKS.md](./packages/eval/docs/BENCHMARKS.md). No paid run has been made yet, so `/benchmarks` says the benchmarks have not been run. The rest of the eval CLI is described in [packages/eval/docs/architecture.md](./packages/eval/docs/architecture.md).
+The method, results format, calibration scripts and how to regenerate the report are in [packages/eval/docs/BENCHMARKS.md](./packages/eval/docs/BENCHMARKS.md). In the first M3 run (run `2026-11-17-m3-matrix`, 200 questions per dataset and 198 for GPQA), the ensemble of Qwen3.5 9B, Llama 3.1 8B and Gemma 3 12B did not beat its best member with statistical significance on any dataset: it scored higher on GSM8K (95.5% [91.7, 97.6] for both methods against 93.0% [88.6, 95.8], p = 0.063 for majority vote and 0.125 for standard consensus), on MMLU-Pro majority vote scored 74.5% [68.0, 80.0] and standard consensus 78.5% [72.3, 83.6] against 77.0% [70.7, 82.3] (p = 0.227 and 0.453), on TruthfulQA 76.5% [70.2, 81.8] and 81.5% [75.5, 86.3] against 81.5% [75.5, 86.3] (p = 0.052 and 1.0), and on GPQA it scored lower, 59.6% [52.6, 66.2] for majority vote and 61.1% [54.2, 67.6] for standard consensus against 68.2% [61.4, 74.3] (p = 0.003 and 0.040), where 33 of the 198 standard consensus calls failed and count as wrong. The full table is on `/benchmarks`. The rest of the eval CLI is described in [packages/eval/docs/architecture.md](./packages/eval/docs/architecture.md).
 
 ## Deployment
 

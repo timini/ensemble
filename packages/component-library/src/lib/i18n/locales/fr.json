@@ -760,6 +760,7 @@
         "council": "conseil"
       },
       "reference": "Référence premium, exécutée une fois et mise en cache : {{model}}.",
+      "referencePending": "Référence premium : {{model}}. Bientôt disponible.",
       "statistics": "L'exactitude a un intervalle de Wilson à 95 %. Chaque configuration est comparée au meilleur modèle ouvert seul sur les mêmes questions avec un test de McNemar apparié (binomial exact sous 25 paires discordantes).",
       "cost": "Le coût provient de la table de prix OpenRouter partagée et de l'usage de jetons déclaré par chaque fournisseur.",
       "docsLink": "Méthode complète et comment la reproduire"

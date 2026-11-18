@@ -30,6 +30,11 @@ export const Default: Story = {
   },
 };
 
+/** A reference model with no published results yet: shown as coming soon. */
+export const ReferencePending: Story = {
+  args: { ...Default.args!, referencePending: true } as Story['args'],
+};
+
 /** A matrix with a single ensemble method. */
 export const MajorityOnly: Story = {
   args: { ...Default.args!, strategies: ['majority'] } as Story['args'],

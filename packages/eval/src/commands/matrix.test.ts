@@ -5,7 +5,12 @@ vi.mock('../lib/matrix/runner.js', () => ({
   runMatrix: vi.fn().mockResolvedValue({ estimate: { calls: 0 }, ran: false, summary: null }),
 }));
 
+vi.mock('../lib/matrix/summarizeRun.js', () => ({
+  summarizeRun: vi.fn().mockResolvedValue({}),
+}));
+
 import { runMatrix } from '../lib/matrix/runner.js';
+import { summarizeRun } from '../lib/matrix/summarizeRun.js';
 import { createMatrixCommand, DEFAULT_PUBLISH_PATH, DEFAULT_RESULTS_DIR } from './matrix.js';
 
 const run = (args: string[]) => createMatrixCommand().parseAsync(args, { from: 'user' });
@@ -64,6 +69,15 @@ describe('matrix command', () => {
     await expect(run(['--mode', 'mock', '--publish'])).rejects.toThrow(/never published/);
     await expect(run(['--mode', 'mock', '--publish', DEFAULT_PUBLISH_PATH])).rejects.toThrow(/never published/);
     expect(runMatrix).not.toHaveBeenCalled();
+  });
+
+  it('rebuilds a summary with --summarize-only and never runs the matrix', async () => {
+    await run(['--summarize-only', '--run-id', 'r1', '--publish']);
+    expect(runMatrix).not.toHaveBeenCalled();
+    expect(vi.mocked(summarizeRun).mock.calls[0]![0]).toMatchObject({
+      runId: 'r1', resultsDir: DEFAULT_RESULTS_DIR, publishPath: DEFAULT_PUBLISH_PATH, appSummaryPath: DEFAULT_PUBLISH_PATH,
+    });
+    await expect(run(['--summarize-only'])).rejects.toThrow(/--run-id/);
   });
 
   it('rejects an unknown mode', async () => {

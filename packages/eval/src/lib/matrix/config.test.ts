@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { parseMatrixConfig, resultKeyOf } from './config.js';
+import { experimentOf } from './experiment.js';
 
 const committed = JSON.parse(
   readFileSync(resolve(__dirname, '../../../bench/matrix.json'), 'utf8'),
@@ -24,6 +25,17 @@ describe('parseMatrixConfig', () => {
     expect(() => parseMatrixConfig({ ...committed, summarizer: 'mistral' })).toThrow(/summarizer/i);
     const models = committed.models as Array<Record<string, string>>;
     expect(() => parseMatrixConfig({ ...committed, models: [models[0], models[0]] })).toThrow(/unique/i);
+  });
+
+  it('reads maxOutputTokens, 4096 by default, and keeps it out of the experiment', () => {
+    expect(parseMatrixConfig(committed).maxOutputTokens).toBe(4096);
+    const { maxOutputTokens: _m, ...bare } = committed;
+    expect(parseMatrixConfig(bare).maxOutputTokens).toBe(4096);
+    expect(parseMatrixConfig({ ...committed, maxOutputTokens: 1024 }).maxOutputTokens).toBe(1024);
+    expect(() => parseMatrixConfig({ ...committed, maxOutputTokens: 0 })).toThrow(/maxOutputTokens/);
+    expect(() => parseMatrixConfig({ ...committed, maxOutputTokens: 'lots' })).toThrow(/maxOutputTokens/);
+    expect(experimentOf(parseMatrixConfig({ ...committed, maxOutputTokens: 1024 })))
+      .toEqual(experimentOf(parseMatrixConfig(committed)));
   });
 
   it('rejects a sample that is not a positive integer', () => {

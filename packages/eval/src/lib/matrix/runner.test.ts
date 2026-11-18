@@ -105,6 +105,8 @@ describe('runMatrix', () => {
 
     const plan = await runMatrix({ ...base(), mode: 'mock', yes: false, retryFailed: true, planOnly: true });
     expect(plan.estimate.jobs.map((j) => j.pending)).toEqual([1, 1]);
+    expect(lines).toContain('gsm8k ensemble: 1 failed entry to run again.');
+    expect(lines).toContain('gsm8k reference: 1 failed entry to run again.');
 
     const result = await runMatrix({ ...base(), mode: 'mock', yes: false, retryFailed: true });
     expect(result.summary?.status).toBe('complete');
@@ -155,8 +157,8 @@ describe('runMatrix', () => {
   }, 30_000);
 
   it('records the routing a run started with and the routing of each repair in the manifest', async () => {
-    // bench/matrix.json routes the reference model around one host.
-    const models = { reference: { ignore: ['claude-on-aws'] } };
+    // bench/matrix.json routes the reference model to one host.
+    const models = { reference: raw.reference.routing };
     await runMatrix({ ...base(), mode: 'mock', yes: false });
     const manifestPath = join(dir, 'results/test-run/manifest.json');
     expect(JSON.parse(readFileSync(manifestPath, 'utf8')).routing).toEqual({ requireParameters: true, models });
@@ -183,6 +185,17 @@ describe('runMatrix', () => {
     const protocol = parseMatrixConfig({ ...raw, protocol: 'legacy' }, { datasets: ['gsm8k'], sample: 3 });
     await expect(runMatrix({ ...base(), config: protocol, mode: 'mock', yes: false })).rejects.toThrow(/protocol/);
     expect(readFileSync(ensemblePath, 'utf8')).toBe(before);
+  }, 30_000);
+
+  it('resumes a run id whose maxOutputTokens changed without allowConfigChange', async () => {
+    // A run started before the field existed: its stored config has no maxOutputTokens.
+    const { maxOutputTokens: _omitted, ...older } = raw as Record<string, unknown>;
+    const olderConfig = parseMatrixConfig(older, { datasets: ['gsm8k'], sample: 3 });
+    await runMatrix({ ...base(), config: olderConfig, rawConfig: older, mode: 'mock', yes: false });
+    const changed = parseMatrixConfig({ ...raw, maxOutputTokens: 1024 }, { datasets: ['gsm8k'], sample: 3 });
+    const result = await runMatrix({ ...base(), config: changed, mode: 'mock', yes: false, retryFailed: true });
+    expect(result.ran).toBe(true);
+    expect(lines.join('\n')).not.toMatch(/changed settings/);
   }, 30_000);
 
   it('resumes a changed run id with allowConfigChange and records the change in the manifest', async () => {

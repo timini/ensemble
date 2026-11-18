@@ -71,7 +71,14 @@ export const BenchmarkResultsTable = React.forwardRef<HTMLDivElement, BenchmarkR
               {t(k('questions'), { count: n })}
             </Text>
           </div>
-          <div className="overflow-x-auto">
+          {/* Focusable so keyboard users can scroll the table on narrow screens. */}
+          <div
+            className="overflow-x-auto focus-ring rounded-md"
+            tabIndex={0}
+            role="region"
+            aria-label={title}
+            data-testid="benchmark-results-scroll"
+          >
             <table className="w-full text-left text-sm">
               <thead className="text-xs text-muted-foreground">
                 <tr className="border-b border-border">

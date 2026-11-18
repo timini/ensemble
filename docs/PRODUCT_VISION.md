@@ -1,6 +1,6 @@
 # Ensemble AI: Product Vision
 
-Last updated: 2026-11-15.
+Last updated: 2026-11-18.
 
 ## One line
 
@@ -50,7 +50,8 @@ We can honestly say today:
 
 We cannot yet say:
 
-- "Ensembles give better answers than the best single model." Our results so far are mixed and not statistically significant (n of 8 to 40 per dataset). See `report/report.pdf` and the benchmark plan in [ROADMAP.md](./ROADMAP.md).
+- "Ensembles give better answers than the best single model." The February 2026 pilot study was mixed and not statistically significant (n of 8 to 40 per dataset). See `report/report.pdf` and the benchmark plan in [ROADMAP.md](./ROADMAP.md).
+- In the first M3 run (run `2026-11-17-m3-matrix`, 200 questions per dataset and 198 for GPQA), the ensemble of Qwen3.5 9B, Llama 3.1 8B and Gemma 3 12B did not beat its best member with statistical significance on any dataset: it scored higher on GSM8K (95.5% [91.7, 97.6] for both methods against 93.0% [88.6, 95.8], p = 0.063 for majority vote and 0.125 for standard consensus), on MMLU-Pro majority vote scored 74.5% [68.0, 80.0] and standard consensus 78.5% [72.3, 83.6] against 77.0% [70.7, 82.3] (p = 0.227 and 0.453), on TruthfulQA 76.5% [70.2, 81.8] and 81.5% [75.5, 86.3] against 81.5% [75.5, 86.3] (p = 0.052 and 1.0), and on GPQA it scored lower, 59.6% [52.6, 66.2] for majority vote and 61.1% [54.2, 67.6] for standard consensus against 68.2% [61.4, 74.3] (p = 0.003 and 0.040), where 33 of the 198 standard consensus calls failed and count as wrong. See `/benchmarks` and [BENCHMARKS.md](../packages/eval/docs/BENCHMARKS.md).
 
 Until the benchmarks in the roadmap say otherwise, the product leads with **agreement and comparison**, not with "more accurate answers". Marketing copy on the landing, `/features` and `/about` pages must follow this rule.
 
