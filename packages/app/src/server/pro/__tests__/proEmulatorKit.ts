@@ -20,6 +20,16 @@ export const TABLE: PriceTable = {
       outputPerMillion: 2,
       openRouterId: "openai/gpt-test-or",
     },
+    "openai/gpt-other": {
+      inputPerMillion: 30,
+      outputPerMillion: 60,
+      openRouterId: "openai/gpt-other-or",
+    },
+    "google/free-test": {
+      inputPerMillion: 0,
+      outputPerMillion: 0,
+      openRouterId: "google/free-test",
+    },
     "openai/text-embedding-3-small": {
       inputPerMillion: 0.02,
       outputPerMillion: 0,
@@ -33,7 +43,7 @@ export const RUN = {
   consensusMethod: "standard" as const,
   summarizer: null,
   eloTopN: 0,
-  embeddings: null,
+  embeddings: { provider: "openai", modelId: "text-embedding-3-small" },
   promptTokens: 10,
 };
 

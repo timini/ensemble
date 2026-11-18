@@ -24,6 +24,7 @@ const RUN_CODES: Record<ProRunError["reason"], Code> = {
   closed: "CONFLICT",
   duplicate_call: "CONFLICT",
   budget: "FORBIDDEN",
+  model: "FORBIDDEN",
 };
 
 /**

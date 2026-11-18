@@ -5,11 +5,8 @@ import {
 } from "@ensemble-ai/shared-utils/pricing";
 import { resolveProModel } from "./models";
 import type { ProDeps } from "./proRunService";
-import {
-  beginProCall,
-  claimPendingStream,
-  storePendingStream,
-} from "./runStore";
+import { claimPendingStream, storePendingStream } from "./pendingStreams";
+import { beginProCall } from "./runStore";
 import {
   callUsage,
   endCall,
@@ -36,15 +33,21 @@ export async function prepareProStream(
   uid: string,
   input: ProCallRef & StreamRequest,
 ): Promise<void> {
-  resolveProModel(input.provider, input.model, deps.credit.priceTable);
+  const model = resolveProModel(
+    input.provider,
+    input.model,
+    deps.credit.priceTable,
+  );
   const { runId, callId, ...request } = input;
   const countedInputTokens = estimateTokensFromText(request.prompt);
   const { maxOutputTokens } = await beginProCall(deps.db, {
     uid,
     runId,
     callId,
+    model: { provider: model.provider, modelId: model.modelId },
     inputTokens: countedInputTokens,
     maxCallOutputTokens: deps.config.maxCallOutputTokens,
+    billing: deps.credit,
   });
   try {
     await storePendingStream(

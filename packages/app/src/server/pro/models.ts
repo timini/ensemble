@@ -16,10 +16,49 @@ export interface ProModel {
 
 /** The model has no price, so a Pro run could not bill it. */
 export class UnpricedModelError extends Error {
-  constructor(readonly model: string) {
-    super(`Pro cannot run ${model}: it has no price.`);
+  constructor(
+    readonly model: string,
+    why = "it has no price",
+  ) {
+    super(`Pro cannot run ${model}: ${why}.`);
     this.name = "UnpricedModelError";
   }
+}
+
+/** The `provider/model` key of a model in the price table and in a run record. */
+export function modelKey(model: { provider: string; modelId: string }) {
+  return `${model.provider}/${model.modelId}`;
+}
+
+/**
+ * The models a reserved run may call: its answering models, the summarizer
+ * (the first model when none is set) and the embedding model. Each must
+ * have a price above zero, or the run could make calls it never pays for.
+ * Throws a RangeError for a model with no price (as reserveForRun does)
+ * and UnpricedModelError for one priced at zero.
+ */
+export function billableRunModels(
+  run: {
+    models: { provider: string; modelId: string }[];
+    summarizer: { provider: string; modelId: string } | null;
+    embeddings: { provider: string; modelId: string } | null;
+  },
+  table: PriceTable = PRICE_TABLE,
+): string[] {
+  const refs = [
+    ...run.models,
+    run.summarizer ?? run.models[0],
+    run.embeddings,
+  ].filter((ref): ref is { provider: string; modelId: string } => !!ref);
+  const keys = [...new Set(refs.map(modelKey))];
+  for (const key of keys) {
+    const entry = table.models[key];
+    if (!entry) throw new RangeError(`No price for ${key}`);
+    if (!(entry.inputPerMillion > 0) && !(entry.outputPerMillion > 0)) {
+      throw new UnpricedModelError(key, "its price is zero");
+    }
+  }
+  return keys;
 }
 
 /** Pro is not configured on this server (no OpenRouter key). */
