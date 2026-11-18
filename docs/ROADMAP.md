@@ -196,12 +196,12 @@ Done when (code complete and tested against the Firebase emulators and Stripe te
 
 ### M6: Sharing, sync and launch (about 1.5 weeks)
 
-- [ ] Share: `shares` collection with a 30-day TTL, a public read-only page at `/s/[id]` showing the prompt, models, answers, agreement and consensus (FR-042 to FR-044). Available to signed-in users in both Free and Pro, since a share is just a stored result.
-- [ ] Synced history and presets for signed-in users.
-- [ ] Custom domain, Open Graph images for shared links, basic SEO on the landing page.
-- [ ] Production checklist: Sentry alerts, uptime check, Lighthouse 90+ performance and 100 accessibility on the landing page (T331, T332), security review of key handling and the webhook.
-- [ ] `docs/DEPLOYMENT.md` with the full production setup.
-- [ ] Update the devblog post with the new product and benchmark results.
+- [x] Share: `shares` collection with a 30-day TTL, a public read-only page at `/s/[id]` showing the prompt, models, answers, agreement and consensus (FR-042 to FR-044). Available to signed-in users in both Free and Pro, since a share is just a stored result.
+- [x] Synced history and presets for signed-in users.
+- [ ] Custom domain, Open Graph images for shared links, basic SEO on the landing page. (Open Graph, SEO, sitemap and robots done; the domain is an owner step in docs/DEPLOYMENT.md.)
+- [ ] Production checklist (Lighthouse 94 to 96 performance and 100 accessibility locally; security review in docs/security-review-m6.md; Sentry scrubbing and an uptime check and budget alert in terraform; owner still applies them): Sentry alerts, uptime check, Lighthouse 90+ performance and 100 accessibility on the landing page (T331, T332), security review of key handling and the webhook.
+- [x] `docs/DEPLOYMENT.md` with the full production setup.
+- [ ] Update the devblog post with the new product and benchmark results. (Draft in docs/launch/devblog-post.md; benchmark section pending.)
 
 Done when: the product is live on its own domain, a shared link opens for a logged-out visitor, and the launch checklist is complete.
 
