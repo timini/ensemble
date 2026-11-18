@@ -89,3 +89,51 @@ env:
     value: "5,20,50"
     availability:
       - RUNTIME
+
+  # Pro mode: model calls go to OpenRouter with this server key
+  # (roadmap Decision 6). Set a monthly spend limit on the key in the
+  # OpenRouter dashboard; see docs/DEPLOYMENT.md.
+  - variable: OPENROUTER_API_KEY
+    secret: OPENROUTER_API_KEY
+    availability:
+      - RUNTIME
+
+  # Pro abuse limits (not secret). See docs/DEPLOYMENT.md.
+  - variable: PRO_MAX_RUN_TOKENS
+    value: "200000"
+    availability:
+      - RUNTIME
+
+  - variable: PRO_MAX_CALL_OUTPUT_TOKENS
+    value: "8192"
+    availability:
+      - RUNTIME
+
+  - variable: PRO_MAX_CALLS_PER_RUN
+    value: "150"
+    availability:
+      - RUNTIME
+
+  - variable: PRO_RATE_LIMIT_RUNS
+    value: "10"
+    availability:
+      - RUNTIME
+
+  - variable: PRO_RATE_LIMIT_WINDOW_SECONDS
+    value: "60"
+    availability:
+      - RUNTIME
+
+  # Firebase App Check. Off until the reCAPTCHA Enterprise key exists and
+  # tokens have been seen in the console's metrics; then add the site key
+  # below and set APP_CHECK_ENFORCE to "true".
+  - variable: APP_CHECK_ENFORCE
+    value: "false"
+    availability:
+      - RUNTIME
+
+  # - variable: NEXT_PUBLIC_FIREBASE_APP_CHECK_SITE_KEY
+  #   secret: NEXT_PUBLIC_FIREBASE_APP_CHECK_SITE_KEY
+  #   availability:
+  #     - BUILD
+  #     - RUNTIME

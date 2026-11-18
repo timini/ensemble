@@ -22,6 +22,16 @@ Server variables are validated in `packages/app/src/env.js`; all are optional, a
 | `CREDIT_LOW_BALANCE_USD` | runtime | Low-balance warning threshold (FR-038). Default `1`. |
 | `CREDIT_PACKS_USD` | runtime | Credit packs on sale, comma-separated dollars, each at least $1. Default `5,20,50`. |
 | `APP_URL` | runtime | Public origin for the Stripe return links. Optional; the request origin is used when unset. Set it once the custom domain is live. |
+| `OPENROUTER_API_KEY` | runtime, secret | Server key for Pro model calls (roadmap Decision 6). Without it Pro calls answer `SERVICE_UNAVAILABLE`. Set a monthly spend limit on it (see Pro mode below). |
+| `OPENROUTER_BASE_URL` | runtime | Default `https://openrouter.ai/api/v1`. Only for tests against a fake server. |
+| `PRO_MAX_RUN_TOKENS` | runtime | Most tokens (input and output, all calls) one Pro run may use. Default `200000`. |
+| `PRO_MAX_CALL_OUTPUT_TOKENS` | runtime | `max_tokens` of each Pro call, lowered to what is left of the run's budget. Default `8192`. |
+| `PRO_MAX_CALLS_PER_RUN` | runtime | Most model and embedding calls in one run, retries included. Default `150`. |
+| `PRO_RATE_LIMIT_RUNS`, `PRO_RATE_LIMIT_WINDOW_SECONDS` | runtime | Runs one user may start per window. Default `10` per `60` seconds. |
+| `PRO_MOCK_UPSTREAM` | local and CI only | `true` answers Pro calls from the mock client instead of OpenRouter, so Pro can be tested without spending. Mock mode (`NEXT_PUBLIC_MOCK_MODE=true`) turns it on too. Never set it in production. |
+| `APP_CHECK_ENFORCE` | runtime | `true` refuses Pro calls without a valid Firebase App Check token. Default off. |
+| `NEXT_PUBLIC_FIREBASE_APP_CHECK_SITE_KEY` | build and runtime | reCAPTCHA Enterprise site key. When set, the client starts App Check and sends its token with Pro calls. |
+| `NEXT_PUBLIC_FIREBASE_APP_CHECK_DEBUG_TOKEN` | local and CI only | App Check debug token registered in the console, for browsers without reCAPTCHA (tests). |
 
 `apphosting.yaml` declares these by reference. The Firebase and Stripe values are Secret Manager secrets; the credit settings are plain values.
 
@@ -32,6 +42,48 @@ Important: App Hosting fails the build if a secret named in `apphosting.yaml` do
 Balances and ledger amounts are integers in micro-dollars: 1 USD is 1,000,000. A cheap model call costs a fraction of a cent, so cents would round most calls up to a whole cent. A credit pack adds exactly what was paid: the $5 pack adds 5,000,000 micro-dollars. The margin is applied when a run is priced, not at purchase.
 
 A Pro run reserves the high end of the pre-run estimate plus the margin, then settles at the actual token cost plus the margin, never more than the reservation, and gives back the difference. A failed run is refunded in full. Every step is an append-only entry in `creditLedger`, idempotent by run id.
+
+## Pro mode (OpenRouter)
+
+Pro model calls go from the server to OpenRouter with one key. To set it up:
+
+1. Create an account at openrouter.ai and add credit.
+2. Create an API key for this app only, and give it a **monthly credit limit** (OpenRouter dashboard, Keys, edit the key, Credit limit). This is the hard cap on what Pro can spend in a month, whatever happens in the app: rate limits and token budgets bound each user, the key limit bounds everyone together. Pick a figure you can afford to lose to abuse or a bug, and raise it as paid usage grows. Also set an email alert on the account balance.
+3. Store the key as a secret and grant the backend access:
+
+   ```bash
+   firebase apphosting:secrets:set OPENROUTER_API_KEY
+   firebase apphosting:secrets:grantaccess OPENROUTER_API_KEY --backend ensemble-app
+   ```
+
+When the key limit is reached OpenRouter refuses calls; the answers show as provider errors and the runs are refunded or settled for what was used.
+
+Abuse controls, all on the server:
+
+- Every Pro call needs a signed-in user and an open run with credits reserved (`proRun.start`).
+- Each user may start `PRO_RATE_LIMIT_RUNS` runs per `PRO_RATE_LIMIT_WINDOW_SECONDS`. The counter is in Firestore (`rateLimits/{uid}`), so it holds across App Hosting instances.
+- Each run has a token budget (`PRO_MAX_RUN_TOKENS`), a call budget (`PRO_MAX_CALLS_PER_RUN`) and a per-call output limit (`PRO_MAX_CALL_OUTPUT_TOKENS`). A call id can be used once, so a reconnecting client cannot repeat a call.
+- Prompts longer than 200,000 characters are refused.
+- Firebase App Check, below.
+
+Run records are in `proRuns/{uid}__{runId}` (status, budget, calls and their usage). A run the client never finished (a closed tab) is settled the next time the same user starts a run, 30 minutes after it started.
+
+## Firebase App Check
+
+App Check makes Pro calls prove they come from this web app. It is off until configured, and the server only checks tokens when `APP_CHECK_ENFORCE` is `true`.
+
+1. In the Google Cloud console, enable the reCAPTCHA Enterprise API and create a website key for the app's domains.
+2. In the Firebase console, App Check, Apps: register the web app with the reCAPTCHA Enterprise provider and that site key.
+3. Store the site key and uncomment its entry in `apphosting.yaml`:
+
+   ```bash
+   firebase apphosting:secrets:set NEXT_PUBLIC_FIREBASE_APP_CHECK_SITE_KEY
+   firebase apphosting:secrets:grantaccess NEXT_PUBLIC_FIREBASE_APP_CHECK_SITE_KEY --backend ensemble-app
+   ```
+
+4. Deploy and watch App Check, APIs, in the Firebase console until nearly all requests carry valid tokens. Then set `APP_CHECK_ENFORCE` to `"true"` in `apphosting.yaml` and deploy again.
+
+For local runs and CI with enforcement on, create a debug token in App Check, Apps, Manage debug tokens, and set `NEXT_PUBLIC_FIREBASE_APP_CHECK_DEBUG_TOKEN`.
 
 ## Firebase Auth providers
 
@@ -61,7 +113,7 @@ firebase apphosting:secrets:grantaccess NEXT_PUBLIC_FIREBASE_API_KEY,NEXT_PUBLIC
    firebase deploy --only firestore:rules,firestore:indexes --project <project-id>
    ```
 
-   `firestore.rules`: the server writes everything through firebase-admin; a signed-in user may read only their own `users/{uid}`, `creditLedger` and `usage` documents; every other path, including `stripeEvents`, is closed.
+   `firestore.rules`: the server writes everything through firebase-admin; a signed-in user may read only their own `users/{uid}`, `creditLedger` and `usage` documents; every other path, including `stripeEvents`, `proRuns` and `rateLimits`, is closed.
 3. The App Hosting backend's service account needs the `Cloud Datastore User` role (`roles/datastore.user`) to read and write Firestore through firebase-admin.
 
 Collections:
@@ -72,6 +124,8 @@ Collections:
 | `creditLedger/{id}` | `uid`, `type` (`purchase`, `reserve`, `settle`, `refund`, `grant`), signed `amountMicros`, `balanceAfterMicros`, `createdAt`, and per-type fields | credit service, Stripe webhook |
 | `usage/{uid}__{runId}` | the calls and tokens of a settled run, its cost and charge | `settleRun` |
 | `stripeEvents/{eventId}` | Stripe events already handled | Stripe webhook |
+| `proRuns/{uid}__{runId}` | an open or closed Pro run: budget, call ids, calls and usage, outcome | Pro run path |
+| `rateLimits/{uid}` | the user's current rate-limit window | `proRun.start` |
 
 ## Stripe (test mode)
 
@@ -105,7 +159,7 @@ Emulator-backed tests need Java and the Firebase CLI. They use the `demo-ensembl
 npm run test:emulator --workspace=packages/app
 ```
 
-This starts the Auth and Firestore emulators (`firebase.json`: ports 9099 and 8080), runs `src/**/*.emulator.test.ts` (Firestore rules, the credit ledger, the Stripe webhook against Firestore, token verification) and stops them.
+This starts the Auth and Firestore emulators (`firebase.json`: ports 9099 and 8080), runs `src/**/*.emulator.test.ts` (Firestore rules, the credit ledger, the Stripe webhook against Firestore, token verification, the Pro run path with a mocked OpenRouter fetch) and stops them.
 
 To try sign-in by hand against the Auth emulator:
 
@@ -117,6 +171,8 @@ FIRESTORE_EMULATOR_HOST=127.0.0.1:8080 \
 FIREBASE_PROJECT_ID=demo-ensemble \
 npm run dev:mock --workspace=packages/app
 ```
+
+In mock mode Pro calls are answered by the mock client on the server (no OpenRouter call), but runs still reserve and settle credits in the Firestore emulator. Give a test user credits with `grantCredits` (`src/server/credits/grants.ts`) from a script or test.
 
 The emulator does not send email. Sign-in links are listed at `http://127.0.0.1:9099/emulator/v1/projects/demo-ensemble/oobCodes`.
 

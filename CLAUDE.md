@@ -18,7 +18,7 @@ Do not write copy claiming ensembles are more accurate than the best single mode
 Modes:
 
 - **Free**: user's own provider keys, encrypted in the browser, providers called directly from the browser. Works today.
-- **Pro**: sign-in with Firebase Auth, Stripe credits, model calls on the server. In progress (roadmap M5): sign-in, the credit ledger and Stripe routes exist; server model calls do not yet.
+- **Pro**: sign-in with Firebase Auth, Stripe credits, model calls on the server through OpenRouter, billed per run. In progress (roadmap M5): the `/account` dashboard and the `pro-mode` E2E suite are still to do.
 - **Mock**: developer and CI only, enabled with `NEXT_PUBLIC_MOCK_MODE=true`. Never show a Mock option to users.
 
 ## Repository structure
@@ -84,7 +84,7 @@ Client modes:
 
 - **Mock client**: lorem-ipsum streams for UI work and E2E tests.
 - **Free clients**: direct browser calls with the user's key (`dangerouslyAllowBrowser: true`).
-- **Pro client**: not built. `createProviderClient` throws for `pro`. Planned as `ProAPIClient` over the `streamTextEvents` tRPC subscription (M5).
+- **Pro client**: `ProAPIClient` (shared-utils) over a transport the app provides (`app/src/providers/pro/`): the `streamTextEvents` tRPC subscription over SSE plus `generateStructured` and `generateEmbeddings` mutations, all billed to a Pro run. See Pro mode in `docs/ARCHITECTURE.md`.
 
 Embeddings: OpenAI (`text-embedding-3-small`), Google (`gemini-embedding-2`) and OpenAI-compatible endpoints (the embedding model set on the endpoint) implement `generateEmbeddings`. Other providers throw `EmbeddingsNotSupportedError`. Only mock mode uses hash-based fake vectors.
 
@@ -93,10 +93,10 @@ Adding a provider with its own API touches about 20 files; adding an OpenAI-comp
 ### Server (tRPC)
 
 - Context and `protectedProcedure`: `src/server/api/trpc.ts` (verifies a Firebase ID token)
-- Routers: `src/server/api/routers/` (`auth`, `provider`, `credits`)
+- Routers: `src/server/api/routers/` (`auth`, `provider`, `credits`, `proRun`)
 - Root router: `src/server/api/root.ts`
 - Client hooks: `src/trpc/react.tsx`. Server caller: `src/trpc/server.ts`
-- Server provider calls: `src/server/providers/providerService.ts`
+- Server provider calls: `src/server/pro/` (Pro calls to OpenRouter, run records, rate limit, App Check); `src/server/providers/providerService.ts` (model lists with direct server keys)
 - Credit ledger: `src/server/credits/` (Firestore, integer micro-dollars). Stripe: `src/server/stripe/` and `src/app/api/stripe/`.
 - Client sign-in: Firebase Auth in `src/lib/auth/` and `src/hooks/useAuthController.ts`, shown by `AccountMenu` in the workspace header. Off when the `NEXT_PUBLIC_FIREBASE_*` config is unset.
 - Emulator tests (Firestore rules, ledger, webhook): `npm run test:emulator --workspace=packages/app`. Setup for Auth, Firestore and Stripe: `docs/DEPLOYMENT.md`.
