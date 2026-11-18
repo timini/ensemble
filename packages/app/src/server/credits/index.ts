@@ -9,6 +9,7 @@ export * from "./errors";
 export * from "./grants";
 export * from "./money";
 export * from "./pricing";
+export * from "./reversals";
 
 let cached: CreditConfig | undefined;
 

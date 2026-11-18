@@ -17,12 +17,15 @@ import {
  *   deleted. `amountMicros` is signed; the balance is their sum.
  * - `usage/{uid}__{runId}`: the calls, tokens and charge of a settled run.
  * - `stripeEvents/{eventId}`: Stripe events already handled.
+ * - `stripeReversals/{sessionId}`: how much of a purchase refunds and
+ *   disputes have taken back so far.
  */
 export const COLLECTIONS = {
   users: "users",
   ledger: "creditLedger",
   usage: "usage",
   stripeEvents: "stripeEvents",
+  stripeReversals: "stripeReversals",
 } as const;
 
 export type LedgerEntryType =
@@ -30,13 +33,15 @@ export type LedgerEntryType =
   | "reserve"
   | "settle"
   | "refund"
-  | "grant";
+  | "grant"
+  /** Credits of a purchase taken back after a Stripe refund or dispute. */
+  | "reversal";
 
 /** One ledger document. Optional fields depend on the type. */
 export interface LedgerEntry {
   uid: string;
   type: LedgerEntryType;
-  /** Signed change to the balance: reserve is negative, the others zero or positive. */
+  /** Signed change to the balance: reserve and reversal are negative, the others zero or positive. */
   amountMicros: number;
   balanceAfterMicros: number;
   createdAt: FieldValue;
@@ -47,6 +52,8 @@ export interface LedgerEntry {
   chargedMicros?: number;
   stripeSessionId?: string;
   stripeEventId?: string;
+  stripePaymentIntentId?: string;
+  stripeDisputeId?: string;
   packId?: string;
   amountTotalCents?: number;
   currency?: string;

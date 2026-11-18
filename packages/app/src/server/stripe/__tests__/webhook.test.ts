@@ -24,6 +24,7 @@ function sessionEvent(
         amount_total: 500,
         currency: "usd",
         client_reference_id: "user-1",
+        payment_intent: "pi_test_1",
         metadata: { uid: "user-1", packId: "usd-5", creditMicros: "5000000" },
         ...overrides,
       },
@@ -50,6 +51,7 @@ function deps(overrides: Partial<WebhookDeps> = {}): WebhookDeps {
     recordPurchase: vi
       .fn()
       .mockResolvedValue({ duplicate: false, balanceMicros: 5_000_000 }),
+    recordReversal: vi.fn(),
     ...overrides,
   };
 }
@@ -68,6 +70,7 @@ describe("handleStripeWebhook", () => {
       sessionId: "cs_test_1",
       eventId: "evt_1",
       eventType: "checkout.session.completed",
+      paymentIntentId: "pi_test_1",
       packId: "usd-5",
       amountMicros: 5_000_000,
       amountTotalCents: 500,

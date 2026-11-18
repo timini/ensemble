@@ -55,6 +55,8 @@ export interface PurchaseInput {
   eventId: string;
   /** Stripe event type, kept in the stripeEvents record. Defaults to checkout.session.completed. */
   eventType?: string;
+  /** The session's PaymentIntent, which refunds and disputes refer to. */
+  paymentIntentId?: string;
   packId: string;
   amountMicros: number;
   amountTotalCents: number;
@@ -100,6 +102,9 @@ export async function recordPurchase(
       amountMicros: input.amountMicros,
       stripeSessionId: input.sessionId,
       stripeEventId: input.eventId,
+      ...(input.paymentIntentId
+        ? { stripePaymentIntentId: input.paymentIntentId }
+        : {}),
       packId: input.packId,
       amountTotalCents: input.amountTotalCents,
       currency: input.currency,

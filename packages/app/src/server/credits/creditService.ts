@@ -54,7 +54,8 @@ function checkRun({ uid, runId }: RunRef) {
 
 /**
  * Hold credits for a run before any model call. Throws
- * InsufficientCreditsError when the balance is too low (FR-036). Calling it
+ * InsufficientCreditsError when the balance is too low (FR-036) or
+ * negative. Calling it
  * again with the same run id returns the first reservation unchanged.
  */
 export async function reserveCredits(
@@ -82,7 +83,8 @@ export async function reserveCredits(
       };
     }
     const balance = balanceOf(user);
-    if (balance < amountMicros)
+    // A negative balance (a refunded or disputed purchase) blocks every run.
+    if (balance < amountMicros || balance < 0)
       throw new InsufficientCreditsError(balance, amountMicros);
     const balanceMicros = appendEntry(tx, db, user, reserveRef, {
       uid,

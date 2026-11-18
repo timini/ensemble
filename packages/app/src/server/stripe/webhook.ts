@@ -1,6 +1,7 @@
 import type Stripe from "stripe";
 import { findPack, type CreditConfig } from "~/server/credits/config";
 import type { PurchaseInput } from "~/server/credits/grants";
+import type { ReversalInput, ReversalResult } from "~/server/credits/reversals";
 import { logger } from "~/lib/logger";
 
 export interface WebhookDeps {
@@ -10,6 +11,10 @@ export interface WebhookDeps {
   secret: string | undefined;
   config: CreditConfig;
   recordPurchase: (input: PurchaseInput) => Promise<{ duplicate: boolean }>;
+  /** Takes back the credits of a refunded or disputed purchase. */
+  recordReversal: (
+    input: ReversalInput,
+  ) => Promise<Pick<ReversalResult, "result">>;
 }
 
 export type WebhookResult =
@@ -17,7 +22,9 @@ export type WebhookResult =
   | "duplicate"
   | "unpaid"
   | "ignored"
-  | "rejected";
+  | "rejected"
+  | "reversed"
+  | "unmatched";
 
 export interface WebhookResponse {
   status: number;
@@ -28,6 +35,9 @@ const CREDIT_EVENTS = new Set([
   "checkout.session.completed",
   "checkout.session.async_payment_succeeded",
 ]);
+
+/** Events that take credits back: a refund, or a dispute opening. */
+const REVERSAL_EVENTS = new Set(["charge.refunded", "charge.dispute.created"]);
 
 const ok = (result: WebhookResult): WebhookResponse => ({
   status: 200,
@@ -51,6 +61,9 @@ function purchaseFrom(
     sessionId: session.id,
     eventId: event.id,
     eventType: event.type,
+    ...(typeof session.payment_intent === "string"
+      ? { paymentIntentId: session.payment_intent }
+      : {}),
     packId: pack.id,
     amountMicros: pack.creditMicros,
     amountTotalCents: session.amount_total,
@@ -58,9 +71,63 @@ function purchaseFrom(
   };
 }
 
+/** The reversal a refund or dispute event asks for, or null without a PaymentIntent. */
+function reversalFrom(event: Stripe.Event): ReversalInput | null {
+  const base = { eventId: event.id, eventType: event.type };
+  if (event.type === "charge.refunded") {
+    const charge = event.data.object;
+    const pi = charge.payment_intent;
+    const paymentIntentId = typeof pi === "string" ? pi : pi?.id;
+    if (!paymentIntentId) return null;
+    return {
+      ...base,
+      paymentIntentId,
+      source: { kind: "refund", refundedCents: charge.amount_refunded },
+    };
+  }
+  if (event.type === "charge.dispute.created") {
+    const dispute = event.data.object;
+    const pi = dispute.payment_intent;
+    const paymentIntentId = typeof pi === "string" ? pi : pi?.id;
+    if (!paymentIntentId) return null;
+    return {
+      ...base,
+      paymentIntentId,
+      source: {
+        kind: "dispute",
+        disputeId: dispute.id,
+        amountCents: dispute.amount,
+      },
+    };
+  }
+  return null;
+}
+
+async function handleReversal(
+  event: Stripe.Event,
+  deps: WebhookDeps,
+): Promise<WebhookResponse> {
+  const input = reversalFrom(event);
+  if (!input) return ok("ignored");
+  try {
+    const { result } = await deps.recordReversal(input);
+    if (result === "unmatched") {
+      logger.error("[Stripe] Refund or dispute matches no purchase", {
+        eventId: event.id,
+        paymentIntentId: input.paymentIntentId,
+      });
+    }
+    return ok(result);
+  } catch (error) {
+    logger.error("[Stripe] Could not record the reversal", error);
+    return { status: 500, body: { error: "Could not record the reversal" } };
+  }
+}
+
 /**
  * POST /api/stripe/webhook. Verifies the Stripe-Signature header against
- * the raw body, then credits paid Checkout Sessions. Idempotent: the ledger
+ * the raw body, then credits paid Checkout Sessions and takes the credits
+ * back when a charge is refunded or disputed. Idempotent: the ledger
  * entry is keyed on the session id and the event id is stored, so a
  * redelivery answers "duplicate". Errors while writing answer 500 so Stripe
  * retries; events that can never be credited answer 200 so it stops.
@@ -86,6 +153,7 @@ export async function handleStripeWebhook(
   } catch {
     return { status: 400, body: { error: "Invalid signature" } };
   }
+  if (REVERSAL_EVENTS.has(event.type)) return handleReversal(event, deps);
   if (!CREDIT_EVENTS.has(event.type)) return ok("ignored");
 
   const session = event.data.object as Stripe.Checkout.Session;

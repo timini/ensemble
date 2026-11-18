@@ -5,6 +5,7 @@ import { getFirestore } from "firebase-admin/firestore";
 import { DEFAULT_CREDIT_CONFIG } from "~/server/credits/config";
 import { getCreditAccount } from "~/server/credits/creditService";
 import { recordPurchase } from "~/server/credits/grants";
+import { recordReversal } from "~/server/credits/reversals";
 import { COLLECTIONS } from "~/server/credits/ledger";
 import { handleStripeWebhook } from "../webhook";
 
@@ -22,6 +23,8 @@ const deps = {
   config: DEFAULT_CREDIT_CONFIG,
   recordPurchase: (input: Parameters<typeof recordPurchase>[1]) =>
     recordPurchase(db, input),
+  recordReversal: (input: Parameters<typeof recordReversal>[1]) =>
+    recordReversal(db, input),
 };
 
 function signedEvent(eventId: string, type = "checkout.session.completed") {
@@ -37,6 +40,7 @@ function signedEvent(eventId: string, type = "checkout.session.completed") {
         amount_total: 2000,
         currency: "usd",
         client_reference_id: "buyer",
+        payment_intent: "pi_emulator",
         metadata: { uid: "buyer", packId: "usd-20", creditMicros: "20000000" },
       },
     },

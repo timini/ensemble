@@ -1,6 +1,10 @@
 import { type NextRequest } from "next/server";
 import { env } from "~/env";
-import { getCreditConfig, recordPurchase } from "~/server/credits";
+import {
+  getCreditConfig,
+  recordPurchase,
+  recordReversal,
+} from "~/server/credits";
 import { getAdminFirestore } from "~/server/firebase/firestore";
 import { getWebhookStripe } from "~/server/stripe/client";
 import { handleStripeWebhook } from "~/server/stripe/webhook";
@@ -22,6 +26,7 @@ export async function POST(req: NextRequest) {
       secret: env.STRIPE_WEBHOOK_SECRET,
       config: getCreditConfig(),
       recordPurchase: (input) => recordPurchase(getAdminFirestore(), input),
+      recordReversal: (input) => recordReversal(getAdminFirestore(), input),
     },
   );
   return Response.json(body, { status });
