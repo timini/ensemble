@@ -24,6 +24,13 @@ export interface ProRunSessionOptions {
   /** A run with no call in flight for this long is finished. Default 10 s. */
   idleMs?: number;
   newId?: () => string;
+  /**
+   * The run on screen as the server prices it, for a follow-up run: a
+   * retry, or a consensus after the run went idle. It also covers a run
+   * restored after a reload, which this page never began. Null when there
+   * is no run; the last run begun is used then.
+   */
+  followUpInput?: () => ProRunInput | null;
 }
 
 /**
@@ -32,8 +39,9 @@ export interface ProRunSessionOptions {
  * `track`, which waits for the reservation and passes the run id. Once no
  * call has been in flight for `idleMs` (answers, embeddings and consensus
  * are all done) the run is finished, so the server settles it. A call made
- * later (a retry, a consensus after a manual answer) opens a follow-up run
- * priced like the last one. `cancel` finishes the run at once.
+ * later (a retry, a consensus after a manual answer, a retry of a run
+ * restored after a reload) opens a follow-up run priced from
+ * `followUpInput`, or like the last one. `cancel` finishes the run at once.
  */
 export class ProRunSession {
   private current: OpenRun | null = null;
@@ -41,6 +49,7 @@ export class ProRunSession {
   private readonly listeners = new Set<() => void>();
   private readonly idleMs: number;
   private readonly newId: () => string;
+  private readonly followUpInput?: () => ProRunInput | null;
 
   constructor(
     private readonly api: ProRunApi,
@@ -48,6 +57,7 @@ export class ProRunSession {
   ) {
     this.idleMs = options.idleMs ?? 10_000;
     this.newId = options.newId ?? (() => crypto.randomUUID());
+    this.followUpInput = options.followUpInput;
   }
 
   /** Start a run. Rejects with a ProviderError (`insufficient_credits`, `rate_limited`...) when it cannot. */
@@ -63,9 +73,10 @@ export class ProRunSession {
   async track<T>(call: (runId: string) => Promise<T>): Promise<T> {
     let run = this.current;
     if (!run) {
-      if (!this.lastInput)
-        throw new ProviderError("No Pro run is open.", "other");
-      run = this.open(this.lastInput);
+      const input = this.followUpInput?.() ?? this.lastInput;
+      if (!input) throw new ProviderError("No Pro run is open.", "other");
+      this.lastInput = input;
+      run = this.open(input);
       this.current = run;
     }
     run.inFlight += 1;
