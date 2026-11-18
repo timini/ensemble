@@ -137,3 +137,34 @@ env:
   #   availability:
   #     - BUILD
   #     - RUNTIME
+
+  # Public origin of the site: canonical URLs, the sitemap, Open Graph
+  # images and Stripe return links. Required in production: checkout
+  # answers 503 without it. Needed at BUILD too, because static pages
+  # (the landing page, robots.txt, sitemap.xml) are rendered at build time.
+  # Set it to the App Hosting URL now and to the custom domain once it is
+  # live. See docs/DEPLOYMENT.md.
+  # - variable: APP_URL
+  #   value: "https://ensemble-app--<project-id>.<region>.hosted.app"
+  #   availability:
+  #     - BUILD
+  #     - RUNTIME
+
+  # Share links one user may create per hour. See docs/DEPLOYMENT.md.
+  - variable: SHARE_RATE_LIMIT_PER_HOUR
+    value: "20"
+    availability:
+      - RUNTIME
+
+  # Sentry environment tag and trace sampling (0 to 1).
+  - variable: NEXT_PUBLIC_SENTRY_ENVIRONMENT
+    value: production
+    availability:
+      - BUILD
+      - RUNTIME
+
+  - variable: NEXT_PUBLIC_SENTRY_TRACES_SAMPLE_RATE
+    value: "0.1"
+    availability:
+      - BUILD
+      - RUNTIME
