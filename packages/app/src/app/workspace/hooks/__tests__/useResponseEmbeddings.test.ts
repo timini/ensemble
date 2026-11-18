@@ -1,6 +1,7 @@
 import { renderHook, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { ModelResponse } from "~/store";
+import type { EmbeddingProvider } from "~/lib/embeddingsProvider";
 
 const generateEmbeddingsForResponses = vi.fn();
 vi.mock("~/lib/embeddings", () => ({
@@ -32,35 +33,45 @@ interface SetupOptions {
   responses?: ModelResponse[];
   embeddings?: Embedding[];
   embeddingsSource?: string | null;
+  /** Identity (endpoint and model) of the current embedding model. */
+  embeddingsModel?: string | null;
+  /** Identity of the model that produced `embeddings`. */
+  embeddingsSourceModel?: string | null;
   similarityMatrix?: number[][] | null;
   readOnly?: boolean;
 }
 
 function setup(
-  embeddingsProvider: "openai" | "google" | null,
+  embeddingsProvider: EmbeddingProvider | null,
   {
     responses = completed,
     embeddings = noEmbeddings,
     embeddingsSource = null,
+    embeddingsModel,
+    embeddingsSourceModel,
     similarityMatrix = null,
     readOnly = false,
   }: SetupOptions = {},
 ) {
   const setEmbeddings = vi.fn();
   const calculateAgreementState = vi.fn();
-  const hook = renderHook(() =>
-    useResponseEmbeddings({
-      hasHydrated: true,
-      completedResponses: responses,
-      embeddingsProvider,
-      viewEmbeddings: embeddings,
-      viewEmbeddingsSource: embeddingsSource,
-      viewSimilarityMatrix: similarityMatrix,
-      mode: "free",
-      setEmbeddings,
-      calculateAgreementState,
-      readOnly,
-    }),
+  const hook = renderHook(
+    ({ model }: { model: string | null | undefined }) =>
+      useResponseEmbeddings({
+        hasHydrated: true,
+        completedResponses: responses,
+        embeddingsProvider,
+        embeddingsModel: model,
+        viewEmbeddings: embeddings,
+        viewEmbeddingsSource: embeddingsSource,
+        viewEmbeddingsModel: embeddingsSourceModel,
+        viewSimilarityMatrix: similarityMatrix,
+        mode: "free",
+        setEmbeddings,
+        calculateAgreementState,
+        readOnly,
+      }),
+    { initialProps: { model: embeddingsModel } },
   );
   return { hook, setEmbeddings, calculateAgreementState };
 }
@@ -88,7 +99,11 @@ describe("useResponseEmbeddings", () => {
       expect.objectContaining({ provider: "google", mode: "free" }),
     );
     expect(setEmbeddings).toHaveBeenCalledTimes(1);
-    expect(setEmbeddings).toHaveBeenCalledWith(expect.any(Array), "google");
+    expect(setEmbeddings).toHaveBeenCalledWith(
+      expect.any(Array),
+      "google",
+      "google",
+    );
     expect(hook.result.current.status).toBe("ready");
   });
 
@@ -167,6 +182,70 @@ describe("useResponseEmbeddings", () => {
     expect(hook.result.current.failedModelIds).toEqual(["b"]);
     // The test passes the store's embeddings unchanged, so "b" has none.
     expect(hook.result.current.excludedModels).toEqual(["b"]);
+  });
+
+  describe("with an OpenAI-compatible endpoint", () => {
+    const persisted = [
+      { modelId: "a", embedding: [1, 0] },
+      { modelId: "b", embedding: [0, 1] },
+    ];
+    const matrix = [
+      [1, 0],
+      [0, 1],
+    ];
+
+    it("embeds every answer again when the endpoint's embedding model changed", async () => {
+      generateEmbeddingsForResponses.mockResolvedValue(persisted);
+      const { setEmbeddings } = setup("openai-compatible", {
+        embeddings: persisted,
+        embeddingsSource: "openai-compatible",
+        embeddingsModel: "openai-compatible/ollama/mxbai-embed-large",
+        embeddingsSourceModel: "openai-compatible/ollama/nomic-embed-text",
+        similarityMatrix: matrix,
+      });
+
+      await waitFor(() => expect(setEmbeddings).toHaveBeenCalled());
+      expect(generateEmbeddingsForResponses).toHaveBeenCalledWith(
+        expect.objectContaining({ existingEmbeddings: [] }),
+      );
+      expect(setEmbeddings).toHaveBeenCalledWith(
+        persisted,
+        "openai-compatible",
+        "openai-compatible/ollama/mxbai-embed-large",
+      );
+    });
+
+    it("reuses the vectors while the endpoint and model stay the same", async () => {
+      const { hook } = setup("openai-compatible", {
+        embeddings: persisted,
+        embeddingsSource: "openai-compatible",
+        embeddingsModel: "openai-compatible/ollama/nomic-embed-text",
+        embeddingsSourceModel: "openai-compatible/ollama/nomic-embed-text",
+        similarityMatrix: matrix,
+      });
+
+      await waitFor(() => expect(hook.result.current.status).toBe("ready"));
+      expect(generateEmbeddingsForResponses).not.toHaveBeenCalled();
+    });
+
+    it("embeds every answer again when another endpoint takes over", async () => {
+      generateEmbeddingsForResponses.mockResolvedValue(persisted);
+      const { hook, setEmbeddings } = setup("openai-compatible", {
+        embeddings: persisted,
+        embeddingsSource: "openai-compatible",
+        embeddingsModel: "openai-compatible/ollama/nomic-embed-text",
+        embeddingsSourceModel: "openai-compatible/ollama/nomic-embed-text",
+        similarityMatrix: matrix,
+      });
+      await waitFor(() => expect(hook.result.current.status).toBe("ready"));
+
+      hook.rerender({ model: "openai-compatible/lmstudio/nomic-embed-text" });
+
+      await waitFor(() => expect(setEmbeddings).toHaveBeenCalled());
+      expect(generateEmbeddingsForResponses).toHaveBeenCalledWith(
+        expect.objectContaining({ existingEmbeddings: [] }),
+      );
+    });
   });
 
   describe("for a run reopened from history", () => {

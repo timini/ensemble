@@ -10,6 +10,7 @@ import type {
 } from "~/store/slices/ensembleSlice";
 import {
   selectRunModels,
+  type ConsensusSettings,
   type HistoryView,
 } from "~/store/slices/responseSlice";
 import type {
@@ -37,6 +38,8 @@ export interface RunRecordSource {
   consensusUsage: CallUsage[];
   consensusMethod: ConsensusMethod;
   summarizerModel: string | null;
+  /** Settings that produced `metaAnalysis`; null before a consensus exists. */
+  consensusSettings: ConsensusSettings | null;
   historyView: HistoryView | null;
 }
 
@@ -93,8 +96,13 @@ export function toStoredRun(
     createdAt: startedAt,
     prompt,
     models: selectRunModels(state),
-    consensusMethod: state.consensusMethod,
-    summarizerModel: state.summarizerModel,
+    // The settings that made the consensus, which the composer may have
+    // changed since. Without a consensus, the current settings.
+    consensusMethod:
+      state.consensusSettings?.consensusMethod ?? state.consensusMethod,
+    summarizerModel: state.consensusSettings
+      ? state.consensusSettings.summarizerModel
+      : state.summarizerModel,
     responses: state.responses,
     manualResponses: state.manualResponses,
     embeddings: state.embeddings,
@@ -122,9 +130,11 @@ export function restoredRunState(run: StoredRun) {
     manualResponses: run.manualResponses,
     embeddings: run.embeddings,
     embeddingsSource: run.embeddingsSource,
+    embeddingsModel: null,
     similarityMatrix: run.similarityMatrix,
     agreementStats: run.agreementStats,
     metaAnalysis: run.metaAnalysis,
+    consensusSettings: null,
     majorityVote: run.majorityVote,
     consensusUsage: run.consensusUsage,
     historyView: {

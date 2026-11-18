@@ -55,6 +55,18 @@ export function embeddingModelRef(
   return provider && modelId ? { provider, modelId } : null;
 }
 
+/**
+ * The embedding model of a provider as one `provider/model` key, or null
+ * for none. Embeddings from different keys cannot be compared.
+ */
+export function embeddingModelKey(
+  provider: string | null,
+  endpoints: readonly EndpointLike[] = [],
+): string | null {
+  const ref = embeddingModelRef(provider, endpoints);
+  return ref ? `${ref.provider}/${ref.modelId}` : null;
+}
+
 function summarizerRef(
   summarizerModel: string | null,
   selectedModels: ModelSelection[],
