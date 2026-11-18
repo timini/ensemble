@@ -1,5 +1,5 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import "~/lib/i18n";
 import { WorkspaceOnboarding } from "./WorkspaceOnboarding";
 import type { useOnboarding } from "../hooks/useOnboarding";
@@ -58,6 +58,7 @@ const offer = {
 };
 
 describe("WorkspaceOnboarding", () => {
+  afterEach(() => vi.unstubAllEnvs());
   it("shows the Ollama offer on the local path", () => {
     render(
       <WorkspaceOnboarding onboarding={onboarding()} ollamaOffer={offer} />,
@@ -97,6 +98,8 @@ describe("WorkspaceOnboarding", () => {
   });
 
   it("offers the sign-in panel on the Pro path while signed out", () => {
+    vi.stubEnv("NEXT_PUBLIC_PRO_ENABLED", "true");
+    vi.stubEnv("NEXT_PUBLIC_FIREBASE_AUTH_EMULATOR_HOST", "127.0.0.1:9099");
     auth.status = "signedOut";
     render(
       <WorkspaceOnboarding

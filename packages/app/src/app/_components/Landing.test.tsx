@@ -32,12 +32,20 @@ describe("Landing", () => {
     expect(screen.getByTestId("ways-in-pro")).toHaveTextContent("Coming soon");
   });
 
-  it("leads to the Pro onboarding path once sign-in is set up", () => {
+  it("leads to the Pro onboarding path once sign-in and Pro are set up", () => {
     vi.stubEnv("NEXT_PUBLIC_FIREBASE_AUTH_EMULATOR_HOST", "127.0.0.1:9099");
+    vi.stubEnv("NEXT_PUBLIC_PRO_ENABLED", "true");
     render(<Landing />);
     const pro = screen.getByTestId("ways-in-pro");
     expect(pro).toHaveAttribute("href", "/workspace?start=pro");
     expect(pro).not.toHaveTextContent("Coming soon");
+  });
+
+  it("keeps Pro as coming soon when sign-in is set up but Pro is not", () => {
+    vi.stubEnv("NEXT_PUBLIC_FIREBASE_AUTH_EMULATOR_HOST", "127.0.0.1:9099");
+    vi.stubEnv("NEXT_PUBLIC_PRO_ENABLED", "false");
+    render(<Landing />);
+    expect(screen.getByTestId("ways-in-pro")).toHaveTextContent("Coming soon");
   });
 
   it("links to the benchmarks and makes no accuracy claim", () => {

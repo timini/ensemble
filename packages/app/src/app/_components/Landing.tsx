@@ -8,7 +8,7 @@ import { HowItWorks } from "@/components/molecules/HowItWorks";
 import recorded from "~/data/example-run.json";
 import { exampleRunProps, type RecordedRun } from "~/lib/exampleRun";
 import { WORKSPACE_PATH } from "~/lib/workspaceRoutes";
-import { firebaseClientConfig } from "~/lib/auth/firebaseConfig";
+import { isProEnabled } from "~/lib/pro/proEnabled";
 
 /** Where each way in leads: the workspace, with onboarding on that path. */
 export const LANDING_LINKS = {
@@ -51,7 +51,7 @@ export function Landing() {
           <WaysIn
             keysHref={LANDING_LINKS.keys}
             localHref={LANDING_LINKS.local}
-            proHref={firebaseClientConfig() ? LANDING_LINKS.pro : undefined}
+            proHref={isProEnabled() ? LANDING_LINKS.pro : undefined}
           />
         </div>
         <ExampleRun {...example} />

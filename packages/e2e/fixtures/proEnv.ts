@@ -21,6 +21,7 @@ export const PRO_E2E_WEBHOOK_SECRET = 'whsec_e2e_pro_mode';
  */
 export const PRO_APP_ENV: Record<string, string> = {
   NEXT_PUBLIC_MOCK_MODE: 'false',
+  NEXT_PUBLIC_PRO_ENABLED: 'true',
   NEXT_PUBLIC_FIREBASE_API_KEY: 'demo-api-key',
   NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN: 'localhost',
   NEXT_PUBLIC_FIREBASE_PROJECT_ID: PROJECT_ID,

@@ -22,6 +22,7 @@ Server variables are validated in `packages/app/src/env.js`; all are optional, a
 | `CREDIT_LOW_BALANCE_USD` | runtime | Low-balance warning threshold (FR-038). Default `1`. |
 | `CREDIT_PACKS_USD` | runtime | Credit packs on sale, comma-separated dollars, each at least $1. Default `5,20,50`. |
 | `APP_URL` | build and runtime | Public origin of the site, such as `https://ensemble.example.com`. Canonical URLs, `sitemap.xml`, `robots.txt`, Open Graph image URLs and the Stripe return links are built from it. Required in production: `/api/stripe/checkout` answers 503 without it. Needed at build time because the landing page, `robots.txt` and `sitemap.xml` are rendered then. Locally it defaults to `http://localhost:3000`. |
+| `NEXT_PUBLIC_PRO_ENABLED` | build and runtime | `"true"` offers Pro mode on the landing page, in onboarding and in settings. Leave it `"false"` until the Stripe and OpenRouter secrets exist and their entries in `apphosting.yaml` are uncommented; Pro then shows as coming soon. |
 | `OPENROUTER_API_KEY` | runtime, secret | Server key for Pro model calls (roadmap Decision 6). Without it Pro calls answer `SERVICE_UNAVAILABLE`. Set a monthly spend limit on it (see Pro mode below). |
 | `OPENROUTER_BASE_URL` | runtime | Default `https://openrouter.ai/api/v1`. Only for tests against a fake server. |
 | `PRO_MAX_RUN_TOKENS` | runtime | Most tokens (input and output, all calls) one Pro run may use. Default `200000`. |

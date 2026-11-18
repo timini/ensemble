@@ -1,6 +1,7 @@
 "use client";
 
 import { useTranslation } from "react-i18next";
+import { isProEnabled } from "~/lib/pro/proEnabled";
 import { SignInPanel } from "@/components/molecules/SignInPanel";
 import {
   CreditNotice,
@@ -105,7 +106,7 @@ export function ModeSettings({ balance }: ProPanelProps) {
     <ModeSwitch
       mode={mode}
       onModeChange={setMode}
-      proAvailable={auth.status !== "unavailable"}
+      proAvailable={auth.status !== "unavailable" && isProEnabled()}
       proPanel={<ProPanel balance={balance} />}
     />
   );

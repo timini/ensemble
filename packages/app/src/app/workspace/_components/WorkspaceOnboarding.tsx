@@ -1,6 +1,7 @@
 "use client";
 
 import { OnboardingSheet } from "@/components/organisms/OnboardingSheet";
+import { isProEnabled } from "~/lib/pro/proEnabled";
 import {
   OllamaDetectedNotice,
   type OllamaDetectedNoticeProps,
@@ -28,9 +29,9 @@ export function WorkspaceOnboarding({
   proBalance = null,
 }: WorkspaceOnboardingProps) {
   const auth = useAuth();
-  // Without sign-in on this server, Pro shows as coming soon.
+  // Without sign-in and the Pro opt-in on this server, Pro shows as coming soon.
   const pro =
-    auth.status === "unavailable"
+    auth.status === "unavailable" || !isProEnabled()
       ? undefined
       : { panel: <ProPanel balance={proBalance} /> };
   return (
