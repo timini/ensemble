@@ -13,7 +13,7 @@
         "fake-openai": "node fixtures/fake-openai-server.mjs"
     },
     "devDependencies": {
-        "@axe-core/playwright": "^4.14.0",
+        "@axe-core/playwright": "4.13.0",
         "@playwright/test": "^1.55.1",
         "@types/node": "^20.14.10",
         "cross-env": "^7.0.3",
