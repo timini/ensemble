@@ -78,6 +78,11 @@ describe('HistorySidebar', () => {
     expect(screen.getAllByTestId('history-item')).toHaveLength(1);
   });
 
+  it('gives the search box a test id', () => {
+    setup();
+    expect(screen.getByTestId('history-search')).toHaveAttribute('type', 'search');
+  });
+
   it('finds a run by its answers and models, not only its prompt', () => {
     setup({ items: [{ ...sampleHistory[0]!, searchText: 'gpt-6-astra says about 71 degrees' }] });
     fireEvent.change(screen.getByRole('searchbox', { name: 'Search history' }), { target: { value: 'astra' } });

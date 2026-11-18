@@ -8,12 +8,12 @@ export interface PopoverControls {
   close: (returnFocus?: boolean) => void;
   triggerRef: React.RefObject<HTMLButtonElement | null>;
   panelRef: React.RefObject<HTMLDivElement | null>;
-  /** Id to put on the panel; the trigger points at it with aria-controls. */
+  /** Id to put on the panel; the trigger points at it with aria-controls while it is open. */
   panelId: string;
   /** Spread on the trigger button. */
   triggerProps: {
     'aria-expanded': boolean;
-    'aria-controls': string;
+    'aria-controls': string | undefined;
     onClick: () => void;
   };
 }
@@ -74,7 +74,8 @@ export function usePopover(initialOpen = false): PopoverControls {
     panelId,
     triggerProps: {
       'aria-expanded': open,
-      'aria-controls': panelId,
+      // Only while the panel is in the page, so the reference is never broken.
+      'aria-controls': open ? panelId : undefined,
       onClick: () => setOpen((value) => !value),
     },
   };

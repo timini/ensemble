@@ -418,7 +418,7 @@ Ready to proceed to **Phase 2: UI Integration with Mock API Clients**
 - [X] T171 Run E2E test: `npm run test:e2e tests/e2e/review-page.spec.ts` and verify passing (12 tests)
 
 - [X] T172 Run full E2E suite (chromium only): `npm run test:e2e` and verify all 4 pages pass (62 E2E tests total)
-- [ ] T173 Test responsive design (chromium only): Run E2E tests on mobile (375px), tablet (768px), desktop (1440px) viewports
+- [x] T173 Test responsive design (chromium only): Run E2E tests on mobile (375px), tablet (768px), desktop (1440px) viewports (done in M4: `packages/e2e/tests/mock-mode/accessibility.spec.ts` opens every route and workspace sheet at 375, 768 and 1440 px in light and dark and fails on sideways scroll; `keyboard-walkthrough.spec.ts` covers the history sheet at 375 px)
 - [X] T174 Commit Phase 2.3 pages: "feat: implement 4-step workflow pages with E2E tests" (commits: 4dc8819, 875b325, 20917f7)
 
 ### Phase 2.4: Integration Testing & Polish (Week 7, Days 46-50)
@@ -429,8 +429,8 @@ Ready to proceed to **Phase 2: UI Integration with Mock API Clients**
 - [x] T178 Test preset management: Verify ensemble presets can be saved, loaded, deleted, and persist to localStorage (done in M1: `packages/e2e/tests/mock-mode/presets.spec.ts`; the sidebar presets were placeholders and are now wired to `savedEnsembles`)
 - [x] T179 Test manual response: Verify manual responses can be added in Prompt page and Review page (done in M1: `packages/e2e/tests/mock-mode/manual-responses.spec.ts`; manual answers are now also scored in the agreement analysis)
 - [x] T180 Test agreement analysis: Verify similarity matrix displays correctly for 2, 3, 4, 5, 6 responses (done in M1: `packages/e2e/tests/mock-mode/agreement-matrix.spec.ts`)
-- [ ] T181 Run accessibility audit on all 4 pages: `npm run test:e2e -- --project=accessibility`
-- [ ] T182 Fix any accessibility violations (WCAG 2.1 AA compliance required per plan.md)
+- [x] T181 Run accessibility audit on all 4 pages: `npm run test:e2e -- --project=accessibility` (done in M4 for the current routes `/`, `/workspace`, `/features`, `/about`, `/benchmarks` and the 404 page, plus the settings, onboarding and history sheets, model picker, method menu, manual answer and preset dialogs and a finished run: axe-core WCAG 2.1 A and AA in `packages/e2e/tests/mock-mode/accessibility.spec.ts`, part of `npm run test:mock`)
+- [x] T182 Fix any accessibility violations (WCAG 2.1 AA compliance required per plan.md) (done in M4: axe reports none; sheets now give focus back to the control that opened them and closed menus no longer point `aria-controls` at a missing panel; keyboard-only flow in `packages/e2e/tests/mock-mode/keyboard-walkthrough.spec.ts`)
 - [ ] T183 Run screenshot testing: `npx tsx scripts/screenshot-stories.ts` and review visual diffs from Phase 1 baseline (git diff screenshots/)
 - [ ] T184 Update README.md with Phase 2 quickstart instructions (how to run Mock mode workflow via env flag; emphasize it is dev/testing only)
 - [ ] T185 Update spec.md to Version 2.0: mark Phase 2 functional requirements (FR-016 to FR-024) as COMPLETED

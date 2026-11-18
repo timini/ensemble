@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import { fireEvent, screen } from '@testing-library/react';
+import * as React from 'react';
 import { Sheet } from './Sheet';
 import { renderWithI18n } from '../../../lib/test-utils/i18n-test-wrapper';
 
@@ -40,6 +41,28 @@ describe('Sheet', () => {
       </Sheet>,
     );
     expect(document.activeElement).toBe(screen.getByTestId('sheet'));
+  });
+
+  it('gives focus back to the control that opened it when it closes', async () => {
+    function Harness() {
+      const [open, setOpen] = React.useState(false);
+      return (
+        <>
+          <button type="button" onClick={() => setOpen(true)}>Open settings</button>
+          <Sheet open={open} onOpenChange={setOpen} title="Settings">
+            <input aria-label="Name" />
+          </Sheet>
+        </>
+      );
+    }
+    renderWithI18n(<Harness />);
+    const opener = screen.getByRole('button', { name: 'Open settings' });
+    opener.focus();
+    fireEvent.click(opener);
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
+    fireEvent.keyDown(document.activeElement!, { key: 'Escape' });
+    await vi.waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
+    await vi.waitFor(() => expect(opener).toHaveFocus());
   });
 
   it('closes on Escape', () => {

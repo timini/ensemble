@@ -34,7 +34,8 @@ export interface SheetProps {
  * history on small screens.
  *
  * Built on Radix Dialog, so it traps focus, closes on Escape and on the
- * overlay, and restores focus to what opened it. From 768 px it slides in
+ * overlay, and gives focus back to the control that had it before it
+ * opened (or to the trigger), whatever opened it. From 768 px it slides in
  * from the side; below that it rises from the bottom with a grab handle.
  *
  * @example
@@ -57,6 +58,9 @@ export function Sheet({
   className,
 }: SheetProps) {
   const { t } = useTranslation();
+  // Radix gives focus back to a Dialog.Trigger, but these sheets are opened
+  // from anywhere (header, setup card, menus), so remember what had focus.
+  const returnFocus = React.useRef<HTMLElement | null>(null);
   return (
     <DialogPrimitive.Root open={open} onOpenChange={onOpenChange}>
       <DialogPrimitive.Portal>
@@ -64,14 +68,22 @@ export function Sheet({
         <DialogPrimitive.Content
           data-testid={testId}
           data-side={side}
-          onOpenAutoFocus={
-            initialFocus === 'panel'
-              ? (event) => {
-                  event.preventDefault();
-                  (event.currentTarget as HTMLElement | null)?.focus();
-                }
-              : undefined
-          }
+          onOpenAutoFocus={(event) => {
+            const active = document.activeElement;
+            returnFocus.current = active instanceof HTMLElement && active !== document.body ? active : null;
+            if (initialFocus === 'panel') {
+              event.preventDefault();
+              (event.currentTarget as HTMLElement | null)?.focus();
+            }
+          }}
+          onCloseAutoFocus={(event) => {
+            const target = returnFocus.current;
+            returnFocus.current = null;
+            if (target?.isConnected) {
+              event.preventDefault();
+              target.focus();
+            }
+          }}
           {...(description ? {} : { 'aria-describedby': undefined })}
           className={cn(
             'fixed inset-x-0 bottom-0 z-50 flex max-h-[92dvh] animate-rise-in flex-col rounded-t-2xl border border-border bg-popover text-popover-foreground shadow-lg focus:outline-none',

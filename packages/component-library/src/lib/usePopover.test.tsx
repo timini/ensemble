@@ -26,6 +26,8 @@ describe('usePopover', () => {
     render(<Harness />);
     const trigger = screen.getByRole('button', { name: 'Open' });
     expect(trigger).toHaveAttribute('aria-expanded', 'false');
+    // No reference to a panel that is not in the page (axe aria-valid-attr-value).
+    expect(trigger).not.toHaveAttribute('aria-controls');
     fireEvent.click(trigger);
     expect(screen.getByTestId('panel')).toBeInTheDocument();
     expect(trigger).toHaveAttribute('aria-expanded', 'true');
