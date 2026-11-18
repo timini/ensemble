@@ -17,12 +17,14 @@ export type ProBlock =
   | "unavailable"
   | "loading"
   | "insufficient"
+  | "negative"
   | "unpriced"
   | "error";
 
 export type ProNotice =
   | { variant: "low"; balanceMicros: number }
   | { variant: "insufficient"; balanceMicros: number; requiredMicros: number }
+  | { variant: "negative"; balanceMicros: number }
   | { variant: "unpriced"; balanceMicros: number; unpricedModels: string[] }
   | { variant: "error" };
 
@@ -37,7 +39,8 @@ export interface ProCreditInput {
 /**
  * What the composer shows in Pro: whether Ask is blocked and why (FR-036),
  * and the credit notice under it (FR-038 low balance, a run the balance
- * cannot cover, models Pro cannot price, or a balance that failed to load).
+ * cannot cover, a negative balance after a refund or dispute, models Pro
+ * cannot price, or a balance that failed to load).
  * The server checks again when it reserves the run.
  */
 export function proCreditState(input: ProCreditInput): {
@@ -52,6 +55,13 @@ export function proCreditState(input: ProCreditInput): {
     return { block: "error", notice: { variant: "error" } };
   const account = input.account;
   if (!account) return { block: "loading", notice: null };
+  // A refund or dispute took back credits already spent: nothing runs.
+  if (account.balanceMicros < 0) {
+    return {
+      block: "negative",
+      notice: { variant: "negative", balanceMicros: account.balanceMicros },
+    };
+  }
   const quote = input.quote;
   if (quote?.status === "unpriced") {
     return {

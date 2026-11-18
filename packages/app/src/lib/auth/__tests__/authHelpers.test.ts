@@ -101,6 +101,15 @@ describe("email link helpers", () => {
     expect(emailLinkContinueUrl("https://ensemble.test")).toBe(
       "https://ensemble.test/workspace",
     );
+    expect(emailLinkContinueUrl("https://ensemble.test", "/landing")).toBe(
+      "https://ensemble.test/workspace",
+    );
+  });
+
+  it("sends a link asked for on the account page back there", () => {
+    expect(emailLinkContinueUrl("https://ensemble.test/", "/account")).toBe(
+      "https://ensemble.test/account",
+    );
   });
 
   it("strips the one-time sign-in parameters from the address bar", () => {

@@ -127,7 +127,10 @@ export function useAuthController(
       return run(async (c) => {
         await c.sendEmailLink(
           email,
-          emailLinkContinueUrl(window.location.origin),
+          emailLinkContinueUrl(
+            window.location.origin,
+            window.location.pathname,
+          ),
         );
         rememberEmailForSignIn(email);
         setEmailSentTo(email);

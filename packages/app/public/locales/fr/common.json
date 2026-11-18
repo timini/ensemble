@@ -426,16 +426,25 @@
           "loading": "Chargement de votre solde de crédits.",
           "insufficient": "Crédits insuffisants pour cette exécution.",
           "unpriced": "Le mode Pro ne peut pas exécuter certains de ces modèles.",
-          "error": "Votre solde de crédits n'a pas pu être chargé."
+          "error": "Votre solde de crédits n'a pas pu être chargé.",
+          "negative": "Votre solde est négatif. Achetez des crédits pour demander en mode Pro."
         },
         "signInTitle": "Connectez-vous pour utiliser Pro",
-        "signInBody": "Pro exécute tous les modèles sur notre serveur et débite vos crédits. Le mode Gratuit avec vos propres clés ne demande aucun compte."
+        "signInBody": "Pro exécute tous les modèles sur notre serveur et débite vos crédits. Le mode Gratuit avec vos propres clés ne demande aucun compte.",
+        "accountLink": "Utilisation et achats"
       }
     },
     "landing": {
       "eyebrow": "Pour les questions où une erreur coûte cher",
       "title": "Interrogez plusieurs modèles d’IA à la fois. Voyez où ils s’accordent.",
       "lead": "Ensemble envoie votre question aux modèles de votre choix, mesure à quel point leurs réponses concordent et les fusionne en une réponse que vous pouvez vérifier face aux originales."
+    },
+    "account": {
+      "workspace": "Espace de travail",
+      "title": "Compte",
+      "signInLead": "Connectez-vous pour voir vos crédits et votre utilisation de Pro.",
+      "unavailable": "La connexion n'est pas configurée sur ce serveur, il n'y a donc pas de compte à afficher. Le mode Gratuit avec vos propres clés n'en a pas besoin.",
+      "loading": "Chargement de votre compte"
     }
   },
   "apiKeys": {

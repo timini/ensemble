@@ -6,7 +6,8 @@ import type { CreditNoticeProps } from "@/components/molecules/CreditNotice";
 import { api } from "~/trpc/react";
 import { useStore } from "~/store";
 import { useAuth } from "~/app/_components/AuthProvider";
-import { formatCredits, formatPackPrice, startCheckout } from "~/lib/credits";
+import { formatCredits, formatPackPrice } from "~/lib/credits";
+import { useCreditCheckout } from "./useCreditCheckout";
 import { proCreditState } from "~/lib/proCredits";
 import { proRunInput } from "~/lib/proMode";
 import { getProRuntime } from "~/providers/pro/runtime";
@@ -69,18 +70,7 @@ export function useProCredits(prompt: string) {
     );
   }, [pro, utils]);
 
-  const [pendingPackId, setPendingPackId] = useState<string | null>(null);
-  const [buyError, setBuyError] = useState(false);
-  const buy = (packId: string) => {
-    setPendingPackId(packId);
-    setBuyError(false);
-    startCheckout(packId)
-      .then((url) => window.location.assign(url))
-      .catch(() => {
-        setBuyError(true);
-        setPendingPackId(null);
-      });
-  };
+  const checkout = useCreditCheckout();
 
   const lang = i18n.language;
   const money = (micros: number) => formatCredits(micros, lang);
@@ -88,7 +78,7 @@ export function useProCredits(prompt: string) {
     id: p.id,
     label: formatPackPrice(p.amountCents, lang),
   }));
-  const buying = { packs: packOptions, onBuy: buy, pendingPackId, buyError };
+  const buying = { packs: packOptions, ...checkout };
   const state = proCreditState({
     auth: auth.status,
     account: account.data,
@@ -114,7 +104,7 @@ export function useProCredits(prompt: string) {
         };
   const balance: CreditNoticeProps | null = account.data
     ? {
-        variant: "balance",
+        variant: account.data.balanceMicros < 0 ? "negative" : "balance",
         balance: money(account.data.balanceMicros),
         ...buying,
       }

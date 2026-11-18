@@ -19,6 +19,25 @@ describe("proCreditState", () => {
     });
   });
 
+  it("blocks every run while the balance is negative (a refund or dispute)", () => {
+    expect(
+      proCreditState({
+        auth: "signedIn",
+        account: { balanceMicros: -4_000_000, lowBalance: true },
+        quote: {
+          status: "priced",
+          requiredMicros: 1000,
+          balanceMicros: -4_000_000,
+          canAfford: false,
+          lowBalance: true,
+        },
+      }),
+    ).toEqual({
+      block: "negative",
+      notice: { variant: "negative", balanceMicros: -4_000_000 },
+    });
+  });
+
   it("allows a run the balance covers, with no notice", () => {
     expect(
       proCreditState({

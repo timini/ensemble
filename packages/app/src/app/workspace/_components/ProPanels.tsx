@@ -14,6 +14,9 @@ import {
 } from "~/app/_components/AccountMenuContainer";
 import { useStore } from "~/store";
 
+/** The usage dashboard (FR-041). */
+export const ACCOUNT_PATH = "/account";
+
 /** The sign-in panel with a line on why Pro needs an account. */
 export function ProSignInCard() {
   const { t } = useTranslation("common");
@@ -69,12 +72,23 @@ export function ProComposerNotice({
   return notice ? <CreditNotice {...notice} /> : null;
 }
 
-/** The header account menu, with the credit balance while in Pro (FR-037). */
+/**
+ * The header account menu, with the credit balance while in Pro (FR-037)
+ * and a link to the usage dashboard on /account.
+ */
 export function WorkspaceAccount({ balance }: ProPanelProps) {
+  const { t } = useTranslation("common");
   const pro = useStore((s) => s.mode === "pro");
   return (
     <AccountMenuContainer>
       {pro && balance && <CreditNotice {...balance} />}
+      <a
+        href={ACCOUNT_PATH}
+        data-testid="account-menu-dashboard-link"
+        className="rounded-md text-label font-medium text-primary underline-offset-4 focus-ring hover:underline"
+      >
+        {t("pages.workspace.pro.accountLink")}
+      </a>
     </AccountMenuContainer>
   );
 }

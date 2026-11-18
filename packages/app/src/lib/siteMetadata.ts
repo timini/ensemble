@@ -30,6 +30,11 @@ export const PAGE_METADATA = {
     description:
       "Why Ensemble measures how much AI models agree, what that score can and cannot tell you, and the research behind it.",
   },
+  account: {
+    title: "Account",
+    description:
+      "Your Pro credit balance, purchases, usage by model and recent runs.",
+  },
   benchmarks: {
     title: "Benchmarks",
     description:

@@ -35,9 +35,16 @@ export function forgetEmailForSignIn(): void {
   storage()?.removeItem(EMAIL_KEY);
 }
 
-/** Where the emailed link leads: the workspace, which finishes the sign-in. */
-export function emailLinkContinueUrl(origin: string): string {
-  return `${origin.replace(/\/+$/, "")}/workspace`;
+/** Pages an emailed link may return to; the app finishes the sign-in on any of them. */
+const RETURN_PATHS = ["/workspace", "/account"];
+
+/**
+ * Where the emailed link leads: the page it was asked for on when that is
+ * the account page, otherwise the workspace.
+ */
+export function emailLinkContinueUrl(origin: string, pathname = ""): string {
+  const path = RETURN_PATHS.includes(pathname) ? pathname : "/workspace";
+  return `${origin.replace(/\/+$/, "")}${path}`;
 }
 
 /** The URL without the one-time link parameters, for history.replaceState. */
