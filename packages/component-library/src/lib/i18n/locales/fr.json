@@ -416,6 +416,36 @@
       "invalid": "{{provider}} a refusé cette clé.",
       "invalidWithReason": "{{provider}} a refusé cette clé : {{reason}}",
       "getKey": "Obtenir une clé chez {{provider}}"
+    },
+    "signInPanel": {
+      "title": "Se connecter",
+      "why": "Un compte n'est nécessaire que pour les crédits Pro, le partage et l'historique synchronisé. Le mode gratuit fonctionne sans compte.",
+      "google": "Continuer avec Google",
+      "or": "ou",
+      "emailLabel": "E-mail",
+      "emailPlaceholder": "vous@exemple.com",
+      "sendLink": "Recevoir un lien de connexion",
+      "sending": "Envoi…",
+      "sent": "Consultez votre boîte de réception ({{email}}) et ouvrez le lien sur cet appareil.",
+      "confirmTitle": "Terminer la connexion",
+      "confirmHint": "Ce lien de connexion a été ouvert sur un autre appareil ou navigateur. Saisissez l'adresse à laquelle il a été envoyé.",
+      "confirm": "Terminer la connexion",
+      "errors": {
+        "popupClosed": "La fenêtre Google s'est fermée avant la fin de la connexion. Réessayez.",
+        "invalidEmail": "Saisissez une adresse e-mail valide.",
+        "network": "Pas de connexion au service d'authentification. Vérifiez votre réseau et réessayez.",
+        "expiredLink": "Ce lien de connexion a expiré ou a déjà servi. Demandez-en un nouveau.",
+        "generic": "La connexion a échoué. Réessayez."
+      }
+    },
+    "accountMenu": {
+      "signIn": "Se connecter",
+      "loading": "Vérification de votre compte",
+      "account": "Compte : {{name}}",
+      "signedInAs": "Connecté en tant que",
+      "signOut": "Se déconnecter",
+      "unavailableTitle": "Les comptes ne sont pas disponibles ici",
+      "unavailable": "La connexion n'est pas configurée sur ce serveur. Le mode gratuit fonctionne sans compte : ajoutez vos propres clés de fournisseur dans les Réglages."
     }
   },
   "organisms": {

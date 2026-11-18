@@ -148,6 +148,8 @@ export {
 export { ModelChip, type ModelChipProps } from './components/molecules/ModelChip';
 export { ModelPicker, type ModelPickerProps, type ModelPickerOption } from './components/molecules/ModelPicker';
 export { MethodMenu, methodCostLabel, type MethodMenuProps, type SummarizerOption } from './components/molecules/MethodMenu';
+export { AccountMenu, initialsOf, type AccountMenuProps, type AccountStatus, type AccountUser } from './components/molecules/AccountMenu';
+export { SignInPanel, type SignInPanelProps, type SignInError } from './components/molecules/SignInPanel';
 export { AppearanceSettings, type AppearanceSettingsProps, type AppearanceTheme, type AppearanceLanguage } from './components/molecules/AppearanceSettings';
 export { ComposerOptions, type ComposerOptionsProps } from './components/molecules/ComposerOptions';
 export { AnswerCard, type AnswerCardProps, type AnswerStatus } from './components/molecules/AnswerCard';

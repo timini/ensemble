@@ -416,6 +416,36 @@
       "invalid": "{{provider}} did not accept this key.",
       "invalidWithReason": "{{provider}} did not accept this key: {{reason}}",
       "getKey": "Get a key from {{provider}}"
+    },
+    "signInPanel": {
+      "title": "Sign in",
+      "why": "You only need an account for Pro credits, sharing and synced history. Free mode works without one.",
+      "google": "Continue with Google",
+      "or": "or",
+      "emailLabel": "Email",
+      "emailPlaceholder": "you@example.com",
+      "sendLink": "Email me a sign-in link",
+      "sending": "Sending…",
+      "sent": "Check your inbox at {{email}} and open the link on this device.",
+      "confirmTitle": "Finish signing in",
+      "confirmHint": "This sign-in link was opened on a different device or browser. Enter the address it was sent to.",
+      "confirm": "Finish signing in",
+      "errors": {
+        "popupClosed": "The Google window closed before sign-in finished. Try again.",
+        "invalidEmail": "Enter a valid email address.",
+        "network": "No connection to the sign-in service. Check your network and try again.",
+        "expiredLink": "This sign-in link has expired or was already used. Ask for a new one.",
+        "generic": "Sign-in failed. Try again."
+      }
+    },
+    "accountMenu": {
+      "signIn": "Sign in",
+      "loading": "Checking your account",
+      "account": "Account: {{name}}",
+      "signedInAs": "Signed in as",
+      "signOut": "Sign out",
+      "unavailableTitle": "Accounts are not available here",
+      "unavailable": "Sign-in is not set up on this server. Free mode works without an account: add your own provider keys in Settings."
     }
   },
   "organisms": {
