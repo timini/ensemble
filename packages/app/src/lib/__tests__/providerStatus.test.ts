@@ -3,7 +3,7 @@ import type {
   Provider,
   ValidationStatus,
 } from "@/components/molecules/ApiKeyInput";
-import { getHydratedStatus, mapStatusToLabel } from "../providerStatus";
+import { getHydratedStatus } from "../providerStatus";
 
 const statuses: Record<Provider, ValidationStatus> = {
   openai: "valid",
@@ -30,12 +30,5 @@ describe("provider status utilities", () => {
   it("returns actual statuses after hydration", () => {
     const result = getHydratedStatus(true, statuses);
     expect(result).toEqual(statuses);
-  });
-
-  it("maps statuses to user-facing labels", () => {
-    expect(mapStatusToLabel("valid")).toBe("Ready");
-    expect(mapStatusToLabel("validating")).toBe("Validating...");
-    expect(mapStatusToLabel("invalid")).toBe("Invalid API key");
-    expect(mapStatusToLabel("idle")).toBe("API key required");
   });
 });

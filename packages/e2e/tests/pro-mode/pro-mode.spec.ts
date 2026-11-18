@@ -81,6 +81,8 @@ async function signInToPro(page: Page, label: string) {
   await page.goto('/workspace?start=pro');
   const sheet = page.getByTestId('onboarding-sheet');
   await signInWithEmailLink(page, sheet, email);
+  // Signed in but not yet in Pro: the Pro path already shows the balance.
+  await expect(sheet.getByTestId('credit-notice')).toBeVisible();
   await sheet.getByTestId('onboarding-start').click();
   await expect(composerChips(page)).toHaveCount(3);
   await onboardingFinished(page);

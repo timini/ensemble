@@ -17,6 +17,7 @@ const m = vi.hoisted(() => ({
 }));
 
 vi.mock("~/app/_components/AuthProvider", () => ({ useAuth: () => m.auth }));
+vi.mock("~/lib/pro/proEnabled", () => ({ isProEnabled: () => true }));
 vi.mock("~/providers/pro/runtime", () => ({
   getProRuntime: () => ({ session: { onChange: m.onChange } }),
 }));
@@ -64,7 +65,8 @@ describe("useProCredits", () => {
     } as never);
   });
 
-  it("does nothing in Free mode", () => {
+  it("does nothing in Free mode while signed out", () => {
+    m.auth = { status: "signedOut", user: null };
     useStore.setState({ mode: "free" } as never);
     const { result } = renderHook(() => useProCredits("Q"));
     expect(result.current).toMatchObject({
@@ -73,6 +75,19 @@ describe("useProCredits", () => {
       notice: null,
     });
     expect(m.queries.every((q) => q.opts.enabled === false)).toBe(true);
+  });
+
+  it("loads the balance for a signed-in user still in Free mode, for the Pro panel", () => {
+    useStore.setState({ mode: "free" } as never);
+    const { result } = renderHook(() => useProCredits("Q"));
+    expect(result.current).toMatchObject({
+      pro: false,
+      blockedReason: undefined,
+      notice: null,
+      balance: { variant: "balance", balance: "$5.00" },
+    });
+    // The run is not priced outside Pro.
+    expect(m.queries.find((q) => q.name === "quote")?.opts.enabled).toBe(false);
   });
 
   it("blocks Ask until the user signs in", () => {
