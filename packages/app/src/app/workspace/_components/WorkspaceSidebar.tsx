@@ -29,6 +29,11 @@ export interface WorkspaceSidebarProps {
   onOpenRun?: (id: string) => void;
   /** Deletes a run. Defaults to clearing the screen. */
   onDeleteRun?: (id: string) => void;
+  /**
+   * True while the run on screen is still streaming. Other runs cannot be
+   * opened then, so the live run is not lost before it is stored.
+   */
+  running?: boolean;
 }
 
 const LIVE_ID = "last-run";
@@ -45,7 +50,8 @@ function searchText(run: StoredRun): string {
 /**
  * History and presets for the workspace's sidebar. History is the runs
  * kept in IndexedDB (Free mode), plus the run on screen while it is not
- * stored yet; opening one puts it back on screen read only. Presets are the
+ * stored yet; opening one puts it back on screen read only, once the run on
+ * screen has finished streaming. Presets are the
  * saved ensembles, loaded or deleted from here.
  */
 export function WorkspaceSidebar({
@@ -57,6 +63,7 @@ export function WorkspaceSidebar({
   currentId,
   onOpenRun,
   onDeleteRun,
+  running = false,
 }: WorkspaceSidebarProps) {
   const hasHydrated = useHasHydrated();
   const savedEnsembles = useStore((state) => state.savedEnsembles);
@@ -96,8 +103,9 @@ export function WorkspaceSidebar({
       items={items}
       presets={presets}
       activeId={activeId}
+      locked={running}
       onSelect={(id) => {
-        if (id !== activeId) onOpenRun?.(id);
+        if (id !== activeId && !running) onOpenRun?.(id);
         onDone();
       }}
       onDelete={(id) => (onDeleteRun ? onDeleteRun(id) : onNewQuestion())}

@@ -104,6 +104,22 @@ describe('HistorySidebar', () => {
     expect(screen.queryByTestId('history-empty')).not.toBeInTheDocument();
   });
 
+  it('keeps other runs shut while a run is in progress, and says why', () => {
+    const props = setup({ activeId: sampleHistory[0]!.id, locked: true });
+    const rows = screen.getAllByTestId('history-item');
+    expect(within(rows[1]!).getByText(sampleHistory[1]!.prompt).closest('button')).toBeDisabled();
+    fireEvent.click(within(rows[1]!).getByText(sampleHistory[1]!.prompt));
+    expect(props.onSelect).not.toHaveBeenCalled();
+    expect(within(rows[0]!).getByText(sampleHistory[0]!.prompt).closest('button')).toBeEnabled();
+    expect(screen.getByTestId('history-locked')).toHaveTextContent('Past runs open once every answer is in.');
+  });
+
+  it('opens runs and shows no note when not locked', () => {
+    setup();
+    expect(screen.queryByTestId('history-locked')).not.toBeInTheDocument();
+    screen.getAllByTestId('history-item').forEach((row) => expect(within(row).getAllByRole('button')[0]).toBeEnabled());
+  });
+
   it('starts a new question', () => {
     const props = setup();
     fireEvent.click(screen.getByRole('button', { name: 'New question' }));

@@ -42,6 +42,9 @@ export const Empty: Story = { args: { items: [], presets: [] } };
 /** Presets only. */
 export const PresetsOnly: Story = { args: { items: [] } };
 
+/** A run in progress: the other runs are shut until its answers are in. */
+export const Locked: Story = { args: { activeId: 'r1', locked: true } };
+
 /** A run whose start time is not known: listed last with no date or time. */
 export const Undated: Story = {
   args: { items: [...sampleHistory.slice(0, 2), { id: 'u1', prompt: 'Run saved before run times were kept' }], activeId: 'u1' },

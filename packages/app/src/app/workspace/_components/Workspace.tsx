@@ -111,6 +111,7 @@ export function Workspace() {
             top.current?.scrollIntoView({ block: "start" });
           }}
           onDeleteRun={(id) => void history.remove(id)}
+          running={run.running}
         />
       }
     >

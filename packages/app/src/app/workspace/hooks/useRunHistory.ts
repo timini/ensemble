@@ -27,7 +27,8 @@ function warn(action: string) {
 /**
  * Past runs kept in IndexedDB (Free mode). A run is written once every
  * answer is in, and written again as its agreement or consensus arrives.
- * `open` puts a stored run back on screen read only; `remove` deletes one
+ * `open` puts a stored run back on screen read only, except while the live
+ * run is still streaming (it is not stored yet); `remove` deletes one
  * and clears the screen when it was the run shown.
  */
 export function useRunHistory({
@@ -102,6 +103,9 @@ export function useRunHistory({
     (id: string) => {
       const run = runs.find((r) => r.id === id);
       if (!run) return;
+      // A live run still streaming is not stored yet: replacing it would
+      // drop its answers, so it has to finish first.
+      if (useStore.getState().responses.some((r) => r.isStreaming)) return;
       onOpen();
       useStore.setState(restoredRunState(run));
     },

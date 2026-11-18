@@ -1,7 +1,8 @@
 /**
  * History sidebar (roadmap M4): finished runs are kept in IndexedDB in Free
  * mode. A run can be found by search, reopened read only (nothing is sent
- * again) and deleted. History survives a reload.
+ * again) and deleted. History survives a reload. While a run streams, other
+ * runs cannot be opened, so the live run is not lost.
  */
 import { test, expect, type Page } from '@playwright/test';
 import { answerCard, ask, consensus, startMockRun, waitForConsensus } from './runHelpers';
@@ -55,6 +56,26 @@ test.describe('History sidebar', () => {
     await expect(page.getByTestId('history-run-notice')).toHaveCount(0);
     await waitForConsensus(page);
     await expect(page.getByTestId('history-item')).toHaveCount(3);
+  });
+
+  test('an earlier run cannot replace the live run while it streams', async ({ page }) => {
+    await twoRuns(page);
+    await ask(page, 'Third question about glaciers');
+    await expect(page.locator('[data-testid="answer-card"][data-status="streaming"]').first()).toBeVisible({
+      timeout: 10_000,
+    });
+
+    const earlier = historyItem(page, 'First question about tides').getByRole('button').first();
+    await expect(earlier).toBeDisabled();
+    await expect(page.getByTestId('history-locked')).toBeVisible();
+    await earlier.click({ force: true });
+
+    await expect(page.getByTestId('history-run-notice')).toHaveCount(0);
+    await expect(page.getByTestId('composer-prompt')).toHaveValue('Third question about glaciers');
+    await waitForConsensus(page);
+    await expect(historyItem(page, 'Third question about glaciers')).toHaveCount(1);
+    await expect(page.getByTestId('history-locked')).toHaveCount(0);
+    await expect(earlier).toBeEnabled();
   });
 
   test('searches runs by prompt and answer text', async ({ page }) => {

@@ -39,6 +39,12 @@ export interface HistorySidebarProps {
   /** Shows a delete button on presets when set. */
   onDeletePreset?: (id: string) => void;
   onNewQuestion?: () => void;
+  /**
+   * True while a run is in progress. Other runs cannot be opened then (their
+   * rows are disabled and a note says why), so the live run is not replaced
+   * before its answers are in. Deleting a run still works.
+   */
+  locked?: boolean;
   /** Reference time for the date groups. Defaults to now. */
   now?: number;
   className?: string;
@@ -62,7 +68,7 @@ const DELETE =
  * ```
  */
 export function HistorySidebar(props: HistorySidebarProps) {
-  const { items, presets, activeId, onDeletePreset } = props;
+  const { items, presets, activeId, onDeletePreset, locked = false } = props;
   const { t, i18n } = useTranslation();
   const [query, setQuery] = React.useState('');
   const base = React.useId();
@@ -122,6 +128,10 @@ export function HistorySidebar(props: HistorySidebarProps) {
         </section>
       )}
 
+      {locked && items.length > 0 && (
+        <p data-testid="history-locked" role="status" className="px-2.5 text-caption text-muted-foreground">{t(`${key}.locked`)}</p>
+      )}
+
       {groups.map(({ group, items: rows }) => (
         <section key={group} aria-labelledby={`${base}-${group}`}>
           <h2 id={`${base}-${group}`} className={group === 'undated' ? 'sr-only' : LABEL}>{t(`${key}.${group}`)}</h2>
@@ -133,8 +143,13 @@ export function HistorySidebar(props: HistorySidebarProps) {
                   <button
                     type="button"
                     onClick={() => props.onSelect(item.id)}
+                    disabled={locked && !active}
                     aria-current={active || undefined}
-                    className={cn(ROW, 'pr-9', active && 'bg-accent text-accent-foreground hover:bg-accent')}
+                    className={cn(
+                      ROW,
+                      'pr-9 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:bg-transparent',
+                      active && 'bg-accent text-accent-foreground hover:bg-accent',
+                    )}
                   >
                     <span aria-hidden="true" className={cn('size-2 shrink-0 rounded-full', item.level ? DOT[item.level] : 'bg-border')} />
                     {item.level && <span className="sr-only">{t(`molecules.agreementSummary.levels.${item.level}.label`)}:</span>}

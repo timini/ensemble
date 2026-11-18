@@ -215,6 +215,13 @@ describe("WorkspaceSidebar", () => {
       expect(props.onDone).toHaveBeenCalled();
     });
 
+    it("keeps other runs shut while the run on screen is in progress", () => {
+      const props = renderWithRuns({ running: true });
+      fireEvent.click(screen.getByText("First"));
+      expect(props.onOpenRun).not.toHaveBeenCalled();
+      expect(screen.getByTestId("history-locked")).toBeInTheDocument();
+    });
+
     it("does not reopen the run already on screen", () => {
       const props = renderWithRuns();
       fireEvent.click(screen.getByText("Second"));

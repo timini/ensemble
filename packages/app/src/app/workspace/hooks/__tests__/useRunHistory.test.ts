@@ -116,6 +116,29 @@ describe("useRunHistory", () => {
     expect(hook.result.current.currentId).toBe("run-1000");
   });
 
+  it("does not open a stored run while the live run is still streaming", async () => {
+    finishedRun("Older question", 1_000);
+    await saveRun(toStoredRun({ ...useStore.getState() }, extras)!);
+    finishedRun("Live question", 2_000);
+    useStore.setState({
+      responses: [
+        answer("a"),
+        answer("b", { isStreaming: true, isComplete: false, response: "half" }),
+      ],
+    });
+    const { hook, onOpen } = setup();
+    await waitFor(() => expect(hook.result.current.runs).toHaveLength(1));
+
+    act(() => hook.result.current.open("run-1000"));
+
+    const state = useStore.getState();
+    expect(onOpen).not.toHaveBeenCalled();
+    expect(state.runPrompt).toBe("Live question");
+    expect(state.runStartedAt).toBe(2_000);
+    expect(state.historyView).toBeNull();
+    expect(state.responses[1]?.isStreaming).toBe(true);
+  });
+
   it("deletes a run, and clears the screen when it was the one shown", async () => {
     finishedRun("Delete me", 1_000);
     const { hook } = setup();

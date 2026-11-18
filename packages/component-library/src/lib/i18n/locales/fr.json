@@ -661,7 +661,8 @@
       "empty": "Aucune question pour l'instant. Vos exécutions sont enregistrées dans ce navigateur.",
       "noMatches": "Rien ne correspond à « {{query}} ».",
       "delete": "Supprimer « {{prompt}} »",
-      "deletePreset": "Supprimer le préréglage {{name}}"
+      "deletePreset": "Supprimer le préréglage {{name}}",
+      "locked": "Les exécutions passées s'ouvrent une fois toutes les réponses reçues."
     },
     "exampleRun": {
       "heading": "Exemple de requête",

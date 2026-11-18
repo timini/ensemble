@@ -661,7 +661,8 @@
       "empty": "No questions yet. Your runs are saved in this browser.",
       "noMatches": "Nothing matches \"{{query}}\".",
       "delete": "Delete \"{{prompt}}\"",
-      "deletePreset": "Delete preset {{name}}"
+      "deletePreset": "Delete preset {{name}}",
+      "locked": "Past runs open once every answer is in."
     },
     "exampleRun": {
       "heading": "Example run",
