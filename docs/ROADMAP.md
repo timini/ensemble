@@ -149,22 +149,22 @@ Goal: a first-time visitor understands the product and gets an answer in under a
 
 Order of work: update the wireframes, then build or adapt components in Storybook, then wire the app.
 
-- [ ] **Landing page at `/`**, replacing the redirect. One sentence explaining the product, a recorded example run (real answers, agreement score and consensus, no keys needed), and three ways in: "Use your own keys", "Use local models", "Sign in for Pro".
-- [ ] **One workspace screen** replacing the four-step wizard:
+- [x] **Landing page at `/`**, replacing the redirect. One sentence explaining the product, a recorded example run (real answers, agreement score and consensus, no keys needed), and three ways in: "Use your own keys", "Use local models", "Sign in for Pro".
+- [x] **One workspace screen** replacing the four-step wizard:
   - Composer at the top, with model chips (the ensemble picker inline) and the consensus method as a dropdown that shows calls and cost.
   - Answers stream into columns on desktop and swipeable tabs on mobile.
   - The agreement panel and the consensus answer sit above the individual answers.
   - Manual response and summarizer choice are reachable from the composer.
   - The old `/config`, `/ensemble`, `/prompt` and `/review` routes redirect into the workspace with the right panel open, so existing links and E2E tests keep working during the change.
-- [ ] **Onboarding sheet** on first run: choose keys, local or Pro. Validate a key inline. One key is enough to start (OpenRouter gives access to every provider with one key).
-- [ ] **Settings sheet**: keys, local endpoints, embedding provider, theme, language. Replaces the config page.
-- [ ] **History sidebar**: past runs stored in IndexedDB in Free mode, with search and delete. Presets live in the same sidebar.
-- [ ] **Visual refresh**: a distinct look (type scale, colour, spacing tokens) applied through the existing token system in `component-library/src/styles/globals.css`. Keep dark mode.
-- [ ] **Accessibility and responsive checks** from the old list (T173, T181, T182): WCAG 2.1 AA on every screen at 375, 768 and 1440 px.
-- [ ] Update `/features` and `/about` to match the vision's claims rule.
-- [ ] Translations (EN, FR) for every new string.
+- [x] **Onboarding sheet** on first run: choose keys, local or Pro. Validate a key inline. One key is enough to start (OpenRouter gives access to every provider with one key).
+- [x] **Settings sheet**: keys, local endpoints, embedding provider, theme, language. Replaces the config page.
+- [x] **History sidebar**: past runs stored in IndexedDB in Free mode, with search and delete. Presets live in the same sidebar.
+- [x] **Visual refresh**: a distinct look (type scale, colour, spacing tokens) applied through the existing token system in `component-library/src/styles/globals.css`. Keep dark mode.
+- [x] **Accessibility and responsive checks** from the old list (T173, T181, T182): WCAG 2.1 AA on every screen at 375, 768 and 1440 px.
+- [x] Update `/features` and `/about` to match the vision's claims rule.
+- [x] Translations (EN, FR) for every new string.
 
-Done when: an untrained tester reaches a first answer in under 60 seconds, measured on five people, and E2E mock tests pass on the new flow.
+Done when: an untrained tester reaches a first answer in under 60 seconds, measured on five people (simulated with five scripted Playwright personas on 2026-11-18; a session with real people is still to do), and E2E mock tests pass on the new flow.
 
 ### M5: Auth, Pro mode and Stripe (about 3 weeks)
 
