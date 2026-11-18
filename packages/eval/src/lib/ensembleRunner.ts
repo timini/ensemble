@@ -15,7 +15,13 @@ import {
 import { isProviderError } from '@ensemble-ai/shared-utils/providers';
 import type { EvalMode, ModelSpec, ProviderResponse } from '../types.js';
 import { answerSchema, formatStructuredContent, type AnswerSpec } from './finalAnswer.js';
-import { isRateLimitOrServerError, isTransientError, retryable, type RetryOptions } from './retryable.js';
+import {
+  isInsufficientCreditsError,
+  isRateLimitOrServerError,
+  isTransientError,
+  retryable,
+  type RetryOptions,
+} from './retryable.js';
 
 export interface EnsembleRunnerOptions {
   requestDelayMs?: number;
@@ -33,6 +39,12 @@ export interface EnsembleRunnerOptions {
   callTimeoutMs?: number;
   /** Host routing per model (OpenRouter), such as hosts to avoid. */
   routingFor?: (spec: ModelSpec) => ProviderRouting | undefined;
+  /**
+   * Most output tokens one model call may produce (`max_tokens`), for plain
+   * and structured calls. Without it OpenRouter reserves the model's maximum
+   * against the balance and refuses with 402 once the balance is low.
+   */
+  maxOutputTokens?: number;
 }
 
 export interface RunPromptOptions {
@@ -146,6 +158,8 @@ export function isEmptyResponseError(error: unknown): boolean {
  * timeout, network and server errors are reported as they are.
  */
 function shouldFallBackToText(error: unknown): boolean {
+  // A plain reply costs the same; the balance would refuse it too.
+  if (isInsufficientCreditsError(error)) return false;
   if (isEmptyResponseError(error)) return true;
   if (isProviderError(error) && NO_FALLBACK_KINDS.has(error.kind)) return false;
   // Network failures and empty completions are retried as they are; a plain
@@ -175,6 +189,7 @@ async function structuredModelResponse(
       ...(streamOptions?.timeoutMs !== undefined ? { timeoutMs: streamOptions.timeoutMs } : {}),
       ...(streamOptions?.signal ? { signal: streamOptions.signal } : {}),
       ...(streamOptions?.routing ? { routing: streamOptions.routing } : {}),
+      ...(streamOptions?.maxTokens !== undefined ? { maxTokens: streamOptions.maxTokens } : {}),
     };
     const result = await client.generateStructured<{ reasoning?: unknown; answer?: unknown }>(
       prompt,
@@ -269,6 +284,7 @@ export class EnsembleRunner {
     const streamOptions: StreamResponseOptions = {
       ...(options?.temperature !== undefined ? { temperature: options.temperature } : {}),
       ...(options?.callTimeoutMs !== undefined ? { timeoutMs: options.callTimeoutMs } : {}),
+      ...(options?.maxOutputTokens !== undefined ? { maxTokens: options.maxOutputTokens } : {}),
     };
     this.streamOptions = Object.keys(streamOptions).length > 0 ? streamOptions : undefined;
     this.endpoints = options?.endpoints ?? [];

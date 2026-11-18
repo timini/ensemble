@@ -65,6 +65,15 @@ export interface MatrixConfig {
    * every entry of a run is routed the same way.
    */
   requireParameters: boolean;
+  /**
+   * Most output tokens one call may produce (`max_tokens`), for every model
+   * answer and summarizer call. Default 4096. OpenRouter reserves this many
+   * tokens against the balance per request; with no limit it reserves the
+   * model's maximum and refuses with 402 once the balance is low. An
+   * infrastructure limit, not an experiment setting: answers need far fewer
+   * tokens, so a run may change it on resume.
+   */
+  maxOutputTokens: number;
 }
 
 export interface MatrixOverrides {
@@ -74,6 +83,9 @@ export interface MatrixOverrides {
 }
 
 type Raw = Record<string, unknown>;
+
+/** Default output token limit per call (see MatrixConfig.maxOutputTokens). */
+export const DEFAULT_MAX_OUTPUT_TOKENS = 4096;
 
 function str(raw: Raw, key: string, fallback?: string): string {
   const value = raw[key] ?? fallback;
@@ -164,6 +176,7 @@ export function parseMatrixConfig(raw: unknown, overrides: MatrixOverrides = {})
     budgetUsd: budget,
     ...timeouts(config),
     requireParameters: requireParameters(config, overrides),
+    maxOutputTokens: int(config, 'maxOutputTokens', DEFAULT_MAX_OUTPUT_TOKENS, 1),
   };
 }
 

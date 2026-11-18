@@ -208,6 +208,10 @@ export async function runMatrix(options: MatrixRunOptions): Promise<MatrixRunRes
     const file = await existingResults(job, mode, questions.length);
     existing.set(job, file);
     const kept = (file?.runs ?? []).filter((run) => !options.retryFailed || !isFailedRun(run));
+    if (options.retryFailed) {
+      const failedCount = (file?.runs.length ?? 0) - kept.length;
+      log(`${job.dataset} ${job.kind}: ${failedCount} failed entr${failedCount === 1 ? 'y' : 'ies'} to run again.`);
+    }
     const done = new Set(kept.map((run) => run.questionId));
     const promptTokens = Math.ceil(questions.reduce((s, q) => s + q.prompt.length, 0) / Math.max(1, questions.length) / 4);
     estimates.push(estimateJob({
@@ -294,7 +298,6 @@ async function runJob(
   );
   const priorResponses = ctx.retryFailed ? failedRunsOf(output) : new Map<string, ProviderResponse[]>();
   const rerunIds = new Set(priorResponses.keys());
-  if (ctx.retryFailed) ctx.log(`${job.dataset} ${job.kind}: ${priorResponses.size} failed entr${priorResponses.size === 1 ? 'y' : 'ies'} to run again.`);
   output.answerProtocol = config.protocol;
   if (config.protocol === 'structured') output.optionSeed = config.optionSeed;
   const working = job.cachePath ?? job.outputPath;
@@ -321,6 +324,7 @@ async function runJob(
     },
     priorResponses,
     routingFor: routingLookup(config),
+    maxOutputTokens: config.maxOutputTokens,
   });
   const done = new Set(output.runs.map((run) => run.questionId).filter((id) => !id || !rerunIds.has(id)));
   const pending = questions.filter((q) => !done.has(q.id));

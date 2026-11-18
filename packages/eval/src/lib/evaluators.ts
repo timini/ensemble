@@ -9,6 +9,12 @@ import { answersMatch, choicesFromPrompt, extractFinalAnswer, type AnswerKind, t
 import type { AnswerProtocol } from './methodology.js';
 import { formatModelSpec, sameModel } from './modelSpecs.js';
 
+/**
+ * Output limit for one judge call (`max_tokens`). The judge returns one short
+ * JSON field; the limit stops OpenRouter reserving the model maximum.
+ */
+const JUDGE_MAX_TOKENS = 4096;
+
 function numericValuesMatch(predicted: string, expected: string): boolean {
   const predictedNumber = Number(predicted);
   const expectedNumber = Number(expected);
@@ -101,7 +107,7 @@ export class LLMJudgeNumericEvaluator {
         NUMERIC_JUDGE_PROMPT + response,
         this.model,
         NUMERIC_ANSWER_SCHEMA,
-        { temperature: 0 },
+        { temperature: 0, maxTokens: JUDGE_MAX_TOKENS },
       );
       predicted = result.parsed.answer ?? null;
       process.stderr.write(`    [judge-numeric] done in ${((Date.now() - start) / 1000).toFixed(1)}s predicted=${predicted}\n`);
@@ -155,7 +161,7 @@ export class LLMJudgeMCQEvaluator {
         MCQ_JUDGE_PROMPT + response,
         this.model,
         MCQ_ANSWER_SCHEMA,
-        { temperature: 0 },
+        { temperature: 0, maxTokens: JUDGE_MAX_TOKENS },
       );
       predicted = result.parsed.answer?.toUpperCase() ?? null;
       process.stderr.write(`    [judge-mcq] done in ${((Date.now() - start) / 1000).toFixed(1)}s predicted=${predicted}\n`);
@@ -212,7 +218,7 @@ export class LLMJudgeExactMatchEvaluator {
           response,
         this.model,
         EXACT_MATCH_ANSWER_SCHEMA,
-        { temperature: 0 },
+        { temperature: 0, maxTokens: JUDGE_MAX_TOKENS },
       );
       equivalent = result.parsed.equivalent ?? false;
       predicted = result.parsed.extracted_answer ?? null;

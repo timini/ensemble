@@ -170,7 +170,7 @@ describe('LLMJudgeMCQEvaluator', () => {
       expect.stringContaining('I think the answer is B because...'),
       'gpt-4o-mini',
       expect.objectContaining({ name: 'mcq_answer' }),
-      { temperature: 0 },
+      { temperature: 0, maxTokens: 4096 },
     );
   });
 
@@ -241,7 +241,7 @@ describe('LLMJudgeNumericEvaluator', () => {
       expect.stringContaining('First I calculated 10 + 32 = 42'),
       'gpt-4o-mini',
       expect.objectContaining({ name: 'numeric_answer' }),
-      { temperature: 0 },
+      { temperature: 0, maxTokens: 4096 },
     );
   });
 
@@ -309,7 +309,7 @@ describe('LLMJudgeExactMatchEvaluator', () => {
       expect.stringContaining('Paris'),
       'gpt-4o-mini',
       expect.objectContaining({ name: 'exact_match_answer' }),
-      { temperature: 0 },
+      { temperature: 0, maxTokens: 4096 },
     );
   });
 

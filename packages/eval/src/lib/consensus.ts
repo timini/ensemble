@@ -62,6 +62,8 @@ export interface ConsensusCallOptions {
   deadline?: number;
   /** Host routing for the summarizer (OpenRouter). */
   routing?: ProviderRouting;
+  /** Most output tokens one summarizer call may produce (`max_tokens`). A strategy's own value wins. */
+  maxTokens?: number;
 }
 
 /**
@@ -94,10 +96,11 @@ class TokenCountingProvider implements AIProvider {
   }
 
   private withLimits<T extends StreamResponseOptions | GenerateStructuredOptions>(options?: T): T | undefined {
-    const { timeoutMs, signal, routing } = this.callOptions;
-    if (timeoutMs === undefined && !signal && !routing) return options;
+    const { timeoutMs, signal, routing, maxTokens } = this.callOptions;
+    if (timeoutMs === undefined && !signal && !routing && maxTokens === undefined) return options;
     return {
       ...(timeoutMs !== undefined ? { timeoutMs } : {}),
+      ...(maxTokens !== undefined ? { maxTokens } : {}),
       ...(signal ? { signal } : {}),
       ...(routing ? { routing } : {}),
       ...options,
