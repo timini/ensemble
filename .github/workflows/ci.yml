@@ -259,8 +259,57 @@ jobs:
           E2E_MODE: 'mock'
           NEXT_PUBLIC_MOCK_MODE: 'true'
 
-  # Note: Free Mode and Pro Mode E2E tests run post-deployment in deploy.yml
-  # They test against the actual deployed infrastructure
+  # Pro Mode E2E Tests
+  # Sign-in, credits, Stripe webhooks and billed runs against the Firebase
+  # Auth and Firestore emulators (demo-ensemble project), with the server's
+  # mock model upstream. No Stripe, Firebase or OpenRouter account is used.
+  app-e2e-pro:
+    name: App E2E (Pro Mode)
+    needs: [detect-changes]
+    if: needs.detect-changes.outputs.e2e == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - name: Cache shared-utils build
+        uses: actions/cache@v4
+        with:
+          path: packages/shared-utils/dist
+          key: shared-utils-build-${{ hashFiles('packages/shared-utils/src/**', 'packages/shared-utils/tsconfig*.json') }}
+      - name: Build consensus packages
+        run: |
+          npm run build --workspace=packages/consensus-core
+          npm run build --workspace=packages/consensus-standard
+          npm run build --workspace=packages/consensus-elo
+          npm run build --workspace=packages/consensus-majority
+          npm run build --workspace=packages/consensus-council
+      - run: npm run build --workspace=packages/shared-utils
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+      - run: npm install -g firebase-tools@15
+      - name: Get Playwright version
+        id: playwright-version
+        run: echo "version=$(npx playwright --version | awk '{print $2}')" >> $GITHUB_OUTPUT
+        working-directory: packages/e2e
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ steps.playwright-version.outputs.version }}
+      - name: Install Playwright browsers
+        run: npx playwright install chromium
+        working-directory: packages/e2e
+      - name: Run Pro Mode E2E Tests (emulators)
+        run: npm run test:pro --workspace=packages/e2e
+
+  # Note: Free Mode E2E tests run post-deployment in deploy.yml against the
+  # deployed infrastructure.
 
   analysis:
     name: Static Analysis
