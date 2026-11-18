@@ -9,6 +9,7 @@ import { getProDeps } from "~/server/pro";
 import { toProTRPCError } from "~/server/pro/errors";
 import {
   embedProCall,
+  prepareProStream,
   streamProCall,
   structuredProCall,
 } from "~/server/pro/proCalls";
@@ -34,8 +35,9 @@ const callRef = { runId: idSchema, callId: idSchema };
 const MAX_PROMPT_CHARS = 200_000;
 
 /**
- * Model calls. `listTextModels` uses the direct server keys. The three Pro
- * calls (`streamTextEvents`, `generateStructured`, `generateEmbeddings`) go
+ * Model calls. `listTextModels` uses the direct server keys. The Pro calls
+ * (`prepareStream` then `streamTextEvents`, `generateStructured`,
+ * `generateEmbeddings`) go
  * to OpenRouter with the server key and are billed to an open Pro run
  * (`proRun.start`): each names its run and a call id that may be used once.
  */
@@ -48,11 +50,11 @@ export const providerRouter = createTRPCRouter({
     }),
 
   /**
-   * One answer, streamed over SSE as chunk events and a complete event.
-   * Closing the subscription aborts the upstream request; the text produced
-   * so far is billed.
+   * Admit one streamed answer and keep its request for streamTextEvents.
+   * The prompt travels here, in a POST body: an SSE subscription is a GET,
+   * so its input would go in the URL (length limits, request logs).
    */
-  streamTextEvents: proProcedure
+  prepareStream: proProcedure
     .input(
       z.object({
         ...callRef,
@@ -63,6 +65,22 @@ export const providerRouter = createTRPCRouter({
         seed: z.number().int().optional(),
       }),
     )
+    .mutation(async ({ ctx, input }) => {
+      try {
+        await prepareProStream(getProDeps(), ctx.authUser.uid, input);
+        return { ok: true as const };
+      } catch (error) {
+        throw toProTRPCError(error);
+      }
+    }),
+
+  /**
+   * One prepared answer, streamed over SSE as chunk events and a complete
+   * event. A prepared stream can be started once. Closing the subscription
+   * aborts the upstream request; the text produced so far is billed.
+   */
+  streamTextEvents: proProcedure
+    .input(z.object(callRef))
     .subscription(async function* ({ ctx, input, signal }) {
       try {
         yield* streamProCall(getProDeps(), ctx.authUser.uid, input, signal);

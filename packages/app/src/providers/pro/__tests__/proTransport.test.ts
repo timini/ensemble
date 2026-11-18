@@ -37,7 +37,9 @@ function fakeApi() {
     responseTimeMs: 1,
   }));
   const generateEmbeddings = vi.fn(async () => [1, 2]);
+  const prepareStream = vi.fn(async (): Promise<unknown> => ({ ok: true }));
   const api: ProCallApi = {
+    prepareStream,
     streamText,
     generateStructured,
     generateEmbeddings,
@@ -47,6 +49,7 @@ function fakeApi() {
     handlers,
     unsubscribe,
     streamText,
+    prepareStream,
     generateStructured,
     generateEmbeddings,
   };
@@ -57,13 +60,17 @@ const ids = () => "call-1";
 
 describe("createProTransport", () => {
   it("streams chunks and resolves with the complete event, inside the run", async () => {
-    const { api, handlers, streamText } = fakeApi();
+    const { api, handlers, streamText, prepareStream } = fakeApi();
     const transport = createProTransport(api, session(), ids);
     const chunks: string[] = [];
     const done = transport.streamText(REQ, (c) => chunks.push(c));
     await vi.waitFor(() => expect(handlers).toHaveLength(1));
-    expect(streamText).toHaveBeenCalledWith(
+    expect(prepareStream).toHaveBeenCalledWith(
       { ...REQ, runId: "run-1", callId: "call-1" },
+      undefined,
+    );
+    expect(streamText).toHaveBeenCalledWith(
+      { runId: "run-1", callId: "call-1" },
       expect.anything(),
     );
     const h = handlers[0]!;
@@ -178,5 +185,18 @@ describe("createProTransport", () => {
     ).rejects.toMatchObject({
       kind: "rate_limited",
     });
+  });
+
+  it("reports a stream the server would not prepare", async () => {
+    const { api, prepareStream, streamText } = fakeApi();
+    prepareStream.mockRejectedValue(
+      Object.assign(new Error("budget"), { data: { code: "FORBIDDEN" } }),
+    );
+    await expect(
+      createProTransport(api, session(), ids).streamText(REQ, vi.fn()),
+    ).rejects.toMatchObject({
+      kind: "other",
+    });
+    expect(streamText).not.toHaveBeenCalled();
   });
 });

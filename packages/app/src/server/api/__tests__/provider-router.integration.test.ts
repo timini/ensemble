@@ -86,7 +86,7 @@ describe("provider router integration auth gate", () => {
     const caller = createCaller(ctx);
 
     await expect(
-      caller.provider.streamTextEvents({
+      caller.provider.prepareStream({
         runId: "run-1",
         callId: "call-1",
         provider,

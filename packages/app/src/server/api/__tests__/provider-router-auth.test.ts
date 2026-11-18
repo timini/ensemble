@@ -8,6 +8,7 @@ const mocks = vi.hoisted(() => ({
   appCheck: vi.fn<(token: string | null) => Promise<boolean>>(),
   listModels: vi.fn<(provider: string) => Promise<string[]>>(),
   stream: vi.fn(),
+  prepare: vi.fn(),
   structured: vi.fn(),
   embed: vi.fn(),
   start: vi.fn(),
@@ -35,6 +36,7 @@ vi.mock("~/server/providers/providerService", () => ({
 }));
 vi.mock("~/server/pro/proCalls", () => ({
   streamProCall: mocks.stream,
+  prepareProStream: mocks.prepare,
   structuredProCall: mocks.structured,
   embedProCall: mocks.embed,
 }));
@@ -128,10 +130,17 @@ describe("provider router", () => {
       { type: "chunk", chunk: "lo" },
       { type: "complete", response: "Hello", responseTimeMs: 5 },
     ]);
+    // The subscription carries only ids; the prompt went with prepareStream.
     expect(mocks.stream.mock.calls[0]?.slice(0, 3)).toEqual([
       { deps: true },
       "user-1",
-      CALL,
+      { runId: CALL.runId, callId: CALL.callId },
     ]);
+  });
+
+  it("prepares a stream with the prompt in the request body", async () => {
+    const c = await caller({ authorization: "Bearer ok" });
+    await expect(c.provider.prepareStream(CALL)).resolves.toEqual({ ok: true });
+    expect(mocks.prepare).toHaveBeenCalledWith({ deps: true }, "user-1", CALL);
   });
 });

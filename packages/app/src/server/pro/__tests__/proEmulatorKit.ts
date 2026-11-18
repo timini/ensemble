@@ -45,40 +45,6 @@ export const CALL = {
   prompt: "Hi",
 };
 
-export function sse(events: unknown[]) {
-  const text =
-    events.map((e) => `data: ${JSON.stringify(e)}\n\n`).join("") +
-    "data: [DONE]\n\n";
-  return new Response(text, {
-    status: 200,
-    headers: { "Content-Type": "text/event-stream" },
-  });
-}
-
-/** A stream that sends one chunk, then waits until its request is aborted. */
-export function hanging(signal: AbortSignal | null | undefined) {
-  const encoder = new TextEncoder();
-  const body = new ReadableStream<Uint8Array>({
-    start(controller) {
-      controller.enqueue(
-        encoder.encode(
-          `data: ${JSON.stringify({ choices: [{ delta: { content: "partial answer" } }] })}\n\n`,
-        ),
-      );
-      signal?.addEventListener("abort", () =>
-        controller.error(new DOMException("aborted", "AbortError")),
-      );
-    },
-  });
-  return new Response(body, { status: 200 });
-}
-
-export async function collect<T>(gen: AsyncGenerator<T>) {
-  const out: T[] = [];
-  for await (const e of gen) out.push(e);
-  return out;
-}
-
 /** A Firestore app for one test file, with helpers bound to it. */
 export function proKit(name: string) {
   const app = initializeApp({ projectId: PROJECT }, name);

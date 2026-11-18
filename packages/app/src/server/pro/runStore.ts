@@ -198,7 +198,7 @@ export async function markProRunClosed(
   await proRunRef(db, uid, runId).update({ status: "closed", outcome });
 }
 
-/** Run ids of a user's runs still open and started before `beforeMs`. */
+/** Run ids of a user's runs not yet closed and started before `beforeMs`. */
 export async function staleProRuns(
   db: Firestore,
   uid: string,
@@ -207,10 +207,69 @@ export async function staleProRuns(
   const snap = await db
     .collection(PRO_RUNS)
     .where("uid", "==", uid)
-    .where("status", "==", "open")
+    .where("status", "in", ["open", "closing"])
     .get();
   return snap.docs
     .map((d) => d.data() as ProRunDoc)
     .filter((run) => run.createdAtMs < beforeMs)
     .map((run) => run.runId);
+}
+
+/**
+ * A stream admitted by `provider.prepareStream` and waiting for its SSE
+ * subscription: `proRuns/{uid}__{runId}/streams/{callId}`. The prompt
+ * travels in the POST body and is kept here for the moment between the two
+ * requests, because an SSE subscription is a GET and its input would go in
+ * the URL. Deleted once the stream starts.
+ */
+export interface PendingStream {
+  provider: string;
+  model: string;
+  prompt: string;
+  temperature?: number;
+  seed?: number;
+  maxOutputTokens: number;
+  countedInputTokens: number;
+  claimed: boolean;
+}
+
+function streamRef(db: Firestore, uid: string, runId: string, callId: string) {
+  assertSafeId("run id", callId);
+  return proRunRef(db, uid, runId)
+    .collection("streams")
+    .doc(callId) as DocumentReference<PendingStream>;
+}
+
+export async function storePendingStream(
+  db: Firestore,
+  ref: { uid: string; runId: string; callId: string },
+  stream: Omit<PendingStream, "claimed">,
+): Promise<void> {
+  await streamRef(db, ref.uid, ref.runId, ref.callId).create({
+    ...stream,
+    claimed: false,
+  });
+}
+
+/** Take a prepared stream once. A second subscription to it is refused. */
+export async function claimPendingStream(
+  db: Firestore,
+  ref: { uid: string; runId: string; callId: string },
+): Promise<PendingStream> {
+  const doc = streamRef(db, ref.uid, ref.runId, ref.callId);
+  const stream = await db.runTransaction(async (tx) => {
+    const data = (await tx.get(doc)).data();
+    if (!data)
+      throw new ProRunError("This stream was not prepared.", "not_found");
+    if (data.claimed) {
+      throw new ProRunError(
+        "This stream was already started.",
+        "duplicate_call",
+      );
+    }
+    tx.update(doc, { claimed: true });
+    return data;
+  });
+  await doc.delete();
+  return stream;
 }

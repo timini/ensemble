@@ -4,10 +4,10 @@ import { getCreditAccount } from "~/server/credits/creditService";
 import { InsufficientCreditsError } from "~/server/credits/errors";
 import { DEFAULT_PRO_CONFIG } from "../config";
 import { closeProRun, startProRun } from "../proRunService";
-import { streamProCall } from "../proCalls";
 import { RateLimitError } from "../rateLimit";
 import { readProRun } from "../runStore";
-import { CALL, collect, proKit, RUN, sse } from "./proEmulatorKit";
+import { CALL, proKit, RUN } from "./proEmulatorKit";
+import { collect, sse, streamCall } from "./proStreamKit";
 
 const { app, db, fetchImpl, deps, reset, fund } = proKit("Pro-run-lifecycle");
 
@@ -38,7 +38,7 @@ describe("Pro run lifecycle", () => {
         },
       ]),
     );
-    const events = await collect(streamProCall(d, "u1", CALL));
+    const events = await collect(streamCall(d, "u1", CALL));
     expect(events.map((e) => e.type)).toEqual(["chunk", "chunk", "complete"]);
     const [url, init] = fetchImpl.mock.calls[0] as [string, RequestInit];
     expect(url).toBe("https://openrouter.ai/api/v1/chat/completions");
@@ -73,6 +73,13 @@ describe("Pro run lifecycle", () => {
     ).toEqual(closed.outcome);
   });
 
+  it("returns the first reservation when the same run starts again", async () => {
+    await fund("u1");
+    const first = await startProRun(deps(), "u1", { runId: "run1", run: RUN });
+    const again = await startProRun(deps(), "u1", { runId: "run1", run: RUN });
+    expect(again).toEqual(first);
+  });
+
   it("refuses a run the balance cannot cover (FR-036)", async () => {
     await expect(
       startProRun(deps(), "poor", { runId: "run1", run: RUN }),
@@ -101,7 +108,7 @@ describe("Pro run lifecycle", () => {
         status: 503,
       }),
     );
-    await expect(collect(streamProCall(d, "u1", CALL))).rejects.toMatchObject({
+    await expect(collect(streamCall(d, "u1", CALL))).rejects.toMatchObject({
       kind: "provider_unavailable",
     });
     const closed = await closeProRun(d, "u1", "run1", { reason: "failed" });
@@ -128,5 +135,17 @@ describe("Pro run lifecycle", () => {
     await startProRun(deps(), "u1", { runId: "new", run: RUN });
     expect((await readProRun(db, "u1", "old"))?.status).toBe("closed");
     expect((await readProRun(db, "u1", "new"))?.status).toBe("open");
+  });
+
+  it("settles a stale run left closing by a crash", async () => {
+    await fund("u1");
+    const old = { ...deps(), now: () => Date.now() - 60 * 60_000 };
+    await startProRun(old, "u1", { runId: "old", run: RUN });
+    await db
+      .collection("proRuns")
+      .doc("u1__old")
+      .update({ status: "closing", inFlight: 1 });
+    await startProRun(deps(), "u1", { runId: "new", run: RUN });
+    expect((await readProRun(db, "u1", "old"))?.outcome?.type).toBe("refunded");
   });
 });

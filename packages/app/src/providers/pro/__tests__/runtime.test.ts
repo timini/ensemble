@@ -6,6 +6,7 @@ describe("Pro runtime", () => {
     const api = {
       startRun: vi.fn(async () => ({})),
       finishRun: vi.fn(async () => ({})),
+      prepareStream: vi.fn(async () => ({})),
       streamText: vi.fn(),
       generateStructured: vi.fn(async () => ({
         parsed: 1,

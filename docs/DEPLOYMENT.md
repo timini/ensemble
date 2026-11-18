@@ -66,7 +66,7 @@ Abuse controls, all on the server:
 - Prompts longer than 200,000 characters are refused.
 - Firebase App Check, below.
 
-Run records are in `proRuns/{uid}__{runId}` (status, budget, calls and their usage). A run the client never finished (a closed tab) is settled the next time the same user starts a run, 30 minutes after it started.
+Run records are in `proRuns/{uid}__{runId}` (status, budget, calls and their usage); a stream's prompt waits in its `streams` subcollection between `prepareStream` and the subscription and is deleted when the stream starts. A run the client never finished (a closed tab, a crash) is settled the next time the same user starts a run, 30 minutes after it started.
 
 ## Firebase App Check
 

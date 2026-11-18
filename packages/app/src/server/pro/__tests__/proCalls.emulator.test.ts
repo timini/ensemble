@@ -3,7 +3,8 @@ import { deleteApp } from "firebase-admin/app";
 import { closeProRun, startProRun } from "../proRunService";
 import { embedProCall, streamProCall, structuredProCall } from "../proCalls";
 import { ProRunError, readProRun } from "../runStore";
-import { hanging, proKit, RUN } from "./proEmulatorKit";
+import { CALL, proKit, RUN } from "./proEmulatorKit";
+import { collect, hanging, sse, streamCall } from "./proStreamKit";
 
 const { app, db, fetchImpl, deps, reset, fund } = proKit("Pro-calls");
 
@@ -19,7 +20,7 @@ describe("Pro calls", () => {
       Promise.resolve(hanging(init?.signal)),
     );
     const controller = new AbortController();
-    const stream = streamProCall(
+    const stream = streamCall(
       d,
       "u1",
       {
@@ -55,7 +56,7 @@ describe("Pro calls", () => {
     fetchImpl.mockImplementation((_url: string, init?: RequestInit) =>
       Promise.resolve(hanging(init?.signal)),
     );
-    const stream = streamProCall(d, "u1", {
+    const stream = streamCall(d, "u1", {
       runId: "run1",
       callId: "c1",
       provider: "openai",
@@ -161,5 +162,61 @@ describe("Pro calls", () => {
         text: "a",
       }),
     ).rejects.toBeInstanceOf(ProRunError);
+  });
+
+  it("keeps a run closing while a call is in flight, then settles it when the call ends", async () => {
+    await fund("u1");
+    const d = deps();
+    await startProRun(d, "u1", { runId: "run1", run: RUN });
+    fetchImpl.mockImplementation((_url: string, init?: RequestInit) =>
+      Promise.resolve(hanging(init?.signal)),
+    );
+    const controller = new AbortController();
+    const stream = streamCall(d, "u1", { ...CALL }, controller.signal);
+    await stream.next();
+    const early = await closeProRun(d, "u1", "run1", {
+      reason: "done",
+      waitMs: 0,
+    });
+    expect(early.outcome).toBeNull();
+    expect((await readProRun(db, "u1", "run1"))?.status).toBe("closing");
+    controller.abort();
+    await expect(stream.next()).rejects.toMatchObject({ kind: "cancelled" });
+    const run = await readProRun(db, "u1", "run1");
+    expect(run?.status).toBe("closed");
+    expect(run?.outcome?.type).toBe("settled");
+  });
+
+  it("starts a prepared stream only once", async () => {
+    await fund("u1");
+    const d = deps();
+    await startProRun(d, "u1", { runId: "run1", run: RUN });
+    fetchImpl.mockResolvedValue(
+      sse([{ choices: [{ delta: { content: "ok" } }] }]),
+    );
+    await collect(streamCall(d, "u1", { ...CALL }));
+    await expect(
+      collect(streamProCall(d, "u1", { runId: "run1", callId: "c1" })),
+    ).rejects.toBeInstanceOf(ProRunError);
+  });
+
+  it("bills the prompt of a structured call the user cancelled", async () => {
+    await fund("u1");
+    const d = deps();
+    await startProRun(d, "u1", { runId: "run1", run: RUN });
+    fetchImpl.mockRejectedValue(new DOMException("aborted", "AbortError"));
+    await expect(
+      structuredProCall(d, "u1", {
+        ...CALL,
+        callId: "s1",
+        schema: { name: "a", schema: { type: "object" } },
+      }),
+    ).rejects.toMatchObject({ kind: "cancelled" });
+    const run = await readProRun(db, "u1", "run1");
+    expect(run?.calls[0]).toMatchObject({
+      inputTokens: 1,
+      outputTokens: 0,
+      source: "estimated",
+    });
   });
 });

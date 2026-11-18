@@ -57,6 +57,8 @@ export function createTrpcProApi(): ProRunApi & ProCallApi {
   return {
     startRun: (input) => client.proRun.start.mutate(input),
     finishRun: (input) => client.proRun.finish.mutate(input),
+    prepareStream: (input, signal) =>
+      client.provider.prepareStream.mutate(input, { signal }),
     streamText: (input, handlers) =>
       client.provider.streamTextEvents.subscribe(input, {
         onData: handlers.onData,

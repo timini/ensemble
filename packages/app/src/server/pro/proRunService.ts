@@ -3,6 +3,7 @@ import type { PriceTable } from "@ensemble-ai/shared-utils/pricing";
 import type { CreditConfig } from "~/server/credits/config";
 import { refundRun, settleRun } from "~/server/credits/creditService";
 import { reserveForRun, type RunQuoteInput } from "~/server/credits/runBilling";
+import { logger } from "~/lib/logger";
 import type { ProConfig } from "./config";
 import { takeRunSlot } from "./rateLimit";
 import {
@@ -28,6 +29,32 @@ export interface ProDeps {
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
+function pick(r: { reservedMicros: number; balanceMicros: number }) {
+  return { reservedMicros: r.reservedMicros, balanceMicros: r.balanceMicros };
+}
+
+/** Settle the user's runs left open or closing past the stale age. Never throws. */
+async function settleStaleRuns(deps: ProDeps, uid: string, now: number) {
+  const before = now - deps.config.staleRunMinutes * 60_000;
+  let stale: string[] = [];
+  try {
+    stale = await staleProRuns(deps.db, uid, before);
+  } catch (error) {
+    logger.warn("[pro] Could not list stale runs", error);
+  }
+  for (const runId of stale) {
+    try {
+      await closeProRun(deps, uid, runId, {
+        reason: "abandoned",
+        waitMs: 0,
+        force: true,
+      });
+    } catch (error) {
+      logger.warn(`[pro] Could not settle stale run ${runId}`, error);
+    }
+  }
+}
+
 /**
  * Start a Pro run: count it against the rate limit, settle the user's
  * abandoned runs, reserve the high estimate plus the margin
@@ -41,77 +68,72 @@ export async function startProRun(
   input: { runId: string; run: RunQuoteInput },
 ): Promise<{ runId: string; reservedMicros: number; balanceMicros: number }> {
   const now = deps.now?.() ?? Date.now();
-  const existing = await readProRun(deps.db, uid, input.runId);
-  if (existing) {
-    return {
-      runId: input.runId,
-      reservedMicros: existing.reservedMicros,
-      balanceMicros: -1,
-    };
+  if (await readProRun(deps.db, uid, input.runId)) {
+    // A repeated start: reserveForRun is idempotent and returns the first reservation.
+    const again = await reserveForRun(deps.db, deps.credit, { uid, ...input });
+    return { runId: input.runId, ...pick(again) };
   }
   await takeRunSlot(deps.db, uid, {
     limit: deps.config.rateLimitRuns,
     windowSeconds: deps.config.rateLimitWindowSeconds,
     now,
   });
-  const stale = await staleProRuns(
-    deps.db,
-    uid,
-    now - deps.config.staleRunMinutes * 60_000,
-  );
-  for (const runId of stale) {
-    await closeProRun(deps, uid, runId, { reason: "abandoned", waitMs: 0 });
-  }
+  await settleStaleRuns(deps, uid, now);
   const reservation = await reserveForRun(deps.db, deps.credit, {
     uid,
-    runId: input.runId,
-    run: input.run,
+    ...input,
   });
-  await openProRun(deps.db, {
-    uid,
-    runId: input.runId,
-    reservedMicros: reservation.reservedMicros,
-    tokenBudget: deps.config.maxRunTokens,
-    maxCalls: deps.config.maxCallsPerRun,
-    now,
-  });
-  return {
-    runId: input.runId,
-    reservedMicros: reservation.reservedMicros,
-    balanceMicros: reservation.balanceMicros,
-  };
+  if (reservation.duplicate)
+    return { runId: input.runId, ...pick(reservation) };
+  try {
+    await openProRun(deps.db, {
+      uid,
+      runId: input.runId,
+      reservedMicros: reservation.reservedMicros,
+      tokenBudget: deps.config.maxRunTokens,
+      maxCalls: deps.config.maxCallsPerRun,
+      now,
+    });
+  } catch (error) {
+    // A concurrent start of the same run created it first: that is fine.
+    if (await readProRun(deps.db, uid, input.runId)) {
+      return { runId: input.runId, ...pick(reservation) };
+    }
+    // Otherwise no call can use this reservation: give it back.
+    await refundRun(deps.db, {
+      uid,
+      runId: input.runId,
+      reason: "run record failed",
+    });
+    throw error;
+  }
+  return { runId: input.runId, ...pick(reservation) };
 }
 
 export interface CloseResult {
+  /** Null while calls are still in flight: the last of them settles the run. */
   outcome: ProRunOutcome | null;
   balanceMicros: number | null;
 }
 
 /**
- * End a run: stop admitting calls, wait up to `waitMs` for calls still in
- * flight to record their usage, then settle for the usage recorded (actual
- * cost plus the margin, never more than the reservation) or, when no call
- * produced anything, refund the whole reservation. A cancelled run settles
- * for what it used. Idempotent: closing a closed run returns its outcome.
+ * Settle a closing run once no call is in flight (or at once with `force`,
+ * for abandoned runs): the usage recorded plus the margin, never more than
+ * the reservation, or a full refund when nothing was used. Idempotent; the
+ * ledger refuses a second settle or refund of the same run.
  */
-export async function closeProRun(
+export async function finalizeProRun(
   deps: ProDeps,
   uid: string,
   runId: string,
-  options: { reason: string; waitMs?: number },
+  options: { reason: string; force?: boolean },
 ): Promise<CloseResult> {
-  const opened = await markProRunClosing(deps.db, uid, runId);
-  if (!opened) {
-    const run = await readProRun(deps.db, uid, runId);
-    return { outcome: run?.outcome ?? null, balanceMicros: null };
-  }
-  const deadline = Date.now() + (options.waitMs ?? 8000);
-  let run = opened;
-  while (run.inFlight > 0 && Date.now() < deadline) {
-    await sleep(200);
-    run = (await readProRun(deps.db, uid, runId)) ?? run;
-  }
-  run = (await readProRun(deps.db, uid, runId)) ?? run;
+  const run = await readProRun(deps.db, uid, runId);
+  if (!run) return { outcome: null, balanceMicros: null };
+  if (run.status === "closed")
+    return { outcome: run.outcome ?? null, balanceMicros: null };
+  if (run.inFlight > 0 && !options.force)
+    return { outcome: null, balanceMicros: null };
 
   let outcome: ProRunOutcome;
   let balanceMicros: number;
@@ -139,4 +161,31 @@ export async function closeProRun(
   }
   await markProRunClosed(deps.db, uid, runId, outcome);
   return { outcome, balanceMicros };
+}
+
+/**
+ * End a run: stop admitting calls and wait up to `waitMs` for calls in
+ * flight to record their usage, then settle (finalizeProRun). If calls are
+ * still running after the wait, the run stays `closing` and the last call
+ * to end settles it, so a run is never refunded while it is still using
+ * the model. A cancelled run settles for what it used. Idempotent.
+ */
+export async function closeProRun(
+  deps: ProDeps,
+  uid: string,
+  runId: string,
+  options: { reason: string; waitMs?: number; force?: boolean },
+): Promise<CloseResult> {
+  const opened = await markProRunClosing(deps.db, uid, runId);
+  if (!opened && !options.force) {
+    const run = await readProRun(deps.db, uid, runId);
+    return { outcome: run?.outcome ?? null, balanceMicros: null };
+  }
+  const deadline = Date.now() + (options.waitMs ?? 8000);
+  let inFlight = opened?.inFlight ?? 0;
+  while (inFlight > 0 && Date.now() < deadline) {
+    await sleep(200);
+    inFlight = (await readProRun(deps.db, uid, runId))?.inFlight ?? 0;
+  }
+  return finalizeProRun(deps, uid, runId, options);
 }
