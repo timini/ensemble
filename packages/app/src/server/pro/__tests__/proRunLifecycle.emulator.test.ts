@@ -20,28 +20,42 @@ describe("Pro run lifecycle", () => {
     const d = deps();
     const started = await startProRun(d, "u1", { runId: "run1", run: RUN });
     expect(started.reservedMicros).toBeGreaterThan(0);
-    expect((await getCreditAccount(db, d.credit, "u1")).balanceMicros).toBe(1_000_000 - started.reservedMicros);
+    expect((await getCreditAccount(db, d.credit, "u1")).balanceMicros).toBe(
+      1_000_000 - started.reservedMicros,
+    );
 
     fetchImpl.mockResolvedValue(
       sse([
         { choices: [{ delta: { content: "Hello " } }] },
         { choices: [{ delta: { content: "world" } }] },
-        { choices: [], usage: { prompt_tokens: 100, completion_tokens: 200, total_tokens: 300 } },
+        {
+          choices: [],
+          usage: {
+            prompt_tokens: 100,
+            completion_tokens: 200,
+            total_tokens: 300,
+          },
+        },
       ]),
     );
-    const events = await collect(
-      streamProCall(d, "u1", CALL),
-    );
+    const events = await collect(streamProCall(d, "u1", CALL));
     expect(events.map((e) => e.type)).toEqual(["chunk", "chunk", "complete"]);
     const [url, init] = fetchImpl.mock.calls[0] as [string, RequestInit];
     expect(url).toBe("https://openrouter.ai/api/v1/chat/completions");
-    const body = JSON.parse(init.body as string) as { model: string; max_tokens: number };
+    const body = JSON.parse(init.body as string) as {
+      model: string;
+      max_tokens: number;
+    };
     expect(body.model).toBe("openai/gpt-test-or");
     expect(body.max_tokens).toBe(DEFAULT_PRO_CONFIG.maxCallOutputTokens);
 
     const run = await readProRun(db, "u1", "run1");
     expect(run?.calls).toHaveLength(1);
-    expect(run?.calls[0]).toMatchObject({ inputTokens: 100, outputTokens: 200, source: "reported" });
+    expect(run?.calls[0]).toMatchObject({
+      inputTokens: 100,
+      outputTokens: 200,
+      source: "reported",
+    });
     expect(run?.inFlight).toBe(0);
 
     const closed = await closeProRun(d, "u1", "run1", { reason: "done" });
@@ -51,14 +65,18 @@ describe("Pro run lifecycle", () => {
       chargedMicros: 650,
       releasedMicros: started.reservedMicros - 650,
     });
-    expect((await getCreditAccount(db, d.credit, "u1")).balanceMicros).toBe(1_000_000 - 650);
-    expect((await closeProRun(d, "u1", "run1", { reason: "again" })).outcome).toEqual(closed.outcome);
+    expect((await getCreditAccount(db, d.credit, "u1")).balanceMicros).toBe(
+      1_000_000 - 650,
+    );
+    expect(
+      (await closeProRun(d, "u1", "run1", { reason: "again" })).outcome,
+    ).toEqual(closed.outcome);
   });
 
   it("refuses a run the balance cannot cover (FR-036)", async () => {
-    await expect(startProRun(deps(), "poor", { runId: "run1", run: RUN })).rejects.toBeInstanceOf(
-      InsufficientCreditsError,
-    );
+    await expect(
+      startProRun(deps(), "poor", { runId: "run1", run: RUN }),
+    ).rejects.toBeInstanceOf(InsufficientCreditsError);
   });
 
   it("refuses a run with an unpriced model", async () => {
@@ -66,7 +84,10 @@ describe("Pro run lifecycle", () => {
     await expect(
       startProRun(deps(), "u1", {
         runId: "run1",
-        run: { ...RUN, models: [{ provider: "openai", modelId: "gpt-unpriced" }] },
+        run: {
+          ...RUN,
+          models: [{ provider: "openai", modelId: "gpt-unpriced" }],
+        },
       }),
     ).rejects.toBeInstanceOf(RangeError);
   });
@@ -75,13 +96,19 @@ describe("Pro run lifecycle", () => {
     await fund("u1");
     const d = deps();
     await startProRun(d, "u1", { runId: "run1", run: RUN });
-    fetchImpl.mockResolvedValue(new Response(JSON.stringify({ error: { message: "bad" } }), { status: 503 }));
-    await expect(
-      collect(streamProCall(d, "u1", CALL)),
-    ).rejects.toMatchObject({ kind: "provider_unavailable" });
+    fetchImpl.mockResolvedValue(
+      new Response(JSON.stringify({ error: { message: "bad" } }), {
+        status: 503,
+      }),
+    );
+    await expect(collect(streamProCall(d, "u1", CALL))).rejects.toMatchObject({
+      kind: "provider_unavailable",
+    });
     const closed = await closeProRun(d, "u1", "run1", { reason: "failed" });
     expect(closed.outcome?.type).toBe("refunded");
-    expect((await getCreditAccount(db, d.credit, "u1")).balanceMicros).toBe(1_000_000);
+    expect((await getCreditAccount(db, d.credit, "u1")).balanceMicros).toBe(
+      1_000_000,
+    );
   });
 
   it("limits how many runs a user starts per window", async () => {
@@ -89,7 +116,9 @@ describe("Pro run lifecycle", () => {
     const d = deps({ rateLimitRuns: 2 });
     await startProRun(d, "u1", { runId: "r1", run: RUN });
     await startProRun(d, "u1", { runId: "r2", run: RUN });
-    await expect(startProRun(d, "u1", { runId: "r3", run: RUN })).rejects.toBeInstanceOf(RateLimitError);
+    await expect(
+      startProRun(d, "u1", { runId: "r3", run: RUN }),
+    ).rejects.toBeInstanceOf(RateLimitError);
   });
 
   it("settles a user's abandoned runs when they start another", async () => {

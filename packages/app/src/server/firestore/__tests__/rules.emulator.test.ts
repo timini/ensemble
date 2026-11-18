@@ -61,7 +61,10 @@ beforeEach(async () => {
     await setDoc(doc(db, "stripeEvents/evt_1"), {
       type: "checkout.session.completed",
     });
-    await setDoc(doc(db, "proRuns/alice__run1"), { uid: "alice", runId: "run1" });
+    await setDoc(doc(db, "proRuns/alice__run1"), {
+      uid: "alice",
+      runId: "run1",
+    });
     await setDoc(doc(db, "rateLimits/alice"), { windowStartMs: 0, count: 1 });
   });
 });
@@ -143,7 +146,9 @@ describe("other collections", () => {
 
   it("keep Pro run records and rate limits server only, even for their owner", async () => {
     await assertFails(getDoc(doc(alice(), "proRuns/alice__run1")));
-    await assertFails(setDoc(doc(alice(), "proRuns/alice__run2"), { uid: "alice" }));
+    await assertFails(
+      setDoc(doc(alice(), "proRuns/alice__run2"), { uid: "alice" }),
+    );
     await assertFails(getDoc(doc(alice(), "rateLimits/alice")));
     await assertFails(setDoc(doc(alice(), "rateLimits/alice"), { count: 0 }));
   });

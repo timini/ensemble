@@ -43,14 +43,22 @@ export async function startProRun(
   const now = deps.now?.() ?? Date.now();
   const existing = await readProRun(deps.db, uid, input.runId);
   if (existing) {
-    return { runId: input.runId, reservedMicros: existing.reservedMicros, balanceMicros: -1 };
+    return {
+      runId: input.runId,
+      reservedMicros: existing.reservedMicros,
+      balanceMicros: -1,
+    };
   }
   await takeRunSlot(deps.db, uid, {
     limit: deps.config.rateLimitRuns,
     windowSeconds: deps.config.rateLimitWindowSeconds,
     now,
   });
-  const stale = await staleProRuns(deps.db, uid, now - deps.config.staleRunMinutes * 60_000);
+  const stale = await staleProRuns(
+    deps.db,
+    uid,
+    now - deps.config.staleRunMinutes * 60_000,
+  );
   for (const runId of stale) {
     await closeProRun(deps, uid, runId, { reason: "abandoned", waitMs: 0 });
   }
@@ -109,7 +117,11 @@ export async function closeProRun(
   let balanceMicros: number;
   if (run.calls.length > 0) {
     const calls = run.calls.map(({ callId: _callId, ...call }) => call);
-    const settled = await settleRun(deps.db, deps.credit, { uid, runId, calls });
+    const settled = await settleRun(deps.db, deps.credit, {
+      uid,
+      runId,
+      calls,
+    });
     outcome = {
       type: "settled",
       chargedMicros: settled.chargedMicros,
@@ -117,7 +129,11 @@ export async function closeProRun(
     };
     balanceMicros = settled.balanceMicros;
   } else {
-    const refunded = await refundRun(deps.db, { uid, runId, reason: options.reason });
+    const refunded = await refundRun(deps.db, {
+      uid,
+      runId,
+      reason: options.reason,
+    });
     outcome = { type: "refunded", refundedMicros: refunded.refundedMicros };
     balanceMicros = refunded.balanceMicros;
   }

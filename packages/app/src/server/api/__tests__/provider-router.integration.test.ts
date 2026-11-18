@@ -110,10 +110,10 @@ const shouldRunRealIntegration =
 
 const maybeDescribe = shouldRunRealIntegration ? describe : describe.skip;
 
-maybeDescribe("provider router real integration (firebase auth + provider API)", () => {
-  it(
-    "allows authenticated backend provider calls with a real Firebase ID token",
-    async () => {
+maybeDescribe(
+  "provider router real integration (firebase auth + provider API)",
+  () => {
+    it("allows authenticated backend provider calls with a real Firebase ID token", async () => {
       const idToken = await fetchFirebaseIdToken();
       const ctx = await createTRPCContext({
         headers: new Headers({
@@ -128,7 +128,6 @@ maybeDescribe("provider router real integration (firebase auth + provider API)",
       expect(modelsResult.provider).toBe(provider);
       expect(Array.isArray(modelsResult.models)).toBe(true);
       expect(modelsResult.models.length).toBeGreaterThan(0);
-    },
-    120000,
-  );
-});
+    }, 120000);
+  },
+);

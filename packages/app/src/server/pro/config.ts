@@ -67,21 +67,34 @@ export function readProConfig(env: ProEnv): ProConfig {
   return {
     openRouterApiKey: text(env.OPENROUTER_API_KEY),
     openRouterBaseURL: text(env.OPENROUTER_BASE_URL) ?? d.openRouterBaseURL,
-    maxRunTokens: positiveInt("PRO_MAX_RUN_TOKENS", env.PRO_MAX_RUN_TOKENS, d.maxRunTokens),
+    maxRunTokens: positiveInt(
+      "PRO_MAX_RUN_TOKENS",
+      env.PRO_MAX_RUN_TOKENS,
+      d.maxRunTokens,
+    ),
     maxCallOutputTokens: positiveInt(
       "PRO_MAX_CALL_OUTPUT_TOKENS",
       env.PRO_MAX_CALL_OUTPUT_TOKENS,
       d.maxCallOutputTokens,
     ),
-    maxCallsPerRun: positiveInt("PRO_MAX_CALLS_PER_RUN", env.PRO_MAX_CALLS_PER_RUN, d.maxCallsPerRun),
-    rateLimitRuns: positiveInt("PRO_RATE_LIMIT_RUNS", env.PRO_RATE_LIMIT_RUNS, d.rateLimitRuns),
+    maxCallsPerRun: positiveInt(
+      "PRO_MAX_CALLS_PER_RUN",
+      env.PRO_MAX_CALLS_PER_RUN,
+      d.maxCallsPerRun,
+    ),
+    rateLimitRuns: positiveInt(
+      "PRO_RATE_LIMIT_RUNS",
+      env.PRO_RATE_LIMIT_RUNS,
+      d.rateLimitRuns,
+    ),
     rateLimitWindowSeconds: positiveInt(
       "PRO_RATE_LIMIT_WINDOW_SECONDS",
       env.PRO_RATE_LIMIT_WINDOW_SECONDS,
       d.rateLimitWindowSeconds,
     ),
     staleRunMinutes: d.staleRunMinutes,
-    mockUpstream: env.PRO_MOCK_UPSTREAM === "true" || env.NEXT_PUBLIC_MOCK_MODE === "true",
+    mockUpstream:
+      env.PRO_MOCK_UPSTREAM === "true" || env.NEXT_PUBLIC_MOCK_MODE === "true",
     appCheckEnforce: env.APP_CHECK_ENFORCE === "true",
   };
 }

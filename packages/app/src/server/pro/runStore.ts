@@ -106,13 +106,18 @@ export async function beginProCall(
   return db.runTransaction(async (tx) => {
     const snap = await tx.get(ref);
     const run = snap.data();
-    if (!run) throw new ProRunError("This Pro run does not exist.", "not_found");
-    if (run.status !== "open") throw new ProRunError("This Pro run has ended.", "closed");
+    if (!run)
+      throw new ProRunError("This Pro run does not exist.", "not_found");
+    if (run.status !== "open")
+      throw new ProRunError("This Pro run has ended.", "closed");
     if (run.callIds.includes(input.callId)) {
       throw new ProRunError("This call was already made.", "duplicate_call");
     }
     if (run.callIds.length >= run.maxCalls) {
-      throw new ProRunError("This run has made as many calls as one run may.", "budget");
+      throw new ProRunError(
+        "This run has made as many calls as one run may.",
+        "budget",
+      );
     }
     const remaining = run.tokenBudget - run.tokensUsed - input.inputTokens;
     if (remaining <= 0) {
@@ -142,12 +147,19 @@ export async function endProCall(
   },
 ): Promise<void> {
   const ref = proRunRef(db, input.uid, input.runId);
-  const used = input.usage ? input.usage.inputTokens + input.usage.outputTokens : 0;
+  const used = input.usage
+    ? input.usage.inputTokens + input.usage.outputTokens
+    : 0;
   await ref.update({
     inFlight: FieldValue.increment(-1),
     tokensUsed: FieldValue.increment(used - input.countedInputTokens),
     ...(input.usage
-      ? { calls: FieldValue.arrayUnion({ ...input.usage, callId: input.callId }) }
+      ? {
+          calls: FieldValue.arrayUnion({
+            ...input.usage,
+            callId: input.callId,
+          }),
+        }
       : {}),
   });
 }
@@ -161,7 +173,8 @@ export async function markProRunClosing(
   const ref = proRunRef(db, uid, runId);
   return db.runTransaction(async (tx) => {
     const run = (await tx.get(ref)).data();
-    if (!run) throw new ProRunError("This Pro run does not exist.", "not_found");
+    if (!run)
+      throw new ProRunError("This Pro run does not exist.", "not_found");
     if (run.status !== "open") return null;
     tx.update(ref, { status: "closing" });
     return run;

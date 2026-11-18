@@ -34,10 +34,14 @@ export function createUpstream(
   }
   const key = config.openRouterApiKey;
   if (!key) throw new ProUnavailableError();
-  const client = new FreeOpenAICompatibleClient("openai-compatible", () => key, {
-    getBaseURL: () => config.openRouterBaseURL,
-    getEmbeddingModel: () => options.embeddingModel,
-    fetchImpl: options.fetchImpl,
-  });
+  const client = new FreeOpenAICompatibleClient(
+    "openai-compatible",
+    () => key,
+    {
+      getBaseURL: () => config.openRouterBaseURL,
+      getEmbeddingModel: () => options.embeddingModel,
+      fetchImpl: options.fetchImpl,
+    },
+  );
   return { client, mock: false };
 }

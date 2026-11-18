@@ -23,7 +23,10 @@ export const proRunRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       const { runId: id, ...run } = input;
       try {
-        return await startProRun(getProDeps(), ctx.authUser.uid, { runId: id, run });
+        return await startProRun(getProDeps(), ctx.authUser.uid, {
+          runId: id,
+          run,
+        });
       } catch (error) {
         throw toProTRPCError(error);
       }

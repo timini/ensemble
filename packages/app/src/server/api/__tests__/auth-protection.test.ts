@@ -2,9 +2,8 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { AuthUser } from "~/server/auth/firebaseAdmin";
 
 const { verifyFirebaseAuthTokenMock } = vi.hoisted(() => ({
-  verifyFirebaseAuthTokenMock: vi.fn<
-    (token: string) => Promise<AuthUser | null>
-  >(),
+  verifyFirebaseAuthTokenMock:
+    vi.fn<(token: string) => Promise<AuthUser | null>>(),
 }));
 
 vi.mock("~/server/auth/firebaseAdmin", () => ({

@@ -27,7 +27,9 @@ vi.mock("~/server/pro", () => ({
   getProConfig: () => ({ ...DEFAULT_PRO_CONFIG, ...mocks.config }),
   getProDeps: () => ({ deps: true }),
 }));
-vi.mock("~/server/firebase/firestore", () => ({ getAdminFirestore: () => ({}) }));
+vi.mock("~/server/firebase/firestore", () => ({
+  getAdminFirestore: () => ({}),
+}));
 vi.mock("~/server/providers/providerService", () => ({
   listProviderTextModels: mocks.listModels,
 }));
@@ -63,12 +65,16 @@ const RUN = {
 };
 
 async function caller(headers: Record<string, string> = {}) {
-  return createCaller(await createTRPCContext({ headers: new Headers(headers) }));
+  return createCaller(
+    await createTRPCContext({ headers: new Headers(headers) }),
+  );
 }
 
 describe("proRun router and App Check", () => {
   beforeEach(() => {
-    Object.values(mocks).forEach((m) => typeof m === "function" && m.mockReset());
+    Object.values(mocks).forEach(
+      (m) => typeof m === "function" && m.mockReset(),
+    );
     mocks.config.appCheckEnforce = false;
     mocks.verify.mockResolvedValue({ uid: "user-1" });
   });
@@ -77,18 +83,33 @@ describe("proRun router and App Check", () => {
     mocks.config.appCheckEnforce = true;
     mocks.appCheck.mockResolvedValue(false);
     const c = await caller({ authorization: "Bearer ok" });
-    await expect(c.proRun.start(RUN)).rejects.toMatchObject({ code: "FORBIDDEN" });
+    await expect(c.proRun.start(RUN)).rejects.toMatchObject({
+      code: "FORBIDDEN",
+    });
     expect(mocks.appCheck).toHaveBeenCalledWith(null);
 
     mocks.appCheck.mockResolvedValue(true);
-    mocks.start.mockResolvedValue({ runId: "run-1", reservedMicros: 10, balanceMicros: 90 });
-    const withToken = await caller({ authorization: "Bearer ok", "x-firebase-appcheck": "tok" });
-    await expect(withToken.proRun.start(RUN)).resolves.toMatchObject({ reservedMicros: 10 });
+    mocks.start.mockResolvedValue({
+      runId: "run-1",
+      reservedMicros: 10,
+      balanceMicros: 90,
+    });
+    const withToken = await caller({
+      authorization: "Bearer ok",
+      "x-firebase-appcheck": "tok",
+    });
+    await expect(withToken.proRun.start(RUN)).resolves.toMatchObject({
+      reservedMicros: 10,
+    });
     expect(mocks.appCheck).toHaveBeenLastCalledWith("tok");
   });
 
   it("does not check App Check while enforcement is off", async () => {
-    mocks.start.mockResolvedValue({ runId: "run-1", reservedMicros: 10, balanceMicros: 90 });
+    mocks.start.mockResolvedValue({
+      runId: "run-1",
+      reservedMicros: 10,
+      balanceMicros: 90,
+    });
     await (await caller({ authorization: "Bearer ok" })).proRun.start(RUN);
     expect(mocks.appCheck).not.toHaveBeenCalled();
     expect(mocks.start).toHaveBeenCalledWith({ deps: true }, "user-1", {
@@ -105,19 +126,33 @@ describe("proRun router and App Check", () => {
   });
 
   it("finishes a run and returns the outcome", async () => {
-    mocks.close.mockResolvedValue({ outcome: { type: "refunded", refundedMicros: 5 }, balanceMicros: 100 });
-    const result = await (await caller({ authorization: "Bearer ok" })).proRun.finish({
+    mocks.close.mockResolvedValue({
+      outcome: { type: "refunded", refundedMicros: 5 },
+      balanceMicros: 100,
+    });
+    const result = await (
+      await caller({ authorization: "Bearer ok" })
+    ).proRun.finish({
       runId: "run-1",
       reason: "cancelled",
     });
     expect(result.outcome).toEqual({ type: "refunded", refundedMicros: 5 });
-    expect(mocks.close).toHaveBeenCalledWith({ deps: true }, "user-1", "run-1", { reason: "cancelled" });
+    expect(mocks.close).toHaveBeenCalledWith(
+      { deps: true },
+      "user-1",
+      "run-1",
+      { reason: "cancelled" },
+    );
   });
 
   it("refuses unsafe run ids", async () => {
     const c = await caller({ authorization: "Bearer ok" });
-    await expect(c.proRun.finish({ runId: "a/b", reason: "done" })).rejects.toMatchObject({ code: "BAD_REQUEST" });
-    await expect(c.provider.streamTextEvents({ ...CALL, callId: "x__y" })).rejects.toMatchObject({
+    await expect(
+      c.proRun.finish({ runId: "a/b", reason: "done" }),
+    ).rejects.toMatchObject({ code: "BAD_REQUEST" });
+    await expect(
+      c.provider.streamTextEvents({ ...CALL, callId: "x__y" }),
+    ).rejects.toMatchObject({
       code: "BAD_REQUEST",
     });
   });

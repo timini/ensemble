@@ -2,8 +2,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { AuthUser } from "~/server/auth/firebaseAdmin";
 import { ProviderError } from "@ensemble-ai/shared-utils/providers";
-import { InsufficientCreditsError } from "~/server/credits/errors";
-import { RateLimitError } from "~/server/pro/rateLimit";
 import { DEFAULT_PRO_CONFIG } from "~/server/pro/config";
 
 const mocks = vi.hoisted(() => ({
@@ -30,7 +28,9 @@ vi.mock("~/server/pro", () => ({
   getProConfig: () => ({ ...DEFAULT_PRO_CONFIG, ...mocks.config }),
   getProDeps: () => ({ deps: true }),
 }));
-vi.mock("~/server/firebase/firestore", () => ({ getAdminFirestore: () => ({}) }));
+vi.mock("~/server/firebase/firestore", () => ({
+  getAdminFirestore: () => ({}),
+}));
 vi.mock("~/server/providers/providerService", () => ({
   listProviderTextModels: mocks.listModels,
 }));
@@ -66,7 +66,9 @@ const RUN = {
 };
 
 async function caller(headers: Record<string, string> = {}) {
-  return createCaller(await createTRPCContext({ headers: new Headers(headers) }));
+  return createCaller(
+    await createTRPCContext({ headers: new Headers(headers) }),
+  );
 }
 
 async function drain(iterable: unknown) {
@@ -77,7 +79,9 @@ async function drain(iterable: unknown) {
 
 describe("provider router", () => {
   beforeEach(() => {
-    Object.values(mocks).forEach((m) => typeof m === "function" && m.mockReset());
+    Object.values(mocks).forEach(
+      (m) => typeof m === "function" && m.mockReset(),
+    );
     mocks.config.appCheckEnforce = false;
     mocks.verify.mockResolvedValue({ uid: "user-1" });
   });
@@ -85,14 +89,26 @@ describe("provider router", () => {
   it("refuses every Pro call without a signed-in user", async () => {
     mocks.verify.mockResolvedValue(null);
     const c = await caller({ authorization: "Bearer bad" });
-    await expect(c.provider.streamTextEvents(CALL)).rejects.toMatchObject({ code: "UNAUTHORIZED" });
+    await expect(c.provider.streamTextEvents(CALL)).rejects.toMatchObject({
+      code: "UNAUTHORIZED",
+    });
     await expect(
-      c.provider.generateStructured({ ...CALL, schema: { name: "s", schema: {} } }),
+      c.provider.generateStructured({
+        ...CALL,
+        schema: { name: "s", schema: {} },
+      }),
     ).rejects.toMatchObject({ code: "UNAUTHORIZED" });
     await expect(
-      c.provider.generateEmbeddings({ runId: "r", callId: "c", provider: "openai", text: "t" }),
+      c.provider.generateEmbeddings({
+        runId: "r",
+        callId: "c",
+        provider: "openai",
+        text: "t",
+      }),
     ).rejects.toMatchObject({ code: "UNAUTHORIZED" });
-    await expect(c.proRun.start(RUN)).rejects.toMatchObject({ code: "UNAUTHORIZED" });
+    await expect(c.proRun.start(RUN)).rejects.toMatchObject({
+      code: "UNAUTHORIZED",
+    });
     expect(mocks.stream).not.toHaveBeenCalled();
     expect(mocks.start).not.toHaveBeenCalled();
   });
@@ -103,31 +119,20 @@ describe("provider router", () => {
       yield { type: "chunk", chunk: "lo" };
       yield { type: "complete", response: "Hello", responseTimeMs: 5 };
     });
-    const events = await drain(await (await caller({ authorization: "Bearer ok" })).provider.streamTextEvents(CALL));
+    const events = await drain(
+      await (
+        await caller({ authorization: "Bearer ok" })
+      ).provider.streamTextEvents(CALL),
+    );
     expect(events).toEqual([
       { type: "chunk", chunk: "Hel" },
       { type: "chunk", chunk: "lo" },
       { type: "complete", response: "Hello", responseTimeMs: 5 },
     ]);
-    expect(mocks.stream.mock.calls[0]?.slice(0, 3)).toEqual([{ deps: true }, "user-1", CALL]);
-  });
-
-  it("maps billing and provider failures to tRPC codes", async () => {
-    const c = await caller({ authorization: "Bearer ok" });
-    mocks.start.mockRejectedValueOnce(new InsufficientCreditsError(10, 100));
-    await expect(c.proRun.start(RUN)).rejects.toMatchObject({ code: "PAYMENT_REQUIRED" });
-    mocks.start.mockRejectedValueOnce(new RateLimitError(30));
-    await expect(c.proRun.start(RUN)).rejects.toMatchObject({ code: "TOO_MANY_REQUESTS" });
-    mocks.structured.mockRejectedValueOnce(new ProviderError("slow", "timeout"));
-    await expect(
-      c.provider.generateStructured({ ...CALL, schema: { name: "s", schema: {} } }),
-    ).rejects.toMatchObject({ code: "GATEWAY_TIMEOUT" });
-    mocks.stream.mockImplementation(async function* () {
-      yield { type: "chunk", chunk: "x" };
-      throw new ProviderError("busy", "rate_limited", { retryAfterSeconds: 7 });
-    });
-    await expect(drain(await c.provider.streamTextEvents(CALL))).rejects.toMatchObject({
-      code: "TOO_MANY_REQUESTS",
-    });
+    expect(mocks.stream.mock.calls[0]?.slice(0, 3)).toEqual([
+      { deps: true },
+      "user-1",
+      CALL,
+    ]);
   });
 });

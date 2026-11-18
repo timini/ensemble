@@ -2,7 +2,10 @@ import {
   GOOGLE_EMBEDDING_MODEL,
   OPENAI_EMBEDDING_MODEL,
 } from "@ensemble-ai/shared-utils/providers";
-import { PRICE_TABLE, type PriceTable } from "@ensemble-ai/shared-utils/pricing";
+import {
+  PRICE_TABLE,
+  type PriceTable,
+} from "@ensemble-ai/shared-utils/pricing";
 
 /** A model as Pro calls it: our ids for billing, the OpenRouter id for the call. */
 export interface ProModel {

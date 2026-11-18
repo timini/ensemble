@@ -35,13 +35,17 @@ export function toProTRPCError(error: unknown): TRPCError {
   if (error instanceof TRPCError) return error;
   const make = (code: Code, message: string) =>
     new TRPCError({ code, message, cause: error });
-  if (error instanceof InsufficientCreditsError) return make("PAYMENT_REQUIRED", error.message);
-  if (error instanceof RateLimitError) return make("TOO_MANY_REQUESTS", error.message);
-  if (error instanceof ProRunError) return make(RUN_CODES[error.reason], error.message);
+  if (error instanceof InsufficientCreditsError)
+    return make("PAYMENT_REQUIRED", error.message);
+  if (error instanceof RateLimitError)
+    return make("TOO_MANY_REQUESTS", error.message);
+  if (error instanceof ProRunError)
+    return make(RUN_CODES[error.reason], error.message);
   if (error instanceof UnpricedModelError || error instanceof RangeError) {
     return make("BAD_REQUEST", error.message);
   }
-  if (error instanceof ProUnavailableError) return make("SERVICE_UNAVAILABLE", error.message);
+  if (error instanceof ProUnavailableError)
+    return make("SERVICE_UNAVAILABLE", error.message);
   if (isProviderError(error)) {
     return make(PROVIDER_CODES[error.kind] ?? "BAD_GATEWAY", error.message);
   }
@@ -50,6 +54,9 @@ export function toProTRPCError(error: unknown): TRPCError {
 
 /** Seconds to wait before retrying, when the error says. */
 export function retryAfterOf(error: unknown): number | undefined {
-  const value = (error as { retryAfterSeconds?: unknown } | null)?.retryAfterSeconds;
-  return typeof value === "number" && Number.isFinite(value) ? value : undefined;
+  const value = (error as { retryAfterSeconds?: unknown } | null)
+    ?.retryAfterSeconds;
+  return typeof value === "number" && Number.isFinite(value)
+    ? value
+    : undefined;
 }

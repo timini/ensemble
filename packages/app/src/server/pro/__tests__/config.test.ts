@@ -44,11 +44,17 @@ describe("readProConfig", () => {
   });
 
   it("turns on the mock upstream in mock mode", () => {
-    expect(readProConfig({ NEXT_PUBLIC_MOCK_MODE: "true" }).mockUpstream).toBe(true);
+    expect(readProConfig({ NEXT_PUBLIC_MOCK_MODE: "true" }).mockUpstream).toBe(
+      true,
+    );
   });
 
   it("refuses a limit that is not a positive whole number", () => {
-    expect(() => readProConfig({ PRO_MAX_RUN_TOKENS: "0" })).toThrow(/PRO_MAX_RUN_TOKENS/);
-    expect(() => readProConfig({ PRO_RATE_LIMIT_RUNS: "abc" })).toThrow(/PRO_RATE_LIMIT_RUNS/);
+    expect(() => readProConfig({ PRO_MAX_RUN_TOKENS: "0" })).toThrow(
+      /PRO_MAX_RUN_TOKENS/,
+    );
+    expect(() => readProConfig({ PRO_RATE_LIMIT_RUNS: "abc" })).toThrow(
+      /PRO_RATE_LIMIT_RUNS/,
+    );
   });
 });

@@ -25,7 +25,11 @@ export type ProStreamEvent =
       usage?: TokenUsage;
     };
 
-function callUsage(model: ProModel, usage: TokenUsage, source: CallUsage["source"]): CallUsage {
+function callUsage(
+  model: ProModel,
+  usage: TokenUsage,
+  source: CallUsage["source"],
+): CallUsage {
   return {
     provider: model.provider,
     modelId: model.modelId,
@@ -41,7 +45,9 @@ async function billed<T>(
   uid: string,
   ref: ProCallRef,
   inputTokens: number,
-  run: (maxOutputTokens: number) => Promise<{ value: T; usage: CallUsage | null }>,
+  run: (
+    maxOutputTokens: number,
+  ) => Promise<{ value: T; usage: CallUsage | null }>,
   usageOnError: () => CallUsage | null,
 ): Promise<T> {
   const { maxOutputTokens } = await beginProCall(deps.db, {
@@ -59,7 +65,12 @@ async function billed<T>(
     usage = usageOnError();
     throw error;
   } finally {
-    await endProCall(deps.db, { uid, ...ref, countedInputTokens: inputTokens, usage });
+    await endProCall(deps.db, {
+      uid,
+      ...ref,
+      countedInputTokens: inputTokens,
+      usage,
+    });
   }
 }
 
@@ -81,7 +92,11 @@ export async function* streamProCall(
   },
   signal?: AbortSignal,
 ): AsyncGenerator<ProStreamEvent> {
-  const model = resolveProModel(input.provider, input.model, deps.credit.priceTable);
+  const model = resolveProModel(
+    input.provider,
+    input.model,
+    deps.credit.priceTable,
+  );
   const upstream = deps.upstream();
   const inputTokens = estimateTokensFromText(input.prompt);
   const controller = new AbortController();
@@ -117,31 +132,46 @@ export async function* streamProCall(
             notify();
           },
           (response, responseTimeMs, _tokens, usage) => {
-            complete = { type: "complete", response, responseTimeMs, ...(usage ? { usage } : {}) };
+            complete = {
+              type: "complete",
+              response,
+              responseTimeMs,
+              ...(usage ? { usage } : {}),
+            };
             resolve({
               value: null,
               usage: usage
                 ? callUsage(model, usage, "reported")
-                : callUsage(model, usageFromText(input.prompt, response), "estimated"),
+                : callUsage(
+                    model,
+                    usageFromText(input.prompt, response),
+                    "estimated",
+                  ),
             });
           },
           reject,
           {
             maxTokens: maxOutputTokens,
             signal: controller.signal,
-            ...(input.temperature !== undefined && { temperature: input.temperature }),
+            ...(input.temperature !== undefined && {
+              temperature: input.temperature,
+            }),
             ...(input.seed !== undefined && { seed: input.seed }),
           },
         );
       }),
-    () => (text ? callUsage(model, usageFromText(input.prompt, text), "estimated") : null),
+    () =>
+      text
+        ? callUsage(model, usageFromText(input.prompt, text), "estimated")
+        : null,
   ).then(
     () => {
       finished = true;
       notify();
     },
     (error: unknown) => {
-      outcome.failure = error instanceof Error ? error : new Error(String(error));
+      outcome.failure =
+        error instanceof Error ? error : new Error(String(error));
       finished = true;
       notify();
     },
@@ -183,7 +213,11 @@ export function structuredProCall(
   },
   signal?: AbortSignal,
 ) {
-  const model = resolveProModel(input.provider, input.model, deps.credit.priceTable);
+  const model = resolveProModel(
+    input.provider,
+    input.model,
+    deps.credit.priceTable,
+  );
   const upstream = deps.upstream();
   return billed(
     deps,
@@ -198,12 +232,18 @@ export function structuredProCall(
         {
           maxTokens: maxOutputTokens,
           ...(signal ? { signal } : {}),
-          ...(input.temperature !== undefined && { temperature: input.temperature }),
+          ...(input.temperature !== undefined && {
+            temperature: input.temperature,
+          }),
         },
       );
       const usage = result.usage
         ? callUsage(model, result.usage, "reported")
-        : callUsage(model, usageFromText(input.prompt, result.raw), "estimated");
+        : callUsage(
+            model,
+            usageFromText(input.prompt, result.raw),
+            "estimated",
+          );
       return { value: { ...result, usage: result.usage ?? usage }, usage };
     },
     () => null,
@@ -226,7 +266,10 @@ export function embedProCall(
     { runId: input.runId, callId: input.callId },
     inputTokens,
     async () => {
-      const vector = await upstream.client.generateEmbeddings(input.text, signal ? { signal } : undefined);
+      const vector = await upstream.client.generateEmbeddings(
+        input.text,
+        signal ? { signal } : undefined,
+      );
       return {
         value: vector,
         usage: callUsage(model, { inputTokens, outputTokens: 0 }, "estimated"),

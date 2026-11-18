@@ -88,7 +88,12 @@ export const providerRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx, input, signal }) => {
       try {
-        return await structuredProCall(getProDeps(), ctx.authUser.uid, input, signal);
+        return await structuredProCall(
+          getProDeps(),
+          ctx.authUser.uid,
+          input,
+          signal,
+        );
       } catch (error) {
         throw toProTRPCError(error);
       }
@@ -105,7 +110,12 @@ export const providerRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx, input, signal }) => {
       try {
-        return await embedProCall(getProDeps(), ctx.authUser.uid, input, signal);
+        return await embedProCall(
+          getProDeps(),
+          ctx.authUser.uid,
+          input,
+          signal,
+        );
       } catch (error) {
         throw toProTRPCError(error);
       }
