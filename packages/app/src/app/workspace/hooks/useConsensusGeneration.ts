@@ -1,5 +1,6 @@
 
 import { useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useStore } from '~/store';
 import { EloRankingConsensus } from '@ensemble-ai/consensus-elo';
 import { MajorityVotingConsensus } from '@ensemble-ai/consensus-majority';
@@ -17,6 +18,7 @@ import { summarizerOrFallback } from '~/lib/summarizerChoice';
 
 export function useConsensusGeneration() {
     const [isGenerating, setIsGenerating] = useState(false);
+    const { t } = useTranslation('common');
     const [error, setError] = useState<string | null>(null);
     // Id of the latest consensus run. restart() bumps it, so a run that was
     // still in flight finishes without storing its stale result.
@@ -39,13 +41,13 @@ export function useConsensusGeneration() {
         const effectiveSummarizerModelId = summarizerOrFallback(summarizerOverride, summarizerModelId ?? undefined);
 
         if (!effectiveSummarizerModelId) {
-            setError('No summarizer model selected');
+            setError(t('errors.consensus.noSummarizer'));
             logger.error('Consensus generation failed: No summarizer model');
             return;
         }
 
         if (responses.length === 0) {
-            setError('No responses to summarize');
+            setError(t('errors.consensus.noResponses'));
             return;
         }
 
@@ -159,7 +161,7 @@ export function useConsensusGeneration() {
             const normalizedError =
                 err instanceof Error ? err : new Error(String(err));
             logger.error('Consensus Generation Error:', normalizedError);
-            if (isCurrent()) setError(normalizedError.message || 'Failed to generate consensus');
+            if (isCurrent()) setError(normalizedError.message || t('errors.consensus.failed'));
         } finally {
             setIsGenerating(false);
         }

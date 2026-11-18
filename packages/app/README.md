@@ -68,7 +68,7 @@ Run from `packages/app` (or with `--workspace=packages/app` from the repo root).
 | `typecheck` | `tsc --noEmit` |
 | `format:check`, `format:write` | Prettier |
 | `test` | `vitest run --coverage` |
-| `i18n:check` | Fails when an EN key has no FR string or the reverse (app and component library), when a string is empty or its `{{placeholders}}` differ, when code uses a literal `t()` key that does not exist, or when a `.tsx` file has hard-coded JSX text or `aria-label`, `placeholder`, `title` or `alt` text. Part of `test` too |
+| `i18n:check` | Fails when an EN key has no FR string or the reverse (app and component library), when a string is empty or its `{{placeholders}}` differ, when code uses a literal `t()` key that does not exist, when a `.tsx` file has hard-coded JSX text or `aria-label`, `placeholder`, `title`, `alt`, `label`, `description`, `heading`, `lead`, `eyebrow` or `emptyText` text, or when a `.ts` file under `src/app` or `src/lib` passes a string literal to `setError` or `toast` (server and logger code left out). Part of `test` too |
 | `test:watch`, `test:ui` | Vitest watch mode and UI |
 | `test:integration:provider-auth` | Runs `src/server/api/__tests__/provider-router.integration.test.ts` |
 | `firebase:test-user:ensure` | `scripts/ensure-firebase-test-user.mjs` |

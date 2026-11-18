@@ -20,6 +20,11 @@
       "title": "Une erreur est survenue",
       "description": "Une erreur inattendue s'est produite. Veuillez réessayer.",
       "tryAgain": "Réessayer"
+    },
+    "consensus": {
+      "noSummarizer": "Aucun modèle de synthèse n'est sélectionné.",
+      "noResponses": "Il n'y a aucune réponse à synthétiser.",
+      "failed": "Le consensus n'a pas pu être généré."
     }
   },
   "common": {

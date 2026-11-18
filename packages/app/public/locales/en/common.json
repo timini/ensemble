@@ -20,6 +20,11 @@
       "title": "Something went wrong",
       "description": "An unexpected error occurred. Please try again.",
       "tryAgain": "Try Again"
+    },
+    "consensus": {
+      "noSummarizer": "No summarizer model is selected.",
+      "noResponses": "There are no answers to summarize.",
+      "failed": "The consensus could not be generated."
     }
   },
   "common": {
