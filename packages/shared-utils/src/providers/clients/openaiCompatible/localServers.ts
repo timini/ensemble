@@ -87,11 +87,18 @@ export interface DetectOllamaOptions {
   fetchImpl?: typeof fetch;
 }
 
+/** Null when nothing answered (refused, blocked or timed out); otherwise the JSON body, or undefined. */
 async function fetchJson(url: string, timeoutMs: number, fetchImpl: typeof fetch): Promise<unknown> {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
+  let response: Response;
   try {
-    const response = await fetchImpl(url, { method: 'GET', signal: controller.signal });
+    response = await fetchImpl(url, { method: 'GET', signal: controller.signal });
+  } catch {
+    clearTimeout(timer);
+    return null;
+  }
+  try {
     if (!response.ok) return undefined;
     return (await response.json()) as unknown;
   } catch {
@@ -117,8 +124,10 @@ function modelNames(body: unknown): string[] | undefined {
 
 /**
  * Look for a running Ollama with a short timeout. Tries Ollama's own
- * `/api/tags`, then `/v1/models`. Never throws and logs nothing: a server
- * that is absent, blocked by the browser or not Ollama gives `{ found: false }`.
+ * `/api/tags`, then `/v1/models` when something answered the first. Never
+ * throws and logs nothing: a server that is absent, blocked by the browser
+ * or not Ollama gives `{ found: false }`. The browser itself logs each
+ * refused request, so an absent server is asked only once.
  */
 export async function detectOllama(options: DetectOllamaOptions = {}): Promise<OllamaDetection> {
   const url = (options.url ?? OLLAMA_DEFAULT_URL).trim().replace(/\/+$/, '');
@@ -126,7 +135,9 @@ export async function detectOllama(options: DetectOllamaOptions = {}): Promise<O
   const fetchImpl = options.fetchImpl ?? globalThis.fetch?.bind(globalThis);
   if (!fetchImpl) return { found: false };
 
-  let models = modelNames(await fetchJson(`${url}/api/tags`, timeoutMs, fetchImpl));
+  const tags = await fetchJson(`${url}/api/tags`, timeoutMs, fetchImpl);
+  if (tags === null) return { found: false };
+  let models = modelNames(tags);
   models ??= modelNames(await fetchJson(`${url}/v1/models`, timeoutMs, fetchImpl));
   if (!models) return { found: false };
 
