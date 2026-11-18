@@ -1,6 +1,7 @@
 import {
   stripSecrets,
   SYNC_LIMITS,
+  utf8Bytes,
   type SyncKind,
   type SyncSnapshot,
 } from "./syncItems";
@@ -15,8 +16,10 @@ export interface MergeResult<T> {
 
 /**
  * Merge this browser's items with the account's copy. The newer copy of an
- * item wins (by `stamp`, the last change); a tombstone at least as new as a
- * local item removes it; items only the account has are added. Items whose
+ * item wins (by `stamp`, the last change); a tombstone always removes the
+ * item, because ids are never reused once deleted (a run's id is its start
+ * time, a preset saved again after a delete gets a new id); items only the
+ * account has are added. Items whose
  * payload does not parse are left out.
  */
 export function mergeSync<T extends { id: string }>(
@@ -33,8 +36,7 @@ export function mergeSync<T extends { id: string }>(
 
   for (const item of local) {
     seen.add(item.id);
-    const tomb = deletedAt.get(item.id);
-    if (tomb !== undefined && tomb >= stamp(item)) continue;
+    if (deletedAt.has(item.id)) continue;
     const theirs = remoteById.get(item.id);
     if (theirs && theirs.updatedAt > stamp(item)) {
       const parsed = parse(theirs.payload);
@@ -64,10 +66,10 @@ export function toSyncPayload<T>(
 ): string | null {
   const max = SYNC_LIMITS[kind].maxPayload;
   const full = JSON.stringify(stripSecrets(item));
-  if (full.length <= max) return full;
+  if (utf8Bytes(full) <= max) return full;
   if (!slim) return null;
   const small = JSON.stringify(stripSecrets(slim(item)));
-  return small.length <= max ? small : null;
+  return utf8Bytes(small) <= max ? small : null;
 }
 
 /** Parses a stored payload as an object with an id, or null. */

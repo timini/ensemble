@@ -19,6 +19,21 @@ export interface UseRunHistoryOptions {
   onOpen: () => void;
 }
 
+/** Clears the run on screen and the composer, as New question does. */
+function clearScreen() {
+  const state = useStore.getState();
+  state.resetStreamingState();
+  state.clearManualResponses();
+  state.setPrompt("");
+}
+
+/** True when `built` holds exactly what `existing` holds, apart from its stamp. */
+function sameRun(existing: StoredRun | undefined, built: StoredRun): boolean {
+  if (!existing) return false;
+  const { updatedAt: _stamp, ...rest } = existing;
+  return JSON.stringify(rest) === JSON.stringify(built);
+}
+
 function warn(action: string) {
   return (error: unknown) =>
     logger.warn(`Run history: ${action} failed`, toError(error));
@@ -41,6 +56,8 @@ export function useRunHistory({
   const runsRef = useRef(runs);
   runsRef.current = runs;
   const writes = useRef<Promise<void>>(Promise.resolve());
+  /** Runs as stored in IndexedDB, kept in step inside the write chain. */
+  const stored = useRef(new Map<string, StoredRun>());
   const startedAt = useStore((s) => s.runStartedAt);
   const historyView = useStore((s) => s.historyView);
   const responses = useStore((s) => s.responses);
@@ -56,9 +73,10 @@ export function useRunHistory({
     // Queued like the writes, so a write made meanwhile is not lost from the list.
     writes.current = writes.current
       .then(listRuns)
-      .then((stored) => {
+      .then((list) => {
+        stored.current = new Map(list.map((r) => [r.id, r]));
         if (!live) return;
-        setRuns(stored);
+        setRuns(list);
         setLoaded(true);
       })
       .catch(warn("loading"));
@@ -78,16 +96,21 @@ export function useRunHistory({
       costUsd,
     });
     if (!built) return;
-    const record: StoredRun = { ...built, updatedAt: Date.now() };
     writes.current = writes.current
-      .then(() => saveRun(record))
-      .then(() =>
+      .then(async () => {
+        // A record that changed nothing (the last run on a reload) is not
+        // written, so its sync stamp stays put and cannot outrun a delete
+        // made on another device.
+        if (sameRun(stored.current.get(built.id), built)) return;
+        const record: StoredRun = { ...built, updatedAt: Date.now() };
+        await saveRun(record);
+        stored.current.set(record.id, record);
         setRuns((prev) =>
           [record, ...prev.filter((r) => r.id !== record.id)].sort(
             (a, b) => b.createdAt - a.createdAt,
           ),
-        ),
-      )
+        );
+      })
       .catch(warn("saving"));
   }, [
     enabled,
@@ -104,6 +127,8 @@ export function useRunHistory({
 
   const currentId =
     historyView?.id ?? (startedAt !== null ? runRecordId(startedAt) : null);
+  const currentRef = useRef(currentId);
+  currentRef.current = currentId;
 
   const open = useCallback(
     (id: string) => {
@@ -120,16 +145,14 @@ export function useRunHistory({
 
   const remove = useCallback(
     async (id: string) => {
-      if (id === currentId) {
-        const state = useStore.getState();
-        state.resetStreamingState();
-        state.clearManualResponses();
-        state.setPrompt("");
-      }
+      if (id === currentId) clearScreen();
       setRuns((prev) => prev.filter((r) => r.id !== id));
       // After any write still queued, so a late write cannot bring it back.
       writes.current = writes.current
-        .then(() => deleteRun(id))
+        .then(async () => {
+          await deleteRun(id);
+          stored.current.delete(id);
+        })
         .catch(warn("deleting"));
       await writes.current;
     },
@@ -143,12 +166,25 @@ export function useRunHistory({
   const replaceRuns = useCallback((next: StoredRun[]) => {
     const keep = new Set(next.map((r) => r.id));
     const previous = runsRef.current;
+    // The run on screen was deleted on another device: clear it, as a delete
+    // here would, so it is not listed or stored again.
+    const shown = currentRef.current;
+    if (shown && !keep.has(shown) && previous.some((r) => r.id === shown))
+      clearScreen();
     setRuns([...next].sort((a, b) => b.createdAt - a.createdAt));
     writes.current = writes.current
       .then(async () => {
         const before = new Map(previous.map((r) => [r.id, r]));
-        for (const r of previous) if (!keep.has(r.id)) await deleteRun(r.id);
-        for (const r of next) if (before.get(r.id) !== r) await saveRun(r);
+        for (const r of previous)
+          if (!keep.has(r.id)) {
+            await deleteRun(r.id);
+            stored.current.delete(r.id);
+          }
+        for (const r of next)
+          if (before.get(r.id) !== r) {
+            await saveRun(r);
+            stored.current.set(r.id, r);
+          }
       })
       .catch(warn("syncing"));
     return writes.current;

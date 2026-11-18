@@ -61,6 +61,12 @@ describe('ShareDialog', () => {
     expect(props.onDelete).toHaveBeenCalledOnce();
   });
 
+  it('keeps the link on screen when deleting it failed', () => {
+    setup({ status: 'ready', error: 'failed' });
+    expect(screen.getByTestId('share-url')).toHaveValue(URL);
+    expect(screen.getByTestId('share-error')).toHaveTextContent('Could not create or delete the link');
+  });
+
   it('disables Delete link while deleting', () => {
     setup({ status: 'deleting' });
     expect(screen.getByTestId('share-delete')).toBeDisabled();

@@ -4,6 +4,7 @@ import {
   SYNC_ID,
   SYNC_LIMITS,
   SYNC_LIST_LIMIT,
+  utf8Bytes,
   type SyncItem,
   type SyncKind,
   type SyncSnapshot,
@@ -46,7 +47,7 @@ export function assertSyncItem(kind: SyncKind, item: SyncItem): void {
   if (!SYNC_ID.test(item.id)) throw new SyncItemError("Invalid item id");
   if (!Number.isSafeInteger(item.updatedAt) || item.updatedAt < 0)
     throw new SyncItemError("Invalid updatedAt");
-  if (item.payload.length > SYNC_LIMITS[kind].maxPayload)
+  if (utf8Bytes(item.payload) > SYNC_LIMITS[kind].maxPayload)
     throw new SyncItemError("Item too large to sync");
   let parsed: unknown;
   try {
@@ -94,8 +95,9 @@ export async function listSyncItems(
 }
 
 /**
- * Store items, newest write wins: an item older than what is stored (or
- * than its tombstone) is skipped. Returns the ids written.
+ * Store items, newest write wins: an item older than what is stored is
+ * skipped, and a deleted item stays deleted (ids are never reused). Returns
+ * the ids written.
  */
 export async function upsertSyncItems(
   db: Firestore,
@@ -114,7 +116,8 @@ export async function upsertSyncItems(
     const written: string[] = [];
     items.forEach((item, i) => {
       const stored = current[i]?.data() as SyncDoc | undefined;
-      if (stored && stored.updatedAt >= item.updatedAt) return;
+      if (stored && (stored.deleted || stored.updatedAt >= item.updatedAt))
+        return;
       const doc: SyncDoc = {
         uid,
         id: item.id,

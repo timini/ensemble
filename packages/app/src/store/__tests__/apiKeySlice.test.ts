@@ -11,9 +11,14 @@ vi.mock("@ensemble-ai/shared-utils/security", () => ({
     ),
   // "old:" stands for a ciphertext made with the legacy derived key.
   isLegacyCiphertext: (value: string) => value.startsWith("old:"),
+  EncryptionKeyUnavailableError: class EncryptionKeyUnavailableError extends Error {},
 }));
 
-import { encrypt, decrypt } from "@ensemble-ai/shared-utils/security";
+import {
+  encrypt,
+  decrypt,
+  EncryptionKeyUnavailableError,
+} from "@ensemble-ai/shared-utils/security";
 
 const encryptMock = vi.mocked(encrypt);
 const decryptMock = vi.mocked(decrypt);
@@ -242,5 +247,25 @@ describe("apiKeySlice", () => {
       encrypted: "enc:sk-new",
     });
     expect(encryptMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("keeps the stored key when only the key store is unavailable", async () => {
+    decryptMock.mockRejectedValueOnce(new EncryptionKeyUnavailableError());
+    store.setState({
+      apiKeys: {
+        ...store.getState().apiKeys,
+        openai: {
+          key: "",
+          encrypted: "v2:kept",
+          visible: false,
+          status: "idle",
+        },
+      },
+    });
+    await store.getState().initializeEncryption();
+    expect(store.getState().apiKeys.openai).toMatchObject({
+      key: "",
+      encrypted: "v2:kept",
+    });
   });
 });

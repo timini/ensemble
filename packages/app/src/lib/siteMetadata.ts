@@ -15,6 +15,23 @@ export const OG_HEADLINE = [
   "See where they agree.",
 ] as const;
 
+/**
+ * Text of a shared run's metadata and preview image. Metadata is rendered
+ * before the reader's language is known, so it is in English.
+ */
+export const SHARED_RUN_METADATA = {
+  title: "Shared run",
+  imageAlt: "A shared Ensemble AI run",
+  imageFooter: "Shared run. Compare every answer and read the consensus.",
+  missing: "This link has expired or was deleted",
+  answers: (count: number) => `${count} answers`,
+  level: {
+    high: "High agreement",
+    medium: "Medium agreement",
+    low: "Low agreement",
+  },
+} as const;
+
 export const PAGE_METADATA = {
   home: {
     title:

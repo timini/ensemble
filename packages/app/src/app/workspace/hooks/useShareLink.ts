@@ -50,7 +50,12 @@ export function useShareLink({ currentId, source }: UseShareLinkOptions) {
 
   const fail = (error: unknown, action: string) => {
     logger.warn(`Share: ${action} failed`, toError(error));
-    setState((s) => ({ ...s, status: "error", error: shareErrorOf(error) }));
+    // A link that could not be deleted still works: keep showing it.
+    setState((s) => ({
+      ...s,
+      status: s.link ? "ready" : "error",
+      error: shareErrorOf(error),
+    }));
   };
 
   const openFor = useCallback(
@@ -94,7 +99,7 @@ export function useShareLink({ currentId, source }: UseShareLinkOptions) {
   const remove = () => {
     const id = state.link?.id;
     if (!id) return;
-    setState((s) => ({ ...s, status: "deleting" }));
+    setState((s) => ({ ...s, status: "deleting", error: undefined }));
     utils.client.share.delete
       .mutate({ id })
       .then(() =>

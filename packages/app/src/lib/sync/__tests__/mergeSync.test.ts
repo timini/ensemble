@@ -48,7 +48,7 @@ describe("mergeSync", () => {
     expect(upload.map((i) => i.id)).toEqual(["a"]);
   });
 
-  it("drops an item deleted on another device unless it changed here since", () => {
+  it("drops an item deleted on another device, even one written here since", () => {
     const { merged, upload } = mergeSync<Item>(
       [
         { id: "a", at: 1 },
@@ -64,8 +64,8 @@ describe("mergeSync", () => {
       stamp,
       parseSyncPayload,
     );
-    expect(merged.map((i) => i.id)).toEqual(["b"]);
-    expect(upload.map((i) => i.id)).toEqual(["b"]);
+    expect(merged).toEqual([]);
+    expect(upload).toEqual([]);
   });
 
   it("skips account items that do not parse", () => {

@@ -14,6 +14,7 @@ vi.mock("@ensemble-ai/shared-utils/security", () => ({
     return value.replace(/^enc:/, "");
   }),
   isLegacyCiphertext: () => false,
+  EncryptionKeyUnavailableError: class EncryptionKeyUnavailableError extends Error {},
 }));
 
 describe("endpointsSlice", () => {

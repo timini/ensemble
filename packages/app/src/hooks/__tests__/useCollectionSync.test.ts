@@ -140,4 +140,26 @@ describe("useCollectionSync", () => {
     expect(result.current).toBe(false);
     expect(api.upsert).not.toHaveBeenCalled();
   });
+
+  it("merges items added while the account's list was loading", async () => {
+    let release: (snap: SyncSnapshot) => void = () => undefined;
+    const api = fakeApi();
+    api.list.mockImplementation(
+      () => new Promise<SyncSnapshot>((resolve) => (release = resolve)),
+    );
+    const { result, rerender, apply } = setup({ uid: "u1", items: [], api });
+    rerender({ uid: "u1", items: [{ id: "late", at: 4 }] });
+    release({ items: [], deleted: [] });
+    await waitFor(() => expect(result.current).toBe(true));
+    expect((apply.mock.calls[0]![0] as Item[]).map((i) => i.id)).toEqual([
+      "late",
+    ]);
+    expect(api.upsert).toHaveBeenCalledWith("presets", [
+      {
+        id: "late",
+        updatedAt: 4,
+        payload: JSON.stringify({ id: "late", at: 4 }),
+      },
+    ]);
+  });
 });

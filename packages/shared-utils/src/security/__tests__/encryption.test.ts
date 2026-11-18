@@ -5,6 +5,7 @@ import {
   decrypt,
   deriveKey,
   encrypt,
+  EncryptionKeyUnavailableError,
   getDeviceKey,
   isLegacyCiphertext,
   resetEncryptionKeyCache,
@@ -71,6 +72,14 @@ describe("browser key encryption", () => {
     const ciphertext = await encrypt("sk-x");
     expect(isLegacyCiphertext(ciphertext)).toBe(true);
     expect(await decrypt(ciphertext)).toBe("sk-x");
+    vi.unstubAllGlobals();
+  });
+
+  it('says the key is unavailable, rather than the payload bad, when IndexedDB fails', async () => {
+    const ciphertext = await encrypt('sk-secret');
+    vi.stubGlobal('indexedDB', undefined);
+    resetEncryptionKeyCache();
+    await expect(decrypt(ciphertext)).rejects.toBeInstanceOf(EncryptionKeyUnavailableError);
     vi.unstubAllGlobals();
   });
 });

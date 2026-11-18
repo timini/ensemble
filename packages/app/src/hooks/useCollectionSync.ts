@@ -59,7 +59,7 @@ function warn(kind: SyncKind, action: string) {
 /**
  * Keeps a list of items in this browser in step with the signed-in
  * account. On sign-in it merges the two copies (newest change wins,
- * deletes win over older copies) and uploads what the account lacks. If
+ * a delete always wins) and uploads what the account lacks. If
  * this browser last synced with a different account, its items are not
  * uploaded: they are replaced by the new account's. After that, changes
  * and deletes here are sent after a short pause. Signed out, nothing is
@@ -107,11 +107,12 @@ export function useCollectionSync<T extends { id: string }>(
     let live = true;
     void (async () => {
       const { api, stamp, apply } = opts.current;
+      const remote = await api.list(kind);
+      if (!live) return;
+      // Read after the list arrives, so changes made meanwhile are merged.
       premerge.current = latest.current;
       const owner = readOwner(kind);
       const local = owner && owner !== uid ? [] : latest.current;
-      const remote = await api.list(kind);
-      if (!live) return;
       const { merged, upload } = mergeSync(
         local,
         remote,

@@ -182,6 +182,13 @@ describe("useOnboarding", () => {
     expect(replace).toHaveBeenCalledWith("/workspace?mockErrors=x");
   });
 
+  it("leaves a used sign-in link out of the URL it keeps, so a reload does not reuse it", () => {
+    query = "start=pro&mode=signIn&oobCode=used&apiKey=k&lang=en";
+    const { result } = renderHook(() => useOnboarding(options()));
+    act(() => result.current.onSkip());
+    expect(replace).toHaveBeenCalledWith("/workspace");
+  });
+
   it("reports Start, and not Skip, so the workspace can choose starting models", () => {
     const onStarted = vi.fn();
     const skipped = renderHook(() => useOnboarding(options({ onStarted })));

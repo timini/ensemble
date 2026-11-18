@@ -30,7 +30,7 @@ export interface SyncSnapshot {
 /** Item ids: letters, digits, `-` and `_`, no `__` (the server's key separator). */
 export const SYNC_ID = /^(?!.*__)[A-Za-z0-9_-]{1,128}$/;
 
-/** Per kind: largest item as JSON, and most items per upload call. */
+/** Per kind: largest item as JSON in UTF-8 bytes, and most items per upload call. */
 export const SYNC_LIMITS: Record<
   SyncKind,
   { maxPayload: number; maxBatch: number }
@@ -39,6 +39,11 @@ export const SYNC_LIMITS: Record<
   history: { maxPayload: 800_000, maxBatch: 5 },
   presets: { maxPayload: 20_000, maxBatch: 50 },
 };
+
+/** Size of a string in UTF-8 bytes, as Firestore counts it. */
+export function utf8Bytes(text: string): number {
+  return new TextEncoder().encode(text).byteLength;
+}
 
 /** Most items (and tombstones) a device reads back per kind. */
 export const SYNC_LIST_LIMIT = 500;

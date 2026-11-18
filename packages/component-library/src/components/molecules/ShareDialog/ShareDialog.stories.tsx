@@ -35,6 +35,9 @@ export const Ready: Story = {};
 /** While the link is being deleted. */
 export const Deleting: Story = { args: { status: 'deleting' } };
 
+/** Deleting the link failed: the link still works and stays on screen. */
+export const DeleteFailed: Story = { args: { error: 'failed' } };
+
 /** Creating the link failed. */
 export const Failed: Story = { args: { status: 'error', error: 'failed', url: undefined } };
 

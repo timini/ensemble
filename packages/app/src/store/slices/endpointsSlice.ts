@@ -15,6 +15,7 @@ import type { StateCreator } from "zustand";
 import {
   decrypt,
   encrypt,
+  EncryptionKeyUnavailableError,
   isLegacyCiphertext,
 } from "@ensemble-ai/shared-utils/security";
 import {
@@ -252,9 +253,11 @@ export const createEndpointsSlice: StateCreator<EndpointsSlice> = (
               `Failed to decrypt the ${endpoint.id} endpoint key`,
               toError(error, "Failed to decrypt an endpoint key"),
             );
-            patchEndpoint(endpoint.id, () => ({
+            // Keep the ciphertext when only the key store failed.
+            const keep = error instanceof EncryptionKeyUnavailableError;
+            patchEndpoint(endpoint.id, (current) => ({
               apiKey: "",
-              encryptedApiKey: null,
+              encryptedApiKey: keep ? current.encryptedApiKey : null,
               status: "idle",
             }));
           }

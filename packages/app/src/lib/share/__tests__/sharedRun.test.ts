@@ -60,9 +60,12 @@ describe("toSharedRun", () => {
       status: "complete",
       content: "Yes.",
     });
-    expect(shared!.answers[1]).toMatchObject({
+    // Provider error text is not shared: it can hold key fragments or local URLs.
+    expect(shared!.answers[1]).toEqual({
+      id: "claude-x",
+      modelName: "Claude",
+      provider: "anthropic",
       status: "error",
-      error: "Rate limited",
     });
     expect(shared!.agreement).toEqual({
       score: 0.91,

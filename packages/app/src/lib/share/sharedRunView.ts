@@ -37,7 +37,6 @@ export function toSharedRunView(run: SharedRun): SharedRunViewProps {
       kind: a.kind,
       status: a.status,
       content: a.content,
-      error: a.error,
     })),
   };
 }

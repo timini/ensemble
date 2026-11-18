@@ -9,6 +9,7 @@ import type { StateCreator } from "zustand";
 import {
   decrypt,
   encrypt,
+  EncryptionKeyUnavailableError,
   isLegacyCiphertext,
 } from "@ensemble-ai/shared-utils/security";
 import type { ValidationStatus } from "@/components/molecules/ApiKeyInput";
@@ -119,6 +120,9 @@ export const createApiKeySlice: StateCreator<ApiKeySlice> = (set, get) => ({
             `Failed to decrypt ${provider} API key`,
             normalizedError,
           );
+          // Keep the ciphertext when only the key store failed (it may
+          // work on the next visit); drop it when it cannot be decrypted.
+          const keep = error instanceof EncryptionKeyUnavailableError;
           set((state) => {
             const currentEntry = state.apiKeys[provider];
             return {
@@ -128,7 +132,7 @@ export const createApiKeySlice: StateCreator<ApiKeySlice> = (set, get) => ({
                   ? {
                       ...currentEntry,
                       key: "",
-                      encrypted: null,
+                      encrypted: keep ? currentEntry.encrypted : null,
                       status: "idle",
                     }
                   : null,

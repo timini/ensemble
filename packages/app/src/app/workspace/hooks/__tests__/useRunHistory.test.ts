@@ -207,4 +207,30 @@ describe("useRunHistory", () => {
     ]);
     expect((await listRuns()).map((r) => r.id)).toEqual(["run-3", "run-1"]);
   });
+
+  it("does not write the run on screen again when nothing changed, so its sync stamp stays", async () => {
+    finishedRun("Unchanged", 3_000);
+    const first = setup();
+    await waitFor(() => expect(first.hook.result.current.runs).toHaveLength(1));
+    await waitFor(async () =>
+      expect((await listRuns())[0]?.updatedAt).toEqual(expect.any(Number)),
+    );
+    const stamp = (await listRuns())[0]!.updatedAt;
+    first.hook.unmount();
+    // A reload: the store still holds the same run.
+    const again = setup();
+    await waitFor(() => expect(again.hook.result.current.loaded).toBe(true));
+    await new Promise((r) => setTimeout(r, 50));
+    expect((await listRuns())[0]!.updatedAt).toBe(stamp);
+  });
+
+  it("clears the run on screen when a synced delete removes it", async () => {
+    finishedRun("Deleted elsewhere", 4_000);
+    const { hook } = setup();
+    await waitFor(() => expect(hook.result.current.runs).toHaveLength(1));
+    await act(() => hook.result.current.replaceRuns([]));
+    expect(useStore.getState().runPrompt).toBeNull();
+    expect(useStore.getState().responses).toEqual([]);
+    expect(await listRuns()).toEqual([]);
+  });
 });

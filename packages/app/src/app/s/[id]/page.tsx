@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { SITE_NAME } from "~/lib/siteMetadata";
+import { SHARED_RUN_METADATA, SITE_NAME } from "~/lib/siteMetadata";
 import { sharePath } from "~/lib/share/shareLinks";
 import { sharedRunSummary } from "~/lib/share/shareMetadata";
 import { loadShare } from "~/server/share/loadShare";
@@ -23,7 +23,8 @@ export async function generateMetadata({
 }: PageProps): Promise<Metadata> {
   const { id } = await params;
   const share = await loadShare(id);
-  if (!share) return { title: "Shared run", robots: { index: false } };
+  if (!share)
+    return { title: SHARED_RUN_METADATA.title, robots: { index: false } };
   const { title, description } = sharedRunSummary(share.run);
   return {
     title,

@@ -6,6 +6,7 @@ import {
   type SharedRun,
 } from "~/lib/share/sharedRun";
 import { takeRateSlot, type RateWindow } from "~/server/pro/rateLimit";
+import { utf8Bytes } from "~/lib/sync/syncItems";
 
 /**
  * `shares/{id}`: a run shared by its owner, readable by anyone with the id
@@ -79,7 +80,7 @@ export function newShareId(): string {
 function serialize(run: SharedRun): string {
   const parsed = sharedRunSchema.parse(run);
   const payload = JSON.stringify(parsed);
-  if (payload.length > MAX_SHARED_RUN_JSON) throw new ShareTooLargeError();
+  if (utf8Bytes(payload) > MAX_SHARED_RUN_JSON) throw new ShareTooLargeError();
   return payload;
 }
 

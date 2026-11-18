@@ -14,7 +14,7 @@ import type { AnswerColumnItem } from "@/components/organisms/AnswerColumns";
 export const MAX_SHARED_ANSWERS = 12;
 /** Longest prompt, answer or consensus kept, in characters. */
 export const MAX_SHARED_TEXT = 60_000;
-/** Largest shared run, as JSON, in characters. Firestore documents hold 1 MiB. */
+/** Largest shared run, as JSON, in UTF-8 bytes. Firestore documents hold 1 MiB. */
 export const MAX_SHARED_RUN_JSON = 400_000;
 
 const text = z.string().max(MAX_SHARED_TEXT);
@@ -30,7 +30,6 @@ const answerSchema = z
     kind: z.enum(["model", "manual"]).optional(),
     status: z.enum(["complete", "error"]),
     content: text.optional(),
-    error: z.string().max(2000).optional(),
   })
   .strict();
 
@@ -128,9 +127,6 @@ export function toSharedRun(source: SharedRunSource): SharedRun | null {
       ...(a.kind ? { kind: a.kind } : {}),
       status: a.status === "error" ? "error" : "complete",
       ...(a.content ? { content: clip(a.content) } : {}),
-      ...(a.status === "error" && a.error
-        ? { error: a.error.slice(0, 2000) }
-        : {}),
     }),
   );
   if (!answers.some((a) => a.status === "complete")) return null;

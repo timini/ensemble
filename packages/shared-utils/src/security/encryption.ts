@@ -246,6 +246,18 @@ export function resetEncryptionKeyCache(): void {
   deviceKeyPromise = null;
 }
 
+/**
+ * The device key could not be loaded (IndexedDB blocked or failing). The
+ * ciphertext may still be fine, so callers should keep it and try again on
+ * a later visit rather than discard it.
+ */
+export class EncryptionKeyUnavailableError extends Error {
+  constructor() {
+    super("The encryption key is not available in this browser right now.");
+    this.name = "EncryptionKeyUnavailableError";
+  }
+}
+
 /** True for a ciphertext made with the old derived key, which should be encrypted again. */
 export function isLegacyCiphertext(ciphertext: string): boolean {
   return !ciphertext.startsWith(V2_PREFIX);
@@ -277,7 +289,7 @@ export async function decrypt(ciphertext: string): Promise<string> {
   const legacy = isLegacyCiphertext(ciphertext);
   const key = legacy ? await deriveKey() : await getDeviceKey();
   if (!key) {
-    throw new Error("Failed to decrypt payload.");
+    throw new EncryptionKeyUnavailableError();
   }
 
   const [ivPart, payloadPart] = (

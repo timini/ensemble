@@ -9,6 +9,7 @@ import type { OnboardingPath } from "@/components/organisms/OnboardingSheet";
 import { useStore } from "~/store";
 import { detectKeyProvider } from "~/lib/keyProvider";
 import { WORKSPACE_PATH } from "~/lib/workspaceRoutes";
+import { withoutEmailLinkParams } from "~/lib/auth/emailLink";
 import type { useApiKeySettings } from "./useApiKeySettings";
 import type { useEndpointConfiguration } from "./useEndpointConfiguration";
 
@@ -145,7 +146,11 @@ export function useOnboarding({
     complete();
     setOpen(false);
     if (!params.get("start")) return;
-    const rest = new URLSearchParams(params.toString());
+    // Never put a used sign-in link (mode, oobCode) back in the address
+    // bar: a reload would then try to sign in with it again.
+    const rest = new URLSearchParams(
+      new URL(withoutEmailLinkParams(`http://x/?${params.toString()}`)).search,
+    );
     rest.delete("start");
     const text = rest.toString();
     router.replace(text ? `${WORKSPACE_PATH}?${text}` : WORKSPACE_PATH);

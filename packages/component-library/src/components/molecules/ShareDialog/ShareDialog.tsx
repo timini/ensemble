@@ -75,10 +75,10 @@ export function ShareDialog(props: ShareDialogProps) {
         <div className="space-y-4">
           <DialogTitle>{t(`${key}.title`)}</DialogTitle>
           {status === 'loading' && (
-            <p className="flex items-center gap-2 text-label text-muted-foreground">
+            <div className="flex items-center gap-2 text-label text-muted-foreground">
               <LoadingSpinner size="sm" />
               {t(`${key}.loading`)}
-            </p>
+            </div>
           )}
           {!hasLink && status !== 'loading' && (
             <>
@@ -118,6 +118,11 @@ export function ShareDialog(props: ShareDialogProps) {
               <p data-testid="share-expiry" className={NOTE}>
                 {t(`${key}.expiresOn`, { date: props.expiresOn ?? '' })} {t(`${key}.deleteNote`)}
               </p>
+              {props.error && (
+                <p data-testid="share-error" role="alert" className="text-label text-destructive">
+                  {t(`${key}.errors.${props.error}`)}
+                </p>
+              )}
             </>
           )}
           <DialogFooter>

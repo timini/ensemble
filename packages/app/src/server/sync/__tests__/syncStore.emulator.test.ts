@@ -67,7 +67,7 @@ describe("sync store", () => {
     );
   });
 
-  it("leaves a tombstone that an older write cannot undo", async () => {
+  it("leaves a tombstone that no later write undoes", async () => {
     await upsertSyncItems(db, "alice", "presets", [run("p1", 10)]);
     await removeSyncItems(db, "alice", "presets", ["p1"], 50);
     await upsertSyncItems(db, "alice", "presets", [run("p1", 40)]);
@@ -75,9 +75,9 @@ describe("sync store", () => {
       items: [],
       deleted: [{ id: "p1", deletedAt: 50 }],
     });
-    // A later save of the same id brings it back.
+    // Not even a newer write brings it back: deleted ids are never reused.
     await upsertSyncItems(db, "alice", "presets", [run("p1", 60)]);
-    expect((await listSyncItems(db, "alice", "presets")).items).toHaveLength(1);
+    expect((await listSyncItems(db, "alice", "presets")).items).toHaveLength(0);
   });
 
   it("refuses secrets, mismatched ids, oversize items and big batches", async () => {
