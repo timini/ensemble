@@ -54,10 +54,9 @@ export async function verifyFirebaseAuthToken(
   }
 
   try {
-    const decoded: DecodedIdToken = await getAuth(getFirebaseApp()).verifyIdToken(
-      idToken,
-      true,
-    );
+    const decoded: DecodedIdToken = await getAuth(
+      getFirebaseApp(),
+    ).verifyIdToken(idToken, true);
     const email = asOptionalString(decoded.email);
     const name = asOptionalString(decoded.name);
     const picture = asOptionalString(decoded.picture);

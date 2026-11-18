@@ -32,6 +32,7 @@ export const env = createEnv({
     PRO_RATE_LIMIT_WINDOW_SECONDS: z.string().optional(),
     PRO_MOCK_UPSTREAM: z.string().optional(),
     APP_CHECK_ENFORCE: z.string().optional(),
+    SHARE_RATE_LIMIT_PER_HOUR: z.string().optional(),
   },
 
   /**
@@ -82,6 +83,7 @@ export const env = createEnv({
     PRO_RATE_LIMIT_WINDOW_SECONDS: process.env.PRO_RATE_LIMIT_WINDOW_SECONDS,
     PRO_MOCK_UPSTREAM: process.env.PRO_MOCK_UPSTREAM,
     APP_CHECK_ENFORCE: process.env.APP_CHECK_ENFORCE,
+    SHARE_RATE_LIMIT_PER_HOUR: process.env.SHARE_RATE_LIMIT_PER_HOUR,
     NEXT_PUBLIC_SENTRY_DSN: process.env.NEXT_PUBLIC_SENTRY_DSN,
     NEXT_PUBLIC_SENTRY_RELEASE: process.env.NEXT_PUBLIC_SENTRY_RELEASE,
     NEXT_PUBLIC_FIREBASE_API_KEY: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,

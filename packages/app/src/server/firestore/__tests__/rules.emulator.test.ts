@@ -66,6 +66,16 @@ beforeEach(async () => {
       runId: "run1",
     });
     await setDoc(doc(db, "rateLimits/alice"), { windowStartMs: 0, count: 1 });
+    await setDoc(doc(db, "shares/abcdefghijklmnopqrstuv"), {
+      uid: "alice",
+      runId: "run-1",
+      payload: "{}",
+    });
+    await setDoc(doc(db, "history/alice__run-1"), {
+      uid: "alice",
+      id: "run-1",
+    });
+    await setDoc(doc(db, "presets/alice__p1"), { uid: "alice", id: "p1" });
   });
 });
 
@@ -151,5 +161,37 @@ describe("other collections", () => {
     );
     await assertFails(getDoc(doc(alice(), "rateLimits/alice")));
     await assertFails(setDoc(doc(alice(), "rateLimits/alice"), { count: 0 }));
+  });
+});
+
+describe("shares, synced history and presets", () => {
+  it("are read through the server only, by visitors and owners alike", async () => {
+    await assertFails(getDoc(doc(guest(), "shares/abcdefghijklmnopqrstuv")));
+    await assertFails(getDoc(doc(alice(), "shares/abcdefghijklmnopqrstuv")));
+    await assertFails(
+      getDocs(
+        query(collection(alice(), "shares"), where("uid", "==", "alice")),
+      ),
+    );
+    await assertFails(getDoc(doc(alice(), "history/alice__run-1")));
+    await assertFails(
+      getDocs(
+        query(collection(alice(), "history"), where("uid", "==", "alice")),
+      ),
+    );
+    await assertFails(getDoc(doc(alice(), "presets/alice__p1")));
+  });
+
+  it("refuse every client write", async () => {
+    await assertFails(
+      setDoc(doc(alice(), "shares/zzzzzzzzzzzzzzzzzzzzzz"), { uid: "alice" }),
+    );
+    await assertFails(deleteDoc(doc(alice(), "shares/abcdefghijklmnopqrstuv")));
+    await assertFails(
+      setDoc(doc(alice(), "history/alice__run-2"), { uid: "alice" }),
+    );
+    await assertFails(
+      setDoc(doc(alice(), "presets/alice__p2"), { uid: "alice" }),
+    );
   });
 });
