@@ -67,6 +67,7 @@ describe("handleStripeWebhook", () => {
       uid: "user-1",
       sessionId: "cs_test_1",
       eventId: "evt_1",
+      eventType: "checkout.session.completed",
       packId: "usd-5",
       amountMicros: 5_000_000,
       amountTotalCents: 500,
@@ -157,6 +158,10 @@ describe("handleStripeWebhook", () => {
     expect(
       (await handleStripeWebhook(wrongAmount.body, wrongAmount.signature, d))
         .body,
+    ).toEqual({ received: true, result: "rejected" });
+    const euro = signed(sessionEvent({ currency: "eur" }));
+    expect(
+      (await handleStripeWebhook(euro.body, euro.signature, d)).body,
     ).toEqual({ received: true, result: "rejected" });
     const noUser = signed(
       sessionEvent({

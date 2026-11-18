@@ -43,15 +43,18 @@ function purchaseFrom(
   const uid = session.client_reference_id ?? session.metadata?.uid;
   const pack = findPack(config, session.metadata?.packId ?? "");
   if (!uid || !pack) return null;
+  // Checkout only sells USD packs at the configured price.
   if (session.amount_total !== pack.amountCents) return null;
+  if (session.currency !== "usd") return null;
   return {
     uid,
     sessionId: session.id,
     eventId: event.id,
+    eventType: event.type,
     packId: pack.id,
     amountMicros: pack.creditMicros,
     amountTotalCents: session.amount_total,
-    currency: session.currency ?? "usd",
+    currency: session.currency,
   };
 }
 

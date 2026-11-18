@@ -53,6 +53,8 @@ export interface PurchaseInput {
   sessionId: string;
   /** Stripe event id, recorded in stripeEvents so a redelivery is skipped early. */
   eventId: string;
+  /** Stripe event type, kept in the stripeEvents record. Defaults to checkout.session.completed. */
+  eventType?: string;
   packId: string;
   amountMicros: number;
   amountTotalCents: number;
@@ -85,7 +87,7 @@ export async function recordPurchase(
     if (entry.exists || event.exists) {
       if (!event.exists)
         tx.create(eventRef, {
-          type: "checkout.session.completed",
+          type: input.eventType ?? "checkout.session.completed",
           sessionId: input.sessionId,
           duplicate: true,
           handledAt: new Date(),
@@ -103,7 +105,7 @@ export async function recordPurchase(
       currency: input.currency,
     });
     tx.create(eventRef, {
-      type: "checkout.session.completed",
+      type: input.eventType ?? "checkout.session.completed",
       sessionId: input.sessionId,
       handledAt: new Date(),
     });
