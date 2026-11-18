@@ -36,7 +36,7 @@ export function HistoryRunNotice({
         type="button"
         onClick={onNewQuestion}
         data-testid="history-run-new"
-        className="h-9 shrink-0 rounded-md border border-border bg-card px-3 text-label font-medium transition-colors duration-fast focus-ring hover:bg-muted"
+        className="h-9 shrink-0 self-start rounded-md border border-border bg-card px-3 text-label font-medium transition-colors duration-fast focus-ring hover:bg-muted sm:self-auto"
       >
         {t("pages.workspace.history.newQuestion")}
       </button>

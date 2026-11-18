@@ -83,12 +83,18 @@ export function toAgreementProps(input: AgreementInput): AgreementSummaryProps {
 
 /**
  * Consensus card status. `null` from useConsensusStatus means the run
- * finished with fewer answers than consensus needs.
+ * finished with fewer answers than consensus needs or, for a run reopened
+ * from history (`readOnly`) with at least 2 answers, that no consensus was
+ * saved with it.
  */
 export function toConsensusStatus(
   status: ConsensusStatus | null,
+  reopened?: { readOnly: boolean; answers: number },
 ): ConsensusAnswerStatus {
-  return status ?? "unavailable";
+  if (status) return status;
+  return reopened?.readOnly && reopened.answers >= 2
+    ? "notSaved"
+    : "unavailable";
 }
 
 export interface AnswerItemsInput {

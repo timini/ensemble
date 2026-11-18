@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useStore } from "~/store";
 import { logger } from "~/lib/logger";
 import { toError } from "~/lib/errors";
@@ -9,9 +9,6 @@ import {
   toStoredRun,
   type RunRecordExtras,
 } from "~/lib/runHistoryRecord";
-
-/** Wait after the last change before a run is written, so bursts write once. */
-const SAVE_DELAY_MS = 250;
 
 export interface UseRunHistoryOptions {
   /** False in Pro mode, where history will live on the server. */
@@ -39,6 +36,7 @@ export function useRunHistory({
   onOpen,
 }: UseRunHistoryOptions) {
   const [runs, setRuns] = useState<StoredRun[]>([]);
+  const writes = useRef<Promise<void>>(Promise.resolve());
   const startedAt = useStore((s) => s.runStartedAt);
   const historyView = useStore((s) => s.historyView);
   const responses = useStore((s) => s.responses);
@@ -51,34 +49,39 @@ export function useRunHistory({
   useEffect(() => {
     if (!enabled) return;
     let live = true;
-    listRuns()
-      .then((stored) => live && setRuns(stored))
+    // Queued like the writes, so a write made meanwhile is not lost from the list.
+    writes.current = writes.current
+      .then(listRuns)
+      .then((stored) => {
+        if (live) setRuns(stored);
+      })
       .catch(warn("loading"));
     return () => {
       live = false;
     };
   }, [enabled]);
 
+  // The record is built from the state of this render and written at once,
+  // so a question asked right after the consensus arrives cannot drop it.
+  // Writes are chained so they reach IndexedDB in order.
   useEffect(() => {
     if (!enabled) return;
-    const timer = setTimeout(() => {
-      const record = toStoredRun(useStore.getState(), {
-        agreementScore,
-        agreementLevel,
-        costUsd,
-      });
-      if (!record) return;
-      saveRun(record)
-        .then(() =>
-          setRuns((prev) =>
-            [record, ...prev.filter((r) => r.id !== record.id)].sort(
-              (a, b) => b.createdAt - a.createdAt,
-            ),
+    const record = toStoredRun(useStore.getState(), {
+      agreementScore,
+      agreementLevel,
+      costUsd,
+    });
+    if (!record) return;
+    writes.current = writes.current
+      .then(() => saveRun(record))
+      .then(() =>
+        setRuns((prev) =>
+          [record, ...prev.filter((r) => r.id !== record.id)].sort(
+            (a, b) => b.createdAt - a.createdAt,
           ),
-        )
-        .catch(warn("saving"));
-    }, SAVE_DELAY_MS);
-    return () => clearTimeout(timer);
+        ),
+      )
+      .catch(warn("saving"));
   }, [
     enabled,
     startedAt,
@@ -114,7 +117,11 @@ export function useRunHistory({
         state.setPrompt("");
       }
       setRuns((prev) => prev.filter((r) => r.id !== id));
-      await deleteRun(id).catch(warn("deleting"));
+      // After any write still queued, so a late write cannot bring it back.
+      writes.current = writes.current
+        .then(() => deleteRun(id))
+        .catch(warn("deleting"));
+      await writes.current;
     },
     [currentId],
   );

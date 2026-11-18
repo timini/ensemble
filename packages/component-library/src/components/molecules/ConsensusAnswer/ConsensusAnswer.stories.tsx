@@ -64,5 +64,8 @@ export const Generating: Story = { args: { status: 'generating' } };
 /** The summarizer failed. */
 export const Failed: Story = { args: { status: 'failed', error: 'Anthropic API error: 529 Overloaded.', onRetry: () => undefined } };
 
+/** A run reopened from history that was saved before its consensus was written, or whose consensus failed. */
+export const NotSaved: Story = { args: { status: 'notSaved', text: undefined } };
+
 /** Council with two answers: no consensus. */
 export const Unavailable: Story = { args: { status: 'unavailable', method: 'council', cost: undefined, durationMs: undefined } };

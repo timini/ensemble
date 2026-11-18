@@ -102,6 +102,18 @@ describe("toConsensusStatus", () => {
     expect(toConsensusStatus("success")).toBe("success");
     expect(toConsensusStatus(null)).toBe("unavailable");
   });
+
+  it("says a reopened run with enough answers kept no consensus", () => {
+    expect(toConsensusStatus(null, { readOnly: true, answers: 2 })).toBe(
+      "notSaved",
+    );
+    expect(toConsensusStatus(null, { readOnly: true, answers: 1 })).toBe(
+      "unavailable",
+    );
+    expect(toConsensusStatus("success", { readOnly: true, answers: 2 })).toBe(
+      "success",
+    );
+  });
 });
 
 const response = (over: Partial<ModelResponse>): ModelResponse => ({

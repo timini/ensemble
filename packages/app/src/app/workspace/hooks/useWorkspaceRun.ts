@@ -120,7 +120,10 @@ export function useWorkspaceRun({
   const done =
     run.viewResponses.filter((r) => !r.isStreaming).length +
     run.viewManualResponses.length;
-  const status = toConsensusStatus(consensusStatus);
+  const status = toConsensusStatus(consensusStatus, {
+    readOnly,
+    answers: analytics.agreementAnswers.length,
+  });
 
   const consensusProps: ConsensusAnswerProps = {
     status,

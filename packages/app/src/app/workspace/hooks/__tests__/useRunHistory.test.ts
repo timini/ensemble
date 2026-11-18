@@ -66,6 +66,22 @@ describe("useRunHistory", () => {
     expect(await listRuns()).toHaveLength(1);
   });
 
+  it("keeps the consensus when the next question is asked right after it arrives", async () => {
+    finishedRun("First", 1_000);
+    useStore.setState({ metaAnalysis: null });
+    const { hook } = setup();
+    await waitFor(() => expect(hook.result.current.runs).toHaveLength(1));
+
+    act(() => useStore.setState({ metaAnalysis: "consensus for First" }));
+    act(() => useStore.getState().startRun("Second", []));
+    act(() => useStore.getState().startStreaming("a", "openai", "a"));
+
+    await waitFor(async () => {
+      const stored = (await listRuns()).find((r) => r.id === "run-1000");
+      expect(stored?.metaAnalysis).toBe("consensus for First");
+    });
+  });
+
   it("does not save a run while an answer streams", async () => {
     finishedRun("Streaming", 1_000);
     useStore.setState({

@@ -362,7 +362,8 @@
       "retry": "Réessayer",
       "copy": "Copier",
       "copied": "Copié",
-      "share": "Partager"
+      "share": "Partager",
+      "notSaved": "Aucun consensus n'a été enregistré avec cette exécution."
     },
     "appearanceSettings": {
       "theme": "Thème",

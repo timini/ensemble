@@ -57,6 +57,7 @@ describe('ConsensusAnswer', () => {
     ['awaiting', 'The consensus is written when the answers are in.'],
     ['generating', 'Writing the consensus'],
     ['unavailable', 'needs at least 3 answers'],
+    ['notSaved', 'No consensus was saved with this run.'],
   ] as const)('explains the %s state', (status, text) => {
     renderWithI18n(<ConsensusAnswer status={status} method="council" />);
     expect(screen.getByTestId('consensus-answer-state')).toHaveTextContent(text);
@@ -68,6 +69,11 @@ describe('ConsensusAnswer', () => {
     const lines = screen.getByTestId('consensus-answer-skeleton');
     expect(lines).toHaveAttribute('aria-hidden', 'true');
     expect(lines.children).toHaveLength(4);
+  });
+
+  it('says in French that a saved run kept no consensus', () => {
+    renderWithI18n(<ConsensusAnswer status="notSaved" method="standard" />, { language: 'fr' });
+    expect(screen.getByTestId('consensus-answer-state')).toHaveTextContent("Aucun consensus n'a été enregistré");
   });
 
   it('says how many answers the standard method needs', () => {

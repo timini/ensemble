@@ -8,7 +8,11 @@ import { MajorityVoteBreakdown, type MajorityVoteBreakdownProps } from '../Major
 import { RunCostSummary, type RunCostSummaryProps } from '../RunCostSummary';
 import { cn } from '../../../lib/utils';
 
-export type ConsensusAnswerStatus = 'awaiting' | 'generating' | 'success' | 'failed' | 'unavailable';
+/**
+ * `notSaved` is for a run reopened from history that kept no consensus
+ * (it failed, or the run was left before it was written).
+ */
+export type ConsensusAnswerStatus = 'awaiting' | 'generating' | 'success' | 'failed' | 'unavailable' | 'notSaved';
 
 export interface ConsensusAnswerProps {
   status: ConsensusAnswerStatus;
@@ -41,7 +45,7 @@ const action =
 /**
  * ConsensusAnswer molecule: the merged answer, how it was made (method and
  * summarizer), the majority vote when there was one, and what the run cost.
- * Covers waiting, writing, failed and not available states. Waiting and
+ * Covers waiting, writing, failed, not available and not saved states. Waiting and
  * writing show placeholder lines so the card does not jump when the answer
  * arrives.
  *
@@ -116,6 +120,11 @@ export function ConsensusAnswer(props: ConsensusAnswerProps) {
         {status === 'unavailable' && (
           <p data-testid="consensus-answer-state" className="text-label text-muted-foreground">
             {t(`${key}.unavailable`, { count: method === 'elo' || method === 'council' ? MIN_ANSWERS_FOR_RANKING : MIN_ANSWERS_FOR_CONSENSUS })}
+          </p>
+        )}
+        {status === 'notSaved' && (
+          <p data-testid="consensus-answer-state" className="text-label text-muted-foreground">
+            {t(`${key}.notSaved`)}
           </p>
         )}
         {status === 'failed' && (
