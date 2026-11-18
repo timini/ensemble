@@ -1,6 +1,6 @@
 # Wireframes
 
-Reference layouts for Ensemble AI after the M4 redesign: a landing page, one workspace screen and its sheets, the benchmarks page and an account placeholder. This is a standalone Next.js 15 app (React 19, Tailwind CSS 3.4). It is the UX source of truth for layout and flow; the real UI lives in `packages/component-library` and `packages/app`.
+Reference layouts for Ensemble AI after the M4 redesign: a landing page, one workspace screen and its sheets, the benchmarks page and the Pro account page. This is a standalone Next.js 15 app (React 19, Tailwind CSS 3.4). It is the UX source of truth for layout and flow; the real UI lives in `packages/component-library` and `packages/app`.
 
 It uses the component library's visual system directly: `app/globals.css` imports `../component-library/src/styles/tokens.css` and `tailwind.config.ts` uses `../component-library/src/styles/tailwindPreset.ts`. Fonts (Geist, Geist Mono, Instrument Serif) load through `next/font`, as in the app. What you see here is the real palette, type and spacing, not a sketch.
 
@@ -25,7 +25,7 @@ npm run screenshot   # needs the dev server; writes screenshots/<page>-<width>-<
 | `/` | Landing: one sentence, an example run with placeholder data (agreement score, consensus, three answers), three ways in (own keys, local models, Pro), what the score means, how it works. |
 | `/workspace` | The one working screen. Composer on top (prompt, inline model chips, consensus method dropdown with calls and cost, a menu with manual answer, summarizer and save as preset). Agreement panel and consensus answer next, then the individual answers: columns from 768 px, swipeable tabs below. History and presets in a left sidebar from 1024 px, in a sheet below. |
 | `/benchmarks` | Method and a results table with confidence intervals, with an honest "not run yet" state. |
-| `/account` | Placeholder for Pro (roadmap M5): sign-in, credits, usage. |
+| `/account` | Pro usage dashboard (FR-041) in the workspace frame: balance with buy buttons, usage by model over 30 days, purchases (refunds show as negative), recent runs. `?state=signedOut\|empty\|ready\|low\|negative`. |
 | `/states` | Index of every page and workspace state, for reviewers. |
 | `/config`, `/ensemble`, `/prompt`, `/review` | Redirect into the workspace with the matching panel open, as the app will. |
 

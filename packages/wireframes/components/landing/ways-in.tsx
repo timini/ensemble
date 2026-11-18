@@ -17,9 +17,8 @@ export function WaysIn() {
       <p className="text-caption text-muted-foreground">
         One key is enough to start. An OpenRouter key reaches every provider.
       </p>
-      <Link href="/account" className="focus-ring inline-flex items-center gap-2 rounded-md text-label text-muted-foreground hover:text-foreground">
+      <Link href="/workspace?state=new&sheet=onboarding" className="focus-ring inline-flex items-center gap-2 rounded-md text-label text-muted-foreground hover:text-foreground">
         <Sparkles className="size-4" /> Or sign in for Pro and pay with credits
-        <span className="rounded-full bg-muted px-2 py-0.5 text-caption">Soon</span>
       </Link>
     </div>
   )

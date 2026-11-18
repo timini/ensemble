@@ -2,7 +2,7 @@ import Link from "next/link"
 import { SiteHeader } from "@/components/site-header"
 
 const groups: Array<[string, Array<[string, string]>]> = [
-  ["Public pages", [["Landing", "/"], ["Benchmarks", "/benchmarks"], ["Account (M5 placeholder)", "/account"]]],
+  ["Public pages", [["Landing", "/"], ["Benchmarks", "/benchmarks"], ["Account: signed out", "/account?state=signedOut"], ["Account: new, no runs", "/account?state=empty"], ["Account: usage dashboard", "/account"], ["Account: low balance", "/account?state=low"], ["Account: negative after a refund", "/account?state=negative"]]],
   ["Workspace", [
     ["First visit: onboarding, keys", "/workspace?state=new"],
     ["First visit: onboarding, local", "/workspace?state=new&path=local"],
