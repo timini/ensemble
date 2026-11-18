@@ -150,6 +150,7 @@ export { ModelPicker, type ModelPickerProps, type ModelPickerOption } from './co
 export { MethodMenu, methodCostLabel, type MethodMenuProps, type SummarizerOption } from './components/molecules/MethodMenu';
 export { AccountMenu, initialsOf, type AccountMenuProps, type AccountStatus, type AccountUser } from './components/molecules/AccountMenu';
 export { SignInPanel, type SignInPanelProps, type SignInError } from './components/molecules/SignInPanel';
+export { ShareDialog, type ShareDialogProps, type ShareDialogStatus, type ShareDialogError } from './components/molecules/ShareDialog';
 export {
   CreditNotice,
   type CreditNoticeProps,
@@ -189,6 +190,7 @@ export {
 export { Composer, type ComposerProps, type ComposerModel, type ComposerManualResponse } from './components/organisms/Composer';
 export { AnswerColumns, type AnswerColumnsProps, type AnswerColumnItem } from './components/organisms/AnswerColumns';
 export { ConsensusPanel, type ConsensusPanelProps } from './components/organisms/ConsensusPanel';
+export { SharedRun, type SharedRunProps } from './components/organisms/SharedRun';
 export { AppShell, type AppShellProps } from './components/organisms/AppShell';
 export { AccountDashboard, type AccountDashboardProps } from './components/organisms/AccountDashboard';
 export {

@@ -527,6 +527,30 @@
       "empty": "Les requêtes que vous faites en Pro s'affichent ici avec leur coût.",
       "calls_one": "{{count}} appel",
       "calls_other": "{{count}} appels"
+    },
+    "shareDialog": {
+      "title": "Partager cette exécution",
+      "loading": "Recherche d'un lien pour cette exécution",
+      "description": "Créez un lien en lecture seule vers cette exécution. Il montre la question, les modèles, chaque réponse, le score d'accord et le consensus.",
+      "public": "Toute personne qui a le lien peut l'ouvrir, sans compte.",
+      "expires": "Le lien cesse de fonctionner après 30 jours.",
+      "noKeys": "Les clés d'API ne sont jamais incluses.",
+      "readyDescription": "Toute personne qui a ce lien peut voir l'exécution, sans compte.",
+      "link": "Lien de partage",
+      "copy": "Copier",
+      "copied": "Copié",
+      "expiresOn": "Valable jusqu'au {{date}}.",
+      "deleteNote": "Supprimer le lien le désactive pour tout le monde.",
+      "delete": "Supprimer le lien",
+      "cancel": "Annuler",
+      "done": "Terminé",
+      "create": "Créer le lien",
+      "retry": "Réessayer",
+      "errors": {
+        "failed": "Impossible de créer ou de supprimer le lien. Réessayez.",
+        "limit": "Vous avez créé trop de liens au cours de la dernière heure. Réessayez plus tard.",
+        "tooLarge": "Cette exécution est trop volumineuse pour être partagée."
+      }
     }
   },
   "organisms": {
@@ -773,7 +797,12 @@
       "noMatches": "Rien ne correspond à « {{query}} ».",
       "delete": "Supprimer « {{prompt}} »",
       "deletePreset": "Supprimer le préréglage {{name}}",
-      "locked": "Les exécutions passées s'ouvrent une fois toutes les réponses reçues."
+      "locked": "Les exécutions passées s'ouvrent une fois toutes les réponses reçues.",
+      "share": "Partager « {{prompt}} »",
+      "sync": {
+        "synced": "Synchronisé avec votre compte",
+        "local": "Uniquement dans ce navigateur. Connectez-vous pour synchroniser."
+      }
     },
     "exampleRun": {
       "heading": "Exemple de requête",
@@ -823,6 +852,16 @@
       "signedInAs": "Connecté en tant que {{email}}",
       "balanceLoading": "Chargement de votre solde",
       "balanceError": "Impossible de charger votre solde de crédits."
+    },
+    "sharedRun": {
+      "label": "Exécution partagée",
+      "models_one": "{{count}} réponse",
+      "models_other": "{{count}} réponses",
+      "dates": "Partagée le {{shared}}, le lien expire le {{expires}}",
+      "answers": "Toutes les réponses",
+      "ctaTitle": "Posez votre propre question",
+      "ctaBody": "Envoyez une question à plusieurs modèles et voyez où ils s'accordent.",
+      "cta": "Posez votre propre question"
     }
   },
   "providers": {

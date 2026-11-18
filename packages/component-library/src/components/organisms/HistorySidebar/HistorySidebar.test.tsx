@@ -136,4 +136,26 @@ describe('HistorySidebar', () => {
     expect(screen.getByTestId('history-empty')).toHaveTextContent('enregistrées dans ce navigateur');
     expect(screen.queryByRole('region', { name: 'Préréglages' })).not.toBeInTheDocument();
   });
+
+  it('shares a run from a labelled button when sharing is on', () => {
+    const onShare = vi.fn();
+    setup({ onShare });
+    fireEvent.click(screen.getByRole('button', { name: 'Share "Postgres vs SQLite for a small internal tool"' }));
+    expect(onShare).toHaveBeenCalledWith('r4');
+  });
+
+  it('has no share buttons when sharing is off', () => {
+    setup();
+    expect(screen.queryByTestId('history-share')).not.toBeInTheDocument();
+  });
+
+  it('says where history is kept', () => {
+    setup({ syncStatus: 'synced' });
+    expect(screen.getByTestId('history-sync')).toHaveTextContent('Synced to your account');
+  });
+
+  it('says history stays in this browser when not synced, in French too', () => {
+    setup({ syncStatus: 'local' }, 'fr');
+    expect(screen.getByTestId('history-sync')).toHaveTextContent('Uniquement dans ce navigateur');
+  });
 });

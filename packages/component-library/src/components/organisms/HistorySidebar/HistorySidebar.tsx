@@ -1,9 +1,10 @@
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Layers, Plus, Search, Trash2 } from 'lucide-react';
+import { Cloud, HardDrive, Layers, Plus, Search, Share2, Trash2 } from 'lucide-react';
 import type { AgreementLevel } from '../../atoms/AgreementRing';
 import { cn } from '../../../lib/utils';
 import { groupHistory, historyTime } from './historyGroups';
+import { DELETE, DOT, LABEL, ROW, SHARE } from './historyStyles';
 
 /** One past run. */
 export interface HistoryItem {
@@ -45,16 +46,18 @@ export interface HistorySidebarProps {
    * before its answers are in. Deleting a run still works.
    */
   locked?: boolean;
+  /** Shows a share button on each run when set. */
+  onShare?: (id: string) => void;
+  /**
+   * Where history and presets are kept: `synced` to the signed-in account,
+   * or `local` to this browser only. No line is shown when unset.
+   */
+  syncStatus?: 'synced' | 'local';
   /** Reference time for the date groups. Defaults to now. */
   now?: number;
   className?: string;
 }
 
-const ROW = 'focus-ring flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-left text-label transition-colors duration-fast hover:bg-muted';
-const LABEL = 'px-2.5 pb-1 text-caption font-medium uppercase tracking-wider text-muted-foreground';
-const DOT: Record<AgreementLevel, string> = { high: 'bg-success', medium: 'bg-warning', low: 'bg-destructive' };
-const DELETE =
-  'focus-ring absolute right-1.5 top-1/2 -translate-y-1/2 rounded-md p-1.5 text-muted-foreground opacity-0 transition-opacity duration-fast hover:text-destructive focus-visible:opacity-100 group-hover:opacity-100 [@media(hover:none)]:opacity-100';
 
 /**
  * HistorySidebar organism: past runs (kept in the browser in Free mode)
@@ -68,7 +71,7 @@ const DELETE =
  * ```
  */
 export function HistorySidebar(props: HistorySidebarProps) {
-  const { items, presets, activeId, onDeletePreset, locked = false } = props;
+  const { items, presets, activeId, onDeletePreset, onShare, locked = false } = props;
   const { t, i18n } = useTranslation();
   const [query, setQuery] = React.useState('');
   const base = React.useId();
@@ -147,7 +150,8 @@ export function HistorySidebar(props: HistorySidebarProps) {
                     aria-current={active || undefined}
                     className={cn(
                       ROW,
-                      'pr-9 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:bg-transparent',
+                      onShare ? 'pr-16' : 'pr-9',
+                      'disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:bg-transparent',
                       active && 'bg-accent text-accent-foreground hover:bg-accent',
                     )}
                   >
@@ -160,6 +164,11 @@ export function HistorySidebar(props: HistorySidebarProps) {
                       </span>
                     )}
                   </button>
+                  {onShare && (
+                    <button type="button" data-testid="history-share" onClick={() => onShare(item.id)} aria-label={t(`${key}.share`, { prompt: item.prompt })} className={SHARE}>
+                      <Share2 className="size-3.5" aria-hidden="true" />
+                    </button>
+                  )}
                   <button type="button" onClick={() => props.onDelete(item.id)} aria-label={t(`${key}.delete`, { prompt: item.prompt })} className={DELETE}>
                     <Trash2 className="size-3.5" aria-hidden="true" />
                   </button>
@@ -175,6 +184,12 @@ export function HistorySidebar(props: HistorySidebarProps) {
       )}
       {needle && groups.length === 0 && shownPresets.length === 0 && (
         <p data-testid="history-no-matches" className="px-2.5 text-caption text-muted-foreground">{t(`${key}.noMatches`, { query: query.trim() })}</p>
+      )}
+      {props.syncStatus && (
+        <p data-testid="history-sync" data-status={props.syncStatus} className="mt-auto flex items-center gap-2 px-2.5 text-caption text-muted-foreground">
+          {props.syncStatus === 'synced' ? <Cloud className="size-3.5 shrink-0" aria-hidden="true" /> : <HardDrive className="size-3.5 shrink-0" aria-hidden="true" />}
+          {t(`${key}.sync.${props.syncStatus}`)}
+        </p>
       )}
     </div>
   );

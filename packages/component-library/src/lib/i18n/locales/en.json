@@ -527,6 +527,30 @@
       "empty": "Runs you make in Pro show here with what they cost.",
       "calls_one": "{{count}} call",
       "calls_other": "{{count}} calls"
+    },
+    "shareDialog": {
+      "title": "Share this run",
+      "loading": "Checking for a link to this run",
+      "description": "Create a read-only link to this run. It shows the question, the models, every answer, the agreement score and the consensus.",
+      "public": "Anyone with the link can open it, without an account.",
+      "expires": "The link stops working after 30 days.",
+      "noKeys": "API keys are never included.",
+      "readyDescription": "Anyone with this link can see the run, without an account.",
+      "link": "Share link",
+      "copy": "Copy",
+      "copied": "Copied",
+      "expiresOn": "Works until {{date}}.",
+      "deleteNote": "Deleting the link stops it working for everyone.",
+      "delete": "Delete link",
+      "cancel": "Cancel",
+      "done": "Done",
+      "create": "Create link",
+      "retry": "Try again",
+      "errors": {
+        "failed": "Could not create or delete the link. Try again.",
+        "limit": "You have created too many links in the last hour. Try again later.",
+        "tooLarge": "This run is too large to share."
+      }
     }
   },
   "organisms": {
@@ -773,7 +797,12 @@
       "noMatches": "Nothing matches \"{{query}}\".",
       "delete": "Delete \"{{prompt}}\"",
       "deletePreset": "Delete preset {{name}}",
-      "locked": "Past runs open once every answer is in."
+      "locked": "Past runs open once every answer is in.",
+      "share": "Share \"{{prompt}}\"",
+      "sync": {
+        "synced": "Synced to your account",
+        "local": "Only in this browser. Sign in to sync."
+      }
     },
     "exampleRun": {
       "heading": "Example run",
@@ -823,6 +852,16 @@
       "signedInAs": "Signed in as {{email}}",
       "balanceLoading": "Loading your balance",
       "balanceError": "Could not load your credit balance."
+    },
+    "sharedRun": {
+      "label": "Shared run",
+      "models_one": "{{count}} answer",
+      "models_other": "{{count}} answers",
+      "dates": "Shared on {{shared}}, link expires {{expires}}",
+      "answers": "Every answer",
+      "ctaTitle": "Ask your own question",
+      "ctaBody": "Send one question to several models and see where they agree.",
+      "cta": "Ask your own question"
     }
   },
   "providers": {

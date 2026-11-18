@@ -49,3 +49,9 @@ export const Locked: Story = { args: { activeId: 'r1', locked: true } };
 export const Undated: Story = {
   args: { items: [...sampleHistory.slice(0, 2), { id: 'u1', prompt: 'Run saved before run times were kept' }], activeId: 'u1' },
 };
+
+/** Signed in: each run has a share button, and history is synced to the account. */
+export const SignedInSynced: Story = { args: { onShare: () => undefined, syncStatus: 'synced' } };
+
+/** Signed out: history stays in this browser. */
+export const LocalOnly: Story = { args: { syncStatus: 'local' } };
