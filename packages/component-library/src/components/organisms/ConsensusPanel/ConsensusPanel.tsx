@@ -14,7 +14,9 @@ export interface ConsensusPanelProps {
  * ConsensusPanel organism: the result of a run, above the individual
  * answers. The agreement score (with its calibrated or uncalibrated label)
  * sits next to the consensus answer, its majority vote breakdown and the
- * cost summary. Stacked on small screens, side by side from 1024 px.
+ * cost summary. Stacked on small screens, side by side from 1024 px, where
+ * the agreement card keeps its own height and stays in view while a long
+ * consensus scrolls.
  *
  * @example
  * ```tsx
@@ -28,9 +30,10 @@ export function ConsensusPanel({ agreement, consensus, className }: ConsensusPan
     <div
       data-testid="consensus-panel"
       data-level={level}
-      className={cn('grid items-stretch gap-4 lg:grid-cols-[minmax(17.5rem,1fr)_2fr]', className)}
+      className={cn('grid items-start gap-4 lg:grid-cols-[minmax(17.5rem,1fr)_2fr]', className)}
     >
-      <AgreementSummary {...agreement} />
+      {/* Keeps its own height and stays in view beside a long consensus. */}
+      <AgreementSummary {...agreement} className="lg:sticky lg:top-20" />
       <ConsensusAnswer {...consensus} />
     </div>
   );

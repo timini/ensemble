@@ -37,6 +37,19 @@ describe('ConsensusPanel', () => {
     expect(screen.getByTestId('majority-vote-breakdown')).toHaveAttribute('data-outcome', 'tie');
   });
 
+  it('keeps the agreement card its own height and in view beside a long consensus', () => {
+    renderWithI18n(
+      <ConsensusPanel
+        agreement={{ status: 'ready', score: 0.86, pairs: samplePairs }}
+        consensus={{ status: 'success', text: 'A long answer.\n\n'.repeat(40), method: 'standard', cost }}
+      />,
+    );
+    const panel = screen.getByTestId('consensus-panel');
+    expect(panel).toHaveClass('items-start');
+    expect(panel).not.toHaveClass('items-stretch');
+    expect(screen.getByTestId('agreement-summary')).toHaveClass('lg:sticky', 'lg:top-20');
+  });
+
   it('has no level while answers arrive', () => {
     renderWithI18n(
       <ConsensusPanel agreement={{ status: 'pending', progress: { done: 1, total: 3 } }} consensus={{ status: 'awaiting', method: 'standard' }} />,

@@ -54,6 +54,23 @@ export const Majority: Story = {
   },
 };
 
+/**
+ * A consensus much taller than the agreement card. From 1024 px the card
+ * keeps its own height and stays in view while the answer scrolls.
+ */
+export const LongConsensus: Story = {
+  args: {
+    consensus: {
+      status: 'success',
+      text: Array.from({ length: 8 }, () => sampleConsensus).join('\n\n'),
+      method: 'standard',
+      summarizerName: 'Claude Opus 5.5',
+      cost,
+      durationMs: 6200,
+    },
+  },
+};
+
 /** While answers stream: placeholders and the estimate. */
 export const Running: Story = {
   args: {
