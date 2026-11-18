@@ -63,26 +63,25 @@ env:
       - BUILD
       - RUNTIME
 
-  # Pro mode is off until the Stripe and OpenRouter secrets exist. To turn
-  # it on: create STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET and
-  # OPENROUTER_API_KEY (docs/DEPLOYMENT.md), uncomment the three secret
-  # entries below and set NEXT_PUBLIC_PRO_ENABLED to "true".
+  # Pro mode needs STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET and
+  # OPENROUTER_API_KEY (docs/DEPLOYMENT.md). Set NEXT_PUBLIC_PRO_ENABLED to
+  # "false" and comment those entries out to run without Pro.
   - variable: NEXT_PUBLIC_PRO_ENABLED
-    value: "false"
+    value: "true"
     availability:
       - BUILD
       - RUNTIME
 
   # Stripe keys, server only. Test-mode keys until launch.
-  # - variable: STRIPE_SECRET_KEY
-  #   secret: STRIPE_SECRET_KEY
-  #   availability:
-  #     - RUNTIME
+  - variable: STRIPE_SECRET_KEY
+    secret: STRIPE_SECRET_KEY
+    availability:
+      - RUNTIME
 
-  # - variable: STRIPE_WEBHOOK_SECRET
-  #   secret: STRIPE_WEBHOOK_SECRET
-  #   availability:
-  #     - RUNTIME
+  - variable: STRIPE_WEBHOOK_SECRET
+    secret: STRIPE_WEBHOOK_SECRET
+    availability:
+      - RUNTIME
 
   # Credit pricing (not secret). See docs/DEPLOYMENT.md.
   - variable: CREDIT_MARGIN_PERCENT
@@ -103,10 +102,10 @@ env:
   # Pro mode: model calls go to OpenRouter with this server key
   # (roadmap Decision 6). Set a monthly spend limit on the key in the
   # OpenRouter dashboard; see docs/DEPLOYMENT.md.
-  # - variable: OPENROUTER_API_KEY
-  #   secret: OPENROUTER_API_KEY
-  #   availability:
-  #     - RUNTIME
+  - variable: OPENROUTER_API_KEY
+    secret: OPENROUTER_API_KEY
+    availability:
+      - RUNTIME
 
   # Pro abuse limits (not secret). See docs/DEPLOYMENT.md.
   - variable: PRO_MAX_RUN_TOKENS
