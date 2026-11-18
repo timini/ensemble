@@ -25,8 +25,8 @@ Modes:
 
 npm workspaces monorepo:
 
-- `packages/app/`: Next.js 15 App Router app. Routes: `/` (landing page with a recorded example run and the three ways in), `/workspace` (the one working screen), `/account` (Pro usage dashboard), `/config`, `/ensemble`, `/prompt` and `/review` (redirect into the workspace with the matching panel open), `/features`, `/about`, `/benchmarks`, `/test-components` (dev only), `/api/trpc/[trpc]`, `/api/stripe/checkout`, `/api/stripe/webhook`.
-- `packages/component-library/`: 63 atomic-design components (atoms, molecules, organisms) developed in Storybook. The app imports its source via a tsconfig alias.
+- `packages/app/`: Next.js 15 App Router app. Routes: `/` (landing page with a recorded example run and the three ways in), `/workspace` (the one working screen), `/account` (Pro usage dashboard), `/config`, `/ensemble`, `/prompt` and `/review` (redirect into the workspace with the matching panel open), `/features`, `/about`, `/benchmarks`, `/s/[id]` (public read-only shared run), `/test-components` (dev only), `/api/trpc/[trpc]`, `/api/stripe/checkout`, `/api/stripe/webhook`, `/api/health`, plus `sitemap.xml`, `robots.txt` and Open Graph images.
+- `packages/component-library/`: 65 atomic-design components (atoms, molecules, organisms) developed in Storybook. The app imports its source via a tsconfig alias.
 - `packages/shared-utils/`: provider clients, registry, factory, similarity maths, Web Crypto helpers. Exports from `dist`; rebuild after changes with `npm run build --workspace=packages/shared-utils`.
 - `packages/consensus-core`, `consensus-standard`, `consensus-majority`, `consensus-elo`, `consensus-council`: consensus strategies.
 - `packages/eval/`: benchmark CLI. `packages/eval-baseline/`: Python lm-eval runner.
@@ -93,13 +93,14 @@ Adding a provider with its own API touches about 20 files; adding an OpenAI-comp
 ### Server (tRPC)
 
 - Context and `protectedProcedure`: `src/server/api/trpc.ts` (verifies a Firebase ID token)
-- Routers: `src/server/api/routers/` (`auth`, `provider`, `credits`, `proRun`)
+- Routers: `src/server/api/routers/` (`auth`, `provider`, `credits`, `proRun`, `share`, `sync`)
 - Root router: `src/server/api/root.ts`
 - Client hooks: `src/trpc/react.tsx`. Server caller: `src/trpc/server.ts`
 - Server provider calls: `src/server/pro/` (Pro calls to OpenRouter, run records, rate limit, App Check); `src/server/providers/providerService.ts` (model lists with direct server keys)
 - Credit ledger: `src/server/credits/` (Firestore, integer micro-dollars). Stripe: `src/server/stripe/` and `src/app/api/stripe/`.
 - Client sign-in: Firebase Auth in `src/lib/auth/` and `src/hooks/useAuthController.ts`, shown by `AccountMenu` in the workspace header. Off when the `NEXT_PUBLIC_FIREBASE_*` config is unset.
-- Emulator tests (Firestore rules, ledger, webhook): `npm run test:emulator --workspace=packages/app`. Setup for Auth, Firestore and Stripe: `docs/DEPLOYMENT.md`.
+- Shares and sync: `src/server/share/`, `src/server/sync/`, `src/lib/share/`, `src/lib/sync/`, `src/hooks/useCollectionSync.ts`. See Sharing and sync in `docs/ARCHITECTURE.md`.
+- Emulator tests (Firestore rules, ledger, webhook, shares, sync): `npm run test:emulator --workspace=packages/app`. Setup for Auth, Firestore and Stripe: `docs/DEPLOYMENT.md`.
 
 ### Constitutional principles
 
@@ -240,7 +241,7 @@ A component is not done until it has all five artifacts (`.tsx`, `.stories.tsx`,
 - **E2E**: Playwright in `packages/e2e` with three suites:
   - `mock-mode`: mock providers. Runs in CI before deploy.
   - `free-mode`: real provider keys. Runs after deploy against the deployed URL.
-  - `pro-mode`: Pro against the Firebase Auth and Firestore emulators with the mock model upstream (`npm run test:pro`, needs Java and firebase-tools). Runs in CI.
+  - `pro-mode`: Pro, share links and synced history against the Firebase Auth and Firestore emulators with the mock model upstream (`npm run test:pro`, needs Java and firebase-tools). Runs in CI.
 - **Selectors**: `data-testid` only, never CSS classes.
 - **Coverage**: 80% minimum per component.
 
@@ -285,7 +286,7 @@ Server variables for the app are validated in `packages/app/src/env.js`; all are
 
 - Component files must not exceed 200 lines.
 - Mock mode is never user-facing. Never add a Mock card or button to the config UI.
-- Free-mode keys are encrypted with AES-GCM via the Web Crypto API and never sent to our server.
+- Free-mode keys are encrypted with AES-GCM via the Web Crypto API, under a random non-extractable key kept in IndexedDB, and never sent to our server. Nothing synced or shared may carry a key.
 - Streaming latency target: under 100 ms p95 from chunk receipt to display.
 - All UI text uses i18n keys.
 - Do not add AI or Claude attribution to commits, pull requests, code comments or docs.
