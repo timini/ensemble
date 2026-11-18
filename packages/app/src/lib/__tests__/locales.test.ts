@@ -62,6 +62,14 @@ describe.each([
     expect(empty).toEqual([]);
   });
 
+  // House style: no em or en dashes in user-facing copy.
+  it("has no em or en dashes", () => {
+    const dashed = [...entries(en), ...entries(fr)]
+      .filter(([, text]) => /[\u2013\u2014]/.test(text))
+      .map(([key]) => key);
+    expect(dashed).toEqual([]);
+  });
+
   it("uses the same {{placeholders}} in EN and FR", () => {
     const frByKey = new Map(entries(fr));
     const mismatched = entries(en)

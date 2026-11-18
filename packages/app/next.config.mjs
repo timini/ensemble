@@ -12,9 +12,10 @@ const config = {
     distDir: process.env.NEXT_DIST_DIR || ".next",
     output: "standalone",
     poweredByHeader: false,
-    // Security headers on every response. A full Content-Security-Policy
-    // (script and connect allowlists) is a follow-up: Free mode calls many
-    // provider origins and user-configured endpoints from the browser.
+    // Security headers on every response. Pages get their
+    // Content-Security-Policy, with a per-request script nonce, from
+    // src/middleware.ts (src/lib/security/contentSecurityPolicy.ts); API
+    // responses, which render nothing, get a locked-down one here.
     async headers() {
         return [
             {
@@ -24,7 +25,12 @@ const config = {
                     { key: "X-Frame-Options", value: "DENY" },
                     { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
                     { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=(), payment=()" },
-                    { key: "Content-Security-Policy", value: "frame-ancestors 'none'; base-uri 'self'; object-src 'none'" },
+                ],
+            },
+            {
+                source: "/api/:path*",
+                headers: [
+                    { key: "Content-Security-Policy", value: "default-src 'none'; frame-ancestors 'none'; base-uri 'none'" },
                 ],
             },
         ];

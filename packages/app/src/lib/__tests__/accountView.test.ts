@@ -48,6 +48,13 @@ describe("account view formatting", () => {
           reason: "dispute",
         },
         {
+          id: "reversal__evt_won",
+          type: "reversal",
+          amountMicros: 5_000_000,
+          createdAtMs: Date.UTC(2026, 10, 14),
+          reason: "dispute_won",
+        },
+        {
           id: "purchase__cs",
           type: "purchase",
           amountMicros: 5_000_000,
@@ -63,8 +70,13 @@ describe("account view formatting", () => {
       amount: "-$5.00",
       negative: true,
     });
-    expect(rows[1]).toMatchObject({ kind: "purchase", pack: "$5" });
-    expect(rows[1]!.date).toMatch(/Nov/);
+    expect(rows[1]).toMatchObject({
+      kind: "disputeWon",
+      amount: "+$5.00",
+      negative: false,
+    });
+    expect(rows[2]).toMatchObject({ kind: "purchase", pack: "$5" });
+    expect(rows[2]!.date).toMatch(/Nov/);
   });
 
   it("turns usage into model rows with their share", () => {

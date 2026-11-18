@@ -2,10 +2,10 @@ import { useTranslation } from 'react-i18next';
 import { AccountSection, type AccountListProps } from '../AccountSection';
 import { cn } from '../../../lib/utils';
 
-/** A ledger entry that moved money: a pack bought, free credits, or credits taken back. */
+/** A ledger entry that moved money: a pack bought, free credits, credits taken back, or given back after a won dispute. */
 export interface PurchaseHistoryItem {
   id: string;
-  kind: 'purchase' | 'grant' | 'refund' | 'dispute';
+  kind: 'purchase' | 'grant' | 'refund' | 'dispute' | 'disputeWon';
   /** purchase: the pack's price, e.g. "$20". */
   pack?: string;
   /** Formatted and signed, e.g. "+$20.00" or "-$20.00". */
@@ -23,7 +23,8 @@ export interface PurchaseHistoryProps extends AccountListProps {
 
 /**
  * PurchaseHistory molecule: credit packs bought, free credits, and
- * credits taken back after a refund or dispute, newest first (FR-041).
+ * credits taken back after a refund or dispute, and credits given back
+ * when a dispute closes in our favour, newest first (FR-041).
  *
  * @example
  * ```tsx

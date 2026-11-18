@@ -47,6 +47,20 @@ const refund = (eventId: string, refundedCents: number) => ({
   source: { kind: "refund" as const, refundedCents },
 });
 
+const dispute = (eventId: string, amountCents = 500, disputeId = "dp_1") => ({
+  eventId,
+  eventType: "charge.dispute.created",
+  paymentIntentId: "pi_1",
+  source: { kind: "dispute" as const, disputeId, amountCents },
+});
+
+const disputeWon = (eventId: string, disputeId = "dp_1") => ({
+  eventId,
+  eventType: "charge.dispute.closed",
+  paymentIntentId: "pi_1",
+  source: { kind: "disputeWon" as const, disputeId },
+});
+
 describe("recordReversal", () => {
   it("takes back the credits of a refunded purchase once", async () => {
     await buyFivePack();
@@ -140,5 +154,84 @@ describe("recordReversal", () => {
       .doc("evt_x")
       .get();
     expect(event.exists).toBe(false);
+  });
+
+  it("gives the credits back once when a dispute is won", async () => {
+    await buyFivePack();
+    await recordReversal(db, dispute("evt_d1"));
+    expect(await balance()).toBe(0);
+    expect(await recordReversal(db, disputeWon("evt_w1"))).toEqual({
+      result: "restored",
+      uid: "buyer",
+      reversedMicros: -5_000_000,
+      balanceMicros: 5_000_000,
+    });
+    // The same event again, or another event for the same won dispute.
+    expect((await recordReversal(db, disputeWon("evt_w1"))).result).toBe(
+      "duplicate",
+    );
+    expect((await recordReversal(db, disputeWon("evt_w2"))).result).toBe(
+      "duplicate",
+    );
+    // A late redelivery of the opening event takes nothing again.
+    expect((await recordReversal(db, dispute("evt_d1b"))).result).toBe(
+      "duplicate",
+    );
+    expect(await balance()).toBe(5_000_000);
+    const restored = await db
+      .collection(COLLECTIONS.ledger)
+      .where("reason", "==", "dispute_won")
+      .get();
+    expect(restored.size).toBe(1);
+    expect(restored.docs[0]!.data()).toMatchObject({
+      uid: "buyer",
+      type: "reversal",
+      amountMicros: 5_000_000,
+      stripeDisputeId: "dp_1",
+      stripeEventId: "evt_w1",
+    });
+  });
+
+  it("restores a balance that went negative while the dispute was open", async () => {
+    await buyFivePack();
+    await reserveCredits(db, {
+      uid: "buyer",
+      runId: "run-1",
+      amountMicros: 4_000_000,
+    });
+    await recordReversal(db, dispute("evt_d1"));
+    expect(await balance()).toBe(-4_000_000);
+    await recordReversal(db, disputeWon("evt_w1"));
+    expect(await balance()).toBe(1_000_000);
+  });
+
+  it("keeps a refund taken back when a dispute of the same money is won", async () => {
+    await buyFivePack();
+    await recordReversal(db, refund("evt_r1", 300));
+    await recordReversal(db, dispute("evt_d1"));
+    expect(await balance()).toBe(0);
+    const won = await recordReversal(db, disputeWon("evt_w1"));
+    expect(won.reversedMicros).toBe(-2_000_000);
+    expect(await balance()).toBe(2_000_000);
+  });
+
+  it("takes nothing when the closing event arrives before the opening one", async () => {
+    await buyFivePack();
+    expect((await recordReversal(db, disputeWon("evt_w1"))).result).toBe(
+      "duplicate",
+    );
+    expect((await recordReversal(db, dispute("evt_d1"))).result).toBe(
+      "duplicate",
+    );
+    expect(await balance()).toBe(5_000_000);
+  });
+
+  it("only restores the dispute that was won", async () => {
+    await buyFivePack();
+    await recordReversal(db, dispute("evt_d1", 200, "dp_1"));
+    await recordReversal(db, dispute("evt_d2", 300, "dp_2"));
+    expect(await balance()).toBe(0);
+    await recordReversal(db, disputeWon("evt_w1", "dp_1"));
+    expect(await balance()).toBe(2_000_000);
   });
 });

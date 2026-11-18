@@ -12,7 +12,7 @@ Date: 2026-11-18. Scope: browser API key encryption (Free mode), the server Open
 | 4 | Checkout return links fell back to the request's Host header | Low | Fixed |
 | 5 | No body size limit on the webhook and checkout routes | Low | Fixed |
 | 6 | `provider.listTextModels` used server keys for any signed-in user | Low | Fixed |
-| 7 | No security headers | Low | Partly fixed; a full CSP is a follow-up |
+| 7 | No security headers | Low | Fixed (CSP added in #352) |
 
 ## Findings and fixes
 
@@ -50,11 +50,19 @@ Without `APP_URL`, `success_url` and `cancel_url` came from the request URL, whi
 
 It listed models with the direct server provider keys for any signed-in user, with no App Check. Listing models is free, so only quota was exposed. It is now a `proProcedure` like the billed calls.
 
-### 7. Security headers (low, partly fixed)
+### 7. Security headers (low, fixed)
 
 The app sent no security headers. `next.config.mjs` now sets `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, `Referrer-Policy: strict-origin-when-cross-origin`, a `Permissions-Policy` that turns off camera, microphone, geolocation and payment, and a `Content-Security-Policy` with `frame-ancestors 'none'; base-uri 'self'; object-src 'none'`, and drops `X-Powered-By`.
 
-Not done: a CSP with `script-src` and `connect-src` allowlists. Free mode calls six provider APIs and any user-configured endpoint from the browser, and the theme script is inline, so a strict policy needs a nonce and a way to allow user endpoints. It is the main remaining defence-in-depth gap against XSS stealing decrypted keys from memory.
+Follow-up (#352): every page now gets an enforced Content-Security-Policy from `src/middleware.ts`, built in `src/lib/security/contentSecurityPolicy.ts` with a fresh nonce per request. Next puts the nonce on its own scripts and the root layout puts it on the inline theme script, so every page renders per request.
+
+- `script-src 'self' 'nonce-…' 'strict-dynamic'`: only scripts carrying the nonce run, and scripts they load (Next chunks, the Firebase Auth helper, reCAPTCHA for App Check). No `'unsafe-inline'`, and `'unsafe-eval'` only under `next dev`. This is the defence against injected script reading decrypted keys.
+- `connect-src 'self' https: http://localhost:* http://127.0.0.1:*`. Free mode calls six provider APIs, OpenRouter and any OpenAI-compatible endpoint the user adds; those endpoints live in the browser, so the server cannot list them, and a host allowlist would break custom endpoints. The trade-off is that `connect-src` does not stop exfiltration to an arbitrary HTTPS host; the script policy has to. Plain HTTP to another machine stays blocked, as it already is for an HTTPS page (mixed content). CSP cannot express IPv6 literals, so `http://[::1]` is not allowed; use `localhost`.
+- `frame-src` allows the Firebase auth domain (the popup sign-in helper iframe) and reCAPTCHA; `frame-ancestors 'none'`, `object-src 'none'`, `base-uri 'self'` and `form-action 'self'` as before. `style-src` keeps `'unsafe-inline'` for React `style` attributes.
+- Stripe Checkout is a top-level redirect, which CSP does not govern. Sentry sends through the same-origin `/monitoring` tunnel.
+- API routes get `default-src 'none'; frame-ancestors 'none'` from `next.config.mjs`.
+
+The mock E2E suite checks the header on every route and fails on any CSP violation (`content-security-policy.spec.ts`); the local-endpoint and pro-mode suites check that calls to a server on this machine and the Auth emulator are not blocked.
 
 ## Checked and fine
 

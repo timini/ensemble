@@ -11,6 +11,7 @@ import { useCreditCheckout } from "./useCreditCheckout";
 import { proCreditState } from "~/lib/proCredits";
 import { proRunInput } from "~/lib/proMode";
 import { getProRuntime } from "~/providers/pro/runtime";
+import { isProEnabled } from "~/lib/pro/proEnabled";
 
 /** `value`, updated only after it has been still for `ms`. */
 function useDebounced<T>(value: T, ms: number): T {
@@ -25,18 +26,24 @@ function useDebounced<T>(value: T, ms: number): T {
 /**
  * Credits in Pro mode: the balance, the quote of the run in the composer,
  * why Ask is blocked (FR-036), the notice under the composer (FR-038) and
- * buying a pack through Stripe Checkout. Queries run only in Pro while
- * signed in; the balance refreshes after each reservation and settlement.
+ * buying a pack through Stripe Checkout. The run is quoted only in Pro
+ * while signed in. The balance and packs also load for a signed-in user
+ * still in Free mode, so the Pro panel of onboarding and settings is not
+ * empty. The balance refreshes after each reservation and settlement.
  */
 export function useProCredits(prompt: string) {
   const { t, i18n } = useTranslation("common");
   const auth = useAuth();
   const pro = useStore((s) => s.mode === "pro");
-  const enabled = pro && auth.status === "signedIn";
+  const signedIn = auth.status === "signedIn";
+  const enabled = pro && signedIn;
+  const offersPro = pro || isProEnabled();
   const utils = api.useUtils();
-  const account = api.credits.account.useQuery(undefined, { enabled });
+  const account = api.credits.account.useQuery(undefined, {
+    enabled: signedIn && offersPro,
+  });
   const packs = api.credits.packs.useQuery(undefined, {
-    enabled: pro,
+    enabled: pro || (signedIn && offersPro),
     staleTime: Infinity,
   });
   const runState = useStore(

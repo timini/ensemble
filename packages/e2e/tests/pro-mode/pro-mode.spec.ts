@@ -1,5 +1,6 @@
 import { expect, test, type APIRequestContext, type Page } from '@playwright/test';
 import { FIRESTORE_EMULATOR, PROJECT_ID } from '../../fixtures/proEnv';
+import { watchCspViolations } from '../../fixtures/cspViolations';
 import {
   askAndFinish,
   composerChips,
@@ -81,6 +82,8 @@ async function signInToPro(page: Page, label: string) {
   await page.goto('/workspace?start=pro');
   const sheet = page.getByTestId('onboarding-sheet');
   await signInWithEmailLink(page, sheet, email);
+  // Signed in but not yet in Pro: the Pro path already shows the balance.
+  await expect(sheet.getByTestId('credit-notice')).toBeVisible();
   await sheet.getByTestId('onboarding-start').click();
   await expect(composerChips(page)).toHaveCount(3);
   await onboardingFinished(page);
@@ -88,6 +91,8 @@ async function signInToPro(page: Page, label: string) {
 }
 
 test('a new user signs in for Pro, buys credits, runs three models and sees the deduction', async ({ page }) => {
+  // Sign-in on the Auth emulator, the checkout redirect and the Pro stream all run under the policy (#352).
+  const violations = await watchCspViolations(page);
   const email = uniqueEmail('buyer');
   await startProFromLanding(page, email);
 
@@ -146,7 +151,9 @@ test('a new user signs in for Pro, buys credits, runs three models and sees the 
     4,
   );
   const models = page.getByTestId('model-usage-list').getByRole('listitem');
-  expect(await models.count()).toBeGreaterThanOrEqual(3);
+  // The list loads after the page; wait for it rather than counting at once.
+  await expect.poll(() => models.count()).toBeGreaterThanOrEqual(3);
+  expect(await violations()).toEqual([]);
 });
 
 test('warns under the low-balance threshold (FR-038) and still runs', async ({ page }) => {

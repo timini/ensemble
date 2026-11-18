@@ -508,7 +508,8 @@
       "purchaseUnknown": "Pack de crédits",
       "grant": "Crédits offerts",
       "refund": "Remboursement",
-      "dispute": "Paiement contesté"
+      "dispute": "Paiement contesté",
+      "disputeWon": "Litige clos, crédits rendus"
     },
     "modelUsageList": {
       "title_one": "Utilisation par modèle, dernier jour",

@@ -2,10 +2,15 @@ import type { Firestore } from "firebase-admin/firestore";
 import { appendEntry, balanceOf, COLLECTIONS, userRef } from "./ledger";
 import { centsToMicros } from "./money";
 
-/** What Stripe reported: the charge's refund total so far, or one dispute. */
+/**
+ * What Stripe reported: the charge's refund total so far, a dispute that
+ * opened, or a dispute that closed in the seller's favour (won, or an
+ * inquiry closed without a chargeback).
+ */
 export type ReversalSource =
   | { kind: "refund"; refundedCents: number }
-  | { kind: "dispute"; disputeId: string; amountCents: number };
+  | { kind: "dispute"; disputeId: string; amountCents: number }
+  | { kind: "disputeWon"; disputeId: string };
 
 export interface ReversalInput {
   /** Stripe event id, stored in stripeEvents so a redelivery is skipped. */
@@ -24,6 +29,13 @@ export type ReversalResult =
       balanceMicros: number;
     }
   | {
+      /** A won dispute gave credits back; `reversedMicros` is negative. */
+      result: "restored";
+      uid: string;
+      reversedMicros: number;
+      balanceMicros: number;
+    }
+  | {
       result: "duplicate";
       uid: string;
       reversedMicros: 0;
@@ -35,8 +47,10 @@ interface ReversalState {
   uid: string;
   /** Latest refund total of the charge, in micros. */
   refundedMicros: number;
-  /** Disputed amount per dispute id, in micros. */
+  /** Disputed amount per open or lost dispute id, in micros. */
   disputes: Record<string, number>;
+  /** Disputes closed in the seller's favour; they never count again. */
+  wonDisputes: string[];
   /** Credits already taken back for this purchase. */
   reversedMicros: number;
 }
@@ -47,6 +61,7 @@ function stateOf(data: unknown, uid: string): ReversalState {
     uid,
     refundedMicros: d.refundedMicros ?? 0,
     disputes: d.disputes ?? {},
+    wonDisputes: d.wonDisputes ?? [],
     reversedMicros: d.reversedMicros ?? 0,
   };
 }
@@ -57,9 +72,11 @@ function stateOf(data: unknown, uid: string): ReversalState {
  * each dispute its own amount, so the purchase keeps a running record
  * (`stripeReversals/{sessionId}`) and only the difference is reversed:
  * the same refund reported twice, or a refund and a dispute of the same
- * money, never take more than the purchase added. The balance may go
- * negative when the credits were already spent; Pro runs are then refused
- * until it is positive again. Idempotent by event id.
+ * money, never take more than the purchase added. A dispute closed in the
+ * seller's favour stops counting, and what it took back is restored, once
+ * (a late or repeated opening event of that dispute is ignored). The
+ * balance may go negative when the credits were already spent; Pro runs
+ * are then refused until it is positive again. Idempotent by event id.
  */
 export async function recordReversal(
   db: Firestore,
@@ -101,14 +118,22 @@ export async function recordReversal(
         state.refundedMicros,
         centsToMicros(input.source.refundedCents),
       );
-    } else {
+    } else if (input.source.kind === "disputeWon") {
+      delete state.disputes[input.source.disputeId];
+      if (!state.wonDisputes.includes(input.source.disputeId))
+        state.wonDisputes.push(input.source.disputeId);
+    } else if (!state.wonDisputes.includes(input.source.disputeId)) {
       state.disputes[input.source.disputeId] = centsToMicros(
         input.source.amountCents,
       );
     }
     const disputed = Object.values(state.disputes).reduce((a, b) => a + b, 0);
     const owed = Math.min(purchasedMicros, state.refundedMicros + disputed);
-    const reversedMicros = Math.max(0, owed - state.reversedMicros);
+    // Only a won dispute lowers what is owed, so only it restores credits.
+    const reversedMicros =
+      input.source.kind === "disputeWon"
+        ? Math.min(0, owed - state.reversedMicros)
+        : Math.max(0, owed - state.reversedMicros);
     state.reversedMicros += reversedMicros;
 
     tx.set(stateRef, state);
@@ -134,15 +159,23 @@ export async function recordReversal(
         uid,
         type: "reversal",
         amountMicros: -reversedMicros,
-        reason: input.source.kind,
+        reason:
+          input.source.kind === "disputeWon"
+            ? "dispute_won"
+            : input.source.kind,
         stripeSessionId: sessionId,
         stripePaymentIntentId: input.paymentIntentId,
         stripeEventId: input.eventId,
-        ...(input.source.kind === "dispute"
+        ...(input.source.kind !== "refund"
           ? { stripeDisputeId: input.source.disputeId }
           : {}),
       },
     );
-    return { result: "reversed", uid, reversedMicros, balanceMicros };
+    return {
+      result: reversedMicros > 0 ? "reversed" : "restored",
+      uid,
+      reversedMicros,
+      balanceMicros,
+    };
   });
 }

@@ -508,7 +508,8 @@
       "purchaseUnknown": "Credit pack",
       "grant": "Free credits",
       "refund": "Refund",
-      "dispute": "Disputed payment"
+      "dispute": "Disputed payment",
+      "disputeWon": "Dispute closed, credits restored"
     },
     "modelUsageList": {
       "title_one": "Usage by model, last day",

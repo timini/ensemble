@@ -1,6 +1,7 @@
 import "~/styles/globals.css";
 
 import type { Metadata } from "next";
+import { headers } from "next/headers";
 import { Geist, Geist_Mono, Instrument_Serif } from "next/font/google";
 import { RootShell } from "./_components/RootShell";
 import { SITE_DESCRIPTION, SITE_NAME } from "~/lib/siteMetadata";
@@ -42,11 +43,14 @@ export const metadata: Metadata = {
  * language and page frame live in the client RootShell. A small script in
  * <head> applies the stored theme, or the system's on a first visit, before
  * the first paint. `en` is the language until the stored or browser choice
- * loads.
+ * loads. The script carries the Content-Security-Policy nonce that
+ * src/middleware.ts sets for this request; reading it renders every page
+ * per request, which the nonce needs.
  */
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
+  const nonce = (await headers()).get("x-nonce") ?? undefined;
   return (
     <html
       lang="en"
@@ -54,7 +58,11 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <head>
-        <script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }} />
+        <script
+          nonce={nonce}
+          suppressHydrationWarning
+          dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }}
+        />
       </head>
       <body>
         <RootShell>{children}</RootShell>
