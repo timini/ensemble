@@ -30,5 +30,7 @@ Captured for review of the M4 wireframes and visual refresh, at 375, 768 and 144
 | `onboarding-key-invalid` | Same, a key the provider rejects | Onboarding sheet with the key error, Start disabled |
 | `onboarding-local` | Same, local models chosen | Onboarding sheet, local path, no server found (mock mode does not detect Ollama) |
 | `settings` | App `/workspace`, settings open, no keys | Settings sheet, top |
+| `history` | App `/workspace`, three finished runs | History sidebar (a sheet below 1024 px) listing the runs kept in IndexedDB, with their agreement level |
+| `history-open` | Same, the first run reopened from history | A saved run on screen read only, with the note that nothing is sent again |
 
 The `app-*` captures show the app's workspace wired to the store in mock mode, so answers and the consensus are placeholder text and their length is not realistic. The `cl-*` captures show the workspace components in Storybook with sample data, before the app is wired to them.
