@@ -12,6 +12,7 @@
  * tiny-gamma an unrelated one, so their pair scores 100% and the others less.
  */
 import { test, expect, type Page } from '@playwright/test';
+import { watchCspViolations } from '../../fixtures/cspViolations';
 
 const FAKE_ROOT = 'http://localhost:11499';
 const FAKE_BASE_URL = `${FAKE_ROOT}/v1`;
@@ -82,6 +83,8 @@ test.describe('Free mode with a local OpenAI-compatible endpoint', () => {
   });
 
   test('detects a running Ollama and runs a 3-model ensemble from one click', async ({ page }) => {
+    // The policy must let the browser reach a server on this machine (#352).
+    const violations = await watchCspViolations(page);
     await test.step('Offer the running Ollama with its installed models', async () => {
       await page.goto('/config');
       await expect(page.getByTestId('settings-sheet')).toBeVisible();
@@ -109,6 +112,7 @@ test.describe('Free mode with a local OpenAI-compatible endpoint', () => {
     expect(counts['GET /api/tags']).toBeGreaterThanOrEqual(1);
 
     await runThreeModelEnsemble(page);
+    expect(await violations()).toEqual([]);
   });
 
   test('picks the embedding model the server has when the suggested one is missing', async ({ page }) => {

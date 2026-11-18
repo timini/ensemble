@@ -30,8 +30,9 @@ function clearScreen() {
 /** True when `built` holds exactly what `existing` holds, apart from its stamp. */
 function sameRun(existing: StoredRun | undefined, built: StoredRun): boolean {
   if (!existing) return false;
-  const { updatedAt: _stamp, ...rest } = existing;
-  return JSON.stringify(rest) === JSON.stringify(built);
+  // JSON leaves out undefined fields, so this drops the stamp in place.
+  const unstamped = { ...existing, updatedAt: undefined };
+  return JSON.stringify(unstamped) === JSON.stringify(built);
 }
 
 function warn(action: string) {

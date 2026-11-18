@@ -3,11 +3,15 @@
  * tests. Everything points at the Firebase emulators started by
  * `npm run test:pro` (firebase.json: Auth 9099, Firestore 8080) with the
  * demo-ensemble project, which needs no cloud project.
+ *
+ * `firebase emulators:exec` exports the emulator hosts it started, so a run
+ * with another config (`firebase --config`, other ports) follows them;
+ * PRO_E2E_APP_PORT moves the app server. That lets two runs share a machine.
  */
-export const PRO_APP_PORT = 3200;
+export const PRO_APP_PORT = Number(process.env.PRO_E2E_APP_PORT || 3200);
 export const PROJECT_ID = 'demo-ensemble';
-export const AUTH_EMULATOR = '127.0.0.1:9099';
-export const FIRESTORE_EMULATOR = '127.0.0.1:8080';
+export const AUTH_EMULATOR = process.env.FIREBASE_AUTH_EMULATOR_HOST || '127.0.0.1:9099';
+export const FIRESTORE_EMULATOR = process.env.FIRESTORE_EMULATOR_HOST || '127.0.0.1:8080';
 
 /** Test-only signing secret: the app verifies webhook events with it, tests sign with it. */
 export const PRO_E2E_WEBHOOK_SECRET = 'fake-webhook-secret-e2e';

@@ -5,6 +5,7 @@ import { renderWithI18n } from '../../../lib/test-utils/i18n-test-wrapper';
 
 const items: PurchaseHistoryItem[] = [
   { id: 'r', kind: 'refund', amount: '-$20.00', date: '12 Nov 2026', negative: true },
+  { id: 'w', kind: 'disputeWon', amount: '+$5.00', date: '14 Nov 2026' },
   { id: 'd', kind: 'dispute', amount: '-$5.00', date: '10 Nov 2026', negative: true },
   { id: 'p', kind: 'purchase', pack: '$20', amount: '+$20.00', date: '3 Nov 2026' },
   { id: 'g', kind: 'grant', amount: '+$1.00', date: '1 Nov 2026' },
@@ -16,6 +17,7 @@ describe('PurchaseHistory', () => {
     const rows = within(screen.getByTestId('purchase-history-list')).getAllByRole('listitem');
     expect(rows.map((r) => r.textContent)).toEqual([
       'Refund12 Nov 2026-$20.00',
+      'Dispute closed, credits restored14 Nov 2026+$5.00',
       'Disputed payment10 Nov 2026-$5.00',
       '$20 credit pack3 Nov 2026+$20.00',
       'Free credits1 Nov 2026+$1.00',
@@ -34,5 +36,6 @@ describe('PurchaseHistory', () => {
     expect(screen.getByRole('heading', { name: 'Achats' })).toBeInTheDocument();
     expect(screen.getByTestId('purchase-history-item-r')).toHaveTextContent('Remboursement');
     expect(screen.getByTestId('purchase-history-item-p')).toHaveTextContent('Pack de crédits $20');
+    expect(screen.getByTestId('purchase-history-item-w')).toHaveTextContent('Litige clos, crédits rendus');
   });
 });

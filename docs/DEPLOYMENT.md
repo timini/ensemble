@@ -114,7 +114,7 @@ Use test mode until launch. No Stripe CLI is needed.
 1. In the Stripe dashboard, switch to **Test mode**. Developers, API keys: copy the secret key (`sk_test_...`) into `STRIPE_SECRET_KEY`.
 2. Developers, Webhooks (Event destinations): add an endpoint.
    - URL: `https://<app domain>/api/stripe/webhook`
-   - Events: `checkout.session.completed`, `checkout.session.async_payment_succeeded`, `charge.refunded` and `charge.dispute.created`.
+   - Events: `checkout.session.completed`, `checkout.session.async_payment_succeeded`, `charge.refunded`, `charge.dispute.created` and `charge.dispute.closed`.
    - After saving, reveal the signing secret (`whsec_...`) and store it in `STRIPE_WEBHOOK_SECRET`.
 3. Settings, Business: set the public business name and support email, which Stripe shows on the Checkout page and the receipt. Settings, Emails: turn on receipts for successful payments (FR-046).
 4. Test a purchase after deploying: sign in, start a checkout for the $5 pack, pay with card `4242 4242 4242 4242`, any future expiry and any CVC. The webhook's delivery log in the dashboard should show a 200 with `{"received":true,"result":"credited"}`, and `users/{uid}.balanceMicros` should be 5000000. Resending the event from the dashboard answers `"duplicate"` and adds nothing. Refunding that payment in the dashboard sends `charge.refunded`, which answers `{"received":true,"result":"reversed"}` and takes the $5 back. The `/account` page shows the purchase, the refund, each run and usage by model.
@@ -177,7 +177,7 @@ Balances and ledger amounts are integers in micro-dollars: 1 USD is 1,000,000. A
 
 A Pro run reserves the high end of the pre-run estimate plus the margin, then settles at the actual token cost plus the margin, never more than the reservation, and gives back the difference. A failed run is refunded in full. Every step is an append-only entry in `creditLedger`, idempotent by run id.
 
-When Stripe refunds a payment or the buyer opens a dispute, the webhook takes the purchase's credits back with a `reversal` entry: the refunded or disputed amount, never more than the purchase added, however many events arrive. If the credits were already spent the balance goes below zero, the workspace and `/account` say why, and Pro runs are refused until a purchase brings it back above zero. A dispute that is later won is not credited back automatically; give the credits back by hand with `grantCredits` if you want to. A refund or dispute whose purchase is not recorded yet (its own event still being retried) answers 500, so Stripe delivers it again; Stripe gives up after about three days, and the error log names the PaymentIntent.
+When Stripe refunds a payment or the buyer opens a dispute, the webhook takes the purchase's credits back with a `reversal` entry: the refunded or disputed amount, never more than the purchase added, however many events arrive. If the credits were already spent the balance goes below zero, the workspace and `/account` say why, and Pro runs are refused until a purchase brings it back above zero. When Stripe closes a dispute as `won`, or closes an inquiry as `warning_closed`, `charge.dispute.closed` gives back what that dispute took (a positive `reversal` entry with reason `dispute_won`), once per dispute; a refund of the same money stays taken back. A dispute closed as `lost` changes nothing. An endpoint created before this event was handled must be edited in the Stripe dashboard to add `charge.dispute.closed`. A refund or dispute whose purchase is not recorded yet (its own event still being retried) answers 500, so Stripe delivers it again; Stripe gives up after about three days, and the error log names the PaymentIntent.
 
 ## Pro mode (OpenRouter)
 
@@ -229,7 +229,7 @@ For local runs and CI with enforcement on, create a debug token in App Check, Ap
 | `creditLedger/{id}` | `uid`, `type` (`purchase`, `reserve`, `settle`, `refund`, `grant`, `reversal`), signed `amountMicros`, `balanceAfterMicros`, `createdAt`, and per-type fields (a purchase keeps its `stripePaymentIntentId`) | credit service, Stripe webhook |
 | `usage/{uid}__{runId}` | the calls and tokens of a settled run, its cost and charge | `settleRun` |
 | `stripeEvents/{eventId}` | Stripe events already handled | Stripe webhook |
-| `stripeReversals/{sessionId}` | refund total and disputed amounts of a purchase, and the credits already taken back | Stripe webhook |
+| `stripeReversals/{sessionId}` | refund total, open and won disputes of a purchase, and the credits already taken back | Stripe webhook |
 | `proRuns/{uid}__{runId}` | an open or closed Pro run: budget, call ids, calls and usage, outcome | Pro run path |
 | `rateLimits/{key}` | a fixed rate-limit window: `{uid}` for Pro runs, `share__{uid}` for share links, `sync__{uid}` for sync writes | `proRun.start`, `share.create`, `sync.upsert` and `sync.remove` |
 | `shares/{id}` | a shared run: `uid`, `runId`, `payload` (the run as JSON), `createdAt`, `expiresAt` (TTL field) | `share.create`, `share.delete` |

@@ -105,6 +105,20 @@ describe('detectOllama', () => {
       throw new TypeError('Failed to fetch');
     });
     await expect(detectOllama({ fetchImpl: fetchImpl as unknown as typeof fetch })).resolves.toEqual({ found: false });
+    // The browser logs every refused request, so an absent server is asked once.
+    expect(fetchImpl).toHaveBeenCalledTimes(1);
+  });
+
+  it('tries /v1/models when the server answers /api/tags without a model list', async () => {
+    const fetchImpl = vi.fn(async (url: string | URL | Request) =>
+      String(url).endsWith('/api/tags')
+        ? new Response('not found', { status: 404 })
+        : new Response(JSON.stringify({ data: [{ id: 'llama3.2:3b' }] }), { status: 200 }),
+    );
+    await expect(detectOllama({ fetchImpl: fetchImpl as unknown as typeof fetch })).resolves.toMatchObject({
+      found: true,
+      chatModels: ['llama3.2:3b'],
+    });
   });
 
   it('gives up after the timeout', async () => {
@@ -118,6 +132,7 @@ describe('detectOllama', () => {
     const result = await detectOllama({ timeoutMs: 30, fetchImpl: fetchImpl as unknown as typeof fetch });
     expect(result).toEqual({ found: false });
     expect(Date.now() - started).toBeLessThan(1000);
+    expect(fetchImpl).toHaveBeenCalledTimes(1);
   });
 
   it('reports not found when the answer is not a model list', async () => {

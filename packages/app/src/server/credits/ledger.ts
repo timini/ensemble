@@ -34,14 +34,14 @@ export type LedgerEntryType =
   | "settle"
   | "refund"
   | "grant"
-  /** Credits of a purchase taken back after a Stripe refund or dispute. */
+  /** Credits of a purchase taken back after a Stripe refund or dispute, or given back when a dispute is won (reason `dispute_won`). */
   | "reversal";
 
 /** One ledger document. Optional fields depend on the type. */
 export interface LedgerEntry {
   uid: string;
   type: LedgerEntryType;
-  /** Signed change to the balance: reserve and reversal are negative, the others zero or positive. */
+  /** Signed change to the balance: reserve is negative, a reversal negative (or positive when a won dispute restores credits), the others zero or positive. */
   amountMicros: number;
   balanceAfterMicros: number;
   createdAt: FieldValue;
