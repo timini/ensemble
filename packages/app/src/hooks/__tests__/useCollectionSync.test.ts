@@ -23,8 +23,14 @@ function fakeApi(remote: SyncSnapshot = { items: [], deleted: [] }) {
   return api;
 }
 
-function setup(initial: { uid: string | null; items: Item[]; api: SyncApi }) {
-  const apply = vi.fn();
+function setup(initial: {
+  uid: string | null;
+  items: Item[];
+  api: SyncApi;
+  apply?: (merged: Item[]) => void | Promise<void>;
+  retryMs?: number;
+}) {
+  const apply = vi.fn(initial.apply ?? (() => undefined));
   const hook = renderHook(
     (props: { uid: string | null; items: Item[] }) =>
       useCollectionSync<Item>({
@@ -36,6 +42,7 @@ function setup(initial: { uid: string | null; items: Item[]; api: SyncApi }) {
         apply,
         api: initial.api,
         debounceMs: 10,
+        retryMs: initial.retryMs ?? 20,
       }),
     { initialProps: { uid: initial.uid, items: initial.items } },
   );
@@ -79,10 +86,7 @@ describe("useCollectionSync", () => {
       api,
     });
     await waitFor(() => expect(result.current).toBe(true));
-    expect((apply.mock.calls[0]![0] as Item[]).map((i) => i.id)).toEqual([
-      "a",
-      "b",
-    ]);
+    expect(apply.mock.calls[0]![0].map((i) => i.id)).toEqual(["a", "b"]);
     expect(api.upsert).toHaveBeenCalledWith("presets", [
       { id: "a", updatedAt: 1, payload: JSON.stringify({ id: "a", at: 1 }) },
     ]);
@@ -101,7 +105,7 @@ describe("useCollectionSync", () => {
       api,
     });
     await waitFor(() => expect(result.current).toBe(true));
-    expect((apply.mock.calls[0]![0] as Item[]).map((i) => i.id)).toEqual(["b"]);
+    expect(apply.mock.calls[0]![0].map((i) => i.id)).toEqual(["b"]);
     expect(api.upsert).not.toHaveBeenCalled();
   });
 
@@ -115,7 +119,7 @@ describe("useCollectionSync", () => {
       api,
     });
     await waitFor(() => expect(result.current).toBe(true));
-    const [mergedA, mergedB] = apply.mock.calls[0]![0] as Item[];
+    const [mergedA, mergedB] = apply.mock.calls[0]![0];
     // The merged items are what the browser now holds: no echo.
     rerender({ uid: "u1", items: [mergedA!, mergedB!] });
     await new Promise((r) => setTimeout(r, 30));
@@ -151,15 +155,90 @@ describe("useCollectionSync", () => {
     rerender({ uid: "u1", items: [{ id: "late", at: 4 }] });
     release({ items: [], deleted: [] });
     await waitFor(() => expect(result.current).toBe(true));
-    expect((apply.mock.calls[0]![0] as Item[]).map((i) => i.id)).toEqual([
-      "late",
-    ]);
+    expect(apply.mock.calls[0]![0].map((i) => i.id)).toEqual(["late"]);
     expect(api.upsert).toHaveBeenCalledWith("presets", [
       {
         id: "late",
         updatedAt: 4,
         payload: JSON.stringify({ id: "late", at: 4 }),
       },
+    ]);
+  });
+
+  it("sends nothing for an account once it signs out during the merge", async () => {
+    let release: () => void = () => undefined;
+    const api = fakeApi();
+    const { rerender } = setup({
+      uid: "u1",
+      items: [{ id: "a", at: 1 }],
+      api,
+      apply: () => new Promise<void>((resolve) => (release = resolve)),
+    });
+    await waitFor(() => expect(api.list).toHaveBeenCalled());
+    await new Promise((r) => setTimeout(r, 10));
+    rerender({ uid: null, items: [{ id: "a", at: 1 }] });
+    release();
+    await new Promise((r) => setTimeout(r, 30));
+    expect(api.upsert).not.toHaveBeenCalled();
+    expect(localStorage.getItem(syncOwnerKey("presets"))).toBeNull();
+  });
+
+  it("stops uploading batches once the account signs out", async () => {
+    const items = Array.from({ length: 60 }, (_, i) => ({
+      id: `i${i}`,
+      at: 1,
+    }));
+    let release: () => void = () => undefined;
+    const api = fakeApi();
+    api.upsert.mockImplementationOnce(
+      () => new Promise((resolve) => (release = () => resolve({}))),
+    );
+    const { rerender } = setup({ uid: "u1", items, api });
+    await waitFor(() => expect(api.upsert).toHaveBeenCalledTimes(1));
+    rerender({ uid: null, items });
+    release();
+    await new Promise((r) => setTimeout(r, 30));
+    expect(api.upsert).toHaveBeenCalledTimes(1);
+  });
+
+  it("keeps a failed delete and sends it again later", async () => {
+    const a = { id: "a", at: 1 };
+    const b = { id: "b", at: 1 };
+    const api = fakeApi({ items: [remoteItem(a), remoteItem(b)], deleted: [] });
+    api.remove.mockRejectedValueOnce(new Error("offline"));
+    const { result, rerender, apply } = setup({
+      uid: "u1",
+      items: [a, b],
+      api,
+    });
+    await waitFor(() => expect(result.current).toBe(true));
+    const [mergedA] = apply.mock.calls[0]![0];
+    act(() => rerender({ uid: "u1", items: [mergedA!] }));
+    await waitFor(() => expect(api.remove).toHaveBeenCalledTimes(2));
+    expect(api.remove).toHaveBeenLastCalledWith("presets", ["b"]);
+  });
+
+  it("keeps a failed change and sends it with the next one", async () => {
+    const a = { id: "a", at: 1 };
+    const api = fakeApi({ items: [remoteItem(a)], deleted: [] });
+    api.upsert.mockRejectedValueOnce(new Error("offline"));
+    const { result, rerender, apply } = setup({
+      uid: "u1",
+      items: [a],
+      api,
+      retryMs: 60_000,
+    });
+    await waitFor(() => expect(result.current).toBe(true));
+    const [mergedA] = apply.mock.calls[0]![0];
+    const changed = { ...mergedA!, at: 5 };
+    act(() => rerender({ uid: "u1", items: [changed] }));
+    await waitFor(() => expect(api.upsert).toHaveBeenCalledTimes(1));
+    const added = { id: "c", at: 6 };
+    act(() => rerender({ uid: "u1", items: [changed, added] }));
+    await waitFor(() => expect(api.upsert).toHaveBeenCalledTimes(2));
+    expect(api.upsert).toHaveBeenLastCalledWith("presets", [
+      { id: "a", updatedAt: 5, payload: JSON.stringify(changed) },
+      { id: "c", updatedAt: 6, payload: JSON.stringify(added) },
     ]);
   });
 });
