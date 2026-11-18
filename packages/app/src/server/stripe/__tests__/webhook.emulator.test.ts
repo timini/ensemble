@@ -14,8 +14,8 @@ const app = initializeApp(
   "stripe-webhook-test",
 );
 const db = getFirestore(app);
-const SECRET = "whsec_emulator_test";
-const stripe = new Stripe("sk_test_unused");
+const SECRET = "fake-webhook-secret-emulator";
+const stripe = new Stripe("fake-stripe-key-unused");
 
 const deps = {
   stripe,

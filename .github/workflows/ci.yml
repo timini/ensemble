@@ -95,7 +95,7 @@ jobs:
     name: Component Library
     needs: [detect-changes]
     if: needs.detect-changes.outputs.component_library == 'true'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04  # Playwright 1.58 has no Ubuntu 26.04 build
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -103,6 +103,10 @@ jobs:
           node-version: 20
           cache: npm
       - run: npm ci
+      - name: Build consensus packages and shared-utils (component imports)
+        run: |
+          npm run build --workspace=packages/consensus-core
+          npm run build --workspace=packages/shared-utils
       - run: npm run lint --workspace=packages/component-library
       - run: npm run test:unit --workspace=packages/component-library
       - name: Get Playwright version
@@ -216,7 +220,7 @@ jobs:
     name: App E2E (Mock Mode)
     needs: [detect-changes]
     if: needs.detect-changes.outputs.e2e == 'true'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04  # Playwright 1.58 has no Ubuntu 26.04 build
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -267,7 +271,7 @@ jobs:
     name: App E2E (Pro Mode)
     needs: [detect-changes]
     if: needs.detect-changes.outputs.e2e == 'true'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04  # Playwright 1.58 has no Ubuntu 26.04 build
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4

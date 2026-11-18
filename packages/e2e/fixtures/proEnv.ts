@@ -10,7 +10,7 @@ export const AUTH_EMULATOR = '127.0.0.1:9099';
 export const FIRESTORE_EMULATOR = '127.0.0.1:8080';
 
 /** Test-only signing secret: the app verifies webhook events with it, tests sign with it. */
-export const PRO_E2E_WEBHOOK_SECRET = 'whsec_e2e_pro_mode';
+export const PRO_E2E_WEBHOOK_SECRET = 'fake-webhook-secret-e2e';
 
 /**
  * The app server's environment: the Free build (no mock clients), sign-in

@@ -236,7 +236,7 @@ jobs:
   # provider, so it only runs on a manual dispatch with full_e2e enabled.
   e2e-post-deploy:
     name: E2E (${{ inputs.full_e2e && 'Free Mode, full' || 'Google smoke' }}) - Post Deploy
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04  # Playwright 1.58 has no Ubuntu 26.04 build
     needs: [deploy, smoke-check]
     if: ${{ needs.deploy.result == 'success' && needs.smoke-check.result == 'success' }}
     env:

@@ -12,7 +12,7 @@ import { AUTH_EMULATOR, FIRESTORE_EMULATOR, PRO_E2E_WEBHOOK_SECRET, PROJECT_ID }
 
 /** Admin access to the emulators, which accept this token in place of credentials. */
 const OWNER = { Authorization: 'Bearer owner' };
-const stripe = new Stripe('sk_test_unused');
+const stripe = new Stripe('fake-stripe-key-unused');
 
 /** A new address per test, so tests never share a user or a balance. */
 export function uniqueEmail(label: string): string {

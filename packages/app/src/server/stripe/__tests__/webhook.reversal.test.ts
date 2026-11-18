@@ -4,8 +4,8 @@ import Stripe from "stripe";
 import { DEFAULT_CREDIT_CONFIG } from "~/server/credits/config";
 import { handleStripeWebhook, type WebhookDeps } from "../webhook";
 
-const SECRET = "whsec_test_secret";
-const stripe = new Stripe("sk_test_unused");
+const SECRET = "fake-webhook-secret-unit";
+const stripe = new Stripe("fake-stripe-key-unused");
 
 function signed(payload: unknown) {
   const body = JSON.stringify(payload);
