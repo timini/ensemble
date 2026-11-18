@@ -72,6 +72,15 @@ describe('Composer', () => {
     expect(screen.getByTestId('method-menu-trigger')).toHaveClass('whitespace-nowrap');
   });
 
+  it('shows the shortcut beside the models, not in the footer with Ask, and announces it on the question', () => {
+    setup();
+    const shortcut = screen.getByTestId('composer-shortcut');
+    expect(screen.getByRole('group', { name: 'Models' })).not.toContainElement(shortcut);
+    expect(shortcut.parentElement).toBe(screen.getByTestId('composer-model-row'));
+    expect(shortcut).toHaveAttribute('aria-hidden', 'true');
+    expect(screen.getByRole('textbox')).toHaveAttribute('aria-keyshortcuts', 'Control+Enter Meta+Enter');
+  });
+
   it('drops the hint once a model or a hand-written answer is in', () => {
     setup();
     expect(screen.queryByTestId('composer-models-hint')).not.toBeInTheDocument();

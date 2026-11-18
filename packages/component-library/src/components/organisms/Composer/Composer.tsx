@@ -114,35 +114,47 @@ export function Composer(props: ComposerProps) {
         value={prompt}
         onChange={(e) => props.onPromptChange(e.target.value)}
         onKeyDown={onKeyDown}
+        aria-keyshortcuts="Control+Enter Meta+Enter"
         placeholder={t('organisms.composer.placeholder')}
         data-testid="composer-prompt"
         className="block max-h-60 min-h-[4.5rem] w-full resize-none rounded-t-2xl bg-transparent px-4 pb-2 pt-4 text-body [field-sizing:content] placeholder:text-muted-foreground focus:outline-none sm:px-5"
       />
-      <div role="group" aria-label={t('organisms.composer.models')} className="flex flex-wrap items-center gap-1.5 px-3 pb-3 sm:px-4">
-        {models.map((m) => (
-          <ModelChip key={m.id} modelId={m.id} name={m.name} provider={m.provider} onRemove={running ? undefined : () => props.onRemoveModel(m.id)} />
-        ))}
-        {manualResponses.map((r) => (
-          <ModelChip
-            key={r.id}
-            modelId={r.id}
-            name={r.label}
-            kind="manual"
-            onRemove={running || !props.onRemoveManualResponse ? undefined : () => props.onRemoveManualResponse?.(r.id)}
+      <div data-testid="composer-model-row" className="flex items-start gap-2 px-3 pb-3 sm:px-4">
+        <div role="group" aria-label={t('organisms.composer.models')} className="flex min-w-0 flex-1 flex-wrap items-center gap-1.5">
+          {models.map((m) => (
+            <ModelChip key={m.id} modelId={m.id} name={m.name} provider={m.provider} onRemove={running ? undefined : () => props.onRemoveModel(m.id)} />
+          ))}
+          {manualResponses.map((r) => (
+            <ModelChip
+              key={r.id}
+              modelId={r.id}
+              name={r.label}
+              kind="manual"
+              onRemove={running || !props.onRemoveManualResponse ? undefined : () => props.onRemoveManualResponse?.(r.id)}
+            />
+          ))}
+          <ModelPicker
+            options={props.modelOptions}
+            selectedIds={models.map((m) => m.id)}
+            onToggle={props.onToggleModel}
+            max={props.maxModels}
+            disabled={running}
           />
-        ))}
-        <ModelPicker
-          options={props.modelOptions}
-          selectedIds={models.map((m) => m.id)}
-          onToggle={props.onToggleModel}
-          max={props.maxModels}
-          disabled={running}
-        />
-        {noModels && (
-          <span id={hintId} data-testid="composer-models-hint" className="px-1 text-caption text-muted-foreground">
-            {t('organisms.composer.modelsHint')}
-          </span>
-        )}
+          {noModels && (
+            <span id={hintId} data-testid="composer-models-hint" className="px-1 text-caption text-muted-foreground">
+              {t('organisms.composer.modelsHint')}
+            </span>
+          )}
+        </div>
+        {/* Here rather than beside Ask, where the French cost label leaves no room. The question announces it. */}
+        <kbd
+          data-testid="composer-shortcut"
+          aria-hidden="true"
+          title={t('organisms.composer.shortcut', { keys })}
+          className="hidden h-8 shrink-0 items-center whitespace-nowrap font-sans text-caption text-muted-foreground md:flex"
+        >
+          {keys}
+        </kbd>
       </div>
       <div className="flex items-center gap-2 border-t border-border px-3 py-2.5 sm:px-4">
         <MethodMenu
@@ -158,14 +170,6 @@ export function Composer(props: ComposerProps) {
           disabled={running}
         />
         <div className="ml-auto flex items-center gap-1">
-          {/* The keys alone keep the row on one line in French; the sentence is the tooltip. */}
-          <kbd
-            data-testid="composer-shortcut"
-            title={t('organisms.composer.shortcut', { keys })}
-            className="mr-2 hidden whitespace-nowrap font-sans text-caption text-muted-foreground md:inline"
-          >
-            {keys}
-          </kbd>
           {/* Answers added by hand join a run in progress, so the menu stays available. */}
           <ComposerOptions onAddManualResponse={props.onAddManualResponse} onSavePreset={props.onSavePreset} />
           <Button
