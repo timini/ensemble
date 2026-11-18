@@ -10,7 +10,7 @@ export default defineConfig({
     globals: true,
     setupFiles: ['./vitest.setup.ts'],
     testTimeout: 15000, // 15 seconds for streaming tests
-    exclude: ['tests/e2e/**'],
+    exclude: ['tests/e2e/**', 'node_modules/**', 'src/**/*.emulator.test.ts'],
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html'],

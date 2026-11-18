@@ -27,7 +27,8 @@
     "firebase:test-user:ensure": "node scripts/ensure-firebase-test-user.mjs",
     "typecheck": "tsc --noEmit",
     "prepare": "husky",
-    "local": "node bin/ensemble-local.mjs"
+    "local": "node bin/ensemble-local.mjs",
+    "test:emulator": "firebase emulators:exec --only firestore,auth --project demo-ensemble \"vitest run -c vitest.emulator.config.ts\""
   },
   "dependencies": {
     "@ai-ensemble/component-library": "*",
