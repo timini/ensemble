@@ -4,6 +4,11 @@ import {
   protectedProcedure,
   publicProcedure,
 } from "~/server/api/trpc";
+import {
+  listPurchases,
+  listRuns,
+  modelUsageSince,
+} from "~/server/credits/accountHistory";
 import { getCreditAccount } from "~/server/credits/creditService";
 import { getCreditConfig } from "~/server/credits";
 import { quoteRunForUser } from "~/server/credits/runBilling";
@@ -26,6 +31,19 @@ export const runQuoteInput = z.object({
   embeddings: modelRef.nullable(),
   promptTokens: z.number().int().min(0).max(2_000_000),
 });
+
+/** One page of a list on /account. The cursor is the last item's id. */
+const pageInput = z.object({
+  cursor: z
+    .string()
+    .regex(/^[A-Za-z0-9_-]{1,256}$/)
+    .nullish(),
+  limit: z.number().int().min(1).max(50).default(10),
+});
+
+const DAY_MS = 24 * 60 * 60 * 1000;
+/** Most runs summed for usage by model; older runs in the window are left out. */
+const MAX_USAGE_RUNS = 1000;
 
 /**
  * Credits for Pro mode. Balances are integer micro-dollars (1 USD is
@@ -56,5 +74,29 @@ export const creditsRouter = createTRPCRouter({
         ctx.authUser.uid,
         input,
       ),
+    ),
+
+  /** Purchases, refunds, disputes and grants, newest first (FR-041). */
+  purchases: protectedProcedure
+    .input(pageInput)
+    .query(({ ctx, input }) =>
+      listPurchases(getAdminFirestore(), ctx.authUser.uid, input),
+    ),
+
+  /** Settled Pro runs, newest first, with their models and charge (FR-041). */
+  runs: protectedProcedure
+    .input(pageInput)
+    .query(({ ctx, input }) =>
+      listRuns(getAdminFirestore(), ctx.authUser.uid, input),
+    ),
+
+  /** Calls, tokens and credits per model over the last `days` days (FR-041). */
+  usageByModel: protectedProcedure
+    .input(z.object({ days: z.number().int().min(1).max(365).default(30) }))
+    .query(({ ctx, input }) =>
+      modelUsageSince(getAdminFirestore(), ctx.authUser.uid, {
+        sinceMs: Date.now() - input.days * DAY_MS,
+        maxRuns: MAX_USAGE_RUNS,
+      }),
     ),
 });

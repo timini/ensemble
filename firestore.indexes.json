@@ -9,6 +9,15 @@
       ]
     },
     {
+      "collectionGroup": "creditLedger",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "uid", "order": "ASCENDING" },
+        { "fieldPath": "type", "order": "ASCENDING" },
+        { "fieldPath": "createdAt", "order": "DESCENDING" }
+      ]
+    },
+    {
       "collectionGroup": "usage",
       "queryScope": "COLLECTION",
       "fields": [

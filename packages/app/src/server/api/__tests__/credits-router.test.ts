@@ -2,9 +2,14 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { AuthUser } from "~/server/auth/firebaseAdmin";
 
-const { verifyMock, accountMock } = vi.hoisted(() => ({
+const { verifyMock, accountMock, historyMock } = vi.hoisted(() => ({
   verifyMock: vi.fn<(token: string) => Promise<AuthUser | null>>(),
   accountMock: vi.fn(),
+  historyMock: {
+    listPurchases: vi.fn(),
+    listRuns: vi.fn(),
+    modelUsageSince: vi.fn(),
+  },
 }));
 
 vi.mock("~/server/auth/firebaseAdmin", () => ({
@@ -17,6 +22,7 @@ vi.mock("~/server/firebase/firestore", () => ({
 vi.mock("~/server/credits/creditService", () => ({
   getCreditAccount: accountMock,
 }));
+vi.mock("~/server/credits/accountHistory", () => historyMock);
 
 import { createCaller } from "~/server/api/root";
 import { createTRPCContext } from "~/server/api/trpc";
