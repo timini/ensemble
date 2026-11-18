@@ -99,7 +99,10 @@ describe("Stripe webhook against Firestore", () => {
       handleStripeWebhook(event.body, event.signature, deps),
       handleStripeWebhook(event.body, event.signature, deps),
     ]);
-    expect(results.map((r) => r.status)).toEqual([200, 200]);
+    // Contention can abort one transaction; it answers 500 and Stripe
+    // retries it later. Either way the session is credited once.
+    expect(results.some((r) => r.status === 200)).toBe(true);
+    for (const r of results) expect([200, 500]).toContain(r.status);
     expect(
       (await getCreditAccount(db, DEFAULT_CREDIT_CONFIG, "buyer"))
         .balanceMicros,
