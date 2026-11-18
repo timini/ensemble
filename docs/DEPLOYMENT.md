@@ -43,6 +43,8 @@ Balances and ledger amounts are integers in micro-dollars: 1 USD is 1,000,000. A
 
 A Pro run reserves the high end of the pre-run estimate plus the margin, then settles at the actual token cost plus the margin, never more than the reservation, and gives back the difference. A failed run is refunded in full. Every step is an append-only entry in `creditLedger`, idempotent by run id.
 
+When Stripe refunds a payment or the buyer opens a dispute, the webhook takes the purchase's credits back with a `reversal` entry: the refunded or disputed amount, never more than the purchase added, however many events arrive. If the credits were already spent the balance goes below zero, the workspace and `/account` say why, and Pro runs are refused until a purchase brings it back above zero. A dispute that is later won is not credited back automatically; give the credits back by hand with `grantCredits` if you want to.
+
 ## Pro mode (OpenRouter)
 
 Pro model calls go from the server to OpenRouter with one key. To set it up:
@@ -113,7 +115,7 @@ firebase apphosting:secrets:grantaccess NEXT_PUBLIC_FIREBASE_API_KEY,NEXT_PUBLIC
    firebase deploy --only firestore:rules,firestore:indexes --project <project-id>
    ```
 
-   `firestore.rules`: the server writes everything through firebase-admin; a signed-in user may read only their own `users/{uid}`, `creditLedger` and `usage` documents; every other path, including `stripeEvents`, `proRuns` and `rateLimits`, is closed.
+   `firestore.rules`: the server writes everything through firebase-admin; a signed-in user may read only their own `users/{uid}`, `creditLedger` and `usage` documents; every other path, including `stripeEvents`, `stripeReversals`, `proRuns` and `rateLimits`, is closed. `firestore.indexes.json` holds the indexes of the `/account` lists (ledger by user and date, ledger by user, type and date, usage by user and date); deploy them before the first visit to `/account`, or its lists fail until the indexes are built.
 3. The App Hosting backend's service account needs the `Cloud Datastore User` role (`roles/datastore.user`) to read and write Firestore through firebase-admin.
 
 Collections:
@@ -121,9 +123,10 @@ Collections:
 | Collection | Document | Written by |
 |---|---|---|
 | `users/{uid}` | `balanceMicros` (cache of the ledger sum), `createdAt`, `updatedAt` | every ledger transaction |
-| `creditLedger/{id}` | `uid`, `type` (`purchase`, `reserve`, `settle`, `refund`, `grant`), signed `amountMicros`, `balanceAfterMicros`, `createdAt`, and per-type fields | credit service, Stripe webhook |
+| `creditLedger/{id}` | `uid`, `type` (`purchase`, `reserve`, `settle`, `refund`, `grant`, `reversal`), signed `amountMicros`, `balanceAfterMicros`, `createdAt`, and per-type fields (a purchase keeps its `stripePaymentIntentId`) | credit service, Stripe webhook |
 | `usage/{uid}__{runId}` | the calls and tokens of a settled run, its cost and charge | `settleRun` |
 | `stripeEvents/{eventId}` | Stripe events already handled | Stripe webhook |
+| `stripeReversals/{sessionId}` | refund total and disputed amounts of a purchase, and the credits already taken back | Stripe webhook |
 | `proRuns/{uid}__{runId}` | an open or closed Pro run: budget, call ids, calls and usage, outcome | Pro run path |
 | `rateLimits/{uid}` | the user's current rate-limit window | `proRun.start` |
 
@@ -134,7 +137,7 @@ Use test mode until launch. No Stripe CLI is needed.
 1. In the Stripe dashboard, switch to **Test mode**. Developers, API keys: copy the secret key (`sk_test_...`).
 2. Developers, Webhooks (Event destinations): add an endpoint.
    - URL: `https://<app domain>/api/stripe/webhook`
-   - Events: `checkout.session.completed` and `checkout.session.async_payment_succeeded`.
+   - Events: `checkout.session.completed`, `checkout.session.async_payment_succeeded`, `charge.refunded` and `charge.dispute.created`.
    - After saving, reveal the signing secret (`whsec_...`).
 3. Store both as App Hosting secrets:
 
@@ -145,7 +148,7 @@ Use test mode until launch. No Stripe CLI is needed.
    ```
 
 4. Settings, Business: set the public business name and support email, which Stripe shows on the Checkout page and the receipt. Settings, Emails: turn on receipts for successful payments (FR-046).
-5. Test a purchase after deploying: sign in, start a checkout for the $5 pack, pay with card `4242 4242 4242 4242`, any future expiry and any CVC. The webhook's delivery log in the dashboard should show a 200 with `{"received":true,"result":"credited"}`, and `users/{uid}.balanceMicros` should be 5000000. Resending the event from the dashboard answers `"duplicate"` and adds nothing.
+5. Test a purchase after deploying: sign in, start a checkout for the $5 pack, pay with card `4242 4242 4242 4242`, any future expiry and any CVC. The webhook's delivery log in the dashboard should show a 200 with `{"received":true,"result":"credited"}`, and `users/{uid}.balanceMicros` should be 5000000. Resending the event from the dashboard answers `"duplicate"` and adds nothing. Refunding that payment in the dashboard sends `charge.refunded`, which answers `{"received":true,"result":"reversed"}` and takes the $5 back. The `/account` page shows the purchase, the refund, each run and usage by model.
 
 Credit packs are created per Checkout Session from `CREDIT_PACKS_USD`, so no Products or Prices need to exist in Stripe. The webhook credits a session only when its amount matches a configured pack.
 
@@ -159,7 +162,7 @@ Emulator-backed tests need Java and the Firebase CLI. They use the `demo-ensembl
 npm run test:emulator --workspace=packages/app
 ```
 
-This starts the Auth and Firestore emulators (`firebase.json`: ports 9099 and 8080), runs `src/**/*.emulator.test.ts` (Firestore rules, the credit ledger, the Stripe webhook against Firestore, token verification, the Pro run path with a mocked OpenRouter fetch) and stops them.
+This starts the Auth and Firestore emulators (`firebase.json`: ports 9099 and 8080), runs `src/**/*.emulator.test.ts` (Firestore rules, the credit ledger, refunds and disputes, the `/account` queries, the Stripe webhook against Firestore, token verification, the Pro run path with a mocked OpenRouter fetch) and stops them.
 
 To try sign-in by hand against the Auth emulator:
 
@@ -177,3 +180,13 @@ In mock mode Pro calls are answered by the mock client on the server (no OpenRou
 The emulator does not send email. Sign-in links are listed at `http://127.0.0.1:9099/emulator/v1/projects/demo-ensemble/oobCodes`.
 
 Webhook tests sign events with the Stripe SDK's `webhooks.generateTestHeaderString` and mock the Stripe client for Checkout Session creation, so no Stripe account or network call is involved.
+
+### Pro mode end to end
+
+The `pro-mode` Playwright suite runs the whole Pro path against the emulators, with no Stripe, Firebase or OpenRouter account:
+
+```bash
+npm run test:pro --workspace=packages/e2e
+```
+
+It wraps Playwright in `firebase emulators:exec` (Auth and Firestore, `demo-ensemble`) and starts the app on port 3200 with the settings in `packages/e2e/fixtures/proEnv.ts`: the Auth and Firestore emulator hosts, `PRO_MOCK_UPSTREAM=true` and a test-only `STRIPE_WEBHOOK_SECRET`, with no Stripe key. Sign-in uses the email links listed by the Auth emulator. A purchase stubs the Checkout redirect in the browser and posts a `checkout.session.completed` event to `/api/stripe/webhook`, signed with that secret by the Stripe SDK's `generateTestHeaderString`; refunds are posted the same way. CI runs it in the App E2E (Pro Mode) job.

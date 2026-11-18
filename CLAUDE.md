@@ -18,14 +18,14 @@ Do not write copy claiming ensembles are more accurate than the best single mode
 Modes:
 
 - **Free**: user's own provider keys, encrypted in the browser, providers called directly from the browser. Works today.
-- **Pro**: sign-in with Firebase Auth, Stripe credits, model calls on the server through OpenRouter, billed per run. In progress (roadmap M5): the `/account` dashboard and the `pro-mode` E2E suite are still to do.
+- **Pro**: sign-in with Firebase Auth, Stripe credits, model calls on the server through OpenRouter, billed per run, with the usage dashboard at `/account`. Built in roadmap M5; tested end to end against the Firebase emulators by the `pro-mode` suite.
 - **Mock**: developer and CI only, enabled with `NEXT_PUBLIC_MOCK_MODE=true`. Never show a Mock option to users.
 
 ## Repository structure
 
 npm workspaces monorepo:
 
-- `packages/app/`: Next.js 15 App Router app. Routes: `/` (landing page with a recorded example run and the three ways in), `/workspace` (the one working screen), `/config`, `/ensemble`, `/prompt` and `/review` (redirect into the workspace with the matching panel open), `/features`, `/about`, `/benchmarks`, `/test-components` (dev only), `/api/trpc/[trpc]`, `/api/stripe/checkout`, `/api/stripe/webhook`.
+- `packages/app/`: Next.js 15 App Router app. Routes: `/` (landing page with a recorded example run and the three ways in), `/workspace` (the one working screen), `/account` (Pro usage dashboard), `/config`, `/ensemble`, `/prompt` and `/review` (redirect into the workspace with the matching panel open), `/features`, `/about`, `/benchmarks`, `/test-components` (dev only), `/api/trpc/[trpc]`, `/api/stripe/checkout`, `/api/stripe/webhook`.
 - `packages/component-library/`: 63 atomic-design components (atoms, molecules, organisms) developed in Storybook. The app imports its source via a tsconfig alias.
 - `packages/shared-utils/`: provider clients, registry, factory, similarity maths, Web Crypto helpers. Exports from `dist`; rebuild after changes with `npm run build --workspace=packages/shared-utils`.
 - `packages/consensus-core`, `consensus-standard`, `consensus-majority`, `consensus-elo`, `consensus-council`: consensus strategies.
@@ -240,13 +240,13 @@ A component is not done until it has all five artifacts (`.tsx`, `.stories.tsx`,
 - **E2E**: Playwright in `packages/e2e` with three suites:
   - `mock-mode`: mock providers. Runs in CI before deploy.
   - `free-mode`: real provider keys. Runs after deploy against the deployed URL.
-  - `pro-mode`: placeholder until M5.
+  - `pro-mode`: Pro against the Firebase Auth and Firestore emulators with the mock model upstream (`npm run test:pro`, needs Java and firebase-tools). Runs in CI.
 - **Selectors**: `data-testid` only, never CSS classes.
 - **Coverage**: 80% minimum per component.
 
 ### CI and deploy flow
 
-1. CI on pull requests and `main`: component library, shared utils, app (lint, typecheck, build), mock E2E, static analysis.
+1. CI on pull requests and `main`: component library, shared utils, app (lint, typecheck, build), mock E2E, pro E2E against the Firebase emulators, static analysis.
 2. On `main`, if CI passes: deploy to Firebase App Hosting (`.github/workflows/deploy.yml`).
 3. After deploy: free-mode E2E against the deployed URL.
 
@@ -257,11 +257,12 @@ A component is not done until it has all five artifacts (`.tsx`, `.stories.tsx`,
 ```bash
 npm run test:mock --workspace=packages/e2e
 npm run test:free --workspace=packages/e2e
+npm run test:pro --workspace=packages/e2e
 E2E_BASE_URL=https://your-app.hosted.app npm run test:free --workspace=packages/e2e
 npm run test:ui --workspace=packages/e2e
 ```
 
-`E2E_MODE` (`mock` or `free`) picks the server mode. `E2E_BASE_URL` runs against a deployment instead of a local server.
+`E2E_MODE` (`mock`, `free` or `pro`) picks the server mode. `E2E_BASE_URL` runs against a deployment instead of a local server.
 
 ## Environment variables
 

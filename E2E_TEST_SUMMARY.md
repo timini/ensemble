@@ -1,6 +1,6 @@
 # E2E Test Suite Summary
 
-Last checked against the code: 2026-11-17.
+Last checked against the code: 2026-11-18.
 
 ## Suites
 
@@ -10,7 +10,7 @@ Tests live in `packages/e2e/` (Playwright). `playwright.config.ts` picks the ser
 |---|---|---|---|
 | mock-mode | `tests/mock-mode/` | `npm run dev:mock` (`NEXT_PUBLIC_MOCK_MODE=true`) | UI behaviour with mock providers. No keys needed. |
 | free-mode | `tests/free-mode/` | `npm run dev:free` | Real provider calls with test keys |
-| pro-mode | `tests/pro-mode/` | none | Placeholder until roadmap M5 |
+| pro-mode | `tests/pro-mode/` | `next dev` on port 3200 with the Firebase emulators and `PRO_MOCK_UPSTREAM=true` (`fixtures/proEnv.ts`) | Sign-in, credits, Stripe webhooks and billed Pro runs. No real Stripe, Firebase or OpenRouter. |
 
 Set `E2E_BASE_URL` to run against a deployed URL instead of starting a local server.
 
@@ -19,6 +19,7 @@ Set `E2E_BASE_URL` to run against a deployed URL instead of starting a local ser
 ```bash
 npm run test:mock --workspace=packages/e2e   # no keys needed
 npm run test:free --workspace=packages/e2e   # needs TEST_*_API_KEY in env or .env.local
+npm run test:pro --workspace=packages/e2e    # needs Java and firebase-tools; starts the emulators
 npm run test:ui --workspace=packages/e2e     # Playwright UI
 
 cd packages/e2e
@@ -61,9 +62,21 @@ Error scenarios are simulated with the mock-only `?mockErrors=` query parameter 
 
 `consensus-presets.spec.ts`, `free-mode.spec.ts` (2), `google-only.spec.ts`, `happy-path.spec.ts`, `perplexity-only.spec.ts`. They drive the workspace with the same steps as the mock suite (`tests/free-mode/helpers.ts`).
 
+## Pro-mode tests (5 tests)
+
+`tests/pro-mode/pro-mode.spec.ts` replaces the old tasks T297 and T298. `npm run test:pro` runs Playwright inside `firebase emulators:exec` (Auth and Firestore, project `demo-ensemble`); the app runs in the Free build with sign-in on the Auth emulator, credits in the Firestore emulator and Pro calls answered by the server's mock upstream. Each test signs in a new address, so tests never share a balance. Shared steps are in `tests/pro-mode/proHelpers.ts`: sign-in with the email link read from the Auth emulator's out-of-band codes, Stripe events signed with the Stripe SDK's `generateTestHeaderString` and the test webhook secret, a stubbed Checkout redirect, and direct balance changes in the Firestore emulator.
+
+| Test | Covers |
+|---|---|
+| New user, purchase, run, deduction | Landing page "Sign in for Pro", email-link sign-in, onboarding fills a 3-model Pro ensemble, Ask blocked with no credits (FR-036), $5 pack bought (stubbed checkout, signed webhook, a repeat answers duplicate), 3-model run with agreement and consensus, the charge in the account menu (FR-037) and on `/account` (balance, purchase, run, usage by model, FR-041) |
+| Low balance | The FR-038 warning under the composer, and the run still goes ahead |
+| Stop | Stop cancels every answer, nothing starts again, the run settles for what it used |
+| Refund | `charge.refunded` takes the $5 back (a repeat answers duplicate), the negative balance blocks Ask, `/account` shows the refund and the negative state |
+| Account page signed out | The sign-in panel on `/account`, and the dashboard after the email link returns there |
+
 ## CI
 
-- `.github/workflows/ci.yml` runs the mock-mode suite on pull requests and pushes.
+- `.github/workflows/ci.yml` runs the mock-mode suite on pull requests and pushes, and the pro-mode suite against the emulators in the App E2E (Pro Mode) job (Java 21 and firebase-tools 15).
 - `.github/workflows/deploy.yml` deploys `main` to Firebase App Hosting, then runs an HTTP smoke check of the deployed URL and `google-only.spec.ts` (one test, no retries, skipped when `TEST_GOOGLE_API_KEY` is not set). The full free-mode suite runs only when the workflow is dispatched by hand with `full_e2e` enabled.
 - The Husky `pre-push` hook is empty. Nothing runs on push locally.
 
@@ -77,7 +90,7 @@ Error scenarios are simulated with the mock-only `?mockErrors=` query parameter 
 
 ## Adding tests
 
-1. Put the file in `tests/mock-mode/` or `tests/free-mode/`.
+1. Put the file in `tests/mock-mode/`, `tests/free-mode/` or `tests/pro-mode/`. Pro tests sign in a new address each (`uniqueEmail`).
 2. Use `data-testid` selectors only.
 3. Follow the existing `beforeEach` setup patterns.
 4. Run locally before committing.
