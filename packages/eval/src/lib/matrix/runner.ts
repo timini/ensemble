@@ -5,17 +5,25 @@
  */
 import { copyFile, mkdir } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
-import { ProviderRegistry } from '@ensemble-ai/shared-utils/providers';
+import { ProviderRegistry, type ProviderRouting } from '@ensemble-ai/shared-utils/providers';
 import { assertValidResumedOutput, createBenchmarkFile } from '../../commands/benchmarkOutput.js';
 import { loadBenchmarkQuestions } from '../benchmarkDatasets.js';
-import { BenchmarkRunner } from '../benchmarkRunner.js';
+import { BenchmarkRunner, isUsableResponse } from '../benchmarkRunner.js';
 import { createEvaluatorForDataset, datasetNeedsJudge } from '../evaluators.js';
 import { isMechanical } from '../finalAnswer.js';
 import { fileExists, readJsonFile, writeJsonFile } from '../io.js';
 import { prepareQuestions } from '../methodology.js';
 import { endpointsOf } from '../modelSpecs.js';
 import { registerProviders } from '../providers.js';
-import type { BenchmarkQuestion, BenchmarkResultsFile, EvalMode, StrategyName } from '../../types.js';
+import type {
+  BenchmarkQuestion,
+  BenchmarkResultsFile,
+  EvalMode,
+  ModelSpec,
+  PromptRunResult,
+  ProviderResponse,
+  StrategyName,
+} from '../../types.js';
 import type { MatrixConfig } from './config.js';
 import { estimateJob, formatEstimate, totalEstimate, type MatrixEstimate } from './estimate.js';
 import { planJobs, runDirOf, type MatrixJob } from './plan.js';
@@ -39,8 +47,61 @@ export interface MatrixRunOptions {
   skipDownload?: boolean;
   /** Questions run at once per job. Results are written after each batch. */
   concurrency?: number;
+  /**
+   * Run again the entries of an existing run that failed (an error, a
+   * timeout, an empty answer or a failed consensus), keeping every answer
+   * that succeeded. Entries that still fail after their retries count as
+   * wrong, as before.
+   */
+  retryFailed?: boolean;
   log?: (line: string) => void;
   now?: () => Date;
+}
+
+/**
+ * True when a stored run needs another attempt: the question failed or timed
+ * out, a model call failed or came back empty, or a consensus strategy failed.
+ */
+export function isFailedRun(run: PromptRunResult): boolean {
+  if (run.failure) return true;
+  if (run.responses.some((response) => !isUsableResponse(response))) return true;
+  const failedResult = (results: Record<string, { failure?: unknown } | undefined> | undefined) =>
+    Object.values(results ?? {}).some((result) => Boolean(result?.failure));
+  return failedResult(run.evaluation?.results) || failedResult(run.consensusEvaluation?.results);
+}
+
+/**
+ * The failed runs of a results file, by question id, with their answers so
+ * models whose answer succeeded are not called again. The runs stay in the
+ * file until their replacements are written, so an interrupted repair
+ * loses nothing.
+ */
+export function failedRunsOf(output: BenchmarkResultsFile): Map<string, ProviderResponse[]> {
+  const prior = new Map<string, ProviderResponse[]>();
+  for (const run of output.runs) {
+    if (run.questionId && isFailedRun(run)) prior.set(run.questionId, run.responses);
+  }
+  return prior;
+}
+
+/** How a run routes OpenRouter calls, as recorded in the manifest. */
+export function routingOf(config: MatrixConfig) {
+  const models = Object.fromEntries(
+    [...config.models, config.reference].filter((m) => m.routing).map((m) => [m.id, m.routing]),
+  );
+  return { requireParameters: config.requireParameters, ...(Object.keys(models).length > 0 ? { models } : {}) };
+}
+
+/** Routing for each model spec of the config (OpenRouter host preferences and require_parameters). */
+function routingLookup(config: MatrixConfig): (spec: ModelSpec) => ProviderRouting | undefined {
+  const all = [...config.models, config.reference];
+  return (spec) => {
+    const entry = all.find((m) => m.parsed.provider === spec.provider && m.parsed.model === spec.model);
+    return {
+      requireParameters: config.requireParameters,
+      ...(entry?.routing ? { provider: entry.routing } : {}),
+    };
+  };
 }
 
 export interface MatrixRunResult {
@@ -111,7 +172,8 @@ export async function runMatrix(options: MatrixRunOptions): Promise<MatrixRunRes
     const questions = questionsByDataset.get(job.dataset)!;
     const file = await existingResults(job, mode, questions.length);
     existing.set(job, file);
-    const done = new Set((file?.runs ?? []).map((run) => run.questionId));
+    const kept = (file?.runs ?? []).filter((run) => !options.retryFailed || !isFailedRun(run));
+    const done = new Set(kept.map((run) => run.questionId));
     const promptTokens = Math.ceil(questions.reduce((s, q) => s + q.prompt.length, 0) / Math.max(1, questions.length) / 4);
     estimates.push(estimateJob({
       job,
@@ -144,12 +206,21 @@ export async function runMatrix(options: MatrixRunOptions): Promise<MatrixRunRes
   const registry = new ProviderRegistry();
   registerProviders(registry, [...config.models, config.reference].map((m) => m.parsed.provider), mode, endpoints);
   const manifestPath = join(runDir, 'manifest.json');
-  const createdAt = (await fileExists(manifestPath))
-    ? (await readJsonFile<{ createdAt?: string }>(manifestPath)).createdAt ?? now().toISOString()
-    : now().toISOString();
+  const previous = (await fileExists(manifestPath))
+    ? await readJsonFile<{ createdAt?: string; config?: unknown; routing?: unknown; repairs?: unknown[] }>(manifestPath)
+    : null;
+  const createdAt = previous?.createdAt ?? now().toISOString();
+  // A repair keeps the routing and config the run started with, and records its own.
+  const routing = previous ? previous.routing ?? 'not recorded (run started before routing was recorded; require_parameters was not sent)' : routingOf(config);
+  const repairs = [
+    ...(previous?.repairs ?? []),
+    ...(options.retryFailed ? [{ at: now().toISOString(), routing: routingOf(config), config: options.rawConfig }] : []),
+  ];
   const writeManifest = (status: string) => writeJsonFile(manifestPath, {
     schemaVersion: 1, runId: options.runId, mode, status, createdAt, updatedAt: now().toISOString(),
-    config: options.rawConfig, estimate: { calls: estimate.calls, lowUsd: estimate.lowUsd, highUsd: estimate.highUsd },
+    config: previous?.config ?? options.rawConfig, routing,
+    ...(repairs.length > 0 ? { repairs } : {}),
+    estimate: { calls: estimate.calls, lowUsd: estimate.lowUsd, highUsd: estimate.highUsd },
     files: jobs.map((job) => ({ dataset: job.dataset, kind: job.kind, file: job.outputPath.slice(runDir.length + 1) })),
   });
   await writeManifest('running');
@@ -185,6 +256,9 @@ async function runJob(
   const output = resumed ?? createBenchmarkFile(
     job.dataset, mode, job.models.map((m) => m.spec), job.strategies, questions.length,
   );
+  const priorResponses = ctx.retryFailed ? failedRunsOf(output) : new Map<string, ProviderResponse[]>();
+  const rerunIds = new Set(priorResponses.keys());
+  if (ctx.retryFailed) ctx.log(`${job.dataset} ${job.kind}: ${priorResponses.size} failed entr${priorResponses.size === 1 ? 'y' : 'ies'} to run again.`);
   output.answerProtocol = config.protocol;
   if (config.protocol === 'structured') output.optionSeed = config.optionSeed;
   const working = job.cachePath ?? job.outputPath;
@@ -200,13 +274,24 @@ async function runJob(
     endpoints: ctx.endpoints,
     parallelQuestions: true,
     questionTimeoutMs: config.questionTimeoutMs,
+    callTimeoutMs: config.callTimeoutMs,
+    consensusTimeoutMs: config.consensusTimeoutMs,
+    retry: {
+      maxRetries: config.maxRetries,
+      onRetry: (error, attempt) => {
+        const message = error instanceof Error ? error.message : String(error);
+        process.stderr.write(`  [retry ${attempt}/${config.maxRetries}] ${message}\n`);
+      },
+    },
+    priorResponses,
+    routingFor: routingLookup(config),
   });
-  const done = new Set(output.runs.map((run) => run.questionId));
+  const done = new Set(output.runs.map((run) => run.questionId).filter((id) => !id || !rerunIds.has(id)));
   const pending = questions.filter((q) => !done.has(q.id));
   ctx.log(`${job.dataset} ${job.kind}: ${pending.length} of ${questions.length} question(s) to run.`);
   const size = Math.max(1, ctx.concurrency ?? 8);
   for (let i = 0; i < pending.length; i += size) {
-    await runner.run({ questions: pending.slice(i, i + size), outputPath: working, output });
+    await runner.run({ questions: pending.slice(i, i + size), outputPath: working, output, rerunIds });
     ctx.log(`  ${job.dataset} ${job.kind}: ${Math.min(i + size, pending.length)}/${pending.length}`);
   }
   if (pending.length === 0) await writeJsonFile(working, output);

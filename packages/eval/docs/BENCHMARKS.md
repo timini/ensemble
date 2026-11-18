@@ -33,9 +33,13 @@ Each dataset has two jobs:
 All four datasets are scored mechanically, with no LLM judge (`src/lib/methodology.ts`, `src/lib/finalAnswer.ts`):
 
 - Multiple-choice options are shuffled with a fixed seed and the permutation is recorded, so position bias does not favour any answer letter and runs are reproducible.
-- Every model is asked for a structured final answer (`generateStructured` with a JSON schema). Servers without strict JSON schema support fall back to `json_object`, then to a plain reply with a `Final answer:` line.
+- Every model is asked for a structured final answer (`generateStructured` with a JSON schema). Servers without strict JSON schema support fall back to `json_object`, then to a plain reply with a `Final answer:` line. A structured reply that comes back empty also falls back to the plain reply; `structuredFallback` on the answer says why.
 - The final answer is read and compared mechanically: letters for multiple choice, numbers by value for GSM8K.
-- A call that fails or times out (300 s per question) counts as wrong. It is not dropped from the sample.
+- Transient failures are retried with exponential backoff and jitter (`maxRetries`, default 4): network errors such as `fetch failed` or `ECONNRESET`, 429 and 5xx (waiting for `Retry-After` when given), per-call timeouts and empty replies. An empty reply, or an error the server sends inside a 200 response, is a failed call, never an answer. Its error names the finish reasons, the OpenRouter host that served it, the response id and the completion tokens.
+- Each model call has a limit (`callTimeoutMs`, default 180 s) and each summarizer call another (`consensusTimeoutMs`, default 300 s). The request is aborted when its limit passes.
+- A question has a hard limit (`questionTimeoutMs`, default 900 s, counted from when it gets a slot). Retries fit inside it: model calls must end by the limit minus `consensusTimeoutMs`, the summary by the limit itself (less a few seconds for scoring). No retry starts that could not finish in time, and a call still running at its deadline is aborted and counts as a timeout. Answers that came back are kept and scored; a timeout never discards them.
+- A call that still fails after its retries, or a question that times out, counts as wrong. It is not dropped from the sample, and failures are reported in their own column.
+- On OpenRouter, structured calls ask for hosts that honour `response_format` (`provider.require_parameters`). `requireParameters: false` in the config, or `--no-require-parameters`, turns that off; runs made before 2026-11-17 evening did not send it. A model entry can carry `routing`, sent as OpenRouter's `provider` object, for example `{ "ignore": ["SomeHost"] }` to avoid a host the logs show returning empty replies. The manifest records the routing a run started with and that of each repair.
 - Mechanical majority counts the final answers and needs no LLM call. Standard consensus is one call to the summarizer, whose answer is scored like any other.
 
 ### Statistics
@@ -111,17 +115,22 @@ Options of `ensemble-eval matrix`:
 | `--sample <n>`, `--datasets <list>` | override the config, for dry runs |
 | `--concurrency <n>` | questions run at once per job (default 8) |
 | `--skip-download` | fail instead of downloading a dataset |
+| `--retry-failed` | with an existing `--run-id`, run again the entries that failed, timed out, came back empty or lost their consensus; answers that succeeded are kept and not paid for again |
 
 ### Resume and cache
 
 Results are written after every batch of questions. Running the same command again with the same `--run-id` skips the questions already answered, and the estimate shows only what is left. The reference answers are kept in a shared cache keyed by model, dataset, sample, seeds, protocol and temperature, so a later run (a new run id, or changed open models) reuses them instead of paying again.
+
+`--retry-failed` repairs a run that hit an outage. Each failed entry is run again and replaced in place when its new result is written; until then the old entry stays in the file, so an interrupted repair loses nothing and the next one picks up where it stopped. Within an entry, a model whose answer succeeded is not called again. The estimate counts the failed entries as pending. Scoring does not change: what still fails after the retries counts as wrong. The priced cost of what a repair replaced (answers not kept, consensus calls) is stored as `priorAttemptCostUsd` on the entry and summed per dataset as `retrySpendUsd`, apart from the configuration costs, which stay the cost of the results. A failed attempt reports no usage, so its tokens are not priced; `attempts` on an answer says how many calls it took.
+
+To repair a run made before require_parameters was sent with the same routing as its kept answers, add `--no-require-parameters`.
 
 ## Results format
 
 ```
 packages/eval/results/
   <run-id>/
-    manifest.json                 run id, mode, status, config as run, estimate, file list
+    manifest.json                 run id, mode, status, config as run, routing, repairs, estimate, file list
     <dataset>/ensemble.json       BenchmarkResultsFile: the three open models, majority and standard
     <dataset>/reference.json      BenchmarkResultsFile: the reference model
     summary.json                  the summary below

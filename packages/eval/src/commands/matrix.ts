@@ -27,6 +27,9 @@ interface MatrixCommandOptions {
   datasets?: string[];
   concurrency: string;
   skipDownload?: boolean;
+  retryFailed?: boolean;
+  /** False with --no-require-parameters (commander sets true otherwise). */
+  requireParameters?: boolean;
 }
 
 function positiveInt(value: string, name: string): number {
@@ -51,6 +54,8 @@ export function createMatrixCommand(): Command {
     .option('--datasets <names...>', 'Override the datasets (comma-separated allowed)')
     .option('--concurrency <n>', 'Questions run at once per job; results are saved after each batch', '8')
     .option('--skip-download', 'Fail instead of downloading a dataset that is not cached')
+    .option('--retry-failed', 'Run again the failed, timed-out or empty entries of an existing run id; successful answers are kept')
+    .option('--no-require-parameters', 'Do not ask OpenRouter for hosts that honour response_format (the routing of runs made before it was sent)')
     .action(async (options: MatrixCommandOptions) => {
       if (options.mode !== 'free' && options.mode !== 'mock') {
         throw new Error(`Invalid mode "${options.mode}". Expected free or mock.`);
@@ -59,6 +64,7 @@ export function createMatrixCommand(): Command {
       const config = parseMatrixConfig(rawConfig, {
         ...(options.sample ? { sample: positiveInt(options.sample, 'sample') } : {}),
         ...(options.datasets ? { datasets: explodeList(options.datasets) } : {}),
+        ...(options.requireParameters === false ? { requireParameters: false } : {}),
       });
       const publishPath = options.publish === true
         ? DEFAULT_PUBLISH_PATH
@@ -77,6 +83,7 @@ export function createMatrixCommand(): Command {
         ...(publishPath ? { publishPath } : {}),
         ...(options.skipDownload ? { skipDownload: true } : {}),
         ...(options.force ? { force: true } : {}),
+        ...(options.retryFailed ? { retryFailed: true } : {}),
         concurrency: positiveInt(options.concurrency, 'concurrency'),
       });
     });

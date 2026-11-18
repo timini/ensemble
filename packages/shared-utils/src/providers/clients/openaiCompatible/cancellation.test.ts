@@ -81,16 +81,23 @@ describe('cancellation and limits', () => {
   });
 
   it('passes the signal and max_tokens to structured output', async () => {
-    const fetchMock = vi.fn().mockResolvedValue(
-      new Response(JSON.stringify({ choices: [{ message: { content: '{"a":1}' } }] }), { status: 200 }),
-    );
     const controller = new AbortController();
-    await makeClient(fetchMock).generateStructured('Q', 'm', { name: 'x', schema: {} }, {
-      signal: controller.signal,
-      maxTokens: 100,
+    let forwardedAbortedWithCaller = false;
+    // The request carries a signal that follows the caller's (it also fires on
+    // the time limit), so aborting the caller's signal aborts the request.
+    const fetchMock = vi.fn((_url: string, init?: RequestInit) => {
+      controller.abort();
+      forwardedAbortedWithCaller = init?.signal?.aborted === true;
+      return Promise.resolve(new Response(JSON.stringify({ choices: [{ message: { content: '{"a":1}' } }] }), { status: 200 }));
     });
+    await expect(
+      makeClient(fetchMock as unknown as typeof fetch).generateStructured('Q', 'm', { name: 'x', schema: {} }, {
+        signal: controller.signal,
+        maxTokens: 100,
+      }),
+    ).rejects.toMatchObject({ kind: 'cancelled' });
     const init = fetchMock.mock.calls[0]![1] as RequestInit;
-    expect(init.signal).toBe(controller.signal);
+    expect(forwardedAbortedWithCaller).toBe(true);
     expect(JSON.parse(init.body as string).max_tokens).toBe(100);
   });
 

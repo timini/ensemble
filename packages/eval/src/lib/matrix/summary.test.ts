@@ -91,6 +91,16 @@ describe('summarizeDataset', () => {
     expect(byId['ensemble:standard']!.strategy).toBe('standard');
   });
 
+  it('reports the spend of replaced attempts apart from the configuration costs', () => {
+    const file = ensembleFile();
+    expect(summary.retrySpendUsd).toBeUndefined();
+    file.runs[0]!.priorAttemptCostUsd = 0.004;
+    file.runs[1]!.priorAttemptCostUsd = 0.001;
+    const s = summarizeDataset(config, { dataset: 'gsm8k', ensemble: file, reference: null });
+    expect(s.retrySpendUsd).toBeCloseTo(0.005, 10);
+    expect(s.rows.find((r) => r.id === 'single:qwen')!.costUsd).toBeCloseTo(0.01, 10);
+  });
+
   it('marks a cost incomplete when some calls had no price', () => {
     const file = ensembleFile();
     delete file.runs[0]!.responses[0]!.estimatedCostUsd;

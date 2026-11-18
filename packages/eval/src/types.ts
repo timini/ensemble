@@ -113,6 +113,14 @@ export interface ProviderResponse {
    * a plain reply with a "Final answer:" line. Unset on legacy runs.
    */
   answerSource?: 'structured' | 'text';
+  /** Why the structured call failed when the answer fell back to a plain reply. */
+  structuredFallback?: string;
+  /**
+   * Calls made for this answer when it took more than one (transient
+   * failures retried). Only the last call's usage is priced: a failed
+   * attempt reports no usage to price.
+   */
+  attempts?: number;
   error?: string;
 }
 
@@ -167,8 +175,18 @@ export interface PromptRunResult {
   selfConsistency?: SelfConsistencyResult;
   /** Total wall-clock time for this question (model calls + consensus + eval). */
   durationMs?: number;
-  /** Set when the whole question failed or timed out. Every answer then counts as wrong. */
+  /**
+   * Set when the question failed or timed out as a whole. The consensus
+   * counts as wrong; answers that came back before it are kept and scored,
+   * and the models that had not answered count as wrong.
+   */
   failure?: AnswerFailure;
+  /**
+   * Priced cost of an earlier attempt at this entry that a --retry-failed
+   * pass replaced: its answers that were not kept and its consensus calls.
+   * Not part of any configuration's cost; summed as retry spend.
+   */
+  priorAttemptCostUsd?: number;
   /** `structured` for runs that asked for structured final answers (see methodology.ts). */
   answerProtocol?: 'structured' | 'legacy';
   /** Displayed option i was dataset option optionPermutation[i]. */

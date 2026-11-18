@@ -90,8 +90,13 @@ describe('classifyProviderError', () => {
     expect(classifyProviderError(error).retryAfterSeconds).toBe(17);
   });
 
-  it('only keeps retry-after for rate limits', () => {
+  it('keeps retry-after for 503 overloads as well as rate limits', () => {
     const error = statusError(503, 'down', { headers: { 'retry-after': '30' } });
+    expect(classifyProviderError(error).retryAfterSeconds).toBe(30);
+  });
+
+  it('drops retry-after on errors that are not retried', () => {
+    const error = statusError(400, 'bad request', { headers: { 'retry-after': '30' } });
     expect(classifyProviderError(error).retryAfterSeconds).toBeUndefined();
   });
 

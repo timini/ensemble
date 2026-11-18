@@ -34,7 +34,8 @@ export interface StreamResponseOptions {
   /**
    * Client-side limit for the whole stream, in milliseconds. When it passes,
    * onError gets a ProviderError of kind `timeout`. Defaults to
-   * DEFAULT_STREAM_TIMEOUT_MS (120 s).
+   * DEFAULT_STREAM_TIMEOUT_MS (120 s). Clients that support it abort the
+   * underlying request when the limit passes.
    */
   timeoutMs?: number;
   /**
@@ -44,6 +45,18 @@ export interface StreamResponseOptions {
   signal?: AbortSignal;
   /** Most output tokens the model may produce (`max_tokens`). Pro mode sets it from the run's token budget. */
   maxTokens?: number;
+  /** Host routing for servers that route a model to several hosts (OpenRouter). Ignored elsewhere. */
+  routing?: ProviderRouting;
+}
+
+/**
+ * OpenRouter host routing. `provider` is sent as OpenRouter's `provider`
+ * object (order, ignore, allow_fallbacks and so on). Structured calls also
+ * ask for `require_parameters: true` unless requireParameters is false.
+ */
+export interface ProviderRouting {
+  requireParameters?: boolean;
+  provider?: Record<string, unknown>;
 }
 
 export interface JsonSchema {
@@ -53,10 +66,18 @@ export interface JsonSchema {
 
 export interface GenerateStructuredOptions {
   temperature?: number;
+  /**
+   * Client-side limit for the whole call, in milliseconds. Clients that
+   * support it abort the request and throw a ProviderError of kind
+   * `timeout`. No limit by default.
+   */
+  timeoutMs?: number;
   /** Cancels the call; it then rejects with a ProviderError of kind `cancelled`. */
   signal?: AbortSignal;
   /** Most output tokens the model may produce. */
   maxTokens?: number;
+  /** Host routing for servers that route a model to several hosts (OpenRouter). Ignored elsewhere. */
+  routing?: ProviderRouting;
 }
 
 export interface GenerateEmbeddingsOptions {

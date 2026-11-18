@@ -148,8 +148,8 @@ export const PRICE_TABLE: PriceTable = {
       "openRouterId": "deepseek/deepseek-v4-pro-0813"
     },
     "deepseek/deepseek-v4.1-flash": {
-      "inputPerMillion": 0.0507,
-      "outputPerMillion": 0.2028,
+      "inputPerMillion": 0.3,
+      "outputPerMillion": 1.2,
       "openRouterId": "deepseek/deepseek-v4.1-flash"
     },
     "deepseek/deepseek-v4.1-flash-1017": {
@@ -753,8 +753,8 @@ export const PRICE_TABLE: PriceTable = {
       "openRouterId": "mistralai/mistral-large-4-0"
     },
     "openrouter/mistralai/mistral-medium-3": {
-      "inputPerMillion": 0.4,
-      "outputPerMillion": 2,
+      "inputPerMillion": 0.44,
+      "outputPerMillion": 2.2,
       "openRouterId": "mistralai/mistral-medium-3"
     },
     "openrouter/mistralai/mistral-medium-3-5": {
@@ -763,8 +763,8 @@ export const PRICE_TABLE: PriceTable = {
       "openRouterId": "mistralai/mistral-medium-3-5"
     },
     "openrouter/mistralai/mistral-medium-3.1": {
-      "inputPerMillion": 0.4,
-      "outputPerMillion": 2,
+      "inputPerMillion": 0.44,
+      "outputPerMillion": 2.2,
       "openRouterId": "mistralai/mistral-medium-3.1"
     },
     "openrouter/mistralai/mistral-nemo": {

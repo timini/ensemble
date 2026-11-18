@@ -8,7 +8,7 @@ import { sanitizeProviderErrorMessage } from '../utils/sanitizeSensitiveData';
  * - `missing_key`: no key is set for the provider, so no request was sent
  * - `rate_limited`: 429; `retryAfterSeconds` is set when the provider said
  * - `timeout`: the client gave up waiting (see DEFAULT_STREAM_TIMEOUT_MS)
- * - `provider_unavailable`: 5xx or a network failure
+ * - `provider_unavailable`: 5xx or a network failure; `retryAfterSeconds` as for 429
  * - `cancelled`: the caller aborted the call (AbortSignal), no answer is expected
  * - `insufficient_credits`: Pro mode only, the credit balance cannot cover the run
  * - `other`: anything else (bad request, unknown model, refusal)
@@ -75,7 +75,8 @@ export function classifyProviderError(error: unknown, options: ClassifyOptions =
   const message = options.label ? `${options.label}: ${detail}` : detail;
   const status = statusOf(error, rawMessage);
   const kind = kindOf(error, status, rawMessage);
-  const retryAfterSeconds = kind === 'rate_limited' ? retryAfterOf(error) : undefined;
+  // OpenRouter and others send Retry-After on 503 overloads as well as on 429.
+  const retryAfterSeconds = kind === 'rate_limited' || kind === 'provider_unavailable' ? retryAfterOf(error) : undefined;
 
   return new ProviderError(message, kind, {
     provider: options.provider,

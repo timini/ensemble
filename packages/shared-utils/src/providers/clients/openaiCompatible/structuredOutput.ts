@@ -32,6 +32,8 @@ export function isUnsupportedFormatError(error: unknown): boolean {
   const status = (error as { status?: unknown } | null)?.status;
   if (status === 400 || status === 422 || status === 501) return true;
   const message = error instanceof Error ? error.message : '';
+  // OpenRouter with provider.require_parameters, when no host serves the format.
+  if (status === 404 && /no endpoints found/i.test(message)) return true;
   return /response_format|json_schema|json_object/i.test(message) && status === undefined;
 }
 
