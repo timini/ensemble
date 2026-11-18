@@ -67,7 +67,7 @@ env:
   # OPENROUTER_API_KEY (docs/DEPLOYMENT.md). Set NEXT_PUBLIC_PRO_ENABLED to
   # "false" and comment those entries out to run without Pro.
   - variable: NEXT_PUBLIC_PRO_ENABLED
-    value: "true"
+    value: "false"
     availability:
       - BUILD
       - RUNTIME
