@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import { useTranslation } from "react-i18next";
 import { TRPCReactProvider } from "~/trpc/react";
+import { AuthProvider } from "./AuthProvider";
 import { useStore } from "~/store";
 import { EnsembleHeader } from "@/components/molecules/EnsembleHeader";
 import { Footer } from "@/components/molecules/Footer";
@@ -78,42 +79,44 @@ export function RootShell({
 
   return (
     <TRPCReactProvider>
-      {isWorkspace ? (
-        children
-      ) : (
-        <>
-          <a
-            href="#main-content"
-            className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-md focus:bg-primary focus:px-4 focus:py-2 focus:text-primary-foreground focus:ring-2 focus:ring-ring focus:ring-offset-2"
-          >
-            {t("accessibility.skipToMainContent")}
-          </a>
-          <EnsembleHeader
-            onSettingsClick={() => setSettingsOpen(true)}
-            currentPath={pathname}
-          />
-          <main id="main-content">{children}</main>
-          <Footer />
-          <SettingsModal
-            open={settingsOpen}
-            onOpenChange={setSettingsOpen}
-            theme={resolvedTheme as Theme}
-            onThemeChange={(newTheme) => setTheme(newTheme)}
-            language={resolvedLanguage as Language}
-            onLanguageChange={(newLang) => {
-              // Only allow supported languages (en, fr)
-              if (newLang === "en" || newLang === "fr") {
-                setLanguage(newLang);
-              }
-            }}
-            onClearData={() => {
-              localStorage.removeItem("ensemble-ai-store");
-              window.location.reload();
-            }}
-            onDone={() => setSettingsOpen(false)}
-          />
-        </>
-      )}
+      <AuthProvider>
+        {isWorkspace ? (
+          children
+        ) : (
+          <>
+            <a
+              href="#main-content"
+              className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-md focus:bg-primary focus:px-4 focus:py-2 focus:text-primary-foreground focus:ring-2 focus:ring-ring focus:ring-offset-2"
+            >
+              {t("accessibility.skipToMainContent")}
+            </a>
+            <EnsembleHeader
+              onSettingsClick={() => setSettingsOpen(true)}
+              currentPath={pathname}
+            />
+            <main id="main-content">{children}</main>
+            <Footer />
+            <SettingsModal
+              open={settingsOpen}
+              onOpenChange={setSettingsOpen}
+              theme={resolvedTheme as Theme}
+              onThemeChange={(newTheme) => setTheme(newTheme)}
+              language={resolvedLanguage as Language}
+              onLanguageChange={(newLang) => {
+                // Only allow supported languages (en, fr)
+                if (newLang === "en" || newLang === "fr") {
+                  setLanguage(newLang);
+                }
+              }}
+              onClearData={() => {
+                localStorage.removeItem("ensemble-ai-store");
+                window.location.reload();
+              }}
+              onDone={() => setSettingsOpen(false)}
+            />
+          </>
+        )}
+      </AuthProvider>
     </TRPCReactProvider>
   );
 }

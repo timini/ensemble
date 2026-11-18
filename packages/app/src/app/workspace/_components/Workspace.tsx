@@ -25,6 +25,7 @@ import { SavePresetDialog } from "./SavePresetDialog";
 import { RunResult } from "./RunResult";
 import { WorkspaceOnboarding } from "./WorkspaceOnboarding";
 import { WorkspaceSidebar } from "./WorkspaceSidebar";
+import { AccountMenuContainer } from "~/app/_components/AccountMenuContainer";
 import {
   ExampleQuestions,
   SetupCard,
@@ -95,6 +96,7 @@ export function Workspace() {
       onOpenSettings={() => setSettingsOpen(true)}
       historyOpen={historyOpen}
       onHistoryOpenChange={setHistoryOpen}
+      account={<AccountMenuContainer />}
       nav={
         <a
           href="/benchmarks"

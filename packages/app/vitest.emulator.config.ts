@@ -15,6 +15,8 @@ export default defineConfig({
     hookTimeout: 30000,
     // One Firestore emulator is shared, so files run one at a time.
     fileParallelism: false,
+    // firebase-admin reads the project id; the emulators run demo-ensemble.
+    env: { FIREBASE_PROJECT_ID: "demo-ensemble", NODE_ENV: "test" },
   },
   resolve: {
     alias: {
