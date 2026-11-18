@@ -9,6 +9,7 @@ import { useHasHydrated } from "~/hooks/useHasHydrated";
 import { useRunEstimates } from "~/hooks/useRunEstimates";
 import { toComposerModels, toPickerOptions } from "~/lib/workspaceModels";
 import { useAvailableModels } from "./useAvailableModels";
+import { PRO_STATUSES, isProPriced } from "~/lib/proMode";
 
 /** Most models in one run, as the vision sets it (2 to 6). */
 export const MAX_MODELS = 6;
@@ -23,9 +24,11 @@ type ComposerState = Omit<
  * with the models the user can add (providers with a working key and
  * connected endpoints), the consensus method with the calls and cost of
  * every method, the summarizer, the Ranked top N and the manual answers.
+ * In Pro the picker offers every model Pro can price, whatever keys are
+ * stored, and no endpoints; the chosen models stay as they are (FR-030).
  */
 export function useWorkspaceComposer(
-  statuses: Record<Provider, ValidationStatus>,
+  keyStatuses: Record<Provider, ValidationStatus>,
 ): ComposerState & {
   /** Models the picker offers. Empty means nothing is set up yet. */
   optionCount: number;
@@ -45,17 +48,24 @@ export function useWorkspaceComposer(
   const setEloTopN = useStore((state) => state.setEloTopN);
   const manual = useStore((state) => state.manualResponses);
   const removeManual = useStore((state) => state.removeManualResponse);
+  const pro = useStore((state) => state.mode === "pro");
+  const statuses = pro ? PRO_STATUSES : keyStatuses;
 
   const connected = useMemo(
-    () => (hasHydrated ? endpoints.filter((e) => e.status === "valid") : []),
-    [endpoints, hasHydrated],
+    () =>
+      hasHydrated && !pro ? endpoints.filter((e) => e.status === "valid") : [],
+    [endpoints, hasHydrated, pro],
   );
-  const available = useAvailableModels({
+  const listed = useAvailableModels({
     hasHydrated,
-    mode: "free",
+    mode: pro ? "pro" : "free",
     hydratedStatuses: statuses,
     endpoints: connected,
   });
+  const available = useMemo(
+    () => (pro ? listed.filter((m) => isProPriced(m.provider, m.id)) : listed),
+    [listed, pro],
+  );
   const modelOptions = useMemo(
     () => toPickerOptions(available, statuses, connected),
     [available, statuses, connected],

@@ -56,7 +56,9 @@ export function useWorkspaceRun({
     run.viewSimilarityMatrix,
     run.viewEmbeddings,
   );
-  const { startRun, retryModel } = useStreamingResponses({ mode: run.mode });
+  const { startRun, retryModel, stop } = useStreamingResponses({
+    mode: run.mode,
+  });
   const embeddings = useResponseEmbeddings({
     hasHydrated,
     completedResponses: analytics.agreementAnswers,
@@ -168,6 +170,19 @@ export function useWorkspaceRun({
     readOnly,
     /** Drops any consensus still running, before another run is shown. */
     stopConsensus: consensus.restart,
+    /**
+     * Stops the run: aborts the answers still streaming and any consensus
+     * in flight. In Pro the run is billed only for what it used.
+     */
+    stop: () => {
+      stop();
+      if (
+        consensus.isGenerating ||
+        run.viewResponses.some((r) => r.isStreaming)
+      ) {
+        consensus.stop();
+      }
+    },
     addManualAnswer,
     agreement: toAgreementProps({
       embeddings: embeddings.status,

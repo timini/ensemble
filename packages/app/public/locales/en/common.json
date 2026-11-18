@@ -24,7 +24,8 @@
     "consensus": {
       "noSummarizer": "No summarizer model is selected.",
       "noResponses": "There are no answers to summarize.",
-      "failed": "The consensus could not be generated."
+      "failed": "The consensus could not be generated.",
+      "stopped": "The consensus was stopped."
     }
   },
   "common": {
@@ -403,7 +404,8 @@
         "clearConfirmYes": "Clear everything",
         "clearCancel": "Cancel",
         "webCryptoTitle": "This browser cannot encrypt keys",
-        "webCryptoBody": "Free mode needs the Web Crypto API to encrypt your keys locally. Use a current browser."
+        "webCryptoBody": "Free mode needs the Web Crypto API to encrypt your keys locally. Use a current browser.",
+        "mode": "Mode"
       },
       "savePreset": {
         "title": "Save models as a preset",
@@ -416,6 +418,18 @@
       "history": {
         "savedRun": "Saved run from {{date}}. It is read only: nothing is sent to a model again.",
         "newQuestion": "Ask a new question"
+      },
+      "pro": {
+        "block": {
+          "signIn": "Sign in to ask in Pro mode.",
+          "unavailable": "Pro is not available here. Switch to Free mode in settings.",
+          "loading": "Loading your credit balance.",
+          "insufficient": "Not enough credits for this run.",
+          "unpriced": "Pro cannot run some of these models.",
+          "error": "Your credit balance could not be loaded."
+        },
+        "signInTitle": "Sign in to use Pro",
+        "signInBody": "Pro runs every model on our server and bills your credits. Free mode with your own keys needs no account."
       }
     },
     "landing": {

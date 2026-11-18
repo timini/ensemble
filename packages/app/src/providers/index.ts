@@ -2,33 +2,34 @@ import {
   ProviderRegistry,
   createProviderClient,
   type ProviderName,
-} from '@ensemble-ai/shared-utils/providers';
-import { useStore } from '~/store';
-import { selectEndpointConfigs } from '~/store/slices/endpointsSlice';
+} from "@ensemble-ai/shared-utils/providers";
+import { useStore } from "~/store";
+import { selectEndpointConfigs } from "~/store/slices/endpointsSlice";
 import {
   captureMockErrorScenarios,
   createMockErrorResolver,
-} from '~/lib/mockErrorScenarios';
+} from "~/lib/mockErrorScenarios";
+import { lazyProTransport } from "./pro/runtime";
 
 const PROVIDERS: ProviderName[] = [
-  'openai',
-  'anthropic',
-  'google',
-  'xai',
-  'deepseek',
-  'perplexity',
-  'openai-compatible',
+  "openai",
+  "anthropic",
+  "google",
+  "xai",
+  "deepseek",
+  "perplexity",
+  "openai-compatible",
 ];
 
 function tabStorage(): Storage | null {
   try {
-    return typeof window === 'undefined' ? null : window.sessionStorage;
+    return typeof window === "undefined" ? null : window.sessionStorage;
   } catch {
     return null;
   }
 }
 
-const isMockMode = () => process.env.NEXT_PUBLIC_MOCK_MODE === 'true';
+const isMockMode = () => process.env.NEXT_PUBLIC_MOCK_MODE === "true";
 
 // The query is read once per page load. initializeProviders runs again before
 // every stream; reading it again would bring back `once` scenarios that
@@ -48,13 +49,13 @@ export function initializeProviders(): void {
   }
 
   PROVIDERS.forEach((provider) => {
-    if (!registry.hasProvider(provider, 'mock')) {
+    if (!registry.hasProvider(provider, "mock")) {
       registry.register(
         provider,
-        'mock',
+        "mock",
         createProviderClient({
           provider,
-          mode: 'mock',
+          mode: "mock",
           mockErrorScenarios: isMockMode()
             ? createMockErrorResolver(tabStorage)
             : undefined,
@@ -62,17 +63,33 @@ export function initializeProviders(): void {
       );
     }
 
-    if (!registry.hasProvider(provider, 'free')) {
+    if (!registry.hasProvider(provider, "free")) {
       registry.register(
         provider,
-        'free',
+        "free",
         createProviderClient({
           provider,
-          mode: 'free',
+          mode: "free",
           getApiKey: () =>
-            provider === 'openai-compatible' ? null : (getState().apiKeys[provider]?.key ?? null),
+            provider === "openai-compatible"
+              ? null
+              : (getState().apiKeys[provider]?.key ?? null),
           // OpenAI-compatible endpoints that passed their check, read at call time.
           getEndpoints: () => selectEndpointConfigs(getState()),
+        }),
+      );
+    }
+
+    // Pro: calls go to our server, which bills them (providers/pro). The
+    // runtime is created on the first call, so Free users load nothing.
+    if (!registry.hasProvider(provider, "pro")) {
+      registry.register(
+        provider,
+        "pro",
+        createProviderClient({
+          provider,
+          mode: "pro",
+          proTransport: lazyProTransport,
         }),
       );
     }

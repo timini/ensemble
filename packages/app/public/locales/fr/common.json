@@ -24,7 +24,8 @@
     "consensus": {
       "noSummarizer": "Aucun modèle de synthèse n'est sélectionné.",
       "noResponses": "Il n'y a aucune réponse à synthétiser.",
-      "failed": "Le consensus n'a pas pu être généré."
+      "failed": "Le consensus n'a pas pu être généré.",
+      "stopped": "Le consensus a été arrêté."
     }
   },
   "common": {
@@ -403,7 +404,8 @@
         "clearConfirmYes": "Tout effacer",
         "clearCancel": "Annuler",
         "webCryptoTitle": "Ce navigateur ne peut pas chiffrer les clés",
-        "webCryptoBody": "Le mode gratuit a besoin de l'API Web Crypto pour chiffrer vos clés localement. Utilisez un navigateur récent."
+        "webCryptoBody": "Le mode gratuit a besoin de l'API Web Crypto pour chiffrer vos clés localement. Utilisez un navigateur récent.",
+        "mode": "Mode"
       },
       "savePreset": {
         "title": "Enregistrer les modèles en préréglage",
@@ -416,6 +418,18 @@
       "history": {
         "savedRun": "Exécution enregistrée le {{date}}. Elle est en lecture seule : rien n'est renvoyé aux modèles.",
         "newQuestion": "Poser une nouvelle question"
+      },
+      "pro": {
+        "block": {
+          "signIn": "Connectez-vous pour poser une question en mode Pro.",
+          "unavailable": "Le mode Pro n'est pas disponible ici. Passez en mode Gratuit dans les réglages.",
+          "loading": "Chargement de votre solde de crédits.",
+          "insufficient": "Crédits insuffisants pour cette exécution.",
+          "unpriced": "Le mode Pro ne peut pas exécuter certains de ces modèles.",
+          "error": "Votre solde de crédits n'a pas pu être chargé."
+        },
+        "signInTitle": "Connectez-vous pour utiliser Pro",
+        "signInBody": "Pro exécute tous les modèles sur notre serveur et débite vos crédits. Le mode Gratuit avec vos propres clés ne demande aucun compte."
       }
     },
     "landing": {

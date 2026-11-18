@@ -3,11 +3,11 @@ import {
   ProviderRegistry,
   type ProviderMode,
   type AIProvider,
-} from '@ensemble-ai/shared-utils/providers';
-import type { AgreementAnswer } from '~/lib/agreement';
-import type { ProviderType } from '~/store/slices/ensembleSlice';
-import { toError } from '~/lib/errors';
-import { logger } from '~/lib/logger';
+} from "@ensemble-ai/shared-utils/providers";
+import type { AgreementAnswer } from "~/lib/agreement";
+import type { ProviderType } from "~/store/slices/ensembleSlice";
+import { toError } from "~/lib/errors";
+import { logger } from "~/lib/logger";
 
 export type EmbeddingVector = {
   modelId: string;
@@ -35,8 +35,10 @@ function isEmbeddableResponse(response: AgreementAnswer): boolean {
  * Resolve the provider mode taking the MOCK_MODE override into account.
  */
 export function resolveEmbeddingsMode(mode: ProviderMode): ProviderMode {
-  if (process.env.NEXT_PUBLIC_MOCK_MODE === 'true') {
-    return 'mock';
+  // Pro goes to the server even in mock mode, where the server answers from its mock upstream.
+  if (mode === "pro") return "pro";
+  if (process.env.NEXT_PUBLIC_MOCK_MODE === "true") {
+    return "mock";
   }
   return mode;
 }

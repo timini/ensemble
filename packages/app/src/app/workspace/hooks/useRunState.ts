@@ -1,8 +1,7 @@
 import { useMemo } from "react";
 import { useStore } from "~/store";
 import { selectRunModels, selectRunPrompt } from "~/store/slices/responseSlice";
-import { resolveEmbeddingsProvider } from "~/lib/embeddingsProvider";
-import { embeddingStatuses } from "~/lib/endpointStatus";
+import { workspaceEmbeddingsProvider } from "~/lib/proMode";
 
 /**
  * Store selectors and hydration-gated memos for the run on the workspace.
@@ -32,13 +31,16 @@ export function useRunState(hasHydrated: boolean) {
   const calculateAgreement = useStore((state) => state.calculateAgreement);
 
   // Provider used for agreement embeddings, or null when none is available.
-  const embeddingsProvider = useMemo(() => {
-    const statuses = embeddingStatuses(apiKeys, endpoints);
-    return resolveEmbeddingsProvider({
-      preference: embeddingsPreference,
-      statuses,
-    });
-  }, [apiKeys, endpoints, embeddingsPreference]);
+  const embeddingsProvider = useMemo(
+    () =>
+      workspaceEmbeddingsProvider({
+        mode,
+        preference: embeddingsPreference,
+        apiKeys,
+        endpoints,
+      }),
+    [mode, apiKeys, endpoints, embeddingsPreference],
+  );
 
   const viewResponses = useMemo(
     () => (hasHydrated ? responses : []),

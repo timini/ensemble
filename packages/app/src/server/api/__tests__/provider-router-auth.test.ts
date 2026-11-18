@@ -1,7 +1,6 @@
 // @vitest-environment node
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { AuthUser } from "~/server/auth/firebaseAdmin";
-import { ProviderError } from "@ensemble-ai/shared-utils/providers";
 import { DEFAULT_PRO_CONFIG } from "~/server/pro/config";
 
 const mocks = vi.hoisted(() => ({

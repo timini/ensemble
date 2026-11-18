@@ -11,10 +11,12 @@ import { endpointModelName } from "~/lib/endpointModels";
 import { logger } from "~/lib/logger";
 import { toResponseError } from "~/lib/responseErrors";
 import { selectRunModels, selectRunPrompt } from "~/store/slices/responseSlice";
+import { proRunInput, resolveClientMode } from "~/lib/proMode";
+import { getProRuntime } from "~/providers/pro/runtime";
 import type { ModelSelection } from "~/store";
 
 interface UseStreamingResponsesProps {
-  mode: "free" | "pro" | "mock";
+  mode: "free" | "pro";
 }
 
 /** Name shown for a model while and after it answers. */
@@ -42,6 +44,12 @@ function displayNameOf(model: ModelSelection): string {
  * started for. A stream left over from a run that was reset (New question)
  * or replaced (a new run or a retry) is ignored, so it can never mix text
  * into a newer answer or mark it complete.
+ *
+ * Every stream of a run shares one AbortController. A new run, `stop` and
+ * unmounting abort it, so the requests really end (in Pro the server then
+ * aborts its OpenRouter call). A stopped answer shows as `cancelled` with a
+ * retry. In Pro, `startRun` first reserves credits for the run
+ * (ProRunSession); a refused reservation fails each answer with its kind.
  */
 export function useStreamingResponses({ mode }: UseStreamingResponsesProps) {
   const startStreaming = useStore((state) => state.startStreaming);
@@ -53,6 +61,16 @@ export function useStreamingResponses({ mode }: UseStreamingResponsesProps) {
   const latestStream = useRef<Record<string, object>>({});
   /** Flush timers of the streams still running, cleared on unmount. */
   const flushIntervals = useRef<Set<NodeJS.Timeout>>(new Set());
+  /** Aborts the streams of the current run. */
+  const runAbort = useRef<AbortController | null>(null);
+
+  /** The run's signal; a retry after Stop gets a fresh controller. */
+  const runSignal = () => {
+    if (!runAbort.current || runAbort.current.signal.aborted) {
+      runAbort.current = new AbortController();
+    }
+    return runAbort.current.signal;
+  };
 
   const streamModel = async (modelId: string) => {
     const state = useStore.getState();
@@ -102,8 +120,7 @@ export function useStreamingResponses({ mode }: UseStreamingResponsesProps) {
     };
 
     try {
-      const clientMode =
-        process.env.NEXT_PUBLIC_MOCK_MODE === "true" ? "mock" : mode;
+      const clientMode = resolveClientMode(mode);
       if (!registry.hasProvider(model.provider as ProviderName, clientMode)) {
         throw new Error(
           `Provider ${model.provider} not available in ${clientMode} mode`,
@@ -140,6 +157,7 @@ export function useStreamingResponses({ mode }: UseStreamingResponsesProps) {
           completeResponse(model.id, responseTime, tokenCount, usage);
         },
         fail,
+        { signal: runSignal() },
       );
     } catch (err) {
       fail(err instanceof Error ? err : new Error(String(err)));
@@ -150,10 +168,28 @@ export function useStreamingResponses({ mode }: UseStreamingResponsesProps) {
   const startRun = (prompt: string) => {
     const text = prompt.trim();
     if (!text) return;
-    const models = useStore.getState().selectedModels;
+    const state = useStore.getState();
+    const models = state.selectedModels;
+    runAbort.current?.abort();
+    runAbort.current = new AbortController();
+    // Reserve credits first; every Pro call waits for it (ProRunSession.track).
+    if (mode === "pro") {
+      getProRuntime()
+        .session.begin(proRunInput(state, text))
+        .catch(() => undefined);
+    }
     // Clears the previous run's answers, agreement and consensus.
     useStore.getState().startRun(text, models);
     void Promise.all(models.map((m) => streamModel(m.id)));
+  };
+
+  /**
+   * Stops the run: aborts every stream still running. In Pro the run is
+   * finished, so it is billed only for what it used.
+   */
+  const stop = () => {
+    runAbort.current?.abort();
+    if (mode === "pro") void getProRuntime().session.cancel();
   };
 
   useEffect(() => {
@@ -161,8 +197,9 @@ export function useStreamingResponses({ mode }: UseStreamingResponsesProps) {
     return () => {
       intervals.forEach((interval) => clearInterval(interval));
       intervals.clear();
+      runAbort.current?.abort();
     };
   }, []);
 
-  return { startRun, retryModel: streamModel };
+  return { startRun, retryModel: streamModel, stop };
 }
