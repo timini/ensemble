@@ -8,7 +8,7 @@ For where the product is going, see [docs/PRODUCT_VISION.md](../../docs/PRODUCT_
 
 ## Routes
 
-The app has one working screen, `/workspace` (`src/app/workspace/`): the composer on top (question, model chips, consensus method with calls and cost, options), then the agreement score and consensus answer, then every answer in columns (tabs on phones). History and presets sit in a sidebar, keys and appearance in a settings sheet. On a first visit an onboarding sheet asks one question (own key, local models or Pro, which is coming soon) and checks a key inline. The landing page at `/` explains the product and links in. The old four-step wizard routes redirect into the workspace.
+The app has one working screen, `/workspace` (`src/app/workspace/`): the composer on top (question, model chips, consensus method with calls and cost, options), then the agreement score and consensus answer, then every answer in columns (tabs on phones). History and presets sit in a sidebar, keys and appearance in a settings sheet. On a first visit an onboarding sheet asks one question (own key, local models or Pro, which is coming soon), checks a key inline and, on Start, chooses a starting ensemble so the visitor only has to type a question. A first visit also follows the system's light or dark scheme and the browser's language (English or French) until the visitor picks one in settings. The landing page at `/` explains the product and links in. The old four-step wizard routes redirect into the workspace.
 
 | Route | Purpose |
 |-------|---------|

@@ -54,12 +54,13 @@ Components that read persisted state use `useHasHydrated()` (`src/hooks/useHasHy
 
 ### Theme (`themeSlice.ts`)
 
-- State: `theme: 'light' | 'dark'` (default `'light'`)
+- State: `theme: 'light' | 'dark'` (default: the system's colour scheme through `prefers-color-scheme`, `'light'` on the server; a stored choice replaces it)
 - Actions: `setTheme(theme)`, `toggleTheme()`. Both also set the `light`/`dark` class on `document.documentElement`.
+- `lib/themeScript.ts` runs in `<head>` (from `app/layout.tsx`) and applies the stored or system theme before the first paint, so a dark page does not flash light.
 
 ### Language (`languageSlice.ts`)
 
-- State: `language: 'en' | 'fr'` (default `'en'`)
+- State: `language: 'en' | 'fr'` (default: the first of the browser's languages that is supported, otherwise `'en'`; a stored choice replaces it)
 - Actions: `setLanguage(language)`
 
 ### Workflow (`workflowSlice.ts`)

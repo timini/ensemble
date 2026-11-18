@@ -53,11 +53,13 @@ export function RootShell({
     setHasHydrated(true);
   }, []);
 
-  // Apply theme to document on mount and when theme changes
+  // Apply theme to document once the store has loaded and when it changes.
+  // Before that the <head> script in layout.tsx has already set it.
   useEffect(() => {
+    if (!hasHydrated) return;
     document.documentElement.classList.remove("light", "dark");
     document.documentElement.classList.add(resolvedTheme);
-  }, [resolvedTheme]);
+  }, [hasHydrated, resolvedTheme]);
 
   // Sync language with i18next
   useEffect(() => {

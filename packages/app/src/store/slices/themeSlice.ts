@@ -9,13 +9,23 @@ export interface ThemeSlice {
 }
 
 /**
+ * The system's colour scheme, for a first visit. Light on the server and
+ * where the browser cannot tell.
+ */
+export function preferredTheme(): Theme {
+  if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') return 'light';
+  return window.matchMedia('(prefers-color-scheme: dark)')?.matches ? 'dark' : 'light';
+}
+
+/**
  * Theme slice for managing light/dark mode
  *
- * Persists theme preference to localStorage
+ * Starts from the system colour scheme; a stored choice replaces it when the
+ * store loads. Persists theme preference to localStorage.
  * Applies theme class to document root for global CSS variables
  */
 export const createThemeSlice: StateCreator<ThemeSlice> = (set) => ({
-  theme: 'light',
+  theme: preferredTheme(),
   setTheme: (theme) => {
     set({ theme });
     // Apply theme to document root

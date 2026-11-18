@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { createStore, type StoreApi } from 'zustand/vanilla';
 import { createThemeSlice, type ThemeSlice } from '../slices/themeSlice';
 
@@ -10,8 +10,18 @@ describe('themeSlice', () => {
     document.documentElement.className = '';
   });
 
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
   it('initializes with light theme', () => {
     expect(store.getState().theme).toBe('light');
+  });
+
+  it('starts dark when the system asks for dark', () => {
+    vi.stubGlobal('matchMedia', (query: string) => ({ matches: query === '(prefers-color-scheme: dark)' }));
+    const dark = createStore<ThemeSlice>()(createThemeSlice);
+    expect(dark.getState().theme).toBe('dark');
   });
 
   it('sets the provided theme and updates the DOM classes', () => {
