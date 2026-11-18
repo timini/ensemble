@@ -2,7 +2,7 @@
 
 This is the method behind the `/benchmarks` page: what is measured, how, what it costs, and how to reproduce it. The question it answers is "does an ensemble of open models beat its best member?", for under $20 in total.
 
-Status: the tooling is built and has been run end to end with the mock provider. No paid run has been made, so no results are committed and the page shows "benchmarks not run yet".
+Status: run `2026-11-17-m3-matrix` is committed and published on the page. The open-model part is complete. The reference has no results yet, so the page shows it as coming soon, and the agreement and token calibrations have not been fitted. See [Run log](#run-log).
 
 ## What is run
 
@@ -52,6 +52,8 @@ The summary (`src/lib/matrix/summary.ts`) gives, per dataset and configuration:
 - a paired McNemar test against the **best single open model** on that dataset (the one with the highest accuracy), on the questions both answered: exact binomial below 25 discordant pairs, chi-squared with continuity correction above (`src/lib/pairedStats.ts`). The best single model itself has no test;
 - failures (calls that errored or timed out);
 - cost.
+
+The reference is shown only when every one of its calls on that dataset came back. Otherwise its row is left out and the dataset gets a `referencePending` note with how many questions it answered, how many failed and why (`out-of-credit` for HTTP 402, `refused` for a content filter or refusal, `other`). A premium model scored on part of the sample, with the rest counted wrong, would say nothing about that model. The page then shows the reference as coming soon. The counts and reasons stay in the run's own `summary.json`; the copy published to the app keeps only `answered`. What the reference's answers cost still counts in the dataset's `spentUsd`.
 
 Read the p-values as one test per row. With four datasets and several configurations, a single p below 0.05 is weak evidence; look for the same direction on several datasets. The reference is there to show how far the open models are from a premium model, not as a configuration to beat.
 
@@ -117,6 +119,7 @@ Options of `ensemble-eval matrix`:
 | `--sample <n>`, `--datasets <list>` | override the config, for dry runs |
 | `--concurrency <n>` | questions run at once per job (default 8) |
 | `--skip-download` | fail instead of downloading a dataset |
+| `--summarize-only` | with an existing `--run-id`, rebuild `summary.json` (and with `--publish`, the app summary) from the results files. No dataset download, no provider and no model call. The config is the last repair's, or the starting one when there was none |
 | `--retry-failed` | with an existing `--run-id`, run again the entries that failed, timed out, came back empty or lost their consensus; answers that succeeded are kept and not paid for again |
 
 ### Resume and cache
@@ -226,3 +229,16 @@ npm run build --workspace=packages/shared-utils
 ```
 
 This makes no calls. From the recorded usage it fits the answer range (10th and 90th percentile of billed output tokens per answer or one-call synthesis, so hidden reasoning tokens are included where the provider reports them) and the consensus overhead (median synthesis input less the prompt and the answers it was given). It writes `packages/shared-utils/src/pricing/tokenCalibration.ts`, which `estimateRun` reads over the hand-set defaults in `tokenAssumptions.ts`. Verdict and critique lengths are not fitted, because the matrix runs no ELO or council consensus. The committed module is `null`, so the defaults apply. Results from a mock run are refused for the default output, because their token counts are not real; pass `--output <scratch file>` to fit them anyway.
+
+## Run log
+
+### 2026-11-17-m3-matrix
+
+Started 2026-11-17 16:27 UTC, with three `--retry-failed` repairs (2026-11-17 20:26 and 22:25, 2026-11-18 13:35). The summary was rebuilt with `--summarize-only` on 2026-11-18, without calls.
+
+- Open models: complete on all four datasets (200 questions each, 198 for GPQA). Llama 3.1 8B timed out or failed on many questions (44 of 198 on GPQA, 24 of 200 on MMLU-Pro, 12 of 200 on GSM8K); those count as wrong.
+- Reference (Claude Sonnet 5.5): no usable results. On GSM8K 121 of 200 answers came back before the OpenRouter balance ran out; the other 79 got HTTP 402. MMLU-Pro got 402 on all 200. On GPQA every call was refused by the Amazon Bedrock host (`content_filter`, `refusal`); on TruthfulQA 168 got 402 and 32 were refused. The reference cache under `results/cache/free/` holds these failed entries and is not committed; a `--retry-failed` repair with credit runs them again (routing in `bench/matrix.json` now sends the reference to Anthropic only).
+- The last repair (2026-11-18 13:35) stopped when the balance ran out, so `manifest.json` still says `running`. It re-ran failed entries of GSM8K, MMLU-Pro and GPQA (over all repairs, 17, 35 and 31 ensemble entries carry a `priorAttemptCostUsd`, and 86 GSM8K reference entries). Their successful model answers were kept, but the standard consensus was called again, and where that call got HTTP 402 the entry now has a failed consensus: 33 of 198 on GPQA and 4 of 200 on MMLU-Pro. Before that repair, the summary of the then-current files had GPQA standard consensus at 149 of 198 (75.3%) with 2 failures; the committed files give 121 of 198 (61.1%) with 33 failures. The published numbers are the committed files', per the method. A repair that re-runs a consensus that had succeeded can lose it; see the PR for the follow-up.
+- Cost of the results: $1.56, of which $0.21 is the 121 GSM8K reference answers. Repairs replaced attempts that cost a further $0.15 (`retrySpendUsd`), $0.03 of it GSM8K reference answers. Failed attempts report no usage, so they are not priced.
+- Not done, needing a paid run or embedding calls: the reference, the agreement calibration. The token calibration makes no calls and has not been run yet either.
+

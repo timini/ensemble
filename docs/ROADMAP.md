@@ -134,12 +134,12 @@ Goal: a reproducible answer to "does an ensemble beat its best member?", for und
 - [x] Fix cost tracking to use the real pricing table from M1.
 - [ ] Calibrate the agreement score. Real embedding cosines sit in a narrow band (roughly 0.1 to 0.9 for `text-embedding-3-small`), and the current `(v+1)/2` mapping makes unrelated answers look like moderate agreement. Fit per-embedding-model thresholds from benchmark runs (agree vs disagree pairs) and update the labels.
 - [ ] Calibrate the token assumptions in `estimateRun` from recorded usage, including hidden reasoning tokens.
-- [ ] Benchmark matrix on GSM8K, MMLU-Pro, GPQA and TruthfulQA (shuffled), all through OpenRouter or local Ollama:
+- [ ] Benchmark matrix on GSM8K, MMLU-Pro, GPQA and TruthfulQA (shuffled), all through OpenRouter or local Ollama (run `2026-11-17-m3-matrix`: the open models alone and as an ensemble are done; the reference has no results yet, see the run log in `packages/eval/docs/BENCHMARKS.md`):
   - three open 7B to 14B models from different families (for example Qwen, Llama, Gemma), each alone
   - the same three as an ensemble, with mechanical majority and standard consensus
   - one premium model as a reference, run once and cached
-- [ ] Commit raw results under `packages/eval/results/` so `report/generate_figures.py` can be re-run. Regenerate the report.
-- [ ] Publish a results page in the app (page built at `/benchmarks` with an honest not-run state; real numbers come from the paid run) (`/about` or `/benchmarks`) with the numbers and their confidence intervals.
+- [x] Commit raw results under `packages/eval/results/` so `report/generate_figures.py` can be re-run. Regenerate the report.
+- [x] Publish a results page in the app (`/benchmarks`) with the numbers and their confidence intervals. The reference shows as coming soon until it has results.
 
 Done when: the results page shows the comparison with confidence intervals, and anyone can reproduce it with one command. The landing page copy is then set from these results, as the vision document requires.
 

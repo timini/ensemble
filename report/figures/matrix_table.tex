@@ -1,0 +1,29 @@
+\begin{tabular}{llrrrrr}
+\toprule
+Dataset & Configuration & n & Accuracy (95\% CI) & $p$ vs best single & Errors & Cost (USD) \\
+\midrule
+GSM8K & Qwen3.5 9B & 200 & 87.5 [82.2, 91.4] & 0.046 & 0 & 0.05 \\
+GSM8K & Llama 3.1 8B Instruct & 200 & 82.0 [76.1, 86.7] & <0.001 & 12 & 0.00 \\
+GSM8K & Gemma 3 12B & 200 & 93.0 [88.6, 95.8] & best & 0 & 0.01 \\
+GSM8K & Ensemble, mechanical majority & 200 & 95.5 [91.7, 97.6] & 0.063 & 0 & 0.06 \\
+GSM8K & Ensemble, standard consensus & 200 & 95.5 [91.7, 97.6] & 0.125 & 0 & 0.25 \\
+\midrule
+MMLU-Pro & Qwen3.5 9B & 200 & 77.0 [70.7, 82.3] & best & 0 & 0.12 \\
+MMLU-Pro & Llama 3.1 8B Instruct & 200 & 49.5 [42.6, 56.4] & <0.001 & 24 & 0.00 \\
+MMLU-Pro & Gemma 3 12B & 200 & 62.0 [55.1, 68.4] & <0.001 & 4 & 0.02 \\
+MMLU-Pro & Ensemble, mechanical majority & 200 & 74.5 [68.0, 80.0] & 0.227 & 0 & 0.14 \\
+MMLU-Pro & Ensemble, standard consensus & 200 & 78.5 [72.3, 83.6] & 0.453 & 4 & 0.35 \\
+\midrule
+GPQA & Qwen3.5 9B & 198 & 68.2 [61.4, 74.3] & best & 11 & 0.20 \\
+GPQA & Llama 3.1 8B Instruct & 198 & 23.7 [18.3, 30.1] & <0.001 & 44 & 0.00 \\
+GPQA & Gemma 3 12B & 198 & 36.4 [30.0, 43.3] & <0.001 & 18 & 0.02 \\
+GPQA & Ensemble, mechanical majority & 198 & 59.6 [52.6, 66.2] & 0.003 & 0 & 0.22 \\
+GPQA & Ensemble, standard consensus & 198 & 61.1 [54.2, 67.6] & 0.040 & 33 & 0.49 \\
+\midrule
+TruthfulQA & Qwen3.5 9B & 200 & 81.5 [75.5, 86.3] & best & 4 & 0.10 \\
+TruthfulQA & Llama 3.1 8B Instruct & 200 & 59.5 [52.6, 66.1] & <0.001 & 2 & 0.00 \\
+TruthfulQA & Gemma 3 12B & 200 & 68.0 [61.2, 74.1] & <0.001 & 0 & 0.01 \\
+TruthfulQA & Ensemble, mechanical majority & 200 & 76.5 [70.2, 81.8] & 0.052 & 0 & 0.11 \\
+TruthfulQA & Ensemble, standard consensus & 200 & 81.5 [75.5, 86.3] & 1.000 & 0 & 0.26 \\
+\bottomrule
+\end{tabular}

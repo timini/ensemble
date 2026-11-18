@@ -8,6 +8,7 @@ packages/eval/docs/BENCHMARKS.md) and writes into the figures directory:
   matrix_accuracy.pdf/.png       accuracy per dataset per configuration, 95% Wilson intervals
   matrix_cost_accuracy.pdf/.png  mean accuracy against total cost per configuration
   matrix_table.tex               the numbers, with McNemar p-values against the best single model
+                                 and the failed or timed-out calls (counted wrong)
 
 A summary from a mock dry run (mode "mock") is refused unless allow_mock is
 set (`--allow-mock` on generate_figures.py). With it, the table and figures
@@ -17,6 +18,7 @@ Needs only matplotlib.
 """
 
 import json
+from decimal import ROUND_HALF_UP, Decimal
 from pathlib import Path
 
 KIND_ORDER = {"single": 0, "ensemble": 1, "reference": 2}
@@ -54,7 +56,10 @@ def configurations(summary):
 def format_p(value):
     if value is None:
         return "best"
-    return "<0.001" if value < 0.001 else f"{value:.3f}"
+    if value < 0.001:
+        return "<0.001"
+    # Half up, as the app's toFixed does, so 0.0625 reads 0.063 in both.
+    return str(Decimal(repr(value)).quantize(Decimal("0.001"), rounding=ROUND_HALF_UP))
 
 
 def latex_escape(text):
@@ -64,10 +69,10 @@ def latex_escape(text):
 def matrix_table(summary):
     """A booktabs table: one block per dataset, one line per configuration."""
     lines = [
-        r"\begin{tabular}{llrrrr}",
+        r"\begin{tabular}{llrrrrr}",
         r"\toprule",
-        *([rf"\multicolumn{{6}}{{l}}{{\textbf{{{MOCK_LABEL}}}}} \\", r"\midrule"] if is_mock(summary) else []),
-        r"Dataset & Configuration & n & Accuracy (95\% CI) & $p$ vs best single & Cost (USD) \\",
+        *([rf"\multicolumn{{7}}{{l}}{{\textbf{{{MOCK_LABEL}}}}} \\", r"\midrule"] if is_mock(summary) else []),
+        r"Dataset & Configuration & n & Accuracy (95\% CI) & $p$ vs best single & Errors & Cost (USD) \\",
         r"\midrule",
     ]
     for dataset in summary.get("datasets", []):
@@ -78,7 +83,7 @@ def matrix_table(summary):
             acc = f"{row['accuracy'] * 100:.1f} [{row['ciLower'] * 100:.1f}, {row['ciUpper'] * 100:.1f}]"
             lines.append(
                 f"{latex_escape(name)} & {latex_escape(row['label'])} & {row['n']} & {acc} & "
-                f"{format_p(test['pValue'] if test else None)} & {cost} \\\\"
+                f"{format_p(test['pValue'] if test else None)} & {row.get('failures', 0)} & {cost} \\\\"
             )
         lines.append(r"\midrule")
     if lines[-1] == r"\midrule":
@@ -93,8 +98,8 @@ def _save(fig, figures_dir, stem, summary):
     if is_mock(summary):
         fig.text(0.5, 0.5, MOCK_LABEL, ha="center", va="center", rotation=20,
                  fontsize=20, color="#c0392b", alpha=0.35)
-    fig.savefig(figures_dir / f"{stem}.pdf")
-    fig.savefig(figures_dir / f"{stem}.png")
+    fig.savefig(figures_dir / f"{stem}.pdf", bbox_inches="tight")
+    fig.savefig(figures_dir / f"{stem}.png", bbox_inches="tight")
 
 
 def fig_accuracy(summary, figures_dir, plt):
@@ -118,7 +123,8 @@ def fig_accuracy(summary, figures_dir, plt):
     ax.set_xticklabels([DATASET_LABELS.get(d["dataset"], d["dataset"]) for d in datasets])
     ax.set_ylabel("Accuracy (%) with 95% Wilson interval")
     ax.set_ylim(0, 100)
-    ax.legend(fontsize=7, ncol=2)
+    # Below the axes, so it never covers a bar.
+    ax.legend(fontsize=7, ncol=3, loc="upper center", bbox_to_anchor=(0.5, -0.1), frameon=False)
     _save(fig, figures_dir, "matrix_accuracy", summary)
     plt.close(fig)
 
