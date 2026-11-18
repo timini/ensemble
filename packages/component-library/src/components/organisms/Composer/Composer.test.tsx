@@ -56,10 +56,25 @@ describe('Composer', () => {
     expect(props.onSubmit).not.toHaveBeenCalled();
   });
 
-  it('cannot submit without models', () => {
+  it('cannot submit without models, and says why', () => {
     setup({ models: [] });
-    expect(screen.getByTestId('composer-submit')).toBeDisabled();
+    const submit = screen.getByTestId('composer-submit');
+    expect(submit).toBeDisabled();
     expect(screen.getByTestId('model-picker-trigger')).toHaveTextContent('Choose models');
+    const hint = screen.getByTestId('composer-models-hint');
+    expect(hint).toHaveTextContent('Choose at least one model to ask');
+    expect(submit).toHaveAttribute('aria-describedby', hint.id);
+  });
+
+  it('drops the hint once a model or a hand-written answer is in', () => {
+    setup();
+    expect(screen.queryByTestId('composer-models-hint')).not.toBeInTheDocument();
+    expect(screen.getByTestId('composer-submit')).not.toHaveAttribute('aria-describedby');
+  });
+
+  it('translates the hint into French', () => {
+    setup({ models: [] }, 'fr');
+    expect(screen.getByTestId('composer-models-hint')).toHaveTextContent('Choisissez au moins un modèle pour demander');
   });
 
   it('shows Running and locks the models during a run', () => {

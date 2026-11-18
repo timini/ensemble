@@ -634,7 +634,8 @@
       "submit": "Demander",
       "running": "En cours",
       "shortcut": "{{keys}} pour demander",
-      "enter": "Entrée"
+      "enter": "Entrée",
+      "modelsHint": "Choisissez au moins un modèle pour demander"
     },
     "answerColumns": {
       "heading": "Réponses individuelles",

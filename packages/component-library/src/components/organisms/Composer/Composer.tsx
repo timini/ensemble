@@ -63,6 +63,7 @@ export interface ComposerProps {
  * chips with an inline picker, the consensus method with its calls and cost,
  * and the Ask button, in one card. Ctrl or Cmd + Enter sends the prompt.
  * During a run the models are locked but answers can still be added by hand.
+ * With no model chosen, a hint beside the picker says why Ask is disabled.
  *
  * @example
  * ```tsx
@@ -75,8 +76,10 @@ export function Composer(props: ComposerProps) {
   const { prompt, models, manualResponses = [], running = false } = props;
   const { t } = useTranslation();
   const promptId = React.useId();
+  const hintId = React.useId();
   const [modKey, setModKey] = React.useState('Ctrl');
-  const canSubmit = prompt.trim().length > 0 && models.length + manualResponses.length > 0 && !running;
+  const noModels = models.length + manualResponses.length === 0;
+  const canSubmit = prompt.trim().length > 0 && !noModels && !running;
 
   React.useEffect(() => {
     if (typeof navigator !== 'undefined' && /Mac|iPhone|iPad/.test(navigator.platform)) setModKey('⌘');
@@ -134,6 +137,11 @@ export function Composer(props: ComposerProps) {
           max={props.maxModels}
           disabled={running}
         />
+        {noModels && (
+          <span id={hintId} data-testid="composer-models-hint" className="px-1 text-caption text-muted-foreground">
+            {t('organisms.composer.modelsHint')}
+          </span>
+        )}
       </div>
       <div className="flex items-center gap-2 border-t border-border px-3 py-2.5 sm:px-4">
         <MethodMenu
@@ -157,6 +165,7 @@ export function Composer(props: ComposerProps) {
           <Button
             type="submit"
             disabled={!canSubmit}
+            aria-describedby={noModels ? hintId : undefined}
             aria-label={running ? t('organisms.composer.running') : t('organisms.composer.submit')}
             data-testid="composer-submit"
             className="gap-1.5 px-3 sm:px-4"

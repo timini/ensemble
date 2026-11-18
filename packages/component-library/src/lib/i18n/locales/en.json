@@ -634,7 +634,8 @@
       "submit": "Ask",
       "running": "Running",
       "shortcut": "{{keys}} to ask",
-      "enter": "Enter"
+      "enter": "Enter",
+      "modelsHint": "Choose at least one model to ask"
     },
     "answerColumns": {
       "heading": "Individual answers",
