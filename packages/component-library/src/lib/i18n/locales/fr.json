@@ -454,9 +454,8 @@
       "unpriced_other": "Pro n'a pas encore de prix pour {{models}} et ne peut donc pas les exécuter. Retirez-les pour demander.",
       "and": "et",
       "error": "Impossible de charger votre solde de crédits.",
-      "buy": "Acheter {{label}}",
-      "packs": "Packs de crédits",
-      "buyError": "Impossible de lancer le paiement. Réessayez."
+      "buyError": "Impossible de lancer le paiement. Réessayez.",
+      "negative": "Votre solde est de {{balance}} car un paiement a été remboursé ou contesté après l'utilisation de ses crédits. Achetez des crédits pour utiliser Pro à nouveau."
     },
     "modeSwitch": {
       "label": "Mode",
@@ -484,6 +483,48 @@
       "signOut": "Se déconnecter",
       "unavailableTitle": "Les comptes ne sont pas disponibles ici",
       "unavailable": "La connexion n'est pas configurée sur ce serveur. Le mode gratuit fonctionne sans compte : ajoutez vos propres clés de fournisseur dans les Réglages."
+    },
+    "creditPacks": {
+      "buy": "Acheter {{label}}",
+      "packs": "Packs de crédits"
+    },
+    "creditBalanceCard": {
+      "title": "Solde de crédits",
+      "ok": "Les requêtes Pro sont facturées sur ce solde. Chaque requête réserve d'abord son estimation, puis vous payez ce qu'elle a utilisé.",
+      "low": "Votre solde est bas. Achetez des crédits pour continuer à utiliser Pro.",
+      "negative": "Un paiement a été remboursé ou contesté après l'utilisation de ses crédits, votre solde est donc négatif. Les requêtes Pro sont suspendues jusqu'à l'achat de crédits.",
+      "note": "Paiement par Stripe. Les crédits arrivent une fois le paiement confirmé.",
+      "buyError": "Impossible de lancer le paiement. Réessayez."
+    },
+    "accountSection": {
+      "loading": "Chargement",
+      "error": "Impossible de charger cette liste.",
+      "more": "Afficher plus"
+    },
+    "purchaseHistory": {
+      "title": "Achats",
+      "empty": "Aucun achat pour l'instant.",
+      "purchase": "Pack de crédits {{pack}}",
+      "purchaseUnknown": "Pack de crédits",
+      "grant": "Crédits offerts",
+      "refund": "Remboursement",
+      "dispute": "Paiement contesté"
+    },
+    "modelUsageList": {
+      "title": "Utilisation par modèle, {{count}} derniers jours",
+      "empty": "Aucune requête Pro ces {{count}} derniers jours.",
+      "truncated": "Seules vos requêtes les plus récentes sont comptées.",
+      "runs_one": "{{count}} requête",
+      "runs_other": "{{count}} requêtes",
+      "calls_one": "{{count}} appel",
+      "calls_other": "{{count}} appels",
+      "tokens": "{{tokens}} jetons"
+    },
+    "runHistory": {
+      "title": "Requêtes récentes",
+      "empty": "Les requêtes que vous faites en Pro s'affichent ici avec leur coût.",
+      "calls_one": "{{count}} appel",
+      "calls_other": "{{count}} appels"
     }
   },
   "organisms": {
@@ -774,6 +815,12 @@
       "localNone": "Aucun serveur local trouvé pour l’instant. Lancez Ollama ou ajoutez un autre serveur dans les paramètres.",
       "localOther": "Vous utilisez LM Studio, llama.cpp ou vLLM ?",
       "localSettings": "Ajoutez-le dans les paramètres"
+    },
+    "accountDashboard": {
+      "title": "Compte",
+      "signedInAs": "Connecté en tant que {{email}}",
+      "balanceLoading": "Chargement de votre solde",
+      "balanceError": "Impossible de charger votre solde de crédits."
     }
   },
   "providers": {

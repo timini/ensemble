@@ -156,6 +156,17 @@ export {
   type CreditNoticeVariant,
   type CreditPackOption,
 } from './components/molecules/CreditNotice';
+export { CreditPackButtons, type CreditPackButtonsProps } from './components/molecules/CreditPackButtons';
+export { CreditBalanceCard, type CreditBalanceCardProps, type CreditBalanceState } from './components/molecules/CreditBalanceCard';
+export {
+  AccountSection,
+  type AccountSectionProps,
+  type AccountListProps,
+  type AccountListStatus,
+} from './components/molecules/AccountSection';
+export { PurchaseHistory, type PurchaseHistoryProps, type PurchaseHistoryItem } from './components/molecules/PurchaseHistory';
+export { ModelUsageList, type ModelUsageListProps, type ModelUsageItem } from './components/molecules/ModelUsageList';
+export { RunHistory, type RunHistoryProps, type RunHistoryItem } from './components/molecules/RunHistory';
 export { ModeSwitch, type ModeSwitchProps, type WorkspaceMode } from './components/molecules/ModeSwitch';
 export { AppearanceSettings, type AppearanceSettingsProps, type AppearanceTheme, type AppearanceLanguage } from './components/molecules/AppearanceSettings';
 export { ComposerOptions, type ComposerOptionsProps } from './components/molecules/ComposerOptions';
@@ -179,6 +190,7 @@ export { Composer, type ComposerProps, type ComposerModel, type ComposerManualRe
 export { AnswerColumns, type AnswerColumnsProps, type AnswerColumnItem } from './components/organisms/AnswerColumns';
 export { ConsensusPanel, type ConsensusPanelProps } from './components/organisms/ConsensusPanel';
 export { AppShell, type AppShellProps } from './components/organisms/AppShell';
+export { AccountDashboard, type AccountDashboardProps } from './components/organisms/AccountDashboard';
 export {
   HistorySidebar,
   type HistorySidebarProps,

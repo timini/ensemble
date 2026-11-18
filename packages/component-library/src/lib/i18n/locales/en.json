@@ -454,9 +454,8 @@
       "unpriced_other": "Pro cannot price {{models}} yet, so it cannot run them. Remove them to ask.",
       "and": "and",
       "error": "Could not load your credit balance.",
-      "buy": "Buy {{label}}",
-      "packs": "Credit packs",
-      "buyError": "Could not start the checkout. Try again."
+      "buyError": "Could not start the checkout. Try again.",
+      "negative": "Your balance is {{balance}} because a payment was refunded or disputed after its credits were used. Buy credits to use Pro again."
     },
     "modeSwitch": {
       "label": "Mode",
@@ -484,6 +483,48 @@
       "signOut": "Sign out",
       "unavailableTitle": "Accounts are not available here",
       "unavailable": "Sign-in is not set up on this server. Free mode works without an account: add your own provider keys in Settings."
+    },
+    "creditPacks": {
+      "buy": "Buy {{label}}",
+      "packs": "Credit packs"
+    },
+    "creditBalanceCard": {
+      "title": "Credit balance",
+      "ok": "Pro runs are billed from this balance. Each run reserves its estimate first, then you pay for what it used.",
+      "low": "Your balance is low. Buy credits to keep using Pro.",
+      "negative": "A payment was refunded or disputed after its credits were used, so your balance is below zero. Pro runs are paused until you buy credits.",
+      "note": "Paid with Stripe. Credits arrive once the payment clears.",
+      "buyError": "Could not start the checkout. Try again."
+    },
+    "accountSection": {
+      "loading": "Loading",
+      "error": "Could not load this list.",
+      "more": "Show more"
+    },
+    "purchaseHistory": {
+      "title": "Purchases",
+      "empty": "No purchases yet.",
+      "purchase": "{{pack}} credit pack",
+      "purchaseUnknown": "Credit pack",
+      "grant": "Free credits",
+      "refund": "Refund",
+      "dispute": "Disputed payment"
+    },
+    "modelUsageList": {
+      "title": "Usage by model, last {{count}} days",
+      "empty": "No Pro runs in the last {{count}} days.",
+      "truncated": "Only your most recent runs are counted.",
+      "runs_one": "{{count}} run",
+      "runs_other": "{{count}} runs",
+      "calls_one": "{{count}} call",
+      "calls_other": "{{count}} calls",
+      "tokens": "{{tokens}} tokens"
+    },
+    "runHistory": {
+      "title": "Recent runs",
+      "empty": "Runs you make in Pro show here with what they cost.",
+      "calls_one": "{{count}} call",
+      "calls_other": "{{count}} calls"
     }
   },
   "organisms": {
@@ -774,6 +815,12 @@
       "localNone": "No local server found yet. Start Ollama, or add another server in settings.",
       "localOther": "Using LM Studio, llama.cpp or vLLM?",
       "localSettings": "Add it in settings"
+    },
+    "accountDashboard": {
+      "title": "Account",
+      "signedInAs": "Signed in as {{email}}",
+      "balanceLoading": "Loading your balance",
+      "balanceError": "Could not load your credit balance."
     }
   },
   "providers": {

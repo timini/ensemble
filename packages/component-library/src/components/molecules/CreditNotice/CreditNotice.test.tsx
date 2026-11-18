@@ -54,6 +54,15 @@ describe('CreditNotice', () => {
     expect(screen.getByTestId('credit-notice-buy-pack-5')).toBeInTheDocument();
   });
 
+  it('blocks Pro while the balance is negative and offers the packs', () => {
+    setup({ variant: 'negative', balance: '-$4.00' });
+    expect(screen.getByTestId('credit-notice')).toHaveAttribute('role', 'alert');
+    expect(screen.getByTestId('credit-notice-message')).toHaveTextContent(
+      'Your balance is -$4.00 because a payment was refunded or disputed after its credits were used. Buy credits to use Pro again.',
+    );
+    expect(screen.getByTestId('credit-notice-buy-pack-5')).toBeInTheDocument();
+  });
+
   it('lists the models Pro cannot price, without buy buttons', () => {
     setup({ variant: 'unpriced', unpricedModels: ['Model A', 'Model B'] });
     expect(screen.getByTestId('credit-notice-message')).toHaveTextContent(

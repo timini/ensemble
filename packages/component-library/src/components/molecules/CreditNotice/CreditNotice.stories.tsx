@@ -31,6 +31,9 @@ export const Low: Story = { args: { variant: 'low', balance: '$0.42' } };
 /** The run needs more credits than the balance (FR-036). */
 export const Insufficient: Story = { args: { variant: 'insufficient', balance: '$0.04', required: '$0.12' } };
 
+/** Below zero after a refund or dispute: Pro is blocked until credits are bought. */
+export const Negative: Story = { args: { variant: 'negative', balance: '-$4.00' } };
+
 /** Models Pro has no price for, so it cannot run them. */
 export const Unpriced: Story = { args: { variant: 'unpriced', unpricedModels: ['qwen3:14b', 'Mistral Large 3'] } };
 
