@@ -23,6 +23,15 @@ export const env = createEnv({
     STRIPE_SECRET_KEY: z.string().optional(),
     STRIPE_WEBHOOK_SECRET: z.string().optional(),
     APP_URL: z.string().url().optional(),
+    OPENROUTER_API_KEY: z.string().optional(),
+    OPENROUTER_BASE_URL: z.string().url().optional(),
+    PRO_MAX_RUN_TOKENS: z.string().optional(),
+    PRO_MAX_CALL_OUTPUT_TOKENS: z.string().optional(),
+    PRO_MAX_CALLS_PER_RUN: z.string().optional(),
+    PRO_RATE_LIMIT_RUNS: z.string().optional(),
+    PRO_RATE_LIMIT_WINDOW_SECONDS: z.string().optional(),
+    PRO_MOCK_UPSTREAM: z.string().optional(),
+    APP_CHECK_ENFORCE: z.string().optional(),
   },
 
   /**
@@ -38,6 +47,9 @@ export const env = createEnv({
     NEXT_PUBLIC_FIREBASE_PROJECT_ID: z.string().optional(),
     NEXT_PUBLIC_FIREBASE_APP_ID: z.string().optional(),
     NEXT_PUBLIC_FIREBASE_AUTH_EMULATOR_HOST: z.string().optional(),
+    NEXT_PUBLIC_FIREBASE_APP_CHECK_SITE_KEY: z.string().optional(),
+    NEXT_PUBLIC_FIREBASE_APP_CHECK_DEBUG_TOKEN: z.string().optional(),
+    NEXT_PUBLIC_MOCK_MODE: z.string().optional(),
   },
 
   /**
@@ -61,6 +73,15 @@ export const env = createEnv({
     STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY,
     STRIPE_WEBHOOK_SECRET: process.env.STRIPE_WEBHOOK_SECRET,
     APP_URL: process.env.APP_URL,
+    OPENROUTER_API_KEY: process.env.OPENROUTER_API_KEY,
+    OPENROUTER_BASE_URL: process.env.OPENROUTER_BASE_URL,
+    PRO_MAX_RUN_TOKENS: process.env.PRO_MAX_RUN_TOKENS,
+    PRO_MAX_CALL_OUTPUT_TOKENS: process.env.PRO_MAX_CALL_OUTPUT_TOKENS,
+    PRO_MAX_CALLS_PER_RUN: process.env.PRO_MAX_CALLS_PER_RUN,
+    PRO_RATE_LIMIT_RUNS: process.env.PRO_RATE_LIMIT_RUNS,
+    PRO_RATE_LIMIT_WINDOW_SECONDS: process.env.PRO_RATE_LIMIT_WINDOW_SECONDS,
+    PRO_MOCK_UPSTREAM: process.env.PRO_MOCK_UPSTREAM,
+    APP_CHECK_ENFORCE: process.env.APP_CHECK_ENFORCE,
     NEXT_PUBLIC_SENTRY_DSN: process.env.NEXT_PUBLIC_SENTRY_DSN,
     NEXT_PUBLIC_SENTRY_RELEASE: process.env.NEXT_PUBLIC_SENTRY_RELEASE,
     NEXT_PUBLIC_FIREBASE_API_KEY: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -68,6 +89,9 @@ export const env = createEnv({
     NEXT_PUBLIC_FIREBASE_PROJECT_ID: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
     NEXT_PUBLIC_FIREBASE_APP_ID: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
     NEXT_PUBLIC_FIREBASE_AUTH_EMULATOR_HOST: process.env.NEXT_PUBLIC_FIREBASE_AUTH_EMULATOR_HOST,
+    NEXT_PUBLIC_FIREBASE_APP_CHECK_SITE_KEY: process.env.NEXT_PUBLIC_FIREBASE_APP_CHECK_SITE_KEY,
+    NEXT_PUBLIC_FIREBASE_APP_CHECK_DEBUG_TOKEN: process.env.NEXT_PUBLIC_FIREBASE_APP_CHECK_DEBUG_TOKEN,
+    NEXT_PUBLIC_MOCK_MODE: process.env.NEXT_PUBLIC_MOCK_MODE,
   },
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially

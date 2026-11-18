@@ -1,263 +1,133 @@
+// @vitest-environment node
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { AuthUser } from "~/server/auth/firebaseAdmin";
+import { ProviderError } from "@ensemble-ai/shared-utils/providers";
+import { InsufficientCreditsError } from "~/server/credits/errors";
+import { RateLimitError } from "~/server/pro/rateLimit";
+import { DEFAULT_PRO_CONFIG } from "~/server/pro/config";
 
-const {
-  verifyFirebaseAuthTokenMock,
-  listProviderTextModelsMock,
-  streamProviderResponseMock,
-} = vi.hoisted(() => ({
-  verifyFirebaseAuthTokenMock: vi.fn<
-    (token: string) => Promise<AuthUser | null>
-  >(),
-  listProviderTextModelsMock: vi.fn<
-    (provider: string) => Promise<string[]>
-  >(),
-  streamProviderResponseMock: vi.fn<
-    (
-      input: {
-        provider: string;
-        model: string;
-        prompt: string;
-        temperature?: number;
-      },
-      options?: { onChunk?: (chunk: string) => void },
-    ) => Promise<{ response: string; responseTimeMs: number; tokenCount?: number }>
-  >(),
+const mocks = vi.hoisted(() => ({
+  verify: vi.fn<(token: string) => Promise<AuthUser | null>>(),
+  appCheck: vi.fn<(token: string | null) => Promise<boolean>>(),
+  listModels: vi.fn<(provider: string) => Promise<string[]>>(),
+  stream: vi.fn(),
+  structured: vi.fn(),
+  embed: vi.fn(),
+  start: vi.fn(),
+  close: vi.fn(),
+  config: { appCheckEnforce: false },
 }));
 
 vi.mock("~/server/auth/firebaseAdmin", () => ({
-  verifyFirebaseAuthToken: verifyFirebaseAuthTokenMock,
+  verifyFirebaseAuthToken: mocks.verify,
+  getFirebaseApp: vi.fn(),
 }));
-
+vi.mock("~/server/pro/appCheck", () => ({
+  APP_CHECK_HEADER: "x-firebase-appcheck",
+  verifyAppCheckToken: mocks.appCheck,
+}));
+vi.mock("~/server/pro", () => ({
+  getProConfig: () => ({ ...DEFAULT_PRO_CONFIG, ...mocks.config }),
+  getProDeps: () => ({ deps: true }),
+}));
+vi.mock("~/server/firebase/firestore", () => ({ getAdminFirestore: () => ({}) }));
 vi.mock("~/server/providers/providerService", () => ({
-  listProviderTextModels: listProviderTextModelsMock,
-  streamProviderResponse: streamProviderResponseMock,
+  listProviderTextModels: mocks.listModels,
+}));
+vi.mock("~/server/pro/proCalls", () => ({
+  streamProCall: mocks.stream,
+  structuredProCall: mocks.structured,
+  embedProCall: mocks.embed,
+}));
+vi.mock("~/server/pro/proRunService", () => ({
+  startProRun: mocks.start,
+  closeProRun: mocks.close,
 }));
 
 import { createCaller } from "~/server/api/root";
 import { createTRPCContext } from "~/server/api/trpc";
 
-interface TestSubscription<T> {
-  subscribe: (handlers: {
-    next: (value: T) => void;
-    error: (error: unknown) => void;
-    complete: () => void;
-  }) => { unsubscribe: () => void };
+const CALL = {
+  runId: "run-1",
+  callId: "call-1",
+  provider: "openai" as const,
+  model: "gpt-5-mini",
+  prompt: "Say hello",
+};
+
+const RUN = {
+  runId: "run-1",
+  models: [{ provider: "openai", modelId: "gpt-5-mini" }],
+  consensusMethod: "standard" as const,
+  summarizer: null,
+  eloTopN: 0,
+  embeddings: null,
+  promptTokens: 10,
+};
+
+async function caller(headers: Record<string, string> = {}) {
+  return createCaller(await createTRPCContext({ headers: new Headers(headers) }));
 }
 
-describe("provider router auth enforcement", () => {
+async function drain(iterable: unknown) {
+  const out: unknown[] = [];
+  for await (const e of iterable as AsyncIterable<unknown>) out.push(e);
+  return out;
+}
+
+describe("provider router", () => {
   beforeEach(() => {
-    verifyFirebaseAuthTokenMock.mockReset();
-    listProviderTextModelsMock.mockReset();
-    streamProviderResponseMock.mockReset();
+    Object.values(mocks).forEach((m) => typeof m === "function" && m.mockReset());
+    mocks.config.appCheckEnforce = false;
+    mocks.verify.mockResolvedValue({ uid: "user-1" });
   });
 
-  it("blocks unauthenticated listTextModels requests and does not call provider service", async () => {
-    const ctx = await createTRPCContext({ headers: new Headers() });
-    const caller = createCaller(ctx);
-
+  it("refuses every Pro call without a signed-in user", async () => {
+    mocks.verify.mockResolvedValue(null);
+    const c = await caller({ authorization: "Bearer bad" });
+    await expect(c.provider.streamTextEvents(CALL)).rejects.toMatchObject({ code: "UNAUTHORIZED" });
     await expect(
-      caller.provider.listTextModels({ provider: "openai" }),
-    ).rejects.toMatchObject({
-      code: "UNAUTHORIZED",
-      message: "Authentication required",
-    });
-    expect(listProviderTextModelsMock).not.toHaveBeenCalled();
+      c.provider.generateStructured({ ...CALL, schema: { name: "s", schema: {} } }),
+    ).rejects.toMatchObject({ code: "UNAUTHORIZED" });
+    await expect(
+      c.provider.generateEmbeddings({ runId: "r", callId: "c", provider: "openai", text: "t" }),
+    ).rejects.toMatchObject({ code: "UNAUTHORIZED" });
+    await expect(c.proRun.start(RUN)).rejects.toMatchObject({ code: "UNAUTHORIZED" });
+    expect(mocks.stream).not.toHaveBeenCalled();
+    expect(mocks.start).not.toHaveBeenCalled();
   });
 
-  it("blocks invalid-token streamText requests and does not call provider service", async () => {
-    verifyFirebaseAuthTokenMock.mockResolvedValueOnce(null);
-
-    const ctx = await createTRPCContext({
-      headers: new Headers({
-        authorization: "Bearer invalid-token",
-      }),
+  it("streams the chunk and complete events of a Pro call", async () => {
+    mocks.stream.mockImplementation(async function* () {
+      yield { type: "chunk", chunk: "Hel" };
+      yield { type: "chunk", chunk: "lo" };
+      yield { type: "complete", response: "Hello", responseTimeMs: 5 };
     });
-    const caller = createCaller(ctx);
-
-    await expect(
-      caller.provider.streamText({
-        provider: "google",
-        model: "gemini-1.5-pro",
-        prompt: "test",
-      }),
-    ).rejects.toMatchObject({
-      code: "UNAUTHORIZED",
-      message: "Authentication required",
-    });
-    expect(verifyFirebaseAuthTokenMock).toHaveBeenCalledWith("invalid-token");
-    expect(streamProviderResponseMock).not.toHaveBeenCalled();
-  });
-
-  it("blocks unauthenticated streamTextEvents subscription and does not call provider service", async () => {
-    const ctx = await createTRPCContext({ headers: new Headers() });
-    const caller = createCaller(ctx);
-
-    await expect(
-      caller.provider.streamTextEvents({
-        provider: "openai",
-        model: "gpt-4o",
-        prompt: "test",
-      }),
-    ).rejects.toMatchObject({
-      code: "UNAUTHORIZED",
-      message: "Authentication required",
-    });
-    expect(streamProviderResponseMock).not.toHaveBeenCalled();
-  });
-
-  it("allows authenticated listTextModels and streamText requests", async () => {
-    verifyFirebaseAuthTokenMock.mockResolvedValue({
-      uid: "user-123",
-      email: "test@example.com",
-    });
-    listProviderTextModelsMock.mockResolvedValue(["gpt-4o", "gpt-4o-mini"]);
-    streamProviderResponseMock.mockResolvedValue({
-      response: "hello from provider",
-      responseTimeMs: 321,
-      tokenCount: 42,
-    });
-
-    const ctx = await createTRPCContext({
-      headers: new Headers({
-        authorization: "Bearer valid-token",
-      }),
-    });
-    const caller = createCaller(ctx);
-
-    await expect(
-      caller.provider.listTextModels({ provider: "openai" }),
-    ).resolves.toEqual({
-      provider: "openai",
-      models: ["gpt-4o", "gpt-4o-mini"],
-    });
-
-    await expect(
-      caller.provider.streamText({
-        provider: "openai",
-        model: "gpt-4o",
-        prompt: "Say hello",
-        temperature: 0.2,
-      }),
-    ).resolves.toEqual({
-      provider: "openai",
-      model: "gpt-4o",
-      response: "hello from provider",
-      responseTimeMs: 321,
-      tokenCount: 42,
-    });
-
-    expect(listProviderTextModelsMock).toHaveBeenCalledWith("openai");
-    expect(streamProviderResponseMock).toHaveBeenCalledWith({
-      provider: "openai",
-      model: "gpt-4o",
-      prompt: "Say hello",
-      temperature: 0.2,
-    });
-  });
-
-  it("emits chunk and complete events for authenticated streamTextEvents subscription", async () => {
-    verifyFirebaseAuthTokenMock.mockResolvedValue({
-      uid: "user-123",
-      email: "test@example.com",
-    });
-    streamProviderResponseMock.mockImplementationOnce(
-      async (_input, options) => {
-        options?.onChunk?.("chunk-1");
-        options?.onChunk?.("chunk-2");
-        return {
-          response: "chunk-1chunk-2",
-          responseTimeMs: 222,
-          tokenCount: 7,
-        };
-      },
-    );
-
-    const ctx = await createTRPCContext({
-      headers: new Headers({
-        authorization: "Bearer valid-token",
-      }),
-    });
-    const caller = createCaller(ctx);
-
-    const stream = await caller.provider.streamTextEvents({
-      provider: "openai",
-      model: "gpt-4o",
-      prompt: "test",
-    });
-
-    const events: Array<Record<string, unknown>> = [];
-    await new Promise<void>((resolve, reject) => {
-      (stream as unknown as TestSubscription<Record<string, unknown>>).subscribe({
-        next: (event) => events.push(event),
-        error: (error) => {
-          reject(
-            error instanceof Error
-              ? error
-              : new Error(`Subscription error: ${String(error)}`),
-          );
-        },
-        complete: () => resolve(),
-      });
-    });
-
+    const events = await drain(await (await caller({ authorization: "Bearer ok" })).provider.streamTextEvents(CALL));
     expect(events).toEqual([
-      { type: "chunk", chunk: "chunk-1" },
-      { type: "chunk", chunk: "chunk-2" },
-      {
-        type: "complete",
-        response: "chunk-1chunk-2",
-        responseTimeMs: 222,
-        tokenCount: 7,
-      },
+      { type: "chunk", chunk: "Hel" },
+      { type: "chunk", chunk: "lo" },
+      { type: "complete", response: "Hello", responseTimeMs: 5 },
     ]);
+    expect(mocks.stream.mock.calls[0]?.slice(0, 3)).toEqual([{ deps: true }, "user-1", CALL]);
   });
 
-  it("supports unsubscribe cleanup for streamTextEvents subscription", async () => {
-    verifyFirebaseAuthTokenMock.mockResolvedValue({
-      uid: "user-123",
-      email: "test@example.com",
+  it("maps billing and provider failures to tRPC codes", async () => {
+    const c = await caller({ authorization: "Bearer ok" });
+    mocks.start.mockRejectedValueOnce(new InsufficientCreditsError(10, 100));
+    await expect(c.proRun.start(RUN)).rejects.toMatchObject({ code: "PAYMENT_REQUIRED" });
+    mocks.start.mockRejectedValueOnce(new RateLimitError(30));
+    await expect(c.proRun.start(RUN)).rejects.toMatchObject({ code: "TOO_MANY_REQUESTS" });
+    mocks.structured.mockRejectedValueOnce(new ProviderError("slow", "timeout"));
+    await expect(
+      c.provider.generateStructured({ ...CALL, schema: { name: "s", schema: {} } }),
+    ).rejects.toMatchObject({ code: "GATEWAY_TIMEOUT" });
+    mocks.stream.mockImplementation(async function* () {
+      yield { type: "chunk", chunk: "x" };
+      throw new ProviderError("busy", "rate_limited", { retryAfterSeconds: 7 });
     });
-    streamProviderResponseMock.mockImplementationOnce(async (_input, options) => {
-      options?.onChunk?.("first");
-      await new Promise((resolve) => setTimeout(resolve, 25));
-      options?.onChunk?.("second");
-      return {
-        response: "firstsecond",
-        responseTimeMs: 111,
-        tokenCount: 2,
-      };
+    await expect(drain(await c.provider.streamTextEvents(CALL))).rejects.toMatchObject({
+      code: "TOO_MANY_REQUESTS",
     });
-
-    const ctx = await createTRPCContext({
-      headers: new Headers({
-        authorization: "Bearer valid-token",
-      }),
-    });
-    const caller = createCaller(ctx);
-    const stream = await caller.provider.streamTextEvents({
-      provider: "openai",
-      model: "gpt-4o",
-      prompt: "test",
-    });
-
-    const events: Array<Record<string, unknown>> = [];
-    const onError = vi.fn();
-    const onComplete = vi.fn();
-    const subscription = (
-      stream as unknown as TestSubscription<Record<string, unknown>>
-    ).subscribe({
-      next: (event) => events.push(event),
-      error: onError,
-      complete: onComplete,
-    });
-
-    await new Promise((resolve) => setTimeout(resolve, 5));
-    subscription.unsubscribe();
-    await new Promise((resolve) => setTimeout(resolve, 60));
-
-    expect(events).toEqual([{ type: "chunk", chunk: "first" }]);
-    expect(onError).not.toHaveBeenCalled();
-    expect(onComplete).not.toHaveBeenCalled();
   });
 });

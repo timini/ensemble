@@ -86,7 +86,9 @@ describe("provider router integration auth gate", () => {
     const caller = createCaller(ctx);
 
     await expect(
-      caller.provider.streamText({
+      caller.provider.streamTextEvents({
+        runId: "run-1",
+        callId: "call-1",
         provider,
         model,
         prompt: "hello",
@@ -126,18 +128,6 @@ maybeDescribe("provider router real integration (firebase auth + provider API)",
       expect(modelsResult.provider).toBe(provider);
       expect(Array.isArray(modelsResult.models)).toBe(true);
       expect(modelsResult.models.length).toBeGreaterThan(0);
-
-      const streamResult = await caller.provider.streamText({
-        provider,
-        model,
-        prompt:
-          "Reply with exactly one short sentence confirming backend auth test success.",
-        temperature: 0,
-      });
-      expect(streamResult.provider).toBe(provider);
-      expect(streamResult.model).toBe(model);
-      expect(streamResult.response.length).toBeGreaterThan(0);
-      expect(streamResult.responseTimeMs).toBeGreaterThan(0);
     },
     120000,
   );

@@ -11,6 +11,9 @@ import { initTRPC, TRPCError } from "@trpc/server";
 import superjson from "superjson";
 import { ZodError } from "zod";
 import { verifyFirebaseAuthToken } from "~/server/auth/firebaseAdmin";
+import { APP_CHECK_HEADER, verifyAppCheckToken } from "~/server/pro/appCheck";
+import { retryAfterOf } from "~/server/pro/errors";
+import { getProConfig } from "~/server/pro";
 
 /**
  * 1. CONTEXT
@@ -61,6 +64,8 @@ const t = initTRPC.context<typeof createTRPCContext>().create({
         ...shape.data,
         zodError:
           error.cause instanceof ZodError ? error.cause.flatten() : null,
+        // Rate limits (ours and the model provider's) say when to retry.
+        retryAfterSeconds: retryAfterOf(error.cause) ?? null,
       },
     };
   },
@@ -137,4 +142,19 @@ export const protectedProcedure = publicProcedure.use(async ({ ctx, next }) => {
       authUser,
     },
   });
+});
+
+/**
+ * Pro procedure: a signed-in user and, when APP_CHECK_ENFORCE is on, a
+ * valid Firebase App Check token in the `x-firebase-appcheck` header. Every
+ * procedure that spends the server's OpenRouter key uses it.
+ */
+export const proProcedure = protectedProcedure.use(async ({ ctx, next }) => {
+  if (getProConfig().appCheckEnforce) {
+    const ok = await verifyAppCheckToken(ctx.headers.get(APP_CHECK_HEADER));
+    if (!ok) {
+      throw new TRPCError({ code: "FORBIDDEN", message: "App Check failed" });
+    }
+  }
+  return next();
 });

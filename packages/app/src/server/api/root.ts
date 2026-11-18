@@ -1,6 +1,7 @@
 import { authRouter } from "~/server/api/routers/auth";
 import { creditsRouter } from "~/server/api/routers/credits";
 import { providerRouter } from "~/server/api/routers/provider";
+import { proRunRouter } from "~/server/api/routers/proRun";
 import { createCallerFactory, createTRPCRouter } from "~/server/api/trpc";
 
 /**
@@ -12,6 +13,7 @@ export const appRouter = createTRPCRouter({
   auth: authRouter,
   credits: creditsRouter,
   provider: providerRouter,
+  proRun: proRunRouter,
 });
 
 // export type definition of API

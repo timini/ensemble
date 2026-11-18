@@ -1,11 +1,17 @@
-import { TRPCError } from "@trpc/server";
-import { observable } from "@trpc/server/observable";
 import { z } from "zod";
-import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import {
-  listProviderTextModels,
-  streamProviderResponse,
-} from "~/server/providers/providerService";
+  createTRPCRouter,
+  proProcedure,
+  protectedProcedure,
+} from "~/server/api/trpc";
+import { listProviderTextModels } from "~/server/providers/providerService";
+import { getProDeps } from "~/server/pro";
+import { toProTRPCError } from "~/server/pro/errors";
+import {
+  embedProCall,
+  streamProCall,
+  structuredProCall,
+} from "~/server/pro/proCalls";
 
 const providerSchema = z.enum([
   "openai",
@@ -16,98 +22,92 @@ const providerSchema = z.enum([
   "perplexity",
 ]);
 
+/** Run and call ids: the ledger's safe id rule (letters, digits, - and _). */
+const idSchema = z
+  .string()
+  .regex(/^[A-Za-z0-9_-]{1,128}$/)
+  .refine((v) => !v.includes("__"));
+
+const callRef = { runId: idSchema, callId: idSchema };
+
+/** Longest prompt a Pro call takes, in characters (about 50,000 tokens). */
+const MAX_PROMPT_CHARS = 200_000;
+
+/**
+ * Model calls. `listTextModels` uses the direct server keys. The three Pro
+ * calls (`streamTextEvents`, `generateStructured`, `generateEmbeddings`) go
+ * to OpenRouter with the server key and are billed to an open Pro run
+ * (`proRun.start`): each names its run and a call id that may be used once.
+ */
 export const providerRouter = createTRPCRouter({
   listTextModels: protectedProcedure
-    .input(
-      z.object({
-        provider: providerSchema,
-      }),
-    )
+    .input(z.object({ provider: providerSchema }))
     .query(async ({ input }) => {
       const models = await listProviderTextModels(input.provider);
-      return {
-        provider: input.provider,
-        models,
-      };
+      return { provider: input.provider, models };
     }),
 
-  streamText: protectedProcedure
+  /**
+   * One answer, streamed over SSE as chunk events and a complete event.
+   * Closing the subscription aborts the upstream request; the text produced
+   * so far is billed.
+   */
+  streamTextEvents: proProcedure
     .input(
       z.object({
+        ...callRef,
         provider: providerSchema,
-        model: z.string().min(1),
-        prompt: z.string().min(1),
+        model: z.string().min(1).max(200),
+        prompt: z.string().min(1).max(MAX_PROMPT_CHARS),
         temperature: z.number().min(0).max(2).optional(),
+        seed: z.number().int().optional(),
       }),
     )
-    .mutation(async ({ input }) => {
+    .subscription(async function* ({ ctx, input, signal }) {
       try {
-        const result = await streamProviderResponse(input);
-        return {
-          provider: input.provider,
-          model: input.model,
-          ...result,
-        };
+        yield* streamProCall(getProDeps(), ctx.authUser.uid, input, signal);
       } catch (error) {
-        const message = error instanceof Error ? error.message : String(error);
-        throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message,
-        });
+        throw toProTRPCError(error);
       }
     }),
 
-  streamTextEvents: protectedProcedure
+  /** A structured (JSON) call, used by the consensus strategies. */
+  generateStructured: proProcedure
     .input(
       z.object({
+        ...callRef,
         provider: providerSchema,
-        model: z.string().min(1),
-        prompt: z.string().min(1),
+        model: z.string().min(1).max(200),
+        prompt: z.string().min(1).max(MAX_PROMPT_CHARS),
+        schema: z.object({
+          name: z.string().min(1).max(64),
+          schema: z.record(z.unknown()),
+        }),
         temperature: z.number().min(0).max(2).optional(),
       }),
     )
-    .subscription(({ input }) => {
-      return observable<
-        | { type: "chunk"; chunk: string }
-        | {
-            type: "complete";
-            response: string;
-            responseTimeMs: number;
-            tokenCount?: number;
-          }
-      >((emit) => {
-        let isSubscribed = true;
+    .mutation(async ({ ctx, input, signal }) => {
+      try {
+        return await structuredProCall(getProDeps(), ctx.authUser.uid, input, signal);
+      } catch (error) {
+        throw toProTRPCError(error);
+      }
+    }),
 
-        void streamProviderResponse(input, {
-          onChunk: (chunk) => {
-            if (!isSubscribed) return;
-            emit.next({ type: "chunk", chunk });
-          },
-        })
-          .then((result) => {
-            if (!isSubscribed) return;
-            emit.next({
-              type: "complete",
-              ...result,
-            });
-            emit.complete();
-          })
-          .catch((error) => {
-            if (!isSubscribed) return;
-            const message = error instanceof Error ? error.message : String(error);
-            emit.error(
-              new TRPCError({
-                code: "INTERNAL_SERVER_ERROR",
-                message,
-              }),
-            );
-          });
-
-        return () => {
-          // Shared provider client API doesn't currently expose cancellation hooks.
-          // We stop emitting when unsubscribed; underlying provider call may still complete.
-          isSubscribed = false;
-        };
-      });
+  /** One embedding for the agreement score. */
+  generateEmbeddings: proProcedure
+    .input(
+      z.object({
+        ...callRef,
+        provider: z.enum(["openai", "google"]),
+        text: z.string().min(1).max(MAX_PROMPT_CHARS),
+      }),
+    )
+    .mutation(async ({ ctx, input, signal }) => {
+      try {
+        return await embedProCall(getProDeps(), ctx.authUser.uid, input, signal);
+      } catch (error) {
+        throw toProTRPCError(error);
+      }
     }),
 });

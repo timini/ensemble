@@ -5,7 +5,8 @@ rules_version = '2';
 // The server (firebase-admin) writes every document and is not bound by
 // these rules. Clients never write. A signed-in user may read their own
 // user document, credit ledger entries and usage records, and nothing else.
-// Collections not listed here (stripeEvents and any later ones) are closed.
+// Collections not listed here (stripeEvents, proRuns, rateLimits and any
+// later ones) are closed.
 service cloud.firestore {
   match /databases/{database}/documents {
     function signedIn() {
