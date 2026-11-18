@@ -138,6 +138,9 @@ export function Workspace() {
           onAddManualResponse={
             run.readOnly ? undefined : () => setManualOpen(true)
           }
+          onRemoveManualResponse={
+            run.readOnly ? undefined : run.removeManualAnswer
+          }
           onSavePreset={
             composer.models.length > 0 ? () => setPresetOpen(true) : undefined
           }

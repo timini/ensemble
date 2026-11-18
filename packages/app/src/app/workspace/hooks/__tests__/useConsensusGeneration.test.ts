@@ -77,6 +77,28 @@ describe("useConsensusGeneration usage", () => {
     });
   });
 
+  it("records the method and summarizer the consensus was made with", async () => {
+    const { result } = renderHook(() => useConsensusGeneration());
+    let pending: Promise<void> = Promise.resolve();
+    act(() => {
+      pending = result.current.generateConsensus(answers, "q");
+    });
+    // The user picks another method and summarizer while it runs.
+    act(() =>
+      useStore.setState({
+        consensusMethod: "council",
+        summarizerModel: "gpt-6-luna",
+      }),
+    );
+    await act(() => pending);
+
+    expect(useStore.getState().metaAnalysis).toBe("consensus text");
+    expect(useStore.getState().consensusSettings).toEqual({
+      consensusMethod: "standard",
+      summarizerModel: "gpt-6-astra",
+    });
+  });
+
   it("starts from no usage after the run is reset", async () => {
     const { result } = renderHook(() => useConsensusGeneration());
     await act(() => result.current.generateConsensus(answers, "q"));

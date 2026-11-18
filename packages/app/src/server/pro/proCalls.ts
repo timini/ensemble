@@ -7,7 +7,7 @@ import {
   isProviderError,
   type JsonSchema,
 } from "@ensemble-ai/shared-utils/providers";
-import { embeddingModelFor, resolveProModel } from "./models";
+import { embeddingModelFor, resolveProModel, type ProModel } from "./models";
 import type { ProDeps } from "./proRunService";
 import { beginProCall } from "./runStore";
 import {
@@ -29,6 +29,7 @@ async function billed<T>(
   deps: ProDeps,
   uid: string,
   ref: ProCallRef,
+  model: ProModel,
   inputTokens: number,
   run: (
     maxOutputTokens: number,
@@ -38,8 +39,10 @@ async function billed<T>(
   const { maxOutputTokens } = await beginProCall(deps.db, {
     uid,
     ...ref,
+    model: { provider: model.provider, modelId: model.modelId },
     inputTokens,
     maxCallOutputTokens: deps.config.maxCallOutputTokens,
+    billing: deps.credit,
   });
   let usage: CallUsage | null = null;
   try {
@@ -77,6 +80,7 @@ export function structuredProCall(
     deps,
     uid,
     { runId: input.runId, callId: input.callId },
+    model,
     estimateTokensFromText(input.prompt),
     async (maxOutputTokens) => {
       const result = await upstream.client.generateStructured<unknown>(
@@ -119,6 +123,7 @@ export function embedProCall(
     deps,
     uid,
     { runId: input.runId, callId: input.callId },
+    model,
     inputTokens,
     async () => {
       const vector = await upstream.client.generateEmbeddings(

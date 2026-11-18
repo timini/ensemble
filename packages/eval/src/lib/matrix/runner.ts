@@ -25,6 +25,7 @@ import type {
   StrategyName,
 } from '../../types.js';
 import type { MatrixConfig } from './config.js';
+import { describeDifferences, experimentDifferences, experimentOf, recordedExperiment } from './experiment.js';
 import { estimateJob, formatEstimate, totalEstimate, type MatrixEstimate } from './estimate.js';
 import { planJobs, runDirOf, type MatrixJob } from './plan.js';
 import { notRunSummary, summarizeMatrix, type DatasetResults, type MatrixSummary } from './summary.js';
@@ -54,6 +55,12 @@ export interface MatrixRunOptions {
    * wrong, as before.
    */
   retryFailed?: boolean;
+  /**
+   * Resume a run id even though result-affecting settings (seeds, protocol,
+   * temperature, models, summarizer, strategies, reference) differ from the
+   * ones it started with. Without it such a resume is refused.
+   */
+  allowConfigChange?: boolean;
   log?: (line: string) => void;
   now?: () => Date;
 }
@@ -104,6 +111,15 @@ function routingLookup(config: MatrixConfig): (spec: ModelSpec) => ProviderRouti
   };
 }
 
+interface PreviousManifest {
+  createdAt?: string;
+  config?: unknown;
+  experiment?: unknown;
+  routing?: unknown;
+  repairs?: unknown[];
+  configChanges?: unknown[];
+}
+
 export interface MatrixRunResult {
   estimate: MatrixEstimate;
   ran: boolean;
@@ -150,6 +166,25 @@ export async function runMatrix(options: MatrixRunOptions): Promise<MatrixRunRes
   const jobs = planJobs(config, options);
   const runDir = runDirOf(options.resultsDir, options.runId);
   const endpoints = endpointsOf([...config.models.map((m) => m.parsed), config.reference.parsed]);
+
+  const manifestPath = join(runDir, 'manifest.json');
+  const previous = (await fileExists(manifestPath))
+    ? await readJsonFile<PreviousManifest>(manifestPath)
+    : null;
+  const experiment = experimentOf(config);
+  const started = previous ? recordedExperiment(previous, config) : null;
+  const changed = started ? experimentDifferences(started, experiment) : [];
+  if (started && changed.length > 0) {
+    const detail = describeDifferences(started, experiment, changed);
+    if (!options.allowConfigChange) {
+      throw new Error(
+        `Run ${options.runId} was started with different settings: ${detail}. `
+        + 'Its results would be relabelled as this configuration. Use a new --run-id, '
+        + 'or pass --allow-config-change to resume it anyway.',
+      );
+    }
+    log(`Resuming ${options.runId} with changed settings (--allow-config-change): ${detail}.`);
+  }
 
   const questionsByDataset = new Map<string, BenchmarkQuestion[]>();
   for (const dataset of config.datasets) {
@@ -205,10 +240,6 @@ export async function runMatrix(options: MatrixRunOptions): Promise<MatrixRunRes
 
   const registry = new ProviderRegistry();
   registerProviders(registry, [...config.models, config.reference].map((m) => m.parsed.provider), mode, endpoints);
-  const manifestPath = join(runDir, 'manifest.json');
-  const previous = (await fileExists(manifestPath))
-    ? await readJsonFile<{ createdAt?: string; config?: unknown; routing?: unknown; repairs?: unknown[] }>(manifestPath)
-    : null;
   const createdAt = previous?.createdAt ?? now().toISOString();
   // A repair keeps the routing and config the run started with, and records its own.
   const routing = previous ? previous.routing ?? 'not recorded (run started before routing was recorded; require_parameters was not sent)' : routingOf(config);
@@ -216,10 +247,15 @@ export async function runMatrix(options: MatrixRunOptions): Promise<MatrixRunRes
     ...(previous?.repairs ?? []),
     ...(options.retryFailed ? [{ at: now().toISOString(), routing: routingOf(config), config: options.rawConfig }] : []),
   ];
+  const configChanges = [
+    ...(previous?.configChanges ?? []),
+    ...(changed.length > 0 ? [{ at: now().toISOString(), fields: changed, experiment, config: options.rawConfig }] : []),
+  ];
   const writeManifest = (status: string) => writeJsonFile(manifestPath, {
     schemaVersion: 1, runId: options.runId, mode, status, createdAt, updatedAt: now().toISOString(),
-    config: previous?.config ?? options.rawConfig, routing,
+    config: previous?.config ?? options.rawConfig, experiment: started ?? experiment, routing,
     ...(repairs.length > 0 ? { repairs } : {}),
+    ...(configChanges.length > 0 ? { configChanges } : {}),
     estimate: { calls: estimate.calls, lowUsd: estimate.lowUsd, highUsd: estimate.highUsd },
     files: jobs.map((job) => ({ dataset: job.dataset, kind: job.kind, file: job.outputPath.slice(runDir.length + 1) })),
   });

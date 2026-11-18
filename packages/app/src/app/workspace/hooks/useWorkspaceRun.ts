@@ -24,7 +24,11 @@ import { useConsensusGeneration } from "./useConsensusGeneration";
 import { useConsensusTrigger } from "./useConsensusTrigger";
 import { useConsensusStatus } from "./useConsensusStatus";
 import { useModelRetry } from "./useModelRetry";
-import { useAddManualAnswer } from "./useAddManualAnswer";
+import {
+  useAddManualAnswer,
+  useRemoveManualAnswer,
+} from "./useAddManualAnswer";
+import { embeddingModelKey } from "~/lib/runCost";
 import { summarizerOrFallback } from "~/lib/summarizerChoice";
 
 /**
@@ -44,11 +48,14 @@ export function useWorkspaceRun({
   // A run reopened from history is read only and keeps its own settings.
   const historyView = useStore((state) => state.historyView);
   const readOnly = historyView !== null;
-  const consensusMethod = historyView?.consensusMethod ?? liveMethod;
   const pullCommand = useStore((state) =>
     ollamaEmbeddingPullCommand(state.endpoints),
   );
   const run = useRunState(hasHydrated);
+  // The consensus on screen keeps the settings it was made with, though
+  // the composer may have changed since.
+  const shownSettings = historyView ?? run.consensusSettings;
+  const consensusMethod = shownSettings?.consensusMethod ?? liveMethod;
   const analytics = useRunAnalytics(
     run.viewResponses,
     run.viewManualResponses,
@@ -63,8 +70,13 @@ export function useWorkspaceRun({
     hasHydrated,
     completedResponses: analytics.agreementAnswers,
     embeddingsProvider: run.embeddingsProvider,
+    embeddingsModel: embeddingModelKey(run.embeddingsProvider, endpoints),
     viewEmbeddings: run.viewEmbeddings,
     viewEmbeddingsSource: run.viewEmbeddingsSource,
+    // Stores from before the model was kept: OpenAI and Google have one
+    // embedding model each, an endpoint's is unknown and is embedded again.
+    viewEmbeddingsModel:
+      run.viewEmbeddingsModel ?? embeddingModelKey(run.viewEmbeddingsSource),
     viewSimilarityMatrix: run.viewSimilarityMatrix,
     mode: run.mode,
     setEmbeddings: run.setEmbeddings,
@@ -74,6 +86,7 @@ export function useWorkspaceRun({
   const consensus = useConsensusGeneration();
   const retry = useModelRetry(retryModel, consensus.restart);
   const addManualAnswer = useAddManualAnswer(consensus.restart);
+  const removeManualAnswer = useRemoveManualAnswer(consensus.restart);
   useConsensusTrigger({
     hasHydrated: hasHydrated && !readOnly,
     responses: run.viewResponses,
@@ -105,8 +118,8 @@ export function useWorkspaceRun({
   );
 
   const summarizerName = useMemo(() => {
-    const chosen = historyView
-      ? historyView.summarizerModel
+    const chosen = shownSettings
+      ? shownSettings.summarizerModel
       : run.summarizerModel;
     const id = summarizerOrFallback(chosen, runModels[0]?.model);
     if (!id) return undefined;
@@ -115,7 +128,7 @@ export function useWorkspaceRun({
       FALLBACK_MODELS.find((m) => m.id === id)?.name ??
       formatModelLabelFromId(id)
     );
-  }, [historyView, run.summarizerModel, runModels, endpoints]);
+  }, [shownSettings, run.summarizerModel, runModels, endpoints]);
 
   const hasRun = hasHydrated && run.prompt !== null;
   const total = run.viewResponses.length + run.viewManualResponses.length;
@@ -184,6 +197,8 @@ export function useWorkspaceRun({
       }
     },
     addManualAnswer,
+    /** Removes a manual answer; consensus and agreement are made again without it. */
+    removeManualAnswer,
     agreement: toAgreementProps({
       embeddings: embeddings.status,
       finished: analytics.allFinished,

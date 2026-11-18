@@ -13,112 +13,27 @@
  */
 
 import type { StateCreator } from "zustand";
-import type { TokenUsage } from "@ensemble-ai/shared-utils/providers";
-import type { CallUsage } from "@ensemble-ai/shared-utils/pricing";
 import { agreementFromEmbeddings } from "./agreementState";
-import type { MajorityVoteRecord } from "~/lib/majorityVote";
-import type {
-  ConsensusMethod,
-  ModelSelection,
-  ProviderType,
-} from "./ensembleSlice";
-import type { ResponseErrorDetails } from "./responseErrorState";
-import type {
-  AgreementStats,
-  ManualResponse,
-  ModelResponse,
-} from "./responseTypes";
+import {
+  withChunk,
+  withCompleted,
+  withError,
+  withStreamStarted,
+} from "./answerUpdates";
+import type { ModelSelection } from "./ensembleSlice";
+import type { ResponseSlice } from "./responseSliceState";
+import type { ManualResponse } from "./responseTypes";
 
 export type {
   AgreementStats,
   ManualResponse,
   ModelResponse,
 } from "./responseTypes";
-
-export interface ResponseSlice {
-  /** Prompt draft on /prompt, saved as the user types. */
-  prompt: string | null;
-  /**
-   * Prompt the current run was submitted with, or null. Kept apart from the
-   * draft so editing the next prompt never relabels the last run's answers.
-   */
-  runPrompt: string | null;
-  /**
-   * Models the current run was started with, so editing the ensemble for
-   * the next question never changes the run on screen (retries, consensus
-   * and cost keep using these). Empty when there is no run.
-   */
-  runModels: ModelSelection[];
-  /**
-   * When the current run was started (ms since the epoch), or null when
-   * there is no run or it was stored before this field existed.
-   */
-  runStartedAt: number | null;
-  responses: ModelResponse[];
-  manualResponses: ManualResponse[];
-  embeddings: Array<{ modelId: string; embedding: number[] }>;
-  /** Provider that produced `embeddings`, or null when unknown. */
-  embeddingsSource: string | null;
-  similarityMatrix: number[][] | null;
-  agreementStats: AgreementStats | null;
-  metaAnalysis: string | null;
-  /** Token usage of each consensus call in the current run. */
-  consensusUsage: CallUsage[];
-  /** Vote breakdown of the last majority consensus, or null. */
-  majorityVote: MajorityVoteRecord | null;
-  /**
-   * Set while a run reopened from history is on screen. That run is read
-   * only: no embeddings, consensus or retries are requested for it, and it
-   * shows the method and summarizer it was run with. Null for a live run.
-   */
-  historyView: HistoryView | null;
-
-  setPrompt: (prompt: string) => void;
-  /**
-   * Starts a new run: clears the previous results and records its prompt,
-   * models and start time.
-   */
-  startRun: (prompt: string, models?: ModelSelection[]) => void;
-  startStreaming: (
-    modelId: string,
-    provider: ProviderType,
-    model: string,
-  ) => void;
-  appendStreamChunk: (modelId: string, chunk: string) => void;
-  completeResponse: (
-    modelId: string,
-    responseTime: number,
-    tokenCount?: number,
-    usage?: TokenUsage,
-  ) => void;
-  setError: (
-    modelId: string,
-    error: string,
-    details?: ResponseErrorDetails,
-  ) => void;
-  addManualResponse: (label: string, response: string) => void;
-  removeManualResponse: (id: string) => void;
-  /**
-   * Drops every manual answer. Manual answers belong to one prompt, so a
-   * new comparison must not carry them over to the next run.
-   */
-  clearManualResponses: () => void;
-  setEmbeddings: (
-    embeddings: Array<{ modelId: string; embedding: number[] }>,
-    source?: string | null,
-  ) => void;
-  calculateAgreement: () => void;
-  setMetaAnalysis: (analysis: string) => void;
-  addConsensusUsage: (call: CallUsage) => void;
-  setMajorityVote: (vote: MajorityVoteRecord | null) => void;
-  /**
-   * Drops the consensus text and majority vote so consensus runs again (for
-   * example after a failed model is retried). Billed usage is kept.
-   */
-  clearConsensus: () => void;
-  clearResponses: () => void;
-  resetStreamingState: () => void;
-}
+export type {
+  ConsensusSettings,
+  HistoryView,
+  ResponseSlice,
+} from "./responseSliceState";
 
 /**
  * Prompt of the run on /review, or null when there is no submitted run.
@@ -151,26 +66,6 @@ export function selectRunModels(state: {
 
 const NO_MODELS: ModelSelection[] = [];
 
-/** The reopened run's id and the settings it was run with. */
-export interface HistoryView {
-  id: string;
-  consensusMethod: ConsensusMethod;
-  summarizerModel: string | null;
-}
-
-/** Fields of an answer when its stream starts or restarts. */
-const STREAM_START = {
-  response: "",
-  isStreaming: true,
-  isComplete: false,
-  responseTime: null,
-  tokenCount: null,
-  usage: null,
-  error: null,
-  errorKind: null,
-  retryAfterSeconds: null,
-} as const;
-
 export const createResponseSlice: StateCreator<ResponseSlice> = (set, get) => ({
   prompt: null,
   runPrompt: null,
@@ -180,9 +75,11 @@ export const createResponseSlice: StateCreator<ResponseSlice> = (set, get) => ({
   manualResponses: [],
   embeddings: [],
   embeddingsSource: null,
+  embeddingsModel: null,
   similarityMatrix: null,
   agreementStats: null,
   metaAnalysis: null,
+  consensusSettings: null,
   consensusUsage: [],
   majorityVote: null,
   historyView: null,
@@ -203,68 +100,32 @@ export const createResponseSlice: StateCreator<ResponseSlice> = (set, get) => ({
     });
   },
 
-  // A new answer, and a restart (retry), start from an empty answer.
   startStreaming: (modelId, provider, model) => {
-    set((state) => {
-      if (state.responses.some((r) => r.modelId === modelId)) {
-        return {
-          responses: state.responses.map((r) =>
-            r.modelId === modelId ? { ...r, ...STREAM_START } : r,
-          ),
-        };
-      }
-      return {
-        responses: [
-          ...state.responses,
-          { modelId, provider, model, ...STREAM_START },
-        ],
-      };
-    });
+    set((state) => ({
+      responses: withStreamStarted(state.responses, modelId, provider, model),
+    }));
   },
 
   appendStreamChunk: (modelId, chunk) => {
-    set((state) => {
-      const responses = state.responses.map((r) =>
-        r.modelId === modelId ? { ...r, response: r.response + chunk } : r,
-      );
-      return { responses };
-    });
+    set((state) => ({ responses: withChunk(state.responses, modelId, chunk) }));
   },
 
   completeResponse: (modelId, responseTime, tokenCount, usage) => {
-    set((state) => {
-      const responses = state.responses.map((r) =>
-        r.modelId === modelId
-          ? {
-              ...r,
-              isStreaming: false,
-              isComplete: true,
-              responseTime,
-              tokenCount: tokenCount ?? null,
-              usage: usage ?? null,
-            }
-          : r,
-      );
-      return { responses };
-    });
+    set((state) => ({
+      responses: withCompleted(
+        state.responses,
+        modelId,
+        responseTime,
+        tokenCount,
+        usage,
+      ),
+    }));
   },
 
   setError: (modelId, error, details) => {
-    set((state) => {
-      const responses = state.responses.map((r) =>
-        r.modelId === modelId
-          ? {
-              ...r,
-              isStreaming: false,
-              isComplete: true,
-              error,
-              errorKind: details?.kind ?? "other",
-              retryAfterSeconds: details?.retryAfterSeconds ?? null,
-            }
-          : r,
-      );
-      return { responses };
-    });
+    set((state) => ({
+      responses: withError(state.responses, modelId, error, details),
+    }));
   },
 
   addManualResponse: (label, response) => {
@@ -278,25 +139,30 @@ export const createResponseSlice: StateCreator<ResponseSlice> = (set, get) => ({
   },
 
   removeManualResponse: (id) => {
-    set((state) => ({
-      manualResponses: state.manualResponses.filter((m) => m.id !== id),
-    }));
+    set((state) => {
+      const embeddings = state.embeddings.filter((e) => e.modelId !== id);
+      return {
+        manualResponses: state.manualResponses.filter((m) => m.id !== id),
+        embeddings,
+        ...agreementFromEmbeddings(embeddings),
+      };
+    });
   },
 
   clearManualResponses: () => {
     set({ manualResponses: [] });
   },
 
-  setEmbeddings: (embeddings, source = null) => {
-    set({ embeddings, embeddingsSource: source });
+  setEmbeddings: (embeddings, source = null, model = null) => {
+    set({ embeddings, embeddingsSource: source, embeddingsModel: model });
   },
 
   calculateAgreement: () => {
     set(agreementFromEmbeddings(get().embeddings));
   },
 
-  setMetaAnalysis: (analysis) => {
-    set({ metaAnalysis: analysis });
+  setMetaAnalysis: (analysis, settings) => {
+    set({ metaAnalysis: analysis, consensusSettings: settings ?? null });
   },
 
   addConsensusUsage: (call) => {
@@ -308,7 +174,7 @@ export const createResponseSlice: StateCreator<ResponseSlice> = (set, get) => ({
   },
 
   clearConsensus: () => {
-    set({ metaAnalysis: null, majorityVote: null });
+    set({ metaAnalysis: null, consensusSettings: null, majorityVote: null });
   },
 
   resetStreamingState: () => {
@@ -322,9 +188,11 @@ export const createResponseSlice: StateCreator<ResponseSlice> = (set, get) => ({
       responses: [],
       embeddings: [],
       embeddingsSource: null,
+      embeddingsModel: null,
       similarityMatrix: null,
       agreementStats: null,
       metaAnalysis: null,
+      consensusSettings: null,
     });
   },
 

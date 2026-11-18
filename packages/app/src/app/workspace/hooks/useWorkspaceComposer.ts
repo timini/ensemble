@@ -16,7 +16,12 @@ export const MAX_MODELS = 6;
 
 type ComposerState = Omit<
   ComposerProps,
-  "onSubmit" | "running" | "onAddManualResponse" | "onSavePreset" | "className"
+  | "onSubmit"
+  | "running"
+  | "onAddManualResponse"
+  | "onRemoveManualResponse"
+  | "onSavePreset"
+  | "className"
 >;
 
 /**
@@ -24,6 +29,8 @@ type ComposerState = Omit<
  * with the models the user can add (providers with a working key and
  * connected endpoints), the consensus method with the calls and cost of
  * every method, the summarizer, the Ranked top N and the manual answers.
+ * Removing a manual answer is the run's (useWorkspaceRun), since the
+ * consensus and agreement are made again without it.
  * In Pro the picker offers every model Pro can price, whatever keys are
  * stored, and no endpoints; the chosen models stay as they are (FR-030).
  */
@@ -47,7 +54,6 @@ export function useWorkspaceComposer(
   const eloTopN = useStore((state) => state.eloTopN);
   const setEloTopN = useStore((state) => state.setEloTopN);
   const manual = useStore((state) => state.manualResponses);
-  const removeManual = useStore((state) => state.removeManualResponse);
   const pro = useStore((state) => state.mode === "pro");
   const statuses = pro ? PRO_STATUSES : keyStatuses;
 
@@ -101,7 +107,6 @@ export function useWorkspaceComposer(
       id: m.id,
       label: m.label,
     })),
-    onRemoveManualResponse: removeManual,
     method,
     onMethodChange: setMethod,
     // Nothing to estimate until something would run.

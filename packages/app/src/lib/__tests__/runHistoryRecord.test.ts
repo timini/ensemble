@@ -37,6 +37,7 @@ const state = {
   consensusUsage: [],
   consensusMethod: "majority" as const,
   summarizerModel: "gpt-6-astra",
+  consensusSettings: null,
   historyView: null,
 };
 
@@ -63,6 +64,25 @@ describe("toStoredRun", () => {
     expect(run!.responses).toHaveLength(1);
     expect(run!.manualResponses).toHaveLength(1);
     expect(run!.embeddings).toEqual([{ modelId: "a", embedding: [1, 0] }]);
+  });
+
+  it("records the method and summarizer that produced the consensus, not the composer's current ones", () => {
+    const run = toStoredRun(
+      {
+        ...state,
+        consensusMethod: "council",
+        summarizerModel: "claude-6-opus",
+        consensusSettings: {
+          consensusMethod: "standard",
+          summarizerModel: "gpt-6-astra",
+        },
+      },
+      extras,
+    );
+    expect(run).toMatchObject({
+      consensusMethod: "standard",
+      summarizerModel: "gpt-6-astra",
+    });
   });
 
   it("records nothing while an answer streams", () => {

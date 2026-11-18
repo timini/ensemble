@@ -2,7 +2,7 @@ import { GoogleGenerativeAI, type ResponseSchema } from '@google/generative-ai';
 import axios from 'axios';
 import { classifyProviderError } from '../../errors/providerError';
 import { BaseFreeClient, type StreamOptions, type StructuredOptions } from '../base/BaseFreeClient';
-import type { StructuredResponse, TokenUsage, ValidationResult } from '../../types';
+import type { GenerateEmbeddingsOptions, StructuredResponse, TokenUsage, ValidationResult } from '../../types';
 import { extractAxiosErrorMessage } from '../../utils/extractAxiosError';
 import { hasNonTextModality } from '../../utils/modelFilters';
 import { fromGeminiUsage } from '../../utils/usage';
@@ -20,8 +20,17 @@ interface GoogleModelsResponse {
 export class FreeGoogleClient extends BaseFreeClient {
   override readonly supportsEmbeddings: boolean = true;
 
-  protected override embedWithProvider(apiKey: string, text: string): Promise<number[]> {
-    return requestGeminiEmbedding({ apiKey, model: GOOGLE_EMBEDDING_MODEL, text });
+  protected override embedWithProvider(
+    apiKey: string,
+    text: string,
+    options?: GenerateEmbeddingsOptions,
+  ): Promise<number[]> {
+    return requestGeminiEmbedding({
+      apiKey,
+      model: GOOGLE_EMBEDDING_MODEL,
+      text,
+      ...(options?.signal ? { signal: options.signal } : {}),
+    });
   }
 
   private createClient(apiKey: string) {
@@ -105,7 +114,7 @@ export class FreeGoogleClient extends BaseFreeClient {
       },
     });
 
-    const result = await model.generateContent(options.prompt);
+    const result = await model.generateContent(options.prompt, { signal: options.signal });
     const raw = result.response.text();
     if (!raw) {
       throw new Error('Google returned empty structured output');
@@ -138,7 +147,7 @@ export class FreeGoogleClient extends BaseFreeClient {
         }),
       });
 
-      const result = await model.generateContentStream(options.prompt);
+      const result = await model.generateContentStream(options.prompt, { signal: options.signal });
 
       for await (const chunk of result.stream) {
         const text = chunk.text();

@@ -100,7 +100,7 @@ export class FreeAnthropicClient extends BaseFreeClient {
       },
       ...temperature,
     };
-    const response = await client.messages.create(body);
+    const response = await client.messages.create(body, { signal: options.signal });
 
     if (response.stop_reason === 'refusal') {
       throw new Error('Anthropic refused to produce structured output for this prompt.');
@@ -145,7 +145,7 @@ export class FreeAnthropicClient extends BaseFreeClient {
       ],
       tool_choice: { type: 'tool' as const, name: options.schema.name },
       ...temperature,
-    });
+    }, { signal: options.signal });
 
     const toolBlock = response.content.find(
       (block): block is Anthropic.ToolUseBlock => block.type === 'tool_use',
@@ -179,7 +179,7 @@ export class FreeAnthropicClient extends BaseFreeClient {
         messages: [{ role: 'user', content: options.prompt }],
         stream: true,
         ...samplingParams(options.model, options.streamOptions?.temperature),
-      });
+      }, { signal: options.signal });
 
       for await (const event of stream) {
         if (event.type === 'content_block_delta' && event.delta.type === 'text_delta') {

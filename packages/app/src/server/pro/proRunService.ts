@@ -5,6 +5,8 @@ import { refundRun, settleRun } from "~/server/credits/creditService";
 import { reserveForRun, type RunQuoteInput } from "~/server/credits/runBilling";
 import { logger } from "~/lib/logger";
 import type { ProConfig } from "./config";
+import { billableRunModels } from "./models";
+import { markProRunAbandoned } from "./pendingStreams";
 import { takeRunSlot } from "./rateLimit";
 import {
   markProRunClosed,
@@ -58,8 +60,9 @@ async function settleStaleRuns(deps: ProDeps, uid: string, now: number) {
 /**
  * Start a Pro run: count it against the rate limit, settle the user's
  * abandoned runs, reserve the high estimate plus the margin
- * (reserveForRun) and open the run record. Throws RateLimitError,
- * InsufficientCreditsError, or a RangeError for an unpriced model.
+ * (reserveForRun) and open the run record with the models it was priced
+ * for. Throws RateLimitError, InsufficientCreditsError, a RangeError for
+ * an unpriced model, or UnpricedModelError for a model priced at zero.
  * Starting the same run id again returns the first reservation.
  */
 export async function startProRun(
@@ -68,6 +71,7 @@ export async function startProRun(
   input: { runId: string; run: RunQuoteInput },
 ): Promise<{ runId: string; reservedMicros: number; balanceMicros: number }> {
   const now = deps.now?.() ?? Date.now();
+  const models = billableRunModels(input.run, deps.credit.priceTable);
   if (await readProRun(deps.db, uid, input.runId)) {
     // A repeated start: reserveForRun is idempotent and returns the first reservation.
     const again = await reserveForRun(deps.db, deps.credit, { uid, ...input });
@@ -90,6 +94,7 @@ export async function startProRun(
       uid,
       runId: input.runId,
       reservedMicros: reservation.reservedMicros,
+      models,
       tokenBudget: deps.config.maxRunTokens,
       maxCalls: deps.config.maxCallsPerRun,
       now,
@@ -134,6 +139,7 @@ export async function finalizeProRun(
     return { outcome: run.outcome ?? null, balanceMicros: null };
   if (run.inFlight > 0 && !options.force)
     return { outcome: null, balanceMicros: null };
+  if (options.force) await markProRunAbandoned(deps.db, uid, runId);
 
   let outcome: ProRunOutcome;
   let balanceMicros: number;

@@ -32,12 +32,25 @@ interface UseResponseEmbeddingsOptions {
   completedResponses: AgreementAnswer[];
   /** Resolved provider, or null when none is available. */
   embeddingsProvider: EmbeddingProvider | null;
+  /**
+   * Embedding model the provider calls, as `provider/model` (an endpoint
+   * model includes its endpoint id). Two endpoints, or one endpoint with a
+   * new embedding model, share the provider name but not this. Defaults to
+   * the provider name.
+   */
+  embeddingsModel?: string | null;
   viewEmbeddings: Embedding[];
   /** Provider that produced `viewEmbeddings` (persisted with them). */
   viewEmbeddingsSource: string | null;
+  /** Embedding model that produced `viewEmbeddings`. Defaults to the source. */
+  viewEmbeddingsModel?: string | null;
   viewSimilarityMatrix: number[][] | null;
   mode: OperatingMode;
-  setEmbeddings: (embeddings: Embedding[], source: string | null) => void;
+  setEmbeddings: (
+    embeddings: Embedding[],
+    source: string | null,
+    model: string | null,
+  ) => void;
   calculateAgreementState: () => void;
   /**
    * A run reopened from history: its stored embeddings are used as they
@@ -50,8 +63,10 @@ export function useResponseEmbeddings({
   hasHydrated,
   completedResponses,
   embeddingsProvider,
+  embeddingsModel,
   viewEmbeddings,
   viewEmbeddingsSource,
+  viewEmbeddingsModel,
   viewSimilarityMatrix,
   mode,
   setEmbeddings,
@@ -59,7 +74,8 @@ export function useResponseEmbeddings({
   readOnly = false,
 }: UseResponseEmbeddingsOptions): UseResponseEmbeddingsResult {
   const embeddingFetchRef = useRef(false);
-  const lastEmbeddingsProviderRef = useRef<EmbeddingProvider | null>(null);
+  // Embedding model of the vectors this mount last stored.
+  const lastEmbeddingsModelRef = useRef<string | null>(null);
   const failedEmbeddingsRef = useRef<Set<string>>(new Set());
   const [status, setStatus] = useState<EmbeddingsStatus>("pending");
   const [failedModelIds, setFailedModelIds] = useState<string[]>([]);
@@ -74,12 +90,16 @@ export function useResponseEmbeddings({
       return;
     }
 
-    // On a fresh mount the ref is empty, so fall back to the provider stored
-    // with the persisted embeddings. Embeddings from the same provider are
-    // reused instead of being requested (and billed) again.
-    const lastProvider =
-      lastEmbeddingsProviderRef.current ?? viewEmbeddingsSource;
-    const providerChanged = lastProvider !== embeddingsProvider;
+    // On a fresh mount the ref is empty, so fall back to the model stored
+    // with the persisted embeddings. Embeddings from the same model are
+    // reused instead of being requested (and billed) again; vectors from
+    // another model are not comparable, so all are made again together.
+    const model = embeddingsModel ?? embeddingsProvider;
+    const lastModel =
+      lastEmbeddingsModelRef.current ??
+      viewEmbeddingsModel ??
+      viewEmbeddingsSource;
+    const providerChanged = lastModel !== model;
 
     if (providerChanged) {
       failedEmbeddingsRef.current.clear();
@@ -94,7 +114,7 @@ export function useResponseEmbeddings({
     );
 
     if (!providerChanged && pendingResponses.length === 0) {
-      lastEmbeddingsProviderRef.current = embeddingsProvider;
+      lastEmbeddingsModelRef.current = model;
       if (viewEmbeddings.length >= 2) {
         setStatus("ready");
         if (!viewSimilarityMatrix) calculateAgreementState();
@@ -126,8 +146,8 @@ export function useResponseEmbeddings({
 
       if (cancelled) return;
 
-      lastEmbeddingsProviderRef.current = embeddingsProvider;
-      setEmbeddings(orderedEmbeddings, embeddingsProvider);
+      lastEmbeddingsModelRef.current = model;
+      setEmbeddings(orderedEmbeddings, embeddingsProvider, model);
       setFailedModelIds(Array.from(failedEmbeddingsRef.current));
 
       if (orderedEmbeddings.length >= 2) {
@@ -143,7 +163,7 @@ export function useResponseEmbeddings({
           toError(error, "Unable to process embeddings"),
         );
         if (cancelled) return;
-        lastEmbeddingsProviderRef.current = embeddingsProvider;
+        lastEmbeddingsModelRef.current = model;
         completedResponses.forEach((r) =>
           failedEmbeddingsRef.current.add(r.modelId),
         );
@@ -161,12 +181,14 @@ export function useResponseEmbeddings({
   }, [
     calculateAgreementState,
     completedResponses,
+    embeddingsModel,
     embeddingsProvider,
     hasHydrated,
     mode,
     readOnly,
     setEmbeddings,
     viewEmbeddings,
+    viewEmbeddingsModel,
     viewEmbeddingsSource,
     viewSimilarityMatrix,
   ]);

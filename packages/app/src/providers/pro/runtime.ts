@@ -1,11 +1,30 @@
 import type { ProTransport } from "@ensemble-ai/shared-utils/providers";
-import { ProRunSession, type ProRunApi } from "./ProRunSession";
+import { proRunInput } from "~/lib/proMode";
+import { useStore } from "~/store";
+import { selectRunModels, selectRunPrompt } from "~/store/slices/responseSlice";
+import {
+  ProRunSession,
+  type ProRunApi,
+  type ProRunInput,
+} from "./ProRunSession";
 import { createProTransport, type ProCallApi } from "./proTransport";
 import { createTrpcProApi } from "~/trpc/proClient";
 
 export interface ProRuntime {
   session: ProRunSession;
   transport: ProTransport;
+}
+
+/**
+ * The run on screen (its prompt and models, and the current consensus
+ * settings) as the server prices a follow-up run, or null with no run.
+ */
+function runOnScreen(): ProRunInput | null {
+  const state = useStore.getState();
+  const prompt = selectRunPrompt(state);
+  const models = selectRunModels(state);
+  if (!prompt || models.length === 0) return null;
+  return proRunInput({ ...state, selectedModels: models }, prompt);
 }
 
 let runtime: ProRuntime | null = null;
@@ -21,7 +40,7 @@ export function setProApiFactory(next: () => ProRunApi & ProCallApi): void {
 export function getProRuntime(): ProRuntime {
   if (!runtime) {
     const api = factory();
-    const session = new ProRunSession(api);
+    const session = new ProRunSession(api, { followUpInput: runOnScreen });
     runtime = { session, transport: createProTransport(api, session) };
   }
   return runtime;

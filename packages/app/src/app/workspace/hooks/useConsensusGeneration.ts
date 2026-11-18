@@ -60,6 +60,11 @@ export function useConsensusGeneration() {
       return;
     }
 
+    // What this attempt is made with, recorded with its result.
+    const settings = {
+      consensusMethod,
+      summarizerModel: effectiveSummarizerModelId,
+    };
     const id = ++runId.current;
     const isCurrent = () => id === runId.current;
     abort.current?.abort();
@@ -199,7 +204,7 @@ export function useConsensusGeneration() {
         return;
       }
 
-      setMetaAnalysis(resultText);
+      setMetaAnalysis(resultText, settings);
     } catch (err: unknown) {
       const normalizedError =
         err instanceof Error ? err : new Error(String(err));

@@ -114,6 +114,34 @@ describe("ProRunSession", () => {
     );
   });
 
+  it("opens a follow-up run from the restored run when none was begun on this page", async () => {
+    const a = api();
+    const session = new ProRunSession(a, {
+      newId: ids(),
+      followUpInput: () => INPUT,
+    });
+    await expect(session.track(async (runId) => runId)).resolves.toBe("run-1");
+    expect(a.startRun).toHaveBeenCalledWith({ ...INPUT, runId: "run-1" });
+  });
+
+  it("prices a follow-up run from the current run settings", async () => {
+    vi.useFakeTimers();
+    const a = api();
+    const later = { ...INPUT, consensusMethod: "majority" as const };
+    let current: ProRunInput = INPUT;
+    const session = new ProRunSession(a, {
+      idleMs: 1000,
+      newId: ids(),
+      followUpInput: () => current,
+    });
+    await session.begin(INPUT);
+    await session.track(async () => "answer");
+    await vi.advanceTimersByTimeAsync(1000);
+    current = later;
+    await session.track(async () => "consensus");
+    expect(a.startRun).toHaveBeenLastCalledWith({ ...later, runId: "run-2" });
+  });
+
   it("swallows a failed finish", async () => {
     const a = api({
       finishRun: vi.fn().mockRejectedValue(new Error("offline")),

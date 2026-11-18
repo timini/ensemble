@@ -21,6 +21,8 @@ export function useRunState(hasHydrated: boolean) {
   const manualResponses = useStore((state) => state.manualResponses);
   const embeddings = useStore((state) => state.embeddings);
   const embeddingsSource = useStore((state) => state.embeddingsSource);
+  const embeddingsModel = useStore((state) => state.embeddingsModel);
+  const consensusSettings = useStore((state) => state.consensusSettings);
   const similarityMatrix = useStore((state) => state.similarityMatrix);
   const mode = useStore((state) => state.mode);
   const embeddingsPreference = useStore((state) => state.embeddingsProvider);
@@ -70,6 +72,7 @@ export function useRunState(hasHydrated: boolean) {
   const viewMajorityVote = hasHydrated ? majorityVote : null;
 
   const viewEmbeddingsSource = hasHydrated ? embeddingsSource : null;
+  const viewEmbeddingsModel = hasHydrated ? embeddingsModel : null;
 
   const viewSimilarityMatrix = useMemo(
     () => (hasHydrated ? similarityMatrix : null),
@@ -93,6 +96,8 @@ export function useRunState(hasHydrated: boolean) {
     viewMajorityVote,
     viewEmbeddings,
     viewEmbeddingsSource,
+    viewEmbeddingsModel,
     viewSimilarityMatrix,
+    consensusSettings: hasHydrated ? consensusSettings : null,
   };
 }

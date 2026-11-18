@@ -4,7 +4,9 @@ import {
   type Firestore,
 } from "firebase-admin/firestore";
 import type { CallUsage } from "@ensemble-ai/shared-utils/pricing";
+import type { PriceTable } from "@ensemble-ai/shared-utils/pricing";
 import { assertSafeId } from "~/server/credits/ledger";
+import { chargeForUsage } from "~/server/credits/pricing";
 
 /**
  * Firestore record of an open Pro run, `proRuns/{uid}__{runId}`. Every
@@ -26,8 +28,12 @@ export interface ProRunDoc {
   runId: string;
   status: ProRunStatus;
   reservedMicros: number;
+  /** `provider/model` keys the reservation was priced for; a call to any other model is refused. */
+  models: string[];
   tokenBudget: number;
   maxCalls: number;
+  /** Set when an abandoned run is force-closed: its prepared streams may no longer start. */
+  abandoned?: boolean;
   /** Tokens counted so far: reported or estimated usage, plus the input of calls in flight. */
   tokensUsed: number;
   callIds: string[];
@@ -45,7 +51,12 @@ export type ProRunOutcome =
 export class ProRunError extends Error {
   constructor(
     message: string,
-    readonly reason: "not_found" | "closed" | "duplicate_call" | "budget",
+    readonly reason:
+      | "not_found"
+      | "closed"
+      | "duplicate_call"
+      | "budget"
+      | "model",
   ) {
     super(message);
     this.name = "ProRunError";
@@ -67,6 +78,7 @@ export async function openProRun(
     uid: string;
     runId: string;
     reservedMicros: number;
+    models: string[];
     tokenBudget: number;
     maxCalls: number;
     now?: number;
@@ -77,6 +89,7 @@ export async function openProRun(
     runId: input.runId,
     status: "open",
     reservedMicros: input.reservedMicros,
+    models: input.models,
     tokenBudget: input.tokenBudget,
     maxCalls: input.maxCalls,
     tokensUsed: 0,
@@ -88,8 +101,10 @@ export async function openProRun(
 }
 
 /**
- * Admit one call to a run. Counts its input tokens against the budget now
- * and returns the output tokens it may still use (at most
+ * Admit one call to a run. The model must be one the run was priced for,
+ * and the usage recorded so far plus this call's input, with the margin,
+ * must stay within the credits reserved. Counts its input tokens against
+ * the budget now and returns the output tokens it may still use (at most
  * `maxCallOutputTokens`). Throws ProRunError when it cannot run.
  */
 export async function beginProCall(
@@ -98,8 +113,10 @@ export async function beginProCall(
     uid: string;
     runId: string;
     callId: string;
+    model: { provider: string; modelId: string };
     inputTokens: number;
     maxCallOutputTokens: number;
+    billing: { marginPercent: number; priceTable?: PriceTable };
   },
 ): Promise<{ maxOutputTokens: number }> {
   const ref = proRunRef(db, input.uid, input.runId);
@@ -110,12 +127,35 @@ export async function beginProCall(
       throw new ProRunError("This Pro run does not exist.", "not_found");
     if (run.status !== "open")
       throw new ProRunError("This Pro run has ended.", "closed");
+    const key = `${input.model.provider}/${input.model.modelId}`;
+    if (!(run.models ?? []).includes(key)) {
+      throw new ProRunError(`This run was not priced for ${key}.`, "model");
+    }
     if (run.callIds.includes(input.callId)) {
       throw new ProRunError("This call was already made.", "duplicate_call");
     }
     if (run.callIds.length >= run.maxCalls) {
       throw new ProRunError(
         "This run has made as many calls as one run may.",
+        "budget",
+      );
+    }
+    const spent = chargeForUsage(
+      [
+        ...run.calls,
+        {
+          ...input.model,
+          inputTokens: input.inputTokens,
+          outputTokens: 0,
+          source: "estimated",
+        },
+      ],
+      input.billing.marginPercent,
+      input.billing.priceTable,
+    );
+    if (spent.chargeMicros > run.reservedMicros) {
+      throw new ProRunError(
+        "This run has used the credits reserved for it.",
         "budget",
       );
     }
@@ -213,63 +253,4 @@ export async function staleProRuns(
     .map((d) => d.data() as ProRunDoc)
     .filter((run) => run.createdAtMs < beforeMs)
     .map((run) => run.runId);
-}
-
-/**
- * A stream admitted by `provider.prepareStream` and waiting for its SSE
- * subscription: `proRuns/{uid}__{runId}/streams/{callId}`. The prompt
- * travels in the POST body and is kept here for the moment between the two
- * requests, because an SSE subscription is a GET and its input would go in
- * the URL. Deleted once the stream starts.
- */
-export interface PendingStream {
-  provider: string;
-  model: string;
-  prompt: string;
-  temperature?: number;
-  seed?: number;
-  maxOutputTokens: number;
-  countedInputTokens: number;
-  claimed: boolean;
-}
-
-function streamRef(db: Firestore, uid: string, runId: string, callId: string) {
-  assertSafeId("run id", callId);
-  return proRunRef(db, uid, runId)
-    .collection("streams")
-    .doc(callId) as DocumentReference<PendingStream>;
-}
-
-export async function storePendingStream(
-  db: Firestore,
-  ref: { uid: string; runId: string; callId: string },
-  stream: Omit<PendingStream, "claimed">,
-): Promise<void> {
-  await streamRef(db, ref.uid, ref.runId, ref.callId).create({
-    ...stream,
-    claimed: false,
-  });
-}
-
-/** Take a prepared stream once. A second subscription to it is refused. */
-export async function claimPendingStream(
-  db: Firestore,
-  ref: { uid: string; runId: string; callId: string },
-): Promise<PendingStream> {
-  const doc = streamRef(db, ref.uid, ref.runId, ref.callId);
-  const stream = await db.runTransaction(async (tx) => {
-    const data = (await tx.get(doc)).data();
-    if (!data)
-      throw new ProRunError("This stream was not prepared.", "not_found");
-    if (data.claimed) {
-      throw new ProRunError(
-        "This stream was already started.",
-        "duplicate_call",
-      );
-    }
-    tx.update(doc, { claimed: true });
-    return data;
-  });
-  await doc.delete();
-  return stream;
 }

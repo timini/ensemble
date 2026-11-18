@@ -41,6 +41,13 @@ describe('matrix command', () => {
     expect(vi.mocked(runMatrix).mock.calls[0]![0]).toMatchObject({ retryFailed: true, runId: '2026-11-17-m3-matrix' });
   });
 
+  it('passes --allow-config-change, off by default', async () => {
+    await run([]);
+    expect(vi.mocked(runMatrix).mock.calls[0]![0].allowConfigChange).toBeUndefined();
+    await run(['--run-id', 'r1', '--allow-config-change']);
+    expect(vi.mocked(runMatrix).mock.calls[1]![0]).toMatchObject({ allowConfigChange: true });
+  });
+
   it('keeps require_parameters on by default and turns it off with --no-require-parameters', async () => {
     await run([]);
     expect(vi.mocked(runMatrix).mock.calls[0]![0].config.requireParameters).toBe(true);
