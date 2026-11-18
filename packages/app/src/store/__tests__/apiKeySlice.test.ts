@@ -6,7 +6,11 @@ vi.mock("@ensemble-ai/shared-utils/security", () => ({
   encrypt: vi.fn().mockImplementation(async (value: string) => `enc:${value}`),
   decrypt: vi
     .fn()
-    .mockImplementation(async (value: string) => value.replace(/^enc:/, "")),
+    .mockImplementation(async (value: string) =>
+      value.replace(/^(enc|old):/, ""),
+    ),
+  // "old:" stands for a ciphertext made with the legacy derived key.
+  isLegacyCiphertext: (value: string) => value.startsWith("old:"),
 }));
 
 import { encrypt, decrypt } from "@ensemble-ai/shared-utils/security";
@@ -208,5 +212,35 @@ describe("apiKeySlice", () => {
     await store.getState().initializeEncryption();
     expect(store.getState().apiKeys.openai?.key).toBe("");
     expect(store.getState().apiKeys.openai?.encrypted).toBeNull();
+  });
+
+  it("encrypts a key stored under the legacy derived key again with the device key", async () => {
+    store.setState({
+      apiKeys: {
+        ...store.getState().apiKeys,
+        openai: {
+          key: "",
+          encrypted: "old:sk-legacy",
+          visible: false,
+          status: "idle",
+        },
+        anthropic: {
+          key: "",
+          encrypted: "enc:sk-new",
+          visible: false,
+          status: "idle",
+        },
+      },
+    });
+    await store.getState().initializeEncryption();
+    expect(store.getState().apiKeys.openai).toMatchObject({
+      key: "sk-legacy",
+      encrypted: "enc:sk-legacy",
+    });
+    expect(store.getState().apiKeys.anthropic).toMatchObject({
+      key: "sk-new",
+      encrypted: "enc:sk-new",
+    });
+    expect(encryptMock).toHaveBeenCalledTimes(1);
   });
 });

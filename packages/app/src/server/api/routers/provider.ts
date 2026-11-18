@@ -1,9 +1,5 @@
 import { z } from "zod";
-import {
-  createTRPCRouter,
-  proProcedure,
-  protectedProcedure,
-} from "~/server/api/trpc";
+import { createTRPCRouter, proProcedure } from "~/server/api/trpc";
 import { listProviderTextModels } from "~/server/providers/providerService";
 import { getProDeps } from "~/server/pro";
 import { toProTRPCError } from "~/server/pro/errors";
@@ -35,14 +31,15 @@ const callRef = { runId: idSchema, callId: idSchema };
 const MAX_PROMPT_CHARS = 200_000;
 
 /**
- * Model calls. `listTextModels` uses the direct server keys. The Pro calls
+ * Model calls. `listTextModels` uses the direct server keys, so it is a
+ * Pro procedure like the billed calls (App Check when enforced). The Pro calls
  * (`prepareStream` then `streamTextEvents`, `generateStructured`,
  * `generateEmbeddings`) go
  * to OpenRouter with the server key and are billed to an open Pro run
  * (`proRun.start`): each names its run and a call id that may be used once.
  */
 export const providerRouter = createTRPCRouter({
-  listTextModels: protectedProcedure
+  listTextModels: proProcedure
     .input(z.object({ provider: providerSchema }))
     .query(async ({ input }) => {
       const models = await listProviderTextModels(input.provider);

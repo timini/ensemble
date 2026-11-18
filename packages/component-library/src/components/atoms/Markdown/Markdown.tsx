@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import ReactMarkdown from 'react-markdown';
+import ReactMarkdown, { type Components } from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { cn } from '../../../lib/utils';
 
@@ -34,6 +34,15 @@ export interface MarkdownProps {
  * </Markdown>
  * ```
  */
+/**
+ * Images in model output are shown as their alt text, never loaded: an
+ * answer could otherwise embed an image URL that sends data to a third
+ * party as soon as the answer renders (a prompt injection channel).
+ */
+const MARKDOWN_COMPONENTS: Components = {
+    img: ({ alt }) => <span data-testid="markdown-image-alt">{alt ? `[${alt}]` : ''}</span>,
+};
+
 export const Markdown = React.forwardRef<HTMLDivElement, MarkdownProps>(
     ({ children, className, 'data-testid': testId = 'markdown' }, ref) => {
         return (
@@ -55,7 +64,7 @@ export const Markdown = React.forwardRef<HTMLDivElement, MarkdownProps>(
                     className
                 )}
             >
-                <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                <ReactMarkdown remarkPlugins={[remarkGfm]} components={MARKDOWN_COMPONENTS}>
                     {children}
                 </ReactMarkdown>
             </div>

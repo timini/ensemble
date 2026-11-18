@@ -15,5 +15,6 @@ export function POST(req: NextRequest) {
     config: getCreditConfig(),
     verifyToken: verifyFirebaseAuthToken,
     appUrl: env.APP_URL,
+    requireAppUrl: env.NODE_ENV === "production",
   });
 }

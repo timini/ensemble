@@ -2,7 +2,7 @@
  * Detects whether the current environment supports the Web Crypto API.
  */
 export function isWebCryptoAvailable(): boolean {
-  if (typeof globalThis === 'undefined') {
+  if (typeof globalThis === "undefined") {
     return false;
   }
 

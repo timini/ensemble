@@ -43,6 +43,8 @@ export const env = createEnv({
   client: {
     NEXT_PUBLIC_SENTRY_DSN: z.string().url().optional(),
     NEXT_PUBLIC_SENTRY_RELEASE: z.string().optional(),
+    NEXT_PUBLIC_SENTRY_ENVIRONMENT: z.string().optional(),
+    NEXT_PUBLIC_SENTRY_TRACES_SAMPLE_RATE: z.string().optional(),
     NEXT_PUBLIC_FIREBASE_API_KEY: z.string().optional(),
     NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN: z.string().optional(),
     NEXT_PUBLIC_FIREBASE_PROJECT_ID: z.string().optional(),
@@ -86,6 +88,9 @@ export const env = createEnv({
     SHARE_RATE_LIMIT_PER_HOUR: process.env.SHARE_RATE_LIMIT_PER_HOUR,
     NEXT_PUBLIC_SENTRY_DSN: process.env.NEXT_PUBLIC_SENTRY_DSN,
     NEXT_PUBLIC_SENTRY_RELEASE: process.env.NEXT_PUBLIC_SENTRY_RELEASE,
+    NEXT_PUBLIC_SENTRY_ENVIRONMENT: process.env.NEXT_PUBLIC_SENTRY_ENVIRONMENT,
+    NEXT_PUBLIC_SENTRY_TRACES_SAMPLE_RATE:
+      process.env.NEXT_PUBLIC_SENTRY_TRACES_SAMPLE_RATE,
     NEXT_PUBLIC_FIREBASE_API_KEY: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
     NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN:
       process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,

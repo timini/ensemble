@@ -12,7 +12,11 @@
  */
 
 import type { StateCreator } from "zustand";
-import { decrypt, encrypt } from "@ensemble-ai/shared-utils/security";
+import {
+  decrypt,
+  encrypt,
+  isLegacyCiphertext,
+} from "@ensemble-ai/shared-utils/security";
 import {
   getEndpointPreset,
   nextEndpointId,
@@ -238,7 +242,11 @@ export const createEndpointsSlice: StateCreator<EndpointsSlice> = (
           if (!endpoint.encryptedApiKey || endpoint.apiKey) return;
           try {
             const apiKey = await decrypt(endpoint.encryptedApiKey);
-            patchEndpoint(endpoint.id, () => ({ apiKey }));
+            // Keys stored under the old derived key move to the device key.
+            const encryptedApiKey = isLegacyCiphertext(endpoint.encryptedApiKey)
+              ? await encrypt(apiKey)
+              : endpoint.encryptedApiKey;
+            patchEndpoint(endpoint.id, () => ({ apiKey, encryptedApiKey }));
           } catch (error: unknown) {
             logger.error(
               `Failed to decrypt the ${endpoint.id} endpoint key`,

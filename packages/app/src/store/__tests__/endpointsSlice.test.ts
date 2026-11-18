@@ -13,6 +13,7 @@ vi.mock("@ensemble-ai/shared-utils/security", () => ({
     if (value === "enc:broken") throw new Error("bad");
     return value.replace(/^enc:/, "");
   }),
+  isLegacyCiphertext: () => false,
 }));
 
 describe("endpointsSlice", () => {

@@ -113,4 +113,22 @@ describe("handleCheckoutRequest", () => {
     );
     expect(res.status).toBe(502);
   });
+
+  it("refuses to start a checkout in production without APP_URL, so return links cannot follow a forged Host", async () => {
+    const { stripe, create } = fakeStripe();
+    const res = await handleCheckoutRequest(
+      request({ packId: "usd-5" }),
+      deps({ stripe, appUrl: undefined, requireAppUrl: true }),
+    );
+    expect(res.status).toBe(503);
+    expect(create).not.toHaveBeenCalled();
+  });
+
+  it("answers 413 for an oversized body", async () => {
+    const res = await handleCheckoutRequest(
+      request({ packId: "usd-5", padding: "x".repeat(20_000) }),
+      deps(),
+    );
+    expect(res.status).toBe(413);
+  });
 });

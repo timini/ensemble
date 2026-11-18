@@ -2,6 +2,10 @@ import type Stripe from "stripe";
 import { z } from "zod";
 import type { AuthUser } from "~/server/auth/firebaseAdmin";
 import { findPack, type CreditConfig } from "~/server/credits/config";
+import { BodyTooLargeError, readBodyLimited } from "~/server/http/bodyLimit";
+
+/** Largest checkout request body; it only carries a pack id. */
+export const MAX_CHECKOUT_BODY_BYTES = 4096;
 
 export interface CheckoutDeps {
   /** Null when STRIPE_SECRET_KEY is not set. */
@@ -10,6 +14,11 @@ export interface CheckoutDeps {
   verifyToken: (idToken: string) => Promise<AuthUser | null>;
   /** Public origin for the return links; the request's origin when unset. */
   appUrl: string | undefined;
+  /**
+   * True in production: without APP_URL no checkout starts, so the return
+   * links never come from the request's Host header.
+   */
+  requireAppUrl?: boolean;
 }
 
 const body = z.object({ packId: z.string().min(1).max(32) });
@@ -36,12 +45,17 @@ export async function handleCheckoutRequest(
   const token = bearer(req);
   const user = token ? await deps.verifyToken(token) : null;
   if (!user) return json(401, { error: "Sign in to buy credits" });
-  if (!deps.stripe) return json(503, { error: "Payments are not set up" });
+  if (!deps.stripe || (deps.requireAppUrl && !deps.appUrl))
+    return json(503, { error: "Payments are not set up" });
 
   let parsed: z.infer<typeof body>;
   try {
-    parsed = body.parse(await req.json());
-  } catch {
+    parsed = body.parse(
+      JSON.parse(await readBodyLimited(req, MAX_CHECKOUT_BODY_BYTES)),
+    );
+  } catch (error) {
+    if (error instanceof BodyTooLargeError)
+      return json(413, { error: "Request too large" });
     return json(400, { error: "Expected a JSON body with a packId" });
   }
   const pack = findPack(deps.config, parsed.packId);

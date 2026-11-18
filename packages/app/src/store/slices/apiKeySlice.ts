@@ -6,7 +6,11 @@
  */
 
 import type { StateCreator } from "zustand";
-import { decrypt, encrypt } from "@ensemble-ai/shared-utils/security";
+import {
+  decrypt,
+  encrypt,
+  isLegacyCiphertext,
+} from "@ensemble-ai/shared-utils/security";
 import type { ValidationStatus } from "@/components/molecules/ApiKeyInput";
 import type { ApiKeyProvider } from "./ensembleSlice";
 import { toError } from "~/lib/errors";
@@ -79,17 +83,22 @@ export const createApiKeySlice: StateCreator<ApiKeySlice> = (set, get) => ({
 
         try {
           const decrypted = await decrypt(entry.encrypted);
+          // Keys stored under the old derived key move to the device key.
+          const encrypted = isLegacyCiphertext(entry.encrypted)
+            ? await encrypt(decrypted)
+            : entry.encrypted;
           set((state) => {
             const currentEntry = state.apiKeys[provider];
             const nextEntry = currentEntry
               ? {
                   ...currentEntry,
                   key: decrypted,
+                  encrypted,
                   status: currentEntry.status ?? "idle",
                 }
               : {
                   key: decrypted,
-                  encrypted: null,
+                  encrypted,
                   visible: false,
                   status: "idle",
                 };
