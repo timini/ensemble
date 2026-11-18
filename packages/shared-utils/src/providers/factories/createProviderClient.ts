@@ -10,6 +10,7 @@ import {
   OpenAICompatibleEndpointsClient,
   type OpenAICompatibleEndpointConfig,
 } from '../clients/openaiCompatible/OpenAICompatibleEndpointsClient';
+import { ProAPIClient, type ProTransport } from '../clients/pro/ProAPIClient';
 
 interface CreateProviderClientOptions {
   provider: ProviderName;
@@ -20,6 +21,8 @@ interface CreateProviderClientOptions {
    * the `openai-compatible` provider in Free mode, which ignores getApiKey.
    */
   getEndpoints?: () => OpenAICompatibleEndpointConfig[];
+  /** How Pro clients reach the server. Required in Pro mode. */
+  proTransport?: ProTransport;
   /** Simulated failures for mock clients (ignored in other modes). */
   mockErrorScenarios?: MockClientConfig['errorScenarios'];
 }
@@ -29,10 +32,18 @@ export function createProviderClient({
   mode,
   getApiKey,
   getEndpoints,
+  proTransport,
   mockErrorScenarios,
 }: CreateProviderClientOptions): AIProvider {
   if (mode === 'mock') {
     return new MockProviderClient({ providerFilter: provider, errorScenarios: mockErrorScenarios });
+  }
+
+  if (mode === 'pro') {
+    if (!proTransport) {
+      throw new Error('Pro mode clients require a proTransport.');
+    }
+    return new ProAPIClient(provider, proTransport);
   }
 
   if (mode === 'free' && provider === 'openai-compatible') {
@@ -65,5 +76,5 @@ export function createProviderClient({
     }
   }
 
-  throw new Error(`Provider mode '${mode}' not yet implemented.`);
+  throw new Error(`Unknown provider mode '${mode}'.`);
 }

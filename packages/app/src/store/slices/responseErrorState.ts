@@ -14,6 +14,8 @@ export type ResponseErrorKind =
   | "rate_limited"
   | "timeout"
   | "provider_unavailable"
+  | "cancelled"
+  | "insufficient_credits"
   | "interrupted"
   | "other";
 

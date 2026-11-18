@@ -37,6 +37,13 @@ export interface StreamResponseOptions {
    * DEFAULT_STREAM_TIMEOUT_MS (120 s).
    */
   timeoutMs?: number;
+  /**
+   * Cancels the call. The request is aborted where the client can (fetch
+   * based clients), and onError gets a ProviderError of kind `cancelled`.
+   */
+  signal?: AbortSignal;
+  /** Most output tokens the model may produce (`max_tokens`). Pro mode sets it from the run's token budget. */
+  maxTokens?: number;
 }
 
 export interface JsonSchema {
@@ -46,6 +53,15 @@ export interface JsonSchema {
 
 export interface GenerateStructuredOptions {
   temperature?: number;
+  /** Cancels the call; it then rejects with a ProviderError of kind `cancelled`. */
+  signal?: AbortSignal;
+  /** Most output tokens the model may produce. */
+  maxTokens?: number;
+}
+
+export interface GenerateEmbeddingsOptions {
+  /** Cancels the call. */
+  signal?: AbortSignal;
 }
 
 /**
@@ -80,7 +96,7 @@ export interface AIProvider {
     options?: StreamResponseOptions,
   ): Promise<void>;
 
-  generateEmbeddings(text: string): Promise<number[]>;
+  generateEmbeddings(text: string, options?: GenerateEmbeddingsOptions): Promise<number[]>;
 
   validateApiKey(apiKey: string): Promise<ValidationResult>;
 

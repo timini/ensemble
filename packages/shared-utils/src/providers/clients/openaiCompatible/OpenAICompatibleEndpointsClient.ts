@@ -1,4 +1,5 @@
 import type {
+  GenerateEmbeddingsOptions,
   AIProvider,
   GenerateStructuredOptions,
   JsonSchema,
@@ -102,10 +103,10 @@ export class OpenAICompatibleEndpointsClient implements AIProvider {
     return this.getEndpoints().find((endpoint) => endpoint.embeddingModel?.trim());
   }
 
-  async generateEmbeddings(text: string): Promise<number[]> {
+  async generateEmbeddings(text: string, options?: GenerateEmbeddingsOptions): Promise<number[]> {
     const endpoint = this.embeddingsEndpoint();
     if (!endpoint) throw new EmbeddingsNotSupportedError(OPENAI_COMPATIBLE_PROVIDER);
-    return this.clientFor(endpoint).generateEmbeddings(text);
+    return this.clientFor(endpoint).generateEmbeddings(text, options);
   }
 
   /** Check that an endpoint answers `GET /models` with its key. */

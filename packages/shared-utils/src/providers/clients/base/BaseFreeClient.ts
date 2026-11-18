@@ -1,5 +1,6 @@
 import type {
   AIProvider,
+  GenerateEmbeddingsOptions,
   GenerateStructuredOptions,
   JsonSchema,
   ProviderName,
@@ -10,7 +11,7 @@ import type {
 } from '../../types';
 import { MockProviderClient } from '../mock/MockProviderClient';
 import { sanitizeProviderErrorMessage } from '../../utils/sanitizeSensitiveData';
-import { ProviderError, classifyProviderError } from '../../errors/providerError';
+import { ProviderError, cancelledError, classifyProviderError } from '../../errors/providerError';
 import { EmbeddingsNotSupportedError } from '../../embeddings/errors';
 
 /** Default client-side limit for one streamed answer (2 minutes). */
@@ -90,6 +91,12 @@ export abstract class BaseFreeClient implements AIProvider {
     onError: (error: Error) => void,
     options?: StreamResponseOptions,
   ): Promise<void> {
+    const signal = options?.signal;
+    if (signal?.aborted) {
+      onError(cancelledError(this.provider));
+      return;
+    }
+
     const apiKey = this.resolveApiKey();
 
     if (apiKey === null || (this.requiresApiKey && !apiKey)) {
@@ -114,7 +121,12 @@ export abstract class BaseFreeClient implements AIProvider {
 
     const timeoutMs = options?.timeoutMs ?? BaseFreeClient.STREAM_TIMEOUT_MS;
     let timeoutId: ReturnType<typeof setTimeout> | null = null;
+    let onAbort: (() => void) | null = null;
     const timeoutPromise = new Promise<never>((_, reject) => {
+      // A cancel ends the call at once, even for SDK clients that cannot abort
+      // their request; fetch based clients also abort it through the signal.
+      onAbort = () => reject(cancelledError(this.provider));
+      signal?.addEventListener('abort', onAbort, { once: true });
       timeoutId = setTimeout(() => {
         reject(
           new ProviderError(
@@ -151,13 +163,15 @@ export abstract class BaseFreeClient implements AIProvider {
       if (timeoutId !== null) {
         clearTimeout(timeoutId);
       }
+      if (onAbort) signal?.removeEventListener('abort', onAbort);
     }
   }
 
   /** True when this client implements embedWithProvider. */
   readonly supportsEmbeddings: boolean = false;
 
-  async generateEmbeddings(text: string): Promise<number[]> {
+  async generateEmbeddings(text: string, options?: GenerateEmbeddingsOptions): Promise<number[]> {
+    if (options?.signal?.aborted) throw cancelledError(this.provider);
     if (!this.supportsEmbeddings) {
       throw new EmbeddingsNotSupportedError(this.provider);
     }
@@ -170,11 +184,15 @@ export abstract class BaseFreeClient implements AIProvider {
       );
     }
 
-    return this.embedWithProvider(apiKey, text);
+    return this.embedWithProvider(apiKey, text, options);
   }
 
   /** Provider-specific embeddings call. Override together with supportsEmbeddings. */
-  protected async embedWithProvider(_apiKey: string, _text: string): Promise<number[]> {
+  protected async embedWithProvider(
+    _apiKey: string,
+    _text: string,
+    _options?: GenerateEmbeddingsOptions,
+  ): Promise<number[]> {
     throw new EmbeddingsNotSupportedError(this.provider);
   }
 
@@ -211,6 +229,7 @@ export abstract class BaseFreeClient implements AIProvider {
     schema: JsonSchema,
     options?: GenerateStructuredOptions,
   ): Promise<StructuredResponse<T>> {
+    if (options?.signal?.aborted) throw cancelledError(this.provider);
     const apiKey = this.resolveApiKey();
 
     if (apiKey === null || (this.requiresApiKey && !apiKey)) {

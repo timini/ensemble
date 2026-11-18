@@ -15,13 +15,16 @@ import type {
   ValidationResult,
   ProviderName,
 } from '../../types.js';
-import { ProviderError, type ProviderErrorKind } from '../../errors/providerError';
+import { ProviderError, cancelledError, type ProviderErrorKind } from '../../errors/providerError';
 
 /**
  * Provider failures the mock client can simulate. A missing key is not
  * simulated: the mock client needs no key.
  */
-export type MockErrorScenario = Exclude<ProviderErrorKind, 'other' | 'missing_key'>;
+export type MockErrorScenario = Exclude<
+  ProviderErrorKind,
+  'other' | 'missing_key' | 'cancelled' | 'insufficient_credits'
+>;
 
 /** Scenario per model id. The key `*` applies to every model. */
 export type MockErrorScenarios = Partial<Record<string, MockErrorScenario>>;
@@ -161,6 +164,10 @@ export class MockProviderClient implements AIProvider {
       for (const chunk of chunks) {
         const delay = this.randomInt(50, 100);
         await this.sleep(delay);
+        if (options?.signal?.aborted) {
+          onError(cancelledError(this.config.providerFilter));
+          return;
+        }
         onChunk(chunk);
       }
 

@@ -9,6 +9,8 @@ import { sanitizeProviderErrorMessage } from '../utils/sanitizeSensitiveData';
  * - `rate_limited`: 429; `retryAfterSeconds` is set when the provider said
  * - `timeout`: the client gave up waiting (see DEFAULT_STREAM_TIMEOUT_MS)
  * - `provider_unavailable`: 5xx or a network failure
+ * - `cancelled`: the caller aborted the call (AbortSignal), no answer is expected
+ * - `insufficient_credits`: Pro mode only, the credit balance cannot cover the run
  * - `other`: anything else (bad request, unknown model, refusal)
  */
 export type ProviderErrorKind =
@@ -17,6 +19,8 @@ export type ProviderErrorKind =
   | 'rate_limited'
   | 'timeout'
   | 'provider_unavailable'
+  | 'cancelled'
+  | 'insufficient_credits'
   | 'other';
 
 export interface ProviderErrorOptions {
@@ -81,6 +85,17 @@ export function classifyProviderError(error: unknown, options: ClassifyOptions =
   });
 }
 
+function nameOf(error: unknown): string {
+  if (typeof error !== 'object' || error === null) return '';
+  const name = (error as { name?: unknown }).name;
+  return typeof name === 'string' ? name : '';
+}
+
+/** A ProviderError of kind `cancelled`, for a call stopped through its AbortSignal. */
+export function cancelledError(provider?: ProviderName): ProviderError {
+  return new ProviderError('The request was cancelled.', 'cancelled', { provider });
+}
+
 function kindOf(error: unknown, status: number | undefined, message: string): ProviderErrorKind {
   if (status !== undefined) {
     if (status === 401 || status === 403) return 'invalid_key';
@@ -90,7 +105,8 @@ function kindOf(error: unknown, status: number | undefined, message: string): Pr
     return 'other';
   }
 
-  const name = error instanceof Error ? error.name : '';
+  const name = nameOf(error);
+  if (name === 'AbortError' || name === 'APIUserAbortError') return 'cancelled';
   if (name === 'APIConnectionTimeoutError' || /timed? ?out/i.test(message)) return 'timeout';
   if (name === 'APIConnectionError') return 'provider_unavailable';
   if (/missing api key/i.test(message)) return 'missing_key';

@@ -1,6 +1,12 @@
 import { classifyProviderError } from '../../errors/providerError';
 import { BaseFreeClient, type StreamOptions, type StructuredOptions } from '../base/BaseFreeClient';
-import type { ProviderName, StructuredResponse, TokenUsage, ValidationResult } from '../../types';
+import type {
+  GenerateEmbeddingsOptions,
+  ProviderName,
+  StructuredResponse,
+  TokenUsage,
+  ValidationResult,
+} from '../../types';
 import { sanitizeProviderErrorMessage } from '../../utils/sanitizeSensitiveData';
 import { fromChatCompletionUsage, type ChatCompletionUsage } from '../../utils/usage';
 import { requestOpenAICompatibleEmbedding } from '../../embeddings/openAICompatibleEmbeddings';
@@ -108,7 +114,11 @@ export class FreeOpenAICompatibleClient extends BaseFreeClient {
     }
   }
 
-  protected override async embedWithProvider(apiKey: string, text: string): Promise<number[]> {
+  protected override async embedWithProvider(
+    apiKey: string,
+    text: string,
+    options?: GenerateEmbeddingsOptions,
+  ): Promise<number[]> {
     const model = this.options.getEmbeddingModel?.()?.trim();
     if (!model) throw new EmbeddingsNotSupportedError(this.provider);
     return requestOpenAICompatibleEmbedding({
@@ -117,6 +127,7 @@ export class FreeOpenAICompatibleClient extends BaseFreeClient {
       model,
       input: text,
       fetchImpl: this.options.fetchImpl,
+      signal: options?.signal,
     });
   }
 
@@ -137,7 +148,9 @@ export class FreeOpenAICompatibleClient extends BaseFreeClient {
             messages: [{ role: 'user', content: structuredPrompt(format, options.prompt, options.schema) }],
             ...(responseFormat ? { response_format: responseFormat } : {}),
             ...(options.options?.temperature !== undefined && { temperature: options.options.temperature }),
+            ...(options.options?.maxTokens !== undefined && { max_tokens: options.options.maxTokens }),
           },
+          signal: options.options?.signal,
         });
         completion = (await response.json()) as ChatCompletion;
       } catch (error) {
@@ -188,7 +201,9 @@ export class FreeOpenAICompatibleClient extends BaseFreeClient {
           messages: [{ role: 'user', content: options.prompt }],
           ...(options.streamOptions?.temperature !== undefined && { temperature: options.streamOptions.temperature }),
           ...(options.streamOptions?.seed !== undefined && { seed: options.streamOptions.seed }),
+          ...(options.streamOptions?.maxTokens !== undefined && { max_tokens: options.streamOptions.maxTokens }),
         },
+        signal: options.streamOptions?.signal,
       });
 
       for await (const chunk of readServerSentEvents<ChatChunk>(response)) {
