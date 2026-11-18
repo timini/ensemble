@@ -40,11 +40,18 @@ const RETURN_PATHS = ["/workspace", "/account"];
 
 /**
  * Where the emailed link leads: the page it was asked for on when that is
- * the account page, otherwise the workspace.
+ * the account page, otherwise the workspace. A link asked for on the Pro
+ * onboarding path (`?start=pro`, from the landing page) returns to it.
  */
-export function emailLinkContinueUrl(origin: string, pathname = ""): string {
+export function emailLinkContinueUrl(
+  origin: string,
+  pathname = "",
+  search = "",
+): string {
   const path = RETURN_PATHS.includes(pathname) ? pathname : "/workspace";
-  return `${origin.replace(/\/+$/, "")}${path}`;
+  const pro = new URLSearchParams(search).get("start") === "pro";
+  const query = pro && path === "/workspace" ? "?start=pro" : "";
+  return `${origin.replace(/\/+$/, "")}${path}${query}`;
 }
 
 /** The URL without the one-time link parameters, for history.replaceState. */

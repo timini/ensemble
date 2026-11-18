@@ -8,7 +8,7 @@ export interface WaysInProps {
   keysHref: string;
   /** Where "Use local models" leads. */
   localHref: string;
-  /** Where "Sign in for Pro" leads once Pro exists. Without it Pro shows as coming soon. */
+  /** Where "Sign in for Pro" leads. Without it (no sign-in on this server) Pro shows as coming soon. */
   proHref?: string;
   className?: string;
 }
@@ -16,7 +16,7 @@ export interface WaysInProps {
 /**
  * WaysIn molecule: the three ways into the product, in the order most
  * visitors start. Own keys is the main action, local models the second.
- * Pro is shown as coming soon until sign-in exists (roadmap M5).
+ * Pro is a quiet link, or coming soon when the server has no sign-in.
  *
  * @example
  * ```tsx

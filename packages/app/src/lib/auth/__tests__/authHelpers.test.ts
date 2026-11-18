@@ -106,6 +106,19 @@ describe("email link helpers", () => {
     );
   });
 
+  it("keeps the Pro onboarding path, so the link returns to it", () => {
+    expect(
+      emailLinkContinueUrl(
+        "https://ensemble.test",
+        "/workspace",
+        "?start=pro&panel=settings",
+      ),
+    ).toBe("https://ensemble.test/workspace?start=pro");
+    expect(
+      emailLinkContinueUrl("https://ensemble.test", "/workspace", "?start=x"),
+    ).toBe("https://ensemble.test/workspace");
+  });
+
   it("sends a link asked for on the account page back there", () => {
     expect(emailLinkContinueUrl("https://ensemble.test/", "/account")).toBe(
       "https://ensemble.test/account",

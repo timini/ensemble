@@ -8,19 +8,23 @@ import { HowItWorks } from "@/components/molecules/HowItWorks";
 import recorded from "~/data/example-run.json";
 import { exampleRunProps, type RecordedRun } from "~/lib/exampleRun";
 import { WORKSPACE_PATH } from "~/lib/workspaceRoutes";
+import { firebaseClientConfig } from "~/lib/auth/firebaseConfig";
 
 /** Where each way in leads: the workspace, with onboarding on that path. */
 export const LANDING_LINKS = {
   keys: `${WORKSPACE_PATH}?start=keys`,
   local: `${WORKSPACE_PATH}?start=local`,
+  pro: `${WORKSPACE_PATH}?start=pro`,
   benchmarks: "/benchmarks",
 } as const;
 
 /**
  * The landing page: one sentence on what Ensemble does, a recorded run
  * (real answers, agreement score and consensus, no keys needed), the three
- * ways in, what the score means and how a run works. Copy follows the
- * claims rule in docs/PRODUCT_VISION.md.
+ * ways in, what the score means and how a run works. "Sign in for Pro"
+ * opens the Pro onboarding path when sign-in is set up on this build, and
+ * shows as coming soon otherwise. Copy follows the claims rule in
+ * docs/PRODUCT_VISION.md.
  */
 export function Landing() {
   const { t, i18n } = useTranslation("common");
@@ -47,6 +51,7 @@ export function Landing() {
           <WaysIn
             keysHref={LANDING_LINKS.keys}
             localHref={LANDING_LINKS.local}
+            proHref={firebaseClientConfig() ? LANDING_LINKS.pro : undefined}
           />
         </div>
         <ExampleRun {...example} />

@@ -53,4 +53,19 @@ describe("useStarterEnsemble", () => {
     rerender();
     expect(chosen()).toEqual([]);
   });
+
+  it("replaces chosen models the mode cannot run, such as local models when starting Pro", () => {
+    useStore.getState().addModel("openai-compatible", "ollama/llama3.2:3b");
+    const { result } = renderHook(() => useStarterEnsemble(OPENAI));
+    act(() => result.current());
+    expect(chosen()).toEqual(["gpt-6-luna", "gpt-6-astra"]);
+  });
+
+  it("keeps the chosen models when one of them can run", () => {
+    useStore.getState().addModel("openai-compatible", "ollama/llama3.2:3b");
+    useStore.getState().addModel("openai", "gpt-6-astra");
+    const { result } = renderHook(() => useStarterEnsemble(OPENAI));
+    act(() => result.current());
+    expect(chosen()).toEqual(["ollama/llama3.2:3b", "gpt-6-astra"]);
+  });
 });

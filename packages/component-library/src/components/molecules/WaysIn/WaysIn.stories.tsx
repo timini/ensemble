@@ -16,4 +16,4 @@ type Story = StoryObj<typeof meta>;
 export const Default: Story = {};
 
 /** Once sign-in exists, Pro is a link. */
-export const WithPro: Story = { args: { proHref: '/account' } };
+export const WithPro: Story = { args: { proHref: '/workspace?start=pro' } };

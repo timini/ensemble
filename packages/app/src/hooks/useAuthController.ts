@@ -130,6 +130,7 @@ export function useAuthController(
           emailLinkContinueUrl(
             window.location.origin,
             window.location.pathname,
+            window.location.search,
           ),
         );
         rememberEmailForSignIn(email);
