@@ -1,69 +1,43 @@
-import { chromium } from 'playwright';
-import { mkdir } from 'fs/promises';
-import { join } from 'path';
+// Captures every wireframe state at 375, 768 and 1440 px in light and dark.
+// Needs the dev server (npm run dev, port 3100). Writes screenshots/<name>-<width>-<theme>.png.
+import { chromium } from "playwright"
+import { mkdir } from "node:fs/promises"
 
-const WIREFRAMES_URL = 'http://localhost:3000';
-const OUTPUT_DIR = './screenshots';
+const BASE = process.env.WIREFRAMES_URL ?? "http://localhost:3100"
+const OUT = "./screenshots"
 
-const pages = [
-  { path: '/config', name: 'Config-Page' },
-  { path: '/ensemble', name: 'Ensemble-Page' },
-  { path: '/prompt', name: 'Prompt-Page' },
-  { path: '/review', name: 'Review-Page' },
-];
+const pages: Array<[string, string]> = [
+  ["landing", "/"],
+  ["workspace-onboarding", "/workspace?state=new"],
+  ["workspace-ready", "/workspace?state=ready"],
+  ["workspace-running", "/workspace?state=running"],
+  ["workspace-done", "/workspace"],
+  ["workspace-method", "/workspace?menu=method"],
+  ["workspace-settings", "/workspace?sheet=settings"],
+  ["workspace-history", "/workspace?sheet=history"],
+  ["workspace-manual", "/workspace?sheet=manual"],
+  ["benchmarks", "/benchmarks"],
+  ["account", "/account"],
+]
 
-async function takeScreenshots() {
-  console.log('🚀 Starting wireframe screenshot capture...');
-  console.log(`📸 Capturing ${pages.length} pages from ${WIREFRAMES_URL}`);
-
-  // Create output directory
-  await mkdir(OUTPUT_DIR, { recursive: true });
-
-  const browser = await chromium.launch();
-  const context = await browser.newContext({
-    viewport: { width: 1920, height: 1080 },
-  });
-  const page = await context.newPage();
-
-  let successCount = 0;
-  let failureCount = 0;
-
-  for (const pageConfig of pages) {
-    try {
-      const url = `${WIREFRAMES_URL}${pageConfig.path}`;
-      console.log(`\n📄 Capturing: ${pageConfig.name}`);
-      console.log(`   URL: ${url}`);
-
-      await page.goto(url, { waitUntil: 'networkidle', timeout: 30000 });
-
-      // Wait for React to hydrate
-      await page.waitForTimeout(1000);
-
-      const screenshotPath = join(OUTPUT_DIR, `${pageConfig.name}.png`);
-      await page.screenshot({
-        path: screenshotPath,
-        fullPage: true,
-      });
-
-      console.log(`   ✅ Saved: ${screenshotPath}`);
-      successCount++;
-    } catch (error) {
-      console.error(`   ❌ Failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
-      failureCount++;
+async function main() {
+  await mkdir(OUT, { recursive: true })
+  const browser = await chromium.launch()
+  for (const width of [375, 768, 1440]) {
+    for (const theme of ["light", "dark"] as const) {
+      const context = await browser.newContext({ viewport: { width, height: width < 700 ? 812 : 900 }, colorScheme: theme })
+      const page = await context.newPage()
+      for (const [name, path] of pages) {
+        await page.goto(`${BASE}${path}`, { waitUntil: "networkidle" })
+        await page.screenshot({ path: `${OUT}/${name}-${width}-${theme}.png` })
+      }
+      await context.close()
     }
   }
-
-  await browser.close();
-
-  console.log('\n' + '='.repeat(50));
-  console.log(`✨ Screenshot capture complete!`);
-  console.log(`   ✅ Successful: ${successCount}`);
-  console.log(`   ❌ Failed: ${failureCount}`);
-  console.log(`   📁 Output: ${OUTPUT_DIR}`);
-  console.log('='.repeat(50));
+  await browser.close()
 }
 
-takeScreenshots().catch((error) => {
-  console.error('❌ Fatal error:', error);
-  process.exit(1);
-});
+main().catch((error) => {
+  console.error(error)
+  process.exit(1)
+})

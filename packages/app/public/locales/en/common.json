@@ -20,6 +20,12 @@
       "title": "Something went wrong",
       "description": "An unexpected error occurred. Please try again.",
       "tryAgain": "Try Again"
+    },
+    "consensus": {
+      "noSummarizer": "No summarizer model is selected.",
+      "noResponses": "There are no answers to summarize.",
+      "failed": "The consensus could not be generated.",
+      "stopped": "The consensus was stopped."
     }
   },
   "common": {
@@ -177,27 +183,40 @@
       "exploreFeatures": "Explore Features"
     },
     "about": {
-      "title": "About Ensemble AI",
-      "description": "The science behind better decisions with AI ensembles",
-      "whatIsEnsemble": {
-        "heading": "What is Ensemble AI?",
-        "body": "Ensemble AI lets you query multiple large language models simultaneously and compare their responses side by side. Instead of relying on a single model's perspective, you get diverse viewpoints from OpenAI, Anthropic, Google, xAI, DeepSeek, and Perplexity — then synthesise them into a consensus answer."
+      "eyebrow": "About",
+      "title": "Why Ensemble exists",
+      "lead": "People who rely on AI for answers that matter already cross-check: they paste the same question into several chatbots and try to work out which answer to trust. Ensemble does that in one step and measures the part that matters, whether the models agree.",
+      "problem": {
+        "heading": "A single model gives no warning",
+        "body": "It sounds the same whether it is right or guessing. When models from different providers give the same answer, that is a useful sign. When they disagree, no single answer should be trusted on that question."
       },
-      "whyEnsemble": {
-        "heading": "Why an Ensemble?",
-        "body": "Every AI model has blind spots. A question that stumps one model may be trivial for another. This is the model selection paradox: you cannot know which model will perform best on your specific question until you have already asked it. An ensemble approach eliminates this guesswork by harnessing the complementary strengths of multiple models, producing more reliable and well-rounded answers.",
-        "statEnsembleVsSingle": "Ensemble vs single model on AlpacaEval 2.0",
-        "statMathAccuracy": "Math accuracy via multi-model debate",
-        "statMedicalAccuracy": "Medical QA via iterative consensus"
+      "score": {
+        "heading": "What the score can and cannot tell you",
+        "body": "The score measures how close the answers are in meaning, using embeddings. Models can agree and still be wrong, for example when they learned the same mistake. Treat high agreement as a reason for more confidence, not as proof. The labels use default thresholds until each embedding model is calibrated on benchmark runs."
       },
-      "flow": {
-        "prompt": "Your Prompt",
-        "models": "AI Models",
-        "consensus": "Consensus"
+      "audience": {
+        "heading": "Who it is for",
+        "items": [
+          {
+            "id": "cross",
+            "title": "Cross-checkers",
+            "body": "Research, engineering, health and legal reading, purchases: anyone who wants confidence before acting on an AI answer."
+          },
+          {
+            "id": "local",
+            "title": "Local model users",
+            "body": "Privacy and no cost, with models running on your own machine."
+          },
+          {
+            "id": "tinkerers",
+            "title": "Model tinkerers",
+            "body": "Compare models and merge methods on your own questions, with the cost of every run."
+          }
+        ]
       },
       "research": {
-        "heading": "The Research",
-        "intro": "The ensemble approach is grounded in peer-reviewed research demonstrating that multiple AI models working together consistently outperform any single model.",
+        "heading": "Research on combining models",
+        "intro": "Published work has studied several ways to combine language models. These papers report gains on their own benchmarks and settings. We have not reproduced them; our own results are on the benchmarks page.",
         "papers": [
           {
             "title": "Mixture-of-Agents Enhances Large Language Model Capabilities",
@@ -235,102 +254,211 @@
             "url": "https://arxiv.org/abs/2502.00773"
           }
         ]
-      }
+      },
+      "benchmarksLink": "See our benchmark method and results"
     },
     "features": {
-      "title": "Features",
-      "description": "Query 20+ AI models simultaneously, analyse their agreement, and synthesise the best answer",
-      "differentiators": {
-        "heading": "What Makes Ensemble AI Different",
+      "eyebrow": "Features",
+      "title": "Everything you need to compare AI answers",
+      "lead": "Ensemble asks several models the same question, shows every answer side by side, measures how closely they agree and merges them into one answer. It shows you when the models disagree; it does not promise that the merged answer beats the best single model.",
+      "openWorkspace": "Open the workspace",
+      "seeBenchmarks": "See the benchmarks",
+      "core": {
+        "heading": "Ask and compare",
         "items": [
           {
-            "title": "Agreement Analysis",
-            "body": "See exactly where models agree or diverge. Vector embeddings and cosine similarity create an N\u00d7N comparison matrix with colour-coded results.",
-            "metrics": ["N\u00d7N Matrix", "Cosine Similarity", "Real-time Stats"]
+            "id": "side",
+            "title": "Answers side by side",
+            "body": "Two to six models answer at once. Each answer streams into its own column with its time and cost, and one failed model never stops the run."
           },
           {
-            "title": "Dual Consensus Strategies",
-            "body": "Standard: synthesise all responses. Elo Ranking: tournament-style LLM judging ranks responses, then synthesises only the top performers.",
-            "metrics": ["Elo Rating", "Top N Selection", "Impartial Judge"]
+            "id": "score",
+            "title": "An agreement score you can read",
+            "body": "Answers are compared pair by pair with semantic embeddings. High agreement means the models give the same answer, which is a reason for more confidence but not proof; low agreement tells you to read every answer."
           },
           {
-            "title": "Human + AI Integration",
-            "body": "Add responses from external tools, human experts, or other AI services. Included in agreement analysis and consensus generation.",
-            "metrics": ["Full Integration", "Agreement Scoring", "Consensus Synthesis"]
+            "id": "merge",
+            "title": "One merged answer",
+            "body": "Choose how answers are merged: Standard (one summary), Majority (a vote on short answers), Ranked (models judge each other in pairs) or Council (critique, rebuttal and a vote)."
+          },
+          {
+            "id": "cost",
+            "title": "Cost before you spend it",
+            "body": "Every method shows how many calls it makes and an estimated cost before you ask, and the real cost once the run is done."
+          },
+          {
+            "id": "manual",
+            "title": "Your own answers too",
+            "body": "Paste an answer from another tool or an expert. It is scored and merged with the others."
+          },
+          {
+            "id": "presets",
+            "title": "Presets and history",
+            "body": "Save a set of models and a method as a preset. Your runs are kept in this browser."
           }
         ]
       },
-      "capabilities": {
-        "heading": "Built for Performance",
+      "models": {
+        "heading": "Models from anywhere",
+        "intro": "Use your own keys for OpenAI, Anthropic, Google, xAI, DeepSeek and Perplexity, or any OpenAI-compatible server. One OpenRouter key reaches every major provider.",
         "items": [
-          { "number": "20+", "label": "AI Models", "description": "Across OpenAI, Anthropic, Google, xAI, DeepSeek, and Perplexity" },
-          { "number": "<100ms", "label": "Streaming", "description": "Buffered chunks with parallel responses" },
-          { "number": "AES-256", "label": "Encryption", "description": "GCM mode with random 96-bit IVs" },
-          { "number": "Zero", "label": "Lock-in", "description": "Direct browser-to-API in Free Mode" }
+          {
+            "id": "cloud",
+            "title": "Cloud providers",
+            "body": "OpenAI, Anthropic, Google, xAI, DeepSeek and Perplexity, called straight from your browser with your keys."
+          },
+          {
+            "id": "local",
+            "title": "Local models",
+            "body": "Ollama, LM Studio, llama.cpp and vLLM on your machine. Ensemble finds a running Ollama for you, and a local embedding model scores agreement with no cloud key."
+          },
+          {
+            "id": "hosted",
+            "title": "Hosted open models",
+            "body": "OpenRouter, Groq, Together or any OpenAI-compatible address."
+          }
         ]
       },
-      "howItWorks": {
-        "heading": "From Question to Consensus in 4 Steps",
-        "steps": [
-          { "name": "Configure", "description": "Choose Free Mode with AES-256 encrypted API keys or Pro Mode with managed credits." },
-          { "name": "Select Ensemble", "description": "Pick 2\u20136 models across 6 providers. Choose your summariser and consensus method." },
-          { "name": "Enter Prompt", "description": "Write your question. Optionally add manual responses from experts or external tools." },
-          { "name": "Review & Analyse", "description": "Watch responses stream in parallel. See agreement analysis and synthesised consensus in real-time." }
+      "privacy": {
+        "heading": "Private by default",
+        "items": [
+          {
+            "id": "keys",
+            "title": "Keys stay in your browser",
+            "body": "Keys are encrypted with AES-GCM through the Web Crypto API and sent only to each provider, never to our server."
+          },
+          {
+            "id": "prompts",
+            "title": "Prompts go straight to the providers",
+            "body": "In Free mode your questions and answers travel between your browser and the providers you pick. Our server does not see them."
+          },
+          {
+            "id": "localonly",
+            "title": "Nothing leaves your machine",
+            "body": "With local models every call, including the agreement score, stays on your computer."
+          }
         ]
       },
       "modes": {
-        "heading": "Two Ways to Use Ensemble AI",
-        "free": {
-          "heading": "Free Mode",
-          "badge": "BYOK",
-          "body": "Bring your own API keys. Direct browser-to-API communication with zero server dependency.",
-          "features": [
-            "AES-256-GCM browser encryption",
-            "Direct provider API calls",
-            "Pay only provider token costs",
-            "Full feature access",
-            "No usage fees"
-          ]
-        },
-        "pro": {
-          "heading": "Pro Mode",
-          "badge": "Coming Soon",
-          "body": "Managed backend with credit-based billing. No API key management needed.",
-          "features": [
-            "Managed API connections",
-            "Credit-based billing",
-            "No key management",
-            "Usage analytics",
-            "Priority support"
-          ]
-        }
-      },
-      "models": {
-        "heading": "20+ Models Across 6 Providers",
-        "body": "Access the best models from every leading AI provider. New models appear automatically via dynamic discovery.",
-        "providers": [
-          { "name": "OpenAI", "models": "GPT-4o, GPT-4o Mini, o1-preview, o1-mini" },
-          { "name": "Anthropic", "models": "Claude 3.5 Sonnet, Claude 3 Opus, Claude 3 Haiku" },
-          { "name": "Google", "models": "Gemini 1.5 Pro, Gemini 1.5 Flash, Gemini 2.5 Flash" },
-          { "name": "xAI", "models": "Grok 2, Grok 2 Mini" },
-          { "name": "Perplexity", "models": "Sonar, Sonar Pro, Sonar Deep Research, Sonar Reasoning, Sonar Reasoning Pro" },
-          { "name": "DeepSeek", "models": "DeepSeek Chat, DeepSeek Reasoner" }
+        "heading": "Two ways to pay",
+        "items": [
+          {
+            "id": "free",
+            "title": "Free: works today",
+            "body": "Bring your own keys and pay the providers directly, or pay nothing with local models. No sign-in."
+          },
+          {
+            "id": "pro",
+            "title": "Pro: coming soon",
+            "body": "Sign in, buy credits and run models without managing any key."
+          }
         ]
       },
-      "security": {
-        "heading": "Security & Privacy",
-        "body": "AES-256-GCM encryption with zero server-side storage in Free Mode.",
-        "features": [
-          "AES-256-GCM encryption via Web Crypto API",
-          "Device-specific key derivation (SHA-256)",
-          "Random 96-bit IV per encryption",
-          "Plaintext keys never touch localStorage",
-          "No server-side key storage in Free Mode",
-          "No prompts or responses logged or stored",
-          "Direct browser-to-provider communication",
-          "Open-source for full transparency"
-        ]
+      "claims": {
+        "heading": "What we can and cannot claim yet",
+        "body": "Whether an ensemble beats its best single model is not settled. The benchmarks page describes how we test it; results will appear there once the run is done."
       }
+    },
+    "benchmarks": {
+      "title": "Benchmarks",
+      "description": "Does an ensemble beat its best member? Accuracy on public benchmarks, with confidence intervals and the method that produced them.",
+      "runInfo": "Run {{runId}} on {{date}}. Cost of these results {{cost}}, cached reference answers included.",
+      "costAtLeast": "at least {{cost}}",
+      "smallSampleNotice": "{{dataset}} has {{n}} questions, below the {{min}} the method asks for before any accuracy claim. Treat its numbers as indicative.",
+      "mockNotice": "These numbers come from a mock dry run of the pipeline. They are not real results.",
+      "partialNotice": "This run is incomplete: some datasets or configurations are missing.",
+      "resultsHeading": "Results",
+      "rowLabel": {
+        "majority": "Ensemble, mechanical majority",
+        "standard": "Ensemble, standard consensus",
+        "elo": "Ensemble, ELO ranking",
+        "council": "Ensemble, council"
+      }
+    },
+    "workspace": {
+      "title": "Ask several models at once.",
+      "subtitle": "See where they agree, and get one answer you can check.",
+      "examplesHeading": "Try one",
+      "examples": [
+        "Is it safe to leave cooked rice out overnight?",
+        "What does a break clause in a UK tenancy usually allow?",
+        "How many hours of sleep does an adult need, and why?"
+      ],
+      "setupTitle": "Connect a model to start",
+      "setupBody": "Add one API key or a local model. One key is enough: OpenRouter reaches every provider. Keys are encrypted in this browser and never sent to our server.",
+      "setupAction": "Add a key or local model",
+      "runPrompt": "Answers to",
+      "runningStatus_one": "{{done}} of {{count}} answer in. Agreement and consensus follow.",
+      "runningStatus_other": "{{done}} of {{count}} answers in. Agreement and consensus follow.",
+      "benchmarks": "Benchmarks",
+      "settings": {
+        "title": "Settings",
+        "keys": "API keys",
+        "securityNote": "Keys are encrypted in this browser and sent only to each provider, never to Ensemble's server.",
+        "endpoints": "Local and hosted endpoints",
+        "embeddings": "Agreement score",
+        "appearance": "Appearance",
+        "data": "Data",
+        "clearData": "Clear keys, presets and history",
+        "clearConfirm": "This removes every key, endpoint, preset and saved run from this browser.",
+        "clearConfirmYes": "Clear everything",
+        "clearCancel": "Cancel",
+        "webCryptoTitle": "This browser cannot encrypt keys",
+        "webCryptoBody": "Free mode needs the Web Crypto API to encrypt your keys locally. Use a current browser.",
+        "mode": "Mode"
+      },
+      "savePreset": {
+        "title": "Save models as a preset",
+        "description": "The models, method and summarizer are saved in this browser. Saving under an existing name replaces it.",
+        "name": "Name",
+        "placeholder": "Three frontier models",
+        "save": "Save preset",
+        "cancel": "Cancel"
+      },
+      "history": {
+        "savedRun": "Saved run from {{date}}. It is read only: nothing is sent to a model again.",
+        "newQuestion": "Ask a new question"
+      },
+      "pro": {
+        "block": {
+          "signIn": "Sign in to ask in Pro mode.",
+          "unavailable": "Pro is not available here. Switch to Free mode in settings.",
+          "loading": "Loading your credit balance.",
+          "insufficient": "Not enough credits for this run.",
+          "unpriced": "Pro cannot run some of these models.",
+          "error": "Your credit balance could not be loaded.",
+          "negative": "Your balance is below zero. Buy credits to ask in Pro mode."
+        },
+        "signInTitle": "Sign in to use Pro",
+        "signInBody": "Pro runs every model on our server and bills your credits. Free mode with your own keys needs no account.",
+        "accountLink": "Usage and purchases"
+      }
+    },
+    "landing": {
+      "eyebrow": "For questions where being wrong costs something",
+      "title": "Ask several AI models at once. See where they agree.",
+      "lead": "Ensemble sends your question to the models you choose, scores how closely their answers agree, and merges them into one answer you can check against the originals."
+    },
+    "account": {
+      "workspace": "Workspace",
+      "title": "Account",
+      "signInLead": "Sign in to see your credits and Pro usage.",
+      "unavailable": "Sign-in is not set up on this server, so there is no account to show. Free mode with your own keys needs none.",
+      "loading": "Loading your account"
+    },
+    "sharedRun": {
+      "missingTitle": "This link has expired or was deleted",
+      "missingBody": "Shared runs stay online for 30 days, and their owner can delete them sooner.",
+      "missingCta": "Ask your own question"
+    }
+  },
+  "apiKeys": {
+    "label": "{{provider}} API Key",
+    "helper": {
+      "idle": "Enter your {{provider}} API key",
+      "validating": "Validating...",
+      "valid": "API key configured",
+      "invalid": "Invalid API key"
     }
   }
 }

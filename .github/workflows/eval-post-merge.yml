@@ -77,12 +77,9 @@ jobs:
       - name: Run quick eval and save baseline
         if: steps.check-keys.outputs.keys_available == 'true'
         working-directory: packages/eval
-        run: |
-          node --import tsx bin/ensemble-eval.mjs quick-eval \
-            --model google:gemini-3-flash-preview \
-            --strategies standard,elo,majority,council \
-            --sample 50 \
-            --baseline baselines/quick-eval.json
+        # Same models, sample size and strategies as the eval-ci gate, so the
+        # baseline it writes is comparable with what the gate runs.
+        run: npm run eval:ci
 
       - name: Upload generated baseline
         if: steps.check-keys.outputs.keys_available == 'true'

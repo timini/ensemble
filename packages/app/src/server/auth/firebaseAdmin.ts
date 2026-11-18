@@ -16,7 +16,13 @@ function asOptionalString(value: unknown): string | undefined {
   return typeof value === "string" && value.length > 0 ? value : undefined;
 }
 
-function getFirebaseApp() {
+/**
+ * The firebase-admin app. With service account variables it uses them;
+ * otherwise Application Default Credentials (App Hosting) or, in tests,
+ * the emulators named by FIREBASE_AUTH_EMULATOR_HOST and
+ * FIRESTORE_EMULATOR_HOST.
+ */
+export function getFirebaseApp() {
   if (getApps().length > 0) {
     return getApp();
   }
@@ -48,10 +54,9 @@ export async function verifyFirebaseAuthToken(
   }
 
   try {
-    const decoded: DecodedIdToken = await getAuth(getFirebaseApp()).verifyIdToken(
-      idToken,
-      true,
-    );
+    const decoded: DecodedIdToken = await getAuth(
+      getFirebaseApp(),
+    ).verifyIdToken(idToken, true);
     const email = asOptionalString(decoded.email);
     const name = asOptionalString(decoded.name);
     const picture = asOptionalString(decoded.picture);

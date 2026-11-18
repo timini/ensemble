@@ -27,12 +27,12 @@ describe('quickEval', () => {
 
   it('has default option values', () => {
     const opts = parseOpts([]);
-    expect(opts.model).toBe('google:gemini-2.5-flash-lite');
+    expect(opts.model).toBe('google:gemini-3-flash-preview');
     expect(opts.consensusModel).toBe('google:gemini-2.5-flash-lite');
-    expect(opts.judgeModel).toBe('google:gemini-2.5-flash-lite');
+    expect(opts.judgeModel).toBe('google:gemini-2.5-flash');
     expect(opts.ensemble).toBe('5');
     expect(opts.temperature).toBe('0.7');
-    expect(opts.sample).toBe('30');
+    expect(opts.sample).toBeUndefined();
     expect(opts.mode).toBe('free');
     expect(opts.cache).toBe(true);
     expect(opts.parallel).toBe(true);

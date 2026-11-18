@@ -11,7 +11,7 @@ const meta = {
   argTypes: {
     provider: {
       control: 'select',
-      options: ['openai', 'anthropic', 'google', 'xai', 'deepseek', 'perplexity'],
+      options: ['openai', 'anthropic', 'google', 'xai', 'deepseek', 'perplexity', 'openai-compatible'],
     },
     size: {
       control: 'select',
@@ -45,6 +45,11 @@ export const DeepSeek: Story = {
 
 export const Perplexity: Story = {
   args: { provider: 'perplexity', size: 'lg' },
+};
+
+/** Any OpenAI-compatible endpoint (Ollama, OpenRouter and others). */
+export const OpenAICompatible: Story = {
+  args: { provider: 'openai-compatible', size: 'lg' },
 };
 
 export const AllProviders: Story = {

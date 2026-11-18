@@ -2,7 +2,7 @@
 
 exports[`Card Snapshots > matches snapshot for basic card 1`] = `
 <div
-  class="rounded-xl border bg-card text-card-foreground shadow"
+  class="rounded-xl border border-border bg-card text-card-foreground shadow-sm"
 >
   <div
     class="p-6 pt-0"
@@ -14,7 +14,7 @@ exports[`Card Snapshots > matches snapshot for basic card 1`] = `
 
 exports[`Card Snapshots > matches snapshot for card with custom className 1`] = `
 <div
-  class="rounded-xl border bg-card text-card-foreground shadow custom-class"
+  class="rounded-xl border border-border bg-card text-card-foreground shadow-sm custom-class"
 >
   <div
     class="p-6 pt-0"
@@ -26,13 +26,13 @@ exports[`Card Snapshots > matches snapshot for card with custom className 1`] = 
 
 exports[`Card Snapshots > matches snapshot for complete card structure 1`] = `
 <div
-  class="rounded-xl border bg-card text-card-foreground shadow"
+  class="rounded-xl border border-border bg-card text-card-foreground shadow-sm"
 >
   <div
-    class="flex flex-col space-y-1.5 p-6"
+    class="flex flex-col gap-1.5 p-6"
   >
     <div
-      class="font-semibold leading-none tracking-tight"
+      class="text-heading font-semibold"
     >
       Card Title
     </div>

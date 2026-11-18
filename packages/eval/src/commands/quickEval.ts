@@ -1,26 +1,28 @@
 import { Command } from 'commander';
 import { ProviderRegistry } from '@ensemble-ai/shared-utils/providers';
 import { ConcurrencyLimiter, SystemMonitor } from '../lib/concurrencyPool.js';
-import { loadBenchmarkQuestions } from '../lib/benchmarkDatasets.js';
 import { resolveBenchmarkDatasetName } from '../lib/benchmarkDatasetShared.js';
-import { loadEnsembleCache } from '../lib/ensembleCache.js';
 import { parseStrategies } from '../lib/consensus.js';
-import { parseModelSpec } from '../lib/modelSpecs.js';
+import {
+  CACHED_EVAL_MODEL, DEFAULT_CONSENSUS_MODEL, DEFAULT_JUDGE_MODEL,
+  DEFAULT_SAMPLE_FREE, DEFAULT_SAMPLE_MOCK, resolveSampleSize, sampleSizeWarning,
+} from '../lib/evalDefaults.js';
+import { endpointsOf, parseModelSpec } from '../lib/modelSpecs.js';
+import { assertIndependentJudge, datasetNeedsJudge } from '../lib/evaluators.js';
+import type { AnswerProtocol } from '../lib/methodology.js';
+import { loadQuickEvalDataset } from './quickEvalDatasets.js';
 import { registerProviders } from '../lib/providers.js';
 import { printResults, type DatasetResult } from './quickEvalOutput.js';
 import { runDataset, type RunDatasetArgs } from './quickEvalRunner.js';
 import {
-  buildBaselineFromResults, loadBaseline, saveBaseline,
+  baselineMismatch, buildBaselineFromResults, loadBaseline, saveBaseline,
   checkRegression, printRegressionReport,
 } from './quickEvalBaseline.js';
 import type { BenchmarkDatasetName, BenchmarkQuestion, EvalMode, StrategyName } from '../types.js';
 
-const DEFAULT_MODEL = 'google:gemini-2.5-flash-lite';
-const DEFAULT_CONSENSUS_MODEL = 'google:gemini-2.5-flash-lite';
-const DEFAULT_JUDGE_MODEL = 'google:gemini-2.5-flash-lite';
+const DEFAULT_MODEL = CACHED_EVAL_MODEL;
 const DEFAULT_ENSEMBLE_SIZE = 5;
 const DEFAULT_TEMPERATURE = 0.7;
-const DEFAULT_SAMPLE = 30;
 const DEFAULT_DATASETS: BenchmarkDatasetName[] = [
   'gsm8k', 'truthfulqa', 'gpqa', 'hle', 'math500',
   'mmlu_pro', 'simpleqa', 'arc', 'hellaswag',
@@ -35,8 +37,9 @@ interface QuickEvalOptions {
   temperature: string;
   strategies?: string[];
   datasets?: string[];
-  sample: string;
+  sample?: string;
   mode: string;
+  allowSameJudge?: boolean;
   cache: boolean;
   parallel: boolean;
   baseline?: string;
@@ -71,7 +74,8 @@ export function createQuickEvalCommand(): Command {
     .option('--temperature <value>', 'Sampling temperature for ensemble diversity (0 = deterministic).', String(DEFAULT_TEMPERATURE))
     .option('--strategies <strategies...>', 'Consensus strategies (standard,elo,majority,council). Comma-separated.')
     .option('--datasets <datasets...>', 'Datasets to evaluate. Comma-separated. Defaults to all.')
-    .option('--sample <count>', 'Questions per dataset.', String(DEFAULT_SAMPLE))
+    .option('--sample <count>', `Questions per dataset (default ${DEFAULT_SAMPLE_FREE} in free mode, ${DEFAULT_SAMPLE_MOCK} in mock mode).`)
+    .option('--allow-same-judge', 'Allow the judge model to be the model under test (biased; off by default).')
     .option('--mode <mode>', 'Provider mode (mock or free).', 'free')
     .option('--no-cache', 'Disable single-model baseline caching.')
     .option('--no-parallel', 'Run datasets sequentially instead of in parallel.')
@@ -80,10 +84,14 @@ export function createQuickEvalCommand(): Command {
     .option('--concurrency <count>', 'Initial max concurrent questions (auto-adapts via AIMD).', '40')
     .option('--question-timeout <seconds>', 'Max seconds per question before skipping (0 = no timeout).', '0')
     .action(async (options: QuickEvalOptions) => {
-      const { provider, model: modelName } = parseModelSpec(options.model);
+      const modelSpec = parseModelSpec(options.model);
+      const consensusSpec = parseModelSpec(options.consensusModel);
+      const judgeSpec = parseModelSpec(options.judgeModel);
+      const { provider, model: modelName } = modelSpec;
       const model = options.model;
-      const { provider: consensusProvider, model: consensusModelName } = parseModelSpec(options.consensusModel);
-      const { provider: judgeProvider, model: judgeModelName } = parseModelSpec(options.judgeModel);
+      const { provider: consensusProvider, model: consensusModelName } = consensusSpec;
+      const { provider: judgeProvider, model: judgeModelName } = judgeSpec;
+      const endpoints = endpointsOf([modelSpec, consensusSpec, judgeSpec]);
 
       const ensembleSize = Number.parseInt(options.ensemble, 10);
       if (!Number.isInteger(ensembleSize) || ensembleSize < 2) {
@@ -95,15 +103,12 @@ export function createQuickEvalCommand(): Command {
         throw new Error(`Temperature must be between 0 and 2, got "${options.temperature}".`);
       }
 
-      const sampleCount = Number.parseInt(options.sample, 10);
-      if (!Number.isInteger(sampleCount) || sampleCount <= 0) {
-        throw new Error(`Invalid sample count "${options.sample}".`);
-      }
-
       const mode = options.mode as EvalMode;
       if (!VALID_MODES.includes(mode)) {
         throw new Error(`Invalid mode "${options.mode}". Expected one of: ${VALID_MODES.join(', ')}.`);
       }
+
+      const sampleCount = resolveSampleSize(options.sample, mode);
 
       const significanceLevel = options.significance !== undefined ? Number.parseFloat(options.significance) : 0.10;
       if (Number.isNaN(significanceLevel) || significanceLevel <= 0 || significanceLevel >= 1) {
@@ -124,7 +129,7 @@ export function createQuickEvalCommand(): Command {
       const useCache = options.cache && mode !== 'mock';
       const registry = new ProviderRegistry();
       const providers = new Set([provider, consensusProvider, judgeProvider]);
-      registerProviders(registry, [...providers], mode);
+      registerProviders(registry, [...providers], mode, endpoints);
 
       const monitor = new SystemMonitor();
       const limiter = new ConcurrencyLimiter({ initial: initialConcurrency, min: 1, max: 60, monitor });
@@ -137,32 +142,17 @@ export function createQuickEvalCommand(): Command {
       log(`  Strategies: ${strategies.join(', ')}  Concurrency: ${initialConcurrency} (AIMD)\n`);
       log(`  Datasets: ${datasetNames.join(', ')}  Sample: ${sampleCount}  Parallel: ${parallel ? 'yes' : 'no'}${questionTimeoutMs ? `  Timeout: ${questionTimeoutSec}s/q` : ''}\n\n`);
 
+      const warning = sampleSizeWarning(sampleCount, mode);
+      if (warning) log(`  Warning: ${warning}\n`);
+
       log(`  [${elapsed()}] Loading datasets...\n`);
-      const datasetQuestions: Array<{ name: BenchmarkDatasetName; questions: BenchmarkQuestion[] }> = [];
+      const datasetQuestions: Array<{
+        name: BenchmarkDatasetName; questions: BenchmarkQuestion[]; protocol: AnswerProtocol;
+      }> = [];
       const loadResults = await Promise.allSettled(
-        datasetNames.map(async (name) => {
-          // Check for ensemble cache first
-          const ensembleCache = useCache
-            ? await loadEnsembleCache(model, name, ensembleSize, temperature)
-            : null;
-
-          if (ensembleCache && ensembleCache.size > 0) {
-            // Cache exists: load ALL questions (unsampled) then filter to cached IDs.
-            // Use seed=42 for deterministic sampling — same questions every run.
-            const all = (await loadBenchmarkQuestions(name, { shuffle: true, seed: 42 })).questions;
-            const cachedIds = new Set(ensembleCache.keys());
-            const cachedQuestions = all.filter((q) => cachedIds.has(q.id));
-            const sampled = cachedQuestions.slice(0, Math.min(sampleCount, cachedQuestions.length));
-            log(`  [${name}] ${cachedIds.size} cached questions, using ${sampled.length}\n`);
-            return { name, questions: sampled };
-          }
-
-          // No cache: load with standard sampling
-          return {
-            name,
-            questions: (await loadBenchmarkQuestions(name, { sample: sampleCount })).questions,
-          };
-        }),
+        datasetNames.map((name) => loadQuickEvalDataset({
+          name, model, ensembleSize, temperature, sampleCount, useCache, log,
+        })),
       );
       for (const [i, result] of loadResults.entries()) {
         if (result.status === 'fulfilled') {
@@ -175,10 +165,13 @@ export function createQuickEvalCommand(): Command {
       if (datasetQuestions.length === 0) {
         throw new Error('All datasets failed to load. Cannot proceed.');
       }
+      if (datasetQuestions.some((d) => datasetNeedsJudge(d.name, d.protocol))) {
+        assertIndependentJudge(judgeSpec, [modelSpec], { allowSameModel: options.allowSameJudge });
+      }
       log(`  [${elapsed()}] Datasets loaded: ${datasetQuestions.map(d => `${d.name}(${d.questions.length})`).join(', ')}\n`);
 
-      const runArgs: RunDatasetArgs[] = datasetQuestions.map(({ name, questions }) => ({
-        datasetName: name, questions,
+      const runArgs: RunDatasetArgs[] = datasetQuestions.map(({ name, questions, protocol }) => ({
+        datasetName: name, questions, protocol, endpoints,
         model, provider, modelName, ensembleSize, strategies,
         mode, registry, useCache, sampleCount,
         limiter, temperature,
@@ -207,12 +200,28 @@ export function createQuickEvalCommand(): Command {
 
       if (options.baseline) {
         log(`  [${elapsed()}] Building baseline...\n`);
+        const protocols = new Set(datasetQuestions.map((d) => d.protocol));
+        const runProtocol = protocols.size > 1 ? 'mixed' : [...protocols][0];
         const current = buildBaselineFromResults(
-          model, ensembleSize, sampleCount, datasetNames, strategies, allDatasetResults,
+          model, ensembleSize, sampleCount, datasetNames, strategies, allDatasetResults, runProtocol,
         );
         log(`  [${elapsed()}] Loading previous baseline...\n`);
         const previous = await loadBaseline(options.baseline);
-        if (previous) {
+        const mismatch = previous ? baselineMismatch(previous, current) : null;
+        if (previous && mismatch) {
+          // stdout lands in eval-results.txt and the PR comment, so make the skip obvious there.
+          process.stdout.write(
+            `\n  WARNING: REGRESSION CHECK SKIPPED (not a pass): ${mismatch}.\n` +
+            '  Regenerate the baseline with the eval-post-merge workflow (or eval:ci locally).\n',
+          );
+          // stderr is not redirected in CI, so the annotation shows on the workflow run.
+          if (process.env.GITHUB_ACTIONS === 'true') {
+            process.stderr.write(
+              `::warning title=Eval regression check skipped::${mismatch}. ` +
+              'Regenerate and commit baselines/quick-eval.json.\n',
+            );
+          }
+        } else if (previous) {
           log(`  [${elapsed()}] Running regression check...\n`);
           const result = checkRegression(previous, current, significanceLevel);
           printRegressionReport(result);

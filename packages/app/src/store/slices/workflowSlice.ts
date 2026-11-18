@@ -5,9 +5,9 @@
  * Config → Ensemble → Prompt → Review
  */
 
-import type { StateCreator } from 'zustand';
+import type { StateCreator } from "zustand";
 
-export type WorkflowStep = 'config' | 'ensemble' | 'prompt' | 'review';
+export type WorkflowStep = "config" | "ensemble" | "prompt" | "review";
 
 export interface WorkflowSlice {
   currentStep: WorkflowStep;
@@ -23,7 +23,7 @@ export interface WorkflowSlice {
 }
 
 export const createWorkflowSlice: StateCreator<WorkflowSlice> = (set) => ({
-  currentStep: 'config',
+  currentStep: "config",
   stepsCompleted: {
     config: false,
     ensemble: false,
@@ -46,7 +46,7 @@ export const createWorkflowSlice: StateCreator<WorkflowSlice> = (set) => ({
 
   resetWorkflow: () => {
     set({
-      currentStep: 'config',
+      currentStep: "config",
       stepsCompleted: {
         config: false,
         ensemble: false,

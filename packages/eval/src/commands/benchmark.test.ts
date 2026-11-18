@@ -1,11 +1,13 @@
 import { describe, expect, it, vi, beforeEach } from 'vitest';
+import { ProviderRegistry } from '@ensemble-ai/shared-utils/providers';
 import { createBenchmarkCommand } from './benchmark.js';
 
 vi.mock('../lib/benchmarkDatasets.js', () => ({
   loadBenchmarkQuestions: vi.fn(),
 }));
 
-vi.mock('../lib/evaluators.js', () => ({
+vi.mock('../lib/evaluators.js', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('../lib/evaluators.js')>()),
   createEvaluatorForDataset: vi.fn(),
 }));
 
@@ -87,7 +89,7 @@ describe('benchmark command', () => {
     it('parses required --models and dataset argument', async () => {
       await runCommand(['gsm8k', '--models', 'openai:gpt-4o', '--output', 'out.json']);
 
-      expect(mockLoadBenchmarkQuestions).toHaveBeenCalledWith('gsm8k', { sample: 10 });
+      expect(mockLoadBenchmarkQuestions).toHaveBeenCalledWith('gsm8k', { sample: 20, seed: 42 });
       expect(MockBenchmarkRunner).toHaveBeenCalledTimes(1);
       const config = MockBenchmarkRunner.mock.calls[0][0];
       expect(config.models).toEqual([{ provider: 'openai', model: 'gpt-4o' }]);
@@ -149,17 +151,17 @@ describe('benchmark command', () => {
         '--output', 'out.json',
       ]);
 
-      expect(mockLoadBenchmarkQuestions).toHaveBeenCalledWith('gsm8k', { sample: 5 });
+      expect(mockLoadBenchmarkQuestions).toHaveBeenCalledWith('gsm8k', { sample: 5, seed: 42 });
     });
 
-    it('defaults sample count to 10', async () => {
+    it('defaults sample count to 20 in mock mode', async () => {
       await runCommand([
         'gsm8k',
         '--models', 'openai:gpt-4o',
         '--output', 'out.json',
       ]);
 
-      expect(mockLoadBenchmarkQuestions).toHaveBeenCalledWith('gsm8k', { sample: 10 });
+      expect(mockLoadBenchmarkQuestions).toHaveBeenCalledWith('gsm8k', { sample: 20, seed: 42 });
     });
 
     it('parses --summarizer option', async () => {
@@ -298,7 +300,7 @@ describe('benchmark command', () => {
 
       await runCommand(['gsm8k', '--models', 'openai:gpt-4o', '--output', 'out.json']);
 
-      expect(mockCreateEvaluatorForDataset).toHaveBeenCalledWith('gsm8k', undefined);
+      expect(mockCreateEvaluatorForDataset).toHaveBeenCalledWith('gsm8k', undefined, { protocol: 'structured' });
       const config = MockBenchmarkRunner.mock.calls[0][0];
       expect(config.evaluator).toBe(fakeEvaluator);
     });
@@ -339,7 +341,8 @@ describe('benchmark command', () => {
 
       expect(mockRunnerRun).toHaveBeenCalledTimes(1);
       const runArgs = mockRunnerRun.mock.calls[0][0];
-      expect(runArgs.questions).toEqual(questions);
+      expect(runArgs.questions.map((q: { id: string }) => q.id)).toEqual(['q1']);
+      expect(runArgs.questions[0].prompt.startsWith('Test?\n\n')).toBe(true);
       expect(runArgs.outputPath).toBe('result.json');
       expect(runArgs.output).toBeDefined();
     });
@@ -347,7 +350,7 @@ describe('benchmark command', () => {
 
   describe('resume behavior', () => {
     it('loads and validates existing output when --resume is used', async () => {
-      const existingOutput = makeOutputFile();
+      const existingOutput = { ...makeOutputFile(), answerProtocol: 'structured' as const };
       mockFileExists.mockResolvedValue(true);
       mockReadJsonFile.mockResolvedValue(existingOutput);
 
@@ -361,6 +364,14 @@ describe('benchmark command', () => {
       expect(mockFileExists).toHaveBeenCalledWith('out.json');
       expect(mockReadJsonFile).toHaveBeenCalledWith('out.json');
       expect(assertValidResumedOutput).toHaveBeenCalled();
+    });
+
+    it('refuses to resume a file run with another protocol', async () => {
+      mockFileExists.mockResolvedValue(true);
+      mockReadJsonFile.mockResolvedValue(makeOutputFile());
+      await expect(
+        runCommand(['gsm8k', '--models', 'openai:gpt-4o', '--output', 'out.json', '--resume']),
+      ).rejects.toThrow(/legacy protocol/);
     });
 
     it('skips resume when file does not exist', async () => {
@@ -412,6 +423,80 @@ describe('benchmark command', () => {
 
       const calls = writeSpy.mock.calls.map((call) => String(call[0]));
       expect(calls.some((call) => call.includes('Benchmark completed'))).toBe(true);
+    });
+  });
+
+  describe('methodology', () => {
+    it('defaults to 200 questions in free mode', async () => {
+      await runCommand(['gsm8k', '--models', 'openai:gpt-4o', '--mode', 'free', '--output', 'out.json']);
+      expect(mockLoadBenchmarkQuestions).toHaveBeenCalledWith('gsm8k', { sample: 200, seed: 42 });
+    });
+
+    it('runs the structured protocol with shuffled options and records it', async () => {
+      mockLoadBenchmarkQuestions.mockResolvedValue({
+        datasetName: 'truthfulqa',
+        questions: [{
+          id: 'truthfulqa-0', prompt: 'legacy', groundTruth: 'A',
+          multipleChoice: { stem: 'Q?', choices: ['r', 'w1', 'w2', 'w3'], correctIndex: 0, style: 'dot' },
+        }],
+      });
+      const file = makeOutputFile();
+      mockCreateBenchmarkFile.mockReturnValue(file);
+      await runCommand(['truthfulqa', '--models', 'openai:gpt-4o', '--output', 'out.json']);
+      const config = MockBenchmarkRunner.mock.calls[0][0];
+      expect(config.protocol).toBe('structured');
+      const questions = mockRunnerRun.mock.calls[0][0].questions;
+      expect(questions[0].optionPermutation).toHaveLength(4);
+      expect(questions[0].answer).toEqual({ kind: 'choice', choices: ['A', 'B', 'C', 'D'] });
+      expect(file.answerProtocol).toBe('structured');
+      expect(file.optionSeed).toBe(1729);
+    });
+
+    it('needs no judge for mechanically scored datasets', async () => {
+      await runCommand(['gsm8k', '--models', 'openai:gpt-4o', '--output', 'out.json']);
+      expect(mockCreateEvaluatorForDataset).toHaveBeenCalledWith('gsm8k', undefined, { protocol: 'structured' });
+    });
+
+    it('refuses a judge that is also a generator', async () => {
+      mockLoadBenchmarkQuestions.mockResolvedValue({
+        datasetName: 'simpleqa',
+        questions: [{ id: 's-0', prompt: 'Who?', groundTruth: 'Ada' }],
+      });
+      await expect(
+        runCommand(['simpleqa', '--models', 'openai:gpt-4o', '--judge', 'openai:gpt-4o', '--output', 'out.json']),
+      ).rejects.toThrow(/also generates answers/);
+      await expect(
+        runCommand(['simpleqa', '--models', 'openai:gpt-4o', '--output', 'out.json']),
+      ).rejects.toThrow(/needs an LLM judge/);
+    });
+
+    it('accepts a different judge, or the same one when forced', async () => {
+      vi.spyOn(ProviderRegistry.prototype, 'getProvider').mockReturnValue({} as never);
+      mockLoadBenchmarkQuestions.mockResolvedValue({
+        datasetName: 'simpleqa',
+        questions: [{ id: 's-0', prompt: 'Who?', groundTruth: 'Ada' }],
+      });
+      await runCommand(['simpleqa', '--models', 'openai:gpt-4o', '--judge', 'google:gemini-2.5-flash', '--output', 'out.json']);
+      expect(mockRegisterProviders.mock.calls[0][1]).toContain('google');
+      await runCommand([
+        'simpleqa', '--models', 'openai:gpt-4o', '--judge', 'openai:gpt-4o', '--allow-same-judge', '--output', 'out.json',
+      ]);
+      expect(MockBenchmarkRunner).toHaveBeenCalledTimes(2);
+    });
+
+    it('registers OpenAI-compatible endpoints from the model specs', async () => {
+      await runCommand(['gsm8k', '--models', 'ollama:llama3.2,openrouter:qwen/qwen3-14b', '--output', 'out.json']);
+      const [, providers, , endpoints] = mockRegisterProviders.mock.calls[0];
+      expect(providers).toContain('openai-compatible');
+      expect(endpoints!.map((e: { id: string }) => e.id)).toEqual(['ollama', 'openrouter']);
+      const config = MockBenchmarkRunner.mock.calls[0][0];
+      expect(config.endpoints).toHaveLength(2);
+    });
+
+    it('rejects an unknown protocol', async () => {
+      await expect(
+        runCommand(['gsm8k', '--models', 'openai:gpt-4o', '--protocol', 'fancy', '--output', 'out.json']),
+      ).rejects.toThrow(/Invalid protocol/);
     });
   });
 });

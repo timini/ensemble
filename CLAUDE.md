@@ -1,520 +1,292 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+Guidance for Claude Code when working in this repository.
 
-## Project Overview
+## Read first
 
-**Ensemble AI** is a web application that allows users to query multiple Large Language Models (LLMs) simultaneously and compare their responses. The project follows a strict **UI-first, Test-Driven Development (TDD)** approach across 4 progressive phases.
+1. [docs/PRODUCT_VISION.md](./docs/PRODUCT_VISION.md): what the product is, who it is for, what we may and may not claim.
+2. [docs/ROADMAP.md](./docs/ROADMAP.md): the active plan. Milestones M0 to M6 with checkbox tasks. This replaces the Phase 4 tasks (T235 onward) in `specs/001-we-need-to/tasks.md`.
+3. [docs/ARCHITECTURE.md](./docs/ARCHITECTURE.md): how the code works today and the target design.
+4. `.specify/memory/constitution.md` (v1.1.0): the development principles below come from it.
 
-**Core Value Proposition**: Make better decisions by comparing perspectives from multiple AI models (OpenAI, Anthropic, Google, XAI) rather than relying on a single model's response.
+## Project overview
 
-## Repository Structure
+**Ensemble AI** sends one prompt to several LLMs in parallel, streams the answers side by side, scores how much they agree, and merges them into a consensus answer. The agreement score is the core of the product: low agreement warns the user that no single answer should be trusted.
 
-This is a **monorepo** organized into three packages:
+Do not write copy claiming ensembles are more accurate than the best single model. The benchmarks do not support that yet (see the vision document).
 
-- **`packages/component-library/`**: UI component library containing all reusable atomic design components (atoms, molecules, organisms). All components are developed in isolation with Storybook as the primary development environment.
-- **`packages/app/`**: The main Next.js application that consumes the component library and implements the full user-facing application with routing, state management, and provider integration.
-- **`packages/wireframes/`**: Design wireframes and mockups that serve as the single source of truth for UI implementation.
+Modes:
 
-**Development Flow**: wireframes → components → application
+- **Free**: user's own provider keys, encrypted in the browser, providers called directly from the browser. Works today.
+- **Pro**: sign-in with Firebase Auth, Stripe credits, model calls on the server through OpenRouter, billed per run, with the usage dashboard at `/account`. Built in roadmap M5; tested end to end against the Firebase emulators by the `pro-mode` suite.
+- **Mock**: developer and CI only, enabled with `NEXT_PUBLIC_MOCK_MODE=true`. Never show a Mock option to users.
 
-## Key Commands
+## Repository structure
 
-All commands should be run from the `packages/app` directory:
+npm workspaces monorepo:
+
+- `packages/app/`: Next.js 15 App Router app. Routes: `/` (landing page with a recorded example run and the three ways in), `/workspace` (the one working screen), `/account` (Pro usage dashboard), `/config`, `/ensemble`, `/prompt` and `/review` (redirect into the workspace with the matching panel open), `/features`, `/about`, `/benchmarks`, `/s/[id]` (public read-only shared run), `/test-components` (dev only), `/api/trpc/[trpc]`, `/api/stripe/checkout`, `/api/stripe/webhook`, `/api/health`, plus `sitemap.xml`, `robots.txt` and Open Graph images.
+- `packages/component-library/`: 65 atomic-design components (atoms, molecules, organisms) developed in Storybook. The app imports its source via a tsconfig alias.
+- `packages/shared-utils/`: provider clients, registry, factory, similarity maths, Web Crypto helpers. Exports from `dist`; rebuild after changes with `npm run build --workspace=packages/shared-utils`.
+- `packages/consensus-core`, `consensus-standard`, `consensus-majority`, `consensus-elo`, `consensus-council`: consensus strategies.
+- `packages/eval/`: benchmark CLI. `packages/eval-baseline/`: Python lm-eval runner.
+- `packages/e2e/`: Playwright suites.
+- `packages/wireframes/`: standalone Next app, the UX source of truth. Not in the root workspaces; run `npm install` inside it.
+
+**Development flow**: wireframes, then components, then application. The M4 redesign follows this order.
+
+## Key commands
+
+From the repo root:
 
 ```bash
-cd packages/app
+npm install
+npm run build --workspace=packages/shared-utils   # needed before the app builds or typechecks
+npm run dev              # app in Free mode (http://localhost:3000)
+npm run dev:mock         # app with mock providers
+npm run dev:components   # Storybook (http://localhost:6006)
+npm run build            # build all workspaces in dependency order
+npm test                 # unit tests, all workspaces
+npm run lint
+npm run typecheck
+```
 
-# Development
-npm run dev              # Start Next.js dev server with Turbo
-npm run build            # Build production application
-npm start                # Start production server
-npm run preview          # Build and start (for testing production builds)
+From `packages/app`:
 
-# Code Quality
-npm run check            # Run linter AND typecheck
-npm run lint             # Run ESLint
-npm run lint:fix         # Auto-fix ESLint issues
-npm run typecheck        # Run TypeScript compiler (no emit)
-npm run format:check     # Check Prettier formatting
-npm run format:write     # Auto-format with Prettier
+```bash
+npm run check            # next lint + tsc --noEmit
+npm run format:check
+npm run format:write
+npm run test             # vitest with coverage
+npm run preview          # production build and start
 ```
 
 ## Architecture
 
-### Tech Stack
+### Tech stack
 
-- **Framework**: Next.js 15 (App Router) with React 19
-- **Styling**: Tailwind CSS v4 (utility-first)
-- **State Management**: Zustand with localStorage persistence
-- **Backend Communication**: tRPC v11 (Phase 4+)
-- **Testing**: Vitest + React Testing Library (unit/integration), Playwright (E2E)
-- **Component Catalog**: Storybook 8+
-- **Linting/Formatting**: ESLint + Prettier (NOT Biome, despite constitution mention)
-- **i18n**: react-i18next (English & French)
+- **Framework**: Next.js 15 (App Router), React 19
+- **Styling**: Tailwind CSS 3.4 with semantic tokens in `packages/component-library/src/styles/tokens.css`
+- **State**: Zustand 5 with localStorage persistence (`ensemble-ai-store`)
+- **Server**: tRPC 11 with TanStack Query 5, Firebase Admin for token verification
+- **Testing**: Vitest and Testing Library (unit), Storybook test runner, Playwright (E2E)
+- **Component catalogue**: Storybook 9
+- **Linting and formatting**: ESLint and Prettier (not Biome, despite the constitution)
+- **i18n**: react-i18next (English and French)
+- **Monitoring**: Sentry
+- **Hosting**: Firebase App Hosting, Terraform in `infra/terraform`
 
-### Application Structure
+### Providers
 
-```
-packages/app/src/
-├── app/                    # Next.js App Router pages
-│   ├── _components/        # Page-specific components
-│   ├── api/trpc/[trpc]/    # tRPC API route handler
-│   ├── layout.tsx          # Root layout
-│   └── page.tsx            # Home page
-├── server/                 # Backend code (tRPC)
-│   └── api/
-│       ├── routers/        # tRPC route handlers
-│       ├── root.ts         # Root tRPC router
-│       └── trpc.ts         # tRPC initialization
-├── trpc/                   # tRPC client setup
-│   ├── query-client.ts     # React Query client
-│   ├── react.tsx           # tRPC React hooks
-│   └── server.ts           # Server-side tRPC caller
-├── styles/                 # Global styles
-└── env.js                  # Environment variable validation
-```
+`AIProvider` interface in `packages/shared-utils/src/providers/types.ts`. Six key providers: `openai`, `anthropic`, `google`, `xai`, `deepseek`, `perplexity`, plus `openai-compatible`, which covers any number of OpenAI-compatible endpoints (Ollama, LM Studio, OpenRouter and others; model ids carry the endpoint id, `ollama/llama3.2:3b`). Clients live in `shared-utils/src/providers/clients/<provider>/` and extend `base/BaseFreeClient.ts`.
 
-### Development Phases
+Client modes:
 
-The project follows a **strict 4-phase delivery**:
+- **Mock client**: lorem-ipsum streams for UI work and E2E tests.
+- **Free clients**: direct browser calls with the user's key (`dangerouslyAllowBrowser: true`).
+- **Pro client**: `ProAPIClient` (shared-utils) over a transport the app provides (`app/src/providers/pro/`): the `streamTextEvents` tRPC subscription over SSE plus `generateStructured` and `generateEmbeddings` mutations, all billed to a Pro run. See Pro mode in `docs/ARCHITECTURE.md`.
 
-1. **Phase 1 (4 weeks)**: Component Library - 20+ UI components in Storybook with 80%+ test coverage
-2. **Phase 2 (3 weeks)**: UI Integration - Functional application using Mock API clients
-3. **Phase 3 (3 weeks)**: Free Mode - Real provider API integration with client-side encrypted API keys
-4. **Phase 4 (4 weeks)**: Pro Mode - Backend services, credit system, managed APIs via tRPC
+Embeddings: OpenAI (`text-embedding-3-small`), Google (`gemini-embedding-2`) and OpenAI-compatible endpoints (the embedding model set on the endpoint) implement `generateEmbeddings`. Other providers throw `EmbeddingsNotSupportedError`. Only mock mode uses hash-based fake vectors.
 
-**Current Status**: Early Phase 1 (initial setup, wireframes complete)
+Adding a provider with its own API touches about 20 files; adding an OpenAI-compatible service is one preset. Both are described in `docs/ARCHITECTURE.md`.
 
-### User Workflow
+### Server (tRPC)
 
-The application implements a **4-step workflow**:
+- Context and `protectedProcedure`: `src/server/api/trpc.ts` (verifies a Firebase ID token)
+- Routers: `src/server/api/routers/` (`auth`, `provider`, `credits`, `proRun`, `share`, `sync`)
+- Root router: `src/server/api/root.ts`
+- Client hooks: `src/trpc/react.tsx`. Server caller: `src/trpc/server.ts`
+- Server provider calls: `src/server/pro/` (Pro calls to OpenRouter, run records, rate limit, App Check); `src/server/providers/providerService.ts` (model lists with direct server keys)
+- Credit ledger: `src/server/credits/` (Firestore, integer micro-dollars). Stripe: `src/server/stripe/` and `src/app/api/stripe/`.
+- Client sign-in: Firebase Auth in `src/lib/auth/` and `src/hooks/useAuthController.ts`, shown by `AccountMenu` in the workspace header. Off when the `NEXT_PUBLIC_FIREBASE_*` config is unset.
+- Shares and sync: `src/server/share/`, `src/server/sync/`, `src/lib/share/`, `src/lib/sync/`, `src/hooks/useCollectionSync.ts`. See Sharing and sync in `docs/ARCHITECTURE.md`.
+- Emulator tests (Firestore rules, ledger, webhook, shares, sync): `npm run test:emulator --workspace=packages/app`. Setup for Auth, Firestore and Stripe: `docs/DEPLOYMENT.md`.
 
-1. **Config**: Select operating mode (Free with own API keys, or Pro with managed service) and provide credentials
-2. **Ensemble**: Select AI models to include and designate one as the "summarizer"
-3. **Prompt**: Enter question/prompt and submit to ensemble
-4. **Review**: View streaming responses, agreement analysis, and meta-analysis
+### Constitutional principles
 
-### Provider Architecture
+From `.specify/memory/constitution.md` (v1.1.0):
 
-The `AIProvider` abstract class (frontend-only) supports three API client modes:
+- **Component modularity**: break UI into the smallest reusable components, files under 200 lines.
+- **Component completeness**: every component has `.tsx`, `.stories.tsx`, `.test.tsx`, a TypeScript props interface and JSDoc.
+- **Storybook as the catalogue**: every component variant has a story.
+- **TDD**: tests before implementation, 80%+ coverage.
+- **Atomic design**: atoms, molecules, organisms, templates, pages.
+- **Design system**: Tailwind utilities and theme tokens only; dark and light themes; EN and FR from day one.
+- **No hardcoding**: theme tokens for colours, i18n keys for text.
 
-- **Mock Client**: Frontend-only, generates lorem ipsum streams (UI development & E2E tests)
-- **Free Client**: Frontend-only, direct API calls to providers (Phase 3)
-- **Pro Client**: Uses tRPC to call backend, which streams from providers (Phase 4)
+## Planning system
 
-Four providers: **XAI, OpenAI, Google (Gemini), Anthropic**
+- Active plan: `docs/ROADMAP.md`. Work milestone by milestone and tick tasks off there.
+- Historical spec: `specs/001-we-need-to/` (`spec.md`, `plan.md`, `tasks.md`). Phases 1 to 3 are mostly done. Its Phase 4 choices (NextAuth, Prisma, Postgres, Vercel) are superseded by the roadmap's Decisions section (Firebase Auth, Firestore, App Hosting).
 
-### Constitutional Principles
+Before starting a task:
 
-All development MUST adhere to `.specify/memory/constitution.md` (v1.1.0). Key principles:
+1. Read the relevant milestone in the roadmap.
+2. Check the functional requirement it refers to in `specs/001-we-need-to/spec.md`, if any.
+3. Read the constitution if the task touches components.
 
-- **UI-First**: Build ALL UI components BEFORE backend integration
-- **Component Modularity**: Break down every UI element into smallest reusable components (200-line limit)
-- **Component Completeness**: Every component requires: `.tsx` + `.stories.tsx` + `.test.tsx` + TypeScript interface + JSDoc
-- **Storybook as SSOT**: Every component variant MUST have a story
-- **TDD Mandatory**: Write tests BEFORE implementing component logic (80%+ coverage minimum)
-- **Atomic Design**: Organize components as atoms → molecules → organisms → templates → pages
-- **Design System**: Tailwind utility classes only; support dark/light themes and EN/FR languages from day one
-- **No Hardcoding**: Use theme tokens (tailwind.config.js) and i18n keys
+## Development workflow
 
-## Specification System
+All changes to `main` go through a pull request with passing CI and at least one approval.
 
-The project uses the `.specify/` workflow system:
+### Branch protection on `main`
 
-- **Constitution**: `.specify/memory/constitution.md` - Governing principles (v1.1.0)
-- **Feature Specs**: `specs/{feature-id}/spec.md` - Detailed requirements
-- **Implementation Plans**: `specs/{feature-id}/plan.md` - Technical design
-- **Task Lists**: `specs/{feature-id}/tasks.md` - Actionable implementation tasks
+- Required status checks: all CI jobs must pass.
+- At least 1 approving review. Stale reviews are dismissed on new commits.
+- No force pushes, no deletion.
 
-**Current Feature**: `specs/001-we-need-to/` (Complete Ensemble AI application)
+### Standard workflow
 
-When working on features, ALWAYS:
-1. Read the constitution first
-2. Check the feature spec for requirements
-3. Review the implementation plan for technical decisions
-4. Follow the task list for implementation order
+1. **Branch**: `git checkout main && git pull && git checkout -b feature/<name>` (or `fix/<name>`, `docs/<name>`).
+2. **Specs**: check the roadmap task and any related spec requirement.
+3. **Tests first (mandatory)**:
+   - Component tasks: Storybook story with all variants, then failing unit tests.
+   - Page tasks: failing E2E test first.
+4. **Code**: implement until tests pass. Files under 200 lines. Tailwind tokens. JSDoc.
+5. **Quality checks**, and do not continue if any fail:
+   ```bash
+   # packages/app
+   npm run check && npm run format:write && npm run build && npm test
+   # packages/component-library (if changed)
+   npm run lint && npm run test:unit && npm run test:storybook:ci
+   # packages/e2e (if pages changed)
+   npm run test:mock
+   ```
+6. **Commit** with a Conventional Commit prefix (`feat:`, `fix:`, `test:`, `refactor:`, `docs:`, `chore:`):
+   ```bash
+   git commit -m "feat: <description>
 
-## Development Workflow
+   <detailed changes>"
+   ```
+7. **Docs**: tick the task in `docs/ROADMAP.md`. Update README or package docs if setup or behaviour changed.
+8. **Pull request**:
+   ```bash
+   git push -u origin feature/<name>
+   gh pr create --title "feat: <description>" --body "## Summary
+   - <changes>
 
-All changes to `main` must go through a Pull Request with passing CI checks and at least one approval.
+   ## Test plan
+   - [ ] All CI checks pass
+   - [ ] Tested locally"
+   ```
+9. **CI**: wait for all jobs (component library, shared utils, app lint/typecheck/build, mock E2E, static analysis). Fix and push again on failure.
+10. **Review and merge** after approval.
 
-### Branch Protection Rules
+### Task rules
 
-The `main` branch is protected with:
-- **Required status checks**: All CI jobs must pass (Component Library, Shared Utils, Wireframes, App, App E2E Mock Mode, Static Analysis)
-- **Required reviews**: At least 1 approving review before merge
-- **Stale review dismissal**: Reviews are dismissed when new commits are pushed
-- **No force pushes**: History cannot be rewritten on main
-- **No deletions**: The main branch cannot be deleted
+1. One roadmap task is one complete cycle of the workflow above.
+2. One task is one commit, or one commit for a tightly coupled group.
+3. Tick the task in the roadmap right after the commit.
+4. Quality checks must pass before committing.
+5. Never skip tests.
+6. Commit often; aim for 30 to 60 minute cycles.
+7. Respect milestone dependencies listed in the roadmap.
 
-### Standard Development Workflow
+## Mandatory development practices
 
-Follow this workflow for all changes:
+### Feature development agents (always use)
 
-#### 1. Create a Feature Branch
+For any development work:
+
+1. **First**: use `feature-dev:code-explorer` to analyse the existing code, trace execution paths and understand patterns.
+2. **Second**: use `feature-dev:code-architect` to design the change.
+3. **After coding**: use `feature-dev:code-reviewer` to review for bugs, security issues and code quality.
+
+Never skip the exploration step.
+
+### Test-driven development (mandatory)
+
+1. Write a failing test that shows the bug or specifies the behaviour.
+2. Run it and confirm it fails.
+3. Implement until it passes.
+4. Refactor with tests green.
+5. Confirm all existing tests still pass before committing.
+
+### Never bypass git hooks (absolute rule)
+
+1. Never use `--no-verify`.
+2. Never use `--force` or `--force-with-lease`.
+3. Never edit `.husky/pre-commit` or `.husky/pre-push` to skip checks.
+4. Never disable hooks temporarily.
+5. Never amend commits that are already pushed.
+
+If a hook fails, fix the cause and run it again. If tests are flaky, fix the tests. If hooks are slow, improve the hooks through a normal pull request.
+
+### Commit requirements
+
+Before every commit:
+
 ```bash
-git checkout main
-git pull origin main
-git checkout -b feature/<descriptive-name>
-# or: git checkout -b fix/<bug-description>
+npm run check   # lint + typecheck
+npm run build   # production build
+npm test        # all tests
 ```
 
-#### 2. Write/Update Specs
-- Review or create specs in `specs/{feature-id}/spec.md`
-- Check implementation plan in `specs/{feature-id}/plan.md`
-- Update task list in `specs/{feature-id}/tasks.md`
+Only commit when all tests pass.
 
-#### 3. Write Tests (TDD - MANDATORY)
-**For component tasks**:
-- **Story First**: Create Storybook story (`.stories.tsx`) with all variants
-- **Tests Before Code**: Write unit tests (`.test.tsx`) testing all behaviors
-- Run tests (they should fail initially - this is correct TDD)
+## Component workflow
 
-**For page tasks**:
-- Write E2E test FIRST, then implement until tests pass
+Component work comes in story, test, implementation order:
 
-#### 4. Write Code
-- Implement the feature/fix until tests pass
-- Keep files under 200 lines
-- Use Tailwind utility classes only
-- Add JSDoc documentation
+1. Story (`.stories.tsx`) with every variant. Commit.
+2. Unit tests (`.test.tsx`) for every behaviour. Commit.
+3. Implementation until tests pass. Commit.
+4. Check in Storybook across themes, languages and states.
 
-#### 5. Iterate Until Tests Pass
-Run all quality checks locally:
-```bash
-# From packages/app
-npm run check            # Linting + typecheck
-npm run format:write     # Auto-format code
-npm run build            # Ensure production build succeeds
-npm test                 # All unit tests pass
-
-# From packages/component-library (if applicable)
-npm run lint
-npm run test:unit
-npm run test:storybook:ci
-
-# From packages/e2e (if applicable)
-npm run test:mock
-```
-
-**DO NOT** proceed if any check fails. Fix issues before committing.
-
-#### 6. Commit Changes
-```bash
-git add .
-git commit -m "feat: <description>
-
-<detailed changes>
-
-🤖 Generated with [Claude Code](https://claude.com/claude-code)
-
-Co-Authored-By: Claude <noreply@anthropic.com>"
-```
-
-Use conventional commit format: `feat:`, `fix:`, `test:`, `refactor:`, `docs:`, `chore:`
-
-#### 7. Update Documentation
-- Mark completed tasks as `[X]` in `specs/{feature-id}/tasks.md`
-- Update README.md if setup changes
-- Update spec.md with completion notes if applicable
-
-#### 8. Push and Create Pull Request
-```bash
-git push -u origin feature/<descriptive-name>
-gh pr create --title "feat: <description>" --body "## Summary
-- <changes>
-
-## Test plan
-- [ ] All CI checks pass
-- [ ] Tested locally
-
-🤖 Generated with [Claude Code](https://claude.com/claude-code)"
-```
-
-#### 9. Verify CI Passes
-Wait for all CI jobs to complete:
-- Component Library (lint + unit tests + Storybook tests)
-- Shared Utils (tests)
-- Wireframes (lint + build)
-- App (lint + typecheck + build)
-- App E2E Mock Mode (Playwright tests with mock API clients)
-- App E2E Free Mode (Playwright tests with real API keys, when secrets configured)
-- Static Analysis
-
-If any job fails, fix the issues and push again.
-
-#### 10. Request Review and Merge
-Once CI passes, request a review. After approval, merge the PR.
-
----
-
-### Task-by-Task Execution
-
-**CRITICAL**: Treat **EACH TASK** in `specs/{feature-id}/tasks.md` as a separate, complete unit of work.
-
----
-
-## Task Execution Patterns
-
-### Pattern 1: Component Tasks (3-step)
-Component tasks typically come in groups of 3 (story → test → implementation):
-
-```markdown
-- [ ] T033 Write Storybook story src/components/atoms/BaseCard.stories.tsx
-- [ ] T034 Write unit tests src/components/atoms/BaseCard.test.tsx
-- [ ] T035 Implement src/components/atoms/BaseCard.tsx
-```
-
-**Execution**:
-1. **T033**: Create story → Quality gates → Commit → Mark [X]
-2. **T034**: Write tests → Quality gates → Commit → Mark [X]
-3. **T035**: Implement component → Quality gates → Commit → Mark [X]
-
-**Alternative**: Execute T033-T035 as a single unit if they're tightly coupled, then commit once with all 3 tasks complete.
-
-### Pattern 2: Setup/Config Tasks (independent)
-Setup tasks are usually independent:
-
-```markdown
-- [ ] T001 Create Next.js 14 project
-- [ ] T002 Initialize Git repository
-- [ ] T003 [P] Install dependencies
-```
-
-**Execution**: Each task is completely independent → commit separately.
-
-### Pattern 3: Page Tasks (E2E test first)
-Page implementation follows TDD with E2E test first:
-
-```markdown
-- [ ] T152 Write E2E test tests/e2e/config-page.spec.ts
-- [ ] T153 Create src/app/config/page.tsx
-- [ ] T154 Wire to Zustand store
-- [ ] T155 Add translations
-- [ ] T156 Run E2E test and verify passing
-```
-
-**Execution**: T152 first (test will fail), then T153-T156 sequentially until test passes.
-
-### Pattern 4: Parallel Tasks `[P]`
-Tasks marked `[P]` can run in parallel (different files, no dependencies):
-
-```markdown
-- [ ] T003 [P] Install dependencies: zustand, react-i18next
-- [ ] T004 [P] Install dev dependencies: storybook, vitest
-- [ ] T005 [P] Install Playwright
-```
-
-**Execution**: Can execute simultaneously, but each still needs separate commit after completion.
-
----
-
-## Key Rules
-
-1. **One task = One complete workflow cycle** (steps 1-7)
-2. **One task = One commit** (or logical task group like T036-T038)
-3. **Mark `[X]` in tasks.md immediately after commit**
-4. **Quality gates MUST pass before commit** (no exceptions)
-5. **Never skip tests** (TDD is mandatory per Constitution Principle VIII)
-6. **Never batch tasks without commits** (commit frequently, aim for 30-60 min cycles)
-7. **Follow task order** (respect dependencies, execute sequentially unless marked `[P]`)
-
-## Mandatory Development Practices
-
-### Feature Development Agents (CRITICAL - ALWAYS USE)
-
-**YOU MUST ALWAYS USE feature-dev agents** for ANY development work. This is not optional. Before writing ANY code, you MUST:
-
-1. **FIRST**: Use `feature-dev:code-explorer` to deeply analyze existing codebase features, trace execution paths, and understand patterns
-2. **SECOND**: Use `feature-dev:code-architect` to design feature architectures and create implementation blueprints
-3. **AFTER CODING**: Use `feature-dev:code-reviewer` to review for bugs, security issues, and code quality
-
-**Launch these agents via the Task tool with the appropriate `subagent_type`.** Example:
-
-```
-Task(subagent_type="feature-dev:code-explorer", prompt="Analyze how model selection works...")
-```
-
-**NEVER skip the exploration phase.** You MUST understand the codebase before making ANY changes. Failing to use these agents leads to:
-- Introducing bugs from misunderstanding existing code
-- Breaking existing functionality
-- Creating inconsistent patterns
-- Wasting time on incorrect approaches
-
-### Test-Driven Development (MANDATORY)
-**TDD is non-negotiable.** For every change:
-1. **Write a failing test first** that demonstrates the bug or specifies the new behavior
-2. **Run the test** to confirm it fails (red phase)
-3. **Implement the fix/feature** until the test passes (green phase)
-4. **Refactor** if needed while keeping tests green
-5. **Verify all existing tests still pass** before committing
-
-### NEVER Bypass Git Hooks (ABSOLUTE RULE)
-
-**This is an ABSOLUTE rule with NO exceptions:**
-
-1. **NEVER use `--no-verify`** on any git command (commit, push, etc.)
-2. **NEVER use `--force` or `--force-with-lease`** to push changes
-3. **NEVER modify hook files** (`.husky/pre-commit`, `.husky/pre-push`) to skip checks
-4. **NEVER disable hooks temporarily** "just this once"
-5. **NEVER amend commits** that have already been pushed to remote
-
-**If hooks fail, you MUST:**
-- Fix the underlying issues (lint errors, test failures, etc.)
-- Run the checks again until they pass
-- Only then proceed with the commit/push
-
-**Why this matters:**
-- Hooks ensure code quality before it reaches the repository
-- Bypassing hooks defeats the entire purpose of having quality gates
-- It introduces bugs, breaks builds, and wastes everyone's time
-- Force pushing rewrites history and can cause data loss and merge conflicts
-
-**There are NO valid reasons to bypass hooks.** If tests are flaky, fix the tests. If linting is wrong, fix the code. If hooks are too slow, optimize the hooks themselves through proper channels - never bypass them.
-
-### Git Commit Rules (STRICT)
-Pre-commit hooks exist to enforce quality:
-- Linting must pass
-- Type checking must pass
-- Tests must pass
-- Formatting must be correct
-
-If hooks fail, **fix the issues** rather than bypassing them.
-
-### Commit Requirements
-Before **every commit**, ensure:
-```bash
-npm run check        # Linting + typecheck must pass
-npm run build        # Production build must succeed
-npm test             # ALL tests must pass (not just new ones)
-```
-
-**Only commit when ALL tests pass.** A commit with failing tests breaks the build for everyone.
-
-## Component Development Workflow (Detailed)
-
-For component development specifically (Phase 1), tasks are structured as 3-step cycles:
-
-**Task Group Example**: T033-T035 (BaseCard Component)
-1. **T033 - Story**: Write Storybook story (`.stories.tsx`) with ALL variants
-2. **T034 - Test**: Write unit tests (`.test.tsx`) for all behaviors
-3. **T035 - Implementation**: Implement component until tests pass
-
-**Complete cycle per component**:
-1. Execute T033 (story) → commit → mark [X]
-2. Execute T034 (test) → commit → mark [X]
-3. Execute T035 (implementation) → commit → mark [X]
-4. Validate in Storybook (themes, languages, states)
-5. Move to next component (e.g., T036-T038 for Button)
-
-**Key Rule**: A component is NOT done until it has all 5 artifacts (`.tsx`, `.stories.tsx`, `.test.tsx`, interface, JSDoc) and passes all quality gates.
-
-## tRPC Setup
-
-The application uses tRPC for type-safe backend communication (Phase 4+):
-
-- **Context**: `src/server/api/trpc.ts` - Request context and middleware
-- **Routers**: `src/server/api/routers/` - API route handlers
-- **Root Router**: `src/server/api/root.ts` - Aggregates all routers
-- **Client Hooks**: `src/trpc/react.tsx` - React Query hooks
-- **Server Caller**: `src/trpc/server.ts` - Server-side API calls
-
-Example procedure: `src/server/api/routers/post.ts` (demo endpoint)
-
-## Design Tokens
-
-All colors, spacing, and typography are defined in `tailwind.config.js`. Use semantic color names:
-- `card`, `cardBorder`, `cardHover` (component-specific)
-- `primary`, `secondary`, `accent` (brand colors)
-- Dark mode via `dark:` variant
+A component is not done until it has all five artifacts (`.tsx`, `.stories.tsx`, `.test.tsx`, interface, JSDoc) and passes all checks.
 
 ## Testing
 
-- **Unit/Integration**: Vitest + React Testing Library
-- **E2E**: Playwright with three test suites:
-  - `mock-mode`: Uses mock API clients (runs in CI before deployment)
-  - `free-mode`: Uses real API keys (runs post-deployment against deployed infrastructure)
-  - `pro-mode`: Phase 4 placeholder for backend tests
-- **Visual Regression**: Chromatic + Storybook
-- **Selectors**: Use `data-testid` exclusively (NEVER CSS classes)
-- **Coverage Goal**: 80% minimum per component
+- **Unit and integration**: Vitest and React Testing Library.
+- **E2E**: Playwright in `packages/e2e` with three suites:
+  - `mock-mode`: mock providers. Runs in CI before deploy.
+  - `free-mode`: real provider keys. Runs after deploy against the deployed URL.
+  - `pro-mode`: Pro, share links and synced history against the Firebase Auth and Firestore emulators with the mock model upstream (`npm run test:pro`, needs Java and firebase-tools). Runs in CI.
+- **Selectors**: `data-testid` only, never CSS classes.
+- **Coverage**: 80% minimum per component.
 
-### CI/CD Pipeline Flow
+### CI and deploy flow
 
-The E2E test strategy follows a deploy-then-test pattern:
+1. CI on pull requests and `main`: component library, shared utils, app (lint, typecheck, build), mock E2E, pro E2E against the Firebase emulators, static analysis.
+2. On `main`, if CI passes: deploy to Firebase App Hosting (`.github/workflows/deploy.yml`).
+3. After deploy: free-mode E2E against the deployed URL.
 
-```
-┌─────────────────────────────────────────────────────────────────┐
-│ CI Checks (PRs & main)                                          │
-│  - Component Library (lint, unit tests, Storybook tests)        │
-│  - Shared Utils (unit tests)                                    │
-│  - App (lint, typecheck, build)                                 │
-│  - Mock Mode E2E (tests with mock API clients)                  │
-│  - Static Analysis                                              │
-└─────────────────────────────────────────────────────────────────┘
-                              │
-                              ▼ (only if CI passes AND on main branch)
-┌─────────────────────────────────────────────────────────────────┐
-│ Deploy to Firebase App Hosting                                  │
-│  - Build app                                                    │
-│  - Deploy to production                                         │
-│  - Verify deployment is accessible                              │
-└─────────────────────────────────────────────────────────────────┘
-                              │
-                              ▼ (only if deploy succeeds)
-┌─────────────────────────────────────────────────────────────────┐
-│ Post-Deploy E2E Tests                                           │
-│  - Free Mode E2E (tests against deployed URL with real APIs)    │
-│  - Pro Mode E2E (Phase 4 - backend service tests)               │
-└─────────────────────────────────────────────────────────────────┘
-```
+`eval-ci.yml` runs paid benchmark calls on pull requests that touch `packages/eval`. Roadmap M0 makes it manual to stop recurring spend.
 
-**Why this pattern?**
-- Mock mode tests verify the UI works correctly without external dependencies
-- Free/Pro mode tests verify the deployed app works with real infrastructure
-- Testing against deployed infrastructure catches deployment-specific issues
+### E2E commands
 
-### E2E Test Commands
 ```bash
-# Run mock mode tests locally (starts local server)
 npm run test:mock --workspace=packages/e2e
-
-# Run free mode tests locally (starts local server, requires API keys)
 npm run test:free --workspace=packages/e2e
-
-# Run tests against deployed infrastructure (no local server)
+npm run test:pro --workspace=packages/e2e
 E2E_BASE_URL=https://your-app.hosted.app npm run test:free --workspace=packages/e2e
-
-# Interactive debugging
 npm run test:ui --workspace=packages/e2e
 ```
 
-**E2E Environment Variables:**
-- `E2E_MODE`: 'mock' or 'free' - determines which API mode to use
-- `E2E_BASE_URL`: When set, tests run against this URL instead of starting a local server
+`E2E_MODE` (`mock`, `free` or `pro`) picks the server mode. `E2E_BASE_URL` runs against a deployment instead of a local server.
 
-## Environment Variables
+## Environment variables
 
-API keys for local development and eval runs are stored in `.env.local` at the repository root. This file is gitignored.
+Keys for local development and eval runs live in `.env.local` at the repo root (gitignored), with `TEST_` prefixes (for example `TEST_GOOGLE_API_KEY`). CI maps these from secrets.
 
-The eval package expects standard env var names (`GOOGLE_API_KEY`, `OPENAI_API_KEY`, etc.), but `.env.local` uses `TEST_` prefixed names (e.g. `TEST_GOOGLE_API_KEY`). CI workflows map these automatically via secrets. For local eval runs, either export the key directly or map it:
+The eval package expects standard names (`GOOGLE_API_KEY`, `OPENAI_API_KEY` and so on):
 
 ```bash
-# Option 1: Export directly
 export GOOGLE_API_KEY="your-key-here"
-
-# Option 2: Source from .env.local with mapping
+# or
 GOOGLE_API_KEY=$(grep TEST_GOOGLE_API_KEY .env.local | cut -d= -f2) \
   node --import tsx packages/eval/bin/ensemble-eval.mjs quick-eval
 ```
 
-The `HF_TOKEN` env var is used to access gated HuggingFace datasets (e.g., HLE). It is stored directly in `.env.local` (not `TEST_` prefixed) and read by the eval loader automatically.
+`HF_TOKEN` (not prefixed) gives access to gated Hugging Face datasets such as HLE.
 
-## Important Notes
+Server variables for the app are validated in `packages/app/src/env.js`; all are optional today.
 
-- Component files MUST NOT exceed 200 lines
-- Mock mode is development/testing only (NOT user-facing). Enable it via `NEXT_PUBLIC_MOCK_MODE=true` when running local Storybook/E2E; never expose a “Mock” card/button in `/config`.
-- API keys in Free Mode are encrypted with AES-256 (Web Crypto API)
-- Streaming latency target: <100ms p95
-- All text uses i18n keys (no hardcoded strings)
+## Important notes
+
+- Component files must not exceed 200 lines.
+- Mock mode is never user-facing. Never add a Mock card or button to the config UI.
+- Free-mode keys are encrypted with AES-GCM via the Web Crypto API, under a random non-extractable key kept in IndexedDB, and never sent to our server. Nothing synced or shared may carry a key.
+- Streaming latency target: under 100 ms p95 from chunk receipt to display.
+- All UI text uses i18n keys.
+- Do not add AI or Claude attribution to commits, pull requests, code comments or docs.

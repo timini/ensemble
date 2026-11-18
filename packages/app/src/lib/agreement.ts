@@ -1,41 +1,72 @@
-import type { PairwiseComparison } from '@/components/organisms/AgreementAnalysis';
-import type { ModelResponse } from '~/store';
+import type { PairwiseComparison } from "@/components/organisms/AgreementAnalysis";
+import type { ManualResponse, ModelResponse } from "~/store";
 
-import { normalizeSimilarity } from '@ensemble-ai/shared-utils/similarity';
+import { normalizeSimilarity } from "@ensemble-ai/shared-utils/similarity";
 
 // Re-export for use by consumers
 export { normalizeSimilarity };
 
 /**
- * Build pairwise comparisons from the similarity matrix while preserving
- * model ordering from the response list.
+ * An answer the agreement analysis scores: a completed model answer or a
+ * manual answer. `model` is the name shown in the comparisons.
+ */
+export type AgreementAnswer = Pick<
+  ModelResponse,
+  "modelId" | "model" | "response" | "isComplete" | "error"
+>;
+
+/** A manual answer in the shape the agreement analysis scores. */
+export function manualAgreementAnswer(manual: ManualResponse): AgreementAnswer {
+  return {
+    modelId: manual.id,
+    model: manual.label,
+    response: manual.response,
+    isComplete: true,
+    error: null,
+  };
+}
+
+/**
+ * Build pairwise comparisons from the similarity matrix.
+ *
+ * Row and column `i` of the matrix belong to `embeddedModelIds[i]` (the order
+ * of the stored embeddings). It defaults to every response, in order. When
+ * some embeddings failed the matrix covers fewer answers than `responses`,
+ * and only the embedded answers are compared.
  */
 export function buildPairwiseComparisons(
-  responses: ModelResponse[],
+  responses: AgreementAnswer[],
   similarityMatrix: number[][] | null,
+  embeddedModelIds: string[] = responses.map((response) => response.modelId),
 ): PairwiseComparison[] {
   if (!similarityMatrix) return [];
-  const responseCount = responses.length;
+  const size = embeddedModelIds.length;
 
-  // Validate matrix dimensions (square matrix with matching response count)
+  // Square matrix with one row per embedded answer
   if (
-    similarityMatrix.length !== responseCount ||
-    similarityMatrix.some((row) => row.length !== responseCount)
+    similarityMatrix.length !== size ||
+    similarityMatrix.some((row) => row.length !== size)
   ) {
     return [];
   }
 
+  const byId = new Map(
+    responses.map((response) => [response.modelId, response]),
+  );
   const comparisons: PairwiseComparison[] = [];
 
-  for (let i = 0; i < responseCount; i++) {
-    for (let j = i + 1; j < responseCount; j++) {
+  for (let i = 0; i < size; i++) {
+    const first = byId.get(embeddedModelIds[i]!);
+    if (!first) continue;
+    for (let j = i + 1; j < size; j++) {
+      const second = byId.get(embeddedModelIds[j]!);
       const similarity = similarityMatrix[i]?.[j];
-      if (typeof similarity !== 'number') continue;
+      if (!second || typeof similarity !== "number") continue;
       const normalized = normalizeSimilarity(similarity);
 
       comparisons.push({
-        model1: responses[i]!.model,
-        model2: responses[j]!.model,
+        model1: first.model,
+        model2: second.model,
         similarity: normalized,
         confidence: normalized,
       });

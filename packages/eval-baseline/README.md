@@ -15,12 +15,15 @@ source .venv/bin/activate
 pip install -e .
 ```
 
-Requires Python >= 3.10.
+Requires Python >= 3.10. Installs `lm-eval[api]`. The key can also be given as `TEST_GOOGLE_API_KEY`.
+
+The script calls Gemini through its OpenAI-compatible endpoint (lm-eval's `local-chat-completions` model) and strips the `seed` parameter, which that endpoint rejects. Only Gemini models are supported.
 
 ## Usage
 
 ```bash
-# Run all benchmarks (GSM8K, TruthfulQA, GPQA Diamond) with 30 samples
+# Run all benchmarks (GSM8K, TruthfulQA, GPQA Diamond), 30 samples each,
+# against gemini-3-flash-preview (the default)
 GOOGLE_API_KEY=your-key python run_baseline.py
 
 # Custom model and sample size
@@ -47,13 +50,18 @@ GOOGLE_API_KEY=your-key python run_baseline.py --tasks gsm8k,gpqa
 # 1. Run reference baseline
 GOOGLE_API_KEY=... python run_baseline.py --output reference.json
 
-# 2. Run TS eval
+# 2. Run TS eval with the same model
 cd ../eval
 GOOGLE_API_KEY=... node --import tsx bin/ensemble-eval.mjs quick-eval \
+  --model google:gemini-3-flash-preview \
   --no-cache --sample 30 --datasets gsm8k,truthfulqa,gpqa \
   --baseline ts-results.json
 
-# 3. Compare the single-model accuracy numbers
+# 3. Compare the single-model accuracy numbers by hand
 ```
+
+Pass `--model` explicitly: the TS eval defaults to `google:gemini-2.5-flash-lite` (see `packages/eval/src/commands/quickEval.ts`), while this script defaults to `gemini-3-flash-preview`. There is no script that compares the two outputs.
+
+Only GSM8K and GPQA are directly comparable. For TruthfulQA, lm-eval scores open-ended answers (BLEURT, BLEU, ROUGE), while the TS eval asks the MC1 question as multiple choice. The TS loader also lists the options in dataset order, so the correct answer is always option A, which inflates its TruthfulQA accuracy. The two TruthfulQA numbers should not be compared.
 
 If the TS eval numbers are significantly different from the reference, investigate the answer extraction logic in `packages/eval/src/lib/parsers.ts`.

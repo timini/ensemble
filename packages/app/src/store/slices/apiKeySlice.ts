@@ -5,12 +5,17 @@
  * Keys are encrypted before localStorage persistence
  */
 
-import type { StateCreator } from 'zustand';
-import { decrypt, encrypt } from '@ensemble-ai/shared-utils/security';
-import type { ValidationStatus } from '@/components/molecules/ApiKeyInput';
-import type { ProviderType } from './ensembleSlice';
-import { toError } from '~/lib/errors';
-import { logger } from '~/lib/logger';
+import type { StateCreator } from "zustand";
+import {
+  decrypt,
+  encrypt,
+  EncryptionKeyUnavailableError,
+} from "@ensemble-ai/shared-utils/security";
+import { reencryptLegacy } from "~/lib/reencryptLegacy";
+import type { ValidationStatus } from "@/components/molecules/ApiKeyInput";
+import type { ApiKeyProvider } from "./ensembleSlice";
+import { toError } from "~/lib/errors";
+import { logger } from "~/lib/logger";
 
 export interface ApiKeyData {
   encrypted: string | null;
@@ -31,14 +36,14 @@ export interface ApiKeySlice {
   };
   encryptionInitialized: boolean;
 
-  setApiKey: (provider: ProviderType, key: string) => Promise<void>;
-  toggleApiKeyVisibility: (provider: ProviderType) => void;
+  setApiKey: (provider: ApiKeyProvider, key: string) => Promise<void>;
+  toggleApiKeyVisibility: (provider: ApiKeyProvider) => void;
   hideAllApiKeys: () => void;
-  getApiKey: (provider: ProviderType) => string | null;
+  getApiKey: (provider: ApiKeyProvider) => string | null;
   clearApiKeys: () => void;
   initializeEncryption: () => Promise<void>;
   setApiKeyStatus: (
-    provider: ProviderType,
+    provider: ApiKeyProvider,
     status: ValidationStatus,
     error?: string,
   ) => void;
@@ -61,7 +66,14 @@ export const createApiKeySlice: StateCreator<ApiKeySlice> = (set, get) => ({
       return;
     }
 
-    const providers: ProviderType[] = ['openai', 'anthropic', 'google', 'xai', 'deepseek', 'perplexity'];
+    const providers: ApiKeyProvider[] = [
+      "openai",
+      "anthropic",
+      "google",
+      "xai",
+      "deepseek",
+      "perplexity",
+    ];
 
     await Promise.all(
       providers.map(async (provider) => {
@@ -72,19 +84,22 @@ export const createApiKeySlice: StateCreator<ApiKeySlice> = (set, get) => ({
 
         try {
           const decrypted = await decrypt(entry.encrypted);
+          // Keys stored under the old derived key move to the device key.
+          const encrypted = await reencryptLegacy(entry.encrypted, decrypted);
           set((state) => {
             const currentEntry = state.apiKeys[provider];
             const nextEntry = currentEntry
               ? {
                   ...currentEntry,
                   key: decrypted,
-                  status: currentEntry.status ?? 'idle',
+                  encrypted,
+                  status: currentEntry.status ?? "idle",
                 }
               : {
                   key: decrypted,
-                  encrypted: null,
+                  encrypted,
                   visible: false,
-                  status: 'idle',
+                  status: "idle",
                 };
 
             return {
@@ -99,7 +114,13 @@ export const createApiKeySlice: StateCreator<ApiKeySlice> = (set, get) => ({
             error,
             `Failed to decrypt ${provider} API key`,
           );
-          logger.error(`Failed to decrypt ${provider} API key`, normalizedError);
+          logger.error(
+            `Failed to decrypt ${provider} API key`,
+            normalizedError,
+          );
+          // Keep the ciphertext when only the key store failed (it may
+          // work on the next visit); drop it when it cannot be decrypted.
+          const keep = error instanceof EncryptionKeyUnavailableError;
           set((state) => {
             const currentEntry = state.apiKeys[provider];
             return {
@@ -108,9 +129,9 @@ export const createApiKeySlice: StateCreator<ApiKeySlice> = (set, get) => ({
                 [provider]: currentEntry
                   ? {
                       ...currentEntry,
-                      key: '',
-                      encrypted: null,
-                      status: 'idle',
+                      key: "",
+                      encrypted: keep ? currentEntry.encrypted : null,
+                      status: "idle",
                     }
                   : null,
               },
@@ -139,17 +160,25 @@ export const createApiKeySlice: StateCreator<ApiKeySlice> = (set, get) => ({
 
     try {
       const encrypted = await encrypt(trimmedKey);
-      set((state) => ({
-        apiKeys: {
-          ...state.apiKeys,
-          [provider]: {
-            key: trimmedKey,
-            encrypted,
-            visible: previousVisibility,
-            status: 'idle',
+      set((state) => {
+        // Read the entry after encryption: a validation may have finished
+        // meanwhile. The same key keeps its status, so a repeated set does
+        // not start a second validation.
+        const current = state.apiKeys[provider];
+        const sameKey = current?.key === trimmedKey;
+        return {
+          apiKeys: {
+            ...state.apiKeys,
+            [provider]: {
+              key: trimmedKey,
+              encrypted,
+              visible: current?.visible ?? previousVisibility,
+              status: sameKey ? current.status : "idle",
+              ...(sameKey && current.error ? { error: current.error } : {}),
+            },
           },
-        },
-      }));
+        };
+      });
     } catch (error: unknown) {
       const normalizedError = toError(
         error,
@@ -179,7 +208,14 @@ export const createApiKeySlice: StateCreator<ApiKeySlice> = (set, get) => ({
 
   hideAllApiKeys: () => {
     set((state) => {
-      const providers: ProviderType[] = ['openai', 'anthropic', 'google', 'xai', 'deepseek', 'perplexity'];
+      const providers: ApiKeyProvider[] = [
+        "openai",
+        "anthropic",
+        "google",
+        "xai",
+        "deepseek",
+        "perplexity",
+      ];
       const updatedKeys = { ...state.apiKeys };
       for (const provider of providers) {
         const entry = updatedKeys[provider];

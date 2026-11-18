@@ -16,6 +16,8 @@ junit.xml
 
 # Next.js
 .next/
+.next-e2e-free/
+.next-e2e-pro/
 out/
 build/
 dist/
@@ -99,3 +101,7 @@ infra/terraform/crash.*.log
 # Gemini CLI
 .gemini/
 gha-creds-*.json
+
+# Benchmark matrix dry runs (mock provider)
+.bench-dry-run/
+__pycache__/

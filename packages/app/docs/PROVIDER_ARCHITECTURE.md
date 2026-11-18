@@ -1,540 +1,182 @@
 # Provider Architecture
 
-**Document Version**: 1.0.0
-**Last Updated**: 2025-10-01
-**Target Phases**: Phase 2 (Mock), Phase 3 (Free), Phase 4 (Pro)
+How the app talks to model providers. The code lives in `packages/shared-utils/src/providers/`; the app wires it up in `packages/app/src/providers/index.ts`.
 
-## Overview
+Supported providers (`ProviderName` in `packages/shared-utils/src/providers/types.ts`): `openai`, `anthropic`, `google`, `xai`, `deepseek`, `perplexity`, and `openai-compatible`, which covers every configured OpenAI-compatible endpoint (Ollama, LM Studio, llama.cpp, vLLM, OpenRouter, Groq, Together, custom URLs).
 
-The Provider Architecture defines how Ensemble AI interacts with AI model providers (OpenAI, Anthropic, Google, XAI) across three operating modes:
+## Modes
 
-- **Mock Mode** (Phase 2): Frontend-only lorem ipsum streaming for UI development and E2E testing
-- **Free Mode** (Phase 3): Frontend-only direct API calls to providers with user-supplied API keys
-- **Pro Mode** (Phase 4): Backend-managed API calls with credit system and usage tracking
+`ProviderMode` is `'mock' | 'free' | 'pro'`.
 
-## Architecture Principles
+| Mode | Status | How calls are made |
+|------|--------|--------------------|
+| `mock` | Built. Developer only, enabled with `NEXT_PUBLIC_MOCK_MODE=true` | `MockProviderClient` streams lorem ipsum in the browser. No network calls |
+| `free` | Built. The only mode users can select | Browser calls each provider directly with the user's key, using the vendor SDKs with `dangerouslyAllowBrowser: true` |
+| `pro` | Not built yet. Not offered in the UI | `createProviderClient` throws `Provider mode 'pro' not yet implemented.` See [ROADMAP](../../../docs/ROADMAP.md) |
 
-### 1. Polymorphic Client Pattern
-All three client modes implement the same `AIProvider` interface, enabling:
-- **Seamless mode switching**: Same UI code works across all modes
-- **Testability**: Mock mode for E2E tests without real API costs
-- **Gradual rollout**: Free mode before Pro mode infrastructure is ready
+The store's user-facing mode is only `'free' | 'pro'`. The app picks `mock` when `NEXT_PUBLIC_MOCK_MODE === 'true'`, regardless of the stored mode.
 
-### 2. Frontend-Only Until Phase 4
-- Mock and Free modes run entirely in the browser
-- No backend required for Phase 2-3
-- API keys encrypted locally (Free mode)
-- Backend introduced only in Phase 4 (Pro mode)
+## AIProvider interface
 
-### 3. Provider Isolation
-Each provider (OpenAI, Anthropic, Google, XAI) has its own implementation:
-- **Encapsulation**: Provider-specific logic isolated
-- **Maintainability**: Changes to one provider don't affect others
-- **Extensibility**: New providers can be added without refactoring
-
----
-
-## Architecture Diagram
-
-```
-┌─────────────────────────────────────────────────────────────┐
-│                         UI Layer                            │
-│  (Config, Ensemble, Prompt, Review Pages)                   │
-└─────────────────┬───────────────────────────────────────────┘
-                  │
-                  ▼
-┌─────────────────────────────────────────────────────────────┐
-│                   Provider Registry                         │
-│  - getProvider(provider, mode)                              │
-│  - Delegates to provider-specific factories                 │
-└─────────────────┬───────────────────────────────────────────┘
-                  │
-         ┌────────┴────────┐
-         ▼                 ▼
-┌────────────────┐  ┌─────────────────────────────┐
-│ Provider       │  │ Provider client factories   │
-│ implementations│  │  (createProviderClient)     │
-│ (OpenAI, etc.) │  │   ├─ openai/mock|free|pro   │
-└───────┬────────┘  │   ├─ anthropic/mock|free|pro│
-        │           │   ├─ google/mock|free|pro   │
-        │           │   └─ xai/mock|free|pro      │
-        │           └─────────────────────────────┘
-        │                          │
-        ▼                          ▼
-┌───────────────┐        ┌──────────────────────┐
-│ Mock clients  │        │ Free-mode clients     │
-│ (lorem ipsum) │        │ (SDK integrations)    │
-└──────┬────────┘        └─────────┬────────────┘
-       │                           │
-       ▼                           ▼
-┌──────────────┐         ┌──────────────────────┐
-│ Lorem Ipsum  │         │ Provider SDKs / APIs │
-└──────────────┘         └──────────────────────┘
-
-(Phase 4 introduces Pro clients backed by the tRPC backend.)
-```
-
----
-
-## AIProvider Interface
-
-### Core Interface (`packages/shared-utils/src/providers/types.ts`)
+Every client implements `AIProvider` (`packages/shared-utils/src/providers/types.ts`):
 
 ```typescript
-/**
- * Abstract interface for all AI provider implementations
- * Implemented by: MockProviderClient, Free<Provider>Client, Pro<Provider>Client
- */
 export interface AIProvider {
-  /**
-   * Stream a response from the AI model
-   * @param prompt - User input text
-   * @param model - Model identifier (e.g., 'gpt-4o', 'claude-3-5-sonnet')
-   * @param onChunk - Callback for each streaming chunk
-   * @param onComplete - Callback when streaming completes
-   * @param onError - Callback for errors
-   * @returns Promise resolving to full response text
-   */
   streamResponse(
     prompt: string,
     model: string,
     onChunk: (chunk: string) => void,
-    onComplete: (fullResponse: string, responseTime: number) => void,
-    onError: (error: Error) => void
+    onComplete: (
+      fullResponse: string,
+      responseTime: number,
+      tokenCount?: number,
+      usage?: TokenUsage, // { inputTokens, outputTokens } when the provider reports them
+    ) => void,
+    onError: (error: Error) => void,
+    options?: StreamResponseOptions, // { temperature?, seed? }
   ): Promise<void>;
 
-  /**
-   * Generate embeddings for agreement analysis
-   * @param text - Text to generate embeddings for
-   * @returns Promise resolving to embedding vector (1536 dimensions)
-   */
   generateEmbeddings(text: string): Promise<number[]>;
 
-  /**
-   * Validate API key (Free mode only)
-   * @param apiKey - API key to validate
-   * @returns Promise resolving to validation result
-   */
-  validateApiKey(apiKey: string): Promise<{ valid: boolean; error?: string }>;
+  validateApiKey(apiKey: string): Promise<ValidationResult>; // { valid, error? }
 
-  /**
-   * List available models for this provider
-   * @returns Array of model metadata
-   */
-  listAvailableModels(): Array<{
-    id: string;
-    name: string;
-    contextWindow: number;
-    costPer1kTokens: number;
-  }>;
-}
-```
+  listAvailableModels(): ModelMetadata[];
 
----
+  listAvailableTextModels(): Promise<string[]>;
 
-## Client Implementations
-
-### 1. Mock Clients (Phase 2)
-
-**Purpose**: Lorem ipsum streaming for UI development and E2E testing
-
-**Location**: `packages/shared-utils/src/providers/clients/mock/MockProviderClient.ts`
-
-**Behavior**:
-- Generates random lorem ipsum text (500-1000 words)
-- Streams in chunks of 50-100 characters
-- Delay between chunks: 50-100ms
-- Total streaming time: ~5-10 seconds per response
-- No real API calls
-- No API keys required
-
-**Implementation**:
-```typescript
-export class MockProviderClient implements AIProvider {
-  async streamResponse(
+  generateStructured<T>(
     prompt: string,
     model: string,
-    onChunk: (chunk: string) => void,
-    onComplete: (fullResponse: string, responseTime: number) => void,
-    onError: (error: Error) => void
-  ): Promise<void> {
-    const startTime = Date.now();
-    const lorem = generateLoremIpsum(500, 1000); // 500-1000 words
-    const chunks = chunkText(lorem, 50, 100); // 50-100 char chunks
-
-    for (const chunk of chunks) {
-      await sleep(randomInt(50, 100)); // 50-100ms delay
-      onChunk(chunk);
-    }
-
-    const responseTime = Date.now() - startTime;
-    onComplete(lorem, responseTime);
-  }
-
-  async generateEmbeddings(text: string): Promise<number[]> {
-    // Return random 1536-dimensional vector
-    return Array.from({ length: 1536 }, () => Math.random());
-  }
-
-  async validateApiKey(apiKey: string): Promise<{ valid: boolean }> {
-    return { valid: true }; // Mock always validates
-  }
-
-  listAvailableModels() {
-    return MOCK_MODELS; // Static list
-  }
+    schema: JsonSchema,
+    options?: GenerateStructuredOptions,
+  ): Promise<StructuredResponse<T>>;
 }
 ```
 
-**Usage**: Development, Storybook, Playwright E2E tests
+`generateStructured` returns JSON constrained to a schema using each provider's native structured output feature. The app does not call it today; the eval package uses it for its LLM judges.
 
----
+## Clients
 
-### 2. Free Clients (Phase 3)
+### MockProviderClient
 
-**Purpose**: Direct API calls to providers with user-supplied API keys.
+`packages/shared-utils/src/providers/clients/mock/MockProviderClient.ts`. Lorem ipsum streaming, hash-based embeddings (used in mock mode only), always-valid keys, a static model list. Details in [MOCK_CLIENT_SPECIFICATION.md](./MOCK_CLIENT_SPECIFICATION.md).
 
-**Location**: `packages/shared-utils/src/providers/clients/<provider>/Free<Provider>Client.ts`
+### Free clients
 
-**Behavior**:
-- Each provider owns its Free-mode implementation (e.g., `FreeOpenAIClient`, `FreeAnthropicClient`).
-- Keys encrypted with AES-256-GCM before localStorage storage.
-- Direct API calls from browser to provider SDKs.
-- API key validation via lightweight test requests.
-- Streaming/embeddings implemented per provider (falling back to mock responses until finished).
+One class per provider, each extending `BaseFreeClient` (`clients/base/BaseFreeClient.ts`):
 
-**Factory Pattern**:
-```typescript
-// packages/shared-utils/src/providers/factories/createProviderClient.ts
-export function createProviderClient(
-  { provider, mode, getApiKey }: CreateProviderClientOptions,
-): AIProvider {
-  if (mode === 'mock') {
-    return new MockProviderClient({ providerFilter: provider });
-  }
+| Provider | Class | SDK |
+|----------|-------|-----|
+| OpenAI | `FreeOpenAIClient` | `openai` |
+| Anthropic | `FreeAnthropicClient` | `@anthropic-ai/sdk` |
+| Google | `FreeGoogleClient` | `@google/generative-ai` |
+| xAI | `FreeXAIClient` | `openai` with `baseURL: https://api.x.ai/v1` |
+| DeepSeek | `FreeDeepSeekClient` | `openai` with `baseURL: https://api.deepseek.com` |
+| Perplexity | `FreePerplexityClient` | `fetch` to the Agent API, `https://api.perplexity.ai/v1/agent` |
+| OpenAI-compatible | `FreeOpenAICompatibleClient` (one server), routed by `OpenAICompatibleEndpointsClient` | `fetch` to `{baseURL}/models`, `/chat/completions` and `/embeddings` |
 
-  if (mode === 'free') {
-    if (!getApiKey) throw new Error('Free mode requires getApiKey');
-    return new Free<Provider>Client(provider, getApiKey);
-  }
+Provider notes:
 
-  throw new Error('Pro mode client not yet implemented.');
-}
-```
+- Perplexity: Sonar Chat Completions ended on 2026-09-27. The client sends `{ effort, input, stream: true }` to `POST /v1/agent` and reads the `response.output_text.delta` and `response.completed` server-sent events. Model ids are effort presets: `perplexity-fast`, `perplexity-low`, `perplexity-medium`. Saved `sonar`, `sonar-pro` and `sonar-reasoning-pro` selections map to `fast`, `fast` and `low`. `validateApiKey` calls `GET /v1/models`, which needs a valid key but runs no model. Temperature and seed are not forwarded.
+- Anthropic: Claude Opus 4.7 and later (all 5.x models included) reject a non-default `temperature`, so it is only sent to older models. `generateStructured` uses structured outputs (`output_config.format` with a JSON schema) because Opus 5.5 and Sonnet 5.5 return HTTP 400 for a forced `tool_choice`. Claude 3.x, Opus 4 and Sonnet 4 predate structured outputs and still get a forced tool call. `max_tokens` is 16000 for streaming and 8000 for structured output, since thinking tokens count against it on 5.5 models. Rules live in `clients/anthropic/anthropicModelRules.ts`.
+- OpenAI-compatible: the key is optional (`requiresApiKey = false` in `BaseFreeClient`), and no Authorization header is sent without one. Model ids are qualified with the endpoint id (`ollama/llama3.2:3b`); `OpenAICompatibleEndpointsClient` reads the connected endpoints from the store at call time and sends each call to the endpoint in the id, with the bare model id. The model list is every id from `GET /models`, unfiltered. Streaming asks for `stream_options.include_usage`. `generateStructured` tries `json_schema`, then `json_object`, then plain prompting, and extracts the JSON from the text. See "OpenAI-compatible endpoints" in [ARCHITECTURE.md](../../../docs/ARCHITECTURE.md).
+- OpenAI: the client never sets `reasoning_effort`, and models reject `temperature` when their effort is above `none`. It is dropped for models whose default effort is above `none`: the o-series, `gpt-5`, GPT-5.5 and later, the GPT-6 family, and the GPT-5.1 and GPT-5.2 `-codex` and `-pro` variants. Base `gpt-5.1` and `gpt-5.2` default to `none` and `-chat` variants are not reasoning models, so both still get `temperature` (`clients/openai/openAIModelRules.ts`).
 
-**Security**:
-- API keys encrypted before localStorage.
-- Web Crypto API (AES-256-GCM) with device-derived entropy.
-- Keys never logged or exposed.
+What `BaseFreeClient` does:
 
----
+- Reads the key through a `getApiKey()` callback. The app passes a callback that reads the decrypted key from the Zustand store.
+- `streamResponse` reports a missing key, races the provider stream against a client-side timeout (`StreamResponseOptions.timeoutMs`, default `DEFAULT_STREAM_TIMEOUT_MS`, 2 minutes), and drops chunks or completions that arrive after the timeout.
+- Every error passed to `onError` is a `ProviderError` (`src/providers/errors/providerError.ts`) with a sanitized message and a `kind`: `invalid_key` (401 or 403), `missing_key` (no key is set, so no request was sent), `rate_limited` (429, with `retryAfterSeconds` from `Retry-After`, `retry-after-ms` or Google's `RetryInfo`), `timeout`, `provider_unavailable` (5xx or a network failure) or `other`. `classifyProviderError` reads the status from the SDK error, an axios response or the message; each client's stream `catch` calls it with its label (for example "Anthropic API error").
+- `listAvailableTextModels` calls the provider's model list API when a key is present and falls back to the mock list on failure or when no key is set. The OpenAI-compatible client returns an empty list instead, never mock models.
+- `generateStructured` delegates to each subclass. Perplexity does not implement it, so it throws "structured output is not yet implemented for Free mode".
+- `generateEmbeddings` throws `EmbeddingsNotSupportedError` unless the subclass sets `supportsEmbeddings` and implements `embedWithProvider`. When it does, it checks the key is present and calls the provider.
 
-### 3. ProAPIClient (Phase 4)
+### Embeddings and agreement scores
 
-**Purpose**: Backend-managed API calls with credit system
+Code in `packages/shared-utils/src/providers/embeddings/`.
 
-**Location**: `src/providers/clients/ProAPIClient.ts`
+| Provider | Model | Call |
+|----------|-------|------|
+| OpenAI | `text-embedding-3-small` | `requestOpenAICompatibleEmbedding`: `POST {baseURL}/embeddings` with `{ model, input }` and an optional bearer key |
+| Google | `gemini-embedding-2` | `requestGeminiEmbedding`: `POST /v1beta/models/{model}:embedContent` with the `x-goog-api-key` header and `outputDimensionality: 768` (the model default is 3072) to keep the persisted store small |
+| OpenAI-compatible | the embedding model set on the endpoint, for example `nomic-embed-text` on Ollama | `requestOpenAICompatibleEmbedding` on the first connected endpoint whose embedding model the check found in `GET /models` |
+| Anthropic, xAI, DeepSeek, Perplexity | none | throw `EmbeddingsNotSupportedError` |
 
-**Behavior**:
-- No user-provided API keys
-- All API calls go through tRPC backend
-- Backend manages provider API keys
-- Credit-based usage tracking
-- Subscription management
-- Real streaming via Server-Sent Events (SSE)
+`requestOpenAICompatibleEmbedding` takes a base URL, an optional key and a model id, so OpenAI and every OpenAI-compatible endpoint share it. Error messages from both helpers go through `sanitizeProviderErrorMessage`.
 
-**Implementation**:
-```typescript
-export class ProAPIClient implements AIProvider {
-  private trpc: ReturnType<typeof createTRPCClient>;
+Provider choice: `selectEmbeddingsProvider` (shared-utils) and `resolveEmbeddingsProvider` (`packages/app/src/lib/embeddingsProvider.ts`). The stored preference is `auto`, `openai`, `google` or `openai-compatible`, set with the embeddings provider setting in the workspace's settings sheet. An override is used when its key is valid; otherwise OpenAI, then Google, then an OpenAI-compatible endpoint. `openai-compatible` counts as available only when a connected endpoint has an embedding model that its server lists (`src/lib/endpointStatus.ts`). With none available there is no provider, and the agreement card shows "No agreement score" with a link to settings instead of a score. Mock mode follows the same rule: mock keys validate, so a mock run needs a mock OpenAI or Google key for a score, and the mock-mode E2E suite covers the no-provider message (`embeddings-unavailable.spec.ts`). If the embeddings calls fail for all but one answer, or the vectors cannot be compared, the card says the answers could not be scored. If some calls fail but at least two answers have embeddings, the score covers those answers and the card lists the answers left out.
 
-  constructor() {
-    this.trpc = createTRPCClient({
-      url: '/api/trpc',
-    });
-  }
+The store records which provider produced the embeddings (`embeddingsSource`). When the workspace mounts again (reload, back and forward) and the stored embeddings came from the provider now resolved, they are reused and no embeddings calls are made.
 
-  async streamResponse(
-    prompt: string,
-    model: string,
-    onChunk: (chunk: string) => void,
-    onComplete: (fullResponse: string, responseTime: number) => void,
-    onError: (error: Error) => void
-  ): Promise<void> {
-    try {
-      // tRPC subscription for streaming
-      const stream = this.trpc.provider.streamResponse.subscribe({
-        prompt,
-        model,
-      });
+The workspace computes the cosine similarity matrix and agreement statistics from these vectors with `shared-utils/similarity`. Only mock mode uses the mock client's hash-based vectors.
 
-      let fullResponse = '';
-      const startTime = Date.now();
+The high, medium and low labels depend on the embedding model. `src/lib/agreementCalibration.ts` looks up the model in use (`openai/text-embedding-3-small`, `google/gemini-embedding-2`, or the endpoint preset and embedding model, such as `ollama/nomic-embed-text`) in the committed `src/data/agreement-calibration.json`, written by `ensemble-eval calibrate-agreement` from benchmark runs (see `packages/eval/docs/BENCHMARKS.md`). A model with no entry keeps the original mapping, (cosine + 1) / 2 above 0.8 high and from 0.5 medium, and the analysis shows an "Uncalibrated" badge. The file has no entries yet.
 
-      for await (const chunk of stream) {
-        fullResponse += chunk;
-        onChunk(chunk);
-      }
+## Factory and registry
 
-      const responseTime = Date.now() - startTime;
-      onComplete(fullResponse, responseTime);
-    } catch (error) {
-      onError(error as Error);
-    }
-  }
+`createProviderClient({ provider, mode, getApiKey })` (`factories/createProviderClient.ts`):
 
-  async generateEmbeddings(text: string): Promise<number[]> {
-    return this.trpc.provider.generateEmbeddings.query({ text });
-  }
+- `mock`: returns `new MockProviderClient({ providerFilter: provider })`.
+- `free`: requires `getApiKey`, returns the matching `Free<Provider>Client`. For `openai-compatible` it requires `getEndpoints` instead and returns an `OpenAICompatibleEndpointsClient`.
+- anything else: throws `Provider mode '<mode>' not yet implemented.`
 
-  async validateApiKey(apiKey: string): Promise<{ valid: boolean }> {
-    // Not applicable in Pro mode (no user-provided keys)
-    throw new Error('validateApiKey not supported in Pro mode');
-  }
+`ProviderRegistry` (`registry/ProviderRegistry.ts`) is a singleton map keyed by provider and mode, with `register`, `getProvider`, `hasProvider`, `listProviders` and `clearAll`. `getProvider` throws if nothing is registered.
 
-  listAvailableModels() {
-    // Fetch from backend (includes available models based on subscription)
-    return this.trpc.provider.listModels.query();
-  }
-}
-```
+The app's `initializeProviders()` (`packages/app/src/providers/index.ts`) registers a mock and a free client for each of the seven providers. The free `openai-compatible` client gets the connected endpoints from `selectEndpointConfigs` in `store/slices/endpointsSlice.ts`. It is called from the root layout and again from a few hooks before use. Nothing is registered for `pro`.
 
-**Backend Features**:
-- API key management (secure storage)
-- Usage tracking (tokens, requests, cost)
-- Credit system (prepaid or subscription)
-- Rate limiting
-- Analytics
+## How the app uses it
 
-**Usage**: Pro Mode (Phase 4) - Managed service with billing
+Everything below happens on `/workspace` (`src/app/workspace/`).
 
----
+- Settings sheet: `src/lib/validation.ts` calls `validateApiKey` on the free client (or mock client in mock mode), from `hooks/useApiKeySettings.ts`. OpenAI-compatible endpoints are checked by `src/lib/endpointValidation.ts` (`GET /models`, which also counts the models; no request in mock mode) from `hooks/useEndpointConfiguration.ts`, 500 ms after an edit.
+- Composer: `src/lib/providerModels.ts` calls `listAvailableTextModels` to fill the model picker. `src/lib/endpointModels.ts` lists the models of connected endpoints, grouped by endpoint in the picker and named `llama3.2:3b (Ollama)` elsewhere.
+- Asking: `streamResponse` is called once per model of the run (`hooks/useStreamingResponses.ts`). If the client for the current mode is missing, the model's answer fails with an error and a retry. `src/lib/embeddings.ts` throws too, so no fake vectors reach the agreement score.
+- Agreement and consensus: `src/lib/embeddings.ts` calls `generateEmbeddings` on the provider chosen by `src/lib/embeddingsProvider.ts`; `hooks/useConsensusGeneration.ts` passes the summarizer model's client to the chosen consensus strategy (`standard`, `elo`, `majority`, `council`).
 
-## Provider Implementations
-
-### Provider-Specific Clients
-
-Each provider has its own implementation handling API-specific details:
-
-#### Free client mapping
-
-- OpenAI: `packages/shared-utils/src/providers/clients/openai/FreeOpenAIClient.ts`
-- Anthropic: `packages/shared-utils/src/providers/clients/anthropic/FreeAnthropicClient.ts`
-- Google: `packages/shared-utils/src/providers/clients/google/FreeGoogleClient.ts`
-- XAI: `packages/shared-utils/src/providers/clients/xai/FreeXAIClient.ts`
-
-Each class extends `BaseFreeClient` (`packages/shared-utils/src/providers/clients/base/BaseFreeClient.ts`), which currently falls back to mock streaming/embeddings while real integrations are implemented.
-
----
-
-## Provider Registry
-
-### Singleton Registry (`src/providers/ProviderRegistry.ts`)
+Example, simplified from `useStreamingResponses`:
 
 ```typescript
-import { MockProviderClient } from '@ensemble-ai/shared-utils/providers';
-import { FreeAPIClient } from './clients/FreeAPIClient';
-import { ProAPIClient } from './clients/ProAPIClient';
-import { useStore } from '@/store';
+import { ProviderRegistry } from '@ensemble-ai/shared-utils/providers';
 
-export class ProviderRegistry {
-  private static instance: ProviderRegistry;
-  private clients: Map<string, AIProvider>;
+const registry = ProviderRegistry.getInstance();
+const client = registry.getProvider(selection.provider, clientMode);
 
-  private constructor() {
-    this.clients = new Map();
-  }
-
-  static getInstance(): ProviderRegistry {
-    if (!ProviderRegistry.instance) {
-      ProviderRegistry.instance = new ProviderRegistry();
-    }
-    return ProviderRegistry.instance;
-  }
-
-  getProvider(mode: 'mock' | 'free' | 'pro'): AIProvider {
-    if (this.clients.has(mode)) {
-      return this.clients.get(mode)!;
-    }
-
-    let client: AIProvider;
-
-    switch (mode) {
-      case 'mock':
-        client = new MockProviderClient();
-        break;
-      case 'free':
-        const apiKeys = useStore.getState().apiKeys;
-        client = new FreeAPIClient(apiKeys);
-        break;
-      case 'pro':
-        client = new ProAPIClient();
-        break;
-      default:
-        throw new Error(`Unknown mode: ${mode}`);
-    }
-
-    this.clients.set(mode, client);
-    return client;
-  }
-
-  clearCache() {
-    this.clients.clear();
-  }
-}
-
-export const getProvider = (mode: 'mock' | 'free' | 'pro') =>
-  ProviderRegistry.getInstance().getProvider(mode);
+void client.streamResponse(
+  prompt,
+  selection.model,
+  (chunk) => appendStreamChunk(selection.id, chunk),
+  (_full, responseTime, tokenCount, usage) =>
+    completeResponse(selection.id, responseTime, tokenCount, usage),
+  (error) => {
+    const failure = toResponseError(error); // src/lib/responseErrors.ts
+    setError(selection.id, failure.message, failure.details);
+  },
+);
 ```
 
-**Usage**:
-```typescript
-import { getProvider } from '@/providers/ProviderRegistry';
+### Errors in the workspace
 
-const client = getProvider('free');
-await client.streamResponse(prompt, model, onChunk, onComplete, onError);
-```
+The response slice stores each failed answer's message, `errorKind` and `retryAfterSeconds`. `AnswerCard` shows the error through the `ResponseErrorNotice` molecule: a plain explanation per kind (EN and FR), the provider message and a retry button. Retry restarts only that model (`useStreamingResponses.retryModel`), and clears the consensus so it runs again once every answer is back. A consensus still running when the retry starts finishes, but its result is dropped (`useConsensusGeneration.restart`), since it leaves out the retried model. Consensus calls already made stay in the run cost.
 
----
+One failed model does not fail the run. Agreement (`useRunAnalytics`) and consensus (`useConsensusTrigger`) use only answers without an error, plus any manual answers. `RunExclusionNote` names the failed models and, once the run has finished, says how many answers were used. It mentions the agreement score only when an embeddings provider is available. When fewer than 2 answers succeeded (manual answers count), it explains why there is no consensus, the consensus card says the method needs more answers, and the agreement card says there are too few answers to compare. After a consensus error the trigger does not fire again until a retry, so a failing summarizer is not called in a loop.
 
-## Usage Examples
+## Server-side provider path
 
-### Example 1: Streaming Response
+Separate from the browser clients, the app has a tRPC `provider` router (`src/server/api/routers/provider.ts`, backed by `src/server/providers/providerService.ts`) with `listTextModels`, `streamText` (a mutation that buffers the whole response) and `streamTextEvents` (a subscription). It uses server-held keys from env vars and requires a Firebase ID token. No UI code calls it, and there is no client-side sign-in. It is groundwork for Pro mode, which is not built yet.
 
-```typescript
-import { getProvider } from '@/providers/ProviderRegistry';
-import { useStore } from '@/store';
+## Security notes
 
-function PromptPage() {
-  const { mode, appendStreamChunk, completeResponse } = useStore();
-
-  const handleSubmit = async (prompt: string) => {
-    const client = getProvider(mode);
-    const selectedModels = useStore.getState().selectedModels;
-
-    for (const model of selectedModels) {
-      await client.streamResponse(
-        prompt,
-        model.model,
-        (chunk) => appendStreamChunk(model.id, chunk),
-        (fullResponse, responseTime) => completeResponse(model.id, responseTime),
-        (error) => setError(model.id, error.message)
-      );
-    }
-  };
-
-  return <PromptInput onSubmit={handleSubmit} />;
-}
-```
-
-### Example 2: Agreement Analysis
-
-```typescript
-import { getProvider } from '@/providers/ProviderRegistry';
-import { cosineSimilarity, similarityMatrix } from '@ensemble-ai/shared-utils/similarity';
-
-async function calculateAgreement(responses: Array<{ modelId: string; response: string }>) {
-  const client = getProvider(mode);
-
-  // Generate embeddings for all responses
-  const embeddings = await Promise.all(
-    responses.map(r => client.generateEmbeddings(r.response))
-  );
-
-  // Calculate similarity matrix
-  const matrix = similarityMatrix(embeddings);
-
-  // Calculate agreement statistics
-  const similarities = matrix.flat().filter((val, i) => i % embeddings.length !== i);
-  const stats = agreementStatistics(similarities);
-
-  return { matrix, stats };
-}
-```
-
----
+- Free-mode keys are encrypted with AES-256-GCM (Web Crypto) before they reach localStorage. The key is derived from browser and screen properties, so this guards against casual reading of localStorage, not against code running on the page.
+- Keys are sent straight to the provider from the browser. They never touch the Ensemble server. Endpoint keys are encrypted the same way and sent only to their endpoint.
+- Provider error messages pass through `sanitizeProviderErrorMessage` before display.
 
 ## Testing
 
-### Unit Testing Providers
+- Unit tests sit next to the clients (for example `FreeOpenAIClient.test.ts`) and run with Vitest in `packages/shared-utils`.
+- The mock-mode Playwright suite in `packages/e2e` starts the app with `npm run dev:mock`. `openai-compatible-mock.spec.ts` runs an ensemble on mock endpoint models.
+- The `local-endpoint` Playwright project starts a second app server in Free mode on port 3100 (its own build directory, `NEXT_DIST_DIR=.next-e2e-free`) and the fake OpenAI-compatible server in `packages/e2e/fixtures/fake-openai-server.mjs` on port 11499. Its test runs a 3-model ensemble with no cloud key, scores agreement with the fake server's embeddings and writes the consensus, all through the real client code. `npm run test:mock` runs it too.
 
-```typescript
-import { MockProviderClient } from '@ensemble-ai/shared-utils/providers';
+## Related
 
-describe('MockProviderClient', () => {
-  it('streams lorem ipsum response', async () => {
-    const client = new MockProviderClient();
-    const chunks: string[] = [];
-
-    await client.streamResponse(
-      'Test prompt',
-      'gpt-4o',
-      (chunk) => chunks.push(chunk),
-      (fullResponse, responseTime) => {
-        expect(fullResponse.length).toBeGreaterThan(500);
-        expect(responseTime).toBeGreaterThan(0);
-      },
-      (error) => fail(error.message)
-    );
-
-    expect(chunks.length).toBeGreaterThan(10);
-  });
-});
-```
-
-### E2E Testing with Mock Mode
-
-```typescript
-import { test, expect } from '@playwright/test';
-
-test('complete workflow with mock responses', async ({ page }) => {
-  await page.goto('/config');
-  await page.click('[data-testid="mode-mock"]');
-  await page.click('[data-testid="continue-to-ensemble"]');
-
-  await page.goto('/ensemble');
-  await page.click('[data-testid="add-model-gpt-4o"]');
-  await page.click('[data-testid="continue-to-prompt"]');
-
-  await page.goto('/prompt');
-  await page.fill('[data-testid="prompt-input"]', 'What is AI?');
-  await page.click('[data-testid="submit-prompt"]');
-
-  await page.goto('/review');
-  await expect(page.locator('[data-testid="response-gpt-4o"]')).toBeVisible();
-  await expect(page.locator('[data-testid="response-gpt-4o"]')).toContainText('Lorem ipsum');
-});
-```
-
----
-
-## Migration Path
-
-### Phase 2: Mock Mode Only
-- Implement MockProviderClient
-- UI development with fake streaming
-- E2E tests without API costs
-
-### Phase 3: Add Free Mode
-- Implement FreeAPIClient
-- Add encryption for API keys
-- Integrate provider SDKs
-- Real streaming responses
-
-### Phase 4: Add Pro Mode
-- Implement ProAPIClient
-- Build tRPC backend
-- Add credit system
-- Subscription management
-
----
-
-## Related Documentation
-
-- [STATE_MANAGEMENT.md](./STATE_MANAGEMENT.md) - Zustand store architecture
-- [MOCK_CLIENT_SPECIFICATION.md](./MOCK_CLIENT_SPECIFICATION.md) - Lorem ipsum streaming behavior
-- [Constitution Principle X](../.specify/memory/constitution.md#x-provider-architecture) - Provider requirements
-
----
-
-**Status**: ✅ Ready for Phase 2 Implementation
+- [STATE_MANAGEMENT.md](./STATE_MANAGEMENT.md)
+- [MOCK_CLIENT_SPECIFICATION.md](./MOCK_CLIENT_SPECIFICATION.md)

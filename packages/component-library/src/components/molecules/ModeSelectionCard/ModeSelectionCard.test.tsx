@@ -235,6 +235,14 @@ describe('ModeSelectionCard', () => {
       expect(screen.getByText('Free Mode')).toBeInTheDocument();
     });
 
+    it('renders the coming soon label in English and French', () => {
+      const { unmount } = renderWithI18n(<ModeSelectionCard mode="pro" comingSoon />, { language: 'en' });
+      expect(screen.getByText('Coming Soon')).toBeInTheDocument();
+      unmount();
+      renderWithI18n(<ModeSelectionCard mode="pro" comingSoon />, { language: 'fr' });
+      expect(screen.getByText('Bientôt disponible')).toBeInTheDocument();
+    });
+
     it('renders free mode title in French', () => {
       renderWithI18n(<ModeSelectionCard mode="free" />, { language: 'fr' });
       expect(screen.getByText('Mode Gratuit')).toBeInTheDocument();

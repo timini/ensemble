@@ -1,206 +1,85 @@
 /**
  * Language Persistence E2E Test (T177)
  *
- * Tests that language (EN/FR) selection persists across:
- * - Page refreshes
- * - Navigation between pages
- * - Browser sessions (localStorage)
- * - UI text updates correctly
+ * The language (EN or FR), chosen in the workspace's settings sheet,
+ * persists across reloads, navigation and browser sessions (localStorage),
+ * and the UI text changes with it.
  */
+import { test, expect, type Page } from '@playwright/test';
+import { ask, closeSettings, openSettings, selectMockModels } from './runHelpers';
 
-import { test, expect } from '@playwright/test';
+async function chooseLanguage(page: Page, language: 'en' | 'fr') {
+  const sheet = await openSettings(page);
+  await sheet.getByTestId(`language-${language}`).click();
+  await expect(sheet.getByTestId(`language-${language}`)).toHaveAttribute('aria-checked', 'true');
+  await closeSettings(page);
+  await expect(page.locator('html')).toHaveAttribute('lang', language);
+}
 
 test.describe('Language Persistence', () => {
   test.beforeEach(async ({ page }) => {
-    // Start on config page
-    await page.goto('/config');
+    await page.goto('/workspace');
   });
 
   test('default language is English', async ({ page }) => {
-    // Check that html element has lang="en"
-    const htmlElement = page.locator('html');
-    await expect(htmlElement).toHaveAttribute('lang', 'en');
-
-    // Verify English text is displayed
-    await expect(page.getByText(/configuration/i)).toBeVisible();
+    await expect(page.locator('html')).toHaveAttribute('lang', 'en');
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText('Ask several models at once.');
   });
 
-  test('can switch to French via settings modal', async ({ page }) => {
-    // Open settings modal
-    await page.getByRole('button', { name: /settings/i }).click();
-
-    // Wait for settings modal
-    await expect(page.getByRole('dialog')).toBeVisible();
-
-    // Switch to French using Select component
-    await page.getByTestId('language-select').click();
-    await page.getByRole('option', { name: /français/i }).click();
-
-    // Close modal
-    await page.getByRole('button', { name: /terminé|done/i }).click();
-
-    // Verify lang attribute changed
-    await expect(page.locator('html')).toHaveAttribute('lang', 'fr');
-
-    // Verify French text is displayed
-    await expect(page.getByText(/configuration/i)).toBeVisible();
+  test('can switch to French in settings', async ({ page }) => {
+    await chooseLanguage(page, 'fr');
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText('Interrogez plusieurs modèles à la fois.');
+    await expect(page.getByTestId('composer-submit')).toHaveAccessibleName('Demander');
   });
 
-  test('French language persists across page refresh', async ({ page }) => {
-    // Switch to French
-    await page.getByRole('button', { name: /settings/i }).click();
-    await page.getByLabel(/language/i).click();
-    await page.getByRole('option', { name: /français/i }).click();
-    await page.getByRole('button', { name: /terminé|done/i }).click();
-
-    // Verify French applied
-    await expect(page.locator('html')).toHaveAttribute('lang', 'fr');
-
-    // Reload page
+  test('French persists across a reload', async ({ page }) => {
+    await chooseLanguage(page, 'fr');
     await page.reload();
-
-    // French should still be applied
     await expect(page.locator('html')).toHaveAttribute('lang', 'fr');
   });
 
-  test('French language persists across navigation', async ({ page }) => {
-    // Set French on config page
-    await page.getByRole('button', { name: /settings/i }).click();
-    await page.getByLabel(/language/i).click();
-    await page.getByRole('option', { name: /français/i }).click();
-    await page.getByRole('button', { name: /terminé|done/i }).click();
+  test('French persists across navigation and on every page', async ({ page }) => {
+    test.setTimeout(60_000);
+    await selectMockModels(page, ['gpt-6-astra', 'gpt-6-luna']);
+    await chooseLanguage(page, 'fr');
+    await ask(page, 'Test en français');
+    await expect(page.getByTestId('answer-columns')).toContainText('Réponses individuelles');
 
-    // Navigate to ensemble page (French: "Suivant" = Next)
-    await page.locator('[data-mode="free"]').click();
-    await page.locator('[data-provider="openai"] input').fill('sk-test-key');
-    // Wait for validation to complete and button to be enabled
-    await expect(page.getByRole('button', { name: 'Suivant' })).toBeEnabled({ timeout: 10000 });
-    await page.getByRole('button', { name: 'Suivant' }).click();
-
-    // French should persist
-    await expect(page.locator('html')).toHaveAttribute('lang', 'fr');
-
-    // Navigate to prompt page
-    await page.locator('[data-testid^="model-card-"]').first().click();
-    await page.locator('[data-testid^="model-card-"]').nth(1).click();
-    await page.getByRole('button', { name: 'Suivant' }).click();
-
-    // French should still persist
-    await expect(page.locator('html')).toHaveAttribute('lang', 'fr');
+    for (const path of ['/features', '/about', '/benchmarks', '/config']) {
+      await page.goto(path);
+      await expect(page.locator('html')).toHaveAttribute('lang', 'fr');
+    }
   });
 
   test('can switch back to English', async ({ page }) => {
-    // Set French
-    await page.getByRole('button', { name: /settings/i }).click();
-    await page.getByLabel(/language/i).click();
-    await page.getByRole('option', { name: /français/i }).click();
-    await page.getByRole('button', { name: /terminé|done/i }).click();
-
-    // Verify French
-    await expect(page.locator('html')).toHaveAttribute('lang', 'fr');
-
-    // Switch back to English
-    await page.getByRole('button', { name: /paramètres|settings/i }).click();
-    await page.getByTestId('language-select').click();
-    await page.getByRole('option', { name: /english/i }).click();
-    await page.getByRole('button', { name: /done|terminé/i }).click();
-
-    // Verify English
-    await expect(page.locator('html')).toHaveAttribute('lang', 'en');
+    await chooseLanguage(page, 'fr');
+    await chooseLanguage(page, 'en');
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText('Ask several models at once.');
   });
 
   test('language persists in localStorage', async ({ page, context }) => {
-    // Set French
-    await page.getByRole('button', { name: /settings/i }).click();
-    await page.getByLabel(/language/i).click();
-    await page.getByRole('option', { name: /français/i }).click();
-    await page.getByRole('button', { name: /terminé|done/i }).click();
+    await chooseLanguage(page, 'fr');
 
-    // Check localStorage contains language
-    const localStorage = await page.evaluate(() => window.localStorage.getItem('ensemble-ai-store'));
-    expect(localStorage).toContain('fr');
+    const stored = await page.evaluate(() => window.localStorage.getItem('ensemble-ai-store'));
+    expect(stored).toContain('"language":"fr"');
 
-    // Close page and open new one (simulates new browser session)
     await page.close();
     const newPage = await context.newPage();
-    await newPage.goto('/config');
-
-    // French should persist from localStorage
+    await newPage.goto('/workspace');
     await expect(newPage.locator('html')).toHaveAttribute('lang', 'fr');
   });
 
   test('UI text updates when language changes', async ({ page }) => {
-    // Capture English text
-    const configTitleEN = await page.locator('h1').first().textContent();
-
-    // Switch to French using Select component
-    await page.getByRole('button', { name: /settings/i }).click();
-    await page.getByTestId('language-select').click();
-    await page.getByRole('option', { name: /français/i }).click();
-    await page.getByRole('button', { name: /terminé|done/i }).click();
-
-    // Wait for text to update
-    await page.waitForTimeout(500);
-
-    // Capture French text
-    const configTitleFR = await page.locator('h1').first().textContent();
-
-    // English and French titles should be different
-    expect(configTitleEN).not.toBe(configTitleFR);
-
-    // French text should be present
-    expect(configTitleFR).toBeTruthy();
+    const english = await page.getByRole('heading', { level: 1 }).textContent();
+    await chooseLanguage(page, 'fr');
+    await expect(page.getByRole('heading', { level: 1 })).not.toHaveText(english ?? '');
   });
 
-  test('all pages respect language preference', async ({ page }) => {
-    // Set French using Select component
-    await page.getByRole('button', { name: /settings/i }).click();
-    await page.getByTestId('language-select').click();
-    await page.getByRole('option', { name: /français/i }).click();
-    await page.getByRole('button', { name: /terminé|done/i }).click();
-
-    // Config page in French
-    await expect(page.locator('html')).toHaveAttribute('lang', 'fr');
-
-    // Navigate to ensemble (French: "Suivant" = Next)
-    await page.locator('[data-mode="free"]').click();
-    await page.locator('[data-provider="openai"] input').fill('sk-test-key');
-    // Wait for validation to complete and button to be enabled
-    await expect(page.getByRole('button', { name: 'Suivant' })).toBeEnabled({ timeout: 10000 });
-    await page.getByRole('button', { name: 'Suivant' }).click();
-
-    // Ensemble page in French
-    await expect(page.locator('html')).toHaveAttribute('lang', 'fr');
-
-    // Navigate to prompt
-    await page.locator('[data-testid^="model-card-"]').first().click();
-    await page.locator('[data-testid^="model-card-"]').nth(1).click();
-    await page.getByRole('button', { name: 'Suivant' }).click();
-
-    // Prompt page in French
-    await expect(page.locator('html')).toHaveAttribute('lang', 'fr');
-
-    // Navigate to review
-    await page.getByTestId('prompt-textarea').fill('Test en français');
-    await page.getByRole('button', { name: /générer les réponses/i }).click();
-
-    // Review page in French
-    await expect(page.locator('html')).toHaveAttribute('lang', 'fr');
-  });
-
-  test('only EN and FR are supported', async ({ page }) => {
-    // Open settings
-    await page.getByRole('button', { name: /settings/i }).click();
-
-    // Check language dropdown
-    await page.getByTestId('language-select').click();
-
-    // Should only show English and Français (not ES, DE, JA, ZH)
-    await expect(page.getByRole('option', { name: /english/i })).toBeVisible();
-    await expect(page.getByRole('option', { name: /français/i })).toBeVisible();
-
-    // Other languages should not be visible or selectable
-    const allOptions = await page.getByRole('option').all();
-    expect(allOptions.length).toBeLessThanOrEqual(2);
+  test('only EN and FR are offered, each named in its own language', async ({ page }) => {
+    const sheet = await openSettings(page);
+    const group = sheet.getByRole('radiogroup', { name: /language|langue/i });
+    await expect(group.getByRole('radio')).toHaveCount(2);
+    await expect(group.getByRole('radio', { name: 'English' })).toBeVisible();
+    await expect(group.getByRole('radio', { name: 'Français' })).toBeVisible();
   });
 });

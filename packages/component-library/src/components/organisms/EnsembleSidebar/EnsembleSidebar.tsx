@@ -53,6 +53,8 @@ export interface EnsembleSidebarProps {
   showQuickPresets?: boolean;
   /** Feature flag to show Save Ensemble section (default: true) */
   showSaveEnsemble?: boolean;
+  /** Disables the save button, for example when no models are selected */
+  saveDisabled?: boolean;
   /** Callback when continue to prompt is clicked */
   onContinue?: () => void;
   /** Whether the continue button is disabled */
@@ -103,6 +105,7 @@ export const EnsembleSidebar = React.forwardRef<HTMLDivElement, EnsembleSidebarP
       onClearAll,
       showQuickPresets = true,
       showSaveEnsemble = true,
+      saveDisabled = false,
       onContinue,
       continueDisabled = false,
     },
@@ -132,7 +135,7 @@ export const EnsembleSidebar = React.forwardRef<HTMLDivElement, EnsembleSidebarP
                     onClick={onClearAll}
                     data-testid="clear-all-models"
                   >
-                    {t('common.clearAll', 'Clear All')}
+                    {t('organisms.ensembleSidebar.clearAll')}
                   </Button>
                 )}
               </div>
@@ -188,6 +191,7 @@ export const EnsembleSidebar = React.forwardRef<HTMLDivElement, EnsembleSidebarP
             <SaveEnsembleSection
               currentEnsembleName={currentEnsembleName}
               onSavePreset={onSavePreset}
+              saveDisabled={saveDisabled}
             />
           )}
 

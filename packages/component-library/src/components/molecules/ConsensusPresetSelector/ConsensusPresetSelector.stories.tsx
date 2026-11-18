@@ -85,6 +85,8 @@ export const Interactive: Story = {
     selectedModelCount: 4,
     consensusMethod: 'standard',
     topN: 3,
+    // Required by the component props; the render function wires up real state handlers.
+    onConsensusMethodChange: () => {},
   },
   render: function Render(args) {
     const [consensusMethod, setConsensusMethod] = React.useState<ConsensusMethod>(

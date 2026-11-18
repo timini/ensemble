@@ -15,6 +15,30 @@ function textResponse(body: string, status: number): Response {
   return new Response(body, { status });
 }
 
+/**
+ * The loader backs off with setTimeout between retries of 429 and 5xx
+ * responses (5s, 10s, 20s, ...). Tests that hit those paths run with fake
+ * timers and use this helper to advance the clock until the promise settles,
+ * so they finish instantly and leave no pending loader running into the next
+ * test. setImmediate stays real so file system work in the loader can finish.
+ */
+async function settleWithFakeTimers<T>(promise: Promise<T>): Promise<T> {
+  let settled = false;
+  promise.then(
+    () => {
+      settled = true;
+    },
+    () => {
+      settled = true;
+    },
+  );
+  while (!settled) {
+    await vi.advanceTimersByTimeAsync(5_000);
+    await new Promise((resolve) => setImmediate(resolve));
+  }
+  return promise;
+}
+
 function makeLoader(overrides?: {
   sources?: Array<{ dataset: string; config: string; split: string }>;
 }) {
@@ -46,6 +70,7 @@ describe('HuggingFaceBenchmarkLoader', () => {
   });
 
   afterEach(async () => {
+    vi.useRealTimers();
     vi.unstubAllGlobals();
 
     if (previousDatasetsDir === undefined) {
@@ -200,15 +225,21 @@ describe('HuggingFaceBenchmarkLoader', () => {
     });
 
     it('throws on 500 server error', async () => {
-      fetchMock.mockResolvedValueOnce(
+      vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
+      fetchMock.mockImplementation(async () =>
         textResponse('Internal Server Error', 500),
       );
 
       const loader = makeLoader();
-      await expect(loader.load()).rejects.toThrow('Unable to download dataset');
+      await expect(settleWithFakeTimers(loader.load())).rejects.toThrow(
+        'Unable to download dataset',
+      );
+      // One initial attempt plus five retries before giving up.
+      expect(fetchMock).toHaveBeenCalledTimes(6);
     });
 
     it('retries on 429 and succeeds', async () => {
+      vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
       fetchMock
         .mockResolvedValueOnce(textResponse('Rate limited', 429))
         .mockResolvedValueOnce(
@@ -219,11 +250,11 @@ describe('HuggingFaceBenchmarkLoader', () => {
         );
 
       const loader = makeLoader();
-      const questions = await loader.load();
+      const questions = await settleWithFakeTimers(loader.load());
 
       expect(questions).toHaveLength(1);
       expect(fetchMock).toHaveBeenCalledTimes(2);
-    }, 15_000);
+    });
   });
 
   describe('network error handling', () => {
@@ -359,13 +390,18 @@ describe('HuggingFaceBenchmarkLoader', () => {
         ],
       });
 
-      fetchMock
-        .mockResolvedValueOnce(textResponse('Error', 500))
-        .mockResolvedValueOnce(textResponse('Error', 500));
+      vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
+      fetchMock.mockImplementation(async () => textResponse('Error', 500));
 
-      await expect(loader.load()).rejects.toThrow(
+      await expect(settleWithFakeTimers(loader.load())).rejects.toThrow(
         'Unable to download dataset gsm8k',
       );
+      // Each source gets one initial attempt plus five retries.
+      expect(fetchMock).toHaveBeenCalledTimes(12);
+      const datasets = fetchMock.mock.calls.map((call) =>
+        new URL(String(call[0])).searchParams.get('dataset'),
+      );
+      expect(new Set(datasets)).toEqual(new Set(['source-a', 'source-b']));
     });
 
     it('includes all attempt error messages in final error', async () => {

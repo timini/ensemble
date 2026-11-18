@@ -4,3 +4,9 @@
 project_id  = "your-gcp-project-id"
 region      = "us-central1"
 github_repo = "your-username/ai-ensemble-8"
+
+# Monitoring (optional; see docs/DEPLOYMENT.md). Leave empty to skip.
+# uptime_check_host  = "ensemble.example.com"
+# alert_email        = "you@example.com"
+# billing_account_id = "XXXXXX-XXXXXX-XXXXXX"
+# monthly_budget_usd = 10

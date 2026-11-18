@@ -47,15 +47,8 @@ describe('encryption utilities', () => {
     expect(keyA.algorithm.name).toBe('AES-GCM');
     expect(keyB.algorithm.name).toBe('AES-GCM');
 
-    // CryptoKey equality is not directly comparable; instead validate exported material.
-    const exportedA = new Uint8Array(
-      await crypto.subtle.exportKey('raw', keyA),
-    );
-    const exportedB = new Uint8Array(
-      await crypto.subtle.exportKey('raw', keyB),
-    );
-
-    expect(exportedA).toHaveLength(32);
-    expect(Array.from(exportedA)).toEqual(Array.from(exportedB));
+    // The same cached key, and its bytes cannot be read out.
+    expect(keyA).toBe(keyB);
+    expect(keyA.extractable).toBe(false);
   });
 });

@@ -131,4 +131,85 @@ describe('consensus', () => {
     expect(sufficient.metrics.majority).toBeDefined();
     expect(sufficient.metrics.majority!.tokenCount).toBe(40);
   });
+
+  it('counts the tokens of the structured extraction call in a decisive majority vote', async () => {
+    const provider: AIProvider = {
+      ...buildProvider(async () => {
+        throw new Error('a decisive vote makes no streaming call');
+      }),
+      generateStructured: async () => {
+        const parsed = {
+          answers: [
+            { id: 'R1', kind: 'number', answer: '42' },
+            { id: 'R2', kind: 'number', answer: '42.0' },
+            { id: 'R3', kind: 'number', answer: '41' },
+          ],
+        };
+        return {
+          parsed: parsed as never,
+          raw: JSON.stringify(parsed),
+          responseTimeMs: 5,
+          usage: { inputTokens: 120, outputTokens: 30 },
+        };
+      },
+    };
+    const responses: ProviderResponse[] = [
+      { provider: 'openai', model: 'a', content: '42', responseTimeMs: 5 },
+      { provider: 'anthropic', model: 'b', content: '42.0', responseTimeMs: 6 },
+      { provider: 'google', model: 'c', content: '41', responseTimeMs: 7 },
+    ];
+
+    const result = await generateConsensus(['majority'], 'Q', responses, provider, 'judge-model');
+
+    expect(result.outputs.majority).toBe('42');
+    expect(result.metrics.majority!.tokenCount).toBe(150);
+  });
+
+  it('prices consensus calls with the shared table', async () => {
+    const provider = buildProvider(async (_prompt, _model, _onChunk, onComplete) => {
+      (onComplete as (f: string, t: number, n?: number, u?: { inputTokens: number; outputTokens: number }) => void)(
+        'merged', 5, 300, { inputTokens: 200, outputTokens: 100 },
+      );
+    });
+    const responses: ProviderResponse[] = [
+      { provider: 'openai', model: 'gpt-4o', content: 'A', responseTimeMs: 5 },
+      { provider: 'openai', model: 'gpt-4o', content: 'B', responseTimeMs: 5 },
+    ];
+    const result = await generateConsensus(['standard'], 'Q', responses, provider, 'gpt-4o', {
+      provider: 'openai',
+    });
+    expect(result.metrics.standard?.tokenCount).toBe(300);
+    expect(result.metrics.standard?.costUsd).toBeCloseTo((200 * 2.5 + 100 * 10) / 1e6, 12);
+    expect(result.metrics.standard?.inputTokens).toBe(200);
+    expect(result.metrics.standard?.outputTokens).toBe(100);
+    expect(result.metrics.standard?.calls).toBe(1);
+  });
+
+  it('prices local consensus models at zero', async () => {
+    const provider = buildProvider(async (_prompt, _model, _onChunk, onComplete) => {
+      onComplete('merged', 5, 30);
+    });
+    const responses: ProviderResponse[] = [
+      { provider: 'openai-compatible', model: 'ollama/a', content: 'A', responseTimeMs: 5 },
+      { provider: 'openai-compatible', model: 'ollama/a', content: 'B', responseTimeMs: 5 },
+    ];
+    const result = await generateConsensus(['standard'], 'Q', responses, provider, 'ollama/a', {
+      provider: 'openai-compatible',
+      endpoints: [{ id: 'ollama', baseURL: 'http://localhost:11434/v1' }],
+    });
+    expect(result.metrics.standard?.costUsd).toBe(0);
+  });
+
+  it('records a failed strategy instead of failing the question', async () => {
+    const provider = buildProvider(async (_prompt, _model, _onChunk, _onComplete, onError) => {
+      onError(new Error('summarizer down'));
+    });
+    const responses: ProviderResponse[] = [
+      { provider: 'openai', model: 'm', content: 'A', responseTimeMs: 5 },
+      { provider: 'openai', model: 'm', content: 'B', responseTimeMs: 5 },
+    ];
+    const result = await generateConsensus(['standard'], 'Q', responses, provider, 'm');
+    expect(result.outputs.standard).toBeUndefined();
+    expect(result.errors?.standard).toMatch(/Failed to generate/);
+  });
 });

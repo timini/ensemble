@@ -2,15 +2,16 @@ import * as React from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '../../../lib/utils';
 import { ExternalLink } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 const linkVariants = cva(
-  'inline-flex items-center gap-1 transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 rounded',
+  'focus-ring inline-flex items-center gap-1 rounded-sm underline-offset-4 transition-colors duration-fast',
   {
     variants: {
       variant: {
-        default: 'text-primary hover:text-primary/80 underline',
+        default: 'text-primary underline decoration-primary/40 hover:decoration-primary',
         subtle: 'text-muted-foreground hover:text-foreground hover:underline',
-        bold: 'text-primary hover:text-primary/80 font-semibold underline',
+        bold: 'font-semibold text-primary underline decoration-primary/40 hover:decoration-primary',
       },
     },
     defaultVariants: {
@@ -46,6 +47,7 @@ export interface LinkProps
  */
 export const Link = React.forwardRef<HTMLAnchorElement, LinkProps>(
   ({ variant, className, children, external, iconSize = 14, ...props }, ref) => {
+    const { t } = useTranslation();
     return (
       <a
         ref={ref}
@@ -59,7 +61,7 @@ export const Link = React.forwardRef<HTMLAnchorElement, LinkProps>(
           <ExternalLink
             size={iconSize}
             className="inline-block"
-            aria-label="Opens in new window"
+            aria-label={t('atoms.link.opensInNewWindow')}
           />
         )}
       </a>

@@ -31,9 +31,7 @@ const handler = (req: NextRequest) =>
       const safePath = path ?? "<no-path>";
 
       if (env.NODE_ENV === "development") {
-        console.error(
-          `❌ tRPC failed on ${safePath}: ${error.message}`,
-        );
+        console.error(`❌ tRPC failed on ${safePath}: ${error.message}`);
       }
 
       const context = {
@@ -46,11 +44,14 @@ const handler = (req: NextRequest) =>
         return;
       }
 
-      Sentry.captureMessage(`Handled tRPC error on ${safePath}: ${error.code}`, {
-        ...context,
-        level: "warning",
-        fingerprint: ["trpc-handled", error.code, safePath],
-      });
+      Sentry.captureMessage(
+        `Handled tRPC error on ${safePath}: ${error.code}`,
+        {
+          ...context,
+          level: "warning",
+          fingerprint: ["trpc-handled", error.code, safePath],
+        },
+      );
     },
   });
 

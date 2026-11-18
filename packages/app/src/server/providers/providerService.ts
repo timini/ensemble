@@ -4,23 +4,10 @@ import {
 } from "@ensemble-ai/shared-utils/providers";
 import { env } from "~/env";
 
-interface StreamProviderInput {
-  provider: ProviderName;
-  model: string;
-  prompt: string;
-  temperature?: number;
-}
-
-interface StreamProviderResult {
-  response: string;
-  responseTimeMs: number;
-  tokenCount?: number;
-}
-
-interface StreamProviderOptions {
-  onChunk?: (chunk: string) => void;
-}
-
+/**
+ * Server key for a provider. OpenAI-compatible endpoints are configured in
+ * the browser only, so the server has no key for them and refuses them.
+ */
 function getProviderApiKey(provider: ProviderName): string | null {
   switch (provider) {
     case "openai":
@@ -57,36 +44,4 @@ export async function listProviderTextModels(
   provider: ProviderName,
 ): Promise<string[]> {
   return getProviderClient(provider).listAvailableTextModels();
-}
-
-export async function streamProviderResponse(
-  input: StreamProviderInput,
-  options?: StreamProviderOptions,
-): Promise<StreamProviderResult> {
-  const client = getProviderClient(input.provider);
-  let bufferedResponse = "";
-
-  return new Promise<StreamProviderResult>((resolve, reject) => {
-    void client.streamResponse(
-      input.prompt,
-      input.model,
-      (chunk) => {
-        bufferedResponse += chunk;
-        options?.onChunk?.(chunk);
-      },
-      (fullResponse, responseTime, tokenCount) => {
-        resolve({
-          response: fullResponse || bufferedResponse,
-          responseTimeMs: responseTime,
-          ...(tokenCount !== undefined ? { tokenCount } : {}),
-        });
-      },
-      (error) => {
-        reject(error);
-      },
-      ...(input.temperature !== undefined
-        ? [{ temperature: input.temperature }]
-        : []),
-    );
-  });
 }

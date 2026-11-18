@@ -1,0 +1,87 @@
+import { describe, expect, it, vi } from 'vitest';
+import { fireEvent, render, screen } from '@testing-library/react';
+import { ResponseErrorNotice } from './ResponseErrorNotice';
+import { renderWithI18n } from '../../../lib/test-utils/i18n-test-wrapper';
+
+describe('ResponseErrorNotice', () => {
+  it.each([
+    ['invalid_key', 'API key rejected'],
+    ['missing_key', 'No API key'],
+    ['rate_limited', 'Rate limit reached'],
+    ['timeout', 'No answer in time'],
+    ['provider_unavailable', 'Provider unavailable'],
+    ['interrupted', 'Answer interrupted'],
+    ['cancelled', 'Stopped'],
+    ['insufficient_credits', 'Not enough credits'],
+    ['other', 'This model failed'],
+  ] as const)('shows a title for %s', (kind, title) => {
+    render(<ResponseErrorNotice kind={kind} />);
+    const notice = screen.getByTestId('response-error');
+    expect(notice).toHaveAttribute('data-error-kind', kind);
+    expect(screen.getByTestId('response-error-title')).toHaveTextContent(title);
+  });
+
+  it('defaults to other when no kind is given', () => {
+    render(<ResponseErrorNotice />);
+    expect(screen.getByTestId('response-error')).toHaveAttribute('data-error-kind', 'other');
+  });
+
+  it('says when to retry after a rate limit', () => {
+    render(<ResponseErrorNotice kind="rate_limited" retryAfterSeconds={30} />);
+    expect(screen.getByTestId('response-error-description')).toHaveTextContent('30 seconds');
+  });
+
+  it('shows the provider detail', () => {
+    render(<ResponseErrorNotice kind="other" detail="400 Unknown model" />);
+    expect(screen.getByTestId('response-error-detail')).toHaveTextContent('400 Unknown model');
+  });
+
+  it('calls onRetry from the retry button', () => {
+    const onRetry = vi.fn();
+    render(<ResponseErrorNotice kind="timeout" onRetry={onRetry} />);
+    fireEvent.click(screen.getByTestId('retry-button'));
+    expect(onRetry).toHaveBeenCalledTimes(1);
+  });
+
+  it('hides the retry button without a handler', () => {
+    render(<ResponseErrorNotice kind="timeout" />);
+    expect(screen.queryByTestId('retry-button')).not.toBeInTheDocument();
+  });
+
+  it('says no key is set, not that a key was rejected, for missing_key', () => {
+    render(<ResponseErrorNotice kind="missing_key" />);
+    const description = screen.getByTestId('response-error-description');
+    expect(description).toHaveTextContent('No API key is set for this provider');
+    expect(description).not.toHaveTextContent(/did not accept/i);
+  });
+
+  it('says a stopped answer can be asked again', () => {
+    render(<ResponseErrorNotice kind="cancelled" />);
+    expect(screen.getByTestId('response-error-description')).toHaveTextContent(
+      'This answer was stopped before it finished. Retry to ask this model again.',
+    );
+  });
+
+  it('points to buying credits when the balance cannot cover the run', () => {
+    render(<ResponseErrorNotice kind="insufficient_credits" />);
+    expect(screen.getByTestId('response-error-description')).toHaveTextContent(/Buy credits/);
+  });
+
+  it('renders French text for the Pro kinds', () => {
+    const { rerender } = renderWithI18n(<ResponseErrorNotice kind="cancelled" />, { language: 'fr' });
+    expect(screen.getByTestId('response-error-title')).toHaveTextContent('Arrêtée');
+    rerender(<ResponseErrorNotice kind="insufficient_credits" />);
+    expect(screen.getByTestId('response-error-title')).toHaveTextContent('Crédits insuffisants');
+  });
+
+  it('renders French text', () => {
+    renderWithI18n(<ResponseErrorNotice kind="invalid_key" onRetry={vi.fn()} />, { language: 'fr' });
+    expect(screen.getByTestId('response-error-title')).toHaveTextContent('Clé API refusée');
+    expect(screen.getByTestId('retry-button')).toHaveTextContent('Réessayer');
+  });
+
+  it('renders French text for a missing key', () => {
+    renderWithI18n(<ResponseErrorNotice kind="missing_key" />, { language: 'fr' });
+    expect(screen.getByTestId('response-error-title')).toHaveTextContent('Aucune clé API');
+  });
+});

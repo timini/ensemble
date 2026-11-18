@@ -1,12 +1,12 @@
 export function toError(
   error: unknown,
-  fallbackMessage = 'Unknown error occurred',
+  fallbackMessage = "Unknown error occurred",
 ): Error {
   if (error instanceof Error) {
     return error;
   }
 
-  if (typeof error === 'string') {
+  if (typeof error === "string") {
     return new Error(error);
   }
 

@@ -4,38 +4,38 @@
  * Errors are also captured by Sentry when available.
  */
 
-import * as Sentry from '@sentry/nextjs';
+import * as Sentry from "@sentry/nextjs";
 
 const isDebug =
-    process.env.NEXT_PUBLIC_DEBUG_LOGS === 'true' ||
-    process.env.NODE_ENV === 'development';
+  process.env.NEXT_PUBLIC_DEBUG_LOGS === "true" ||
+  process.env.NODE_ENV === "development";
 
 export const logger = {
-    debug: (...args: unknown[]) => {
-        if (isDebug) {
-            console.log('[DEBUG]', ...args);
-        }
-    },
-    log: (...args: unknown[]) => {
-        if (isDebug) {
-            console.log(...args);
-        }
-    },
-    warn: (...args: unknown[]) => {
-        console.warn(...args);
-        Sentry.addBreadcrumb({
-            category: 'console',
-            message: args.map(String).join(' '),
-            level: 'warning',
-        });
-    },
-    error: (...args: unknown[]) => {
-        console.error(...args);
-        const err = args.find((a) => a instanceof Error);
-        if (err) {
-            Sentry.captureException(err);
-        } else {
-            Sentry.captureMessage(args.map(String).join(' '), 'error');
-        }
-    },
+  debug: (...args: unknown[]) => {
+    if (isDebug) {
+      console.log("[DEBUG]", ...args);
+    }
+  },
+  log: (...args: unknown[]) => {
+    if (isDebug) {
+      console.log(...args);
+    }
+  },
+  warn: (...args: unknown[]) => {
+    console.warn(...args);
+    Sentry.addBreadcrumb({
+      category: "console",
+      message: args.map(String).join(" "),
+      level: "warning",
+    });
+  },
+  error: (...args: unknown[]) => {
+    console.error(...args);
+    const err = args.find((a) => a instanceof Error);
+    if (err) {
+      Sentry.captureException(err);
+    } else {
+      Sentry.captureMessage(args.map(String).join(" "), "error");
+    }
+  },
 };

@@ -5,12 +5,12 @@ import { Badge } from '../../atoms/Badge';
 import { ProviderLogo, type ProviderLogoProvider } from '../../atoms/ProviderLogo';
 import { ModelLogo } from '../../atoms/ModelLogo';
 import { LoadingSpinner } from '../../atoms/LoadingSpinner';
-import { InlineAlert } from '../../atoms/InlineAlert';
 import { Rating } from '../../atoms/Rating';
 import { Button } from '../../atoms/Button';
 import { cn } from '@/lib/utils';
 import { ChevronDown, ChevronUp, Copy } from 'lucide-react';
 import { Markdown } from '../../atoms/Markdown';
+import { ResponseErrorNotice, type ResponseErrorKind } from '../ResponseErrorNotice';
 
 export type Provider = ProviderLogoProvider;
 export type ResponseStatus = 'streaming' | 'complete' | 'error';
@@ -27,8 +27,12 @@ export interface ResponseCardProps {
   responseType: ResponseType;
   /** Response content */
   content?: string;
-  /** Error message (when status is 'error') */
+  /** Error message (when status is 'error'), shown as the provider detail */
   error?: string;
+  /** Why the answer failed (when status is 'error'). Defaults to `other`. */
+  errorKind?: ResponseErrorKind;
+  /** Seconds the provider asked us to wait, for a rate limit */
+  retryAfterSeconds?: number;
   /** Star rating value (0-5) */
   rating?: number;
   /** Response time (e.g., "1568ms") */
@@ -54,13 +58,15 @@ export const PROVIDER_NAMES = {
   xai: 'XAI',
   deepseek: 'DeepSeek',
   perplexity: 'Perplexity',
+  'openai-compatible': 'OpenAI-compatible',
 } as const;
 
 /**
  * ResponseCard molecule for displaying AI or manual responses.
  *
- * Combines Card, Badge, LoadingSpinner, and InlineAlert atoms to create
- * a complete response display with streaming support and error handling.
+ * Combines Card, Badge and LoadingSpinner atoms with ResponseErrorNotice to
+ * create a complete response display with streaming support and per-kind
+ * error states with a retry for that model.
  *
  * @example
  * ```tsx
@@ -82,6 +88,8 @@ export const ResponseCard = React.forwardRef<HTMLDivElement, ResponseCardProps>(
       responseType,
       content,
       error,
+      errorKind,
+      retryAfterSeconds,
       rating = 0,
       responseTime,
       tokenCount,
@@ -107,8 +115,6 @@ export const ResponseCard = React.forwardRef<HTMLDivElement, ResponseCardProps>(
       onCopy?.();
     };
 
-    console.log(`[ResponseCard] Render ${modelName} (${testId}), status=${status}, tokenCount=${tokenCount}`);
-
     return (
       <Card
         ref={ref}
@@ -116,6 +122,7 @@ export const ResponseCard = React.forwardRef<HTMLDivElement, ResponseCardProps>(
         data-status={status}
         data-response-type={responseType}
         data-expanded={isExpanded}
+        data-error-kind={isError ? (errorKind ?? 'other') : undefined}
         aria-busy={isStreaming ? 'true' : undefined}
         className={cn(
           'w-full',
@@ -189,21 +196,12 @@ export const ResponseCard = React.forwardRef<HTMLDivElement, ResponseCardProps>(
 
         <CardContent className="pt-0 space-y-4">
           {isError ? (
-            <div className="flex flex-col gap-2">
-              <InlineAlert variant="error">
-                {error}
-              </InlineAlert>
-              {onRetry && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={onRetry}
-                  className="self-start"
-                >
-                  {t('common.retry', 'Retry')}
-                </Button>
-              )}
-            </div>
+            <ResponseErrorNotice
+              kind={errorKind}
+              detail={error}
+              retryAfterSeconds={retryAfterSeconds}
+              onRetry={onRetry}
+            />
           ) : (
             <>
               {isExpanded && (
@@ -242,7 +240,7 @@ export const ResponseCard = React.forwardRef<HTMLDivElement, ResponseCardProps>(
                     )}
                     {tokenCount !== undefined && (
                       <span className="text-sm text-muted-foreground">
-                        {tokenCount} tokens
+                        {t('molecules.responseCard.tokens', { count: tokenCount })}
                       </span>
                     )}
                   </div>

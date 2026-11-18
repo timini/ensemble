@@ -282,7 +282,7 @@ describe('ApiKeyConfigurationModal', () => {
         />
       );
 
-      expect(screen.getByLabelText('Close modal')).toBeInTheDocument();
+      expect(screen.getByLabelText('Close')).toBeInTheDocument();
     });
 
     it('has modal overlay', () => {

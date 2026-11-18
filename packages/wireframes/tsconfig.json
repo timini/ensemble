@@ -18,7 +18,9 @@
       }
     ],
     "paths": {
-      "@/*": ["./*"]
+      "@/*": ["./*"],
+      "tailwindcss": ["./node_modules/tailwindcss"],
+      "tailwindcss/*": ["./node_modules/tailwindcss/*"]
     },
     "target": "ES2017"
   },

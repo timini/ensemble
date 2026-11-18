@@ -2,7 +2,44 @@
 
 ## Overview
 
-The eval pipeline measures whether ensemble consensus strategies improve accuracy over a single model baseline. It runs a model against benchmark datasets, then runs the same model N times as an ensemble with different consensus strategies, comparing accuracy.
+The eval pipeline asks whether ensemble consensus strategies beat a single model. For each benchmark question it runs the model once (the single baseline), runs the same model N times as an ensemble, combines the N answers with each consensus strategy, and scores everything against ground truth.
+
+In `quick-eval` the ensemble is the same model sampled N times at a non-zero temperature. The `benchmark` command takes any list of models (`--models`), so it can run an ensemble of different models, for example three open models through OpenRouter or a local Ollama.
+
+The `matrix` command (`npm run bench:matrix`) runs the M3 benchmark matrix from `bench/matrix.json` on top of the same runner: three open models alone and as an ensemble, plus a cached premium reference, on four datasets, with a cost estimate before any spend, resume, and a summary for the app's `/benchmarks` page. Its method, results format and the two calibration commands (`calibrate-agreement`, `calibrate-tokens`) are described in [BENCHMARKS.md](./BENCHMARKS.md).
+
+## Model specs
+
+Models are written as `provider:model`:
+
+| Form | Example | Notes |
+|------|---------|-------|
+| `provider:model` | `openai:gpt-4o`, `google:gemini-2.5-flash` | Key from `OPENAI_API_KEY`, `GOOGLE_API_KEY` and so on |
+| `<endpoint>:model` | `openrouter:qwen/qwen3-14b`, `ollama:llama3.2:3b` | OpenAI-compatible presets: `openrouter`, `groq`, `together`, `ollama`, `lmstudio`, `llamacpp`, `vllm` |
+| `compat:<baseURL>#<model>` | `compat:http://localhost:8081/v1#my-model` | Any other OpenAI-compatible server |
+
+Preset endpoints read their key from `<PRESET>_API_KEY` (`OPENROUTER_API_KEY`, `GROQ_API_KEY`, `TOGETHER_API_KEY`, `OLLAMA_API_KEY` and so on) and can be pointed elsewhere with `<PRESET>_BASE_URL`. `compat:` endpoints read `OPENAI_COMPATIBLE_API_KEY`. OpenRouter, Groq and Together refuse to start in free mode without their key; local servers and `compat:` endpoints run with an empty key. Results record these models as `openai-compatible:<endpoint>/<model>` (see `src/lib/modelSpecs.ts` and `src/lib/providers.ts`).
+
+## Answer protocols
+
+Runs use one of two answer protocols (`src/lib/methodology.ts`):
+
+- `structured`, the default for every new run (`benchmark`, `baseline`, `generate-cache`, and `quick-eval` without a cache):
+  - Multiple-choice options (TruthfulQA, GPQA, MMLU-Pro, ARC, HellaSwag) are shuffled with a fixed seed (`--option-seed`, default 1729) mixed with the question id, so each question has its own order and every run gets the same one. Each run records `optionPermutation` (displayed option i was dataset option `optionPermutation[i]`) and `optionSeed`. Without shuffling, TruthfulQA always had the right answer at A.
+  - Every prompt ends with an instruction asking for a final answer. The model is called through `generateStructured` with a `{ reasoning, answer }` schema; choice answers are limited to the option letters and yes/no answers to yes or no. OpenAI-compatible clients fall back from strict `json_schema` to `json_object` to a prompt by themselves. If the call still fails with a format error, the model is asked again for a plain reply that ends with `Final answer: <answer>`. Each response records `answerSource` (`structured` or `text`).
+  - Answers are read mechanically (`src/lib/finalAnswer.ts`): the JSON `answer` field, then the last `Final answer:` line, then the dataset's free-text parser. Choice, numeric (GSM8K), LaTeX (MATH-500) and yes/no (HalluMix) answers need no LLM judge. Only SimpleQA and HLE still use one.
+    - Choice letters: a marked answer counts when it is a bare letter (`B`, `(B)`, `B.`), a labelled option (`B. Paris`), an explicit pattern (`the answer is B`), or else the last standalone capital that is a valid option, skipping one followed by a lower-case word (the article "A", the pronoun "I"). Unmarked text uses only explicit patterns, so a reply that starts "A careful reading..." is not read as A. Letters outside the options named in the prompt are rejected.
+    - LaTeX: `\boxed{}`, `\text{}` and similar wrappers are removed, `\frac12` and `\frac1{2}` become `\frac{1}{2}`, `\$` and `$` are dropped, and a single-variable assignment (`x = 3`) is reduced to its value before comparing. Numeric values are also compared as numbers.
+  - `majority` is a mechanical vote over the extracted answers, with no LLM call. Ties go to the answer given first. When replies came back but none had a readable answer, the vote is recorded with no answer (`Final answer:`) and scored wrong, not as an error.
+- `legacy`: the prompts exactly as the loaders build them, unshuffled, scored by the LLM judge for every dataset (GSM8K and MATH-500 included). Only used to score the committed caches, whose replies answered those prompts.
+
+## Failures count as wrong
+
+A response that errors or times out is scored wrong, not dropped. Each such result records `failure: 'error' | 'timeout'`. Older caches, including the committed legacy single-baseline caches, left failed responses unscored; `loadCachedBaseline` scores them wrong with their failure when it loads them, so the single model's failures count the same way as the ensemble's. Legacy single-baseline accuracy is lower than in reports made before this change for that reason (for example GPQA has 15 timed-out responses out of 100). A question that fails or runs past `--question-timeout` as a whole is recorded with `failure` set and every model and strategy scored wrong. A strategy that fails or cannot run (for example ELO with fewer than 3 answers) is scored wrong as an error. Reports show errors and timeouts in their own columns as well.
+
+## Judges
+
+Where a judge is still needed it must be a different model from the generators. `benchmark` takes `--judge`, or uses `--summarizer` when it is not one of the `--models`. `quick-eval`, `generate-cache` and `baseline` refuse a judge that is also the model under test. `--allow-same-judge` forces it.
 
 ```
                     ┌─────────────┐
@@ -12,434 +49,235 @@ The eval pipeline measures whether ensemble consensus strategies improve accurac
               ┌────────────┼────────────┐
               ▼            ▼            ▼
          ┌─────────┐ ┌─────────┐ ┌─────────┐
-         │ Dataset1 │ │ Dataset2 │ │ DatasetN │  10 benchmark datasets
+         │ Dataset1 │ │ Dataset2 │ │ DatasetN │  up to 10 datasets,
          └────┬─────┘ └────┬─────┘ └────┬─────┘  loaded in parallel
               │            │            │
               ▼            ▼            ▼
          ┌──────────────────────────────────┐
-         │        Per-Dataset Runner         │  runs single + ensemble
+         │        Per-dataset runner         │
          │  ┌──────────┐  ┌──────────────┐  │
-         │  │ Single 1x │  │ Ensemble 5x  │  │
+         │  │ Single 1x │  │ Ensemble Nx  │  │
          │  │ baseline  │  │ + consensus  │  │
          │  └──────────┘  └──────────────┘  │
          └──────────────────────────────────┘
               │
               ▼
          ┌──────────────────────────────────┐
-         │     Results + Regression Check    │
+         │   Results and regression check    │
          └──────────────────────────────────┘
 ```
 
-## Data Flow: Per-Question Execution
+## Per-question steps
 
-Each question goes through this pipeline:
+1. **Ensemble generation.** N calls (default 5) to the same model at temperature 0.7. The responses are shared by all strategies. Loaded from `.cache/ensemble/` when a matching cache file exists.
+2. **Consensus.** Each selected strategy turns the N responses into one answer using a consensus model (`--consensus-model`). On structured runs `majority` is a mechanical vote with no LLM call (see Answer protocols). On legacy runs all four use LLM calls; majority uses them only to extract answers unless its vote falls back:
+   - `standard`: the consensus model summarizes the responses.
+   - `elo`: pairwise LLM comparisons produce Elo ratings; the top responses are synthesized.
+   - `majority`: one structured call to the consensus model extracts a short final answer from each response. The answers are normalised and counted. When one answer has the most votes (at least 2), that bare answer is the consensus text; a numeric winner is given as its canonical value (`1/2` becomes `0.5`). On a tie, when most answers are long-form, or when extraction fails, the consensus model ranks the responses and synthesizes an answer from the top ones. That is 1 to 3 calls in all, and the reported `tokenCount` includes the extraction call. Majority results saved before the mechanical vote was added used only the rank-and-synthesize method and are not comparable with newer results. Consensus outputs are not cached, so rerunning `quick-eval` on cached ensembles gives the new behaviour.
+   - `council`: extra LLM rounds of critique, rebuttal and judgment.
+3. **Evaluation.** Each individual response and each consensus answer is scored (see `src/lib/evaluators.ts`). On structured runs the final answer is read mechanically (`MechanicalEvaluator`) except for HLE and SimpleQA, which use the exact-match judge. On legacy runs an LLM judge (`--judge-model`) scores everything through `generateStructured`:
+   - GSM8K, MATH-500: numeric judge (a regex numeric evaluator exists for when no judge is configured)
+   - TruthfulQA, GPQA, MMLU-Pro, ARC, HellaSwag: multiple-choice judge
+   - HLE, SimpleQA, HalluMix: exact-match judge
 
-```
-  Question
-     │
-     ▼
-  ┌──────────────────────────────────────────────────────────┐
-  │ Step 1: Ensemble Generation (EXPENSIVE - cached)         │
-  │                                                          │
-  │  Prompt ──► Model Instance 1 ──► Response 1              │
-  │         ──► Model Instance 2 ──► Response 2              │
-  │         ──► Model Instance 3 ──► Response 3              │
-  │         ──► Model Instance 4 ──► Response 4              │
-  │         ──► Model Instance 5 ──► Response 5              │
-  │                                                          │
-  │  5 parallel API calls, same model, temperature=0.7       │
-  │  These responses are SHARED across all strategies        │
-  │  Cached in .cache/ensemble/ after first run              │
-  └──────────────────┬───────────────────────────────────────┘
-                     │
-                     │  ProviderResponse[] (5 responses)
-                     │
-                     ▼
-  ┌──────────────────────────────────────────────────────────┐
-  │ Step 2: Consensus Generation (per-strategy)              │
-  │                                                          │
-  │  Responses ──► Standard strategy ──► consensus answer    │
-  │            ──► ELO strategy      ──► consensus answer    │
-  │            ──► Majority strategy ──► consensus answer    │
-  │            ──► Council strategy  ──► consensus answer    │
-  │                                                          │
-  │  Each strategy produces ONE consensus answer from the    │
-  │  5 responses. Some strategies make additional API calls  │
-  │  (e.g. council does critique/rebuttal/judgment rounds).  │
-  └──────────────────┬───────────────────────────────────────┘
-                     │
-                     ▼
-  ┌──────────────────────────────────────────────────────────┐
-  │ Step 3: Evaluation (per-response + per-strategy)         │
-  │                                                          │
-  │  Each response evaluated against ground truth:           │
-  │   - Numeric evaluator (GSM8K, MATH-500)                 │
-  │   - MCQ evaluator (TruthfulQA, GPQA, MMLU-Pro, etc.)   │
-  │   - LLM judge (SimpleQA, HLE, free-text answers)        │
-  │                                                          │
-  │  Each consensus answer also evaluated.                   │
-  │  All evaluations run in parallel (Promise.all).          │
-  └──────────────────────────────────────────────────────────┘
-```
+## Caches
 
-## Cache Architecture
-
-There are three cache layers. The first two are committed to the repository so they are available in CI and for local development without regeneration.
+`.cache/` is committed so runs can reuse expensive model output.
 
 ```
-  .cache/
-  ├── baselines/          ← Single-model baseline results (committed)
-  │   │                     Key: {model}_{dataset}_n{sample}.json
-  │   │                     Contains: full PromptRunResult[] for single runs
-  │   │                     Eliminates: single-model API calls
-  │   ├── google_gemini-2.5-flash-lite_gsm8k_n30.json
-  │   └── google_gemini-2.5-flash-lite_truthfulqa_n30.json
-  │
-  ├── ensemble/           ← Raw ensemble API responses (committed)
-  │   │                     Key: {model}_{dataset}_{N}x_t{temp}.json
-  │   │                     Contains: questionId → ProviderResponse[]
-  │   │                     Fixed 100 questions per dataset (seed=42)
-  │   │                     Eliminates: ALL ensemble API calls
-  │   ├── google_gemini-2.5-flash-lite_gsm8k_5x_t0.7.json
-  │   └── google_gemini-2.5-flash-lite_truthfulqa_5x_t0.7.json
-  │
-  └── datasets/           ← HuggingFace dataset downloads (gitignored)
-                            Cached in CI via actions/cache
-                            Key: eval-datasets-v1
+.cache/
+├── baselines/   single-model results, key {model}_{dataset}.json (legacy) or {model}_{dataset}_structured.json
+└── ensemble/    raw ensemble responses, key {model}_{dataset}_{N}x_t{temp}.json (legacy) or ..._structured.json
+datasets/        HuggingFace downloads (gitignored; cached in CI as eval-datasets-v2)
 ```
 
-### Cache Key Design
+What is committed today: legacy baseline and ensemble caches for `google:gemini-3-flash-preview`, 5x at t=0.7, for nine datasets (all except HalluMix). Structured caches are saved under separate `_structured` file names, so they never mix with legacy replies.
 
-Cache keys encode all parameters that affect the output:
+| Cache | Key | Changes when |
+|-------|-----|--------------|
+| Baseline | `{model}_{dataset}` | Model changes. Not keyed by sample size; partial hits fall back to a live run |
+| Ensemble | `{model}_{dataset}_{N}x_t{temp}` | Model, ensemble size or temperature changes |
 
-| Cache | Key Format | Invalidated When |
-|-------|-----------|-----------------|
-| Baseline | `{model}_{dataset}_n{sample}` | Model or sample size changes |
-| Ensemble | `{model}_{dataset}_{N}x_t{temp}` | Model, ensemble size, or temperature changes |
-| Dataset | `eval-datasets-v1` | Manual bump (HF data rarely changes) |
+When `quick-eval` finds an ensemble cache for the requested model, it loads the full dataset shuffled with seed 42, keeps only the cached question ids, and takes the first `--sample` of them. Every question then hits the cache. A structured cache is preferred; a legacy cache (the committed ones) is scored with the legacy protocol (`src/commands/quickEvalDatasets.ts`). Without a matching cache it takes a seed-42 sample and makes live calls with the structured protocol.
 
-**Important**: The ensemble cache stores responses for a FIXED set of 100 questions
-per dataset (configurable via `--sample`). The questions are selected by shuffling
-each dataset with a deterministic seed (default 42), then taking the first N.
-When `quick-eval` detects an ensemble cache, it automatically filters to only
-cached question IDs, ensuring 100% cache hit rate. This keeps generation costs
-manageable while providing good statistical significance.
+`--no-cache` (and `--mode mock`) disables cache lookups for that run. It does not delete cache files.
 
-### Two-Phase Workflow: Generate Then Evaluate
+### Model defaults
 
-Cache generation and evaluation are **separate commands** with different lifecycles:
+Defaults live in `src/lib/evalDefaults.ts` and are shared by `quick-eval`, `generate-cache` and the `eval:ci*` scripts (a unit test keeps them in step):
 
-```
-  ┌─────────────────────────────────────────────────────────┐
-  │  Phase 1: generate-cache (run ONCE, commit to repo)     │
-  │                                                         │
-  │  For each dataset:                                      │
-  │    → Shuffle with deterministic seed (default 42)       │
-  │    → Pick first 100 questions (configurable)            │
-  │    → Generate 5 diverse responses per question (t=0.7)  │
-  │    → Save to .cache/ensemble/                           │
-  │    → No consensus, no evaluation                        │
-  │                                                         │
-  │  Can use an expensive pro model — you only pay once.    │
-  │  100 questions × 5 responses × 10 datasets = 5,000     │
-  │  API calls total. Manageable even with pro models.      │
-  └─────────────────────────────────────────────────────────┘
-                          │
-                          │  git add + commit
-                          ▼
-  ┌─────────────────────────────────────────────────────────┐
-  │  Phase 2: quick-eval (run MANY times, iterate freely)   │
-  │                                                         │
-  │  For each dataset:                                      │
-  │    → Detect ensemble cache → filter to cached IDs       │
-  │    → Sample up to N questions from cached set            │
-  │    → Load 5 cached responses per question (FREE)        │
-  │    → Run consensus strategy (cheap API calls)           │
-  │    → Evaluate against ground truth (cheap API calls)    │
-  │    → Check regression against baseline                  │
-  │                                                         │
-  │  100% cache hit rate guaranteed because quick-eval      │
-  │  only uses questions that were pre-generated.           │
-  └─────────────────────────────────────────────────────────┘
-```
+- Model: `google:gemini-3-flash-preview`, the model of the committed caches, so default and CI runs hit them.
+- Judge: `google:gemini-2.5-flash`, the judge that scored the committed single-model baseline cache.
+- Consensus model: `google:gemini-2.5-flash-lite`. On a cached run the consensus calls (plus judge calls) are the only live calls, so they use the cheapest model.
 
-### Using a Pro Model for Ensemble Responses
+If the saved baseline file was produced with a different model, ensemble size, sample size or answer protocol (a baseline with no `protocol` field is legacy), `quick-eval --baseline` skips the regression check, says why, and writes a fresh baseline.
 
-Since ensemble responses are cached and committed to the repo, you only pay for generation once. With only 100 questions per dataset (1,000 total across 10 datasets), even pro models are affordable:
+### Sample size
+
+Real runs default to 200 questions per dataset (`DEFAULT_SAMPLE_FREE`) for `quick-eval`, `benchmark` and `baseline`; mock runs default to 20. Smaller real runs print a warning. The `eval:ci*` and `eval:regenerate-baseline` scripts pass `--sample 30` so CI stays on the committed caches and the committed baseline.
+
+### Generate, then evaluate
+
+`generate-cache` (run rarely, commit the output):
+
+- For each dataset: shuffle with seed 42 (`--seed`), take the first 200 questions (`--sample`), generate N responses per question with the structured protocol (`--protocol legacy` for the old one), save to `.cache/ensemble/`. It also writes the single baseline cache, scored mechanically or, for SimpleQA and HLE, with `--judge-model`.
+
+`quick-eval` (run often):
+
+- Load cached responses, run the consensus strategies, judge, and optionally check for regressions against a baseline file.
+
+## CI
+
+`.github/workflows/eval-ci.yml` makes paid calls, so it does not run on every PR. It runs on manual dispatch (with a `strategies` input) or on pull requests that touch the consensus packages, `shared-utils` or `eval` and carry the `run-eval` label. On a PR, a path filter decides which strategies are affected, and each affected strategy runs as its own job with `npm run eval:ci:<strategy>`. The jobs need a Google API key secret. A final `eval-report` job downloads the results and posts a PR comment. A job fails if regressions are detected.
+
+Each job builds the consensus packages, `shared-utils` and `eval`, then runs `quick-eval` with `--baseline baselines/quick-eval.json` and `--question-timeout 300`. Ensemble responses and the single-model baseline come from the committed caches; consensus and judge calls are live.
+
+## Concurrency: AIMD limiter
+
+API calls in a run share one `ConcurrencyLimiter` (`src/lib/concurrencyPool.ts`) using additive increase, multiplicative decrease:
+
+- Start at `--concurrency` (default 40)
+- +1 on success, halve on a 429 or when the system monitor reports pressure
+- 2 s cooldown between adjustments
+- Bounds: min 1, max 60 (as set by `quick-eval` and `generate-cache`)
+
+The limiter is shared across datasets, so fast datasets free slots for slow ones.
+
+## Datasets
+
+| Dataset | Name in CLI | Source | Judge |
+|---------|-------------|--------|-------|
+| GSM8K | `gsm8k` | `openai/gsm8k` | numeric |
+| MATH-500 | `math500` | `HuggingFaceH4/MATH-500` | numeric |
+| TruthfulQA (MC1) | `truthfulqa` | `truthfulqa/truthful_qa` | multiple choice |
+| GPQA Diamond | `gpqa` | `Idavidrein/gpqa` (`gpqa_diamond`), fallback `hendrydong/gpqa_diamond_mc` | multiple choice |
+| MMLU-Pro | `mmlu_pro` | `TIGER-Lab/MMLU-Pro` | multiple choice |
+| SimpleQA | `simpleqa` | `basicv8vc/SimpleQA` | exact match |
+| HLE | `hle` | `cais/hle` (gated, needs `HF_TOKEN`) | exact match |
+| ARC-Challenge | `arc` | `allenai/ai2_arc` | multiple choice |
+| HellaSwag | `hellaswag` | `Rowan/hellaswag` (validation) | multiple choice |
+| HalluMix | `hallumix` | `quotientai/HalluMix` | exact match |
+
+The TruthfulQA MC1 options come in dataset order with the correct answer always at A. Loaders keep each multiple-choice question's stem, options and correct index (`multipleChoice`), and structured runs shuffle them (see Answer protocols). GPQA options are parsed from the `(A) ...` lines of the problem text; a problem whose options cannot be parsed keeps its text and is not shuffled. The "Judge" column applies to legacy runs; on structured runs only SimpleQA and HLE use a judge.
+
+## Regression detection
+
+With `--baseline <file>`, `quick-eval` compares accuracy against the stored baseline (`src/commands/quickEvalBaseline.ts`):
+
+1. One-sided Fisher's exact test (lower tail) per comparison.
+2. Holm-Bonferroni correction across comparisons.
+3. Significance level 0.10 by default (`--significance`).
+
+At 30 questions per dataset only large drops (roughly 15 percentage points or more) are detectable. Smaller differences are noise.
+
+## Reports and statistics
+
+`quick-eval` and `analyze` give each accuracy with a 95% Wilson score interval and pair each strategy with the single model on the same questions for a McNemar test (`src/lib/pairedStats.ts`): exact binomial below 25 discordant pairs, chi-squared with continuity correction above. `quick-eval` prints these per dataset and overall; `analyze` writes them for every strategy against every model. The regression report used by `compare` and `ci-eval` (`src/lib/regressionReport.ts`) does not have Wilson intervals yet.
+
+## Costs
+
+Costs come from the shared price table in `shared-utils` (`@ensemble-ai/shared-utils/pricing`), using the token usage the provider reported, or an estimate from text length (`costFromTextLength`) when it reported none. Models on a local server (an Ollama, LM Studio, llama.cpp or vLLM preset at a loopback URL) cost $0. OpenRouter models use OpenRouter prices from the table. Models the table does not have get no cost. A total that includes any call with no price is shown as a lower bound (`>= $0.0123 (4 unpriced calls)`), or as `unknown` when nothing in it was priced, in both `quick-eval` output and the `analyze` cost table; it is never shown as free. Consensus calls are priced the same way (`consensusMetrics.costUsd`), so a strategy's cost is the ensemble answers plus its own consensus calls. Judge calls are not priced.
+
+Each response also records its token usage (`usage`: input and output tokens, `reported` or `estimated`), and consensus metrics record `inputTokens`, `outputTokens` and `calls`. `calibrate-tokens` fits the cost estimate's token assumptions from these.
+
+## CLI reference
+
+Run from `packages/eval`:
 
 ```bash
-# One-time: generate 100 questions per dataset with a pro model
-npm run eval:generate-cache -- --model google:gemini-2.5-pro
-
-# Commit the cache
-git add packages/eval/.cache/ensemble/
-git commit -m "chore: generate ensemble cache (gemini-2.5-pro)"
-
-# Now iterate on consensus strategies for free:
-npm run eval:ci:standard    # loads cached pro responses, only runs consensus + eval
-npm run eval:ci:council     # same cached responses, different strategy
-```
-
-The cache key includes the model name, so switching models naturally invalidates the cache. You can have caches for multiple models simultaneously.
-
-### Why 5 Different Responses Matter
-
-Each cached entry stores 5 **distinct** responses generated with `temperature=0.7`. The ensemble's value comes from response diversity — if all 5 responses were identical, consensus would add nothing. The temperature creates variation in reasoning paths, which consensus strategies exploit.
-
-```
-  Question: "What is 15% of 240?"
-
-  Response 1: "15% of 240 = 0.15 × 240 = 36"         ← correct
-  Response 2: "240 × 15 / 100 = 3600 / 100 = 36"     ← correct (different path)
-  Response 3: "10% is 24, 5% is 12, total = 36"       ← correct (mental math)
-  Response 4: "15/100 × 240 = 15 × 2.4 = 34"         ← WRONG (arithmetic error)
-  Response 5: "0.15 × 240 = 36.0"                     ← correct
-
-  Majority vote: 36 (4/5 agree) → correct!
-  The wrong response is outvoted by the diverse correct ones.
-```
-
-## CI Pipeline: 4 Parallel Strategy Jobs
-
-Each consensus strategy runs as an independent CI job. All 4 jobs share the same committed cache files.
-
-```
-  ┌──────────────────────────────────────────────────────────────┐
-  │                    Pull Request                              │
-  └──────┬──────────┬──────────┬──────────┬─────────────────────┘
-         │          │          │          │
-         ▼          ▼          ▼          ▼
-  ┌───────────┐┌───────────┐┌───────────┐┌───────────┐
-  │ standard  ││   elo     ││ majority  ││ council   │   4 parallel
-  │           ││           ││           ││           │   GitHub Actions
-  │ 1. checkout│ 1. checkout│ 1. checkout│ 1. checkout│  runners
-  │ 2. install ││ 2. install ││ 2. install ││ 2. install │
-  │ 3. build  ││ 3. build  ││ 3. build  ││ 3. build  │
-  │ 4. run    ││ 4. run    ││ 4. run    ││ 4. run    │
-  │ 5. upload ││ 5. upload ││ 5. upload ││ 5. upload │
-  └─────┬─────┘└─────┬─────┘└─────┬─────┘└─────┬─────┘
-        │            │            │            │
-        └────────────┼────────────┼────────────┘
-                     ▼
-              ┌─────────────┐
-              │ eval-report │   Downloads all 4 artifacts
-              │             │   Posts combined PR comment
-              └─────────────┘
-```
-
-### What Each Job Actually Executes
-
-With ensemble responses cached in the repo:
-
-```
-  ┌────────────────────────────────────────────────────────┐
-  │                    Per Job                              │
-  │                                                        │
-  │  For each of 10 datasets × 30 sampled questions:        │
-  │                                                        │
-  │  ┌─ Single baseline ──────────────────────────────┐    │
-  │  │  Load from .cache/baselines/ (committed)       │    │
-  │  │  NO API calls                                  │    │
-  │  └────────────────────────────────────────────────┘    │
-  │                                                        │
-  │  ┌─ Ensemble responses ───────────────────────────┐    │
-  │  │  Load from .cache/ensemble/ (committed)        │    │
-  │  │  NO API calls                                  │    │
-  │  └────────────────────────────────────────────────┘    │
-  │                                                        │
-  │  ┌─ Consensus generation ─────────────────────────┐    │
-  │  │  Run ONLY this job's strategy                  │    │
-  │  │  API calls: summarizer LLM (lightweight)       │    │
-  │  └────────────────────────────────────────────────┘    │
-  │                                                        │
-  │  ┌─ Evaluation ───────────────────────────────────┐    │
-  │  │  LLM judge evaluates each response + consensus │    │
-  │  │  API calls: judge model (lightweight)          │    │
-  │  └────────────────────────────────────────────────┘    │
-  │                                                        │
-  │  ┌─ Regression check ─────────────────────────────┐    │
-  │  │  Compare this strategy against baseline        │    │
-  │  │  Fisher exact test + Holm-Bonferroni           │    │
-  │  │  NO API calls                                  │    │
-  │  └────────────────────────────────────────────────┘    │
-  └────────────────────────────────────────────────────────┘
-```
-
-### Why Separate Jobs Work Now (But Didn't Before)
-
-Before the ensemble cache, each job would have independently called the model API 5 times per question (the expensive ensemble generation step). With 4 jobs that's 4x the API cost, and all 4 jobs hitting the same API key would cause rate limit storms.
-
-With the ensemble cache committed to the repo:
-- **Zero ensemble API calls** in CI (all loaded from cache)
-- **No rate limit contention** between jobs (only lightweight consensus/judge calls)
-- **Fault isolation** (council breaking doesn't block standard/elo/majority)
-- **Parallel execution** (wall time = slowest job, not sum of all)
-
-### Rate Limits
-
-Each job shares the same Google API key. The only API calls are:
-- Consensus summarizer calls (1 per question per strategy)
-- LLM judge evaluation calls (1 per response + 1 per consensus answer)
-
-The AIMD concurrency limiter in each job independently adapts to rate limits. Since the load per job is light (~300 questions × 1-2 calls each), contention between jobs is minimal.
-
-## Concurrency: AIMD Limiter
-
-All API calls within a job are governed by a shared `ConcurrencyLimiter` using AIMD (Additive Increase, Multiplicative Decrease) — the same algorithm TCP uses.
-
-```
-  Concurrency
-  Limit
-    60 ┤ ╭──────────────── max
-       │╱
-    40 ┤  ← start
-       │    ╲
-    20 ┤     ╲ ← 429 error: halve
-       │      ╲
-    10 ┤       ╰───────╮
-       │        +1/success ╲ ← another 429
-     5 ┤                    ╰──
-     1 ┤                       min
-       └────────────────────────── time
-```
-
-- **Initial**: 40 concurrent questions
-- **On success**: +1 to limit (slow ramp up)
-- **On 429**: halve the limit (fast back-off)
-- **Cooldown**: 2s between adjustments (prevents oscillation)
-- **Bounds**: min=1, max=60
-
-The limiter is shared across ALL datasets within a job. Fast-completing datasets free slots for slower ones automatically.
-
-## Benchmark Datasets
-
-| Dataset | Questions | Category | Evaluator | Source |
-|---------|----------|----------|-----------|--------|
-| GSM8K | 1,319 | Grade school math | Numeric + LLM judge | `openai/gsm8k` |
-| MATH-500 | 500 | Competition math | Numeric + LLM judge | `HuggingFaceH4/MATH-500` |
-| TruthfulQA | 817 | Misconceptions | MCQ (A-D) | `truthfulqa/truthful_qa` |
-| GPQA | 448 | PhD-level science | MCQ (A-D) | `Idavidrein/gpqa` |
-| MMLU-Pro | 12,032 | General knowledge | MCQ (A-J, 10 choices) | `TIGER-Lab/MMLU-Pro` |
-| SimpleQA | 4,326 | Short-answer factuality | Exact-match + LLM judge | `openai/simple-qa` |
-| HLE | 2,694 | Very hard mixed | Exact-match + LLM judge | `cais/hle` |
-| ARC | 1,172 | Science knowledge | MCQ (A-D) | `allenai/ai2_arc` |
-| HellaSwag | 10,042 | Commonsense reasoning | MCQ (A-D) | `Rowan/hellaswag` |
-| HalluMix | ~6,500 | Hallucination detection | LLM judge | `quotientai/HalluMix` |
-
-Each CI run samples 30 questions per dataset (configurable via `--sample`) from the 100 pre-generated cached questions.
-
-## Regression Detection
-
-Each CI job compares its strategy accuracy against the committed baseline using:
-
-1. **Fisher's exact test** (one-sided, lower tail) — tests if current accuracy is significantly worse
-2. **Holm-Bonferroni correction** — controls family-wise error rate across multiple comparisons
-3. **Significance level** α = 0.10 (configurable via `--significance`)
-
-At n=30 questions per dataset (300 total from 100 cached per dataset), the test can detect ~15pp regressions. Smaller deltas are noise.
-
-## CLI Reference
-
-```bash
-# --- Cache Generation (run once, commit results) ---
-
-# Generate 100 questions per dataset (default) for all datasets
-npm run eval:generate-cache
-
-# Generate with a pro model (one-time cost, cached forever)
-npm run eval:generate-cache -- --model google:gemini-2.5-pro
-
-# Generate more questions per dataset
+# Cache generation (run rarely, commit results)
+npm run eval:generate-cache -- --model google:gemini-3-flash-preview
 npm run eval:generate-cache -- --sample 200
-
-# Generate for specific datasets only
 npm run eval:generate-cache -- --datasets gsm8k,truthfulqa
 
-# --- Evaluation (run many times, iterates on strategies) ---
+# Evaluation
+npm run eval                      # all strategies
+npm run eval:standard             # also eval:elo, eval:majority
+npm run eval:mock                 # mock providers, no API calls
+npm run eval -- --model google:gemini-3-flash-preview --sample 50
 
-# Run all strategies locally
-npm run eval
+# Benchmark any mix of models, including OpenRouter and local servers
+node --import tsx bin/ensemble-eval.mjs benchmark gsm8k \
+  --models openrouter:qwen/qwen3-14b,openrouter:meta-llama/llama-3.1-8b-instruct,ollama:gemma3:12b \
+  --strategies standard,majority --mode free --output results/gsm8k.json
+node --import tsx bin/ensemble-eval.mjs benchmark simpleqa --models ollama:llama3.2 \
+  --judge google:gemini-2.5-flash --mode free --output results/simpleqa.json
+node --import tsx bin/ensemble-eval.mjs analyze results/gsm8k.json --report results/gsm8k.md
 
-# Run a specific strategy
-npm run eval:standard
-npm run eval:elo
+# Benchmark matrix (see BENCHMARKS.md): estimate, mock dry run, real run
+npm run bench:matrix
+npm run bench:matrix:dry-run
+npm run bench:matrix -- --yes --publish
+npm run calibrate:agreement -- --results results/<run-id> --embedding openai:text-embedding-3-small
+npm run calibrate:tokens -- --results results/<run-id>
 
-# Run with custom model and sample size
-npm run eval -- --model google:gemini-2.5-pro --sample 50
+# Refresh the baseline file with a live run
+npm run eval:regenerate-baseline  # quick-eval --sample 30 --no-cache --baseline baselines/quick-eval.json
 
-# Regenerate baseline (clears all caches, runs fresh)
-npm run eval:regenerate-baseline
-
-# --- CI commands (per-strategy, with regression check) ---
-npm run eval:ci:standard
-npm run eval:ci:elo
-npm run eval:ci:majority
-npm run eval:ci:council
+# CI commands (one strategy each, with regression check)
+npm run eval:ci:standard          # also eval:ci:elo, eval:ci:majority, eval:ci:council
 ```
 
-## Regenerating Caches
+There is no `eval:council` script; use `npm run eval -- --strategies council`.
 
-### When to Regenerate
+## Regenerating caches
 
-- **Ensemble cache**: When changing model, ensemble size, or temperature
-- **Baseline cache**: When changing model or sample size
-- **Baseline file**: When intentionally changing expected accuracy thresholds
-
-### How to Regenerate
+- Ensemble cache: when changing model, ensemble size or temperature.
+- Baseline cache: when changing model.
+- Baseline file (`baselines/quick-eval.json`): when expected accuracy changes on purpose.
 
 ```bash
-# 1. Generate fresh ensemble responses for all questions
-npm run eval:generate-cache -- --model google:gemini-2.5-pro
-
-# 2. Run a fresh eval to update baselines
+npm run eval:generate-cache -- --model google:gemini-3-flash-preview
 npm run eval:regenerate-baseline
-
-# 3. Commit everything
 git add packages/eval/.cache/ packages/eval/baselines/
-git commit -m "chore: regenerate eval caches and baseline"
 ```
 
-### Upgrading the Ensemble Model
-
-```bash
-# Generate responses with pro model (one-time cost)
-npm run eval:generate-cache -- --model google:gemini-2.5-pro
-
-# Commit the cache
-git add packages/eval/.cache/ensemble/
-git commit -m "chore: upgrade ensemble cache to gemini-2.5-pro"
-
-# Now all CI runs use pro-quality responses at zero API cost
-# Only consensus + evaluation calls hit the API
-```
-
-## File Structure
+## File structure
 
 ```
 packages/eval/
 ├── .cache/
-│   ├── baselines/              Committed — single-model results
-│   └── ensemble/               Committed — raw ensemble responses
+│   ├── baselines/              committed, single-model results
+│   └── ensemble/               committed, raw ensemble responses
 ├── baselines/
-│   └── quick-eval.json         Committed — regression check reference
-├── datasets/                   Gitignored — HF downloads (CI-cached)
+│   └── quick-eval.json         committed, regression reference
+├── bench/
+│   └── matrix.json             the benchmark matrix config
+├── datasets/                   gitignored, HF downloads
 ├── docs/
-│   └── architecture.md         This file
+│   ├── architecture.md         this file
+│   └── BENCHMARKS.md           benchmark matrix method, formats, calibration
+├── results/                    matrix runs (<run-id>/) and the reference cache, committed after paid runs
+├── reports/
 ├── src/
 │   ├── commands/
-│   │   ├── quickEval.ts        CLI entry point + option parsing
-│   │   ├── quickEvalRunner.ts  Orchestrates single + ensemble runs
-│   │   ├── quickEvalOutput.ts  Results formatting
-│   │   └── quickEvalBaseline.ts Regression detection
+│   │   ├── quickEval.ts        CLI entry point and option parsing
+│   │   ├── quickEvalDatasets.ts question and protocol choice per dataset
+│   │   ├── quickEvalRunner.ts  single and ensemble runs per dataset
+│   │   ├── quickEvalOutput.ts  results formatting
+│   │   ├── quickEvalBaseline.ts regression detection
+│   │   ├── matrix.ts           benchmark matrix command
+│   │   ├── calibrateAgreement.ts agreement threshold fit
+│   │   ├── calibrateTokens.ts  token assumption fit
+│   │   └── generateCache.ts    cache generation
 │   ├── lib/
-│   │   ├── baselineCache.ts    Single-model result cache
-│   │   ├── ensembleCache.ts    Ensemble response cache
-│   │   ├── benchmarkRunner.ts  Question execution + cache lookup
-│   │   ├── ensembleRunner.ts   Parallel model API calls
-│   │   ├── concurrencyPool.ts  AIMD adaptive limiter
-│   │   ├── evaluators.ts       Numeric/MCQ/LLM judge evaluators
-│   │   ├── evaluation.ts       Parallel evaluation orchestration
-│   │   └── consensus.ts        Strategy dispatch
+│   │   ├── matrix/             matrix config, plan, estimate, runner, summary
+│   │   ├── calibration/        answer pairs, threshold and token fits, embedder
+│   │   ├── baselineCache.ts    single-model result cache
+│   │   ├── ensembleCache.ts    ensemble response cache
+│   │   ├── benchmarkRunner.ts  question execution and cache lookup
+│   │   ├── benchmarkDatasetLoaders.ts  HF dataset loaders
+│   │   ├── ensembleRunner.ts   parallel model calls, cost estimates
+│   │   ├── concurrencyPool.ts  AIMD limiter
+│   │   ├── evaluators.ts       mechanical scoring, numeric, MCQ and exact-match judges
+│   │   ├── evaluation.ts       parallel evaluation, failures counted wrong
+│   │   ├── finalAnswer.ts      structured final answer schema, extraction, comparison
+│   │   ├── methodology.ts      answer protocols, option shuffling
+│   │   ├── mechanicalMajority.ts majority vote with no LLM call
+│   │   ├── modelSpecs.ts       model spec parsing, OpenAI-compatible endpoints
+│   │   ├── providers.ts        provider registration and keys
+│   │   ├── pairedStats.ts      Wilson intervals and paired McNemar tests
+│   │   └── consensus.ts        strategy dispatch, consensus cost
 │   └── types.ts
 └── package.json
 ```

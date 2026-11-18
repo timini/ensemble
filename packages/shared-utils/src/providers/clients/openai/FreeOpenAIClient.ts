@@ -1,10 +1,25 @@
 import OpenAI from 'openai';
 import { BaseFreeClient, type StreamOptions, type StructuredOptions } from '../base/BaseFreeClient';
-import type { StructuredResponse, ValidationResult } from '../../types';
+import type { StructuredResponse, TokenUsage, ValidationResult } from '../../types';
 import { hasNonTextModality } from '../../utils/modelFilters';
 import { sanitizeProviderErrorMessage } from '../../utils/sanitizeSensitiveData';
+import { fromChatCompletionUsage, type ChatCompletionUsage } from '../../utils/usage';
+import { openAISamplingParams } from './openAIModelRules';
+import { requestOpenAICompatibleEmbedding } from '../../embeddings/openAICompatibleEmbeddings';
+import { OPENAI_BASE_URL, OPENAI_EMBEDDING_MODEL } from '../../embeddings/models';
 
 export class FreeOpenAIClient extends BaseFreeClient {
+  override readonly supportsEmbeddings: boolean = true;
+
+  protected override embedWithProvider(apiKey: string, text: string): Promise<number[]> {
+    return requestOpenAICompatibleEmbedding({
+      baseURL: OPENAI_BASE_URL,
+      apiKey,
+      model: OPENAI_EMBEDDING_MODEL,
+      input: text,
+    });
+  }
+
   private createClient(apiKey: string) {
     return new OpenAI({
       apiKey,
@@ -20,7 +35,9 @@ export class FreeOpenAIClient extends BaseFreeClient {
     try {
       const client = this.createClient(apiKey);
 
-      await client.models.retrieve('gpt-4o-mini');
+      // Listing models checks the key without depending on one model id
+      // that OpenAI may later retire.
+      await client.models.list();
       return { valid: true };
     } catch (error) {
       return {
@@ -35,7 +52,7 @@ export class FreeOpenAIClient extends BaseFreeClient {
 
   protected async fetchTextModels(apiKey: string): Promise<string[]> {
     if (process.env.NEXT_PUBLIC_MOCK_MODE === 'true') {
-      return ['gpt-4o', 'gpt-4o-mini'];
+      return ['gpt-6-astra', 'gpt-6-luna'];
     }
     const client = this.createClient(apiKey);
 
@@ -44,8 +61,8 @@ export class FreeOpenAIClient extends BaseFreeClient {
       .map((model) => model.id)
       .filter((id): id is string => {
         if (!id) return false;
-        const isChatCandidate =
-          id.startsWith('gpt-') || id.startsWith('o1-') || id.startsWith('o3-');
+        // gpt-* chat models plus o-series reasoning models (o1, o3, o4-mini).
+        const isChatCandidate = id.startsWith('gpt-') || /^o\d+($|-)/.test(id);
         if (!isChatCandidate) return false;
         // Exclude models that don't support the Chat Completions endpoint.
         // Patterns derived from probing the OpenAI API (404 = not chat).
@@ -78,9 +95,7 @@ export class FreeOpenAIClient extends BaseFreeClient {
           schema: options.schema.schema,
         },
       },
-      ...(options.options?.temperature !== undefined && {
-        temperature: options.options.temperature,
-      }),
+      ...openAISamplingParams(options.model, options.options?.temperature),
     });
 
     const raw = response.choices[0]?.message?.content ?? '';
@@ -89,12 +104,14 @@ export class FreeOpenAIClient extends BaseFreeClient {
     }
     const parsed = JSON.parse(raw) as T;
     const tokenCount = response.usage?.total_tokens;
+    const usage = fromChatCompletionUsage(response.usage);
 
     return {
       parsed,
       raw,
       responseTimeMs: Date.now() - startTime,
       ...(tokenCount ? { tokenCount } : {}),
+      ...(usage ? { usage } : {}),
     };
   }
 
@@ -103,15 +120,14 @@ export class FreeOpenAIClient extends BaseFreeClient {
     const startTime = Date.now();
     let fullResponse = '';
     let tokenCount = 0;
+    let usage: TokenUsage | undefined;
 
     const stream = await client.chat.completions.create({
       model: options.model,
       stream: true,
       messages: [{ role: 'user', content: options.prompt }],
       stream_options: { include_usage: true },
-      ...(options.streamOptions?.temperature !== undefined && {
-        temperature: options.streamOptions.temperature,
-      }),
+      ...openAISamplingParams(options.model, options.streamOptions?.temperature),
       ...(options.streamOptions?.seed !== undefined && {
         seed: options.streamOptions.seed,
       }),
@@ -119,11 +135,12 @@ export class FreeOpenAIClient extends BaseFreeClient {
 
     for await (const chunk of stream as AsyncIterable<{
       choices?: { delta?: { content?: unknown }; finish_reason?: string | null }[];
-      usage?: { total_tokens?: number };
+      usage?: ChatCompletionUsage | null;
     }>) {
       if (chunk.usage?.total_tokens) {
         tokenCount = chunk.usage.total_tokens;
       }
+      usage = fromChatCompletionUsage(chunk.usage) ?? usage;
 
       const choice = chunk.choices?.[0];
       const deltaContent = choice?.delta?.content;
@@ -149,6 +166,11 @@ export class FreeOpenAIClient extends BaseFreeClient {
       }
     }
 
-    options.onComplete(fullResponse, Date.now() - startTime, tokenCount > 0 ? tokenCount : undefined);
+    options.onComplete(
+      fullResponse,
+      Date.now() - startTime,
+      tokenCount > 0 ? tokenCount : undefined,
+      usage,
+    );
   }
 }

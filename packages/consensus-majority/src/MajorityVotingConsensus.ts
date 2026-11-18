@@ -10,6 +10,14 @@ import {
     buildMajoritySynthesisPrompt,
     parseMajorityVotingOutput,
 } from './majorityVotingUtils';
+import {
+    ANSWER_EXTRACTION_SCHEMA,
+    buildAnswerExtractionPrompt,
+    parseAnswerExtraction,
+    tallyVotes,
+    winningAnswerText,
+    type MajorityVoteResult,
+} from './mechanicalVote';
 
 const MIN_RESPONSES_FOR_MAJORITY = 2;
 
@@ -22,6 +30,32 @@ function writeDebug(message: string): void {
     }
 }
 
+/** How the consensus text was produced. */
+export type MajorityConsensusMethod = 'vote' | 'llm';
+
+/** Why the strategy used the LLM method instead of the vote. */
+export type MajorityFallbackReason = 'extraction-failed' | 'long-form' | 'tie';
+
+export interface MajorityConsensusOutcome {
+    text: string;
+    method: MajorityConsensusMethod;
+    fallbackReason?: MajorityFallbackReason;
+    /** The vote count, or null when the answers could not be extracted. */
+    vote: MajorityVoteResult | null;
+}
+
+/**
+ * Majority consensus.
+ *
+ * First a mechanical vote: one structured call to the summarizer extracts a
+ * short final answer (number, option letter, yes/no or short phrase) from
+ * every response; the answers are normalised and counted. When one answer
+ * has the most votes, that answer is the consensus and no other call is made.
+ *
+ * On a tie, when most answers are long-form, or when extraction fails, it
+ * falls back to the LLM method: one call ranks the responses by alignment
+ * with the majority position and one call synthesises the top ones.
+ */
 export class MajorityVotingConsensus implements ConsensusStrategy {
     constructor(
         private summarizerProvider: AIProvider,
@@ -56,10 +90,61 @@ export class MajorityVotingConsensus implements ConsensusStrategy {
         topN: number,
         prompt: string
     ): Promise<string> {
+        return (await this.runConsensus(responses, topN, prompt)).text;
+    }
+
+    /** Run the vote, falling back to the LLM method, and report how it went. */
+    async runConsensus(
+        responses: ConsensusModelResponse[],
+        topN: number,
+        prompt: string
+    ): Promise<MajorityConsensusOutcome> {
         if (responses.length < MIN_RESPONSES_FOR_MAJORITY) {
             throw new Error('At least 2 responses are required for majority voting');
         }
 
+        const vote = await this.mechanicalVote(responses, prompt);
+        if (vote?.status === 'winner' && vote.winner) {
+            return { text: winningAnswerText(vote.winner), method: 'vote', vote };
+        }
+
+        const fallbackReason: MajorityFallbackReason = !vote
+            ? 'extraction-failed'
+            : vote.status === 'tie' ? 'tie' : 'long-form';
+        const text = await this.generateLlmConsensus(responses, topN, prompt);
+        return { text, method: 'llm', fallbackReason, vote };
+    }
+
+    /** One structured call extracts every final answer; null when it fails. */
+    private async mechanicalVote(
+        responses: ConsensusModelResponse[],
+        prompt: string
+    ): Promise<MajorityVoteResult | null> {
+        if (typeof this.summarizerProvider.generateStructured !== 'function') {
+            return null;
+        }
+        const start = Date.now();
+        try {
+            const result = await this.summarizerProvider.generateStructured<unknown>(
+                buildAnswerExtractionPrompt(responses, prompt),
+                this.summarizerModelId,
+                ANSWER_EXTRACTION_SCHEMA
+            );
+            const ballots = parseAnswerExtraction(result.parsed, responses);
+            writeDebug(`    [majority] extraction done in ${((Date.now() - start) / 1000).toFixed(1)}s\n`);
+            return ballots ? tallyVotes(ballots) : null;
+        } catch (err) {
+            writeDebug(`    [majority] extraction error: ${err instanceof Error ? err.message : String(err)}\n`);
+            return null;
+        }
+    }
+
+    /** The LLM method: rank by alignment with the majority, then synthesise. */
+    private async generateLlmConsensus(
+        responses: ConsensusModelResponse[],
+        topN: number,
+        prompt: string
+    ): Promise<string> {
         const rankings = await this.rankResponses(responses, prompt);
         const effectiveTopN = topN > 0
             ? Math.min(topN, rankings.length)

@@ -1,40 +1,27 @@
 import type { Metadata } from "next"
-import localFont from "next/font/local"
+import { Geist, Geist_Mono, Instrument_Serif } from "next/font/google"
 import "./globals.css"
-import { EnsembleHeader } from "@/components/ensemble-header"
-import { Footer } from "@/components/footer"
 
-const geistSans = localFont({
-  src: "./fonts/GeistVF.woff",
-  variable: "--font-geist-sans",
-  weight: "100 900",
-})
-
-const geistMono = localFont({
-  src: "./fonts/GeistMonoVF.woff",
-  variable: "--font-geist-mono",
-  weight: "100 900",
-})
+// The same families and variables as packages/app, read by tokens.css.
+const sans = Geist({ subsets: ["latin"], variable: "--font-sans-loaded" })
+const mono = Geist_Mono({ subsets: ["latin"], variable: "--font-mono-loaded" })
+const display = Instrument_Serif({ subsets: ["latin"], weight: "400", variable: "--font-display-loaded" })
 
 export const metadata: Metadata = {
-  title: "Ensemble AI Wireframes",
-  description: "Wireframes for Ensemble AI free-mode and pro-mode planning",
+  title: "Ensemble wireframes",
+  description: "Reference layouts for the Ensemble AI workspace (roadmap M4)",
 }
 
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode
-}>) {
+// Follows the system theme; ?theme=dark or ?theme=light overrides it.
+const themeScript = `(function(){try{var q=new URLSearchParams(location.search).get('theme');var d=q?q==='dark':matchMedia('(prefers-color-scheme: dark)').matches;document.documentElement.classList.add(d?'dark':'light')}catch(e){}})()`
+
+export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en">
-      <body className={`${geistSans.variable} ${geistMono.variable} bg-background text-foreground antialiased`}>
-        <div className="flex min-h-screen flex-col">
-          <EnsembleHeader />
-          <main className="flex-1">{children}</main>
-          <Footer />
-        </div>
-      </body>
+    <html lang="en" className={`${sans.variable} ${mono.variable} ${display.variable}`} suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: themeScript }} />
+      </head>
+      <body className="min-h-dvh bg-background text-foreground">{children}</body>
     </html>
   )
 }

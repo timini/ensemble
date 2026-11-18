@@ -3,6 +3,7 @@ import type { PromptRunResult } from '../types.js';
 import type { DatasetResult } from './quickEvalOutput.js';
 import {
   buildBaselineFromResults,
+  baselineMismatch,
   checkRegression,
   type QuickEvalBaselineFile,
   type StrategyCheckResult,
@@ -233,6 +234,42 @@ describe('quickEvalBaseline', () => {
       for (const r of result.results) {
         expect(r.delta).toBeGreaterThan(0);
       }
+    });
+  });
+
+  describe('baselineMismatch', () => {
+    const base: QuickEvalBaselineFile = {
+      model: 'google:gemini-3-flash-preview',
+      ensembleSize: 5,
+      sample: 30,
+      datasets: ['gsm8k'],
+      strategies: ['standard'],
+      updatedAt: '2026-01-01T00:00:00.000Z',
+      single: { accuracy: 0.5, correct: 5, total: 10 },
+      ensemble: { standard: { accuracy: 0.5, correct: 5, total: 10 } },
+    };
+
+    it('returns null when model, ensemble size and sample match', () => {
+      expect(baselineMismatch(base, { ...base, updatedAt: 'later' })).toBeNull();
+    });
+
+    it('reports a different model', () => {
+      const reason = baselineMismatch({ ...base, model: 'google:gemini-2.5-flash-lite' }, base);
+      expect(reason).toContain('model');
+      expect(reason).toContain('google:gemini-2.5-flash-lite');
+    });
+
+    it('reports a different sample size', () => {
+      expect(baselineMismatch({ ...base, sample: 50 }, base)).toContain('sample');
+    });
+
+    it('reports a different ensemble size', () => {
+      expect(baselineMismatch({ ...base, ensembleSize: 3 }, base)).toContain('ensemble');
+    });
+
+    it('treats a baseline with no protocol as legacy and reports a protocol change', () => {
+      expect(baselineMismatch(base, { ...base, protocol: 'legacy' })).toBeNull();
+      expect(baselineMismatch(base, { ...base, protocol: 'structured' })).toContain('protocol legacy vs structured');
     });
   });
 });

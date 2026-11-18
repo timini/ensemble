@@ -1,36 +1,15 @@
-'use client';
+import type { Metadata } from "next";
+import { PAGE_METADATA, pageOpenGraph } from "~/lib/siteMetadata";
+import { Landing } from "./_components/Landing";
 
-import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { useTranslation } from 'react-i18next';
+export const metadata: Metadata = {
+  title: { absolute: PAGE_METADATA.home.title },
+  description: PAGE_METADATA.home.description,
+  alternates: { canonical: "/" },
+  openGraph: { ...pageOpenGraph(PAGE_METADATA.home), url: "/" },
+};
 
-/**
- * Landing page
- *
- * Automatically redirects to /config (Step 1 of workflow)
- * Shows loading message while redirecting
- */
+/** `/`: the landing page. The workspace is at /workspace. */
 export default function Home() {
-  const router = useRouter();
-  const { t } = useTranslation();
-
-  useEffect(() => {
-    // Redirect to config page after brief delay
-    const timer = setTimeout(() => {
-      router.push('/config');
-    }, 100);
-
-    return () => clearTimeout(timer);
-  }, [router]);
-
-  return (
-    <main className="flex min-h-screen items-center justify-center bg-[var(--color-background)]">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold text-[var(--color-foreground)] mb-4">
-          {t('app.name')}
-        </h1>
-        <p className="text-[var(--color-muted)]">{t('common.loading')}</p>
-      </div>
-    </main>
-  );
+  return <Landing />;
 }

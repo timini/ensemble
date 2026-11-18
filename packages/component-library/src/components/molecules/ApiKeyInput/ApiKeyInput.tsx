@@ -8,7 +8,11 @@ import { LoadingSpinner } from '../../atoms/LoadingSpinner';
 import { InlineAlert } from '../../atoms/InlineAlert';
 import { cn } from '@/lib/utils';
 
-export type Provider = ProviderLogoProvider;
+/**
+ * Providers configured with one API key. OpenAI-compatible endpoints have a
+ * base URL and an optional key each, and use EndpointInput instead.
+ */
+export type Provider = Exclude<ProviderLogoProvider, 'openai-compatible'>;
 export type ValidationStatus = 'idle' | 'validating' | 'valid' | 'invalid';
 
 export interface ApiKeyInputProps {

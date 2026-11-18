@@ -5,9 +5,11 @@ import {
   toDelta,
   sumTokens,
   sumCost,
+  countUnpriced,
   avgDurationMs,
   formatMs,
   computeAccuracy,
+  sumStrategyMetrics,
 } from './quickEvalHelpers.js';
 
 describe('quickEvalHelpers', () => {
@@ -70,6 +72,19 @@ describe('quickEvalHelpers', () => {
         },
       ];
       expect(sumCost(runs)).toBeCloseTo(0.003);
+    });
+
+    it('counts successful responses with no price separately', () => {
+      const runs: PromptRunResult[] = [
+        {
+          prompt: 'q1', responses: [
+            { provider: 'google', model: 'm', content: '', responseTimeMs: 0, estimatedCostUsd: 0 },
+            { provider: 'google', model: 'm', content: '', responseTimeMs: 0 },
+            { provider: 'google', model: 'm', content: '', responseTimeMs: 0, error: 'boom' },
+          ], consensus: {},
+        },
+      ];
+      expect(countUnpriced(runs)).toBe(1);
     });
   });
 
@@ -140,7 +155,42 @@ describe('quickEvalHelpers', () => {
     });
 
     it('returns 0 accuracy for empty runs', () => {
-      expect(computeAccuracy([])).toEqual({ correct: 0, total: 0, accuracy: 0 });
+      expect(computeAccuracy([])).toEqual({ correct: 0, total: 0, accuracy: 0, errors: 0, timeouts: 0 });
+    });
+  });
+
+  describe('failures and costs', () => {
+    const failed: PromptRunResult = {
+      questionId: 'q1',
+      prompt: 'p',
+      responses: [],
+      consensus: {},
+      failure: 'timeout',
+      evaluation: {
+        evaluator: 'mcq', groundTruth: 'A', accuracy: 0,
+        results: {
+          'a:b': { correct: false, expected: 'A', predicted: null, failure: 'timeout' },
+          'a:b#2': { correct: false, expected: 'A', predicted: null, failure: 'error' },
+          'a:b#3': { correct: true, expected: 'A', predicted: 'A' },
+        },
+      },
+      consensusEvaluation: {
+        evaluator: 'mcq', groundTruth: 'A',
+        results: { majority: { correct: false, expected: 'A', predicted: null, failure: 'error' } },
+      },
+      consensusMetrics: { majority: { tokenCount: 10, durationMs: 4, costUsd: 0.002 } },
+    };
+
+    it('counts errors and timeouts as wrong and reports them', () => {
+      expect(computeAccuracy([failed])).toEqual({ correct: 1, total: 3, accuracy: 1 / 3, errors: 1, timeouts: 1 });
+      expect(computeAccuracy([failed], 'majority')).toEqual({ correct: 0, total: 1, accuracy: 0, errors: 1, timeouts: 0 });
+    });
+
+    it('sums consensus costs per strategy', () => {
+      expect(sumStrategyMetrics([failed, failed], 'majority')).toMatchObject({ tokenCount: 20, costUsd: 0.004 });
+      expect(sumStrategyMetrics([failed], 'standard').costUsd).toBe(0);
+      const unpriced = { ...failed, consensusMetrics: { majority: { tokenCount: 1, durationMs: 1 } } };
+      expect(sumStrategyMetrics([failed, unpriced], 'majority')).toMatchObject({ costUsd: 0.002, unpriced: 1 });
     });
   });
 });

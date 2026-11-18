@@ -1,0 +1,55 @@
+rules_version = '2';
+
+// Ensemble AI Firestore rules.
+//
+// The server (firebase-admin) writes every document and is not bound by
+// these rules. Clients never write. A signed-in user may read their own
+// user document, credit ledger entries and usage records, and nothing else.
+// Collections not listed here (stripeEvents, proRuns, rateLimits and any
+// later ones) are closed. Shares, synced history and synced presets are
+// read and written through the server only: the public /s/[id] page reads
+// a share with firebase-admin, so no client query can list shares.
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function ownsExisting() {
+      return signedIn() && resource.data.uid == request.auth.uid;
+    }
+
+    match /users/{uid} {
+      allow get: if signedIn() && request.auth.uid == uid;
+      allow list, write: if false;
+    }
+
+    match /creditLedger/{entryId} {
+      // A list query must filter on uid == request.auth.uid to pass.
+      allow read: if ownsExisting();
+      allow write: if false;
+    }
+
+    match /usage/{usageId} {
+      allow read: if ownsExisting();
+      allow write: if false;
+    }
+
+    // Server only. Listed so a later rule cannot open them by accident.
+    match /shares/{shareId} {
+      allow read, write: if false;
+    }
+
+    match /history/{itemId} {
+      allow read, write: if false;
+    }
+
+    match /presets/{itemId} {
+      allow read, write: if false;
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

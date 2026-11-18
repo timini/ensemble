@@ -4,6 +4,20 @@
 **Status**: Resolved
 **Severity**: High (Blocking)
 
+## Current state
+
+All three front-end packages use Tailwind CSS 3.4 with the v3 config and PostCSS setup:
+
+| Package | `tailwindcss` |
+|---------|---------------|
+| `packages/app` | `^3.4.18` |
+| `packages/component-library` | `^3.4.17` |
+| `packages/wireframes` | `^3.4.17` |
+
+The app and component library share the same semantic tokens (RGB triples in `packages/component-library/src/styles/tokens.css`, mapped in `tailwind.config.ts`). The token values have changed since this incident (primary is now indigo, `79 70 229`), and `success`, `warning` and `info` were added; see `packages/component-library/docs/TAILWIND_DESIGN_SYSTEM.md`.
+
+The rest of this document is the record of the original incident.
+
 ## Problem Summary
 
 The application initially used **Tailwind CSS v4** while the component library used **Tailwind CSS v3**. This version mismatch caused component library components to render **completely unstyled** when used in the main app, despite having correct class names in the HTML.
@@ -78,7 +92,7 @@ className="bg-primary text-primary-foreground shadow hover:bg-primary/90"
 ### Attempt 1: Wrap RGB Values in `rgb()` Function
 **What we tried:**
 ```css
---color-primary: rgb(24 24 27); /* ❌ Wrong */
+--color-primary: rgb(24 24 27); /* wrong */
 ```
 
 **Why it failed:** Tailwind v4's `@theme` block expects raw RGB values without `rgb()` wrapper, but v3's config expects the wrapper.
@@ -186,7 +200,7 @@ className="bg-primary text-primary-foreground shadow hover:bg-primary/90"
 
    @layer base {
      :root {
-       --color-primary: 24 24 27;  /* ✅ Raw RGB values */
+       --color-primary: 24 24 27;  /* raw RGB values */
        --color-primary-foreground: 250 250 250;
        /* ... etc */
      }
@@ -245,29 +259,20 @@ export default function TestComponentsPage() {
 
 ## Prevention
 
-To prevent this issue in the future:
+Ideas recorded at the time, and their status:
 
-1. **Lock Tailwind Versions**: Use exact version match between component library and app:
-   ```json
-   {
-     "devDependencies": {
-       "tailwindcss": "3.4.18"  // Exact version, not ^3.4.18
-     }
-   }
-   ```
-
-2. **Add Pre-commit Hook**: Verify Tailwind versions match between packages
-
-3. **Integration Tests**: Add E2E tests that render component library components in the app
-
-4. **Documentation**: Update CLAUDE.md to specify Tailwind v3 requirement
+1. **Lock Tailwind versions** to an exact match between the component library and app. Not done: both use caret ranges (`^3.4.18` and `^3.4.17`).
+2. **Pre-commit hook** that checks Tailwind versions match. Not done.
+3. **Integration tests** that render component library components in the app. Partly covered: the mock-mode Playwright suite in `packages/e2e` exercises the app pages, which are built from library components, but nothing checks styling.
+4. **Documentation** of the Tailwind v3 requirement. Done in the root `CLAUDE.md` and the component library docs.
 
 ## Related Files
 
 - `packages/app/tailwind.config.ts` - App's Tailwind configuration
 - `packages/app/postcss.config.js` - PostCSS configuration
-- `packages/app/src/styles/globals.css` - Global styles with CSS variables
+- `packages/app/src/styles/globals.css` - App global styles; imports the shared tokens
 - `packages/component-library/tailwind.config.ts` - Component library's Tailwind config
+- `packages/component-library/src/styles/tokens.css` - Shared CSS variables (design tokens)
 - `packages/component-library/src/styles/globals.css` - Component library's global styles
 - `packages/app/src/app/test-components/page.tsx` - Component testing page
 

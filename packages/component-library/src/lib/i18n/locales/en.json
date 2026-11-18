@@ -2,16 +2,22 @@
   "ensemble": {
     "header": {
       "title": "Ensemble AI",
-      "tagline": "The smartest AI is an ensemble.",
+      "tagline": "Ask several models, see where they agree.",
       "about": "About",
-      "features": "Features"
+      "features": "Features",
+      "benchmarks": "Benchmarks",
+      "workspace": "Open workspace",
+      "home": "Ensemble AI home",
+      "mainNavigation": "Main navigation",
+      "openSettings": "Open settings"
     },
     "footer": {
       "getStarted": "Get Started",
       "features": "Features",
       "about": "About",
       "github": "GitHub",
-      "copyright": "\u00a9 {{year}} Ensemble AI"
+      "copyright": "© {{year}} Ensemble AI",
+      "benchmarks": "Benchmarks"
     },
     "steps": {
       "config": "Config",
@@ -27,12 +33,39 @@
     }
   },
   "atoms": {
+    "dialog": {
+      "close": "Close"
+    },
     "inlineAlert": {
       "dismiss": "Dismiss"
     },
     "rating": {
       "star": "{{count}} star",
       "star_other": "{{count}} stars"
+    },
+    "endpointLogo": {
+      "label": "{{name}} logo"
+    },
+    "commandSnippet": {
+      "copy": "Copy",
+      "copied": "Copied",
+      "copyLabel": "Copy command"
+    },
+    "sheet": {
+      "close": "Close"
+    },
+    "logo": {
+      "name": "Ensemble",
+      "home": "Ensemble home"
+    },
+    "agreementRing": {
+      "label": "Agreement score {{score}} out of 100"
+    },
+    "link": {
+      "opensInNewWindow": "Opens in new window"
+    },
+    "tag": {
+      "remove": "Remove"
     }
   },
   "molecules": {
@@ -61,7 +94,8 @@
         "title": "Pro Mode",
         "description": "Buy credits to get access to the latest models across all providers.",
         "buttonText": "Go Pro"
-      }
+      },
+      "comingSoon": "Coming Soon"
     },
     "responseCard": {
       "manual": "Manual",
@@ -70,10 +104,453 @@
       "expand": "Expand",
       "copy": "Copy",
       "rateResponse": "Rate response:",
-      "responseTime": "Response time: {{time}}"
+      "responseTime": "Response time: {{time}}",
+      "tokens_one": "{{count}} token",
+      "tokens_other": "{{count}} tokens"
     },
     "summarizerIndicator": {
       "label": "Summarizer Model:"
+    },
+    "embeddingsProviderSelector": {
+      "heading": "Embeddings provider",
+      "description": "Agreement scores compare the meaning of answers using embeddings from one provider.",
+      "options": {
+        "auto": "Automatic (OpenAI, then Google, then an OpenAI-compatible endpoint)",
+        "openai": "OpenAI",
+        "google": "Google",
+        "openai-compatible": "OpenAI-compatible endpoint"
+      },
+      "noValidKey": "No valid key",
+      "active": "Agreement will use {{provider}} embeddings.",
+      "noneTitle": "No agreement score",
+      "noneDescription": "Add a valid OpenAI or Google API key, or set an embedding model on an OpenAI-compatible endpoint, to score agreement between answers.",
+      "noValidKeyEndpoint": "No endpoint with an embedding model"
+    },
+    "runCostSummary": {
+      "calls_one": "{{count}} model call",
+      "calls_other": "{{count}} model calls",
+      "answers_one": "{{count}} answer",
+      "answers_other": "{{count}} answers",
+      "consensusCalls_one": "{{value}} consensus call",
+      "consensusCalls_other": "{{value}} consensus calls",
+      "embeddingCalls_one": "{{count}} embedding call",
+      "embeddingCalls_other": "{{count}} embedding calls",
+      "breakdown": "{{answers}}, {{consensus}}, {{embeddings}}",
+      "range": "{{min}} to {{max}}",
+      "estimatedRange": "Estimated cost: {{low}} to {{high}}",
+      "estimatedRangePartial": "Estimated cost: {{low}} to {{high}}, plus calls with no price",
+      "estimatedUnknown": "Estimated cost: unknown",
+      "actual": "Cost: {{cost}}",
+      "actualEstimated": "Estimated cost: {{cost}}",
+      "actualPartial": "Cost: at least {{cost}}",
+      "actualEstimatedPartial": "Estimated cost: at least {{cost}}",
+      "actualUnknown": "Cost: unknown",
+      "estimatedNote": "Some providers did not report token counts, so those calls are estimated from text length.",
+      "consensusUnavailable": "This consensus method needs at least 3 answers, so it will not run.",
+      "unpriced": "No price for {{models}}. Those calls are not in the cost.",
+      "estimateSource": "Range assumes short to long answers. Prices from OpenRouter, {{date}}.",
+      "priceSource": "Prices from OpenRouter, {{date}}.",
+      "local_one": "{{count}} call runs on a local model at no cost.",
+      "local_other": "{{count}} calls run on local models at no cost."
+    },
+    "majorityVoteBreakdown": {
+      "title": "Majority vote",
+      "winner": "{{answer}} won with {{votes}} of {{total}} votes.",
+      "tie": "Tie between {{answers}} with {{votes}} votes each. The consensus comes from the LLM majority method.",
+      "noShortAnswers": "The answers are not short (a number, option letter, yes or no, or short phrase), so there is no vote. The consensus comes from the LLM majority method.",
+      "extractionFailed": "Short answers could not be extracted, so there is no vote. The consensus comes from the LLM majority method.",
+      "votes_one": "{{count}} vote",
+      "votes_other": "{{count}} votes",
+      "abstained": "No short answer: {{models}}",
+      "and": "and"
+    },
+    "responseErrorNotice": {
+      "retry": "Retry this model",
+      "invalid_key": {
+        "title": "API key rejected",
+        "description": "The provider did not accept your API key. Check the key on the configuration page, then retry."
+      },
+      "missing_key": {
+        "title": "No API key",
+        "description": "No API key is set for this provider, so no request was sent. Add one on the configuration page, then retry."
+      },
+      "rate_limited": {
+        "title": "Rate limit reached",
+        "description": "The provider is limiting requests on your key. Wait a moment, then retry.",
+        "descriptionWithDelay_one": "The provider is limiting requests on your key. Try again in {{count}} second.",
+        "descriptionWithDelay_other": "The provider is limiting requests on your key. Try again in {{count}} seconds."
+      },
+      "timeout": {
+        "title": "No answer in time",
+        "description": "The model did not finish before the time limit. The provider may be slow or stuck."
+      },
+      "provider_unavailable": {
+        "title": "Provider unavailable",
+        "description": "The provider is down or could not be reached. Retry in a few minutes."
+      },
+      "interrupted": {
+        "title": "Answer interrupted",
+        "description": "The page was reloaded while this answer was streaming, so it is incomplete."
+      },
+      "cancelled": {
+        "title": "Stopped",
+        "description": "This answer was stopped before it finished. Retry to ask this model again."
+      },
+      "insufficient_credits": {
+        "title": "Not enough credits",
+        "description": "Your credit balance cannot cover this model. Buy credits, then retry."
+      },
+      "other": {
+        "title": "This model failed",
+        "description": "The provider returned an error. The details are below."
+      }
+    },
+    "endpointInput": {
+      "baseUrl": "Base URL",
+      "apiKey": "API key",
+      "apiKeyOptional": "API key (optional)",
+      "embeddingModel": "Embedding model (optional)",
+      "embeddingModelHelp": "Used for agreement scores, for example nomic-embed-text on Ollama.",
+      "remove": "Remove {{name}}",
+      "showKey": "Show API key",
+      "hideKey": "Hide API key",
+      "local": "Local",
+      "status": {
+        "idle": "Not checked yet",
+        "validating": "Checking the endpoint...",
+        "valid_one": "Connected. {{count}} model available.",
+        "valid_other": "Connected. {{count}} models available.",
+        "invalid": "Could not connect: {{error}}"
+      },
+      "customLabel": "Custom",
+      "embeddingModelMissing": "{{model}} is not in this server's model list, so it is not used for agreement scores.",
+      "errors": {
+        "baseUrlRequired": "Base URL is required.",
+        "unreachable": "Could not reach the endpoint.",
+        "localBlocked": "Your browser did not let this site reach a server on your computer."
+      },
+      "ollamaEmbeddingMissing": "{{model}} is not installed in Ollama, so there is no agreement score yet. Install it with:"
+    },
+    "localServerHelp": {
+      "blocked": "Chrome and Firefox ask before a website may reach servers on your computer; if the prompt was dismissed or blocked, allow local network access in the site settings. Safari blocks these calls from HTTPS sites. The server must also allow this site (for Ollama, set OLLAMA_ORIGINS).",
+      "notFound": "Start Ollama and look again. If it is running, your browser may be stopping this site from reaching it.",
+      "runLocally": "The most reliable way to use local models is to run Ensemble on your computer, where no permission or OLLAMA_ORIGINS setting is needed:",
+      "guideLink": "Local models guide"
+    },
+    "ollamaDetectedNotice": {
+      "foundTitle": "Ollama is running on this computer",
+      "models_one": "{{count}} chat model installed: {{models}}.",
+      "models_other": "{{count}} chat models installed: {{models}}.",
+      "noChatModels": "No chat models are installed yet. Install a small one with:",
+      "embedding": "Agreement scores will use {{model}}.",
+      "noEmbedding": "No embedding model is installed, so there will be no agreement score. Install one with:",
+      "add": "Add Ollama",
+      "dismiss": "Not now",
+      "askTitle": "Using Ollama?",
+      "askDescription": "Ensemble can look for Ollama on this computer. Your browser may ask whether this site may reach local servers.",
+      "check": "Look for Ollama",
+      "checkingTitle": "Using Ollama?",
+      "checkingDescription": "Looking for Ollama on this computer.",
+      "checking": "Looking for Ollama...",
+      "notFoundTitle": "Ollama was not found",
+      "notFoundDescription": "Ollama did not answer.",
+      "notFoundLocal": "Ollama did not answer at {{url}}. Start it (open the Ollama app, or run ollama serve) and look again.",
+      "checkAgain": "Look again"
+    },
+    "accuracyInterval": {
+      "label": "Accuracy {{value}}%, 95% interval {{lower}}% to {{upper}}%",
+      "range": "95% CI {{lower}} to {{upper}}"
+    },
+    "benchmarksNotRun": {
+      "title": "Benchmarks not run yet",
+      "description": "No measured results are published. This page shows numbers only after the benchmark matrix has been run. Until then it shows the method and what a run will cost.",
+      "estimate": "Estimated cost of a full run: {{low}} to {{high}} for {{calls}} model calls.",
+      "commandLabel": "Run it yourself:"
+    },
+    "modelChip": {
+      "remove": "Remove {{name}}",
+      "manual": "Added by hand"
+    },
+    "modelPicker": {
+      "add": "Add model",
+      "choose": "Choose models",
+      "search": "Search models",
+      "noMatches": "No models match \"{{query}}\".",
+      "empty": "No models yet. Add a key or a local endpoint in settings.",
+      "selected_one": "{{count}} of {{max}} selected",
+      "selected_other": "{{count}} of {{max}} selected",
+      "limit": "Up to {{max}} models. Remove one to add another."
+    },
+    "methodMenu": {
+      "label": "Method",
+      "listLabel": "Consensus method",
+      "calls_one": "{{count}} call",
+      "calls_other": "{{count}} calls",
+      "costAbout": "about {{cost}}",
+      "costRange": "{{low}} to {{high}}",
+      "costAtLeast": "at least {{cost}}",
+      "costFree": "free",
+      "costUnknown": "cost unknown",
+      "unavailable_one": "Needs at least {{count}} answer",
+      "unavailable_other": "Needs at least {{count}} answers",
+      "summarizer": "Merged by",
+      "topN": "Best answers merged",
+      "note": "Calls include every answer and the agreement score.",
+      "methods": {
+        "standard": {
+          "name": "Standard",
+          "detail": "One model merges every answer"
+        },
+        "elo": {
+          "name": "Ranked",
+          "detail": "Models rank the answers, the best are merged"
+        },
+        "majority": {
+          "name": "Majority",
+          "detail": "Picks the answer most models give"
+        },
+        "council": {
+          "name": "Council",
+          "detail": "Models critique each other, then merge"
+        }
+      }
+    },
+    "composerOptions": {
+      "label": "More options",
+      "manual": "Add an answer by hand",
+      "savePreset": "Save models as a preset"
+    },
+    "answerCard": {
+      "streaming": "Streaming",
+      "waiting": "Waiting",
+      "copy": "Copy",
+      "copied": "Copied",
+      "seconds": "{{value}} s"
+    },
+    "agreementSummary": {
+      "heading": "Agreement",
+      "levels": {
+        "high": {
+          "label": "High agreement",
+          "meaning": "The answers say the same thing. That is a reason for more confidence, not proof."
+        },
+        "medium": {
+          "label": "Mixed agreement",
+          "meaning": "The answers overlap but differ in places. Read where they disagree."
+        },
+        "low": {
+          "label": "Low agreement",
+          "meaning": "The answers disagree. Do not trust any single one; read them all."
+        }
+      },
+      "pending": "Scored when all answers are in.",
+      "progress_one": "{{count}} of {{total}} answers so far.",
+      "progress_other": "{{count}} of {{total}} answers so far.",
+      "unavailable": "No agreement score",
+      "unavailableHint": "Add an embedding model in settings (OpenAI, Google or a local endpoint) to score agreement.",
+      "pairs": "Scores for each pair",
+      "pair": "{{a}} and {{b}}",
+      "calibrated": "Calibrated for {{model}}",
+      "uncalibrated": "Uncalibrated",
+      "uncalibratedHint": "Scored with {{model}}. The labels use default thresholds until this model is calibrated.",
+      "errorHint": "The answers could not be scored. The embedding calls failed; try the run again.",
+      "tooFewHint": "Agreement needs at least 2 answers to compare.",
+      "openSettings": "Open settings",
+      "excluded": "Left out of the score (no embedding): {{models}}.",
+      "commandHint": "Your Ollama server has no embedding model, so the answers cannot be compared. Install one, then ask again:"
+    },
+    "consensusAnswer": {
+      "heading": "Consensus answer",
+      "mergedBy": "{{method}}, merged by {{model}}",
+      "awaiting": "The consensus is written when the answers are in.",
+      "generating": "Writing the consensus",
+      "failed": "The consensus could not be written.",
+      "unavailable_one": "This method needs at least {{count}} answer, so no consensus was written.",
+      "unavailable_other": "This method needs at least {{count}} answers, so no consensus was written.",
+      "retry": "Try again",
+      "copy": "Copy",
+      "copied": "Copied",
+      "share": "Share",
+      "notSaved": "No consensus was saved with this run."
+    },
+    "appearanceSettings": {
+      "theme": "Theme",
+      "light": "Light",
+      "dark": "Dark",
+      "language": "Language"
+    },
+    "waysIn": {
+      "keys": "Use your own keys",
+      "local": "Use local models",
+      "oneKey": "One key is enough to start. An OpenRouter key reaches every major provider.",
+      "pro": "Sign in for Pro, pay with credits",
+      "soon": "Coming soon"
+    },
+    "scoreGuide": {
+      "heading": "What the score tells you",
+      "body": "A single model sounds just as sure when it is right as when it is guessing. Asking several and measuring how closely they agree gives you a warning sign.",
+      "benchmarks": "See how we test it",
+      "levels": {
+        "high": "The models say the same thing. That is a reason for more confidence, not proof.",
+        "medium": "They overlap but differ on details. Check the parts they disagree on.",
+        "low": "Stop and read the individual answers. No single answer should be trusted here."
+      }
+    },
+    "howItWorks": {
+      "heading": "How it works",
+      "steps": {
+        "ask": {
+          "title": "Ask once",
+          "body": "Pick two to six models, from cloud providers or your own machine, and write one question."
+        },
+        "compare": {
+          "title": "Compare side by side",
+          "body": "Every answer streams in next to the others, with its time and cost."
+        },
+        "read": {
+          "title": "Read the agreement",
+          "body": "A score from semantic embeddings shows how closely the answers match, and one merged answer sits on top."
+        }
+      }
+    },
+    "onboardingKeyField": {
+      "provider": "Provider",
+      "key": "API key",
+      "placeholder": "Paste your {{provider}} key",
+      "hint": "One key is enough. We pick the provider from the key where we can.",
+      "validating": "Checking the key with {{provider}}",
+      "valid": "The {{provider}} key works.",
+      "validOpenRouter": "The OpenRouter key works. It reaches models from every major provider.",
+      "invalid": "{{provider}} did not accept this key.",
+      "invalidWithReason": "{{provider}} did not accept this key: {{reason}}",
+      "getKey": "Get a key from {{provider}}"
+    },
+    "signInPanel": {
+      "title": "Sign in",
+      "why": "You only need an account for Pro credits, sharing and synced history. Free mode works without one.",
+      "google": "Continue with Google",
+      "or": "or",
+      "emailLabel": "Email",
+      "emailPlaceholder": "you@example.com",
+      "sendLink": "Email me a sign-in link",
+      "sending": "Sending…",
+      "sent": "Check your inbox at {{email}} and open the link on this device.",
+      "confirmTitle": "Finish signing in",
+      "confirmHint": "This sign-in link was opened on a different device or browser. Enter the address it was sent to.",
+      "confirm": "Finish signing in",
+      "errors": {
+        "popupClosed": "The Google window closed before sign-in finished. Try again.",
+        "invalidEmail": "Enter a valid email address.",
+        "network": "No connection to the sign-in service. Check your network and try again.",
+        "expiredLink": "This sign-in link has expired or was already used. Ask for a new one.",
+        "generic": "Sign-in failed. Try again."
+      }
+    },
+    "creditNotice": {
+      "balance": "Credits: {{balance}}",
+      "low": "Your credit balance is low ({{balance}}). Buy credits to keep using Pro.",
+      "insufficient": "This run needs about {{required}} in credits and your balance is {{balance}}. Buy credits or choose fewer or cheaper models.",
+      "unpriced_one": "Pro cannot price {{models}} yet, so it cannot run it. Remove it to ask.",
+      "unpriced_other": "Pro cannot price {{models}} yet, so it cannot run them. Remove them to ask.",
+      "and": "and",
+      "error": "Could not load your credit balance.",
+      "buyError": "Could not start the checkout. Try again.",
+      "negative": "Your balance is {{balance}} because a payment was refunded or disputed after its credits were used. Buy credits to use Pro again."
+    },
+    "modeSwitch": {
+      "label": "Mode",
+      "free": {
+        "title": "Free",
+        "body": "Your own keys or local models, called from your browser."
+      },
+      "pro": {
+        "title": "Pro",
+        "body": "Sign in and pay with credits. No keys needed; models run on our server."
+      },
+      "unavailable": "Pro is not available on this server.",
+      "keeps": "Switching keeps your presets and history."
+    },
+    "composerSubmit": {
+      "submit": "Ask",
+      "running": "Running",
+      "stop": "Stop"
+    },
+    "accountMenu": {
+      "signIn": "Sign in",
+      "loading": "Checking your account",
+      "account": "Account: {{name}}",
+      "signedInAs": "Signed in as",
+      "signOut": "Sign out",
+      "unavailableTitle": "Accounts are not available here",
+      "unavailable": "Sign-in is not set up on this server. Free mode works without an account: add your own provider keys in Settings."
+    },
+    "creditPacks": {
+      "buy": "Buy {{label}}",
+      "packs": "Credit packs"
+    },
+    "creditBalanceCard": {
+      "title": "Credit balance",
+      "ok": "Pro runs are billed from this balance. Each run reserves its estimate first, then you pay for what it used.",
+      "low": "Your balance is low. Buy credits to keep using Pro.",
+      "negative": "A payment was refunded or disputed after its credits were used, so your balance is below zero. Pro runs are paused until you buy credits.",
+      "note": "Paid with Stripe. Credits arrive once the payment clears.",
+      "buyError": "Could not start the checkout. Try again."
+    },
+    "accountSection": {
+      "loading": "Loading",
+      "error": "Could not load this list.",
+      "more": "Show more"
+    },
+    "purchaseHistory": {
+      "title": "Purchases",
+      "empty": "No purchases yet.",
+      "purchase": "{{pack}} credit pack",
+      "purchaseUnknown": "Credit pack",
+      "grant": "Free credits",
+      "refund": "Refund",
+      "dispute": "Disputed payment"
+    },
+    "modelUsageList": {
+      "title_one": "Usage by model, last day",
+      "title_other": "Usage by model, last {{count}} days",
+      "empty_one": "No Pro runs in the last day.",
+      "empty_other": "No Pro runs in the last {{count}} days.",
+      "truncated": "Only your most recent runs are counted.",
+      "runs_one": "{{count}} run",
+      "runs_other": "{{count}} runs",
+      "calls_one": "{{count}} call",
+      "calls_other": "{{count}} calls",
+      "tokens": "{{tokens}} tokens"
+    },
+    "runHistory": {
+      "title": "Recent runs",
+      "empty": "Runs you make in Pro show here with what they cost.",
+      "calls_one": "{{count}} call",
+      "calls_other": "{{count}} calls"
+    },
+    "shareDialog": {
+      "title": "Share this run",
+      "loading": "Checking for a link to this run",
+      "description": "Create a read-only link to this run. It shows the question, the models, every answer, the agreement score and the consensus.",
+      "public": "Anyone with the link can open it, without an account.",
+      "expires": "The link stops working after 30 days.",
+      "noKeys": "API keys are never included.",
+      "readyDescription": "Anyone with this link can see the run, without an account.",
+      "link": "Share link",
+      "copy": "Copy",
+      "copied": "Copied",
+      "expiresOn": "Works until {{date}}.",
+      "deleteNote": "Deleting the link stops it working for everyone.",
+      "delete": "Delete link",
+      "cancel": "Cancel",
+      "done": "Done",
+      "create": "Create link",
+      "retry": "Try again",
+      "errors": {
+        "failed": "Could not create or delete the link. Try again.",
+        "limit": "You have created too many links in the last hour. Try again later.",
+        "tooLarge": "This run is too large to share."
+      }
     }
   },
   "organisms": {
@@ -88,7 +565,10 @@
       "confidence": "Confidence: {{percent}}%",
       "responsesAnalyzed": "RESPONSES ANALYZED",
       "comparisons": "COMPARISONS",
-      "avgConfidence": "AVG CONFIDENCE"
+      "avgConfidence": "AVG CONFIDENCE",
+      "uncalibrated": "Uncalibrated",
+      "uncalibratedHint": "High, medium and low use the default mapping because this embedding model has not been calibrated against benchmark answers yet.",
+      "calibrated": "Calibrated for {{model}}"
     },
     "apiKeyConfiguration": {
       "heading": "Configure API Keys",
@@ -100,7 +580,8 @@
     },
     "apiKeyConfigurationModal": {
       "title": "Configure API Key",
-      "done": "Done"
+      "done": "Done",
+      "close": "Close"
     },
     "consensusCard": {
       "heading": "Consensus",
@@ -142,7 +623,7 @@
         },
         "majority": {
           "title": "Majority Voting",
-          "description": "Favors the majority position across responses. Works with 2+ models."
+          "description": "Counts votes when the answers are short (a number, letter or yes/no), otherwise favors the majority position. Works with 2+ models."
         },
         "council": {
           "title": "Council Debate",
@@ -172,8 +653,8 @@
       "summarizerLabel": "Summarizer",
       "noModels": "No models selected yet",
       "selectModelsHint": "Pick at least 2 models to start comparing.",
-      "quickPresets": "Quick presets",
-      "quickPresetsDescription": "Start from a curated ensemble tuned for common workflows.",
+      "quickPresets": "Saved ensembles",
+      "quickPresetsDescription": "Load an ensemble you saved earlier. It restores the models, summarizer and consensus method.",
       "noPresets": "No saved presets yet. Save your first ensemble below to get started.",
       "usePreset": "Use preset",
       "deletePreset": "Delete preset {{name}}",
@@ -190,7 +671,8 @@
       "addManualResponse": "Add Manual Response",
       "manualResponsesNote": "Add reference answers or benchmark outputs to compare against live model responses.",
       "continueToPrompt": "Continue to Prompt",
-      "removeModel": "Remove {{name}}"
+      "removeModel": "Remove {{name}}",
+      "clearAll": "Clear all"
     },
     "manualResponseModal": {
       "title": "Manual Response",
@@ -208,7 +690,8 @@
       "heading": "Select Your Mode"
     },
     "modelSelectionList": {
-      "noModels": "No models available"
+      "noModels": "No models available",
+      "configure": "Configure"
     },
     "pageHero": {
       "breadcrumb": "Breadcrumb"
@@ -235,6 +718,150 @@
     "workflowNavigator": {
       "back": "Back",
       "continue": "Continue"
+    },
+    "endpointConfiguration": {
+      "heading": "OpenAI-compatible endpoints",
+      "description": "Use local models (Ollama, LM Studio, llama.cpp, vLLM) or hosted routers (OpenRouter, Groq, Together). Several endpoints can be used at once.",
+      "presetLabel": "Endpoint type",
+      "add": "Add endpoint",
+      "empty": "No endpoints yet. Pick a type and add one.",
+      "localHint": "Local servers must allow requests from this site (for Ollama, set OLLAMA_ORIGINS), and some browsers block them from the hosted site.",
+      "guideLink": "Setup guide for local models"
+    },
+    "benchmarkResultsTable": {
+      "questions_one": "{{count}} question",
+      "questions_other": "{{count}} questions",
+      "configuration": "Configuration",
+      "accuracy": "Accuracy (95% CI)",
+      "pValue": "p vs best single model",
+      "cost": "Cost",
+      "kind": {
+        "single": "Single model",
+        "ensemble": "Ensemble",
+        "reference": "Reference"
+      },
+      "best": "Best single model",
+      "notTested": "Not tested",
+      "costLowerBound": "at least {{cost}}",
+      "failures_one": "{{count}} failed call",
+      "failures_other": "{{count}} failed calls"
+    },
+    "benchmarkMethod": {
+      "title": "Method",
+      "datasets": "Datasets: {{list}}. Up to {{sample}} questions each, sampled with seed {{questionSeed}}.",
+      "scoring": "Multiple-choice options are shuffled with seed {{optionSeed}}. Every model gives a structured final answer, which is read and scored mechanically, with no LLM judge. Failed or timed-out calls count as wrong.",
+      "models": "Open models, each alone and together as an ensemble: {{list}}.",
+      "ensemble": "Ensemble methods: {{list}}.",
+      "strategy": {
+        "majority": "mechanical majority vote",
+        "standard": "standard consensus written by {{summarizer}}",
+        "elo": "ELO ranking",
+        "council": "council"
+      },
+      "reference": "Premium reference, run once and cached: {{model}}.",
+      "statistics": "Accuracy has a 95% Wilson interval. Each configuration is compared with the best single open model on the same questions with a paired McNemar test (exact binomial below 25 discordant pairs).",
+      "cost": "Cost comes from the shared OpenRouter price table and the token usage each provider reported.",
+      "docsLink": "Full method and how to reproduce it"
+    },
+    "composer": {
+      "promptLabel": "Your question",
+      "placeholder": "Ask a question where being wrong costs something",
+      "models": "Models",
+      "shortcut": "{{keys}} to ask",
+      "enter": "Enter",
+      "modelsHint": "Choose at least one model to ask"
+    },
+    "answerColumns": {
+      "heading": "Individual answers",
+      "tabs": "Answers",
+      "swipe": "Swipe to compare"
+    },
+    "appShell": {
+      "history": "History and presets",
+      "showHistory": "Show history",
+      "hideHistory": "Hide history",
+      "settings": "Settings",
+      "skip": "Skip to content"
+    },
+    "historySidebar": {
+      "newQuestion": "New question",
+      "search": "Search history",
+      "presets": "Presets",
+      "models_one": "{{count}} model",
+      "models_other": "{{count}} models",
+      "today": "Today",
+      "week": "Previous 7 days",
+      "older": "Older",
+      "undated": "Runs with no date",
+      "empty": "No questions yet. Your runs are saved in this browser.",
+      "noMatches": "Nothing matches \"{{query}}\".",
+      "delete": "Delete \"{{prompt}}\"",
+      "deletePreset": "Delete preset {{name}}",
+      "locked": "Past runs open once every answer is in.",
+      "share": "Share \"{{prompt}}\"",
+      "sync": {
+        "synced": "Synced to your account",
+        "local": "Only in this browser. Sign in to sync."
+      }
+    },
+    "exampleRun": {
+      "heading": "Example run",
+      "real": "Real answers",
+      "illustrative": "Illustrative example",
+      "models_one": "{{count}} model",
+      "models_other": "{{count}} models",
+      "calls_one": "{{count}} call",
+      "calls_other": "{{count}} calls",
+      "consensus": "Consensus",
+      "answers": "Individual answers",
+      "seconds": "{{value}} s",
+      "showAll": "Read the run in full",
+      "showLess": "Show less",
+      "uncalibratedHint": "Default thresholds.",
+      "source": "Recorded on {{date}} through {{via}}. Agreement scored with {{embedding}}; consensus written by {{summarizer}}.",
+      "sourceIllustrative": "Illustrative example, not a recorded run."
+    },
+    "onboardingSheet": {
+      "title": "How do you want to run models?",
+      "description": "Pick one. You can add more later in settings.",
+      "choose": "How to run models",
+      "keys": {
+        "title": "Use your own key",
+        "body": "Stored encrypted in this browser. Never sent to our server."
+      },
+      "local": {
+        "title": "Use local models",
+        "body": "Ollama, LM Studio or any OpenAI-compatible server. Nothing leaves your machine."
+      },
+      "pro": {
+        "title": "Sign in for Pro",
+        "body": "Credits instead of keys.",
+        "soon": "Coming soon",
+        "available": "Credits instead of keys. Every model, no setup."
+      },
+      "start": "Start asking",
+      "skip": "Skip for now",
+      "localConnected_one": "Connected to {{name}}. {{count}} model available.",
+      "localConnected_other": "Connected to {{name}}. {{count}} models available.",
+      "localNone": "No local server found yet. Start Ollama, or add another server in settings.",
+      "localOther": "Using LM Studio, llama.cpp or vLLM?",
+      "localSettings": "Add it in settings"
+    },
+    "accountDashboard": {
+      "title": "Account",
+      "signedInAs": "Signed in as {{email}}",
+      "balanceLoading": "Loading your balance",
+      "balanceError": "Could not load your credit balance."
+    },
+    "sharedRun": {
+      "label": "Shared run",
+      "models_one": "{{count}} answer",
+      "models_other": "{{count}} answers",
+      "dates": "Shared on {{shared}}, link expires {{expires}}",
+      "answers": "Every answer",
+      "ctaTitle": "Ask your own question",
+      "ctaBody": "Send one question to several models and see where they agree.",
+      "cta": "Ask your own question"
     }
   },
   "providers": {
@@ -243,7 +870,8 @@
     "google": "Google",
     "xai": "XAI",
     "deepseek": "DeepSeek",
-    "perplexity": "Perplexity"
+    "perplexity": "Perplexity",
+    "openai-compatible": "OpenAI-compatible"
   },
   "pages": {
     "prompt": {
@@ -268,7 +896,21 @@
       "noResponses": "No responses yet. Responses will appear here when models complete.",
       "backButton": "Back to Prompt",
       "newComparisonButton": "New Comparison",
-      "startOverButton": "Start Over"
+      "startOverButton": "Start Over",
+      "agreementUnavailableTitle": "No agreement score",
+      "agreementUnavailableDescription": "Scoring agreement needs an embeddings provider. Add a valid OpenAI or Google API key, or an endpoint with an embedding model, on the configuration page.",
+      "agreementErrorTitle": "Agreement could not be scored",
+      "agreementErrorDescription": "The embeddings provider did not return results for enough answers. Check your API key and try again.",
+      "agreementPartialNote": "Left out of the agreement score because their embeddings could not be generated: {{models}}.",
+      "runExclusionNote_one": "{{count}} model failed and is left out of the consensus and the agreement score: {{models}}.",
+      "runExclusionNote_other": "{{count}} models failed and are left out of the consensus and the agreement score: {{models}}.",
+      "runExclusionNoteNoAgreement_one": "{{count}} model failed and is left out of the consensus: {{models}}.",
+      "runExclusionNoteNoAgreement_other": "{{count}} models failed and are left out of the consensus: {{models}}.",
+      "runExclusionCount": "Consensus and agreement use the {{succeeded}} of {{total}} model answers that succeeded.",
+      "runExclusionCountNoAgreement": "Consensus uses the {{succeeded}} of {{total}} model answers that succeeded.",
+      "consensusInsufficientTitle": "No consensus for this run",
+      "consensusInsufficientDescription": "Consensus and agreement need at least 2 answers, and only {{count}} of {{total}} models answered. Retry the failed models below.",
+      "agreementOllamaPull": "Your Ollama server has no embedding model. Install one, then open the configuration page so Ensemble finds it:"
     }
   }
 }

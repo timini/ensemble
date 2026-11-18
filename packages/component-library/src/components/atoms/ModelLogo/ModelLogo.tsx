@@ -10,6 +10,12 @@ import PerplexityMono from '@lobehub/icons/es/Perplexity/components/Mono';
 import ClaudeMono from '@lobehub/icons/es/Claude/components/Mono';
 import GeminiMono from '@lobehub/icons/es/Gemini/components/Mono';
 import GrokMono from '@lobehub/icons/es/Grok/components/Mono';
+import MetaMono from '@lobehub/icons/es/Meta/components/Mono';
+import QwenMono from '@lobehub/icons/es/Qwen/components/Mono';
+import GemmaMono from '@lobehub/icons/es/Gemma/components/Mono';
+import MistralMono from '@lobehub/icons/es/Mistral/components/Mono';
+import { Server } from 'lucide-react';
+import { openModelFamily } from './openModelFamilies';
 import type { ProviderLogoProvider } from '../ProviderLogo';
 
 const SIZE_MAP = {
@@ -44,7 +50,12 @@ type ModelLogoKey =
   | 'perplexity'
   | 'claude'
   | 'gemini'
-  | 'grok';
+  | 'grok'
+  | 'meta'
+  | 'qwen'
+  | 'gemma'
+  | 'mistral'
+  | 'server';
 
 export interface ModelLogoProps
   extends Omit<React.HTMLAttributes<HTMLSpanElement>, 'children'>,
@@ -64,6 +75,7 @@ const MODEL_ICON_KEYS: Record<ModelLogoProvider, ModelLogoKey> = {
   xai: 'grok',
   deepseek: 'deepseek',
   perplexity: 'perplexity',
+  'openai-compatible': 'server',
 };
 
 const PROVIDER_FALLBACK_KEYS: Record<ModelLogoProvider, ModelLogoKey> = {
@@ -73,6 +85,7 @@ const PROVIDER_FALLBACK_KEYS: Record<ModelLogoProvider, ModelLogoKey> = {
   xai: 'xai',
   deepseek: 'deepseek',
   perplexity: 'perplexity',
+  'openai-compatible': 'server',
 };
 
 const MODEL_NAME_MATCHERS: Partial<Record<ModelLogoProvider, RegExp>> = {
@@ -93,6 +106,11 @@ const LOGO_COMPONENTS: Record<ModelLogoKey, IconComponent> = {
   claude: ClaudeMono,
   gemini: GeminiMono,
   grok: GrokMono,
+  meta: MetaMono,
+  qwen: QwenMono,
+  gemma: GemmaMono,
+  mistral: MistralMono,
+  server: ({ size }) => <Server size={size} aria-hidden="true" />,
 };
 
 function resolveModelLogoKey(
@@ -100,6 +118,13 @@ function resolveModelLogoKey(
   modelName?: string,
   modelId?: string,
 ): ModelLogoKey {
+  // OpenAI-compatible endpoints serve many families; pick the logo from the
+  // id without its endpoint prefix (`ollama/` would match llama).
+  if (provider === 'openai-compatible') {
+    const bareId = modelId ? modelId.slice(modelId.indexOf('/') + 1) : '';
+    // Display names end with the endpoint label in brackets, "Qwen 2.5 (Ollama)".
+    return openModelFamily(bareId || (modelName ?? '').replace(/\s*\([^)]*\)\s*$/, ''));
+  }
   const matcher = MODEL_NAME_MATCHERS[provider];
   if (!matcher) {
     return MODEL_ICON_KEYS[provider];

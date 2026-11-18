@@ -1,10 +1,11 @@
 import * as React from 'react';
 import { X } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '@/lib/utils';
 
 const tagVariants = cva(
-  'inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-medium transition-colors border',
+  'inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-label font-medium transition-colors duration-fast',
   {
     variants: {
       variant: {
@@ -61,6 +62,7 @@ export interface TagProps extends React.HTMLAttributes<HTMLButtonElement | HTMLS
  */
 const Tag = React.forwardRef<HTMLElement, TagProps>(
   ({ className, variant, selected, removable, onRemove, onClick, disabled, children, ...props }, ref) => {
+    const { t } = useTranslation();
     const isClickable = !!onClick && !disabled;
     // Use div when removable to avoid nesting buttons
     const Comp = removable ? 'div' : (isClickable ? 'button' : 'span');
@@ -94,8 +96,8 @@ const Tag = React.forwardRef<HTMLElement, TagProps>(
             type="button"
             onClick={handleRemove}
             disabled={disabled}
-            aria-label="Remove"
-            className="inline-flex items-center justify-center rounded-full hover:bg-black/10 dark:hover:bg-white/10 p-0.5 transition-colors"
+            aria-label={t('atoms.tag.remove')}
+            className="inline-flex items-center justify-center rounded-full focus-ring p-0.5 transition-colors duration-fast hover:bg-foreground/10"
           >
             <X className="h-3 w-3" />
           </button>

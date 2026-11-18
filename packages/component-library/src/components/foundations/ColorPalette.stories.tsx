@@ -57,7 +57,7 @@ function ColorPalette() {
           Design System Colors
         </h2>
         <p className="text-sm text-muted-foreground">
-          Semantic tokens defined in globals.css and mapped in tailwind.config.ts.
+          Semantic tokens defined in tokens.css and mapped in tailwindPreset.ts.
           Toggle light/dark mode using the toolbar above.
         </p>
       </div>

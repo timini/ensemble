@@ -237,3 +237,17 @@ export const NoAgreement: Story = {
     averageConfidence: 0.85,
   },
 };
+
+/** Labels from the default mapping, marked uncalibrated as the app shows them before calibration. */
+export const Uncalibrated: Story = {
+  args: { ...MediumAgreement.args!, calibration: { calibrated: false } } as Story['args'],
+};
+
+/** Labels from thresholds fitted for the embedding model in use. */
+export const Calibrated: Story = {
+  args: {
+    ...MediumAgreement.args!,
+    levelThresholds: { high: 0.86, medium: 0.72 },
+    calibration: { calibrated: true, embeddingModel: 'openai/text-embedding-3-small' },
+  } as Story['args'],
+};

@@ -1,2 +1,2 @@
-export * from './encryption';
-export * from './webCryptoDetection';
+export * from "./encryption";
+export * from "./webCryptoDetection";

@@ -13,14 +13,15 @@ export function Footer({ githubUrl = 'https://github.com/timini/ensemble' }: Foo
   const year = new Date().getFullYear();
 
   const navLinks = [
-    { href: '/config', label: isReady ? t('ensemble.footer.getStarted') : 'Get Started' },
+    { href: '/workspace', label: isReady ? t('ensemble.footer.getStarted') : 'Get Started' },
     { href: '/features', label: isReady ? t('ensemble.footer.features') : 'Features' },
     { href: '/about', label: isReady ? t('ensemble.footer.about') : 'About' },
+    { href: '/benchmarks', label: isReady ? t('ensemble.footer.benchmarks') : 'Benchmarks' },
   ];
 
   return (
     <footer className="border-t border-border bg-background" data-testid="site-footer">
-      <div className="max-w-6xl mx-auto px-6 py-8">
+      <div className="mx-auto max-w-6xl px-gutter py-8">
         <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex flex-wrap items-center gap-4">
             {navLinks.map(({ href, label }) => (

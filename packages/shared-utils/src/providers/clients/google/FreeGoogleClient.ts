@@ -1,10 +1,13 @@
 import { GoogleGenerativeAI, type ResponseSchema } from '@google/generative-ai';
 import axios from 'axios';
+import { classifyProviderError } from '../../errors/providerError';
 import { BaseFreeClient, type StreamOptions, type StructuredOptions } from '../base/BaseFreeClient';
-import type { StructuredResponse, ValidationResult } from '../../types';
+import type { StructuredResponse, TokenUsage, ValidationResult } from '../../types';
 import { extractAxiosErrorMessage } from '../../utils/extractAxiosError';
 import { hasNonTextModality } from '../../utils/modelFilters';
-import { sanitizeProviderErrorMessage } from '../../utils/sanitizeSensitiveData';
+import { fromGeminiUsage } from '../../utils/usage';
+import { requestGeminiEmbedding } from '../../embeddings/geminiEmbeddings';
+import { GOOGLE_EMBEDDING_MODEL } from '../../embeddings/models';
 
 interface GoogleModelEntry {
   name?: string;
@@ -15,6 +18,12 @@ interface GoogleModelsResponse {
 }
 
 export class FreeGoogleClient extends BaseFreeClient {
+  override readonly supportsEmbeddings: boolean = true;
+
+  protected override embedWithProvider(apiKey: string, text: string): Promise<number[]> {
+    return requestGeminiEmbedding({ apiKey, model: GOOGLE_EMBEDDING_MODEL, text });
+  }
+
   private createClient(apiKey: string) {
     return new GoogleGenerativeAI(apiKey);
   }
@@ -39,7 +48,7 @@ export class FreeGoogleClient extends BaseFreeClient {
 
   protected async fetchTextModels(apiKey: string): Promise<string[]> {
     if (process.env.NEXT_PUBLIC_MOCK_MODE === 'true') {
-      return ['gemini-1.5-flash', 'gemini-1.5-pro'];
+      return ['gemini-4-carbon', 'gemini-4-hydrogen'];
     }
     const response = await axios.get<GoogleModelsResponse>(
       'https://generativelanguage.googleapis.com/v1beta/models',
@@ -103,12 +112,14 @@ export class FreeGoogleClient extends BaseFreeClient {
     }
     const parsed = JSON.parse(raw) as T;
     const tokenCount = result.response.usageMetadata?.totalTokenCount;
+    const usage = fromGeminiUsage(result.response.usageMetadata);
 
     return {
       parsed,
       raw,
       responseTimeMs: Date.now() - startTime,
       ...(tokenCount ? { tokenCount } : {}),
+      ...(usage ? { usage } : {}),
     };
   }
 
@@ -116,6 +127,7 @@ export class FreeGoogleClient extends BaseFreeClient {
     const startTime = Date.now();
     let fullResponse = '';
     let tokenCount = 0;
+    let usage: TokenUsage | undefined;
 
     try {
       const genAI = this.createClient(options.apiKey);
@@ -137,16 +149,17 @@ export class FreeGoogleClient extends BaseFreeClient {
         if (chunk.usageMetadata?.totalTokenCount) {
           tokenCount = chunk.usageMetadata.totalTokenCount;
         }
+        usage = fromGeminiUsage(chunk.usageMetadata) ?? usage;
       }
 
-      options.onComplete(fullResponse, Date.now() - startTime, tokenCount > 0 ? tokenCount : undefined);
-    } catch (error) {
-      // Extract error message from Google SDK error
-      const errorMessage = sanitizeProviderErrorMessage(
-        error instanceof Error ? error.message : String(error),
-        'Unknown Google provider error.',
+      options.onComplete(
+        fullResponse,
+        Date.now() - startTime,
+        tokenCount > 0 ? tokenCount : undefined,
+        usage,
       );
-      options.onError(new Error(`Google API error: ${errorMessage}`));
+    } catch (error) {
+      options.onError(classifyProviderError(error, { provider: this.provider, label: 'Google API error' }));
     }
   }
 }

@@ -2,9 +2,15 @@ import { Command } from 'commander';
 import { ProviderRegistry } from '@ensemble-ai/shared-utils/providers';
 import { loadBenchmarkQuestions } from '../lib/benchmarkDatasets.js';
 import { evaluateResponses } from '../lib/evaluation.js';
-import { createEvaluatorForDataset, type JudgeConfig } from '../lib/evaluators.js';
+import {
+  assertIndependentJudge, createEvaluatorForDataset, datasetNeedsJudge, type JudgeConfig,
+} from '../lib/evaluators.js';
 import { writeJsonFile } from '../lib/io.js';
-import { parseModelSpec } from '../lib/modelSpecs.js';
+import { endpointsOf, parseModelSpec } from '../lib/modelSpecs.js';
+import { prepareQuestions } from '../lib/methodology.js';
+import {
+  DEFAULT_SAMPLE_FREE, DEFAULT_SAMPLE_MOCK, QUESTION_SEED, resolveSampleSize, sampleSizeWarning,
+} from '../lib/evalDefaults.js';
 import { registerProviders } from '../lib/providers.js';
 import { EnsembleRunner } from '../lib/ensembleRunner.js';
 import { buildSelfConsistencyResult } from '../lib/selfConsistency.js';
@@ -12,7 +18,9 @@ import type { BaselineResultsFile, EvalMode, PromptRunResult } from '../types.js
 
 interface BaselineCommandOptions {
   model: string;
-  samples: string;
+  samples?: string;
+  judge?: string;
+  allowSameJudge?: boolean;
   output: string;
   mode: EvalMode;
   requestDelayMs?: string;
@@ -31,7 +39,12 @@ export function createBaselineCommand(): Command {
       'Dataset alias (gsm8k, truthfulqa, gpqa) or path to dataset JSON (array of prompts or {prompt} objects)',
     )
     .requiredOption('--model <model>', 'Model spec in provider:model format.')
-    .option('--samples <count>', 'Number of prompts to evaluate.', '10')
+    .option(
+      '--samples <count>',
+      `Number of prompts to evaluate (default ${DEFAULT_SAMPLE_FREE} in free mode, ${DEFAULT_SAMPLE_MOCK} in mock mode).`,
+    )
+    .option('--judge <spec>', 'Judge model for datasets that still need one (simpleqa, hle).')
+    .option('--allow-same-judge', 'Allow the judge to be the model under test (biased; off by default).')
     .option('--output <file>', 'Output JSON file path.', 'eval-baseline-results.json')
     .option(
       '--self-consistency-runs <count>',
@@ -58,10 +71,9 @@ export function createBaselineCommand(): Command {
     )
     .action(async (dataset: string, options: BaselineCommandOptions) => {
       const modelSpec = parseModelSpec(options.model);
-      const sampleCount = Number.parseInt(options.samples, 10);
-      if (!Number.isInteger(sampleCount) || sampleCount <= 0) {
-        throw new Error(`Invalid sample count "${options.samples}".`);
-      }
+      const sampleCount = resolveSampleSize(options.samples, options.mode);
+      const warning = sampleSizeWarning(sampleCount, options.mode);
+      if (warning) process.stderr.write(`Warning: ${warning}\n`);
       const selfConsistencyRuns = Number.parseInt(
         options.selfConsistencyRuns ?? '1',
         10,
@@ -82,30 +94,44 @@ export function createBaselineCommand(): Command {
         throw new Error(`Invalid temperature "${options.temperature}".`);
       }
 
-      const { datasetName, questions } = await loadBenchmarkQuestions(dataset, {
+      const loaded = await loadBenchmarkQuestions(dataset, {
         sample: sampleCount,
-        skipDownload: options.skipDownload,
-        forceDownload: options.forceDownload,
+        seed: QUESTION_SEED,
+        ...(options.skipDownload ? { skipDownload: true } : {}),
+        ...(options.forceDownload ? { forceDownload: true } : {}),
       });
+      const datasetName = loaded.datasetName;
+      const questions = prepareQuestions(datasetName, loaded.questions, { protocol: 'structured' });
 
+      // A judge is only needed for free-text datasets, and must not be the model under test.
+      const needsJudge = datasetName !== null && datasetNeedsJudge(datasetName, 'structured');
+      const judgeSpec = needsJudge && options.judge ? parseModelSpec(options.judge) : null;
+      if (needsJudge) {
+        if (!judgeSpec && !options.allowSameJudge) {
+          throw new Error(`${datasetName} needs an LLM judge. Pass --judge with a model other than --model.`);
+        }
+        assertIndependentJudge(judgeSpec ?? modelSpec, [modelSpec], { allowSameModel: options.allowSameJudge });
+      }
+
+      const endpoints = endpointsOf([modelSpec, judgeSpec]);
       const registry = new ProviderRegistry();
-      registerProviders(registry, [modelSpec.provider], options.mode);
+      registerProviders(
+        registry,
+        judgeSpec ? [modelSpec.provider, judgeSpec.provider] : [modelSpec.provider],
+        options.mode,
+        endpoints,
+      );
 
       let judgeConfig: JudgeConfig | undefined;
-      try {
-        judgeConfig = {
-          provider: registry.getProvider(modelSpec.provider, options.mode),
-          model: modelSpec.model,
-        };
-      } catch (error) {
-        process.stderr.write(
-          `Warning: judge provider unavailable (${error instanceof Error ? error.message : String(error)})\n`,
-        );
+      if (needsJudge) {
+        const spec = judgeSpec ?? modelSpec;
+        judgeConfig = { provider: registry.getProvider(spec.provider, options.mode), model: spec.model };
       }
-      const evaluator = createEvaluatorForDataset(datasetName, judgeConfig);
+      const evaluator = createEvaluatorForDataset(datasetName, judgeConfig, { protocol: 'structured' });
       const ensembleRunner = new EnsembleRunner(registry, options.mode, {
         requestDelayMs,
         temperature,
+        endpoints,
       });
 
       const runs: PromptRunResult[] = [];
@@ -117,6 +143,7 @@ export function createBaselineCommand(): Command {
         const responses = await ensembleRunner.runPrompt(
           question.prompt,
           repeatedModelSpecs,
+          question.answer ? { answer: question.answer } : {},
         );
 
         const evaluation = await evaluateResponses(
@@ -135,6 +162,10 @@ export function createBaselineCommand(): Command {
           responses,
           consensus: {},
           evaluation,
+          answerProtocol: 'structured',
+          ...(question.optionPermutation
+            ? { optionPermutation: question.optionPermutation, optionSeed: question.optionSeed }
+            : {}),
           selfConsistency: buildSelfConsistencyResult({
             runCount: selfConsistencyRuns,
             responses,

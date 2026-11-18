@@ -1,5 +1,8 @@
 import { describe, expect, it, vi } from "vitest";
-import type { ProviderName } from "@ensemble-ai/shared-utils/providers";
+import type { ProviderName as AnyProviderName } from "@ensemble-ai/shared-utils/providers";
+
+/** Providers the server calls with its own keys. Endpoints are browser-only. */
+type ProviderName = Exclude<AnyProviderName, "openai-compatible">;
 
 vi.mock("server-only", () => ({}));
 
@@ -17,7 +20,7 @@ const PROVIDERS: ProviderName[] = [
 
 const provider = (process.env.TEST_BACKEND_PROVIDER ??
   "openai") as ProviderName;
-const model = process.env.TEST_BACKEND_MODEL ?? "gpt-4o-mini";
+const model = process.env.TEST_BACKEND_MODEL ?? "gpt-6-luna";
 const firebaseWebApiKey = process.env.TEST_FIREBASE_WEB_API_KEY;
 const firebaseAuthEmail = process.env.TEST_FIREBASE_AUTH_EMAIL;
 const firebaseAuthPassword = process.env.TEST_FIREBASE_AUTH_PASSWORD;
@@ -83,7 +86,9 @@ describe("provider router integration auth gate", () => {
     const caller = createCaller(ctx);
 
     await expect(
-      caller.provider.streamText({
+      caller.provider.prepareStream({
+        runId: "run-1",
+        callId: "call-1",
         provider,
         model,
         prompt: "hello",
@@ -105,10 +110,10 @@ const shouldRunRealIntegration =
 
 const maybeDescribe = shouldRunRealIntegration ? describe : describe.skip;
 
-maybeDescribe("provider router real integration (firebase auth + provider API)", () => {
-  it(
-    "allows authenticated backend provider calls with a real Firebase ID token",
-    async () => {
+maybeDescribe(
+  "provider router real integration (firebase auth + provider API)",
+  () => {
+    it("allows authenticated backend provider calls with a real Firebase ID token", async () => {
       const idToken = await fetchFirebaseIdToken();
       const ctx = await createTRPCContext({
         headers: new Headers({
@@ -123,19 +128,6 @@ maybeDescribe("provider router real integration (firebase auth + provider API)",
       expect(modelsResult.provider).toBe(provider);
       expect(Array.isArray(modelsResult.models)).toBe(true);
       expect(modelsResult.models.length).toBeGreaterThan(0);
-
-      const streamResult = await caller.provider.streamText({
-        provider,
-        model,
-        prompt:
-          "Reply with exactly one short sentence confirming backend auth test success.",
-        temperature: 0,
-      });
-      expect(streamResult.provider).toBe(provider);
-      expect(streamResult.model).toBe(model);
-      expect(streamResult.response.length).toBeGreaterThan(0);
-      expect(streamResult.responseTimeMs).toBeGreaterThan(0);
-    },
-    120000,
-  );
-});
+    }, 120000);
+  },
+);

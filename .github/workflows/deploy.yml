@@ -5,6 +5,12 @@ on:
     branches:
       - main
   workflow_dispatch:
+    inputs:
+      full_e2e:
+        description: 'Run the full free-mode E2E suite (paid calls to every provider) after deploy'
+        type: boolean
+        required: false
+        default: false
 
 concurrency:
   group: deploy-${{ github.ref }}
@@ -181,47 +187,120 @@ jobs:
     outputs:
       deploy_url: https://ensemble-app--${{ vars.FIREBASE_PROJECT_ID }}.us-central1.hosted.app
 
-  # Post-deployment E2E tests run against the actual deployed infrastructure
-  # These tests verify the real deployment works correctly
-  e2e-free-mode:
-    name: E2E Tests (Free Mode) - Post Deploy
+  # Free check that the deployed app answers. No provider calls.
+  smoke-check:
+    name: HTTP Smoke Check - Post Deploy
     runs-on: ubuntu-latest
     needs: [deploy]
     if: ${{ needs.deploy.result == 'success' }}
 
     steps:
+      - name: Check deployed pages respond
+        env:
+          DEPLOY_URL: ${{ needs.deploy.outputs.deploy_url }}
+        run: |
+          set -euo pipefail
+          # minInstances is 0, so the first request may wait for a cold start.
+          # -L follows the / redirect, so this keeps working once / becomes a page.
+          for path in / /workspace; do
+            status="$(curl -sSL -o /dev/null -w '%{http_code}' --max-time 60 \
+              --retry 5 --retry-delay 10 --retry-all-errors "${DEPLOY_URL}${path}")"
+            echo "GET ${path} -> ${status}"
+            if [[ "${status}" != "200" ]]; then
+              echo "::error::Expected 200 from ${DEPLOY_URL}${path}, got ${status}"
+              exit 1
+            fi
+          done
+          # The old wizard route is a server redirect into the settings panel.
+          check_redirect() {
+            local path="$1" expected="$2" out status location
+            out="$(curl -sS -o /dev/null -w '%{http_code} %{redirect_url}' --max-time 60 \
+              --retry 5 --retry-delay 10 --retry-all-errors "${DEPLOY_URL}${path}")"
+            status="${out%% *}"
+            location="${out#* }"
+            echo "GET ${path} -> ${status} ${location}"
+            if [[ "${status}" != "307" && "${status}" != "308" ]]; then
+              echo "::error::Expected a redirect from ${DEPLOY_URL}${path}, got ${status}"
+              exit 1
+            fi
+            if [[ "${location}" != *"${expected}" ]]; then
+              echo "::error::Expected ${DEPLOY_URL}${path} to redirect to ${expected}, got ${location}"
+              exit 1
+            fi
+          }
+          check_redirect /config '/workspace?panel=settings'
+
+  # Post-deploy E2E against the deployed URL. By default this is one cheap
+  # real-provider test (google-only spec: two short Gemini calls) and only runs
+  # when TEST_GOOGLE_API_KEY is set. The full free-mode suite calls every
+  # provider, so it only runs on a manual dispatch with full_e2e enabled.
+  e2e-post-deploy:
+    name: E2E (${{ inputs.full_e2e && 'Free Mode, full' || 'Google smoke' }}) - Post Deploy
+    runs-on: ubuntu-24.04  # Playwright 1.58 has no Ubuntu 26.04 build
+    needs: [deploy, smoke-check]
+    if: ${{ needs.deploy.result == 'success' && needs.smoke-check.result == 'success' }}
+    env:
+      FULL_E2E: ${{ inputs.full_e2e && 'true' || 'false' }}
+      TEST_GOOGLE_API_KEY: ${{ secrets.TEST_GOOGLE_API_KEY }}
+
+    steps:
+      - name: Check provider key is configured
+        id: check-keys
+        run: |
+          if [[ "${FULL_E2E}" == "true" || -n "${TEST_GOOGLE_API_KEY}" ]]; then
+            echo "run=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "::warning::TEST_GOOGLE_API_KEY is not set. Skipping post-deploy provider smoke test."
+            echo "run=false" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Checkout
+        if: steps.check-keys.outputs.run == 'true'
         uses: actions/checkout@v4
 
       - name: Setup Node.js
+        if: steps.check-keys.outputs.run == 'true'
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: "npm"
 
       - name: Install dependencies
+        if: steps.check-keys.outputs.run == 'true'
         run: npm ci
 
       - name: Get Playwright version
+        if: steps.check-keys.outputs.run == 'true'
         id: playwright-version
         run: echo "version=$(npx playwright --version | awk '{print $2}')" >> $GITHUB_OUTPUT
         working-directory: packages/e2e
       - name: Cache Playwright browsers
+        if: steps.check-keys.outputs.run == 'true'
         id: playwright-cache
         uses: actions/cache@v4
         with:
           path: ~/.cache/ms-playwright
           key: playwright-${{ runner.os }}-${{ steps.playwright-version.outputs.version }}
       - name: Install Playwright browsers
-        if: steps.playwright-cache.outputs.cache-hit != 'true'
+        if: steps.check-keys.outputs.run == 'true' && steps.playwright-cache.outputs.cache-hit != 'true'
         run: npx playwright install --with-deps chromium
         working-directory: packages/e2e
       - name: Install Playwright system deps
-        if: steps.playwright-cache.outputs.cache-hit == 'true'
+        if: steps.check-keys.outputs.run == 'true' && steps.playwright-cache.outputs.cache-hit == 'true'
         run: npx playwright install-deps chromium
         working-directory: packages/e2e
 
-      - name: Run Free Mode E2E Tests against deployed app
+      # One test, no retries, so a merge costs at most one pass of two Gemini calls.
+      - name: Run Google smoke test against deployed app
+        if: steps.check-keys.outputs.run == 'true' && env.FULL_E2E != 'true'
+        run: npm run test:free --workspace=packages/e2e -- google-only.spec.ts --retries=0
+        env:
+          E2E_MODE: "free"
+          E2E_BASE_URL: ${{ needs.deploy.outputs.deploy_url }}
+          NEXT_PUBLIC_MOCK_MODE: "false"
+
+      - name: Run full Free Mode E2E suite against deployed app
+        if: steps.check-keys.outputs.run == 'true' && env.FULL_E2E == 'true'
         run: npm run test:free --workspace=packages/e2e
         env:
           E2E_MODE: "free"
@@ -229,7 +308,6 @@ jobs:
           NEXT_PUBLIC_MOCK_MODE: "false"
           TEST_OPENAI_API_KEY: ${{ secrets.TEST_OPENAI_API_KEY }}
           TEST_ANTHROPIC_API_KEY: ${{ secrets.TEST_ANTHROPIC_API_KEY }}
-          TEST_GOOGLE_API_KEY: ${{ secrets.TEST_GOOGLE_API_KEY }}
           TEST_XAI_API_KEY: ${{ secrets.TEST_XAI_API_KEY }}
           TEST_PERPLEXITY_API_KEY: ${{ secrets.TEST_PERPLEXITY_API_KEY }}
 
@@ -237,7 +315,7 @@ jobs:
         uses: actions/upload-artifact@v4
         if: failure()
         with:
-          name: e2e-free-mode-results
+          name: e2e-post-deploy-results
           path: packages/e2e/test-results/
           retention-days: 7
 

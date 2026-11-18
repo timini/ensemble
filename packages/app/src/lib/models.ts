@@ -3,134 +3,114 @@
  *
  * Static list of models used as fallback when dynamic loading from
  * provider APIs fails or is unavailable. Prefer dynamically loaded models.
+ *
+ * Each provider lists a flagship model and a fast or cheap model. Ids were
+ * checked against each provider's model documentation in November 2026.
  */
 
-import type { Model } from '@/components/organisms/ModelSelectionList';
+import type { Model } from "@/components/organisms/ModelSelectionList";
 
 export const FALLBACK_MODELS: Model[] = [
   // XAI (Grok)
   {
-    id: 'grok-1',
-    provider: 'xai',
-    name: 'Grok 1',
-    modalities: ['text'],
+    id: "grok-4.7",
+    provider: "xai",
+    name: "Grok 4.7",
+    modalities: ["text"],
   },
   {
-    id: 'grok-2',
-    provider: 'xai',
-    name: 'Grok 2',
-    modalities: ['text'],
+    id: "grok-4.3",
+    provider: "xai",
+    name: "Grok 4.3",
+    modalities: ["text"],
   },
 
   // OpenAI (GPT)
   {
-    id: 'gpt-4o',
-    provider: 'openai',
-    name: 'GPT-4o',
-    modalities: ['text', 'image'],
+    id: "gpt-6-astra",
+    provider: "openai",
+    name: "GPT-6 Astra",
+    modalities: ["text", "image"],
   },
   {
-    id: 'gpt-4o-mini',
-    provider: 'openai',
-    name: 'GPT-4o Mini',
-    modalities: ['text', 'image'],
-  },
-  {
-    id: 'o1-preview',
-    provider: 'openai',
-    name: 'o1 Preview',
-    modalities: ['text'],
-  },
-  {
-    id: 'o1-mini',
-    provider: 'openai',
-    name: 'o1 Mini',
-    modalities: ['text'],
+    id: "gpt-6-luna",
+    provider: "openai",
+    name: "GPT-6 Luna",
+    modalities: ["text", "image"],
   },
 
   // Google (Gemini)
   {
-    id: 'gemini-2.0-flash',
-    provider: 'google',
-    name: 'Gemini 2.0 Flash',
-    modalities: ['text', 'image'],
+    id: "gemini-4-carbon",
+    provider: "google",
+    name: "Gemini 4 Carbon",
+    modalities: ["text", "image", "audio", "video"],
   },
   {
-    id: 'gemini-2.5-flash',
-    provider: 'google',
-    name: 'Gemini 2.5 Flash',
-    modalities: ['text', 'image'],
+    id: "gemini-4-hydrogen",
+    provider: "google",
+    name: "Gemini 4 Hydrogen",
+    modalities: ["text", "image", "audio", "video"],
   },
   {
-    id: 'gemini-1.5-flash',
-    provider: 'google',
-    name: 'Gemini 1.5 Flash',
-    modalities: ['text', 'image'],
+    id: "gemini-3.5-flash-lite",
+    provider: "google",
+    name: "Gemini 3.5 Flash-Lite",
+    modalities: ["text", "image"],
   },
 
   // Anthropic (Claude)
   {
-    id: 'claude-3-5-sonnet-20241022',
-    provider: 'anthropic',
-    name: 'Claude 3.5 Sonnet',
-    modalities: ['text', 'image'],
+    id: "claude-opus-5-5",
+    provider: "anthropic",
+    name: "Claude Opus 5.5",
+    modalities: ["text", "image"],
   },
   {
-    id: 'claude-3-5-haiku-20241022',
-    provider: 'anthropic',
-    name: 'Claude 3.5 Haiku',
-    modalities: ['text', 'image'],
+    id: "claude-sonnet-5-5",
+    provider: "anthropic",
+    name: "Claude Sonnet 5.5",
+    modalities: ["text", "image"],
   },
   {
-    id: 'claude-3-opus-20240229',
-    provider: 'anthropic',
-    name: 'Claude 3 Opus',
-    modalities: ['text', 'image'],
+    id: "claude-haiku-5-5",
+    provider: "anthropic",
+    name: "Claude Haiku 5.5",
+    modalities: ["text", "image"],
   },
 
   // DeepSeek
   {
-    id: 'deepseek-chat',
-    provider: 'deepseek',
-    name: 'DeepSeek Chat',
-    modalities: ['text'],
+    id: "deepseek-v4-pro",
+    provider: "deepseek",
+    name: "DeepSeek V4 Pro",
+    modalities: ["text"],
   },
   {
-    id: 'deepseek-reasoner',
-    provider: 'deepseek',
-    name: 'DeepSeek Reasoner',
-    modalities: ['text'],
+    id: "deepseek-flash",
+    provider: "deepseek",
+    name: "DeepSeek Flash",
+    modalities: ["text"],
   },
 
-  // Perplexity (Sonar)
+  // Perplexity Agent API effort presets (Sonar Chat Completions ended on
+  // 2026-09-27). Each preset runs web search with Perplexity's chosen model.
   {
-    id: 'sonar',
-    provider: 'perplexity',
-    name: 'Sonar',
-    modalities: ['text'],
+    id: "perplexity-fast",
+    provider: "perplexity",
+    name: "Perplexity Fast",
+    modalities: ["text"],
   },
   {
-    id: 'sonar-pro',
-    provider: 'perplexity',
-    name: 'Sonar Pro',
-    modalities: ['text'],
+    id: "perplexity-low",
+    provider: "perplexity",
+    name: "Perplexity Low",
+    modalities: ["text"],
   },
   {
-    id: 'sonar-deep-research',
-    provider: 'perplexity',
-    name: 'Sonar Deep Research',
-    modalities: ['text'],
-  },
-  {
-    id: 'sonar-reasoning',
-    provider: 'perplexity',
-    name: 'Sonar Reasoning',
-    modalities: ['text'],
-  },
-  {
-    id: 'sonar-reasoning-pro',
-    provider: 'perplexity',
-    name: 'Sonar Reasoning Pro',
-    modalities: ['text'],
+    id: "perplexity-medium",
+    provider: "perplexity",
+    name: "Perplexity Medium",
+    modalities: ["text"],
   },
 ];

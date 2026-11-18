@@ -1,7 +1,9 @@
 import OpenAI from 'openai';
+import { classifyProviderError } from '../../errors/providerError';
 import { BaseFreeClient, type StreamOptions, type StructuredOptions } from '../base/BaseFreeClient';
-import type { StructuredResponse, ValidationResult } from '../../types';
+import type { StructuredResponse, TokenUsage, ValidationResult } from '../../types';
 import { sanitizeProviderErrorMessage } from '../../utils/sanitizeSensitiveData';
+import { fromChatCompletionUsage, type ChatCompletionUsage } from '../../utils/usage';
 
 export class FreeDeepSeekClient extends BaseFreeClient {
   private createClient(apiKey: string) {
@@ -33,7 +35,8 @@ export class FreeDeepSeekClient extends BaseFreeClient {
   }
 
   protected async fetchTextModels(_apiKey: string): Promise<string[]> {
-    return ['deepseek-chat', 'deepseek-reasoner'];
+    // deepseek-chat and deepseek-reasoner were retired on 2026-07-24.
+    return ['deepseek-v4-pro', 'deepseek-flash'];
   }
 
   protected override async generateStructuredWithProvider<T>(
@@ -64,12 +67,14 @@ export class FreeDeepSeekClient extends BaseFreeClient {
     }
     const parsed = JSON.parse(raw) as T;
     const tokenCount = response.usage?.total_tokens;
+    const usage = fromChatCompletionUsage(response.usage);
 
     return {
       parsed,
       raw,
       responseTimeMs: Date.now() - startTime,
       ...(tokenCount ? { tokenCount } : {}),
+      ...(usage ? { usage } : {}),
     };
   }
 
@@ -77,6 +82,7 @@ export class FreeDeepSeekClient extends BaseFreeClient {
     const startTime = Date.now();
     let fullResponse = '';
     let tokenCount = 0;
+    let usage: TokenUsage | undefined;
 
     try {
       const client = this.createClient(options.apiKey);
@@ -96,11 +102,12 @@ export class FreeDeepSeekClient extends BaseFreeClient {
 
       for await (const chunk of stream as AsyncIterable<{
         choices?: { delta?: { content?: unknown }; finish_reason?: string | null }[];
-        usage?: { total_tokens?: number };
+        usage?: ChatCompletionUsage | null;
       }>) {
         if (chunk.usage?.total_tokens) {
           tokenCount = chunk.usage.total_tokens;
         }
+        usage = fromChatCompletionUsage(chunk.usage) ?? usage;
 
         const choice = chunk.choices?.[0];
         const deltaContent = choice?.delta?.content;
@@ -122,13 +129,14 @@ export class FreeDeepSeekClient extends BaseFreeClient {
         }
       }
 
-      options.onComplete(fullResponse, Date.now() - startTime, tokenCount > 0 ? tokenCount : undefined);
+      options.onComplete(
+      fullResponse,
+      Date.now() - startTime,
+      tokenCount > 0 ? tokenCount : undefined,
+      usage,
+    );
     } catch (error) {
-      const errorMessage = sanitizeProviderErrorMessage(
-        error instanceof Error ? error.message : String(error),
-        'Unknown DeepSeek provider error.',
-      );
-      options.onError(new Error(`DeepSeek API error: ${errorMessage}`));
+      options.onError(classifyProviderError(error, { provider: this.provider, label: 'DeepSeek API error' }));
     }
   }
 }

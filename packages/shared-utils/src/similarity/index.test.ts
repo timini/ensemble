@@ -1,5 +1,10 @@
 import { describe, it, expect } from 'vitest';
-import { cosineSimilarity, similarityMatrix, agreementStatistics } from './index.js';
+import {
+  cosineSimilarity,
+  similarityMatrix,
+  agreementStatistics,
+  normalizeSimilarity,
+} from './index.js';
 
 describe('cosineSimilarity', () => {
   describe('edge cases', () => {
@@ -37,6 +42,28 @@ describe('cosineSimilarity', () => {
       expect(() => cosineSimilarity(zeroVector, normalVector)).toThrow(
         'Cannot calculate similarity for zero-magnitude vectors'
       );
+    });
+  });
+
+  describe('more edge cases', () => {
+    it('throws when both vectors are zero', () => {
+      expect(() => cosineSimilarity([0, 0], [0, 0])).toThrow('zero-magnitude');
+    });
+
+    it('throws when the second vector is zero', () => {
+      expect(() => cosineSimilarity([1, 2], [0, 0])).toThrow('zero-magnitude');
+    });
+
+    it('reports both lengths on a mismatch', () => {
+      expect(() => cosineSimilarity([1, 2, 3], [1, 2])).toThrow('3 !== 2');
+    });
+
+    it('throws when only one vector is empty', () => {
+      expect(() => cosineSimilarity([], [1])).toThrow('Vectors cannot be empty');
+    });
+
+    it('ignores vector magnitude', () => {
+      expect(cosineSimilarity([1, 2, 3], [10, 20, 30])).toBeCloseTo(1, 10);
     });
   });
 
@@ -124,6 +151,40 @@ describe('similarityMatrix', () => {
     // 45-degree angle vectors
     expect(matrix[0]![2]).toBeCloseTo(0.707, 3);
     expect(matrix[1]![2]).toBeCloseTo(0.707, 3);
+  });
+});
+
+describe('similarityMatrix edge cases', () => {
+  it('returns an empty matrix for no vectors', () => {
+    expect(similarityMatrix([])).toEqual([]);
+  });
+
+  it('returns [[1]] for a single vector', () => {
+    expect(similarityMatrix([[1, 2]])).toEqual([[1]]);
+  });
+
+  it('throws when vector lengths differ', () => {
+    expect(() => similarityMatrix([[1, 2], [1, 2, 3]])).toThrow(
+      'Vector dimensions must match',
+    );
+  });
+
+  it('throws when a vector is zero', () => {
+    expect(() => similarityMatrix([[1, 2], [0, 0]])).toThrow('zero-magnitude');
+  });
+});
+
+describe('normalizeSimilarity', () => {
+  it('maps -1, 0 and 1 to 0, 0.5 and 1', () => {
+    expect(normalizeSimilarity(-1)).toBe(0);
+    expect(normalizeSimilarity(0)).toBe(0.5);
+    expect(normalizeSimilarity(1)).toBe(1);
+  });
+
+  it('clamps out-of-range values and maps NaN to 0', () => {
+    expect(normalizeSimilarity(2)).toBe(1);
+    expect(normalizeSimilarity(-3)).toBe(0);
+    expect(normalizeSimilarity(Number.NaN)).toBe(0);
   });
 });
 

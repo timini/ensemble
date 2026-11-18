@@ -78,6 +78,7 @@ export const ModelSelectionList = React.forwardRef<HTMLDivElement, ModelSelectio
         xai: [],
         deepseek: [],
         perplexity: [],
+        'openai-compatible': [],
       };
 
       models.forEach((model) => {
@@ -135,7 +136,7 @@ export const ModelSelectionList = React.forwardRef<HTMLDivElement, ModelSelectio
                             onClick={() => onConfigureApiKey(provider)}
                             className="px-3 py-1 text-xs font-medium text-primary bg-primary/10 hover:bg-primary/20 rounded border border-primary/30 transition-colors"
                           >
-                            Configure
+                            {t('organisms.modelSelectionList.configure')}
                           </button>
                         )}
                       </>

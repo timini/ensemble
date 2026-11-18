@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
+import { Badge } from '../../atoms/Badge';
 import { Card, CardContent } from '../../atoms/Card';
 import { Heading } from '../../atoms/Heading';
 import { Text } from '../../atoms/Text';
@@ -23,7 +24,29 @@ export interface AgreementAnalysisProps {
   comparisonCount: number;
   /** Average confidence percentage (0-1) */
   averageConfidence: number;
+  /**
+   * Cut-offs for the high and medium labels on the 0-1 scale shown. Above
+   * `high` is high, from `medium` is medium. Defaults to the uncalibrated
+   * mapping (0.8 and 0.5).
+   */
+  levelThresholds?: AgreementLevelThresholds;
+  /** Whether the thresholds were fitted for this embedding model. Shown as a note when set. */
+  calibration?: AgreementCalibrationInfo;
 }
+
+export interface AgreementLevelThresholds {
+  high: number;
+  medium: number;
+}
+
+export interface AgreementCalibrationInfo {
+  calibrated: boolean;
+  /** Embedding model key the calibration was fitted for (`openai/text-embedding-3-small`). */
+  embeddingModel?: string;
+}
+
+/** The uncalibrated mapping: (cosine + 1) / 2 above 0.8 is high, from 0.5 medium. */
+export const DEFAULT_LEVEL_THRESHOLDS: AgreementLevelThresholds = { high: 0.8, medium: 0.5 };
 
 /**
  * AgreementAnalysis organism for displaying model agreement metrics.
@@ -46,27 +69,34 @@ export interface AgreementAnalysisProps {
  */
 export const AgreementAnalysis = React.forwardRef<HTMLDivElement, AgreementAnalysisProps>(
   (
-    { overallAgreement, pairwiseComparisons, responseCount, comparisonCount, averageConfidence },
+    {
+      overallAgreement,
+      pairwiseComparisons,
+      responseCount,
+      comparisonCount,
+      averageConfidence,
+      levelThresholds = DEFAULT_LEVEL_THRESHOLDS,
+      calibration,
+    },
     ref
   ) => {
     const { t } = useTranslation();
+    const { high, medium } = levelThresholds;
 
     // Determine agreement level and color
     const getAgreementLevel = (agreement: number) => {
-      if (agreement > 0.8) return { label: t('organisms.agreementAnalysis.highAgreement'), color: 'text-success', level: 'high' };
-      if (agreement >= 0.5) return { label: t('organisms.agreementAnalysis.mediumAgreement'), color: 'text-warning', level: 'medium' };
+      if (agreement > high) return { label: t('organisms.agreementAnalysis.highAgreement'), color: 'text-success', level: 'high' };
+      if (agreement >= medium) return { label: t('organisms.agreementAnalysis.mediumAgreement'), color: 'text-warning', level: 'medium' };
       return { label: t('organisms.agreementAnalysis.lowAgreement'), color: 'text-destructive', level: 'low' };
     };
 
     const agreementLevel = getAgreementLevel(overallAgreement);
 
-    // Format percentage
     const formatPercentage = (value: number) => Math.round(value * 100);
 
-    // Get color for progress bar
     const getProgressColor = (similarity: number) => {
-      if (similarity > 0.8) return 'bg-success';
-      if (similarity >= 0.5) return 'bg-warning';
+      if (similarity > high) return 'bg-success';
+      if (similarity >= medium) return 'bg-warning';
       return 'bg-destructive';
     };
 
@@ -77,20 +107,25 @@ export const AgreementAnalysis = React.forwardRef<HTMLDivElement, AgreementAnaly
           <div className="flex items-center justify-between mb-6">
             <Heading level={3} size="lg">{t('organisms.agreementAnalysis.title')}</Heading>
             <div className="text-right">
-              <div className={cn('text-2xl font-bold', agreementLevel.color)} data-agreement-level={agreementLevel.level}>
+              <div
+                className={cn('text-2xl font-bold', agreementLevel.color)}
+                data-agreement-level={agreementLevel.level}
+                data-testid="agreement-overall"
+              >
                 {formatPercentage(overallAgreement)}%
               </div>
               <Text variant="small" color="muted">{t('organisms.agreementAnalysis.overallAgreement')}</Text>
               <Text variant="small" className={agreementLevel.color}>{agreementLevel.label}</Text>
             </div>
           </div>
+          {calibration && <CalibrationNote {...calibration} />}
 
           {/* Pairwise Comparisons */}
           <div className="mb-6">
             <Heading level={4} size="lg" className="mb-4">{t('organisms.agreementAnalysis.pairwiseComparisons')}</Heading>
-            <div className="space-y-3">
+            <div className="space-y-3" data-testid="pairwise-comparisons">
               {pairwiseComparisons.map((comparison, index) => (
-                <div key={index} className="flex items-center justify-between">
+                <div key={index} className="flex items-center justify-between" data-testid="pairwise-comparison">
                   <div className="flex items-center space-x-3">
                     <Text as="span" variant="small">{comparison.model1}</Text>
                     <Text as="span" variant="small" className="text-muted-foreground">{t('organisms.agreementAnalysis.vs')}</Text>
@@ -103,7 +138,7 @@ export const AgreementAnalysis = React.forwardRef<HTMLDivElement, AgreementAnaly
                         style={{ width: `${formatPercentage(comparison.similarity)}%` }}
                       />
                     </div>
-                    <Text as="span" variant="small" className="font-medium">
+                    <Text as="span" variant="small" className="font-medium" data-testid="pairwise-similarity">
                       {formatPercentage(comparison.similarity)}%
                     </Text>
                     <Text as="span" variant="caption" color="muted">
@@ -118,11 +153,11 @@ export const AgreementAnalysis = React.forwardRef<HTMLDivElement, AgreementAnaly
           {/* Statistics Grid */}
           <div className="grid grid-cols-3 gap-8 text-center" data-testid="agreement-stats" role="group">
             <div>
-              <div className="text-2xl font-bold text-primary">{responseCount}</div>
+              <div className="text-2xl font-bold text-primary" data-testid="agreement-response-count">{responseCount}</div>
               <Text variant="small" color="muted">{t('organisms.agreementAnalysis.responsesAnalyzed')}</Text>
             </div>
             <div>
-              <div className="text-2xl font-bold text-primary">{comparisonCount}</div>
+              <div className="text-2xl font-bold text-primary" data-testid="agreement-comparison-count">{comparisonCount}</div>
               <Text variant="small" color="muted">{t('organisms.agreementAnalysis.comparisons')}</Text>
             </div>
             <div>
@@ -139,3 +174,26 @@ export const AgreementAnalysis = React.forwardRef<HTMLDivElement, AgreementAnaly
 );
 
 AgreementAnalysis.displayName = 'AgreementAnalysis';
+
+/** Says whether the labels are calibrated for the embedding model in use. */
+function CalibrationNote({ calibrated, embeddingModel }: AgreementCalibrationInfo) {
+  const { t } = useTranslation();
+  return (
+    <div
+      className="-mt-2 mb-6 flex flex-wrap items-center gap-2"
+      data-testid="agreement-calibration"
+      data-calibrated={calibrated ? 'true' : 'false'}
+    >
+      {calibrated ? (
+        <Text variant="caption" color="muted">
+          {t('organisms.agreementAnalysis.calibrated', { model: embeddingModel ?? '' })}
+        </Text>
+      ) : (
+        <>
+          <Badge variant="outline">{t('organisms.agreementAnalysis.uncalibrated')}</Badge>
+          <Text variant="caption" color="muted">{t('organisms.agreementAnalysis.uncalibratedHint')}</Text>
+        </>
+      )}
+    </div>
+  );
+}

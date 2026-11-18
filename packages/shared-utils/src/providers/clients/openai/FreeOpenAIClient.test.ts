@@ -37,6 +37,9 @@ describe('FreeOpenAIClient model filtering', () => {
         { id: 'o1-preview' },
         { id: 'o1-mini' },
         { id: 'o3-mini' },
+        { id: 'gpt-6-astra' },
+        { id: 'gpt-6-luna' },
+        { id: 'gpt-6.1-sol' },
       ],
     });
 
@@ -47,7 +50,27 @@ describe('FreeOpenAIClient model filtering', () => {
       'gpt-4o', 'gpt-4o-mini', 'gpt-4-turbo', 'gpt-4.1', 'gpt-4.1-mini',
       'gpt-4.1-nano', 'gpt-3.5-turbo', 'gpt-5', 'gpt-5-mini', 'gpt-5.2',
       'o1-preview', 'o1-mini', 'o3-mini',
+      'gpt-6-astra', 'gpt-6-luna', 'gpt-6.1-sol',
     ]);
+  });
+
+  it('includes o-series reasoning models without a hyphenated suffix', async () => {
+    mocks.openAiList.mockResolvedValueOnce({
+      data: [
+        { id: 'o1' },
+        { id: 'o3' },
+        { id: 'o4-mini' },
+        { id: 'omni-moderation-latest' },
+        { id: 'text-embedding-3-small' },
+        { id: 'dall-e-3' },
+        { id: 'whisper-1' },
+      ],
+    });
+
+    const client = new FreeOpenAIClient('openai', () => 'sk-test');
+    const models = await client.listAvailableTextModels();
+
+    expect(models).toEqual(['o1', 'o3', 'o4-mini']);
   });
 
   it('excludes Responses API models (codex)', async () => {
@@ -168,5 +191,113 @@ describe('FreeOpenAIClient model filtering', () => {
     const client = new FreeOpenAIClient('openai', () => 'sk-test');
     const models = await client.listAvailableTextModels();
     expect(models).toEqual(['gpt-4o']);
+  });
+});
+
+describe('FreeOpenAIClient sampling parameters', () => {
+  const schema = {
+    name: 'answer',
+    schema: {
+      type: 'object',
+      properties: { answer: { type: 'string' } },
+      required: ['answer'],
+      additionalProperties: false,
+    },
+  };
+
+  const emptyStream = () => ({
+    async *[Symbol.asyncIterator]() {
+      yield { choices: [{ delta: {}, finish_reason: 'stop' }], usage: { total_tokens: 1 } };
+    },
+  });
+
+  beforeEach(() => {
+    mocks.openAiChatCreate.mockReset();
+  });
+
+  it('reports input and output tokens from the final stream chunk', async () => {
+    mocks.openAiChatCreate.mockResolvedValueOnce({
+      async *[Symbol.asyncIterator]() {
+        yield { choices: [{ delta: { content: 'Hi' } }] };
+        yield {
+          choices: [],
+          usage: { prompt_tokens: 12, completion_tokens: 30, total_tokens: 42 },
+        };
+      },
+    });
+    const client = new FreeOpenAIClient('openai', () => 'sk-test');
+    const onComplete = vi.fn();
+    await client.streamResponse('hi', 'gpt-6-astra', vi.fn(), onComplete, vi.fn());
+    expect(onComplete).toHaveBeenCalledWith('Hi', expect.any(Number), 42, {
+      inputTokens: 12,
+      outputTokens: 30,
+    });
+  });
+
+  it.each(['gpt-6-astra', 'gpt-6-luna', 'gpt-5.6-terra', 'gpt-5', 'o3-mini', 'o4-mini'])(
+    'omits temperature for reasoning model %s when streaming',
+    async (model) => {
+      mocks.openAiChatCreate.mockResolvedValueOnce(emptyStream());
+      const client = new FreeOpenAIClient('openai', () => 'sk-test');
+      await client.streamResponse('hi', model, vi.fn(), vi.fn(), vi.fn(), {
+        temperature: 0.7,
+        seed: 1,
+      });
+      const request = mocks.openAiChatCreate.mock.calls[0][0];
+      expect(request).not.toHaveProperty('temperature');
+      expect(request).toMatchObject({ model, seed: 1 });
+    },
+  );
+
+  it.each(['gpt-5.1', 'gpt-5.1-2025-11-13', 'gpt-5.2', 'gpt-5.2-2025-12-11'])(
+    'keeps temperature for %s, which defaults to reasoning effort none',
+    async (model) => {
+      mocks.openAiChatCreate.mockResolvedValueOnce(emptyStream());
+      const client = new FreeOpenAIClient('openai', () => 'sk-test');
+      await client.streamResponse('hi', model, vi.fn(), vi.fn(), vi.fn(), { temperature: 0 });
+      const request = mocks.openAiChatCreate.mock.calls[0][0];
+      expect(request).toMatchObject({ model, temperature: 0 });
+      expect(request).not.toHaveProperty('reasoning_effort');
+    },
+  );
+
+  it.each(['gpt-5.1-codex', 'gpt-5.2-pro', 'gpt-5.5'])(
+    'omits temperature for %s, which defaults to a reasoning effort above none',
+    async (model) => {
+      mocks.openAiChatCreate.mockResolvedValueOnce(emptyStream());
+      const client = new FreeOpenAIClient('openai', () => 'sk-test');
+      await client.streamResponse('hi', model, vi.fn(), vi.fn(), vi.fn(), { temperature: 0 });
+      expect(mocks.openAiChatCreate.mock.calls[0][0]).not.toHaveProperty('temperature');
+    },
+  );
+
+  it('keeps temperature for non-reasoning models', async () => {
+    mocks.openAiChatCreate.mockResolvedValueOnce(emptyStream());
+    const client = new FreeOpenAIClient('openai', () => 'sk-test');
+    await client.streamResponse('hi', 'gpt-4.1', vi.fn(), vi.fn(), vi.fn(), { temperature: 0.7 });
+    expect(mocks.openAiChatCreate.mock.calls[0][0]).toMatchObject({ temperature: 0.7 });
+  });
+
+  it('omits temperature for reasoning models in structured output', async () => {
+    mocks.openAiChatCreate.mockResolvedValueOnce({
+      choices: [{ message: { content: '{"answer":"4"}' } }],
+      usage: { total_tokens: 5 },
+    });
+    const client = new FreeOpenAIClient('openai', () => 'sk-test');
+    await client.generateStructured('2+2?', 'gpt-6-luna', schema, { temperature: 0 });
+    const request = mocks.openAiChatCreate.mock.calls[0][0];
+    expect(request).not.toHaveProperty('temperature');
+    expect(request).not.toHaveProperty('max_tokens');
+  });
+
+  it('reports input and output tokens of a structured call', async () => {
+    mocks.openAiChatCreate.mockResolvedValueOnce({
+      choices: [{ message: { content: '{"answer":"4"}' } }],
+      usage: { prompt_tokens: 20, completion_tokens: 6, total_tokens: 26 },
+    });
+    const client = new FreeOpenAIClient('openai', () => 'sk-test');
+    const result = await client.generateStructured('2+2?', 'gpt-4.1', schema);
+    expect(result.usage).toEqual({ inputTokens: 20, outputTokens: 6 });
+    expect(result.tokenCount).toBe(26);
   });
 });

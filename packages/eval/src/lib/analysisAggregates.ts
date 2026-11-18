@@ -1,4 +1,4 @@
-import type { PromptRunResult, StrategyName } from '../types.js';
+import type { EvaluationResult, PromptRunResult, StrategyName } from '../types.js';
 import {
   collectModelResults,
   evaluateConsensusAnswer,
@@ -8,11 +8,15 @@ import {
 export interface AccuracyCounter {
   correct: number;
   total: number;
+  errors: number;
+  timeouts: number;
 }
 
 export interface CostCounter {
   tokens: number;
   costUsd: number;
+  /** Calls with no price, which costUsd leaves out. */
+  unpriced: number;
 }
 
 export interface AgreementCounter {
@@ -43,11 +47,13 @@ export interface AnalysisAggregates {
 function incrementAccuracy(
   map: Map<string, AccuracyCounter>,
   key: string,
-  isCorrect: boolean,
+  result: Pick<EvaluationResult, 'correct' | 'failure'>,
 ): void {
-  const row = map.get(key) ?? { correct: 0, total: 0 };
+  const row = map.get(key) ?? { correct: 0, total: 0, errors: 0, timeouts: 0 };
   row.total += 1;
-  row.correct += isCorrect ? 1 : 0;
+  row.correct += result.correct ? 1 : 0;
+  if (result.failure === 'error') row.errors += 1;
+  if (result.failure === 'timeout') row.timeouts += 1;
   map.set(key, row);
 }
 
@@ -56,10 +62,12 @@ function incrementCost(
   key: string,
   tokens: number,
   costUsd: number,
+  unpriced: number,
 ): void {
-  const row = map.get(key) ?? { tokens: 0, costUsd: 0 };
+  const row = map.get(key) ?? { tokens: 0, costUsd: 0, unpriced: 0 };
   row.tokens += tokens;
   row.costUsd += costUsd;
+  row.unpriced += unpriced;
   map.set(key, row);
 }
 
@@ -111,7 +119,7 @@ export function collectAnalysisAggregates(runs: PromptRunResult[]): AnalysisAggr
     const groundTruth = run.evaluation?.groundTruth ?? run.groundTruth ?? '';
     const modelResults = collectModelResults(run);
     for (const [model, result] of Object.entries(modelResults)) {
-      incrementAccuracy(modelCounts, model, result.correct);
+      incrementAccuracy(modelCounts, model, result);
     }
 
     for (const response of run.responses) {
@@ -123,6 +131,7 @@ export function collectAnalysisAggregates(runs: PromptRunResult[]): AnalysisAggr
         `${response.provider}:${response.model}`,
         response.tokenCount ?? 0,
         response.estimatedCostUsd ?? 0,
+        response.estimatedCostUsd === undefined ? 1 : 0,
       );
     }
 
@@ -137,9 +146,25 @@ export function collectAnalysisAggregates(runs: PromptRunResult[]): AnalysisAggr
       );
       strategyResults[strategy] = { predicted: answer, correct: evaluated?.correct ?? null };
       if (evaluated) {
-        incrementAccuracy(strategyCounts, strategy, evaluated.correct);
+        incrementAccuracy(strategyCounts, strategy, evaluated);
       }
-      incrementCost(strategyCosts, strategy, runCost.tokens, runCost.costUsd);
+    }
+    // Strategies scored with no output (failed or not run) still count as wrong.
+    for (const [strategy, result] of Object.entries(run.consensusEvaluation?.results ?? {})) {
+      if (!result || strategy in run.consensus) continue;
+      strategyResults[strategy] = { predicted: '', correct: result.correct };
+      incrementAccuracy(strategyCounts, strategy, result);
+    }
+    // A strategy costs the ensemble's answers plus its own consensus calls.
+    for (const strategy of Object.keys(strategyResults)) {
+      const metrics = run.consensusMetrics?.[strategy as StrategyName];
+      incrementCost(
+        strategyCosts,
+        strategy,
+        runCost.tokens + (metrics?.tokenCount ?? 0),
+        runCost.costUsd + (metrics?.costUsd ?? 0),
+        runCost.unpriced + (metrics && metrics.costUsd === undefined ? 1 : 0),
+      );
     }
 
     updateAgreementBin(run, groundTruth, modelResults, agreementBins);

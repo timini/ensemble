@@ -1,107 +1,224 @@
 /**
  * Response Slice
  *
- * Manages AI responses and streaming state
- * NOT persisted (transient data)
+ * Manages AI responses and streaming state.
+ *
+ * This slice is persisted to localStorage with the rest of the store (see
+ * src/store/index.ts), so the last run survives a reload or a later visit to
+ * /review. Submitting a new prompt calls startRun, which clears the old
+ * answers, embeddings, agreement and consensus and records the run's
+ * prompt. When the store loads, markInterruptedStreams turns any answer that
+ * was still streaming into an `interrupted` error, since a fresh page has no
+ * live streams.
  */
 
-import type { StateCreator } from 'zustand';
-import type { ProviderType } from './ensembleSlice';
+import type { StateCreator } from "zustand";
+import type { TokenUsage } from "@ensemble-ai/shared-utils/providers";
+import type { CallUsage } from "@ensemble-ai/shared-utils/pricing";
+import { agreementFromEmbeddings } from "./agreementState";
+import type { MajorityVoteRecord } from "~/lib/majorityVote";
+import type {
+  ConsensusMethod,
+  ModelSelection,
+  ProviderType,
+} from "./ensembleSlice";
+import type { ResponseErrorDetails } from "./responseErrorState";
+import type {
+  AgreementStats,
+  ManualResponse,
+  ModelResponse,
+} from "./responseTypes";
 
-export interface ModelResponse {
-  modelId: string;
-  provider: ProviderType;
-  model: string;
-  response: string;
-  isStreaming: boolean;
-  isComplete: boolean;
-  responseTime: number | null;
-  tokenCount: number | null;
-  error: string | null;
-}
-
-export interface ManualResponse {
-  id: string;
-  label: string;
-  response: string;
-}
-
-export interface AgreementStats {
-  mean: number;
-  median: number;
-  min: number;
-  max: number;
-  stddev: number;
-}
+export type {
+  AgreementStats,
+  ManualResponse,
+  ModelResponse,
+} from "./responseTypes";
 
 export interface ResponseSlice {
+  /** Prompt draft on /prompt, saved as the user types. */
   prompt: string | null;
+  /**
+   * Prompt the current run was submitted with, or null. Kept apart from the
+   * draft so editing the next prompt never relabels the last run's answers.
+   */
+  runPrompt: string | null;
+  /**
+   * Models the current run was started with, so editing the ensemble for
+   * the next question never changes the run on screen (retries, consensus
+   * and cost keep using these). Empty when there is no run.
+   */
+  runModels: ModelSelection[];
+  /**
+   * When the current run was started (ms since the epoch), or null when
+   * there is no run or it was stored before this field existed.
+   */
+  runStartedAt: number | null;
   responses: ModelResponse[];
   manualResponses: ManualResponse[];
   embeddings: Array<{ modelId: string; embedding: number[] }>;
+  /** Provider that produced `embeddings`, or null when unknown. */
+  embeddingsSource: string | null;
   similarityMatrix: number[][] | null;
   agreementStats: AgreementStats | null;
   metaAnalysis: string | null;
+  /** Token usage of each consensus call in the current run. */
+  consensusUsage: CallUsage[];
+  /** Vote breakdown of the last majority consensus, or null. */
+  majorityVote: MajorityVoteRecord | null;
+  /**
+   * Set while a run reopened from history is on screen. That run is read
+   * only: no embeddings, consensus or retries are requested for it, and it
+   * shows the method and summarizer it was run with. Null for a live run.
+   */
+  historyView: HistoryView | null;
 
   setPrompt: (prompt: string) => void;
-  startStreaming: (modelId: string, provider: ProviderType, model: string) => void;
+  /**
+   * Starts a new run: clears the previous results and records its prompt,
+   * models and start time.
+   */
+  startRun: (prompt: string, models?: ModelSelection[]) => void;
+  startStreaming: (
+    modelId: string,
+    provider: ProviderType,
+    model: string,
+  ) => void;
   appendStreamChunk: (modelId: string, chunk: string) => void;
-  completeResponse: (modelId: string, responseTime: number, tokenCount?: number) => void;
-  setError: (modelId: string, error: string) => void;
+  completeResponse: (
+    modelId: string,
+    responseTime: number,
+    tokenCount?: number,
+    usage?: TokenUsage,
+  ) => void;
+  setError: (
+    modelId: string,
+    error: string,
+    details?: ResponseErrorDetails,
+  ) => void;
   addManualResponse: (label: string, response: string) => void;
   removeManualResponse: (id: string) => void;
+  /**
+   * Drops every manual answer. Manual answers belong to one prompt, so a
+   * new comparison must not carry them over to the next run.
+   */
+  clearManualResponses: () => void;
   setEmbeddings: (
     embeddings: Array<{ modelId: string; embedding: number[] }>,
+    source?: string | null,
   ) => void;
   calculateAgreement: () => void;
   setMetaAnalysis: (analysis: string) => void;
+  addConsensusUsage: (call: CallUsage) => void;
+  setMajorityVote: (vote: MajorityVoteRecord | null) => void;
+  /**
+   * Drops the consensus text and majority vote so consensus runs again (for
+   * example after a failed model is retried). Billed usage is kept.
+   */
+  clearConsensus: () => void;
   clearResponses: () => void;
   resetStreamingState: () => void;
 }
 
+/**
+ * Prompt of the run on /review, or null when there is no submitted run.
+ * Runs stored before runPrompt existed have answers but no runPrompt; only
+ * those fall back to the draft. An unsubmitted draft never counts as a run,
+ * so /review does not start streams for it.
+ */
+export function selectRunPrompt(state: {
+  runPrompt?: string | null;
+  prompt: string | null;
+  responses: unknown[];
+}): string | null {
+  if (state.runPrompt) return state.runPrompt;
+  return state.responses.length > 0 ? state.prompt : null;
+}
+
+/**
+ * Models of the run on screen. Runs stored before runModels existed have
+ * model answers but no models recorded, and use the current selection, as
+ * they always did. A run of manual answers alone has no models.
+ */
+export function selectRunModels(state: {
+  runModels?: ModelSelection[];
+  selectedModels: ModelSelection[];
+  responses: unknown[];
+}): ModelSelection[] {
+  if (state.runModels && state.runModels.length > 0) return state.runModels;
+  return state.responses.length > 0 ? state.selectedModels : NO_MODELS;
+}
+
+const NO_MODELS: ModelSelection[] = [];
+
+/** The reopened run's id and the settings it was run with. */
+export interface HistoryView {
+  id: string;
+  consensusMethod: ConsensusMethod;
+  summarizerModel: string | null;
+}
+
+/** Fields of an answer when its stream starts or restarts. */
+const STREAM_START = {
+  response: "",
+  isStreaming: true,
+  isComplete: false,
+  responseTime: null,
+  tokenCount: null,
+  usage: null,
+  error: null,
+  errorKind: null,
+  retryAfterSeconds: null,
+} as const;
+
 export const createResponseSlice: StateCreator<ResponseSlice> = (set, get) => ({
   prompt: null,
+  runPrompt: null,
+  runModels: [],
+  runStartedAt: null,
   responses: [],
   manualResponses: [],
   embeddings: [],
+  embeddingsSource: null,
   similarityMatrix: null,
   agreementStats: null,
   metaAnalysis: null,
+  consensusUsage: [],
+  majorityVote: null,
+  historyView: null,
 
   setPrompt: (prompt) => {
     set({ prompt });
   },
 
+  // The draft takes the submitted (trimmed) text too, so the two never
+  // differ by whitespace alone.
+  startRun: (prompt, models = []) => {
+    get().resetStreamingState();
+    set({
+      runPrompt: prompt,
+      prompt,
+      runModels: models,
+      runStartedAt: Date.now(),
+    });
+  },
+
+  // A new answer, and a restart (retry), start from an empty answer.
   startStreaming: (modelId, provider, model) => {
     set((state) => {
-      const existingIndex = state.responses.findIndex(
-        (r) => r.modelId === modelId,
-      );
-
-      if (existingIndex >= 0) {
-        const updated = [...state.responses];
-        updated[existingIndex] = {
-          ...updated[existingIndex]!,
-          isStreaming: true,
-          isComplete: false,
-          error: null,
+      if (state.responses.some((r) => r.modelId === modelId)) {
+        return {
+          responses: state.responses.map((r) =>
+            r.modelId === modelId ? { ...r, ...STREAM_START } : r,
+          ),
         };
-        return { responses: updated };
       }
-
-      const newResponse: ModelResponse = {
-        modelId,
-        provider,
-        model,
-        response: '',
-        isStreaming: true,
-        isComplete: false,
-        responseTime: null,
-        tokenCount: null,
-        error: null,
+      return {
+        responses: [
+          ...state.responses,
+          { modelId, provider, model, ...STREAM_START },
+        ],
       };
-
-      return { responses: [...state.responses, newResponse] };
     });
   },
 
@@ -114,7 +231,7 @@ export const createResponseSlice: StateCreator<ResponseSlice> = (set, get) => ({
     });
   },
 
-  completeResponse: (modelId, responseTime, tokenCount) => {
+  completeResponse: (modelId, responseTime, tokenCount, usage) => {
     set((state) => {
       const responses = state.responses.map((r) =>
         r.modelId === modelId
@@ -124,6 +241,7 @@ export const createResponseSlice: StateCreator<ResponseSlice> = (set, get) => ({
               isComplete: true,
               responseTime,
               tokenCount: tokenCount ?? null,
+              usage: usage ?? null,
             }
           : r,
       );
@@ -131,11 +249,18 @@ export const createResponseSlice: StateCreator<ResponseSlice> = (set, get) => ({
     });
   },
 
-  setError: (modelId, error) => {
+  setError: (modelId, error, details) => {
     set((state) => {
       const responses = state.responses.map((r) =>
         r.modelId === modelId
-          ? { ...r, isStreaming: false, isComplete: true, error }
+          ? {
+              ...r,
+              isStreaming: false,
+              isComplete: true,
+              error,
+              errorKind: details?.kind ?? "other",
+              retryAfterSeconds: details?.retryAfterSeconds ?? null,
+            }
           : r,
       );
       return { responses };
@@ -158,77 +283,45 @@ export const createResponseSlice: StateCreator<ResponseSlice> = (set, get) => ({
     }));
   },
 
-  setEmbeddings: (embeddings) => {
-    set({ embeddings });
+  clearManualResponses: () => {
+    set({ manualResponses: [] });
+  },
+
+  setEmbeddings: (embeddings, source = null) => {
+    set({ embeddings, embeddingsSource: source });
   },
 
   calculateAgreement: () => {
-    const state = get();
-    const { embeddings } = state;
-
-    if (embeddings.length < 2) {
-      set({ similarityMatrix: null, agreementStats: null });
-      return;
-    }
-
-    // Calculate cosine similarity matrix
-    const n = embeddings.length;
-    const matrix: number[][] = Array.from({ length: n }, () =>
-      Array.from({ length: n }, () => 0),
-    );
-
-    for (let i = 0; i < n; i++) {
-      for (let j = 0; j < n; j++) {
-        if (i === j) {
-          matrix[i]![j] = 1.0;
-        } else {
-          const similarity = cosineSimilarity(
-            embeddings[i]!.embedding,
-            embeddings[j]!.embedding,
-          );
-          matrix[i]![j] = similarity;
-        }
-      }
-    }
-
-    // Calculate statistics (upper triangle only, excluding diagonal)
-    const similarities: number[] = [];
-    for (let i = 0; i < n; i++) {
-      for (let j = i + 1; j < n; j++) {
-        similarities.push(matrix[i]![j]!);
-      }
-    }
-
-    const mean =
-      similarities.reduce((sum, val) => sum + val, 0) / similarities.length;
-    const sortedSims = [...similarities].sort((a, b) => a - b);
-    const median =
-      sortedSims.length % 2 === 0
-        ? (sortedSims[sortedSims.length / 2 - 1]! +
-            sortedSims[sortedSims.length / 2]!) /
-          2
-        : sortedSims[Math.floor(sortedSims.length / 2)]!;
-    const min = Math.min(...similarities);
-    const max = Math.max(...similarities);
-    const variance =
-      similarities.reduce((sum, val) => sum + (val - mean) ** 2, 0) /
-      similarities.length;
-    const stddev = Math.sqrt(variance);
-
-    set({
-      similarityMatrix: matrix,
-      agreementStats: { mean, median, min, max, stddev },
-    });
+    set(agreementFromEmbeddings(get().embeddings));
   },
 
   setMetaAnalysis: (analysis) => {
     set({ metaAnalysis: analysis });
   },
 
+  addConsensusUsage: (call) => {
+    set((state) => ({ consensusUsage: [...state.consensusUsage, call] }));
+  },
+
+  setMajorityVote: (vote) => {
+    set({ majorityVote: vote });
+  },
+
+  clearConsensus: () => {
+    set({ metaAnalysis: null, majorityVote: null });
+  },
+
   resetStreamingState: () => {
     set({
+      runPrompt: null,
+      runModels: [],
+      runStartedAt: null,
+      historyView: null,
+      consensusUsage: [],
+      majorityVote: null,
       responses: [],
       embeddings: [],
+      embeddingsSource: null,
       similarityMatrix: null,
       agreementStats: null,
       metaAnalysis: null,
@@ -236,24 +329,7 @@ export const createResponseSlice: StateCreator<ResponseSlice> = (set, get) => ({
   },
 
   clearResponses: () => {
-    set({ prompt: null, manualResponses: [] });
+    set({ prompt: null, runPrompt: null, manualResponses: [] });
     get().resetStreamingState();
   },
 });
-
-/**
- * Calculate cosine similarity between two vectors
- */
-function cosineSimilarity(a: number[], b: number[]): number {
-  let dotProduct = 0;
-  let normA = 0;
-  let normB = 0;
-
-  for (let i = 0; i < a.length; i++) {
-    dotProduct += a[i]! * b[i]!;
-    normA += a[i]! * a[i]!;
-    normB += b[i]! * b[i]!;
-  }
-
-  return dotProduct / (Math.sqrt(normA) * Math.sqrt(normB));
-}

@@ -1,25 +1,56 @@
 import type { AIProvider, ProviderMode, ProviderName } from '../types';
-import { MockProviderClient } from '../clients/mock/MockProviderClient';
+import { MockProviderClient, type MockClientConfig } from '../clients/mock/MockProviderClient';
 import { FreeOpenAIClient } from '../clients/openai/FreeOpenAIClient';
 import { FreeAnthropicClient } from '../clients/anthropic/FreeAnthropicClient';
 import { FreeGoogleClient } from '../clients/google/FreeGoogleClient';
 import { FreeXAIClient } from '../clients/xai/FreeXAIClient';
 import { FreeDeepSeekClient } from '../clients/deepseek/FreeDeepSeekClient';
 import { FreePerplexityClient } from '../clients/perplexity/FreePerplexityClient';
+import {
+  OpenAICompatibleEndpointsClient,
+  type OpenAICompatibleEndpointConfig,
+} from '../clients/openaiCompatible/OpenAICompatibleEndpointsClient';
+import { ProAPIClient, type ProTransport } from '../clients/pro/ProAPIClient';
 
 interface CreateProviderClientOptions {
   provider: ProviderName;
   mode: ProviderMode;
   getApiKey?: () => string | null;
+  /**
+   * Configured OpenAI-compatible endpoints, read at call time. Required for
+   * the `openai-compatible` provider in Free mode, which ignores getApiKey.
+   */
+  getEndpoints?: () => OpenAICompatibleEndpointConfig[];
+  /** How Pro clients reach the server. Required in Pro mode. */
+  proTransport?: ProTransport;
+  /** Simulated failures for mock clients (ignored in other modes). */
+  mockErrorScenarios?: MockClientConfig['errorScenarios'];
 }
 
 export function createProviderClient({
   provider,
   mode,
   getApiKey,
+  getEndpoints,
+  proTransport,
+  mockErrorScenarios,
 }: CreateProviderClientOptions): AIProvider {
   if (mode === 'mock') {
-    return new MockProviderClient({ providerFilter: provider });
+    return new MockProviderClient({ providerFilter: provider, errorScenarios: mockErrorScenarios });
+  }
+
+  if (mode === 'pro') {
+    if (!proTransport) {
+      throw new Error('Pro mode clients require a proTransport.');
+    }
+    return new ProAPIClient(provider, proTransport);
+  }
+
+  if (mode === 'free' && provider === 'openai-compatible') {
+    if (!getEndpoints) {
+      throw new Error('The openai-compatible provider requires a getEndpoints callback.');
+    }
+    return new OpenAICompatibleEndpointsClient(getEndpoints);
   }
 
   if (mode === 'free') {
@@ -45,5 +76,5 @@ export function createProviderClient({
     }
   }
 
-  throw new Error(`Provider mode '${mode}' not yet implemented.`);
+  throw new Error(`Unknown provider mode '${mode}'.`);
 }

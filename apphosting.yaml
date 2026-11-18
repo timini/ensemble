@@ -7,9 +7,9 @@
 
 runConfig:
   cpu: 1
-  memoryMiB: 2048
-  minInstances: 1
-  maxInstances: 10
+  memoryMiB: 1024
+  minInstances: 0
+  maxInstances: 3
   concurrency: 80
 
 env:
@@ -32,6 +32,149 @@ env:
   # Secret names are resolved in Google Secret Manager.
   - variable: NEXT_PUBLIC_SENTRY_DSN
     secret: NEXT_PUBLIC_SENTRY_DSN
+    availability:
+      - BUILD
+      - RUNTIME
+
+  # Firebase Auth web config (public values, inlined into the client
+  # bundle at build time). Stored as secrets only so the values live in
+  # one place; create them with `firebase apphosting:secrets:set`.
+  - variable: NEXT_PUBLIC_FIREBASE_API_KEY
+    secret: NEXT_PUBLIC_FIREBASE_API_KEY
+    availability:
+      - BUILD
+      - RUNTIME
+
+  - variable: NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN
+    secret: NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN
+    availability:
+      - BUILD
+      - RUNTIME
+
+  - variable: NEXT_PUBLIC_FIREBASE_PROJECT_ID
+    secret: NEXT_PUBLIC_FIREBASE_PROJECT_ID
+    availability:
+      - BUILD
+      - RUNTIME
+
+  - variable: NEXT_PUBLIC_FIREBASE_APP_ID
+    secret: NEXT_PUBLIC_FIREBASE_APP_ID
+    availability:
+      - BUILD
+      - RUNTIME
+
+  # Pro mode is off until the Stripe and OpenRouter secrets exist. To turn
+  # it on: create STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET and
+  # OPENROUTER_API_KEY (docs/DEPLOYMENT.md), uncomment the three secret
+  # entries below and set NEXT_PUBLIC_PRO_ENABLED to "true".
+  - variable: NEXT_PUBLIC_PRO_ENABLED
+    value: "false"
+    availability:
+      - BUILD
+      - RUNTIME
+
+  # Stripe keys, server only. Test-mode keys until launch.
+  # - variable: STRIPE_SECRET_KEY
+  #   secret: STRIPE_SECRET_KEY
+  #   availability:
+  #     - RUNTIME
+
+  # - variable: STRIPE_WEBHOOK_SECRET
+  #   secret: STRIPE_WEBHOOK_SECRET
+  #   availability:
+  #     - RUNTIME
+
+  # Credit pricing (not secret). See docs/DEPLOYMENT.md.
+  - variable: CREDIT_MARGIN_PERCENT
+    value: "30"
+    availability:
+      - RUNTIME
+
+  - variable: CREDIT_LOW_BALANCE_USD
+    value: "1"
+    availability:
+      - RUNTIME
+
+  - variable: CREDIT_PACKS_USD
+    value: "5,20,50"
+    availability:
+      - RUNTIME
+
+  # Pro mode: model calls go to OpenRouter with this server key
+  # (roadmap Decision 6). Set a monthly spend limit on the key in the
+  # OpenRouter dashboard; see docs/DEPLOYMENT.md.
+  # - variable: OPENROUTER_API_KEY
+  #   secret: OPENROUTER_API_KEY
+  #   availability:
+  #     - RUNTIME
+
+  # Pro abuse limits (not secret). See docs/DEPLOYMENT.md.
+  - variable: PRO_MAX_RUN_TOKENS
+    value: "200000"
+    availability:
+      - RUNTIME
+
+  - variable: PRO_MAX_CALL_OUTPUT_TOKENS
+    value: "8192"
+    availability:
+      - RUNTIME
+
+  - variable: PRO_MAX_CALLS_PER_RUN
+    value: "150"
+    availability:
+      - RUNTIME
+
+  - variable: PRO_RATE_LIMIT_RUNS
+    value: "10"
+    availability:
+      - RUNTIME
+
+  - variable: PRO_RATE_LIMIT_WINDOW_SECONDS
+    value: "60"
+    availability:
+      - RUNTIME
+
+  # Firebase App Check. Off until the reCAPTCHA Enterprise key exists and
+  # tokens have been seen in the console's metrics; then add the site key
+  # below and set APP_CHECK_ENFORCE to "true".
+  - variable: APP_CHECK_ENFORCE
+    value: "false"
+    availability:
+      - RUNTIME
+
+  # - variable: NEXT_PUBLIC_FIREBASE_APP_CHECK_SITE_KEY
+  #   secret: NEXT_PUBLIC_FIREBASE_APP_CHECK_SITE_KEY
+  #   availability:
+  #     - BUILD
+  #     - RUNTIME
+
+  # Public origin of the site: canonical URLs, the sitemap, Open Graph
+  # images and Stripe return links. Required in production: checkout
+  # answers 503 without it. Needed at BUILD too, because static pages
+  # (the landing page, robots.txt, sitemap.xml) are rendered at build time.
+  # Set it to the App Hosting URL now and to the custom domain once it is
+  # live. See docs/DEPLOYMENT.md.
+  - variable: APP_URL
+    value: "https://ensemble-app--ensemble-ai-prod.us-central1.hosted.app"
+    availability:
+      - BUILD
+      - RUNTIME
+
+  # Share links one user may create per hour. See docs/DEPLOYMENT.md.
+  - variable: SHARE_RATE_LIMIT_PER_HOUR
+    value: "20"
+    availability:
+      - RUNTIME
+
+  # Sentry environment tag and trace sampling (0 to 1).
+  - variable: NEXT_PUBLIC_SENTRY_ENVIRONMENT
+    value: production
+    availability:
+      - BUILD
+      - RUNTIME
+
+  - variable: NEXT_PUBLIC_SENTRY_TRACES_SAMPLE_RATE
+    value: "0.1"
     availability:
       - BUILD
       - RUNTIME

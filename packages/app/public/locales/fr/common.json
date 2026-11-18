@@ -20,6 +20,12 @@
       "title": "Une erreur est survenue",
       "description": "Une erreur inattendue s'est produite. Veuillez réessayer.",
       "tryAgain": "Réessayer"
+    },
+    "consensus": {
+      "noSummarizer": "Aucun modèle de synthèse n'est sélectionné.",
+      "noResponses": "Il n'y a aucune réponse à synthétiser.",
+      "failed": "Le consensus n'a pas pu être généré.",
+      "stopped": "Le consensus a été arrêté."
     }
   },
   "common": {
@@ -116,6 +122,14 @@
       "addManualResponse": "Ajouter une réponse manuelle",
       "manualResponsesNote": "Ajoutez des réponses de référence ou des benchmarks à comparer aux réponses des modèles.",
       "continueToPrompt": "Continuer vers l'Invite"
+    },
+    "apiKeyConfiguration": {
+      "heading": "Configurer les clés API",
+      "apiKeyInfoBold": "Configurez une clé API pour continuer.",
+      "apiKeyInfoNormal": "Vos clés sont stockées localement et ne sont jamais envoyées à nos serveurs.",
+      "apiKeysConfigured": "{{count}} clé API configurée.",
+      "apiKeysConfigured_other": "{{count}} clés API configurées.",
+      "configureMoreOrContinue": "Configurez-en plus ou continuez à sélectionner des modèles."
     }
   },
   "pages": {
@@ -169,27 +183,40 @@
       "exploreFeatures": "Explorer les fonctionnalités"
     },
     "about": {
-      "title": "À propos d'Ensemble AI",
-      "description": "La science derrière de meilleures décisions avec les ensembles d'IA",
-      "whatIsEnsemble": {
-        "heading": "Qu'est-ce qu'Ensemble AI ?",
-        "body": "Ensemble AI vous permet d'interroger simultanément plusieurs grands modèles de langage et de comparer leurs réponses côte à côte. Au lieu de vous fier à la perspective d'un seul modèle, vous obtenez des points de vue diversifiés d'OpenAI, Anthropic, Google, xAI, DeepSeek et Perplexity, puis les synthétisez en une réponse consensuelle."
+      "eyebrow": "À propos",
+      "title": "Pourquoi Ensemble existe",
+      "lead": "Ceux qui comptent sur l’IA pour des réponses importantes vérifient déjà : ils collent la même question dans plusieurs assistants et cherchent laquelle croire. Ensemble le fait en une étape et mesure ce qui compte, l’accord entre les modèles.",
+      "problem": {
+        "heading": "Un modèle seul ne prévient pas",
+        "body": "Il paraît aussi sûr de lui quand il a raison que quand il devine. Quand des modèles de fournisseurs différents donnent la même réponse, c’est un signal utile. Quand ils divergent, aucune réponse seule ne mérite confiance sur cette question."
       },
-      "whyEnsemble": {
-        "heading": "Pourquoi un ensemble ?",
-        "body": "Chaque modèle d'IA a ses angles morts. Une question qui déroute un modèle peut être triviale pour un autre. C'est le paradoxe de la sélection de modèle : vous ne pouvez pas savoir quel modèle sera le plus performant sur votre question spécifique avant de l'avoir posée. L'approche d'ensemble élimine cette incertitude en exploitant les forces complémentaires de plusieurs modèles, produisant des réponses plus fiables et équilibrées.",
-        "statEnsembleVsSingle": "Ensemble vs modèle unique sur AlpacaEval 2.0",
-        "statMathAccuracy": "Précision mathématique via débat multi-modèle",
-        "statMedicalAccuracy": "QA médicale via consensus itératif"
+      "score": {
+        "heading": "Ce que le score peut et ne peut pas dire",
+        "body": "Le score mesure la proximité de sens des réponses à l’aide d’embeddings. Des modèles peuvent s’accorder et avoir tort, par exemple s’ils ont appris la même erreur. Voyez un accord élevé comme une raison d’avoir plus confiance, pas comme une preuve. Les libellés utilisent des seuils par défaut tant que chaque modèle d’embedding n’est pas calibré sur des benchmarks."
       },
-      "flow": {
-        "prompt": "Votre invite",
-        "models": "Modèles d'IA",
-        "consensus": "Consensus"
+      "audience": {
+        "heading": "Pour qui",
+        "items": [
+          {
+            "id": "cross",
+            "title": "Ceux qui vérifient",
+            "body": "Recherche, ingénierie, lectures médicales et juridiques, achats : quiconque veut être sûr avant d’agir sur une réponse d’IA."
+          },
+          {
+            "id": "local",
+            "title": "Utilisateurs de modèles locaux",
+            "body": "Confidentialité et gratuité, avec des modèles sur votre propre machine."
+          },
+          {
+            "id": "tinkerers",
+            "title": "Curieux des modèles",
+            "body": "Comparez modèles et méthodes de fusion sur vos propres questions, avec le coût de chaque requête."
+          }
+        ]
       },
       "research": {
-        "heading": "La recherche",
-        "intro": "L'approche d'ensemble est fondée sur des recherches évaluées par des pairs démontrant que plusieurs modèles d'IA travaillant ensemble surpassent systématiquement tout modèle individuel.",
+        "heading": "Recherche sur la combinaison de modèles",
+        "intro": "Des travaux publiés ont étudié plusieurs façons de combiner des modèles de langage. Ces articles rapportent des gains sur leurs propres benchmarks et conditions. Nous ne les avons pas reproduits ; nos propres résultats sont sur la page des benchmarks.",
         "papers": [
           {
             "title": "Mixture-of-Agents Enhances Large Language Model Capabilities",
@@ -227,102 +254,211 @@
             "url": "https://arxiv.org/abs/2502.00773"
           }
         ]
-      }
+      },
+      "benchmarksLink": "Voir notre méthode et nos résultats"
     },
     "features": {
-      "title": "Fonctionnalités",
-      "description": "Interrogez plus de 20 modèles d'IA simultanément, analysez leur concordance et synthétisez la meilleure réponse",
-      "differentiators": {
-        "heading": "Ce qui rend Ensemble AI unique",
+      "eyebrow": "Fonctionnalités",
+      "title": "Tout ce qu’il faut pour comparer des réponses d’IA",
+      "lead": "Ensemble pose la même question à plusieurs modèles, affiche chaque réponse côte à côte, mesure à quel point elles concordent et les fusionne en une réponse. Il vous montre quand les modèles divergent ; il ne promet pas que la réponse fusionnée bat le meilleur modèle seul.",
+      "openWorkspace": "Ouvrir l’espace de travail",
+      "seeBenchmarks": "Voir les benchmarks",
+      "core": {
+        "heading": "Demander et comparer",
         "items": [
           {
-            "title": "Analyse de concordance",
-            "body": "Voyez exactement où les modèles concordent ou divergent. Les embeddings vectoriels et la similarité cosinus créent une matrice N\u00d7N avec des résultats codés par couleur.",
-            "metrics": ["Matrice N\u00d7N", "Similarité cosinus", "Stats en temps réel"]
+            "id": "side",
+            "title": "Réponses côte à côte",
+            "body": "De deux à six modèles répondent en même temps. Chaque réponse arrive dans sa colonne avec son temps et son coût, et un modèle en échec n’arrête jamais la requête."
           },
           {
-            "title": "Double stratégie de consensus",
-            "body": "Standard : synthétise toutes les réponses. Classement Elo : un jugement LLM par tournoi classe les réponses, puis ne synthétise que les meilleures.",
-            "metrics": ["Classement Elo", "Sélection Top N", "Juge impartial"]
+            "id": "score",
+            "title": "Un score d’accord lisible",
+            "body": "Les réponses sont comparées deux à deux avec des embeddings sémantiques. Un accord élevé signifie que les modèles donnent la même réponse : c’est une raison d’avoir plus confiance, pas une preuve ; un accord faible vous invite à lire chaque réponse."
           },
           {
-            "title": "Intégration Humain + IA",
-            "body": "Ajoutez des réponses d'outils externes, d'experts humains ou d'autres services d'IA. Incluses dans l'analyse de concordance et la génération de consensus.",
-            "metrics": ["Intégration complète", "Score de concordance", "Synthèse de consensus"]
+            "id": "merge",
+            "title": "Une réponse fusionnée",
+            "body": "Choisissez la méthode : Standard (un résumé), Majorité (un vote sur les réponses courtes), Classement (les modèles se jugent par paires) ou Conseil (critique, réplique et vote)."
+          },
+          {
+            "id": "cost",
+            "title": "Le coût avant de dépenser",
+            "body": "Chaque méthode indique son nombre d’appels et un coût estimé avant de demander, puis le coût réel une fois la requête terminée."
+          },
+          {
+            "id": "manual",
+            "title": "Vos propres réponses aussi",
+            "body": "Collez la réponse d’un autre outil ou d’un expert. Elle est mesurée et fusionnée avec les autres."
+          },
+          {
+            "id": "presets",
+            "title": "Préréglages et historique",
+            "body": "Enregistrez un ensemble de modèles et une méthode en préréglage. Vos requêtes sont gardées dans ce navigateur."
           }
         ]
       },
-      "capabilities": {
-        "heading": "Conçu pour la performance",
+      "models": {
+        "heading": "Des modèles de partout",
+        "intro": "Utilisez vos clés pour OpenAI, Anthropic, Google, xAI, DeepSeek et Perplexity, ou tout serveur compatible OpenAI. Une clé OpenRouter donne accès à tous les grands fournisseurs.",
         "items": [
-          { "number": "20+", "label": "Modèles d'IA", "description": "OpenAI, Anthropic, Google, xAI, DeepSeek et Perplexity" },
-          { "number": "<100ms", "label": "Streaming", "description": "Chunks tamponnés avec réponses parallèles" },
-          { "number": "AES-256", "label": "Chiffrement", "description": "Mode GCM avec IV 96 bits aléatoires" },
-          { "number": "Zéro", "label": "Verrouillage", "description": "Communication navigateur-API directe en Mode Gratuit" }
+          {
+            "id": "cloud",
+            "title": "Fournisseurs cloud",
+            "body": "OpenAI, Anthropic, Google, xAI, DeepSeek et Perplexity, appelés directement depuis votre navigateur avec vos clés."
+          },
+          {
+            "id": "local",
+            "title": "Modèles locaux",
+            "body": "Ollama, LM Studio, llama.cpp et vLLM sur votre machine. Ensemble trouve un Ollama en marche, et un modèle d’embedding local mesure l’accord sans clé cloud."
+          },
+          {
+            "id": "hosted",
+            "title": "Modèles ouverts hébergés",
+            "body": "OpenRouter, Groq, Together ou toute adresse compatible OpenAI."
+          }
         ]
       },
-      "howItWorks": {
-        "heading": "De la question au consensus en 4 étapes",
-        "steps": [
-          { "name": "Configurer", "description": "Choisissez le Mode Gratuit avec clés API chiffrées AES-256 ou le Mode Pro avec crédits gérés." },
-          { "name": "Sélectionner l'ensemble", "description": "Choisissez 2 à 6 modèles parmi 6 fournisseurs. Sélectionnez votre synthétiseur et méthode de consensus." },
-          { "name": "Entrer l'invite", "description": "Rédigez votre question. Ajoutez optionnellement des réponses manuelles d'experts ou d'outils externes." },
-          { "name": "Examiner et analyser", "description": "Regardez les réponses en streaming parallèle. Consultez l'analyse de concordance et le consensus synthétisé en temps réel." }
+      "privacy": {
+        "heading": "Privé par défaut",
+        "items": [
+          {
+            "id": "keys",
+            "title": "Les clés restent dans votre navigateur",
+            "body": "Les clés sont chiffrées en AES-GCM via l’API Web Crypto et envoyées uniquement à chaque fournisseur, jamais à notre serveur."
+          },
+          {
+            "id": "prompts",
+            "title": "Les questions vont directement aux fournisseurs",
+            "body": "En mode Gratuit, vos questions et réponses circulent entre votre navigateur et les fournisseurs choisis. Notre serveur ne les voit pas."
+          },
+          {
+            "id": "localonly",
+            "title": "Rien ne quitte votre machine",
+            "body": "Avec des modèles locaux, chaque appel, score d’accord compris, reste sur votre ordinateur."
+          }
         ]
       },
       "modes": {
-        "heading": "Deux façons d'utiliser Ensemble AI",
-        "free": {
-          "heading": "Mode Gratuit",
-          "badge": "BYOK",
-          "body": "Utilisez vos propres clés API. Communication directe navigateur-API sans dépendance serveur.",
-          "features": [
-            "Chiffrement AES-256-GCM dans le navigateur",
-            "Appels API directs aux fournisseurs",
-            "Ne payez que les jetons consommés",
-            "Accès complet aux fonctionnalités",
-            "Aucun frais d'utilisation"
-          ]
-        },
-        "pro": {
-          "heading": "Mode Pro",
-          "badge": "Bientôt disponible",
-          "body": "Backend géré avec facturation par crédits. Aucune gestion de clés API nécessaire.",
-          "features": [
-            "Connexions API gérées",
-            "Facturation par crédits",
-            "Pas de gestion de clés",
-            "Analytique d'utilisation",
-            "Support prioritaire"
-          ]
-        }
-      },
-      "models": {
-        "heading": "Plus de 20 modèles chez 6 fournisseurs",
-        "body": "Accédez aux meilleurs modèles de chaque fournisseur d'IA. Les nouveaux modèles apparaissent automatiquement grâce à la découverte dynamique.",
-        "providers": [
-          { "name": "OpenAI", "models": "GPT-4o, GPT-4o Mini, o1-preview, o1-mini" },
-          { "name": "Anthropic", "models": "Claude 3.5 Sonnet, Claude 3 Opus, Claude 3 Haiku" },
-          { "name": "Google", "models": "Gemini 1.5 Pro, Gemini 1.5 Flash, Gemini 2.5 Flash" },
-          { "name": "xAI", "models": "Grok 2, Grok 2 Mini" },
-          { "name": "Perplexity", "models": "Sonar, Sonar Pro, Sonar Deep Research, Sonar Reasoning, Sonar Reasoning Pro" },
-          { "name": "DeepSeek", "models": "DeepSeek Chat, DeepSeek Reasoner" }
+        "heading": "Deux façons de payer",
+        "items": [
+          {
+            "id": "free",
+            "title": "Gratuit : disponible",
+            "body": "Apportez vos clés et payez les fournisseurs directement, ou rien du tout avec des modèles locaux. Sans connexion."
+          },
+          {
+            "id": "pro",
+            "title": "Pro : bientôt",
+            "body": "Connectez-vous, achetez des crédits et utilisez les modèles sans gérer de clé."
+          }
         ]
       },
-      "security": {
-        "heading": "Sécurité et confidentialité",
-        "body": "Chiffrement AES-256-GCM sans stockage côté serveur en Mode Gratuit.",
-        "features": [
-          "Chiffrement AES-256-GCM via l'API Web Crypto",
-          "Dérivation de clé spécifique à l'appareil (SHA-256)",
-          "IV 96 bits aléatoire par chiffrement",
-          "Les clés en clair ne touchent jamais le localStorage",
-          "Aucun stockage côté serveur en Mode Gratuit",
-          "Aucune invite ni réponse enregistrée ou stockée",
-          "Communication directe navigateur-fournisseur",
-          "Code source ouvert pour une transparence totale"
-        ]
+      "claims": {
+        "heading": "Ce que nous pouvons affirmer, et pas encore",
+        "body": "Qu’un ensemble batte son meilleur modèle seul n’est pas établi. La page des benchmarks décrit comment nous le testons ; les résultats y paraîtront une fois l’évaluation terminée."
       }
+    },
+    "benchmarks": {
+      "title": "Benchmarks",
+      "description": "Un ensemble fait-il mieux que son meilleur membre ? L'exactitude sur des benchmarks publics, avec intervalles de confiance et la méthode qui les a produits.",
+      "runInfo": "Exécution {{runId}} du {{date}}. Coût de ces résultats {{cost}}, réponses de référence en cache comprises.",
+      "costAtLeast": "au moins {{cost}}",
+      "smallSampleNotice": "{{dataset}} compte {{n}} questions, moins que les {{min}} que la méthode exige avant toute affirmation sur l'exactitude. Ses chiffres sont indicatifs.",
+      "mockNotice": "Ces chiffres viennent d'un essai à blanc avec des fournisseurs simulés. Ce ne sont pas de vrais résultats.",
+      "partialNotice": "Cette exécution est incomplète : il manque des jeux de données ou des configurations.",
+      "resultsHeading": "Résultats",
+      "rowLabel": {
+        "majority": "Ensemble, vote majoritaire mécanique",
+        "standard": "Ensemble, consensus standard",
+        "elo": "Ensemble, classement ELO",
+        "council": "Ensemble, conseil"
+      }
+    },
+    "workspace": {
+      "title": "Interrogez plusieurs modèles à la fois.",
+      "subtitle": "Voyez où ils s'accordent, et obtenez une réponse que vous pouvez vérifier.",
+      "examplesHeading": "Essayez",
+      "examples": [
+        "Peut-on laisser du riz cuit dehors toute la nuit ?",
+        "Que permet en général une clause de résiliation dans un bail ?",
+        "Combien d'heures de sommeil faut-il à un adulte, et pourquoi ?"
+      ],
+      "setupTitle": "Connectez un modèle pour commencer",
+      "setupBody": "Ajoutez une clé API ou un modèle local. Une seule clé suffit : OpenRouter donne accès à tous les fournisseurs. Les clés sont chiffrées dans ce navigateur et jamais envoyées à notre serveur.",
+      "setupAction": "Ajouter une clé ou un modèle local",
+      "runPrompt": "Réponses à",
+      "runningStatus_one": "Réponses reçues : {{done}} sur {{count}}. L'accord et le consensus suivent.",
+      "runningStatus_other": "Réponses reçues : {{done}} sur {{count}}. L'accord et le consensus suivent.",
+      "benchmarks": "Benchmarks",
+      "settings": {
+        "title": "Réglages",
+        "keys": "Clés API",
+        "securityNote": "Les clés sont chiffrées dans ce navigateur et envoyées seulement à chaque fournisseur, jamais au serveur d'Ensemble.",
+        "endpoints": "Serveurs locaux et hébergés",
+        "embeddings": "Score d'accord",
+        "appearance": "Apparence",
+        "data": "Données",
+        "clearData": "Effacer les clés, les préréglages et l'historique",
+        "clearConfirm": "Cela supprime de ce navigateur toutes les clés, serveurs, préréglages et exécutions enregistrées.",
+        "clearConfirmYes": "Tout effacer",
+        "clearCancel": "Annuler",
+        "webCryptoTitle": "Ce navigateur ne peut pas chiffrer les clés",
+        "webCryptoBody": "Le mode gratuit a besoin de l'API Web Crypto pour chiffrer vos clés localement. Utilisez un navigateur récent.",
+        "mode": "Mode"
+      },
+      "savePreset": {
+        "title": "Enregistrer les modèles en préréglage",
+        "description": "Les modèles, la méthode et le modèle de synthèse sont enregistrés dans ce navigateur. Un nom existant est remplacé.",
+        "name": "Nom",
+        "placeholder": "Trois modèles de pointe",
+        "save": "Enregistrer",
+        "cancel": "Annuler"
+      },
+      "history": {
+        "savedRun": "Exécution enregistrée le {{date}}. Elle est en lecture seule : rien n'est renvoyé aux modèles.",
+        "newQuestion": "Poser une nouvelle question"
+      },
+      "pro": {
+        "block": {
+          "signIn": "Connectez-vous pour poser une question en mode Pro.",
+          "unavailable": "Le mode Pro n'est pas disponible ici. Passez en mode Gratuit dans les réglages.",
+          "loading": "Chargement de votre solde de crédits.",
+          "insufficient": "Crédits insuffisants pour cette exécution.",
+          "unpriced": "Le mode Pro ne peut pas exécuter certains de ces modèles.",
+          "error": "Votre solde de crédits n'a pas pu être chargé.",
+          "negative": "Votre solde est négatif. Achetez des crédits pour demander en mode Pro."
+        },
+        "signInTitle": "Connectez-vous pour utiliser Pro",
+        "signInBody": "Pro exécute tous les modèles sur notre serveur et débite vos crédits. Le mode Gratuit avec vos propres clés ne demande aucun compte.",
+        "accountLink": "Utilisation et achats"
+      }
+    },
+    "landing": {
+      "eyebrow": "Pour les questions où une erreur coûte cher",
+      "title": "Interrogez plusieurs modèles d’IA à la fois. Voyez où ils s’accordent.",
+      "lead": "Ensemble envoie votre question aux modèles de votre choix, mesure à quel point leurs réponses concordent et les fusionne en une réponse que vous pouvez vérifier face aux originales."
+    },
+    "account": {
+      "workspace": "Espace de travail",
+      "title": "Compte",
+      "signInLead": "Connectez-vous pour voir vos crédits et votre utilisation de Pro.",
+      "unavailable": "La connexion n'est pas configurée sur ce serveur, il n'y a donc pas de compte à afficher. Le mode Gratuit avec vos propres clés n'en a pas besoin.",
+      "loading": "Chargement de votre compte"
+    },
+    "sharedRun": {
+      "missingTitle": "Ce lien a expiré ou a été supprimé",
+      "missingBody": "Les exécutions partagées restent en ligne 30 jours, et leur auteur peut les supprimer plus tôt.",
+      "missingCta": "Posez votre propre question"
+    }
+  },
+  "apiKeys": {
+    "label": "Clé API {{provider}}",
+    "helper": {
+      "idle": "Saisissez votre clé API {{provider}}",
+      "validating": "Validation...",
+      "valid": "Clé API configurée",
+      "invalid": "Clé API invalide"
     }
   }
 }

@@ -1,10 +1,11 @@
 import OpenAI from 'openai';
 import axios from 'axios';
+import { classifyProviderError } from '../../errors/providerError';
 import { BaseFreeClient, type StreamOptions, type StructuredOptions } from '../base/BaseFreeClient';
-import type { StructuredResponse, ValidationResult } from '../../types';
+import type { StructuredResponse, TokenUsage, ValidationResult } from '../../types';
 import { extractAxiosErrorMessage } from '../../utils/extractAxiosError';
 import { hasNonTextModality } from '../../utils/modelFilters';
-import { sanitizeProviderErrorMessage } from '../../utils/sanitizeSensitiveData';
+import { fromChatCompletionUsage, type ChatCompletionUsage } from '../../utils/usage';
 
 interface XaiModelEntry {
   id?: string;
@@ -43,7 +44,7 @@ export class FreeXAIClient extends BaseFreeClient {
 
   protected async fetchTextModels(apiKey: string): Promise<string[]> {
     if (process.env.NEXT_PUBLIC_MOCK_MODE === 'true') {
-      return ['grok-beta'];
+      return ['grok-4.7', 'grok-4.3'];
     }
     const response = await axios.get<XaiModelsResponse>('https://api.x.ai/v1/models', {
       headers: {
@@ -90,12 +91,14 @@ export class FreeXAIClient extends BaseFreeClient {
     }
     const parsed = JSON.parse(raw) as T;
     const tokenCount = response.usage?.total_tokens;
+    const usage = fromChatCompletionUsage(response.usage);
 
     return {
       parsed,
       raw,
       responseTimeMs: Date.now() - startTime,
       ...(tokenCount ? { tokenCount } : {}),
+      ...(usage ? { usage } : {}),
     };
   }
 
@@ -103,6 +106,7 @@ export class FreeXAIClient extends BaseFreeClient {
     const startTime = Date.now();
     let fullResponse = '';
     let tokenCount = 0;
+    let usage: TokenUsage | undefined;
 
     try {
       const client = this.createClient(options.apiKey);
@@ -122,11 +126,12 @@ export class FreeXAIClient extends BaseFreeClient {
 
       for await (const chunk of stream as AsyncIterable<{
         choices?: { delta?: { content?: unknown }; finish_reason?: string | null }[];
-        usage?: { total_tokens?: number };
+        usage?: ChatCompletionUsage | null;
       }>) {
         if (chunk.usage?.total_tokens) {
           tokenCount = chunk.usage.total_tokens;
         }
+        usage = fromChatCompletionUsage(chunk.usage) ?? usage;
 
         const choice = chunk.choices?.[0];
         const deltaContent = choice?.delta?.content;
@@ -152,14 +157,14 @@ export class FreeXAIClient extends BaseFreeClient {
         }
       }
 
-      options.onComplete(fullResponse, Date.now() - startTime, tokenCount > 0 ? tokenCount : undefined);
+      options.onComplete(
+      fullResponse,
+      Date.now() - startTime,
+      tokenCount > 0 ? tokenCount : undefined,
+      usage,
+    );
     } catch (error) {
-      // Extract error message from XAI/OpenAI SDK error
-      const errorMessage = sanitizeProviderErrorMessage(
-        error instanceof Error ? error.message : String(error),
-        'Unknown xAI provider error.',
-      );
-      options.onError(new Error(`XAI API error: ${errorMessage}`));
+      options.onError(classifyProviderError(error, { provider: this.provider, label: 'XAI API error' }));
     }
   }
 }

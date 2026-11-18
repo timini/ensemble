@@ -1,15 +1,15 @@
 /**
  * Free Mode Perplexity-Only E2E Test
  *
- * Tests the workflow with only a Perplexity API key configured.
- * Selects 2 Perplexity models and verifies responses complete.
+ * A run with only a Perplexity API key configured: two Perplexity models
+ * answer.
  *
  * Requires TEST_PERPLEXITY_API_KEY.
  * Skips gracefully when key is missing.
  */
 
 import { test, expect } from '@playwright/test';
-import { fillAndValidateKey } from './helpers';
+import { answerCards, ask, configureKeys, openModelPicker, pickerOption } from './helpers';
 
 const PERPLEXITY_API_KEY = process.env.TEST_PERPLEXITY_API_KEY;
 
@@ -23,81 +23,50 @@ const TIMEOUT = {
 
 /**
  * Known-good Perplexity model IDs in priority order.
- * Sonar and Sonar Pro are the most reliable for testing.
+ * These are Agent API effort presets; fast and low are the quickest.
  */
-const PREFERRED_PERPLEXITY_MODELS = [
-  'sonar',
-  'sonar-pro',
-  'sonar-reasoning',
-];
+const PREFERRED_PERPLEXITY_MODELS = ['perplexity-fast', 'perplexity-low'];
 
 test.describe('Free Mode - Perplexity Only', () => {
   test.skip(!PERPLEXITY_API_KEY, 'Skipping Perplexity-only test - Perplexity API key not configured');
 
   test.beforeEach(async ({ page }) => {
-    await page.goto('/');
+    await page.goto('/workspace');
     await page.evaluate(() => localStorage.clear());
     await page.reload();
   });
 
-  test('should complete workflow with ONLY Perplexity API key', async ({ page }) => {
+  test('should complete a run with ONLY a Perplexity API key', async ({ page }) => {
     test.setTimeout(120_000);
 
-    // 1. Configuration
-    await page.goto('/config');
-    await page.locator('[data-mode="free"]').click();
+    await configureKeys(page, [['perplexity', PERPLEXITY_API_KEY!]], TIMEOUT.API_VALIDATION);
 
-    await fillAndValidateKey(page, 'perplexity', PERPLEXITY_API_KEY!, 1, TIMEOUT.API_VALIDATION);
+    await openModelPicker(page);
+    const options = page.locator('[data-testid="model-picker-option"][data-model-id^="perplexity-"]');
+    await expect(options.first()).toBeVisible({ timeout: TIMEOUT.MODEL_VISIBLE });
 
-    await page.getByRole('button', { name: 'Next', exact: true }).click();
-
-    // 2. Ensemble — select 2 known-good Perplexity models
-    await expect(page).toHaveURL('/ensemble');
-
-    // Wait for Perplexity model cards to load
-    await expect(
-      page.locator('[data-testid^="model-card-sonar"]').first(),
-    ).toBeVisible({ timeout: TIMEOUT.MODEL_VISIBLE });
-
-    // Select 2 different known-good models
     let selectedCount = 0;
     for (const modelId of PREFERRED_PERPLEXITY_MODELS) {
       if (selectedCount >= 2) break;
-      const card = page.getByTestId(`model-card-${modelId}`);
-      if ((await card.count()) > 0) {
-        await card.click();
+      const option = pickerOption(page, modelId);
+      if ((await option.count()) > 0) {
+        await option.click();
         selectedCount++;
       }
     }
-
-    // Fallback: if preferred models weren't found, pick the last two
-    if (selectedCount < 2) {
-      const allSonar = page.locator('[data-testid^="model-card-sonar"]');
-      const count = await allSonar.count();
-      for (let i = count - 1; i >= 0 && selectedCount < 2; i--) {
-        await allSonar.nth(i).click();
-        selectedCount++;
-      }
+    // Fallback: if preferred models weren't found, pick the last ones listed.
+    const count = await options.count();
+    for (let i = count - 1; i >= 0 && selectedCount < 2; i--) {
+      if ((await options.nth(i).getAttribute('aria-pressed')) === 'true') continue;
+      await options.nth(i).click();
+      selectedCount++;
     }
 
-    await page.getByRole('button', { name: 'Next', exact: true }).click();
+    await ask(page, 'Test prompt for Perplexity only');
 
-    // 3. Prompt
-    await expect(page).toHaveURL('/prompt');
-    await page.getByTestId('prompt-textarea').fill('Test prompt for Perplexity only');
-    await page.getByRole('button', { name: /generate responses/i }).click();
-
-    // 4. Review — verify responses appear and complete
-    await expect(page).toHaveURL('/review');
-
-    const responseCards = page.locator('[data-testid^="response-card-perplexity-"]');
-    await expect(responseCards).toHaveCount(2, { timeout: TIMEOUT.RESPONSE_VISIBLE });
-
-    await expect(responseCards.first()).toHaveAttribute('data-status', 'complete', {
-      timeout: TIMEOUT.RESPONSE_COMPLETE,
-    });
-    await expect(responseCards.last()).toHaveAttribute('data-status', 'complete', {
-      timeout: TIMEOUT.RESPONSE_COMPLETE,
-    });
+    const cards = answerCards(page, 'perplexity-');
+    await expect(cards).toHaveCount(2, { timeout: TIMEOUT.RESPONSE_VISIBLE });
+    await expect(cards.first()).toHaveAttribute('data-status', 'complete', { timeout: TIMEOUT.RESPONSE_COMPLETE });
+    await expect(cards.last()).toHaveAttribute('data-status', 'complete', { timeout: TIMEOUT.RESPONSE_COMPLETE });
   });
 });

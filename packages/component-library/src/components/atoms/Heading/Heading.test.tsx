@@ -93,6 +93,18 @@ describe('Heading', () => {
       expect(screen.getByRole('heading', { level: 3 })).toHaveAttribute('data-size', '2xl');
     });
 
+    it('applies display size with the display typeface', () => {
+      render(<Heading level={1} size="display">Ask once</Heading>);
+      const heading = screen.getByRole('heading', { level: 1 });
+      expect(heading).toHaveAttribute('data-size', 'display');
+      expect(heading).toHaveClass('font-display', 'text-display');
+    });
+
+    it('applies title size', () => {
+      render(<Heading level={1} size="title">Workspace</Heading>);
+      expect(screen.getByRole('heading', { level: 1 })).toHaveClass('text-title');
+    });
+
     it('applies 3xl size', () => {
       render(<Heading level={1} size="3xl">3X Large</Heading>);
       expect(screen.getByRole('heading', { level: 1 })).toHaveAttribute('data-size', '3xl');

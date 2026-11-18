@@ -1,1 +1,0 @@
-export { MajorityVotingConsensus } from './MajorityVotingConsensus';

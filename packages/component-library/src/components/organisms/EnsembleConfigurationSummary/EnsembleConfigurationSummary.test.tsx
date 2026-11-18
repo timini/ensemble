@@ -423,7 +423,7 @@ describe('EnsembleConfigurationSummary', () => {
       expect(screen.getByTestId('preset-elo')).toBeInTheDocument();
       expect(screen.getByTestId('preset-majority')).toBeInTheDocument();
       expect(
-        screen.getByText('Favors the majority position across responses. Works with 2+ models.')
+        screen.getByText('Counts votes when the answers are short (a number, letter or yes/no), otherwise favors the majority position. Works with 2+ models.')
       ).toBeInTheDocument();
     });
 

@@ -29,6 +29,26 @@ describe('ModelLogo', () => {
     });
   });
 
+  describe('OpenAI-compatible endpoints', () => {
+    it.each([
+      ['ollama/llama3.2:3b', 'meta'],
+      ['ollama/qwen2.5:7b', 'qwen'],
+      ['openrouter/google/gemma-3-27b-it', 'gemma'],
+      ['together/mistralai/Mixtral-8x7B', 'mistral'],
+      ['groq/openai/gpt-oss-120b', 'openai'],
+      ['openrouter/deepseek/deepseek-r1', 'deepseek'],
+      ['custom/my-finetune', 'server'],
+    ])('picks the family logo for %s', (modelId, key) => {
+      render(<ModelLogo provider="openai-compatible" modelId={modelId} />);
+      expect(screen.getByTestId('model-logo-openai-compatible')).toHaveAttribute('data-logo-key', key);
+    });
+  });
+
+  it('ignores the endpoint label in brackets when only a name is given', () => {
+    render(<ModelLogo provider="openai-compatible" modelName="Qwen 2.5 7B (Ollama)" />);
+    expect(screen.getByTestId('model-logo-openai-compatible')).toHaveAttribute('data-logo-key', 'qwen');
+  });
+
   describe('fallback behavior', () => {
     it('falls back to Anthropic provider logo when model family is unknown', () => {
       render(<ModelLogo provider="anthropic" modelName="Sonnet Experimental" />);

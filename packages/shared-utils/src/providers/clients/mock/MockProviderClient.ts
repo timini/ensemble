@@ -15,12 +15,34 @@ import type {
   ValidationResult,
   ProviderName,
 } from '../../types.js';
+import { ProviderError, cancelledError, type ProviderErrorKind } from '../../errors/providerError';
+
+/**
+ * Provider failures the mock client can simulate. A missing key is not
+ * simulated: the mock client needs no key.
+ */
+export type MockErrorScenario = Exclude<
+  ProviderErrorKind,
+  'other' | 'missing_key' | 'cancelled' | 'insufficient_credits'
+>;
+
+/** Scenario per model id. The key `*` applies to every model. */
+export type MockErrorScenarios = Partial<Record<string, MockErrorScenario>>;
+
+/** Returns the scenario for one call to `model`, or undefined to succeed. */
+export type MockErrorResolver = (model: string) => MockErrorScenario | undefined;
 
 export interface MockClientConfig {
   enableErrors?: boolean;
   errorProbability?: number;
   timeoutAfterMs?: number;
   providerFilter?: ProviderName;
+  /**
+   * Simulated failures: a fixed map, or a function asked for the model's
+   * scenario at the start of each call (so a test or the app's mock mode can
+   * change them between calls, or fail a model only once).
+   */
+  errorScenarios?: MockErrorScenarios | MockErrorResolver;
 }
 
 interface MockClientResolvedConfig {
@@ -28,6 +50,26 @@ interface MockClientResolvedConfig {
   errorProbability: number;
   timeoutAfterMs: number;
   providerFilter?: ProviderName;
+  errorScenarios?: MockErrorScenarios | MockErrorResolver;
+}
+
+/** Default client-side timeout for a simulated `timeout` scenario. */
+const MOCK_TIMEOUT_MS = 2000;
+/** Retry-After sent with a simulated rate limit. */
+const MOCK_RETRY_AFTER_SECONDS = 30;
+
+const SIMULATED_HTTP_ERRORS: Record<Exclude<MockErrorScenario, 'timeout'>, { status: number; message: string }> = {
+  invalid_key: { status: 401, message: 'Incorrect API key provided.' },
+  rate_limited: { status: 429, message: 'Rate limit reached for requests.' },
+  provider_unavailable: { status: 503, message: 'The server is overloaded. Please try again later.' },
+};
+
+function simulatedHttpError(kind: Exclude<MockErrorScenario, 'timeout'>): ProviderError {
+  const { status, message } = SIMULATED_HTTP_ERRORS[kind];
+  return new ProviderError(`Mock API error: ${status} ${message}`, kind, {
+    status,
+    retryAfterSeconds: kind === 'rate_limited' ? MOCK_RETRY_AFTER_SECONDS : undefined,
+  });
 }
 
 const LOREM_IPSUM_WORDS = [
@@ -46,6 +88,20 @@ const LOREM_IPSUM_WORDS = [
   'nemo', 'enim', 'ipsam', 'quia', 'voluptas', 'aspernatur', 'aut', 'odit',
 ];
 
+/**
+ * Mock answers for the majority vote extraction call: one short answer per
+ * response label ([R1], [R2], ...) in the prompt. All agree on "42" except
+ * the last of three or more, so a mock run shows a winner and a dissent.
+ */
+function mockFinalAnswers(prompt: string): { id: string; kind: string; answer: string }[] {
+  const labels = [...new Set([...prompt.matchAll(/\[(R\d+)\]/g)].map((match) => match[1]!))];
+  return labels.map((id, index) => ({
+    id,
+    kind: 'number',
+    answer: labels.length >= 3 && index === labels.length - 1 ? '41' : '42',
+  }));
+}
+
 export class MockProviderClient implements AIProvider {
   private readonly config: MockClientResolvedConfig;
 
@@ -55,7 +111,14 @@ export class MockProviderClient implements AIProvider {
       errorProbability: config.errorProbability ?? 0,
       timeoutAfterMs: config.timeoutAfterMs ?? 30000,
       providerFilter: config.providerFilter,
+      errorScenarios: config.errorScenarios,
     };
+  }
+
+  private scenarioFor(model: string): MockErrorScenario | undefined {
+    const source = this.config.errorScenarios;
+    if (typeof source === 'function') return source(model);
+    return source?.[model] ?? source?.['*'];
   }
 
   async streamResponse(
@@ -64,10 +127,30 @@ export class MockProviderClient implements AIProvider {
     onChunk: (chunk: string) => void,
     onComplete: (fullResponse: string, responseTime: number, tokenCount?: number) => void,
     onError: (error: Error) => void,
-    _options?: StreamResponseOptions,
+    options?: StreamResponseOptions,
   ): Promise<void> {
     if (this.config.enableErrors && Math.random() < this.config.errorProbability) {
-      onError(new Error('Rate limit exceeded. Please try again in 60 seconds.'));
+      onError(simulatedHttpError('rate_limited'));
+      return;
+    }
+
+    const scenario = this.scenarioFor(model);
+    if (scenario === 'timeout') {
+      // A stream that starts, then stalls until the client gives up.
+      onChunk(this.generateLoremIpsum(12));
+      const timeoutMs = options?.timeoutMs ?? MOCK_TIMEOUT_MS;
+      await this.sleep(timeoutMs);
+      onError(
+        new ProviderError(
+          `Streaming timeout for mock after ${Math.round(timeoutMs / 1000)}s. The API may be unresponsive.`,
+          'timeout',
+        ),
+      );
+      return;
+    }
+    if (scenario) {
+      await this.sleep(this.randomInt(100, 200));
+      onError(simulatedHttpError(scenario));
       return;
     }
 
@@ -81,6 +164,10 @@ export class MockProviderClient implements AIProvider {
       for (const chunk of chunks) {
         const delay = this.randomInt(50, 100);
         await this.sleep(delay);
+        if (options?.signal?.aborted) {
+          onError(cancelledError(this.config.providerFilter));
+          return;
+        }
         onChunk(chunk);
       }
 
@@ -100,20 +187,33 @@ export class MockProviderClient implements AIProvider {
     return Promise.resolve(embedding);
   }
 
-  async validateApiKey(_apiKey: string): Promise<ValidationResult> {
+  /** Accepts any key except one containing "invalid", which E2E tests use for a rejected key. */
+  async validateApiKey(apiKey: string): Promise<ValidationResult> {
     const delay = this.randomInt(100, 300);
     await new Promise((resolve) => setTimeout(resolve, delay));
+    if (/invalid/i.test(apiKey)) return { valid: false, error: 'Invalid API key (401 Unauthorized)' };
     return { valid: true };
   }
 
   async generateStructured<T>(
-    _prompt: string,
-    _model: string,
+    prompt: string,
+    model: string,
     schema: JsonSchema,
     _options?: GenerateStructuredOptions,
   ): Promise<StructuredResponse<T>> {
     const delay = this.randomInt(50, 150);
     await new Promise((resolve) => setTimeout(resolve, delay));
+
+    const scenario = this.scenarioFor(model);
+    if (scenario === 'timeout') {
+      throw new ProviderError('Structured call timed out (mock).', 'timeout');
+    }
+    if (scenario) throw simulatedHttpError(scenario);
+
+    if (schema.name === 'final_answers') {
+      const parsed = { answers: mockFinalAnswers(prompt) } as T;
+      return { parsed, raw: JSON.stringify(parsed), responseTimeMs: delay };
+    }
 
     // Build a deterministic response using the first enum value for each property
     const properties = (schema.schema as Record<string, unknown>).properties as
@@ -134,125 +234,139 @@ export class MockProviderClient implements AIProvider {
   }
 
   listAvailableModels(): ModelMetadata[] {
+    // Ids match real provider ids so mock runs look like free-mode runs.
+    // costPer1kTokens is the input price from each provider's pricing page
+    // in November 2026 (peak rate for DeepSeek). Context windows are
+    // approximate. Mock data only: nothing bills against these numbers.
     const allModels: ModelMetadata[] = [
       {
-        id: 'gpt-4o',
-        name: 'GPT-4o',
+        id: 'gpt-6-astra',
+        name: 'GPT-6 Astra',
         provider: 'openai',
-        contextWindow: 128000,
-        costPer1kTokens: 0.005,
+        contextWindow: 1050000,
+        costPer1kTokens: 0.01,
         modalities: ['text', 'image'],
       },
       {
-        id: 'gpt-4o-mini',
-        name: 'GPT-4o Mini',
+        id: 'gpt-6-luna',
+        name: 'GPT-6 Luna',
         provider: 'openai',
-        contextWindow: 128000,
-        costPer1kTokens: 0.00015,
+        contextWindow: 1050000,
+        costPer1kTokens: 0.0001,
         modalities: ['text', 'image'],
       },
       {
-        id: 'o1-preview',
-        name: 'o1 Preview',
-        provider: 'openai',
-        contextWindow: 128000,
-        costPer1kTokens: 0.003,
-        modalities: ['text'],
-      },
-      {
-        id: 'claude-3-5-sonnet',
-        name: 'Claude 3.5 Sonnet',
+        id: 'claude-opus-5-5',
+        name: 'Claude Opus 5.5',
         provider: 'anthropic',
-        contextWindow: 200000,
-        costPer1kTokens: 0.003,
+        contextWindow: 1000000,
+        costPer1kTokens: 0.004,
         modalities: ['text', 'image'],
       },
       {
-        id: 'claude-3-opus',
-        name: 'Claude 3 Opus',
+        id: 'claude-sonnet-5-5',
+        name: 'Claude Sonnet 5.5',
         provider: 'anthropic',
-        contextWindow: 200000,
-        costPer1kTokens: 0.015,
+        contextWindow: 1000000,
+        costPer1kTokens: 0.002,
         modalities: ['text', 'image'],
       },
       {
-        id: 'claude-3-haiku',
-        name: 'Claude 3 Haiku',
+        id: 'claude-haiku-5-5',
+        name: 'Claude Haiku 5.5',
         provider: 'anthropic',
-        contextWindow: 200000,
+        contextWindow: 1000000,
+        costPer1kTokens: 0.0001,
+        modalities: ['text', 'image'],
+      },
+      {
+        id: 'gemini-4-carbon',
+        name: 'Gemini 4 Carbon',
+        provider: 'google',
+        contextWindow: 1000000,
+        costPer1kTokens: 0.002,
+        modalities: ['text', 'image', 'audio', 'video'],
+      },
+      {
+        id: 'gemini-4-hydrogen',
+        name: 'Gemini 4 Hydrogen',
+        provider: 'google',
+        contextWindow: 1000000,
         costPer1kTokens: 0.0015,
-        modalities: ['text', 'image'],
+        modalities: ['text', 'image', 'audio', 'video'],
       },
       {
-        id: 'gemini-1.5-pro',
-        name: 'Gemini 1.5 Pro',
-        provider: 'google',
-        contextWindow: 1000000,
-        costPer1kTokens: 0.00125,
-        modalities: ['text', 'image'],
-      },
-      {
-        id: 'gemini-1.5-flash',
-        name: 'Gemini 1.5 Flash',
-        provider: 'google',
-        contextWindow: 1000000,
-        costPer1kTokens: 0.000075,
-        modalities: ['text', 'image'],
-      },
-      {
-        id: 'grok-2',
-        name: 'Grok 2',
+        id: 'grok-4.7',
+        name: 'Grok 4.7',
         provider: 'xai',
-        contextWindow: 128000,
+        contextWindow: 500000,
         costPer1kTokens: 0.002,
         modalities: ['text'],
       },
       {
-        id: 'grok-2-mini',
-        name: 'Grok 2 Mini',
+        id: 'grok-4.3',
+        name: 'Grok 4.3',
         provider: 'xai',
-        contextWindow: 128000,
-        costPer1kTokens: 0.0002,
+        contextWindow: 1000000,
+        costPer1kTokens: 0.00125,
         modalities: ['text'],
       },
       {
-        id: 'deepseek-chat',
-        name: 'DeepSeek Chat',
+        id: 'deepseek-v4-pro',
+        name: 'DeepSeek V4 Pro',
         provider: 'deepseek',
-        contextWindow: 128000,
-        costPer1kTokens: 0.00014,
+        contextWindow: 1000000,
+        costPer1kTokens: 0.00132,
         modalities: ['text'],
       },
       {
-        id: 'deepseek-reasoner',
-        name: 'DeepSeek Reasoner',
+        id: 'deepseek-flash',
+        name: 'DeepSeek Flash',
         provider: 'deepseek',
-        contextWindow: 128000,
-        costPer1kTokens: 0.00055,
+        contextWindow: 1000000,
+        costPer1kTokens: 0.0003,
         modalities: ['text'],
       },
       {
-        id: 'sonar',
-        name: 'Sonar',
+        id: 'perplexity-fast',
+        name: 'Perplexity Fast',
         provider: 'perplexity',
         contextWindow: 128000,
         costPer1kTokens: 0.001,
         modalities: ['text'],
       },
       {
-        id: 'sonar-pro',
-        name: 'Sonar Pro',
+        id: 'perplexity-low',
+        name: 'Perplexity Low',
         provider: 'perplexity',
-        contextWindow: 200000,
+        contextWindow: 128000,
         costPer1kTokens: 0.003,
         modalities: ['text'],
       },
+      // OpenAI-compatible models, qualified with the `ollama` endpoint id as
+      // the app does for a configured Ollama endpoint. Local: no cost.
       {
-        id: 'sonar-reasoning',
-        name: 'Sonar Reasoning',
-        provider: 'perplexity',
+        id: 'ollama/llama3.2:3b',
+        name: 'Llama 3.2 3B (Ollama)',
+        provider: 'openai-compatible',
         contextWindow: 128000,
-        costPer1kTokens: 0.005,
+        costPer1kTokens: 0,
+        modalities: ['text'],
+      },
+      {
+        id: 'ollama/qwen2.5:7b',
+        name: 'Qwen 2.5 7B (Ollama)',
+        provider: 'openai-compatible',
+        contextWindow: 32000,
+        costPer1kTokens: 0,
+        modalities: ['text'],
+      },
+      {
+        id: 'ollama/gemma3:4b',
+        name: 'Gemma 3 4B (Ollama)',
+        provider: 'openai-compatible',
+        contextWindow: 128000,
+        costPer1kTokens: 0,
         modalities: ['text'],
       },
     ];
@@ -270,19 +384,19 @@ export class MockProviderClient implements AIProvider {
 
   private getWordCountForModel(model: string): number {
     const ranges: Record<string, [number, number]> = {
-      'gpt-4o': [750, 1000],
-      'gpt-4o-mini': [600, 800],
-      'o1-preview': [650, 850],
-      'claude-3-5-sonnet': [700, 900],
-      'claude-3-opus': [800, 1000],
-      'claude-3-haiku': [550, 750],
-      'gemini-1.5-pro': [700, 950],
-      'gemini-1.5-flash': [600, 800],
-      'grok-2': [700, 900],
-      'grok-2-mini': [550, 750],
-      'sonar': [600, 800],
-      'sonar-pro': [700, 900],
-      'sonar-reasoning': [650, 850],
+      'gpt-6-astra': [750, 1000],
+      'gpt-6-luna': [600, 800],
+      'claude-opus-5-5': [800, 1000],
+      'claude-sonnet-5-5': [700, 900],
+      'claude-haiku-5-5': [550, 750],
+      'gemini-4-carbon': [700, 950],
+      'gemini-4-hydrogen': [600, 800],
+      'grok-4.7': [700, 900],
+      'grok-4.3': [550, 750],
+      'deepseek-v4-pro': [700, 900],
+      'deepseek-flash': [550, 750],
+      'perplexity-fast': [600, 800],
+      'perplexity-low': [700, 900],
     };
 
     const [min, max] = ranges[model] ?? [600, 800];

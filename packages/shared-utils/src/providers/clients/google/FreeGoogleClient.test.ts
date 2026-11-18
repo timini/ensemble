@@ -71,7 +71,7 @@ describe('FreeGoogleClient', () => {
 
         // BaseFreeClient catches error and returns mock models
         expect(models.length).toBeGreaterThan(0);
-        expect(models).toContain('Gemini 1.5 Pro'); // From mock list
+        expect(models).toContain('Gemini 4 Carbon'); // From mock list
     });
 
     it('should validate API keys via x-goog-api-key header', async () => {

@@ -1,7 +1,13 @@
 name: Eval CI Gate
 
+# The eval makes paid model calls, so it does not run on every PR.
+# It runs when:
+#   - someone starts it by hand (workflow_dispatch), or
+#   - a PR touching consensus or eval code carries the "run-eval" label
+#     (adding the label starts a run; later pushes re-run while it stays on).
 on:
   pull_request:
+    types: [opened, synchronize, reopened, labeled]
     paths:
       - 'packages/consensus-core/**'
       - 'packages/consensus-standard/**'
@@ -10,9 +16,22 @@ on:
       - 'packages/consensus-council/**'
       - 'packages/shared-utils/**'
       - 'packages/eval/**'
+  workflow_dispatch:
+    inputs:
+      strategies:
+        description: 'Comma-separated strategies to evaluate (standard,elo,majority,council)'
+        required: false
+        default: 'standard,elo,majority,council'
 
+# Runs that will not evaluate (for example, another label being added) go in
+# their own group so they never cancel an eval that is in progress.
 concurrency:
-  group: eval-ci-${{ github.event.pull_request.number }}
+  group: >-
+    eval-ci-${{ github.event.pull_request.number || github.ref }}-${{
+    (github.event_name == 'workflow_dispatch'
+    || (github.event.action == 'labeled' && github.event.label.name == 'run-eval')
+    || (github.event.action != 'labeled' && contains(github.event.pull_request.labels.*.name, 'run-eval')))
+    && 'eval' || 'skip' }}
   cancel-in-progress: true
 
 permissions:
@@ -21,6 +40,10 @@ permissions:
 jobs:
   detect-changes:
     name: Detect Eval Changes
+    if: >-
+      github.event_name == 'workflow_dispatch'
+      || (github.event.action == 'labeled' && github.event.label.name == 'run-eval')
+      || (github.event.action != 'labeled' && contains(github.event.pull_request.labels.*.name, 'run-eval'))
     runs-on: ubuntu-latest
     outputs:
       strategies: ${{ steps.build-matrix.outputs.strategies }}
@@ -28,6 +51,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Detect changed paths
+        if: github.event_name == 'pull_request'
         uses: dorny/paths-filter@v3
         id: filter
         with:
@@ -55,16 +79,27 @@ jobs:
 
       - name: Build strategy matrix
         id: build-matrix
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          REQUESTED: ${{ inputs.strategies }}
         run: |
           strategies="["
           first=true
           for s in standard elo majority council; do
-            case "$s" in
-              standard) changed="${{ steps.filter.outputs.standard }}" ;;
-              elo)      changed="${{ steps.filter.outputs.elo }}" ;;
-              majority) changed="${{ steps.filter.outputs.majority }}" ;;
-              council)  changed="${{ steps.filter.outputs.council }}" ;;
-            esac
+            if [ "$EVENT_NAME" = "workflow_dispatch" ]; then
+              # Run the strategies named in the input; ignore unknown names.
+              case ",${REQUESTED// /}," in
+                *",$s,"*) changed=true ;;
+                *)        changed=false ;;
+              esac
+            else
+              case "$s" in
+                standard) changed="${{ steps.filter.outputs.standard }}" ;;
+                elo)      changed="${{ steps.filter.outputs.elo }}" ;;
+                majority) changed="${{ steps.filter.outputs.majority }}" ;;
+                council)  changed="${{ steps.filter.outputs.council }}" ;;
+              esac
+            fi
             if [ "$changed" = "true" ]; then
               [ "$first" = "false" ] && strategies="${strategies},"
               strategies="${strategies}\"${s}\""
@@ -166,7 +201,7 @@ jobs:
   eval-report:
     name: Eval Report
     needs: [detect-changes, eval-strategy]
-    if: "!cancelled() && github.event_name == 'pull_request'"
+    if: "!cancelled() && github.event_name == 'pull_request' && needs.detect-changes.result == 'success'"
     runs-on: ubuntu-latest
     permissions:
       pull-requests: write

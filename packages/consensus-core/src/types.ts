@@ -32,16 +32,33 @@ export interface GenerateStructuredOptions {
   temperature?: number;
 }
 
+/**
+ * Tokens billed for one call, as the provider reported them. Hidden
+ * reasoning tokens count as output.
+ */
+export interface TokenUsage {
+  inputTokens: number;
+  outputTokens: number;
+}
+
 export interface StructuredResponse<T> {
   parsed: T;
   raw: string;
   responseTimeMs: number;
   tokenCount?: number;
+  usage?: TokenUsage;
 }
 
 export type ModelModality = 'text' | 'image' | 'audio' | 'video';
 
-export type ProviderName = 'openai' | 'anthropic' | 'google' | 'xai' | 'deepseek' | 'perplexity';
+export type ProviderName =
+  | 'openai'
+  | 'anthropic'
+  | 'google'
+  | 'xai'
+  | 'deepseek'
+  | 'perplexity'
+  | 'openai-compatible';
 
 export interface ModelMetadata {
   id: string;
@@ -66,6 +83,7 @@ export interface AIProvider {
       fullResponse: string,
       responseTime: number,
       tokenCount?: number,
+      usage?: TokenUsage,
     ) => void,
     onError: (error: Error) => void,
     options?: StreamResponseOptions,

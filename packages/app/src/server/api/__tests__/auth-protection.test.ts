@@ -2,9 +2,8 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { AuthUser } from "~/server/auth/firebaseAdmin";
 
 const { verifyFirebaseAuthTokenMock } = vi.hoisted(() => ({
-  verifyFirebaseAuthTokenMock: vi.fn<
-    (token: string) => Promise<AuthUser | null>
-  >(),
+  verifyFirebaseAuthTokenMock:
+    vi.fn<(token: string) => Promise<AuthUser | null>>(),
 }));
 
 vi.mock("~/server/auth/firebaseAdmin", () => ({
@@ -12,7 +11,17 @@ vi.mock("~/server/auth/firebaseAdmin", () => ({
 }));
 
 import { createCaller } from "~/server/api/root";
-import { createTRPCContext } from "~/server/api/trpc";
+import {
+  createCallerFactory,
+  createTRPCContext,
+  createTRPCRouter,
+  publicProcedure,
+} from "~/server/api/trpc";
+
+const publicTestRouter = createTRPCRouter({
+  ping: publicProcedure.query(() => "pong"),
+});
+const createPublicTestCaller = createCallerFactory(publicTestRouter);
 
 describe("tRPC auth protection", () => {
   beforeEach(() => {
@@ -25,11 +34,9 @@ describe("tRPC auth protection", () => {
         authorization: "Bearer valid-token",
       }),
     });
-    const caller = createCaller(ctx);
+    const caller = createPublicTestCaller(ctx);
 
-    await expect(caller.post.hello({ text: "world" })).resolves.toEqual({
-      greeting: "Hello world",
-    });
+    await expect(caller.ping()).resolves.toBe("pong");
     expect(verifyFirebaseAuthTokenMock).not.toHaveBeenCalled();
   });
 

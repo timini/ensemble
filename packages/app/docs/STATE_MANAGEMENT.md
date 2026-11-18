@@ -1,511 +1,145 @@
-# State Management Architecture
+# State Management
 
-**Document Version**: 1.0.0
-**Last Updated**: 2025-10-01
-**Target Phase**: Phase 2 (UI Integration)
+The app uses one Zustand store built from seven slices, with a small custom persistence middleware that writes to localStorage.
 
-## Overview
+- Store: `src/store/index.ts`
+- Slices: `src/store/slices/`
+- Middleware: `src/store/middleware/persistenceMiddleware.ts`
 
-Ensemble AI uses **Zustand** for state management with localStorage persistence. State is organized into focused slices following single-responsibility principles, with middleware handling persistence and cross-slice synchronization.
-
-## Architecture Principles
-
-### 1. Slice-Based Organization
-Each slice manages a specific domain of application state:
-- **Separation of concerns**: Each slice has clear boundaries
-- **Composability**: Slices can reference each other when needed
-- **Testability**: Individual slices can be tested in isolation
-
-### 2. Persistence Strategy
-- **Essential data persists**: Theme, language, API keys (encrypted), ensemble configurations
-- **Transient data in-memory**: Current responses, streaming state, UI state
-- **Selective persistence**: Only serialize what's needed between sessions
-
-### 3. Type Safety
-- Full TypeScript support with strict types
-- Exported types for actions and state
-- Type inference for store consumers
-
----
-
-## Store Structure
-
-### Root Store (`src/store/index.ts`)
+## Root store
 
 ```typescript
-import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
-import { themeSlice } from './slices/themeSlice';
-import { languageSlice } from './slices/languageSlice';
-import { workflowSlice } from './slices/workflowSlice';
-import { modeSlice } from './slices/modeSlice';
-import { apiKeySlice } from './slices/apiKeySlice';
-import { ensembleSlice } from './slices/ensembleSlice';
-import { responseSlice } from './slices/responseSlice';
-
-export const useStore = create(
+export const useStore = create<StoreState>()(
   persist(
-    (...args) => ({
-      ...themeSlice(...args),
-      ...languageSlice(...args),
-      ...workflowSlice(...args),
-      ...modeSlice(...args),
-      ...apiKeySlice(...args),
-      ...ensembleSlice(...args),
-      ...responseSlice(...args),
+    (...a) => ({
+      ...createThemeSlice(...a),
+      ...createLanguageSlice(...a),
+      ...createWorkflowSlice(...a),
+      ...createModeSlice(...a),
+      ...createApiKeySlice(...a),
+      ...createEnsembleSlice(...a),
+      ...createResponseSlice(...a),
     }),
     {
-      name: 'ensemble-ai-storage',
-      partialize: (state) => ({
-        // Persist only essential state
-        theme: state.theme,
-        language: state.language,
-        mode: state.mode,
-        apiKeys: state.apiKeys, // Encrypted before storage
-        savedEnsembles: state.savedEnsembles,
-        currentStep: state.currentStep,
-      }),
-    }
-  )
+      name: 'ensemble-ai-store',
+      serialize: serializeStoreState,
+    },
+  ),
 );
 ```
 
----
+`persist` here is the local middleware, not `zustand/middleware`.
 
-## State Slices
+## What gets persisted
 
-### 1. Theme Slice (`themeSlice.ts`)
+The middleware subscribes to the store and writes `JSON.stringify(serialize(state))` to `localStorage['ensemble-ai-store']` on every change. Functions are dropped by `JSON.stringify`.
 
-**Purpose**: Manage light/dark theme preferences
+`serializeStoreState` copies the whole state and changes only three things:
 
-**State**:
-```typescript
-{
-  theme: 'light' | 'dark';
-}
-```
+- each `apiKeys[provider]` keeps `encrypted` and `status`, with `key` set to `''` and `visible` set to `false`;
+- each OpenAI-compatible endpoint keeps `encryptedApiKey`, with `apiKey` set to `''` (`sanitizeEndpointsForPersist`);
+- `encryptionInitialized` is set to `false`.
 
-**Actions**:
-- `setTheme(theme: 'light' | 'dark')` - Set theme and update DOM
-- `toggleTheme()` - Toggle between light/dark
+So everything else is persisted, including the prompt, responses, manual responses, embeddings, similarity matrix, agreement stats and meta-analysis. The last run therefore survives a reload, a closed tab or a later visit to the workspace. Earlier runs are not in the store: they are kept in IndexedDB (`lib/runHistory.ts`, see `docs/ARCHITECTURE.md`), and opening one copies it back into the response slice with `historyView` set.
 
-**Persistence**: ✅ Persisted
+A new run clears the old one: asking in the workspace calls `startRun(prompt, models)` (through `useStreamingResponses.startRun`), which runs `resetStreamingState()` (responses, embeddings, agreement, consensus, consensus usage, majority vote and run models) and records the run's prompt as `runPrompt` (and as the draft, so the two match) and its models as `runModels`. "New question" in the history sidebar calls `resetStreamingState()` and `clearManualResponses()` and empties the draft. The workspace reads the run through `selectRunPrompt` (the run's prompt, or null when no run was submitted) and `selectRunModels`. Nothing starts streams on load: a stored run is shown as it was, so a draft that was never submitted never starts streams.
 
----
+On load, the middleware merges the stored JSON over the initial state, after the store's `deserialize` option, `markInterruptedStreams`, has run on it. A fresh page has no live streams, so any answer stored with `isStreaming: true` (the page was reloaded or closed mid-stream) becomes an error of kind `interrupted` with `isComplete: true`. The workspace shows it with a retry button instead of a spinner that never stops. There is no schema versioning.
 
-### 2. Language Slice (`languageSlice.ts`)
+The root layout (`src/app/layout.tsx`) calls `initializeEncryption()` and `initializeEndpointKeys()` after mount. They decrypt each stored key back into plaintext. If decryption fails, that key is cleared.
 
-**Purpose**: Manage i18n language selection (EN/FR)
+Components that read persisted state use `useHasHydrated()` (`src/hooks/useHasHydrated.ts`) to avoid server/client hydration mismatches.
 
-**State**:
-```typescript
-{
-  language: 'en' | 'fr';
-}
-```
+## Slices
 
-**Actions**:
-- `setLanguage(lang: 'en' | 'fr')` - Set language and update i18next
-- `toggleLanguage()` - Toggle between EN/FR
+### Theme (`themeSlice.ts`)
 
-**Persistence**: ✅ Persisted
+- State: `theme: 'light' | 'dark'` (default: the system's colour scheme through `prefers-color-scheme`, `'light'` on the server; a stored choice replaces it)
+- Actions: `setTheme(theme)`, `toggleTheme()`. Both also set the `light`/`dark` class on `document.documentElement`.
+- `lib/themeScript.ts` runs in `<head>` (from `app/layout.tsx`) and applies the stored or system theme before the first paint, so a dark page does not flash light.
 
----
+### Language (`languageSlice.ts`)
 
-### 3. Workflow Slice (`workflowSlice.ts`)
+- State: `language: 'en' | 'fr'` (default: the first of the browser's languages that is supported, otherwise `'en'`; a stored choice replaces it)
+- Actions: `setLanguage(language)`
 
-**Purpose**: Track user progress through 4-step workflow
+### Workflow (`workflowSlice.ts`)
 
-**State**:
-```typescript
-{
-  currentStep: 'config' | 'ensemble' | 'prompt' | 'review';
-  stepsCompleted: {
-    config: boolean;
-    ensemble: boolean;
-    prompt: boolean;
-    review: boolean;
-  };
-}
-```
+- State: `currentStep: 'config' | 'ensemble' | 'prompt' | 'review'`, `stepsCompleted` (one boolean per step)
+- Actions: `setCurrentStep(step)`, `completeStep(step)`, `resetWorkflow()`
 
-**Actions**:
-- `setCurrentStep(step)` - Navigate to workflow step
-- `completeStep(step)` - Mark step as completed
-- `resetWorkflow()` - Reset to config step
+### Mode (`modeSlice.ts`)
 
-**Persistence**: ✅ Persisted (current step only)
+- State: `mode: 'free' | 'pro'` (default `'free'`), `isModeConfigured`, `onboardingDone` (the first-run onboarding sheet was finished or skipped; persisted)
+- Actions: `setMode(mode)`, `configureModeComplete()`, `completeOnboarding()`
+- Mock mode is not in the store. It is controlled by `NEXT_PUBLIC_MOCK_MODE`. Pro mode is disabled in the UI and has no client; see [PROVIDER_ARCHITECTURE.md](./PROVIDER_ARCHITECTURE.md).
 
----
+### API keys (`apiKeySlice.ts`)
 
-### 4. Mode Slice (`modeSlice.ts`)
+- State: `apiKeys` with one entry per provider (`openai`, `anthropic`, `google`, `xai`, `deepseek`, `perplexity`), each `null` or `{ encrypted, key, visible, status, error? }`; `encryptionInitialized`
+- Actions:
+  - `setApiKey(provider, key)`: trims, encrypts with `encrypt()` from `@ensemble-ai/shared-utils/security`, stores both. A new key starts at status `idle`; setting the same key again keeps its status, so a late encryption write cannot undo a finished validation. An empty key clears the entry.
+  - `getApiKey(provider)`: returns the plaintext `key` or `null`.
+  - `toggleApiKeyVisibility(provider)`, `hideAllApiKeys()`
+  - `setApiKeyStatus(provider, status, error?)`
+  - `initializeEncryption()`: decrypts persisted keys once per session.
+  - `clearApiKeys()`
+- Validation is not a slice action. It lives in `src/lib/validation.ts` and reports back through `setApiKeyStatus`.
+- A status of `validating` is persisted as `idle`, so a key whose check was cut off by a reload is checked again on the next load. `useApiKeySettings` validates stored `idle` keys on load and typed keys once, 500 ms after the last edit.
+- Encryption is AES-256-GCM with a key derived from browser and screen properties (`packages/shared-utils/src/security/encryption.ts`). The plaintext key is held in memory while the app runs.
 
-**Purpose**: Manage operating mode (Free/Pro)
+### OpenAI-compatible endpoints (`endpointsSlice.ts`)
 
-**State**:
-```typescript
-{
-  mode: 'free' | 'pro';
-  isModeConfigured: boolean;
-}
-```
+- State: `endpoints`, an ordered list of `{ id, presetId, label, baseURL, apiKey, encryptedApiKey, embeddingModel, status, error?, errorCode?, modelCount?, embeddingModelFound? }`. `errorCode` is a check failure with no server message (`baseUrlRequired`, `unreachable`, or `localBlocked` when a hosted page could not reach a server on this machine), translated by `EndpointInput`. `embeddingModelFound` says whether the last check saw the embedding model in the server's model list. The `id` is the preset id, then `ollama-2` and so on, and prefixes the endpoint's model ids (`ollama/llama3.2:3b`).
+- Actions:
+  - `addEndpoint(presetId, overrides?)`: adds an endpoint with the preset's base URL and suggested embedding model, or the `baseURL` and `embeddingModel` in `overrides` (the Ollama offer passes what detection found), and returns its id.
+  - `updateEndpoint(id, { baseURL?, embeddingModel? })`: a new base URL resets the status to `idle`, so the workspace checks it again. A new embedding model clears `embeddingModelFound`, and the workspace checks again to look it up.
+  - `setEndpointApiKey(id, key)`: trims and encrypts like `setApiKey`; an empty key clears it. Resets the status.
+  - `setEndpointStatus(id, status, { error?, errorCode?, modelCount?, embeddingModelFound? })`, `removeEndpoint(id)`
+  - `initializeEndpointKeys()`: decrypts persisted keys and resets checks a reload cut off.
+  - `dismissOllamaOffer()`: sets `ollamaOfferDismissed` (persisted), so the workspace stops offering a detected Ollama.
+- `selectEndpointConfigs(state)` gives the provider client the connected endpoints with their keys, and with their embedding model only when `embeddingModelFound` is true.
+- Checks are not slice actions. `src/lib/endpointValidation.ts` does them and `app/workspace/hooks/useEndpointConfiguration.ts` reports back through `setEndpointStatus`. When a check of a local endpoint suggests an embedding model the server has, and the field is empty or still the preset's suggestion, the hook sets it with `updateEndpoint` and marks it found.
 
-**Actions**:
-- `setMode(mode)` - Switch between Free/Pro
-- `configureModeComplete()` - Mark mode configuration as done
+### Ensemble (`ensembleSlice.ts`)
 
-**Persistence**: ✅ Persisted
+- State:
+  - `selectedModels: { id, provider, model }[]` (`model` is the API id, such as `gpt-6-luna`; for `openai-compatible` it is qualified with the endpoint id, such as `ollama/llama3.2:3b`)
+  - `summarizerModel: string | null`
+  - `embeddingsProvider: 'auto' | 'openai' | 'google' | 'openai-compatible'` (default `'auto'`). The preference for agreement embeddings, set in the workspace's settings sheet. `src/lib/embeddingsProvider.ts` resolves it against the valid keys; older stored values such as `'anthropic'` count as `'auto'`.
+  - `consensusMethod: 'standard' | 'elo' | 'majority' | 'council'` (default `'standard'`)
+  - `eloTopN` (default `3`)
+  - `savedEnsembles: { id, name, description, models, summarizer, consensusMethod, eloTopN }[]`
+  - `currentEnsembleId`
+- Actions: `addModel(provider, model)`, `removeModel(modelId)`, `setSummarizer(modelId)`, `setEmbeddingsProvider(preference)`, `setConsensusMethod(method)`, `setEloTopN(n)`, `saveEnsemble(name, description)` (saving under an existing name replaces that ensemble and keeps its id), `loadEnsemble(id)` (a preset saved with no summarizer stores `''`, which loads as `null`, so the first model of the run summarises), `deleteEnsemble(id)`, `clearSelection()`
 
-**Note**: Mock mode is development-only, not exposed to users.
+### Responses (`responseSlice.ts`)
 
----
+Helpers next to the slice: `responseTypes.ts` (the stored data shapes), `responseErrorState.ts` (error kinds and `markInterruptedStreams`) and `agreementState.ts` (similarity matrix and statistics from the embeddings).
 
-### 5. API Key Slice (`apiKeySlice.ts`)
 
-**Purpose**: Manage provider API keys (Free Mode only)
+- State: `prompt` (the draft in the composer, saved as the user types), `runStartedAt` (when the current run started, in epoch ms, shown in the history sidebar; null with no run or for runs stored before it existed), `runPrompt` (the prompt the current run was submitted with, so editing the next prompt never relabels the last run; the workspace falls back to `prompt` only for runs stored before it existed, which have answers but no `runPrompt`), `responses` (`{ modelId, provider, model, response, isStreaming, isComplete, responseTime, tokenCount, usage, error, errorKind, retryAfterSeconds }[]`, where `usage` is `{ inputTokens, outputTokens }` or null when the provider reported none, and `errorKind` is `invalid_key`, `missing_key`, `rate_limited`, `timeout`, `provider_unavailable`, `interrupted` or `other`), `manualResponses`, `embeddings`, `embeddingsSource` (provider that produced `embeddings`, or null), `similarityMatrix`, `agreementStats` (`mean`, `median`, `min`, `max`, `stddev`), `metaAnalysis`, `consensusUsage` (provider, model and tokens of each consensus call, used for the run cost), `majorityVote` (for majority runs: whether the vote or the LLM fallback made the consensus, the fallback reason, the vote tallies and the model names; null otherwise), `historyView` (`{ id, consensusMethod, summarizerModel }` while a run reopened from history is on screen, which makes it read only; null for a live run; cleared by `resetStreamingState`)
+- Actions: `setPrompt`, `startRun(prompt, models?)`, `startStreaming(modelId, provider, model)` (a restart clears the previous text, usage and error), `appendStreamChunk(modelId, chunk)`, `completeResponse(modelId, responseTime, tokenCount?, usage?)`, `setError(modelId, error, details?)` (`details` is `{ kind, retryAfterSeconds }`; the kind defaults to `other`), `addManualResponse(label, response)`, `removeManualResponse(id)`, `clearManualResponses()` (manual answers belong to one prompt, so New question in the workspace calls it), `setEmbeddings(embeddings, source?)`, `calculateAgreement()`, `setMetaAnalysis(analysis)`, `addConsensusUsage(call)`, `setMajorityVote(vote)`, `clearConsensus()` (drops `metaAnalysis` and `majorityVote` so consensus runs again after a retry; keeps `consensusUsage`), `resetStreamingState()` (also clears `runPrompt`, `runStartedAt`, `majorityVote` and `consensusUsage`, which otherwise keeps every consensus attempt of the run, including regenerations), `clearResponses()`
+- `calculateAgreement()` builds a cosine similarity matrix from `embeddings` with `similarityMatrix` and `agreementStatistics` from `@ensemble-ai/shared-utils/similarity`, using the upper triangle for the stats. If the vectors cannot be compared (different lengths or a zero vector) it clears the matrix and stats instead of storing a wrong score. Embeddings come from OpenAI, Google or an OpenAI-compatible endpoint (see [PROVIDER_ARCHITECTURE.md](./PROVIDER_ARCHITECTURE.md#embeddings-and-agreement-scores)); only mock mode uses hash-based vectors.
 
-**State**:
-```typescript
-{
-  apiKeys: {
-    openai: string | null;
-    anthropic: string | null;
-    google: string | null;
-    xai: string | null;
-  };
-  encryptionKey: string | null; // Device-derived key
-}
-```
+## Usage
 
-**Actions**:
-- `setApiKey(provider, key)` - Store encrypted API key
-- `getApiKey(provider)` - Retrieve decrypted API key
-- `clearApiKeys()` - Remove all API keys
-- `validateApiKey(provider, key)` - Test API key validity
-
-**Persistence**: ✅ Persisted (encrypted with AES-256-GCM via Web Crypto API)
-
-**Security**:
-- Keys encrypted before localStorage storage
-- Device-specific encryption key derived from browser entropy
-- Keys never logged or exposed in dev tools
-
----
-
-### 6. Ensemble Slice (`ensembleSlice.ts`)
-
-**Purpose**: Manage model selection and ensemble configuration
-
-**State**:
-```typescript
-{
-  selectedModels: Array<{
-    id: string;
-    provider: 'openai' | 'anthropic' | 'google' | 'xai';
-    model: string;
-  }>;
-  summarizerModel: string | null;
-  embeddingsProvider: 'openai' | 'anthropic' | 'google' | 'xai';
-  savedEnsembles: Array<{
-    id: string;
-    name: string;
-    description: string;
-    models: Array<ModelSelection>;
-    summarizer: string;
-  }>;
-  currentEnsembleId: string | null;
-}
-```
-
-**Actions**:
-- `addModel(provider, model)` - Add model to ensemble
-- `removeModel(modelId)` - Remove model from ensemble
-- `setSummarizer(modelId)` - Designate summarizer model
-- `setEmbeddingsProvider(provider)` - Select embeddings provider
-- `saveEnsemble(name, description)` - Save current configuration as preset
-- `loadEnsemble(ensembleId)` - Load saved ensemble preset
-- `deleteEnsemble(ensembleId)` - Remove saved ensemble
-
-**Persistence**: ✅ Persisted (saved ensembles and current configuration)
-
----
-
-### 7. Response Slice (`responseSlice.ts`)
-
-**Purpose**: Manage AI responses and streaming state
-
-**State**:
-```typescript
-{
-  prompt: string | null;
-  responses: Array<{
-    modelId: string;
-    provider: string;
-    model: string;
-    response: string;
-    isStreaming: boolean;
-    isComplete: boolean;
-    responseTime: number | null;
-    error: string | null;
-  }>;
-  manualResponses: Array<{
-    id: string;
-    label: string;
-    response: string;
-  }>;
-  embeddings: Array<{
-    modelId: string;
-    embedding: number[];
-  }>;
-  similarityMatrix: number[][] | null;
-  agreementStats: {
-    mean: number;
-    median: number;
-    min: number;
-    max: number;
-    stddev: number;
-  } | null;
-  metaAnalysis: string | null;
-}
-```
-
-**Actions**:
-- `setPrompt(prompt)` - Set current prompt
-- `startStreaming(modelId)` - Initialize streaming response
-- `appendStreamChunk(modelId, chunk)` - Append streamed text
-- `completeResponse(modelId, responseTime)` - Mark response complete
-- `setError(modelId, error)` - Set error state for model
-- `addManualResponse(label, response)` - Add manual response
-- `calculateAgreement(embeddings)` - Compute similarity matrix and stats
-- `setMetaAnalysis(analysis)` - Store summarizer meta-analysis
-- `clearResponses()` - Reset for new prompt
-
-**Persistence**: ❌ NOT persisted (transient, regenerated on each prompt)
-
----
-
-## Persistence Middleware
-
-### Custom Persistence Middleware (`persistenceMiddleware.ts`)
-
-Handles selective state persistence with encryption:
+Subscribe to the fields you need, not the whole store:
 
 ```typescript
-export const persistenceMiddleware = (config) => (set, get, api) =>
-  config(
-    (args) => {
-      set(args);
-      // After state update, persist to localStorage
-      const state = get();
-      const persistedState = {
-        theme: state.theme,
-        language: state.language,
-        mode: state.mode,
-        apiKeys: encryptApiKeys(state.apiKeys), // Encrypt before storage
-        savedEnsembles: state.savedEnsembles,
-        currentStep: state.currentStep,
-      };
-      localStorage.setItem('ensemble-ai-storage', JSON.stringify(persistedState));
-    },
-    get,
-    api
-  );
+const theme = useStore((state) => state.theme);
+const toggleTheme = useStore((state) => state.toggleTheme);
 ```
 
-**Features**:
-- Selective persistence (only essential state)
-- Automatic encryption for API keys
-- Hydration on app initialization
-- Quota management (localStorage 5-10MB limit)
+Inside async callbacks, read fresh state with `useStore.getState()` to avoid stale closures. `useStreamingResponses` does this for API keys.
 
----
-
-## Usage Examples
-
-### 1. Theme Management
-
-```typescript
-import { useStore } from '@/store';
-
-function ThemeToggle() {
-  const { theme, toggleTheme } = useStore();
-
-  return (
-    <button onClick={toggleTheme}>
-      {theme === 'light' ? '🌙' : '☀️'}
-    </button>
-  );
-}
-```
-
-### 2. API Key Management
-
-```typescript
-import { useStore } from '@/store';
-
-function ApiKeyInput() {
-  const { setApiKey, getApiKey } = useStore();
-  const [key, setKey] = useState(getApiKey('openai') || '');
-
-  const handleSave = () => {
-    setApiKey('openai', key);
-  };
-
-  return (
-    <input
-      type="password"
-      value={key}
-      onChange={(e) => setKey(e.target.value)}
-    />
-  );
-}
-```
-
-### 3. Ensemble Management
-
-```typescript
-import { useStore } from '@/store';
-
-function EnsembleBuilder() {
-  const { selectedModels, addModel, setSummarizer } = useStore();
-
-  const handleAddModel = () => {
-    addModel('openai', 'gpt-4o');
-  };
-
-  return (
-    <div>
-      {selectedModels.map(model => (
-        <ModelCard key={model.id} model={model} />
-      ))}
-    </div>
-  );
-}
-```
-
-### 4. Response Streaming
-
-```typescript
-import { useStore } from '@/store';
-
-function ResponseViewer() {
-  const { responses, appendStreamChunk } = useStore();
-
-  useEffect(() => {
-    const stream = fetchStreamingResponse(prompt);
-    stream.on('chunk', (modelId, chunk) => {
-      appendStreamChunk(modelId, chunk);
-    });
-  }, [prompt]);
-
-  return (
-    <div>
-      {responses.map(resp => (
-        <ResponseCard key={resp.modelId} response={resp} />
-      ))}
-    </div>
-  );
-}
-```
-
----
+`app/workspace/hooks/useStreamingResponses.ts` buffers each stream's chunks and flushes them to the store every 100 ms to limit re-renders. A stream writes only while it is the latest one for its model in its run (same `runStartedAt`), so a stream from a run that was reset or replaced never touches the next run.
 
 ## Testing
 
-### Unit Testing Slices
+Slice and store tests live in `src/store/__tests__/` and `tests/integration/store/`, and run with `npm test` (Vitest). Reset state between tests with `useStore.setState(...)`.
 
-```typescript
-import { renderHook, act } from '@testing-library/react';
-import { useStore } from '@/store';
+## Related
 
-describe('themeSlice', () => {
-  it('toggles theme', () => {
-    const { result } = renderHook(() => useStore());
-
-    expect(result.current.theme).toBe('light');
-
-    act(() => {
-      result.current.toggleTheme();
-    });
-
-    expect(result.current.theme).toBe('dark');
-  });
-});
-```
-
-### Integration Testing with Components
-
-```typescript
-import { render, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import { useStore } from '@/store';
-
-describe('ModelSelectionList', () => {
-  it('adds model to ensemble', async () => {
-    render(<ModelSelectionList />);
-
-    const addButton = screen.getByTestId('add-model-gpt-4o');
-    await userEvent.click(addButton);
-
-    const { selectedModels } = useStore.getState();
-    expect(selectedModels).toHaveLength(1);
-    expect(selectedModels[0].model).toBe('gpt-4o');
-  });
-});
-```
-
----
-
-## Migration Strategy
-
-### Phase 2: Mock Mode (Current)
-- All slices implemented
-- Persistence enabled for essential state
-- Mock responses in responseSlice
-
-### Phase 3: Free Mode
-- Add encryption to apiKeySlice
-- Integrate real provider SDKs
-- Real streaming in responseSlice
-
-### Phase 4: Pro Mode
-- Add creditSlice for usage tracking
-- Add subscriptionSlice for billing
-- Remove apiKeySlice (managed backend)
-
----
-
-## Performance Considerations
-
-### 1. Selective Subscriptions
-Use selectors to subscribe only to needed state:
-
-```typescript
-// Bad: Re-renders on ANY state change
-const store = useStore();
-
-// Good: Re-renders only when theme changes
-const theme = useStore(state => state.theme);
-```
-
-### 2. localStorage Quota
-- Keep persisted state minimal (<1MB)
-- Monitor quota usage
-- Clear old ensembles if quota exceeded
-
-### 3. Response State
-- Don't persist large response strings
-- Use pagination for response history
-- Clear responses when navigating away
-
----
-
-## Related Documentation
-
-- [PROVIDER_ARCHITECTURE.md](./PROVIDER_ARCHITECTURE.md) - AIProvider interface and client modes
-- [MOCK_CLIENT_SPECIFICATION.md](./MOCK_CLIENT_SPECIFICATION.md) - Mock streaming behavior
-- [Constitution Principle IX](../.specify/memory/constitution.md#ix-state-management) - State management requirements
-
----
-
-**Status**: ✅ Ready for Phase 2 Implementation
+- [PROVIDER_ARCHITECTURE.md](./PROVIDER_ARCHITECTURE.md)
+- [MOCK_CLIENT_SPECIFICATION.md](./MOCK_CLIENT_SPECIFICATION.md)

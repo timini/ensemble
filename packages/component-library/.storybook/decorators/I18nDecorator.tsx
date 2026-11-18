@@ -3,8 +3,11 @@ import type { Decorator } from '@storybook/react';
 import { I18nextProvider } from 'react-i18next';
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
+import en from '../../src/lib/i18n/locales/en.json';
+import fr from '../../src/lib/i18n/locales/fr.json';
 
-// Initialize i18next for Storybook
+// Initialize i18next for Storybook with the component library's own
+// locale files, so stories show the same strings as the app.
 i18n.use(initReactI18next).init({
   lng: 'en',
   fallbackLng: 'en',
@@ -13,48 +16,8 @@ i18n.use(initReactI18next).init({
     escapeValue: false, // React already escapes
   },
   resources: {
-    en: {
-      translation: {
-        ensemble: {
-          header: {
-            title: 'Ensemble AI',
-            tagline: 'The smartest AI is an ensemble.',
-          },
-          steps: {
-            config: 'Config',
-            ensemble: 'Ensemble',
-            prompt: 'Prompt',
-            review: 'Review',
-          },
-        },
-        'app.name': 'Ensemble AI',
-        'common.loading': 'Loading...',
-        'common.error': 'Error',
-        'common.submit': 'Submit',
-        'common.cancel': 'Cancel',
-      },
-    },
-    fr: {
-      translation: {
-        ensemble: {
-          header: {
-            title: 'IA Ensemble',
-            tagline: "L'IA la plus intelligente est un ensemble.",
-          },
-          steps: {
-            config: 'Configuration',
-            ensemble: 'Ensemble',
-            prompt: 'Invite',
-            review: 'Révision',
-          },
-        },
-        'app.name': 'Ensemble IA',
-        'common.loading': 'Chargement...',
-        'common.error': 'Erreur',
-        'common.submit': 'Soumettre',
-        'common.cancel': 'Annuler',
-      },
-    },
+    en: { translation: en },
+    fr: { translation: fr },
   },
 });
 

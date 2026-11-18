@@ -2,7 +2,7 @@
 
 exports[`Button Snapshots > matches snapshot for default variant 1`] = `
 <button
-  class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 bg-primary text-primary-foreground shadow hover:bg-primary/90 h-9 px-4 py-2"
+  class="focus-ring inline-flex select-none items-center justify-center gap-2 whitespace-nowrap rounded-lg text-label font-medium transition-[color,background-color,border-color,box-shadow,transform] duration-fast active:translate-y-px disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 bg-primary text-primary-foreground shadow-sm hover:bg-primary/90 h-10 px-4"
   data-size="default"
   data-variant="default"
 >
@@ -12,7 +12,7 @@ exports[`Button Snapshots > matches snapshot for default variant 1`] = `
 
 exports[`Button Snapshots > matches snapshot for destructive variant 1`] = `
 <button
-  class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 bg-destructive text-destructive-foreground shadow-sm hover:bg-destructive/90 h-9 px-4 py-2"
+  class="focus-ring inline-flex select-none items-center justify-center gap-2 whitespace-nowrap rounded-lg text-label font-medium transition-[color,background-color,border-color,box-shadow,transform] duration-fast active:translate-y-px disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 bg-destructive text-destructive-foreground shadow-sm hover:bg-destructive/90 h-10 px-4"
   data-size="default"
   data-variant="destructive"
 >
@@ -22,7 +22,7 @@ exports[`Button Snapshots > matches snapshot for destructive variant 1`] = `
 
 exports[`Button Snapshots > matches snapshot for disabled state 1`] = `
 <button
-  class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 bg-primary text-primary-foreground shadow hover:bg-primary/90 h-9 px-4 py-2"
+  class="focus-ring inline-flex select-none items-center justify-center gap-2 whitespace-nowrap rounded-lg text-label font-medium transition-[color,background-color,border-color,box-shadow,transform] duration-fast active:translate-y-px disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 bg-primary text-primary-foreground shadow-sm hover:bg-primary/90 h-10 px-4"
   data-size="default"
   data-variant="default"
   disabled=""
@@ -33,7 +33,7 @@ exports[`Button Snapshots > matches snapshot for disabled state 1`] = `
 
 exports[`Button Snapshots > matches snapshot for ghost variant 1`] = `
 <button
-  class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 px-4 py-2"
+  class="focus-ring inline-flex select-none items-center justify-center gap-2 whitespace-nowrap rounded-lg text-label font-medium transition-[color,background-color,border-color,box-shadow,transform] duration-fast active:translate-y-px disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 text-foreground hover:bg-muted h-10 px-4"
   data-size="default"
   data-variant="ghost"
 >
@@ -43,7 +43,7 @@ exports[`Button Snapshots > matches snapshot for ghost variant 1`] = `
 
 exports[`Button Snapshots > matches snapshot for icon size 1`] = `
 <button
-  class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 bg-primary text-primary-foreground shadow hover:bg-primary/90 h-9 w-9"
+  class="focus-ring inline-flex select-none items-center justify-center gap-2 whitespace-nowrap rounded-lg text-label font-medium transition-[color,background-color,border-color,box-shadow,transform] duration-fast active:translate-y-px disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 bg-primary text-primary-foreground shadow-sm hover:bg-primary/90 h-10 w-10"
   data-size="icon"
   data-variant="default"
 >
@@ -53,7 +53,7 @@ exports[`Button Snapshots > matches snapshot for icon size 1`] = `
 
 exports[`Button Snapshots > matches snapshot for large size 1`] = `
 <button
-  class="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 bg-primary text-primary-foreground shadow hover:bg-primary/90 h-10 rounded-md px-8"
+  class="focus-ring inline-flex select-none items-center justify-center gap-2 whitespace-nowrap font-medium transition-[color,background-color,border-color,box-shadow,transform] duration-fast active:translate-y-px disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 bg-primary text-primary-foreground shadow-sm hover:bg-primary/90 h-12 rounded-xl px-6 text-body"
   data-size="lg"
   data-variant="default"
 >
@@ -63,7 +63,7 @@ exports[`Button Snapshots > matches snapshot for large size 1`] = `
 
 exports[`Button Snapshots > matches snapshot for link variant 1`] = `
 <button
-  class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 text-primary underline-offset-4 hover:underline h-9 px-4 py-2"
+  class="focus-ring inline-flex select-none items-center justify-center gap-2 whitespace-nowrap rounded-lg text-label font-medium transition-[color,background-color,border-color,box-shadow,transform] duration-fast active:translate-y-px disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 text-primary underline-offset-4 hover:underline h-10 px-4"
   data-size="default"
   data-variant="link"
 >
@@ -73,7 +73,7 @@ exports[`Button Snapshots > matches snapshot for link variant 1`] = `
 
 exports[`Button Snapshots > matches snapshot for outline variant 1`] = `
 <button
-  class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground h-9 px-4 py-2"
+  class="focus-ring inline-flex select-none items-center justify-center gap-2 whitespace-nowrap rounded-lg text-label font-medium transition-[color,background-color,border-color,box-shadow,transform] duration-fast active:translate-y-px disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border border-border bg-card text-foreground shadow-sm hover:border-input/60 hover:bg-muted h-10 px-4"
   data-size="default"
   data-variant="outline"
 >
@@ -83,7 +83,7 @@ exports[`Button Snapshots > matches snapshot for outline variant 1`] = `
 
 exports[`Button Snapshots > matches snapshot for secondary variant 1`] = `
 <button
-  class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 bg-secondary text-secondary-foreground shadow-sm hover:bg-secondary/80 h-9 px-4 py-2"
+  class="focus-ring inline-flex select-none items-center justify-center gap-2 whitespace-nowrap rounded-lg text-label font-medium transition-[color,background-color,border-color,box-shadow,transform] duration-fast active:translate-y-px disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 bg-secondary text-secondary-foreground hover:bg-secondary/70 h-10 px-4"
   data-size="default"
   data-variant="secondary"
 >
@@ -93,7 +93,7 @@ exports[`Button Snapshots > matches snapshot for secondary variant 1`] = `
 
 exports[`Button Snapshots > matches snapshot for small size 1`] = `
 <button
-  class="inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 bg-primary text-primary-foreground shadow hover:bg-primary/90 h-8 rounded-md px-3 text-xs"
+  class="focus-ring inline-flex select-none items-center justify-center gap-2 whitespace-nowrap font-medium transition-[color,background-color,border-color,box-shadow,transform] duration-fast active:translate-y-px disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 bg-primary text-primary-foreground shadow-sm hover:bg-primary/90 h-8 rounded-md px-3 text-caption"
   data-size="sm"
   data-variant="default"
 >

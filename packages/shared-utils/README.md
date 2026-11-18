@@ -1,77 +1,92 @@
 # @ensemble-ai/shared-utils
 
-Shared utilities for Ensemble AI application.
+Non-UI code shared by the app and the eval package: provider clients, similarity maths, Web Crypto helpers, and re-exports of the consensus strategies. UI helpers stay in the component library.
 
-## Overview
+The package is consumed from `dist/`. After changing it, rebuild:
 
-This package contains domain utilities used across the Ensemble AI monorepo. These are **non-UI utilities** - UI-specific utilities remain in `@ensemble-ai/component-library`.
-
-## Modules
-
-### Similarity (`similarity/`)
-
-Cosine similarity calculations for AI response agreement analysis.
-
-**Functions:**
-- `cosineSimilarity(vectorA, vectorB)` - Calculate cosine similarity between two embedding vectors (-1 to 1)
-- `similarityMatrix(vectors)` - Generate pairwise similarity matrix for multiple vectors
-- `agreementStatistics(similarities)` - Calculate mean, median, min, max, stddev from similarity scores
-
-**Usage:**
-```typescript
-import { cosineSimilarity, similarityMatrix, agreementStatistics } from '@ensemble-ai/shared-utils/similarity';
-
-// Compare two embeddings
-const similarity = cosineSimilarity([1, 2, 3], [2, 3, 4]);
-
-// Generate matrix for multiple responses
-const embeddings = [embedding1, embedding2, embedding3];
-const matrix = similarityMatrix(embeddings);
-
-// Calculate agreement statistics
-const scores = [0.85, 0.92, 0.78];
-const stats = agreementStatistics(scores); // { mean, median, min, max, stddev }
+```bash
+npm run build --workspace=packages/shared-utils
 ```
 
-### Crypto (Future - Phase 3)
+The app's `tsconfig.json` also maps the bare `@ensemble-ai/shared-utils` import to `src/index.ts`, but subpath imports such as `@ensemble-ai/shared-utils/providers` resolve to `dist/`.
 
-Client-side encryption for API keys using Web Crypto API (AES-256).
+## Entry points
 
-### Embeddings (Future - Phase 3)
+| Import | Contents |
+|--------|----------|
+| `@ensemble-ai/shared-utils` | Everything below |
+| `@ensemble-ai/shared-utils/providers` | `AIProvider` and related types, `ProviderRegistry`, `createProviderClient`, `MockProviderClient`, the six `Free*Client` classes, `FreeOpenAICompatibleClient`, `OpenAICompatibleEndpointsClient` and the endpoint presets and helpers (`ENDPOINT_PRESETS`, `toEndpointModelId`, `parseEndpointModelId`, `isLocalEndpoint`, `isLoopbackURL`, `modelListIncludes`), the local server helpers (`detectOllama`, `pickEmbeddingModel`, `isEmbeddingModelId`, `ollamaPullCommand`, `isLocalNetworkBlockLikely`, `OLLAMA_DEFAULT_URL`, `DEFAULT_OLLAMA_EMBEDDING_MODEL`), `sanitizeProviderErrorMessage`, `ProviderError`, `classifyProviderError`, `DEFAULT_STREAM_TIMEOUT_MS` |
+| `@ensemble-ai/shared-utils/similarity` | `cosineSimilarity`, `similarityMatrix`, `agreementStatistics`, `normalizeSimilarity`, `resolveAgreementCalibration`, `agreementLevel`, `displayThresholds`, `embeddingModelKey` |
+| `@ensemble-ai/shared-utils/security` | `encrypt`, `decrypt`, `deriveKey`, `isWebCryptoAvailable` |
+| `@ensemble-ai/shared-utils/pricing` | `getModelPrice`, `PRICE_TABLE`, `estimateRun`, `countConsensusCalls`, `computeRunCost`, `withUsageTracking`, `estimateTokensFromText` |
+| `@ensemble-ai/shared-utils/consensus` | Re-exports from `@ensemble-ai/consensus-core` and the four strategy packages (kept for backward compatibility; new code can import those packages directly) |
 
-Utilities for generating embeddings from AI model responses.
+## Providers (`src/providers/`)
 
-### Streaming (Future - Phase 2-3)
+- Providers: `openai`, `anthropic`, `google`, `xai`, `deepseek`, `perplexity`, `openai-compatible`.
+- `openai-compatible` (`src/providers/clients/openaiCompatible/`) covers any number of OpenAI-compatible endpoints (Ollama, LM Studio, llama.cpp, vLLM, OpenRouter, Groq, Together, custom). Model ids carry the endpoint id: `ollama/llama3.2:3b`. `FreeOpenAICompatibleClient` talks to one server with `fetch` and an optional key: unfiltered `GET /models`, streamed chat with usage, structured output that falls back from `json_schema` to `json_object` to JSON extracted from text, and embeddings with the endpoint's embedding model. `OpenAICompatibleEndpointsClient` routes calls by the endpoint id; `createProviderClient` builds it from a `getEndpoints` callback.
+- Modes: `mock` and `free` are implemented. `createProviderClient` throws `not yet implemented` for `pro`.
+- Free clients call the provider APIs from the browser with the vendor SDKs (`dangerouslyAllowBrowser: true`). Perplexity is the exception: it calls the Agent API (`/v1/agent`) with `fetch`, and its model ids are effort presets (`perplexity-fast`, `perplexity-low`, `perplexity-medium`).
+- Anthropic and OpenAI clients drop `temperature` for models that reject it, and Anthropic structured output uses `output_config.format` rather than a forced tool call. See the provider notes in the architecture document linked below.
+- Embeddings (`src/providers/embeddings/`): OpenAI calls `text-embedding-3-small` through `requestOpenAICompatibleEmbedding` (`POST {baseURL}/embeddings`, optional key), which OpenAI-compatible endpoints use too, with the embedding model set on the endpoint. Google calls `gemini-embedding-2` through `requestGeminiEmbedding` (`models/{model}:embedContent`, 768 dimensions via `outputDimensionality`). Other clients have `supportsEmbeddings = false` and throw `EmbeddingsNotSupportedError`; `BaseFreeClient` never returns fake vectors. `selectEmbeddingsProvider(preference, validProviders)` picks the override when its key is valid, otherwise OpenAI, then Google, then `openai-compatible` (callers count it only when a connected endpoint has an embedding model its server lists), or null.
+- Perplexity has no `generateStructured` implementation.
+- Errors (`src/providers/errors/providerError.ts`): every error a client passes to `onError` from `streamResponse` is a `ProviderError` with a `kind`: `invalid_key` (401 or 403), `missing_key` (no key is set, so no request was sent), `rate_limited` (429, with `retryAfterSeconds` from `Retry-After`, `retry-after-ms` or Google's `RetryInfo` when given), `timeout` (client-side, `StreamResponseOptions.timeoutMs`, default `DEFAULT_STREAM_TIMEOUT_MS` = 120 s), `provider_unavailable` (5xx or a network failure) or `other`. `classifyProviderError` reads the status from the SDK error, an axios response or the message. Messages are sanitized. After a timeout, late chunks and completions from the abandoned stream are dropped.
+- Mock errors: `new MockProviderClient({ errorScenarios })` (or `createProviderClient({ mode: 'mock', mockErrorScenarios })`) fails the listed models with a simulated 401, 429 (Retry-After 30 s), 503 or timeout (`timeoutMs`, default 2 s in mock). `errorScenarios` maps model id (or `*`) to a kind, or is a function `(model) => kind | undefined` asked at the start of each call.
 
-Utilities for handling streaming responses from AI providers.
+Full description: [packages/app/docs/PROVIDER_ARCHITECTURE.md](../app/docs/PROVIDER_ARCHITECTURE.md).
+
+## Pricing (`src/pricing/`)
+
+- `priceTable.ts` is generated; do not edit it by hand. Refresh it with `npm run prices:refresh` (public OpenRouter model lists, no key). The mapping from OpenRouter ids lives in `openRouterMapping.ts` and is tested against fixtures in `src/pricing/__fixtures__/`. First-party vendors map to their provider (`anthropic/claude-opus-5-5`); open-weight vendors (Meta Llama, Qwen, Mistral, Microsoft, IBM Granite, NVIDIA, AllenAI) are kept as `openrouter/<OpenRouter id>`, for models called through OpenRouter.
+- `getModelPrice(provider, modelId)` gives USD per million input and output tokens, or `{ status: 'unknown' }`. It also accepts Anthropic ids with dots and Gemini ids with a `models/` prefix. OpenAI-compatible model ids are priced by `getEndpointModelPrice` from the configured endpoints (`{ id, baseURL }`, the fourth argument; `estimateRun` takes them as `endpoints`, `computeRunCost` as its third argument): a local preset at a loopback URL (`isLocalEndpoint`) costs 0 and is marked `local`, OpenRouter at `openrouter.ai` uses the table entry with the same OpenRouter id when there is one, and the rest (Groq, Together, Custom, local presets at other hosts, endpoints not passed in) are unknown. `estimateRun` and `computeRunCost` report `localCallCount`.
+- `estimateRun(input)` returns call counts by kind (answers, consensus, embeddings) and a cost range before a run. Its token assumptions (`ESTIMATE_TOKENS`) are the defaults in `tokenAssumptions.ts`, replaced field by field by a fit in the generated `tokenCalibration.ts` (`ensemble-eval calibrate-tokens`) when one is committed; `ESTIMATE_TOKENS_CALIBRATED` says which. None is committed yet. `countConsensusCalls` mirrors the strategy packages; see the call counts in [docs/ARCHITECTURE.md](../../docs/ARCHITECTURE.md#pricing).
+- `computeRunCost(calls)` prices finished calls and flags the total as estimated when any call's tokens came from text length. It and `estimateRun` also count priced and unpriced calls, so a caller can tell a full cost from a lower bound or an unknown one.
+- `withUsageTracking(provider, name, record)` wraps an `AIProvider` and reports the tokens of every completed call.
+- Provider clients pass `{ inputTokens, outputTokens }` to `onComplete` as a fourth argument when the stream reports usage, and set `usage` on the result of `generateStructured`. Reasoning tokens count as output, including xAI's, which sit outside `completion_tokens`.
+
+## Similarity (`src/similarity/`)
+
+```typescript
+import {
+  cosineSimilarity,
+  similarityMatrix,
+  agreementStatistics,
+  normalizeSimilarity,
+} from '@ensemble-ai/shared-utils/similarity';
+
+cosineSimilarity([1, 2, 3], [2, 3, 4]);    // -1 to 1; throws on empty, mismatched or zero vectors
+similarityMatrix([v1, v2, v3]);            // n x n, diagonal is 1
+agreementStatistics([0.85, 0.92, 0.78]);   // { mean, median, min, max, stddev }
+normalizeSimilarity(0.4);                  // maps -1..1 to 0..1, clamped
+```
+
+Agreement labels (`calibration.ts`): `resolveAgreementCalibration(file, 'openai/text-embedding-3-small')` returns the cosine cut-offs fitted for that embedding model, or `DEFAULT_AGREEMENT_THRESHOLDS` (the original (v+1)/2 mapping) with `calibrated: false`. `agreementLevel(cosine, thresholds)` gives `high`, `medium` or `low`; `displayThresholds` converts the cut-offs to the 0 to 1 scale the UI shows.
+
+These functions are correct for any vectors. The vectors the app feeds them today are placeholders (see Providers above).
+
+## Security (`src/security/`)
+
+- `encrypt(plaintext)` and `decrypt(ciphertext)`: AES-256-GCM via Web Crypto, output `base64(iv):base64(payload)`.
+- `deriveKey()`: SHA-256 of browser and screen properties (user agent, language, platform, core count, screen size, time zone), imported as an AES key and cached. This keeps keys out of plain sight in localStorage; it does not protect against code running on the page, and changing browser or screen settings can make stored keys undecryptable.
+- `isWebCryptoAvailable()`
 
 ## Development
 
 ```bash
-# Install dependencies
-npm install
-
-# Run tests
-npm test
-
-# Type checking
+npm run build       # tsc
+npm test            # vitest run --coverage
+npm run test:watch
 npm run typecheck
-
-# Build
-npm run build
-
-# Lint
-npm run lint
+npm run lint        # eslint, zero warnings allowed
+npm run clean       # rm -rf dist
 ```
 
-## Testing
+Tests sit next to the code (`*.test.ts`) and in `src/providers/__tests__/`. Coverage is measured for `src/providers`, `src/similarity` and `src/pricing`. Thresholds are currently lowered to 65% lines and statements, 75% functions and branches (`vitest.config.ts`).
 
-All utilities include comprehensive unit tests with 100% coverage.
+## Dependency note
 
-- **Test Framework**: Vitest
-- **Coverage Requirement**: 80%+ (currently 100%)
-- **Test Location**: `src/**/*.test.ts`
+The Anthropic and Google clients import `@anthropic-ai/sdk` and `@google/generative-ai`, but those are not listed in this package's `package.json`. They resolve through the workspace because the app depends on them. `openai` is listed here as `^4.68.4`, while the app uses `^6.8.1`.
 
 ## License
 
-Private - All rights reserved
+UNLICENSED. Private.

@@ -10,9 +10,10 @@ describe('Footer', () => {
 
   it('renders navigation links', () => {
     render(<Footer />);
-    expect(screen.getByRole('link', { name: /get started/i })).toHaveAttribute('href', '/config');
+    expect(screen.getByRole('link', { name: /get started/i })).toHaveAttribute('href', '/workspace');
     expect(screen.getByRole('link', { name: /features/i })).toHaveAttribute('href', '/features');
     expect(screen.getByRole('link', { name: /about/i })).toHaveAttribute('href', '/about');
+    expect(screen.getByRole('link', { name: /benchmarks/i })).toHaveAttribute('href', '/benchmarks');
   });
 
   it('renders GitHub link with external attributes', () => {

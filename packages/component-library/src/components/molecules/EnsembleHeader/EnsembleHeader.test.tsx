@@ -9,17 +9,25 @@ describe('EnsembleHeader', () => {
     expect(screen.getByText('Ensemble AI')).toBeInTheDocument();
   });
 
-  it('renders the tagline', () => {
+  it('renders the brand name as a link to the landing page', () => {
     render(<EnsembleHeader />);
-    expect(screen.getByText('The smartest AI is an ensemble.')).toBeInTheDocument();
+    const brandLink = screen.getByTestId('site-header-home');
+    expect(brandLink).toHaveAttribute('href', '/');
+    expect(brandLink).toHaveTextContent('Ensemble AI');
   });
 
-  it('renders the brand name as a link to /config', () => {
+  it('offers the workspace as the main action', () => {
     render(<EnsembleHeader />);
-    const brandLink = screen.getByRole('link', { name: /ensemble ai/i });
-    expect(brandLink).toBeInTheDocument();
-    expect(brandLink).toHaveAttribute('href', '/config');
+    const cta = screen.getByTestId('site-header-workspace');
+    expect(cta).toHaveAttribute('href', '/workspace');
+    expect(cta).toHaveTextContent('Open workspace');
   });
+
+  it('links to the benchmarks', () => {
+    render(<EnsembleHeader />);
+    expect(screen.getByRole('link', { name: 'Benchmarks' })).toHaveAttribute('href', '/benchmarks');
+  });
+
 
   it('renders the settings button', () => {
     render(<EnsembleHeader />);
@@ -86,42 +94,19 @@ describe('EnsembleHeader', () => {
   describe('internationalization', () => {
     it('renders English translations correctly', () => {
       renderWithI18n(<EnsembleHeader />, { language: 'en' });
-
-      expect(screen.getByText('Ensemble AI')).toBeInTheDocument();
-      expect(screen.getByText('The smartest AI is an ensemble.')).toBeInTheDocument();
+      expect(screen.getByTestId('site-header-home')).toHaveTextContent('Ensemble AI');
+      expect(screen.getByTestId('site-header-workspace')).toHaveTextContent('Open workspace');
     });
 
     it('renders French translations correctly', () => {
       renderWithI18n(<EnsembleHeader />, { language: 'fr' });
-
-      expect(screen.getByText('IA Ensemble')).toBeInTheDocument();
-      expect(screen.getByText("L'IA la plus intelligente est un ensemble.")).toBeInTheDocument();
+      expect(screen.getByTestId('site-header-home')).toHaveTextContent('IA Ensemble');
+      expect(screen.getByTestId('site-header-workspace')).toHaveTextContent('Ouvrir l’espace de travail');
     });
 
-    it('displays translated title in English', () => {
+    it('leaves the page heading to the page', () => {
       renderWithI18n(<EnsembleHeader />, { language: 'en' });
-
-      const title = screen.getByRole('heading', { level: 1 });
-      expect(title).toHaveTextContent('Ensemble AI');
-    });
-
-    it('displays translated title in French', () => {
-      renderWithI18n(<EnsembleHeader />, { language: 'fr' });
-
-      const title = screen.getByRole('heading', { level: 1 });
-      expect(title).toHaveTextContent('IA Ensemble');
-    });
-
-    it('displays translated tagline in English', () => {
-      renderWithI18n(<EnsembleHeader />, { language: 'en' });
-
-      expect(screen.getByText('The smartest AI is an ensemble.')).toBeInTheDocument();
-    });
-
-    it('displays translated tagline in French', () => {
-      renderWithI18n(<EnsembleHeader />, { language: 'fr' });
-
-      expect(screen.getByText("L'IA la plus intelligente est un ensemble.")).toBeInTheDocument();
+      expect(screen.queryByRole('heading', { level: 1 })).not.toBeInTheDocument();
     });
   });
 });

@@ -3,7 +3,7 @@ import type {
   ProviderRegistry,
   StreamResponseOptions,
 } from '@ensemble-ai/shared-utils/providers';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { EnsembleRunner } from './ensembleRunner.js';
 import type { EvalProvider } from '../types.js';
 
@@ -12,7 +12,12 @@ function buildProvider(args: {
     prompt: string,
     model: string,
     onChunk: (chunk: string) => void,
-    onComplete: (fullResponse: string, responseTime: number, tokenCount?: number) => void,
+    onComplete: (
+      fullResponse: string,
+      responseTime: number,
+      tokenCount?: number,
+      usage?: { inputTokens: number; outputTokens: number },
+    ) => void,
     onError: (error: Error) => void,
     options?: StreamResponseOptions,
   ) => Promise<void>;
@@ -35,17 +40,17 @@ function buildProvider(args: {
   };
 }
 
-function buildRegistry(providers: Record<EvalProvider, AIProvider>): ProviderRegistry {
+function buildRegistry(providers: Partial<Record<EvalProvider, AIProvider>>): ProviderRegistry {
   return {
     getProvider: (provider: EvalProvider) => providers[provider],
   } as unknown as ProviderRegistry;
 }
 
 describe('EnsembleRunner', () => {
-  it('collects responses, estimates costs, and keeps failed model runs', async () => {
+  it('collects responses, prices reported usage from the shared table, and keeps failed runs', async () => {
     const openaiProvider = buildProvider({
       onStream: async (_prompt, _model, _onChunk, onComplete) => {
-        onComplete('openai answer', 40, 1200);
+        onComplete('openai answer', 40, 1200, { inputTokens: 200, outputTokens: 1000 });
       },
       models: [{ id: 'gpt-4o', costPer1kTokens: 0.01 }],
     });
@@ -81,12 +86,44 @@ describe('EnsembleRunner', () => {
       responseTimeMs: 40,
       tokenCount: 1200,
     });
-    expect(results[0].estimatedCostUsd).toBeCloseTo(0.012, 10);
+    // gpt-4o in the shared price table: $2.50 input, $10 output per million tokens.
+    expect(results[0].estimatedCostUsd).toBeCloseTo((200 * 2.5 + 1000 * 10) / 1e6, 12);
+    expect(results[0].costFromTextLength).toBeUndefined();
+    // Usage is kept so token assumptions can be fitted later (calibrate-tokens).
+    expect(results[0].usage).toEqual({ inputTokens: 200, outputTokens: 1000, source: 'reported' });
+    // No price for an unknown model id: no cost rather than a guess.
+    expect(results[1].estimatedCostUsd).toBeUndefined();
     expect(results[1]).toMatchObject({
       provider: 'anthropic',
       model: 'claude',
       error: 'provider error',
     });
+  });
+
+  it('estimates tokens from text length when the provider reports no usage', async () => {
+    const provider = buildProvider({
+      onStream: async (_prompt, _model, _onChunk, onComplete) => {
+        onComplete('openai answer', 40, 1200);
+      },
+    });
+    const runner = new EnsembleRunner(
+      buildRegistry({
+        openai: provider,
+        anthropic: provider,
+        google: provider,
+        xai: provider,
+        deepseek: provider,
+        perplexity: provider,
+      }),
+      'mock',
+    );
+
+    const [result] = await runner.runPrompt('Test prompt', [{ provider: 'openai', model: 'gpt-4o' }]);
+
+    // 'Test prompt' is 11 characters (3 tokens), 'openai answer' 13 (4 tokens).
+    expect(result.estimatedCostUsd).toBeCloseTo((3 * 2.5 + 4 * 10) / 1e6, 12);
+    expect(result.costFromTextLength).toBe(true);
+    expect(result.usage).toEqual({ inputTokens: 3, outputTokens: 4, source: 'estimated' });
   });
 
   it('supports configurable delay between starting model calls', async () => {
@@ -331,5 +368,107 @@ describe('EnsembleRunner', () => {
 
     expect(results).toHaveLength(1);
     expect(results[0].content).toBe('ok');
+  });
+
+  describe('structured final answers', () => {
+    const spec = { kind: 'choice' as const, choices: ['A', 'B', 'C', 'D'] };
+
+    it('asks generateStructured for the answer and stores it as a Final answer line', async () => {
+      const generateStructured = vi.fn(async () => ({
+        parsed: { reasoning: 'B is right.', answer: 'B' } as never,
+        raw: '{}',
+        responseTimeMs: 12,
+        usage: { inputTokens: 100, outputTokens: 50 },
+      }));
+      const stream = vi.fn();
+      const provider = { ...buildProvider({ onStream: stream }), generateStructured };
+      const runner = new EnsembleRunner(buildRegistry({ openai: provider }), 'free', { temperature: 0.5 });
+
+      const [result] = await runner.runPrompt('Q', [{ provider: 'openai', model: 'gpt-4o' }], { answer: spec });
+
+      expect(generateStructured).toHaveBeenCalledWith('Q', 'gpt-4o', expect.objectContaining({ name: 'final_answer' }), {
+        temperature: 0.5,
+      });
+      expect(stream).not.toHaveBeenCalled();
+      expect(result.content).toBe('B is right.\n\nFinal answer: B');
+      expect(result.answerSource).toBe('structured');
+      expect(result.tokenCount).toBe(150);
+      expect(result.estimatedCostUsd).toBeCloseTo((100 * 2.5 + 50 * 10) / 1e6, 12);
+    });
+
+    it('falls back to a streamed reply when the server rejects structured output', async () => {
+      const generateStructured = vi.fn(async () => {
+        throw Object.assign(new Error('response_format is not supported'), { status: 400 });
+      });
+      const provider = {
+        ...buildProvider({
+          onStream: async (_p, _m, _c, onComplete) => onComplete('Thinking.\nFinal answer: C', 9, 30),
+        }),
+        generateStructured,
+      };
+      const runner = new EnsembleRunner(buildRegistry({ openai: provider }), 'free');
+
+      const [result] = await runner.runPrompt('Q', [{ provider: 'openai', model: 'gpt-4o' }], { answer: spec });
+
+      expect(result.content).toBe('Thinking.\nFinal answer: C');
+      expect(result.answerSource).toBe('text');
+      expect(result.error).toBeUndefined();
+    });
+
+    it('reports rate limits instead of falling back', async () => {
+      const generateStructured = vi.fn(async () => {
+        throw Object.assign(new Error('429 Too Many Requests'), { status: 429 });
+      });
+      const stream = vi.fn();
+      const provider = { ...buildProvider({ onStream: stream }), generateStructured };
+      const runner = new EnsembleRunner(buildRegistry({ openai: provider }), 'free');
+
+      const [result] = await runner.runPrompt('Q', [{ provider: 'openai', model: 'gpt-4o' }], { answer: spec });
+
+      expect(result.error).toMatch(/429/);
+      expect(stream).not.toHaveBeenCalled();
+    });
+
+    it('uses the raw reply when the parsed object has no answer', async () => {
+      const provider = {
+        ...buildProvider({ onStream: vi.fn() }),
+        generateStructured: vi.fn(async () => ({ parsed: {} as never, raw: 'Final answer: D', responseTimeMs: 1 })),
+      };
+      const runner = new EnsembleRunner(buildRegistry({ openai: provider }), 'free');
+      const [result] = await runner.runPrompt('Q', [{ provider: 'openai', model: 'gpt-4o' }], { answer: spec });
+      expect(result.content).toBe('Final answer: D');
+      expect(result.answerSource).toBe('text');
+    });
+  });
+
+  describe('OpenAI-compatible pricing', () => {
+    const provider = buildProvider({
+      onStream: async (_p, _m, _c, onComplete) =>
+        onComplete('ok', 5, 1500, { inputTokens: 1000, outputTokens: 500 }),
+    });
+
+    it('prices local endpoint models at zero', async () => {
+      const runner = new EnsembleRunner(buildRegistry({ 'openai-compatible': provider }), 'free', {
+        endpoints: [{ id: 'ollama', baseURL: 'http://localhost:11434/v1' }],
+      });
+      const [result] = await runner.runPrompt('Q', [{ provider: 'openai-compatible', model: 'ollama/llama3.2' }]);
+      expect(result.estimatedCostUsd).toBe(0);
+    });
+
+    it('prices OpenRouter models from the shared table', async () => {
+      const runner = new EnsembleRunner(buildRegistry({ 'openai-compatible': provider }), 'free', {
+        endpoints: [{ id: 'openrouter', baseURL: 'https://openrouter.ai/api/v1' }],
+      });
+      const [result] = await runner.runPrompt('Q', [
+        { provider: 'openai-compatible', model: 'openrouter/anthropic/claude-fable-5' },
+      ]);
+      expect(result.estimatedCostUsd).toBeGreaterThan(0);
+    });
+
+    it('leaves endpoints it was not told about unpriced', async () => {
+      const runner = new EnsembleRunner(buildRegistry({ 'openai-compatible': provider }), 'free');
+      const [result] = await runner.runPrompt('Q', [{ provider: 'openai-compatible', model: 'ollama/llama3.2' }]);
+      expect(result.estimatedCostUsd).toBeUndefined();
+    });
   });
 });

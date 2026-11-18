@@ -1,16 +1,16 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { ModelSelectionList } from './ModelSelectionList';
+import { ModelSelectionList, type Model } from './ModelSelectionList';
 import { renderWithI18n } from '../../../lib/test-utils/i18n-test-wrapper';
 
-const mockModels = [
-  { id: 'gpt-4', provider: 'openai' as const, name: 'GPT-4', modalities: ['text', 'image'] },
-  { id: 'gpt-4-turbo', provider: 'openai' as const, name: 'GPT-4 Turbo' },
-  { id: 'claude-3-opus', provider: 'anthropic' as const, name: 'Claude 3 Opus' },
-  { id: 'claude-3-sonnet', provider: 'anthropic' as const, name: 'Claude 3 Sonnet' },
-  { id: 'gemini-pro', provider: 'google' as const, name: 'Gemini Pro' },
-  { id: 'grok-1', provider: 'xai' as const, name: 'Grok 1' },
+const mockModels: Model[] = [
+  { id: 'gpt-4', provider: 'openai', name: 'GPT-4', modalities: ['text', 'image'] },
+  { id: 'gpt-4-turbo', provider: 'openai', name: 'GPT-4 Turbo' },
+  { id: 'claude-3-opus', provider: 'anthropic', name: 'Claude 3 Opus' },
+  { id: 'claude-3-sonnet', provider: 'anthropic', name: 'Claude 3 Sonnet' },
+  { id: 'gemini-pro', provider: 'google', name: 'Gemini Pro' },
+  { id: 'grok-1', provider: 'xai', name: 'Grok 1' },
 ];
 
 describe('ModelSelectionList', () => {

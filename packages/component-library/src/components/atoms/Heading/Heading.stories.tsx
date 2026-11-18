@@ -16,7 +16,7 @@ const meta = {
     },
     size: {
       control: 'select',
-      options: ['xs', 'sm', 'md', 'lg', 'xl', '2xl', '3xl'],
+      options: ['xs', 'sm', 'md', 'lg', 'xl', '2xl', '3xl', 'title', 'display'],
       description: 'Visual size (independent of semantic level)',
     },
   },
@@ -52,6 +52,8 @@ export const AllSizes: Story = {
       <Heading level={2} size="xl">Extra Large (xl)</Heading>
       <Heading level={2} size="2xl">2X Large (2xl)</Heading>
       <Heading level={2} size="3xl">3X Large (3xl)</Heading>
+      <Heading level={2} size="title">Title (title)</Heading>
+      <Heading level={2} size="display">Display (display)</Heading>
     </div>
   ),
 };
@@ -169,5 +171,14 @@ export const Playground: Story = {
     level: 2,
     size: 'lg',
     children: 'Editable Heading Text',
+  },
+};
+
+// Landing hero headline in the display typeface
+export const Display: Story = {
+  args: {
+    level: 1,
+    size: 'display',
+    children: 'Ask several models. See where they agree.',
   },
 };

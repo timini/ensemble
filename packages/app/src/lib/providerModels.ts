@@ -1,16 +1,19 @@
-import type { Model } from '@/components/organisms/ModelSelectionList';
+import type { Model } from "@/components/organisms/ModelSelectionList";
 import type {
   ProviderName,
   ProviderMode,
   ModelMetadata,
   AIProvider,
-} from '@ensemble-ai/shared-utils/providers';
-import { ProviderRegistry } from '@ensemble-ai/shared-utils/providers';
-import { FALLBACK_MODELS } from './models';
-import { toError } from './errors';
-import { initializeProviders } from '~/providers';
-import { logger } from '~/lib/logger';
-import { inferModelModalities, normalizeModelModalities } from './modelModalities';
+} from "@ensemble-ai/shared-utils/providers";
+import { ProviderRegistry } from "@ensemble-ai/shared-utils/providers";
+import { FALLBACK_MODELS } from "./models";
+import { toError } from "./errors";
+import { initializeProviders } from "~/providers";
+import { logger } from "~/lib/logger";
+import {
+  inferModelModalities,
+  normalizeModelModalities,
+} from "./modelModalities";
 
 export function mapModelMetadataToModels(
   provider: ProviderName,
@@ -64,7 +67,6 @@ export async function fetchProviderModels(options: {
   const registry = ProviderRegistry.getInstance();
   let client: AIProvider;
   try {
-
     client = registry.getProvider(options.provider, options.mode);
   } catch (error: unknown) {
     throw toError(
@@ -79,16 +81,20 @@ export async function fetchProviderModels(options: {
   );
   const metadataMap = new Map(metadata.map((model) => [model.id, model]));
 
-  if (!('listAvailableTextModels' in client)) {
+  if (!("listAvailableTextModels" in client)) {
     return metadata;
   }
 
   try {
-    const textModels = await (client as TextModelCapableProvider).listAvailableTextModels();
+    const textModels = await (
+      client as TextModelCapableProvider
+    ).listAvailableTextModels();
     const resolved = textModels
       .map((raw) => sanitizeModelIdentifier(raw))
       .filter((value): value is string => value.length > 0)
-      .map((id) => metadataMap.get(id) ?? createModelFromId(options.provider, id));
+      .map(
+        (id) => metadataMap.get(id) ?? createModelFromId(options.provider, id),
+      );
 
     if (resolved.length > 0) {
       return resolved;
@@ -96,7 +102,7 @@ export async function fetchProviderModels(options: {
   } catch (error: unknown) {
     console.warn(
       `Failed to load dynamic models for ${options.provider}`,
-      toError(error, 'Unable to load dynamic provider models'),
+      toError(error, "Unable to load dynamic provider models"),
     );
   }
 
@@ -125,7 +131,7 @@ function createModelFromId(provider: ProviderName, identifier: string): Model {
 }
 
 export function sanitizeModelIdentifier(value: string): string {
-  return value.replace(/^models\//i, '').trim();
+  return value.replace(/^models\//i, "").trim();
 }
 
 export function formatModelLabelFromId(rawId: string): string {
@@ -138,5 +144,5 @@ export function formatModelLabelFromId(rawId: string): string {
     .split(/[-_]/g)
     .filter((segment) => segment.length > 0)
     .map((segment) => segment.charAt(0).toUpperCase() + segment.slice(1))
-    .join(' ');
+    .join(" ");
 }

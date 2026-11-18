@@ -1,21 +1,22 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   generateEmbeddingsForResponses,
   resolveEmbeddingsMode,
-} from '~/lib/embeddings';
+} from "~/lib/embeddings";
 import {
+  EmbeddingsNotSupportedError,
   MockProviderClient,
   ProviderRegistry,
-} from '@ensemble-ai/shared-utils/providers';
-import type { ModelResponse } from '~/store';
+} from "@ensemble-ai/shared-utils/providers";
+import type { ModelResponse } from "~/store";
 
 const registry = ProviderRegistry.getInstance();
 const originalMockMode = process.env.NEXT_PUBLIC_MOCK_MODE;
 
 const createResponse = (modelId: string, response: string): ModelResponse => ({
   modelId,
-  provider: 'openai',
-  model: 'gpt-4o',
+  provider: "openai",
+  model: "gpt-4o",
   response,
   isStreaming: false,
   isComplete: true,
@@ -35,50 +36,48 @@ class TrackingClient extends MockProviderClient {
 
 beforeEach(() => {
   registry.clearAll();
-  registry.register('openai', 'mock', new MockProviderClient());
+  registry.register("openai", "mock", new MockProviderClient());
 });
 
 afterEach(() => {
   process.env.NEXT_PUBLIC_MOCK_MODE = originalMockMode;
 });
 
-describe('generateEmbeddingsForResponses', () => {
-  it('returns embeddings for completed responses', async () => {
+describe("generateEmbeddingsForResponses", () => {
+  it("returns embeddings for completed responses", async () => {
     const responses = [
-      createResponse('model-a', 'First response'),
-      createResponse('model-b', 'Second response'),
+      createResponse("model-a", "First response"),
+      createResponse("model-b", "Second response"),
     ];
 
     const result = await generateEmbeddingsForResponses({
       responses,
-      provider: 'openai',
-      mode: 'free',
+      provider: "openai",
+      mode: "mock",
     });
 
     expect(result).toHaveLength(2);
-    expect(result[0]?.modelId).toBe('model-a');
+    expect(result[0]?.modelId).toBe("model-a");
     expect(result[0]?.embedding).toHaveLength(1536);
-    expect(result[1]?.modelId).toBe('model-b');
+    expect(result[1]?.modelId).toBe("model-b");
   });
 
-  it('skips generating embeddings already present in cache', async () => {
+  it("skips generating embeddings already present in cache", async () => {
     const trackingClient = new TrackingClient();
     registry.clearAll();
-    registry.register('openai', 'mock', trackingClient);
+    registry.register("openai", "mock", trackingClient);
 
     const responses = [
-      createResponse('model-a', 'Cached response'),
-      createResponse('model-b', 'Needs embedding'),
+      createResponse("model-a", "Cached response"),
+      createResponse("model-b", "Needs embedding"),
     ];
 
-    const existingEmbeddings = [
-      { modelId: 'model-a', embedding: [0, 0, 1] },
-    ];
+    const existingEmbeddings = [{ modelId: "model-a", embedding: [0, 0, 1] }];
 
     const result = await generateEmbeddingsForResponses({
       responses,
-      provider: 'openai',
-      mode: 'free',
+      provider: "openai",
+      mode: "mock",
       existingEmbeddings,
     });
 
@@ -87,42 +86,78 @@ describe('generateEmbeddingsForResponses', () => {
     expect(result[0]?.embedding).toEqual(existingEmbeddings[0]?.embedding);
   });
 
-  it('invokes onError callback when embedding generation fails', async () => {
+  it("invokes onError callback when embedding generation fails", async () => {
     class ErroringClient extends MockProviderClient {
       override async generateEmbeddings(): Promise<number[]> {
-        throw new Error('boom');
+        throw new Error("boom");
       }
     }
 
     registry.clearAll();
-    registry.register('openai', 'mock', new ErroringClient());
+    registry.register("openai", "mock", new ErroringClient());
 
-    const responses = [createResponse('model-a', 'text')];
+    const responses = [createResponse("model-a", "text")];
     const onError = vi.fn();
 
     const result = await generateEmbeddingsForResponses({
       responses,
-      provider: 'openai',
-      mode: 'free',
+      provider: "openai",
+      mode: "mock",
       onError,
     });
 
     expect(onError).toHaveBeenCalledTimes(1);
-    expect(onError).toHaveBeenCalledWith('model-a', expect.any(Error));
+    expect(onError).toHaveBeenCalledWith("model-a", expect.any(Error));
     expect(result).toHaveLength(0);
   });
 });
 
-describe('resolveEmbeddingsMode', () => {
-  it('returns mock mode when override enabled', () => {
-    process.env.NEXT_PUBLIC_MOCK_MODE = 'true';
-    expect(resolveEmbeddingsMode('free')).toBe('mock');
-    expect(resolveEmbeddingsMode('pro')).toBe('mock');
+describe("generateEmbeddingsForResponses outside mock mode", () => {
+  it("does not fall back to mock vectors when the free client is missing", async () => {
+    process.env.NEXT_PUBLIC_MOCK_MODE = "false";
+    const responses = [createResponse("model-a", "text")];
+
+    await expect(
+      generateEmbeddingsForResponses({
+        responses,
+        provider: "openai",
+        mode: "free",
+      }),
+    ).rejects.toThrow("not found for mode 'free'");
   });
 
-  it('returns provided mode when override disabled', () => {
-    process.env.NEXT_PUBLIC_MOCK_MODE = 'false';
-    expect(resolveEmbeddingsMode('free')).toBe('free');
-    expect(resolveEmbeddingsMode('pro')).toBe('pro');
+  it("rethrows when the provider has no embeddings API", async () => {
+    process.env.NEXT_PUBLIC_MOCK_MODE = "false";
+    class NoEmbeddingsClient extends MockProviderClient {
+      override async generateEmbeddings(): Promise<number[]> {
+        throw new EmbeddingsNotSupportedError("anthropic");
+      }
+    }
+    registry.register("anthropic", "free", new NoEmbeddingsClient());
+    const onError = vi.fn();
+
+    await expect(
+      generateEmbeddingsForResponses({
+        responses: [createResponse("model-a", "text")],
+        provider: "anthropic",
+        mode: "free",
+        onError,
+      }),
+    ).rejects.toBeInstanceOf(EmbeddingsNotSupportedError);
+    expect(onError).not.toHaveBeenCalled();
+  });
+});
+
+describe("resolveEmbeddingsMode", () => {
+  it("returns mock mode when override enabled, except for Pro, which goes to the server", () => {
+    process.env.NEXT_PUBLIC_MOCK_MODE = "true";
+    expect(resolveEmbeddingsMode("free")).toBe("mock");
+    expect(resolveEmbeddingsMode("pro")).toBe("pro");
+  });
+
+  it("returns provided mode when override disabled", () => {
+    process.env.NEXT_PUBLIC_MOCK_MODE = "false";
+    expect(resolveEmbeddingsMode("free")).toBe("free");
+    expect(resolveEmbeddingsMode("pro")).toBe("pro");
   });
 });

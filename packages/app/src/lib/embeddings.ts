@@ -1,12 +1,13 @@
 import {
+  isEmbeddingsNotSupportedError,
   ProviderRegistry,
   type ProviderMode,
   type AIProvider,
-} from '@ensemble-ai/shared-utils/providers';
-import type { ModelResponse } from '~/store';
-import type { ProviderType } from '~/store/slices/ensembleSlice';
-import { toError } from '~/lib/errors';
-import { logger } from '~/lib/logger';
+} from "@ensemble-ai/shared-utils/providers";
+import type { AgreementAnswer } from "~/lib/agreement";
+import type { ProviderType } from "~/store/slices/ensembleSlice";
+import { toError } from "~/lib/errors";
+import { logger } from "~/lib/logger";
 
 export type EmbeddingVector = {
   modelId: string;
@@ -14,14 +15,15 @@ export type EmbeddingVector = {
 };
 
 export interface GenerateEmbeddingsOptions {
-  responses: ModelResponse[];
+  /** Model answers and manual answers to embed. */
+  responses: AgreementAnswer[];
   provider: ProviderType;
   mode: ProviderMode;
   existingEmbeddings?: EmbeddingVector[];
   onError?: (modelId: string, error: Error) => void;
 }
 
-function isEmbeddableResponse(response: ModelResponse): boolean {
+function isEmbeddableResponse(response: AgreementAnswer): boolean {
   return (
     response.isComplete &&
     !response.error &&
@@ -33,8 +35,10 @@ function isEmbeddableResponse(response: ModelResponse): boolean {
  * Resolve the provider mode taking the MOCK_MODE override into account.
  */
 export function resolveEmbeddingsMode(mode: ProviderMode): ProviderMode {
-  if (process.env.NEXT_PUBLIC_MOCK_MODE === 'true') {
-    return 'mock';
+  // Pro goes to the server even in mock mode, where the server answers from its mock upstream.
+  if (mode === "pro") return "pro";
+  if (process.env.NEXT_PUBLIC_MOCK_MODE === "true") {
+    return "mock";
   }
   return mode;
 }
@@ -61,17 +65,15 @@ export async function generateEmbeddingsForResponses({
   const resolvedMode = resolveEmbeddingsMode(mode);
   let client: AIProvider;
 
+  // No fallback to the mock client outside mock mode: fake vectors would
+  // produce a fake agreement score.
   try {
     client = registry.getProvider(provider, resolvedMode);
   } catch (error: unknown) {
-    if (resolvedMode !== 'mock' && registry.hasProvider(provider, 'mock')) {
-      client = registry.getProvider(provider, 'mock');
-    } else {
-      throw toError(
-        error,
-        `Provider '${provider}' not registered for mode '${resolvedMode}'`,
-      );
-    }
+    throw toError(
+      error,
+      `Provider '${provider}' not registered for mode '${resolvedMode}'`,
+    );
   }
 
   const handleError =
@@ -96,6 +98,10 @@ export async function generateEmbeddingsForResponses({
       const embedding = await client.generateEmbeddings(response.response);
       embeddingMap.set(response.modelId, embedding);
     } catch (error: unknown) {
+      // A provider without embeddings fails the same way for every response.
+      if (isEmbeddingsNotSupportedError(error)) {
+        throw error;
+      }
       handleError(response.modelId, toError(error));
     }
   }

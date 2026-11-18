@@ -116,15 +116,17 @@ describe('Free mode provider clients', () => {
 
   describe('FreeOpenAIClient', () => {
     it('validates API key successfully', async () => {
-      mocks.openAiRetrieve.mockResolvedValueOnce({});
+      mocks.openAiList.mockResolvedValueOnce({ data: [] });
       const client = new FreeOpenAIClient('openai', () => 'sk-test');
       const result = await client.validateApiKey('sk-test');
       expect(result.valid).toBe(true);
-      expect(mocks.openAiRetrieve).toHaveBeenCalledWith('gpt-4o-mini');
+      // Listing models checks the key without depending on any one model id.
+      expect(mocks.openAiList).toHaveBeenCalled();
+      expect(mocks.openAiRetrieve).not.toHaveBeenCalled();
     });
 
     it('reports validation errors', async () => {
-      mocks.openAiRetrieve.mockRejectedValueOnce(new Error('Invalid key'));
+      mocks.openAiList.mockRejectedValueOnce(new Error('Invalid key'));
       const client = new FreeOpenAIClient('openai', () => 'sk-test');
       const result = await client.validateApiKey('sk-test');
       expect(result.valid).toBe(false);
@@ -167,15 +169,25 @@ describe('Free mode provider clients', () => {
     it('fetches text models via Anthropic SDK', async () => {
       mocks.anthropicModelsList.mockResolvedValueOnce({
         data: [
-          { id: 'claude-3-5-sonnet-20241022' },
-          { id: 'claude-3-opus-20240229' },
+          { id: 'claude-opus-5-5' },
+          { id: 'claude-haiku-5-5' },
           { id: 'text-embedding-ada-002' }, // Should be filtered out
         ],
       });
       const client = new FreeAnthropicClient('anthropic', () => 'sk-ant');
       await expect(client.listAvailableTextModels()).resolves.toEqual([
-        'claude-3-5-sonnet-20241022',
-        'claude-3-opus-20240229',
+        'claude-opus-5-5',
+        'claude-haiku-5-5',
+      ]);
+    });
+
+    it('falls back to current Claude models when the SDK call fails', async () => {
+      mocks.anthropicModelsList.mockRejectedValueOnce(new Error('network'));
+      const client = new FreeAnthropicClient('anthropic', () => 'sk-ant');
+      await expect(client.listAvailableTextModels()).resolves.toEqual([
+        'claude-opus-5-5',
+        'claude-sonnet-5-5',
+        'claude-haiku-5-5',
       ]);
     });
   });
@@ -364,7 +376,7 @@ describe('Free mode provider clients', () => {
     expect(models).toEqual(['gpt-4o', 'o1-preview']);
   });
 
-  it('requires API keys for stream and embedding operations in the base client', async () => {
+  it('requires API keys for streaming and reports missing embeddings support in the base client', async () => {
     const onError = vi.fn();
     const client = new TestFreeClient(() => null);
     await client.streamResponse('prompt', 'model', vi.fn(), vi.fn(), onError);
@@ -374,7 +386,9 @@ describe('Free mode provider clients', () => {
       }),
     );
 
-    await expect(client.generateEmbeddings('text')).rejects.toThrow('Missing API key');
+    await expect(client.generateEmbeddings('text')).rejects.toThrow(
+      'does not provide an embeddings API',
+    );
   });
 
   it('falls back to mock text models when fetchTextModels fails', async () => {
@@ -590,6 +604,67 @@ describe('Free mode provider clients', () => {
       );
       expect(onComplete).not.toHaveBeenCalled();
     }, 10000);
+
+    it('reports a timeout as a ProviderError of kind timeout and honours timeoutMs', async () => {
+      vi.useFakeTimers();
+
+      let lateHandlers: { onChunk: (c: string) => void; onComplete: (r: string, t: number) => void } | null = null;
+      class SlowClient extends BaseFreeClient {
+        async validateApiKey() {
+          return { valid: true };
+        }
+
+        protected override async streamWithProvider(options: {
+          onChunk: (chunk: string) => void;
+          onComplete: (response: string, time: number) => void;
+        }): Promise<void> {
+          lateHandlers = options;
+          await new Promise(() => undefined);
+        }
+      }
+
+      const client = new SlowClient('anthropic', () => 'test-key');
+      const onChunk = vi.fn();
+      const onComplete = vi.fn();
+      const onError = vi.fn();
+      const streamPromise = client.streamResponse('p', 'm', onChunk, onComplete, onError, {
+        timeoutMs: 5000,
+      });
+
+      await vi.advanceTimersByTimeAsync(5001);
+      await streamPromise;
+
+      expect(onError).toHaveBeenCalledTimes(1);
+      const error = onError.mock.calls[0][0];
+      expect(error.kind).toBe('timeout');
+      expect(error.provider).toBe('anthropic');
+      expect(error.message).toContain('5s');
+
+      // A stream that wakes up after the timeout must not report anything.
+      lateHandlers!.onChunk('late');
+      lateHandlers!.onComplete('late', 1);
+      expect(onChunk).not.toHaveBeenCalled();
+      expect(onComplete).not.toHaveBeenCalled();
+    });
+
+    it('classifies a thrown provider error', async () => {
+      mocks.openAiChatCreate.mockRejectedValueOnce(new MockAPIError(429, '429 Rate limit reached'));
+      const client = new FreeOpenAIClient('openai', () => 'sk-test');
+      const onError = vi.fn();
+
+      await client.streamResponse('prompt', 'gpt-4o', vi.fn(), vi.fn(), onError);
+
+      expect(onError.mock.calls[0][0]).toMatchObject({ kind: 'rate_limited', status: 429, provider: 'openai' });
+    });
+
+    it('reports a missing key as missing_key', async () => {
+      const client = new FreeOpenAIClient('openai', () => null);
+      const onError = vi.fn();
+
+      await client.streamResponse('prompt', 'gpt-4o', vi.fn(), vi.fn(), onError);
+
+      expect(onError.mock.calls[0][0]).toMatchObject({ kind: 'missing_key' });
+    });
 
     it('should complete normally when stream finishes before timeout', async () => {
       class FastClient extends BaseFreeClient {

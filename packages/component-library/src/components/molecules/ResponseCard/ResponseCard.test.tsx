@@ -1,5 +1,5 @@
-import { describe, it, expect } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { describe, it, expect, vi } from 'vitest';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { ResponseCard } from './ResponseCard';
 import { renderWithI18n } from '../../../lib/test-utils/i18n-test-wrapper';
 
@@ -193,6 +193,40 @@ describe('ResponseCard', () => {
   });
 
   describe('error state', () => {
+    it('explains the error kind and keeps the provider detail', () => {
+      render(
+        <ResponseCard
+          modelName="GPT-4"
+          provider="openai"
+          status="error"
+          responseType="ai"
+          error="429 Rate limit reached"
+          errorKind="rate_limited"
+          retryAfterSeconds={12}
+        />
+      );
+      expect(screen.getByTestId('response-error')).toHaveAttribute('data-error-kind', 'rate_limited');
+      expect(screen.getByTestId('response-error-title')).toHaveTextContent('Rate limit reached');
+      expect(screen.getByTestId('response-error-description')).toHaveTextContent('12 seconds');
+      expect(screen.getByTestId('response-error-detail')).toHaveTextContent('429 Rate limit reached');
+    });
+
+    it('exposes the error kind on the card', () => {
+      const { container } = render(
+        <ResponseCard status="error" responseType="ai" modelName="X" errorKind="timeout" error="t" />
+      );
+      expect(container.querySelector('[data-error-kind="timeout"]')).toBeInTheDocument();
+    });
+
+    it('retries from the error state', () => {
+      const onRetry = vi.fn();
+      render(
+        <ResponseCard status="error" responseType="ai" modelName="X" errorKind="invalid_key" onRetry={onRetry} />
+      );
+      fireEvent.click(screen.getByTestId('retry-button'));
+      expect(onRetry).toHaveBeenCalledTimes(1);
+    });
+
     it('shows error message', () => {
       render(
         <ResponseCard
@@ -473,6 +507,15 @@ describe('ResponseCard', () => {
   });
 
   describe('internationalization', () => {
+    it('shows the token count with a translated, pluralised label', () => {
+      const card = (count: number) => <ResponseCard modelName="GPT-4" provider="openai" status="complete" responseType="ai" content="Done" tokenCount={count} />;
+      const { unmount } = renderWithI18n(card(1), { language: 'en' });
+      expect(screen.getByText('1 token')).toBeInTheDocument();
+      unmount();
+      renderWithI18n(card(42), { language: 'fr' });
+      expect(screen.getByText('42 jetons')).toBeInTheDocument();
+    });
+
     it('renders manual badge in English', () => {
       renderWithI18n(<ResponseCard status="complete" responseType="manual" content="Manual response" />, { language: 'en' });
       expect(screen.getByText('Manual')).toBeInTheDocument();

@@ -235,6 +235,37 @@ describe('AgreementAnalysis', () => {
     });
   });
 
+  describe('test ids', () => {
+    it('marks one row per pairwise comparison with its similarity', () => {
+      const comparisons = [
+        { model1: 'A', model2: 'B', similarity: 0.72, confidence: 0.72 },
+        { model1: 'A', model2: 'C', similarity: 0.65, confidence: 0.65 },
+        { model1: 'B', model2: 'C', similarity: 0.4, confidence: 0.4 },
+      ];
+      render(
+        <AgreementAnalysis
+          overallAgreement={0.59}
+          pairwiseComparisons={comparisons}
+          responseCount={3}
+          comparisonCount={3}
+          averageConfidence={0.59}
+        />
+      );
+
+      expect(screen.getByTestId('pairwise-comparisons')).toBeInTheDocument();
+      const rows = screen.getAllByTestId('pairwise-comparison');
+      expect(rows).toHaveLength(3);
+      expect(screen.getAllByTestId('pairwise-similarity').map((el) => el.textContent)).toEqual([
+        '72%',
+        '65%',
+        '40%',
+      ]);
+      expect(screen.getByTestId('agreement-overall')).toHaveTextContent('59%');
+      expect(screen.getByTestId('agreement-response-count')).toHaveTextContent('3');
+      expect(screen.getByTestId('agreement-comparison-count')).toHaveTextContent('3');
+    });
+  });
+
   describe('statistics', () => {
     it('renders response count', () => {
       render(
@@ -495,6 +526,55 @@ describe('AgreementAnalysis', () => {
       expect(screen.getByText('RÉPONSES ANALYSÉES')).toBeInTheDocument();
       expect(screen.getByText('COMPARAISONS')).toBeInTheDocument();
       expect(screen.getByText('CONFIANCE MOYENNE')).toBeInTheDocument();
+    });
+  });
+
+  describe('calibration', () => {
+    const base = {
+      pairwiseComparisons: mockComparisons,
+      responseCount: 2,
+      comparisonCount: 1,
+      averageConfidence: 0.7,
+    };
+
+    it('labels with the calibrated thresholds when given', () => {
+      renderWithI18n(
+        <AgreementAnalysis {...base} overallAgreement={0.7} levelThresholds={{ high: 0.65, medium: 0.55 }} />,
+      );
+      expect(screen.getByTestId('agreement-overall')).toHaveAttribute('data-agreement-level', 'high');
+    });
+
+    it('keeps the default thresholds otherwise', () => {
+      renderWithI18n(<AgreementAnalysis {...base} overallAgreement={0.7} />);
+      expect(screen.getByTestId('agreement-overall')).toHaveAttribute('data-agreement-level', 'medium');
+    });
+
+    it('marks uncalibrated labels clearly', () => {
+      renderWithI18n(
+        <AgreementAnalysis {...base} overallAgreement={0.7} calibration={{ calibrated: false }} />,
+      );
+      const note = screen.getByTestId('agreement-calibration');
+      expect(note).toHaveAttribute('data-calibrated', 'false');
+      expect(note).toHaveTextContent('Uncalibrated');
+      expect(note).toHaveTextContent('has not been calibrated');
+    });
+
+    it('names the embedding model of a calibrated mapping', () => {
+      renderWithI18n(
+        <AgreementAnalysis
+          {...base}
+          overallAgreement={0.7}
+          calibration={{ calibrated: true, embeddingModel: 'openai/text-embedding-3-small' }}
+        />,
+      );
+      expect(screen.getByTestId('agreement-calibration')).toHaveTextContent(
+        'Calibrated for openai/text-embedding-3-small',
+      );
+    });
+
+    it('shows no calibration note when none is passed', () => {
+      renderWithI18n(<AgreementAnalysis {...base} overallAgreement={0.7} />);
+      expect(screen.queryByTestId('agreement-calibration')).not.toBeInTheDocument();
     });
   });
 });

@@ -1,4 +1,5 @@
 import { computeMcNemar, computePairedBootstrapDelta } from './statistics.js';
+import { comparePaired } from './pairedStats.js';
 import type { ComparisonStats } from './analysisTypes.js';
 import type { QuestionSummary } from './analysisAggregates.js';
 
@@ -27,31 +28,32 @@ function extractPairs(
     .filter((value): value is PairedOutcome => Boolean(value));
 }
 
+/** Paired comparison of every strategy against every model on the questions both answered. */
 export function buildComparisonStats(
   questions: QuestionSummary[],
-  primaryStrategy: string | null,
+  strategies: string[],
   models: string[],
   bootstrapIterations: number,
 ): ComparisonStats[] {
-  if (!primaryStrategy) {
-    return [];
-  }
-
   const comparisons: ComparisonStats[] = [];
-  for (const model of models) {
-    const pairs = extractPairs(questions, model, primaryStrategy);
-    if (pairs.length === 0) {
-      continue;
+  for (const strategy of strategies) {
+    for (const model of models) {
+      const pairs = extractPairs(questions, model, strategy);
+      if (pairs.length === 0) {
+        continue;
+      }
+      const paired = comparePaired(pairs);
+      comparisons.push({
+        strategy,
+        comparedAgainst: model,
+        sampleSize: pairs.length,
+        mcnemar: { ...computeMcNemar(pairs), pValue: paired.pValue, method: paired.method },
+        bootstrap: {
+          ...computePairedBootstrapDelta(pairs, bootstrapIterations),
+          iterations: bootstrapIterations,
+        },
+      });
     }
-    comparisons.push({
-      comparedAgainst: model,
-      sampleSize: pairs.length,
-      mcnemar: computeMcNemar(pairs),
-      bootstrap: {
-        ...computePairedBootstrapDelta(pairs, bootstrapIterations),
-        iterations: bootstrapIterations,
-      },
-    });
   }
 
   return comparisons;

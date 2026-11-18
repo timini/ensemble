@@ -1,29 +1,118 @@
-# Create T3 App
+# @ai-ensemble/app
 
-This is a [T3 Stack](https://create.t3.gg/) project bootstrapped with `create-t3-app`.
+The Ensemble AI web app. A Next.js 15 (App Router, React 19) app that sends one prompt to several models, shows their answers side by side, and asks a chosen summarizer model to produce a consensus answer.
 
-## What's next? How do I make an app with this?
+UI components come from `packages/component-library`. Provider clients, encryption and similarity helpers come from `packages/shared-utils`. Consensus strategies come from the `packages/consensus-*` packages.
 
-We try to keep this project as simple as possible, so you can start with just the scaffolding we set up for you, and add additional things later when they become necessary.
+For where the product is going, see [docs/PRODUCT_VISION.md](../../docs/PRODUCT_VISION.md), [docs/ROADMAP.md](../../docs/ROADMAP.md) and [docs/ARCHITECTURE.md](../../docs/ARCHITECTURE.md).
 
-If you are not familiar with the different technologies used in this project, please refer to the respective docs. If you still are in the wind, please join our [Discord](https://t3.gg/discord) and ask for help.
+## Routes
 
-- [Next.js](https://nextjs.org)
-- [NextAuth.js](https://next-auth.js.org)
-- [Prisma](https://prisma.io)
-- [Drizzle](https://orm.drizzle.team)
-- [Tailwind CSS](https://tailwindcss.com)
-- [tRPC](https://trpc.io)
+The app has one working screen, `/workspace` (`src/app/workspace/`): the composer on top (question, model chips, consensus method with calls and cost, options), then the agreement score and consensus answer, then every answer in columns (tabs on phones). History and presets sit in a sidebar, keys and appearance in a settings sheet. On a first visit an onboarding sheet asks one question (own key, local models or Pro, which is coming soon), checks a key inline and, on Start, chooses a starting ensemble so the visitor only has to type a question. A first visit also follows the system's light or dark scheme and the browser's language (English or French) until the visitor picks one in settings. The landing page at `/` explains the product and links in. The old four-step wizard routes redirect into the workspace.
 
-## Learn More
+| Route | Purpose |
+|-------|---------|
+| `/` | Landing page: one sentence on the product, a recorded real run (`src/data/example-run.json`), and the three ways in (`/workspace?start=keys`, `/workspace?start=local`, Pro coming soon) |
+| `/workspace` | The workspace. `?panel=settings` opens settings, `?panel=models` the model picker, `?panel=prompt` focuses the question. `?start=keys` or `?start=local` opens onboarding on that path when nothing works yet |
+| `/config` | Redirects to `/workspace?panel=settings` (API keys, OpenAI-compatible endpoints such as Ollama, LM Studio and OpenRouter, embeddings provider, theme, language) |
+| `/ensemble` | Redirects to `/workspace?panel=models` |
+| `/prompt` | Redirects to `/workspace?panel=prompt` |
+| `/review` | Redirects to `/workspace`, which shows the last run |
+| `/about` | Why Ensemble exists, what the agreement score can and cannot say, who it is for, and published research (framed by the claims rule) |
+| `/features` | What Ensemble does, models, privacy, Free and Pro, and what we can and cannot claim yet, with a link to `/benchmarks` |
+| `/benchmarks` | Benchmark results from `src/data/benchmark-summary.json` (accuracy with Wilson intervals, McNemar p-values, cost), or a "not run yet" state with the estimate and method |
+| `/test-components` | Dev page that renders component-library buttons (404 in production unless `NEXT_PUBLIC_MOCK_MODE=true`) |
+| `/api/trpc/[trpc]` | tRPC endpoint (see Server below) |
 
-To learn more about the [T3 Stack](https://create.t3.gg/), take a look at the following resources:
+Consensus methods offered in the composer's method menu, each with its calls and cost before the run: `standard`, `elo`, `majority`, `council`. `standard`, `elo` and `council` are LLM-driven. `majority` first extracts a short final answer from each response with one structured call and counts the votes. On a tie, on long-form answers or when extraction fails, it falls back to the LLM rank-and-synthesize method.
 
-- [Documentation](https://create.t3.gg/)
-- [Learn the T3 Stack](https://create.t3.gg/en/faq#what-learning-resources-are-currently-available) — Check out these awesome tutorials
+## Modes
 
-You can check out the [create-t3-app GitHub repository](https://github.com/t3-oss/create-t3-app) — your feedback and contributions are welcome!
+- **Free** (default, the only mode users can pick). The user pastes their own provider keys. Keys are encrypted with AES-256-GCM (Web Crypto) and stored in localStorage. Requests go directly from the browser to each provider using the vendor SDKs with `dangerouslyAllowBrowser`. There is no server in the loop.
+- **Pro**. Not offered in the UI yet. `createProviderClient` throws "not yet implemented" for this mode. Not built yet, see [docs/ROADMAP.md](../../docs/ROADMAP.md).
+- **Mock** (developer only). Set `NEXT_PUBLIC_MOCK_MODE=true` (or run `npm run dev:mock`). Every provider call uses `MockProviderClient`, which streams lorem ipsum. Used by the mock-mode Playwright suite in `packages/e2e`.
 
-## How do I deploy this?
+Supported providers: OpenAI, Anthropic, Google, xAI, DeepSeek, Perplexity, and any number of OpenAI-compatible endpoints (Ollama, LM Studio, llama.cpp, vLLM, OpenRouter, Groq, Together, custom). On first run the workspace looks for a running Ollama and offers to add it; see [docs/LOCAL_MODELS.md](../../docs/LOCAL_MODELS.md).
 
-Follow our deployment guides for [Vercel](https://create.t3.gg/en/deployment/vercel), [Netlify](https://create.t3.gg/en/deployment/netlify) and [Docker](https://create.t3.gg/en/deployment/docker) for more information.
+### Example run on the landing page
+
+`src/data/example-run.json` is a real run recorded once through OpenRouter with cheap models by `scripts/record-example-run.mjs`, which uses the same client, similarity and `StandardConsensus` code as the workspace. `src/lib/exampleRun.ts` turns its cosine similarities into the score and level the workspace would show. To record it again (it costs well under one US cent):
+
+```bash
+npm run build --workspace=packages/shared-utils
+cd packages/app && node --env-file=../eval/.env.local --import tsx scripts/record-example-run.mjs
+```
+
+Page metadata (title, description, Open Graph) is set by the server layouts: `src/app/layout.tsx` for defaults, the page or route `layout.tsx` for each public page, with the text in `src/lib/siteMetadata.ts`. Next.js replaces the root `openGraph` object rather than merging it, so pages build theirs with `pageOpenGraph()`, which repeats the type and site name and adds the site name to the title. The client side of the root layout is `src/app/_components/RootShell.tsx`.
+
+### Agreement scores
+
+The workspace computes cosine similarity between response embeddings from OpenAI (`text-embedding-3-small`), Google (`gemini-embedding-2`) or an OpenAI-compatible endpoint with an embedding model (for example `nomic-embed-text` on Ollama). The provider is picked from the valid keys, OpenAI first, then Google, then an endpoint, and can be overridden in settings. Without any of them the agreement card says there is no score instead of showing one, links to settings, and gives the `ollama pull` command when a connected Ollama has no embedding model. Mock mode uses hash-based vectors, so its scores are not semantic.
+
+## Scripts
+
+Run from `packages/app` (or with `--workspace=packages/app` from the repo root).
+
+| Script | What it does |
+|--------|--------------|
+| `dev` | Same as `dev:free` |
+| `dev:free` | `next dev --turbo` with `NEXT_PUBLIC_MOCK_MODE=false` |
+| `dev:mock` | `next dev --turbo` with `NEXT_PUBLIC_MOCK_MODE=true` |
+| `build` | `next build`, then `scripts/flatten-standalone.mjs` |
+| `apphosting:build` | Builds the consensus and shared-utils packages, then the app (used by Firebase App Hosting) |
+| `start` | Copies static assets into `.next/standalone` and runs the standalone server |
+| `preview` | `next build && next start` |
+| `local` | `bin/ensemble-local.mjs`: builds the workspace if needed and serves the app on `http://localhost:3000` for local models (also `npm run local` at the root, and the `ensemble-local` bin) |
+| `check` | `next lint && tsc --noEmit` |
+| `lint`, `lint:fix` | `next lint` |
+| `typecheck` | `tsc --noEmit` |
+| `format:check`, `format:write` | Prettier |
+| `test` | `vitest run --coverage` |
+| `i18n:check` | Fails when an EN key has no FR string or the reverse (app and component library), when a string is empty or its `{{placeholders}}` differ, when code uses a literal `t()` key that does not exist, when a `.tsx` file has hard-coded JSX text or `aria-label`, `placeholder`, `title`, `alt`, `label`, `description`, `heading`, `lead`, `eyebrow` or `emptyText` text, or when a `.ts` file under `src/app` or `src/lib` passes a string literal to `setError` or `toast` (server and logger code left out). Part of `test` too |
+| `test:watch`, `test:ui` | Vitest watch mode and UI |
+| `test:integration:provider-auth` | Runs `src/server/api/__tests__/provider-router.integration.test.ts` |
+| `firebase:test-user:ensure` | `scripts/ensure-firebase-test-user.mjs` |
+
+## Environment variables
+
+Validated in `src/env.js` with `@t3-oss/env-nextjs`. All are optional except `NODE_ENV`. Set `SKIP_ENV_VALIDATION=1` to skip validation.
+
+Server:
+
+- `NODE_ENV`
+- `FIREBASE_PROJECT_ID`, `FIREBASE_CLIENT_EMAIL`, `FIREBASE_PRIVATE_KEY`: Firebase Admin credentials for verifying ID tokens on tRPC calls
+- `OPENAI_API_KEY`, `ANTHROPIC_API_KEY`, `GOOGLE_API_KEY`, `XAI_API_KEY`, `DEEPSEEK_API_KEY`, `PERPLEXITY_API_KEY`: used only by the server-side provider router
+
+Client:
+
+- `NEXT_PUBLIC_SENTRY_DSN`, `NEXT_PUBLIC_SENTRY_RELEASE`: Sentry (configured in `sentry.*.config.ts`)
+
+Not in `env.js` but read directly: `NEXT_PUBLIC_MOCK_MODE`.
+
+## Where things live
+
+| Path | Contents |
+|------|----------|
+| `src/app/` | Pages. Each workflow step keeps its page logic in a `hooks/` folder next to `page.tsx` |
+| `src/providers/index.ts` | `initializeProviders()`: registers a mock and a free client per provider in the shared `ProviderRegistry` |
+| `src/store/` | Zustand store (`index.ts`), slices in `slices/`, custom localStorage persistence in `middleware/` |
+| `src/lib/` | Embeddings, agreement, model lists, validation, logging, i18n |
+| `src/server/api/` | tRPC v11 routers: `auth`, `post` (leftover T3 demo), `provider` |
+| `src/server/auth/firebaseAdmin.ts` | Firebase Admin token verification for `protectedProcedure` |
+| `src/server/providers/providerService.ts` | Server-side provider calls behind the `provider` router |
+| `src/trpc/` | tRPC React and server clients |
+| `tests/` | Unit and integration tests |
+
+Path aliases: `~/*` is `src/*`; `@/*` is `../component-library/src/*`.
+
+## Server
+
+`src/server/api/root.ts` mounts three routers. `provider` has `listTextModels`, `streamText` (a mutation that buffers the full response) and `streamTextEvents` (a subscription). `auth.me` and all `provider` procedures require a Firebase ID token, checked with Firebase Admin.
+
+No UI code calls these routers today. There is no client-side Firebase sign-in and no billing code. The server path exists for the future Pro mode.
+
+## More docs
+
+- [docs/PROVIDER_ARCHITECTURE.md](./docs/PROVIDER_ARCHITECTURE.md)
+- [docs/STATE_MANAGEMENT.md](./docs/STATE_MANAGEMENT.md)
+- [docs/MOCK_CLIENT_SPECIFICATION.md](./docs/MOCK_CLIENT_SPECIFICATION.md)
