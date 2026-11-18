@@ -18,14 +18,14 @@ Do not write copy claiming ensembles are more accurate than the best single mode
 Modes:
 
 - **Free**: user's own provider keys, encrypted in the browser, providers called directly from the browser. Works today.
-- **Pro**: sign-in with Firebase Auth, Stripe credits, model calls on the server. Not built yet (roadmap M5).
+- **Pro**: sign-in with Firebase Auth, Stripe credits, model calls on the server. In progress (roadmap M5): sign-in, the credit ledger and Stripe routes exist; server model calls do not yet.
 - **Mock**: developer and CI only, enabled with `NEXT_PUBLIC_MOCK_MODE=true`. Never show a Mock option to users.
 
 ## Repository structure
 
 npm workspaces monorepo:
 
-- `packages/app/`: Next.js 15 App Router app. Routes: `/` (landing page with a recorded example run and the three ways in), `/workspace` (the one working screen), `/config`, `/ensemble`, `/prompt` and `/review` (redirect into the workspace with the matching panel open), `/features`, `/about`, `/benchmarks`, `/test-components` (dev only), `/api/trpc/[trpc]`.
+- `packages/app/`: Next.js 15 App Router app. Routes: `/` (landing page with a recorded example run and the three ways in), `/workspace` (the one working screen), `/config`, `/ensemble`, `/prompt` and `/review` (redirect into the workspace with the matching panel open), `/features`, `/about`, `/benchmarks`, `/test-components` (dev only), `/api/trpc/[trpc]`, `/api/stripe/checkout`, `/api/stripe/webhook`.
 - `packages/component-library/`: 63 atomic-design components (atoms, molecules, organisms) developed in Storybook. The app imports its source via a tsconfig alias.
 - `packages/shared-utils/`: provider clients, registry, factory, similarity maths, Web Crypto helpers. Exports from `dist`; rebuild after changes with `npm run build --workspace=packages/shared-utils`.
 - `packages/consensus-core`, `consensus-standard`, `consensus-majority`, `consensus-elo`, `consensus-council`: consensus strategies.
@@ -93,12 +93,13 @@ Adding a provider with its own API touches about 20 files; adding an OpenAI-comp
 ### Server (tRPC)
 
 - Context and `protectedProcedure`: `src/server/api/trpc.ts` (verifies a Firebase ID token)
-- Routers: `src/server/api/routers/` (`auth`, `provider`, and the T3 demo `post`, which M0 removes)
+- Routers: `src/server/api/routers/` (`auth`, `provider`, `credits`)
 - Root router: `src/server/api/root.ts`
 - Client hooks: `src/trpc/react.tsx`. Server caller: `src/trpc/server.ts`
 - Server provider calls: `src/server/providers/providerService.ts`
-
-No UI code calls tRPC yet. There is no client sign-in, database or Stripe code yet.
+- Credit ledger: `src/server/credits/` (Firestore, integer micro-dollars). Stripe: `src/server/stripe/` and `src/app/api/stripe/`.
+- Client sign-in: Firebase Auth in `src/lib/auth/` and `src/hooks/useAuthController.ts`, shown by `AccountMenu` in the workspace header. Off when the `NEXT_PUBLIC_FIREBASE_*` config is unset.
+- Emulator tests (Firestore rules, ledger, webhook): `npm run test:emulator --workspace=packages/app`. Setup for Auth, Firestore and Stripe: `docs/DEPLOYMENT.md`.
 
 ### Constitutional principles
 

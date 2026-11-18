@@ -96,9 +96,17 @@ Adding a provider with its own API and key touches about 20 files: shared-utils 
 - tRPC 11 at `/api/trpc/[trpc]`. Routers in `app/src/server/api/routers/`:
   - `auth` (`me`)
   - `provider` (`listTextModels`, `streamText`, `streamTextEvents`), using server keys from `src/env.js` through `server/providers/providerService.ts`. `streamText` buffers the whole answer. Cancellation is a no-op.
-  - `post` (leftover T3 demo).
-- `protectedProcedure` verifies a Firebase ID token with Firebase Admin (`server/auth/firebaseAdmin.ts`). The client has no sign-in code yet, and no UI calls any tRPC procedure.
-- Sentry is configured (`sentry.*.config.ts`). No database. No Stripe.
+  - `credits` (`packs`, public; `account` and `quote`, signed in). `quote` prices a run with `estimateRun` plus the margin and says whether the balance covers it (FR-036) and whether it is low (FR-038).
+- `protectedProcedure` verifies a Firebase ID token with Firebase Admin (`server/auth/firebaseAdmin.ts`). The client sends it as a Bearer header from `trpc/react.tsx`.
+- Credit service (`server/credits/`): balances in integer micro-dollars (1 USD is 1,000,000). An append-only `creditLedger` (purchase, reserve, settle, refund, grant) with the balance cached on `users/{uid}` in the same Firestore transaction. `reserveCredits` holds the high estimate plus the margin (`CREDIT_MARGIN_PERCENT`, default 30) and refuses a short balance; `settleRun` charges actual tokens plus the margin, capped at the reservation, and writes `usage/{uid}__{runId}`; `refundRun` gives back a failed run. All are idempotent by run id. `reserveForRun` in `runBilling.ts` is the entry point for the Pro run path, which is not wired yet.
+- Stripe (`server/stripe/`, routes under `app/api/stripe/`): `POST /api/stripe/checkout` creates a Checkout Session for a pack from `CREDIT_PACKS_USD` for a signed-in user; `POST /api/stripe/webhook` verifies the signature over the raw body and credits paid sessions once, keyed on the session id, with handled event ids in `stripeEvents`.
+- Firestore rules (`firestore.rules`): server writes only; a user reads their own user document, ledger entries and usage. Rules, ledger and webhook tests run against the emulators with `npm run test:emulator --workspace=packages/app`.
+- Sentry is configured (`sentry.*.config.ts`). Setup steps for Auth, Firestore and Stripe are in `docs/DEPLOYMENT.md`.
+
+## Client auth
+
+- Firebase Auth with Google (popup) and passwordless email link, in `lib/auth/` and `hooks/useAuthController.ts`, provided app-wide by `app/_components/AuthProvider.tsx`. The SDK loads on demand and only when the `NEXT_PUBLIC_FIREBASE_*` web config is set; otherwise the status is `unavailable` and Free mode is unchanged. `NEXT_PUBLIC_FIREBASE_AUTH_EMULATOR_HOST` points it at the Auth emulator.
+- The workspace header's account slot shows `AccountMenu` (component library) through `AccountMenuContainer`: sign in, the signed-in user, sign out. Sign-in is only needed for Pro, sharing and synced history.
 
 ## Hosting today
 
@@ -142,6 +150,6 @@ Changes from today, by milestone:
 | Eval harness accepts the OpenAI-compatible provider; methodology fixes (done) | M3 |
 | Shared visual system: every token in `component-library/src/styles/tokens.css`, mapped by `tailwindPreset.ts` for the library, the app and the wireframes (done); wireframes for the new layout (done) | M4 |
 | Single workspace route replacing the four wizard pages (done); history in IndexedDB (done) | M4 |
-| Client Firebase Auth, `ProAPIClient` over `streamTextEvents`, Firestore, credit ledger, Stripe routes | M5 |
+| Client Firebase Auth, Firestore rules, credit ledger, Stripe routes (done); `ProAPIClient` over `streamTextEvents`, `/account` dashboard | M5 |
 | Shares with Firestore TTL, synced history | M6 |
 | `apphosting.yaml`: `minInstances: 0`, `maxInstances: 3`, 1 GiB | M0 |

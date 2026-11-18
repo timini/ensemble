@@ -176,6 +176,14 @@ jobs:
       - run: npm run lint --workspace=packages/app
       - run: npm run typecheck --workspace=packages/app
       - run: npm run build --workspace=packages/app
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+      - name: Firestore rules, credit ledger and Stripe webhook tests (emulators, demo project)
+        run: |
+          npm install -g firebase-tools@15
+          npm run test:emulator --workspace=packages/app
       - name: Ensure Firebase backend integration test user (optional)
         run: npm run firebase:test-user:ensure --workspace=packages/app
         env:

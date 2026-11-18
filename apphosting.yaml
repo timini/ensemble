@@ -35,3 +35,57 @@ env:
     availability:
       - BUILD
       - RUNTIME
+
+  # Firebase Auth web config (public values, inlined into the client
+  # bundle at build time). Stored as secrets only so the values live in
+  # one place; create them with `firebase apphosting:secrets:set`.
+  - variable: NEXT_PUBLIC_FIREBASE_API_KEY
+    secret: NEXT_PUBLIC_FIREBASE_API_KEY
+    availability:
+      - BUILD
+      - RUNTIME
+
+  - variable: NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN
+    secret: NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN
+    availability:
+      - BUILD
+      - RUNTIME
+
+  - variable: NEXT_PUBLIC_FIREBASE_PROJECT_ID
+    secret: NEXT_PUBLIC_FIREBASE_PROJECT_ID
+    availability:
+      - BUILD
+      - RUNTIME
+
+  - variable: NEXT_PUBLIC_FIREBASE_APP_ID
+    secret: NEXT_PUBLIC_FIREBASE_APP_ID
+    availability:
+      - BUILD
+      - RUNTIME
+
+  # Stripe keys, server only. Test-mode keys until launch.
+  - variable: STRIPE_SECRET_KEY
+    secret: STRIPE_SECRET_KEY
+    availability:
+      - RUNTIME
+
+  - variable: STRIPE_WEBHOOK_SECRET
+    secret: STRIPE_WEBHOOK_SECRET
+    availability:
+      - RUNTIME
+
+  # Credit pricing (not secret). See docs/DEPLOYMENT.md.
+  - variable: CREDIT_MARGIN_PERCENT
+    value: "30"
+    availability:
+      - RUNTIME
+
+  - variable: CREDIT_LOW_BALANCE_USD
+    value: "1"
+    availability:
+      - RUNTIME
+
+  - variable: CREDIT_PACKS_USD
+    value: "5,20,50"
+    availability:
+      - RUNTIME
