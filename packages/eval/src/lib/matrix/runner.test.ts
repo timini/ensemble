@@ -157,8 +157,8 @@ describe('runMatrix', () => {
   }, 30_000);
 
   it('records the routing a run started with and the routing of each repair in the manifest', async () => {
-    // bench/matrix.json routes the reference model around one host.
-    const models = { reference: { ignore: ['claude-on-aws'] } };
+    // bench/matrix.json routes the reference model to one host.
+    const models = { reference: raw.reference.routing };
     await runMatrix({ ...base(), mode: 'mock', yes: false });
     const manifestPath = join(dir, 'results/test-run/manifest.json');
     expect(JSON.parse(readFileSync(manifestPath, 'utf8')).routing).toEqual({ requireParameters: true, models });

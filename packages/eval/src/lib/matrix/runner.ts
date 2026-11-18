@@ -28,7 +28,7 @@ import type { MatrixConfig } from './config.js';
 import { describeDifferences, experimentDifferences, experimentOf, recordedExperiment } from './experiment.js';
 import { estimateJob, formatEstimate, totalEstimate, type MatrixEstimate } from './estimate.js';
 import { planJobs, runDirOf, type MatrixJob } from './plan.js';
-import { notRunSummary, summarizeMatrix, type DatasetResults, type MatrixSummary } from './summary.js';
+import { forPublication, notRunSummary, summarizeMatrix, type DatasetResults, type MatrixSummary } from './summary.js';
 
 export interface MatrixRunOptions {
   config: MatrixConfig;
@@ -281,7 +281,7 @@ export async function runMatrix(options: MatrixRunOptions): Promise<MatrixRunRes
   const summary = summarizeMatrix(config, results, { runId: options.runId, mode, estimate, now: now() });
   await writeJsonFile(join(runDir, 'summary.json'), summary);
   await writeManifest(summary.status);
-  if (options.publishPath) await writeJsonFile(options.publishPath, summary);
+  if (options.publishPath) await writeJsonFile(options.publishPath, forPublication(summary));
   log(`Summary written to ${join(runDir, 'summary.json')}${options.publishPath ? ` and ${options.publishPath}` : ''}.`);
   return { estimate, ran: true, summary };
 }

@@ -5,6 +5,7 @@ import { fileURLToPath } from 'node:url';
 import { parseMatrixConfig } from '../lib/matrix/config.js';
 import { defaultRunId } from '../lib/matrix/plan.js';
 import { runMatrix } from '../lib/matrix/runner.js';
+import { summarizeRun } from '../lib/matrix/summarizeRun.js';
 import { explodeList } from '../lib/modelSpecs.js';
 import type { EvalMode } from '../types.js';
 
@@ -31,6 +32,7 @@ interface MatrixCommandOptions {
   allowConfigChange?: boolean;
   /** False with --no-require-parameters (commander sets true otherwise). */
   requireParameters?: boolean;
+  summarizeOnly?: boolean;
 }
 
 function positiveInt(value: string, name: string): number {
@@ -58,7 +60,21 @@ export function createMatrixCommand(): Command {
     .option('--retry-failed', 'Run again the failed, timed-out or empty entries of an existing run id; successful answers are kept')
     .option('--allow-config-change', 'Resume an existing run id even though seeds, protocol, temperature, models, summarizer, strategies or reference changed')
     .option('--no-require-parameters', 'Do not ask OpenRouter for hosts that honour response_format (the routing of runs made before it was sent)')
+    .option('--summarize-only', 'With an existing --run-id, rebuild its summary from the results files; makes no calls and downloads nothing')
     .action(async (options: MatrixCommandOptions) => {
+      if (options.summarizeOnly) {
+        if (!options.runId) throw new Error('--summarize-only needs the --run-id of an existing run.');
+        const publishPath = options.publish === true
+          ? DEFAULT_PUBLISH_PATH
+          : typeof options.publish === 'string' ? resolve(options.publish) : undefined;
+        await summarizeRun({
+          resultsDir: resolve(options.resultsDir),
+          runId: options.runId,
+          ...(publishPath ? { publishPath } : {}),
+          appSummaryPath: DEFAULT_PUBLISH_PATH,
+        });
+        return;
+      }
       if (options.mode !== 'free' && options.mode !== 'mock') {
         throw new Error(`Invalid mode "${options.mode}". Expected free or mock.`);
       }

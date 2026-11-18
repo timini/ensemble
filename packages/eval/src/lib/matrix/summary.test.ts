@@ -3,7 +3,7 @@ import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import type { BenchmarkResultsFile, PromptRunResult } from '../../types.js';
 import { parseMatrixConfig, resultKeyOf } from './config.js';
-import { notRunSummary, summarizeDataset, summarizeMatrix } from './summary.js';
+import { forPublication, notRunSummary, referenceFailureReason, summarizeDataset, summarizeMatrix } from './summary.js';
 
 const config = parseMatrixConfig(
   JSON.parse(readFileSync(resolve(__dirname, '../../../bench/matrix.json'), 'utf8')),
@@ -112,6 +112,58 @@ describe('summarizeDataset', () => {
       runId: 'r1', mode: 'mock', estimate: null, now: new Date('2026-11-17T12:00:00Z'),
     });
     expect(total.totalCostIncomplete).toBe(true);
+  });
+});
+
+describe('a reference with failed calls', () => {
+  const key = resultKeyOf(config.reference);
+  function failedReference(): BenchmarkResultsFile {
+    const file = referenceFile();
+    file.runs.forEach((run, i) => {
+      if (i < 4) return;
+      run.responses[0]!.error = i < 8
+        ? 'OpenAI-compatible API error: 402 This request requires more credits, or fewer max_tokens.'
+        : 'Empty response from anthropic/claude-sonnet-5.5 (finish_reason: content_filter; native_finish_reason: refusal)';
+      delete run.responses[0]!.estimatedCostUsd;
+      run.evaluation!.results[key] = result(false, 'error');
+    });
+    return file;
+  }
+  const summary = summarizeDataset(config, { dataset: 'gsm8k', ensemble: ensembleFile(), reference: failedReference() });
+
+  it('leaves out the reference row and says how many answers came back and why the rest failed', () => {
+    expect(summary.rows.some((r) => r.kind === 'reference')).toBe(false);
+    expect(summary.referencePending).toEqual({
+      answered: 4,
+      failed: 6,
+      reasons: [{ reason: 'out-of-credit', count: 4 }, { reason: 'refused', count: 2 }],
+    });
+  });
+
+  it('still counts what the answers that came back cost', () => {
+    expect(summary.spentUsd).toBeCloseTo(0.03 + 0.02 + 0.04, 10);
+  });
+
+  it('has no note when every reference answer came back', () => {
+    const ok = summarizeDataset(config, { dataset: 'gsm8k', ensemble: ensembleFile(), reference: referenceFile() });
+    expect(ok.referencePending).toBeUndefined();
+  });
+
+  it('keeps the failure reasons out of the published copy', () => {
+    const matrix = summarizeMatrix(config, [{ dataset: 'gsm8k', ensemble: ensembleFile(), reference: failedReference() }], {
+      runId: 'r1', mode: 'free', estimate: null, now: new Date('2026-11-17T12:00:00Z'),
+    });
+    const published = forPublication(matrix);
+    expect(published.datasets[0]!.referencePending).toEqual({ answered: 4 });
+    expect(matrix.datasets[0]!.referencePending!.reasons).toHaveLength(2);
+    expect(published.datasets[0]!.rows).toEqual(matrix.datasets[0]!.rows);
+  });
+
+  it('classifies stored errors', () => {
+    expect(referenceFailureReason('API error: 402 Payment Required')).toBe('out-of-credit');
+    expect(referenceFailureReason('finish_reason: content_filter')).toBe('refused');
+    expect(referenceFailureReason('fetch failed')).toBe('other');
+    expect(referenceFailureReason(undefined)).toBe('other');
   });
 });
 
