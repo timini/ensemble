@@ -57,9 +57,13 @@ test.describe('Settings sheet', () => {
     await expect(sheet.getByText(keysConfigured(1))).toBeVisible();
   });
 
-  test('offers no Pro or Mock mode: Pro comes with sign-in (M5), Mock is never shown', async ({ page }) => {
+  test('offers Free and Pro, with Pro disabled while sign-in is not set up, and never Mock', async ({ page }) => {
     const sheet = await openSettings(page);
-    await expect(page.locator('[data-mode]')).toHaveCount(0);
+    await expect(sheet.locator('[data-mode]')).toHaveCount(2);
+    await expect(sheet.getByTestId('mode-switch-free')).toHaveAttribute('aria-checked', 'true');
+    // Mock E2E runs without the Firebase web config, so nobody can sign in.
+    await expect(sheet.getByTestId('mode-switch-pro')).toBeDisabled();
+    await expect(sheet.getByTestId('mode-switch-unavailable')).toBeVisible();
     await expect(sheet).not.toContainText(/mock/i);
   });
 
