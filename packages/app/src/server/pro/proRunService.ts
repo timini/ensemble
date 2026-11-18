@@ -6,7 +6,7 @@ import { reserveForRun, type RunQuoteInput } from "~/server/credits/runBilling";
 import { logger } from "~/lib/logger";
 import type { ProConfig } from "./config";
 import { billableRunModels } from "./models";
-import { markProRunAbandoned } from "./pendingStreams";
+import { markProRunAbandoned, releaseUnstartedStreams } from "./pendingStreams";
 import { takeRunSlot } from "./rateLimit";
 import {
   markProRunClosed,
@@ -174,7 +174,8 @@ export async function finalizeProRun(
  * flight to record their usage, then settle (finalizeProRun). If calls are
  * still running after the wait, the run stays `closing` and the last call
  * to end settles it, so a run is never refunded while it is still using
- * the model. A cancelled run settles for what it used. Idempotent.
+ * the model. A cancelled run drops the streams it admitted but never
+ * started, then settles for what it used. Idempotent.
  */
 export async function closeProRun(
   deps: ProDeps,
@@ -182,13 +183,20 @@ export async function closeProRun(
   runId: string,
   options: { reason: string; waitMs?: number; force?: boolean },
 ): Promise<CloseResult> {
-  const opened = await markProRunClosing(deps.db, uid, runId);
+  const cancelled = options.reason === "cancelled";
+  const opened = await markProRunClosing(deps.db, uid, runId, { cancelled });
   if (!opened && !options.force) {
     const run = await readProRun(deps.db, uid, runId);
     return { outcome: run?.outcome ?? null, balanceMicros: null };
   }
-  const deadline = Date.now() + (options.waitMs ?? 8000);
   let inFlight = opened?.inFlight ?? 0;
+  // After Stop the browser opens no more subscriptions, so streams it had
+  // admitted but not started would keep the run open until it went stale.
+  if (cancelled && inFlight > 0) {
+    await releaseUnstartedStreams(deps.db, uid, runId);
+    inFlight = (await readProRun(deps.db, uid, runId))?.inFlight ?? 0;
+  }
+  const deadline = Date.now() + (options.waitMs ?? 8000);
   while (inFlight > 0 && Date.now() < deadline) {
     await sleep(200);
     inFlight = (await readProRun(deps.db, uid, runId))?.inFlight ?? 0;

@@ -1,4 +1,8 @@
-import type { DocumentReference, Firestore } from "firebase-admin/firestore";
+import {
+  FieldValue,
+  type DocumentReference,
+  type Firestore,
+} from "firebase-admin/firestore";
 import { assertSafeId } from "~/server/credits/ledger";
 import { ProRunError, proRunRef } from "./runStore";
 
@@ -31,22 +35,34 @@ function streamRef(db: Firestore, uid: string, runId: string, callId: string) {
     .doc(callId) as DocumentReference<PendingStream>;
 }
 
+/**
+ * Keep an admitted stream until its subscription starts. Refused once the
+ * run has ended, was abandoned or was stopped, so a stream admitted just
+ * before Stop cannot be left waiting for a subscription that never comes.
+ */
 export async function storePendingStream(
   db: Firestore,
   ref: { uid: string; runId: string; callId: string },
   stream: Omit<PendingStream, "claimed">,
 ): Promise<void> {
-  await streamRef(db, ref.uid, ref.runId, ref.callId).create({
-    ...stream,
-    claimed: false,
+  const doc = streamRef(db, ref.uid, ref.runId, ref.callId);
+  const run = proRunRef(db, ref.uid, ref.runId);
+  await db.runTransaction(async (tx) => {
+    const parent = (await tx.get(run)).data();
+    if (!parent)
+      throw new ProRunError("This Pro run does not exist.", "not_found");
+    if (parent.status === "closed" || parent.abandoned || parent.cancelled) {
+      throw new ProRunError("This Pro run has ended.", "closed");
+    }
+    tx.create(doc, { ...stream, claimed: false });
   });
 }
 
 /**
  * Take a prepared stream once. A second subscription to it is refused, and
- * so is one whose run is closed or was abandoned: the run is settled, so
- * the call would never be billed. A closing run still takes the streams it
- * admitted, since it waits for them before it settles.
+ * so is one whose run is closed, was abandoned or was stopped: the run is
+ * settled, or the user no longer wants the answer. A run closing normally
+ * still takes the streams it admitted, since it waits for them.
  */
 export async function claimPendingStream(
   db: Firestore,
@@ -59,7 +75,7 @@ export async function claimPendingStream(
     const parent = runSnap.data();
     if (!parent)
       throw new ProRunError("This Pro run does not exist.", "not_found");
-    if (parent.status === "closed" || parent.abandoned) {
+    if (parent.status === "closed" || parent.abandoned || parent.cancelled) {
       throw new ProRunError("This Pro run has ended.", "closed");
     }
     const data = streamSnap.data();
@@ -95,4 +111,37 @@ export async function markProRunAbandoned(
   });
   const pending = await ref.collection("streams").get();
   await Promise.all(pending.docs.map((d) => d.ref.delete()));
+}
+
+/**
+ * Drop the streams a stopped run admitted but never started, and give
+ * their place in the run back (nothing reached the model, so nothing is
+ * billed). Each stream is taken in a transaction, so one whose
+ * subscription claimed it first is left to finish and record its usage.
+ * Returns how many were dropped.
+ */
+export async function releaseUnstartedStreams(
+  db: Firestore,
+  uid: string,
+  runId: string,
+): Promise<number> {
+  const run = proRunRef(db, uid, runId);
+  const pending = await run.collection("streams").get();
+  const dropped = await Promise.all(
+    pending.docs.map((d) =>
+      db.runTransaction(async (tx) => {
+        const stream = (await tx.get(d.ref)).data() as
+          | PendingStream
+          | undefined;
+        if (!stream || stream.claimed) return 0;
+        tx.delete(d.ref);
+        tx.update(run, {
+          inFlight: FieldValue.increment(-1),
+          tokensUsed: FieldValue.increment(-stream.countedInputTokens),
+        });
+        return 1;
+      }),
+    ),
+  );
+  return dropped.reduce<number>((a, b) => a + b, 0);
 }

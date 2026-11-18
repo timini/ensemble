@@ -34,6 +34,8 @@ export interface ProRunDoc {
   maxCalls: number;
   /** Set when an abandoned run is force-closed: its prepared streams may no longer start. */
   abandoned?: boolean;
+  /** Set when the user stopped the run: streams it admitted but never started are dropped. */
+  cancelled?: boolean;
   /** Tokens counted so far: reported or estimated usage, plus the input of calls in flight. */
   tokensUsed: number;
   callIds: string[];
@@ -204,11 +206,16 @@ export async function endProCall(
   });
 }
 
-/** Stop admitting calls. Returns the run, or null when it was already closing or closed. */
+/**
+ * Stop admitting calls. With `cancelled` (the user pressed Stop) the run
+ * also refuses to start the streams it admitted but has not started yet.
+ * Returns the run, or null when it was already closing or closed.
+ */
 export async function markProRunClosing(
   db: Firestore,
   uid: string,
   runId: string,
+  options: { cancelled?: boolean } = {},
 ): Promise<ProRunDoc | null> {
   const ref = proRunRef(db, uid, runId);
   return db.runTransaction(async (tx) => {
@@ -216,7 +223,10 @@ export async function markProRunClosing(
     if (!run)
       throw new ProRunError("This Pro run does not exist.", "not_found");
     if (run.status !== "open") return null;
-    tx.update(ref, { status: "closing" });
+    tx.update(ref, {
+      status: "closing",
+      ...(options.cancelled ? { cancelled: true } : {}),
+    });
     return run;
   });
 }
