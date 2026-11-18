@@ -70,4 +70,36 @@ describe('OnboardingSheet', () => {
     renderWithI18n(<OnboardingSheet {...props()} />, { language: 'fr' });
     expect(screen.getByTestId('onboarding-start')).toHaveTextContent('Commencer');
   });
+
+  it('makes Pro a real path when a Pro panel is given', () => {
+    const onPathChange = vi.fn();
+    renderWithI18n(<OnboardingSheet {...props({ onPathChange, pro: { panel: <div data-testid="sign-in" /> } })} />);
+    const pro = screen.getByTestId('onboarding-path-pro');
+    expect(pro).toHaveAttribute('role', 'radio');
+    expect(pro).toHaveAttribute('aria-checked', 'false');
+    expect(pro).toHaveTextContent('Sign in for Pro');
+    expect(pro).toHaveTextContent('Credits instead of keys. Every model, no setup.');
+    expect(pro).not.toHaveTextContent('Coming soon');
+    fireEvent.click(pro);
+    expect(onPathChange).toHaveBeenCalledWith('pro');
+  });
+
+  it('shows the Pro panel on the Pro path', () => {
+    renderWithI18n(<OnboardingSheet {...props({ path: 'pro', pro: { panel: <div data-testid="sign-in" /> } })} />);
+    expect(screen.getByTestId('onboarding-path-pro')).toHaveAttribute('aria-checked', 'true');
+    expect(screen.getByTestId('onboarding-panel-pro')).toContainElement(screen.getByTestId('sign-in'));
+    expect(screen.queryByTestId('onboarding-key-field')).not.toBeInTheDocument();
+  });
+
+  it('keeps Pro as a disabled coming-soon card without a Pro panel', () => {
+    renderWithI18n(<OnboardingSheet {...props()} />);
+    const pro = screen.getByTestId('onboarding-path-pro');
+    expect(pro).toHaveAttribute('aria-disabled', 'true');
+    expect(pro).not.toHaveAttribute('role', 'radio');
+  });
+
+  it('renders the Pro path in French', () => {
+    renderWithI18n(<OnboardingSheet {...props({ pro: { panel: null } })} />, { language: 'fr' });
+    expect(screen.getByTestId('onboarding-path-pro')).toHaveTextContent('Tous les modèles, sans configuration.');
+  });
 });

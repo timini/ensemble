@@ -6,7 +6,7 @@ import { Button } from '../../atoms/Button';
 import { OnboardingKeyField, type OnboardingKeyFieldProps } from '../../molecules/OnboardingKeyField';
 import { cn } from '../../../lib/utils';
 
-export type OnboardingPath = 'keys' | 'local';
+export type OnboardingPath = 'keys' | 'local' | 'pro';
 
 export interface OnboardingLocalProps {
   /** The Ollama offer (OllamaDetectedNotice), when there is one. */
@@ -17,6 +17,11 @@ export interface OnboardingLocalProps {
   onOpenSettings: () => void;
 }
 
+export interface OnboardingProProps {
+  /** The Pro panel: the sign-in panel when signed out, or a credit notice when signed in. */
+  panel: React.ReactNode;
+}
+
 export interface OnboardingSheetProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -25,6 +30,8 @@ export interface OnboardingSheetProps {
   /** The key field for the keys path. */
   keyField: OnboardingKeyFieldProps;
   local: OnboardingLocalProps;
+  /** Makes Pro a real path. Without it, Pro is a disabled coming-soon card. */
+  pro?: OnboardingProProps;
   /** A key works or a local endpoint is connected. */
   canStart: boolean;
   onStart: () => void;
@@ -34,13 +41,15 @@ export interface OnboardingSheetProps {
 const OPTIONS = [
   { id: 'keys', Icon: KeyRound },
   { id: 'local', Icon: Cpu },
+  { id: 'pro', Icon: Sparkles },
 ] as const;
 
 /**
  * OnboardingSheet organism: the one decision before the first question.
  * Own key (checked inline; one is enough), local models (the Ollama offer)
- * or Pro (coming soon until sign-in exists). Start asking is enabled once a
- * key works or a local server is connected; Skip leaves it for later.
+ * or Pro (sign in and pay with credits, when `pro` is given; otherwise a
+ * coming-soon card). Start asking is enabled once a key works or a local
+ * server is connected (the app decides for Pro); Skip leaves it for later.
  *
  * @example
  * ```tsx
@@ -49,7 +58,8 @@ const OPTIONS = [
  * ```
  */
 export function OnboardingSheet(props: OnboardingSheetProps) {
-  const { path, local } = props;
+  const { path, local, pro } = props;
+  const options = pro ? OPTIONS : OPTIONS.filter((o) => o.id !== 'pro');
   const { t } = useTranslation();
   const key = 'organisms.onboardingSheet';
 
@@ -74,7 +84,7 @@ export function OnboardingSheet(props: OnboardingSheetProps) {
       }
     >
       <div role="radiogroup" aria-label={t(`${key}.choose`)} className="space-y-2.5">
-        {OPTIONS.map(({ id, Icon }) => {
+        {options.map(({ id, Icon }) => {
           const on = path === id;
           return (
             <button
@@ -92,24 +102,28 @@ export function OnboardingSheet(props: OnboardingSheetProps) {
               <Icon className={cn('mt-0.5 size-5 shrink-0', on ? 'text-primary' : 'text-muted-foreground')} aria-hidden="true" />
               <span>
                 <span className="block text-label font-semibold">{t(`${key}.${id}.title`)}</span>
-                <span className="block text-caption text-muted-foreground">{t(`${key}.${id}.body`)}</span>
+                <span className="block text-caption text-muted-foreground">{t(id === 'pro' ? `${key}.pro.available` : `${key}.${id}.body`)}</span>
               </span>
             </button>
           );
         })}
-        <div data-testid="onboarding-path-pro" aria-disabled="true" className="flex gap-3 rounded-xl border border-dashed border-border p-4 text-muted-foreground">
-          <Sparkles className="mt-0.5 size-5 shrink-0" aria-hidden="true" />
-          <span className="flex-1">
-            <span className="block text-label font-semibold">{t(`${key}.pro.title`)}</span>
-            <span className="block text-caption">{t(`${key}.pro.body`)}</span>
-          </span>
-          <span className="self-start rounded-full bg-muted px-2 py-0.5 text-caption">{t(`${key}.pro.soon`)}</span>
-        </div>
+        {!pro && (
+          <div data-testid="onboarding-path-pro" aria-disabled="true" className="flex gap-3 rounded-xl border border-dashed border-border p-4 text-muted-foreground">
+            <Sparkles className="mt-0.5 size-5 shrink-0" aria-hidden="true" />
+            <span className="flex-1">
+              <span className="block text-label font-semibold">{t(`${key}.pro.title`)}</span>
+              <span className="block text-caption">{t(`${key}.pro.body`)}</span>
+            </span>
+            <span className="self-start rounded-full bg-muted px-2 py-0.5 text-caption">{t(`${key}.pro.soon`)}</span>
+          </div>
+        )}
       </div>
 
       <div className="mt-6" data-testid={`onboarding-panel-${path}`}>
         {path === 'keys' ? (
           <OnboardingKeyField {...props.keyField} />
+        ) : path === 'pro' ? (
+          pro?.panel
         ) : (
           <div className="space-y-3">
             {local.connected ? (

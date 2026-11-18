@@ -150,8 +150,16 @@ export { ModelPicker, type ModelPickerProps, type ModelPickerOption } from './co
 export { MethodMenu, methodCostLabel, type MethodMenuProps, type SummarizerOption } from './components/molecules/MethodMenu';
 export { AccountMenu, initialsOf, type AccountMenuProps, type AccountStatus, type AccountUser } from './components/molecules/AccountMenu';
 export { SignInPanel, type SignInPanelProps, type SignInError } from './components/molecules/SignInPanel';
+export {
+  CreditNotice,
+  type CreditNoticeProps,
+  type CreditNoticeVariant,
+  type CreditPackOption,
+} from './components/molecules/CreditNotice';
+export { ModeSwitch, type ModeSwitchProps, type WorkspaceMode } from './components/molecules/ModeSwitch';
 export { AppearanceSettings, type AppearanceSettingsProps, type AppearanceTheme, type AppearanceLanguage } from './components/molecules/AppearanceSettings';
 export { ComposerOptions, type ComposerOptionsProps } from './components/molecules/ComposerOptions';
+export { ComposerSubmit, type ComposerSubmitProps } from './components/molecules/ComposerSubmit';
 export { AnswerCard, type AnswerCardProps, type AnswerStatus } from './components/molecules/AnswerCard';
 export {
   AgreementSummary,
@@ -206,6 +214,6 @@ export { ScoreGuide, type ScoreGuideProps } from './components/molecules/ScoreGu
 export { HowItWorks, type HowItWorksProps } from './components/molecules/HowItWorks';
 export { OnboardingKeyField, ONBOARDING_KEY_PROVIDERS, type OnboardingKeyFieldProps, type OnboardingKeyProvider, type OnboardingKeyStatus } from './components/molecules/OnboardingKeyField';
 export { ExampleRun, type ExampleRunProps, type ExampleRunAnswer } from './components/organisms/ExampleRun';
-export { OnboardingSheet, type OnboardingSheetProps, type OnboardingPath, type OnboardingLocalProps } from './components/organisms/OnboardingSheet';
+export { OnboardingSheet, type OnboardingSheetProps, type OnboardingPath, type OnboardingLocalProps, type OnboardingProProps } from './components/organisms/OnboardingSheet';
 export { PageIntro, type PageIntroProps } from './components/molecules/PageIntro';
 export { FeatureGrid, type FeatureGridProps, type FeatureGridItem } from './components/molecules/FeatureGrid';

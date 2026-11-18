@@ -11,6 +11,8 @@ describe('ResponseErrorNotice', () => {
     ['timeout', 'No answer in time'],
     ['provider_unavailable', 'Provider unavailable'],
     ['interrupted', 'Answer interrupted'],
+    ['cancelled', 'Stopped'],
+    ['insufficient_credits', 'Not enough credits'],
     ['other', 'This model failed'],
   ] as const)('shows a title for %s', (kind, title) => {
     render(<ResponseErrorNotice kind={kind} />);
@@ -51,6 +53,25 @@ describe('ResponseErrorNotice', () => {
     const description = screen.getByTestId('response-error-description');
     expect(description).toHaveTextContent('No API key is set for this provider');
     expect(description).not.toHaveTextContent(/did not accept/i);
+  });
+
+  it('says a stopped answer can be asked again', () => {
+    render(<ResponseErrorNotice kind="cancelled" />);
+    expect(screen.getByTestId('response-error-description')).toHaveTextContent(
+      'This answer was stopped before it finished. Retry to ask this model again.',
+    );
+  });
+
+  it('points to buying credits when the balance cannot cover the run', () => {
+    render(<ResponseErrorNotice kind="insufficient_credits" />);
+    expect(screen.getByTestId('response-error-description')).toHaveTextContent(/Buy credits/);
+  });
+
+  it('renders French text for the Pro kinds', () => {
+    const { rerender } = renderWithI18n(<ResponseErrorNotice kind="cancelled" />, { language: 'fr' });
+    expect(screen.getByTestId('response-error-title')).toHaveTextContent('Arrêtée');
+    rerender(<ResponseErrorNotice kind="insufficient_credits" />);
+    expect(screen.getByTestId('response-error-title')).toHaveTextContent('Crédits insuffisants');
   });
 
   it('renders French text', () => {

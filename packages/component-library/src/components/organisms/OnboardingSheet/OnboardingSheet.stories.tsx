@@ -3,6 +3,8 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { OnboardingSheet, type OnboardingPath } from './OnboardingSheet';
 import { OllamaDetectedNotice } from '../../molecules/OllamaDetectedNotice';
 import type { OnboardingKeyProvider } from '../../molecules/OnboardingKeyField';
+import { SignInPanel } from '../../molecules/SignInPanel';
+import { CreditNotice } from '../../molecules/CreditNotice';
 
 const noop = () => undefined;
 const notice = (
@@ -54,6 +56,20 @@ export const LocalConnected: Story = { args: { path: 'local', canStart: true, lo
 /** Local path with nothing found. */
 export const LocalNone: Story = { args: { path: 'local' } };
 
+/** Pro path, signed out: the sign-in panel. */
+export const ProSignIn: Story = {
+  args: { path: 'pro', pro: { panel: <SignInPanel onGoogle={noop} onEmailLink={noop} /> } },
+};
+
+/** Pro path, signed in with credits: Start is enabled. */
+export const ProSignedIn: Story = {
+  args: {
+    path: 'pro',
+    canStart: true,
+    pro: { panel: <CreditNotice variant="balance" balance="$5.00" packs={[{ id: 'pack-5', label: '$5' }]} onBuy={noop} /> },
+  },
+};
+
 /** Interactive: switch path and type a key. */
 export const Interactive: Story = {
   render: function Render(args) {
@@ -63,7 +79,7 @@ export const Interactive: Story = {
     return (
       <OnboardingSheet {...args} path={path} onPathChange={setPath} canStart={value.length > 8}
         keyField={{ provider, onProviderChange: setProvider, value, onChange: setValue, status: value.length > 8 ? 'valid' : 'idle' }}
-        local={{ notice, onOpenSettings: noop }} />
+        local={{ notice, onOpenSettings: noop }} pro={{ panel: <SignInPanel onGoogle={noop} onEmailLink={noop} /> }} />
     );
   },
 };

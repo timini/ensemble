@@ -192,6 +192,14 @@
         "title": "Answer interrupted",
         "description": "The page was reloaded while this answer was streaming, so it is incomplete."
       },
+      "cancelled": {
+        "title": "Stopped",
+        "description": "This answer was stopped before it finished. Retry to ask this model again."
+      },
+      "insufficient_credits": {
+        "title": "Not enough credits",
+        "description": "Your credit balance cannot cover this model. Buy credits, then retry."
+      },
       "other": {
         "title": "This model failed",
         "description": "The provider returned an error. The details are below."
@@ -438,6 +446,36 @@
         "generic": "Sign-in failed. Try again."
       }
     },
+    "creditNotice": {
+      "balance": "Credits: {{balance}}",
+      "low": "Your credit balance is low ({{balance}}). Buy credits to keep using Pro.",
+      "insufficient": "This run needs about {{required}} in credits and your balance is {{balance}}. Buy credits or choose fewer or cheaper models.",
+      "unpriced_one": "Pro cannot price {{models}} yet, so it cannot run it. Remove it to ask.",
+      "unpriced_other": "Pro cannot price {{models}} yet, so it cannot run them. Remove them to ask.",
+      "and": "and",
+      "error": "Could not load your credit balance.",
+      "buy": "Buy {{label}}",
+      "packs": "Credit packs",
+      "buyError": "Could not start the checkout. Try again."
+    },
+    "modeSwitch": {
+      "label": "Mode",
+      "free": {
+        "title": "Free",
+        "body": "Your own keys or local models, called from your browser."
+      },
+      "pro": {
+        "title": "Pro",
+        "body": "Sign in and pay with credits. No keys needed; models run on our server."
+      },
+      "unavailable": "Pro is not available on this server.",
+      "keeps": "Switching keeps your presets and history."
+    },
+    "composerSubmit": {
+      "submit": "Ask",
+      "running": "Running",
+      "stop": "Stop"
+    },
     "accountMenu": {
       "signIn": "Sign in",
       "loading": "Checking your account",
@@ -662,8 +700,6 @@
       "promptLabel": "Your question",
       "placeholder": "Ask a question where being wrong costs something",
       "models": "Models",
-      "submit": "Ask",
-      "running": "Running",
       "shortcut": "{{keys}} to ask",
       "enter": "Enter",
       "modelsHint": "Choose at least one model to ask"
@@ -728,7 +764,8 @@
       "pro": {
         "title": "Sign in for Pro",
         "body": "Credits instead of keys.",
-        "soon": "Coming soon"
+        "soon": "Coming soon",
+        "available": "Credits instead of keys. Every model, no setup."
       },
       "start": "Start asking",
       "skip": "Skip for now",

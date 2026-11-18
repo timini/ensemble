@@ -76,5 +76,13 @@ export const WithManualAnswer: Story = {
 /** While the answers stream in. */
 export const Running: Story = { args: { running: true } };
 
+/** While the answers stream in, with a Stop button to cancel the run. */
+export const RunningWithStop: Story = { args: { running: true, onStop: () => undefined } };
+
+/** Pro mode with too few credits: Ask is blocked and says why. */
+export const Blocked: Story = {
+  args: { blockedReason: 'This run needs about $0.12 in credits and your balance is $0.04.' },
+};
+
 /** Phone width. */
 export const Mobile: Story = { globals: { viewport: { value: 'mobile1' } } };

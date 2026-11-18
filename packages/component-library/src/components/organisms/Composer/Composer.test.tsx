@@ -170,4 +170,43 @@ describe('Composer', () => {
     expect(shortcut).toHaveAttribute('title', 'Ctrl Entrée pour demander');
     expect(screen.getByTestId('composer-submit')).toHaveAccessibleName('Demander');
   });
+
+  it('shows Stop in place of Ask during a run and calls onStop', () => {
+    const onStop = vi.fn();
+    const props = setup({ running: true, onStop });
+    expect(screen.queryByTestId('composer-submit')).not.toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('composer-stop'));
+    expect(onStop).toHaveBeenCalledOnce();
+    expect(props.onSubmit).not.toHaveBeenCalled();
+  });
+
+  it('keeps Ask when not running, even with onStop', () => {
+    setup({ onStop: vi.fn() });
+    expect(screen.getByTestId('composer-submit')).toBeEnabled();
+    expect(screen.queryByTestId('composer-stop')).not.toBeInTheDocument();
+  });
+
+  it('blocks Ask and the shortcut with a reason, and links the reason to Ask', () => {
+    const props = setup({ blockedReason: 'Not enough credits for this run.' });
+    const submit = screen.getByTestId('composer-submit');
+    expect(submit).toBeDisabled();
+    const hint = screen.getByTestId('composer-blocked-hint');
+    expect(hint).toHaveTextContent('Not enough credits for this run.');
+    expect(submit).toHaveAttribute('aria-describedby', hint.id);
+    fireEvent.keyDown(screen.getByRole('textbox'), { key: 'Enter', ctrlKey: true });
+    fireEvent.click(submit);
+    expect(props.onSubmit).not.toHaveBeenCalled();
+  });
+
+  it('describes Ask by both hints when there are no models and it is blocked', () => {
+    setup({ models: [], blockedReason: 'Blocked.' });
+    const ids = screen.getByTestId('composer-submit').getAttribute('aria-describedby')?.split(' ');
+    expect(ids).toEqual([screen.getByTestId('composer-models-hint').id, screen.getByTestId('composer-blocked-hint').id]);
+  });
+
+  it('hides the blocked reason during a run', () => {
+    setup({ running: true, onStop: vi.fn(), blockedReason: 'Blocked.' });
+    expect(screen.queryByTestId('composer-blocked-hint')).not.toBeInTheDocument();
+    expect(screen.getByTestId('composer-stop')).toBeInTheDocument();
+  });
 });

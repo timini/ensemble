@@ -10,7 +10,7 @@ const meta = {
   argTypes: {
     kind: {
       control: 'select',
-      options: ['invalid_key', 'missing_key', 'rate_limited', 'timeout', 'provider_unavailable', 'interrupted', 'other'],
+      options: ['invalid_key', 'missing_key', 'rate_limited', 'timeout', 'provider_unavailable', 'interrupted', 'cancelled', 'insufficient_credits', 'other'],
     },
   },
 } satisfies Meta<typeof ResponseErrorNotice>;
@@ -51,6 +51,16 @@ export const ProviderUnavailable: Story = {
 /** The page was reloaded while the answer was streaming. */
 export const Interrupted: Story = {
   args: { kind: 'interrupted' },
+};
+
+/** The user stopped the run, or started a new one, before this answer finished. */
+export const Cancelled: Story = {
+  args: { kind: 'cancelled' },
+};
+
+/** Pro mode: the credit balance cannot cover the run. */
+export const InsufficientCredits: Story = {
+  args: { kind: 'insufficient_credits' },
 };
 
 /** Any other failure. */

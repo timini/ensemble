@@ -1,14 +1,13 @@
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { ArrowUp } from 'lucide-react';
 import type { ConsensusMethod } from '@ensemble-ai/shared-utils/consensus';
 import type { RunEstimate } from '@ensemble-ai/shared-utils/pricing';
-import { Button } from '../../atoms/Button';
 import type { ProviderLogoProvider } from '../../atoms/ProviderLogo';
 import { ModelChip } from '../../molecules/ModelChip';
 import { ModelPicker, type ModelPickerOption } from '../../molecules/ModelPicker';
 import { MethodMenu, type SummarizerOption } from '../../molecules/MethodMenu';
 import { ComposerOptions } from '../../molecules/ComposerOptions';
+import { ComposerSubmit } from '../../molecules/ComposerSubmit';
 import { cn } from '../../../lib/utils';
 
 /** A model in the ensemble. */
@@ -55,6 +54,10 @@ export interface ComposerProps {
   onSavePreset?: () => void;
   /** A run is in progress: the prompt stays editable but cannot be sent again. */
   running?: boolean;
+  /** Cancels the run. While running, a Stop button replaces Ask. */
+  onStop?: () => void;
+  /** Why Ask is blocked (Pro: too few credits). Shown under the models; disables Ask and the shortcut. */
+  blockedReason?: string;
   className?: string;
 }
 
@@ -64,6 +67,8 @@ export interface ComposerProps {
  * and the Ask button, in one card. Ctrl or Cmd + Enter sends the prompt.
  * During a run the models are locked but answers can still be added by hand.
  * With no model chosen, a hint beside the picker says why Ask is disabled.
+ * With `onStop`, a Stop button replaces Ask during a run. A `blockedReason`
+ * disables Ask and is shown as a hint.
  *
  * @example
  * ```tsx
@@ -77,10 +82,13 @@ export function Composer(props: ComposerProps) {
   const { t } = useTranslation();
   const promptId = React.useId();
   const hintId = React.useId();
+  const blockedId = React.useId();
   const [modKey, setModKey] = React.useState('Ctrl');
   const keys = `${modKey} ${t('organisms.composer.enter')}`;
   const noModels = models.length + manualResponses.length === 0;
-  const canSubmit = prompt.trim().length > 0 && !noModels && !running;
+  const blocked = Boolean(props.blockedReason) && !running;
+  const canSubmit = prompt.trim().length > 0 && !noModels && !running && !blocked;
+  const describedBy = [noModels && hintId, blocked && blockedId].filter(Boolean).join(' ') || undefined;
 
   React.useEffect(() => {
     if (typeof navigator !== 'undefined' && /Mac|iPhone|iPad/.test(navigator.platform)) setModKey('⌘');
@@ -156,6 +164,11 @@ export function Composer(props: ComposerProps) {
           {keys}
         </kbd>
       </div>
+      {blocked && (
+        <p id={blockedId} data-testid="composer-blocked-hint" className="px-4 pb-3 text-caption text-warning sm:px-5">
+          {props.blockedReason}
+        </p>
+      )}
       <div className="flex items-center gap-2 border-t border-border px-3 py-2.5 sm:px-4">
         <MethodMenu
           method={props.method}
@@ -172,19 +185,7 @@ export function Composer(props: ComposerProps) {
         <div className="ml-auto flex items-center gap-1">
           {/* Answers added by hand join a run in progress, so the menu stays available. */}
           <ComposerOptions onAddManualResponse={props.onAddManualResponse} onSavePreset={props.onSavePreset} />
-          <Button
-            type="submit"
-            disabled={!canSubmit}
-            aria-describedby={noModels ? hintId : undefined}
-            aria-label={running ? t('organisms.composer.running') : t('organisms.composer.submit')}
-            data-testid="composer-submit"
-            className="gap-1.5 px-3 sm:px-4"
-          >
-            <span className="hidden sm:inline" aria-hidden="true">
-              {running ? t('organisms.composer.running') : t('organisms.composer.submit')}
-            </span>
-            <ArrowUp aria-hidden="true" />
-          </Button>
+          <ComposerSubmit running={running} disabled={!canSubmit} describedBy={describedBy} onStop={props.onStop} />
         </div>
       </div>
     </form>

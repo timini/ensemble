@@ -6,7 +6,10 @@ import { RotateCcw } from 'lucide-react';
 
 /**
  * Why a model's answer failed. Matches the provider error kinds from
- * shared-utils, plus `interrupted` for a stream cut off by a page reload.
+ * shared-utils, plus `interrupted` for a stream cut off by a page reload,
+ * `cancelled` for a run the user stopped (or replaced) before this answer
+ * finished, and `insufficient_credits` when the Pro credit balance cannot
+ * cover the run.
  */
 export type ResponseErrorKind =
   | 'invalid_key'
@@ -15,6 +18,8 @@ export type ResponseErrorKind =
   | 'timeout'
   | 'provider_unavailable'
   | 'interrupted'
+  | 'cancelled'
+  | 'insufficient_credits'
   | 'other';
 
 export interface ResponseErrorNoticeProps {

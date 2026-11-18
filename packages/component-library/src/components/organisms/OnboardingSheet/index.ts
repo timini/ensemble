@@ -1,1 +1,1 @@
-export { OnboardingSheet, type OnboardingSheetProps, type OnboardingPath, type OnboardingLocalProps } from './OnboardingSheet';
+export { OnboardingSheet, type OnboardingSheetProps, type OnboardingPath, type OnboardingLocalProps, type OnboardingProProps } from './OnboardingSheet';

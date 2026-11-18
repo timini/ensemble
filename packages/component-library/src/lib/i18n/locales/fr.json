@@ -192,6 +192,14 @@
         "title": "Réponse interrompue",
         "description": "La page a été rechargée pendant la réponse, elle est donc incomplète."
       },
+      "cancelled": {
+        "title": "Arrêtée",
+        "description": "Cette réponse a été arrêtée avant la fin. Réessayez pour interroger ce modèle à nouveau."
+      },
+      "insufficient_credits": {
+        "title": "Crédits insuffisants",
+        "description": "Votre solde de crédits ne couvre pas ce modèle. Achetez des crédits, puis réessayez."
+      },
       "other": {
         "title": "Ce modèle a échoué",
         "description": "Le fournisseur a renvoyé une erreur. Les détails sont ci-dessous."
@@ -438,6 +446,36 @@
         "generic": "La connexion a échoué. Réessayez."
       }
     },
+    "creditNotice": {
+      "balance": "Crédits : {{balance}}",
+      "low": "Votre solde de crédits est bas ({{balance}}). Achetez des crédits pour continuer à utiliser Pro.",
+      "insufficient": "Cette requête demande environ {{required}} de crédits et votre solde est de {{balance}}. Achetez des crédits ou choisissez des modèles moins nombreux ou moins chers.",
+      "unpriced_one": "Pro n'a pas encore de prix pour {{models}} et ne peut donc pas l'exécuter. Retirez-le pour demander.",
+      "unpriced_other": "Pro n'a pas encore de prix pour {{models}} et ne peut donc pas les exécuter. Retirez-les pour demander.",
+      "and": "et",
+      "error": "Impossible de charger votre solde de crédits.",
+      "buy": "Acheter {{label}}",
+      "packs": "Packs de crédits",
+      "buyError": "Impossible de lancer le paiement. Réessayez."
+    },
+    "modeSwitch": {
+      "label": "Mode",
+      "free": {
+        "title": "Gratuit",
+        "body": "Vos propres clés ou des modèles locaux, appelés depuis votre navigateur."
+      },
+      "pro": {
+        "title": "Pro",
+        "body": "Connectez-vous et payez avec des crédits. Aucune clé requise : les modèles tournent sur notre serveur."
+      },
+      "unavailable": "Pro n'est pas disponible sur ce serveur.",
+      "keeps": "Changer de mode conserve vos préréglages et votre historique."
+    },
+    "composerSubmit": {
+      "submit": "Demander",
+      "running": "En cours",
+      "stop": "Arrêter"
+    },
     "accountMenu": {
       "signIn": "Se connecter",
       "loading": "Vérification de votre compte",
@@ -662,8 +700,6 @@
       "promptLabel": "Votre question",
       "placeholder": "Posez une question où une erreur coûte cher",
       "models": "Modèles",
-      "submit": "Demander",
-      "running": "En cours",
       "shortcut": "{{keys}} pour demander",
       "enter": "Entrée",
       "modelsHint": "Choisissez au moins un modèle pour demander"
@@ -728,7 +764,8 @@
       "pro": {
         "title": "Se connecter à Pro",
         "body": "Des crédits à la place des clés.",
-        "soon": "Bientôt"
+        "soon": "Bientôt",
+        "available": "Des crédits à la place des clés. Tous les modèles, sans configuration."
       },
       "start": "Commencer",
       "skip": "Plus tard",

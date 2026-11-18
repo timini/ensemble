@@ -35,6 +35,16 @@ export const InvalidKey: Story = {
   args: { status: 'error', errorKind: 'invalid_key', error: '401 Incorrect API key provided.', onRetry: () => undefined },
 };
 
+/** Stopped by the user before it finished. */
+export const Cancelled: Story = {
+  args: { status: 'error', errorKind: 'cancelled', content: undefined, onRetry: () => undefined },
+};
+
+/** Pro mode: not enough credits for this model. */
+export const InsufficientCredits: Story = {
+  args: { status: 'error', errorKind: 'insufficient_credits', content: undefined, onRetry: () => undefined },
+};
+
 /** A local model through Ollama, free. */
 export const LocalModel: Story = {
   args: { modelName: 'qwen3:14b', provider: 'openai-compatible', providerLabel: 'Ollama', costUsd: 0 },

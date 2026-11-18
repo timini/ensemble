@@ -174,6 +174,17 @@ export const ErrorInterrupted: Story = {
   },
 };
 
+export const ErrorCancelled: Story = {
+  args: {
+    modelName: 'DeepSeek V4 Pro',
+    provider: 'deepseek',
+    status: 'error',
+    responseType: 'ai',
+    errorKind: 'cancelled',
+    onRetry: () => undefined,
+  },
+};
+
 export const ErrorOther: Story = {
   args: {
     modelName: 'GPT-4',
