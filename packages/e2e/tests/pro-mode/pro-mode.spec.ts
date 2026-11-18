@@ -151,7 +151,8 @@ test('a new user signs in for Pro, buys credits, runs three models and sees the 
     4,
   );
   const models = page.getByTestId('model-usage-list').getByRole('listitem');
-  expect(await models.count()).toBeGreaterThanOrEqual(3);
+  // The list loads after the page; wait for it rather than counting at once.
+  await expect.poll(() => models.count()).toBeGreaterThanOrEqual(3);
   expect(await violations()).toEqual([]);
 });
 
