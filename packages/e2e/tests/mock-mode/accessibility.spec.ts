@@ -54,6 +54,7 @@ for (const theme of THEMES) {
 
         await page.getByTestId('composer-options-trigger').click();
         await page.getByTestId('composer-option-preset').click();
+        await expect(page.getByTestId('save-preset-dialog')).toBeVisible();
         await expectAccessible(page);
         await page.keyboard.press('Escape');
 
