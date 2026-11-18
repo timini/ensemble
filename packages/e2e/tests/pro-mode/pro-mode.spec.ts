@@ -1,5 +1,6 @@
 import { expect, test, type APIRequestContext, type Page } from '@playwright/test';
 import { FIRESTORE_EMULATOR, PROJECT_ID } from '../../fixtures/proEnv';
+import { watchCspViolations } from '../../fixtures/cspViolations';
 import {
   askAndFinish,
   composerChips,
@@ -90,6 +91,8 @@ async function signInToPro(page: Page, label: string) {
 }
 
 test('a new user signs in for Pro, buys credits, runs three models and sees the deduction', async ({ page }) => {
+  // Sign-in on the Auth emulator, the checkout redirect and the Pro stream all run under the policy (#352).
+  const violations = await watchCspViolations(page);
   const email = uniqueEmail('buyer');
   await startProFromLanding(page, email);
 
@@ -149,6 +152,7 @@ test('a new user signs in for Pro, buys credits, runs three models and sees the 
   );
   const models = page.getByTestId('model-usage-list').getByRole('listitem');
   expect(await models.count()).toBeGreaterThanOrEqual(3);
+  expect(await violations()).toEqual([]);
 });
 
 test('warns under the low-balance threshold (FR-038) and still runs', async ({ page }) => {
