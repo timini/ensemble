@@ -106,6 +106,10 @@ jobs:
       - name: Build consensus packages and shared-utils (component imports)
         run: |
           npm run build --workspace=packages/consensus-core
+          npm run build --workspace=packages/consensus-standard
+          npm run build --workspace=packages/consensus-elo
+          npm run build --workspace=packages/consensus-majority
+          npm run build --workspace=packages/consensus-council
           npm run build --workspace=packages/shared-utils
       - run: npm run lint --workspace=packages/component-library
       - run: npm run test:unit --workspace=packages/component-library
