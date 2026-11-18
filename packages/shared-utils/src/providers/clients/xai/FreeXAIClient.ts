@@ -83,7 +83,7 @@ export class FreeXAIClient extends BaseFreeClient {
       ...(options.options?.temperature !== undefined && {
         temperature: options.options.temperature,
       }),
-    });
+    }, { signal: options.signal });
 
     const raw = response.choices[0]?.message?.content ?? '';
     if (!raw) {
@@ -122,7 +122,7 @@ export class FreeXAIClient extends BaseFreeClient {
         ...(options.streamOptions?.seed !== undefined && {
           seed: options.streamOptions.seed,
         }),
-      });
+      }, { signal: options.signal });
 
       for await (const chunk of stream as AsyncIterable<{
         choices?: { delta?: { content?: unknown }; finish_reason?: string | null }[];

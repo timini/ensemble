@@ -1,6 +1,6 @@
 import OpenAI from 'openai';
 import { BaseFreeClient, type StreamOptions, type StructuredOptions } from '../base/BaseFreeClient';
-import type { StructuredResponse, TokenUsage, ValidationResult } from '../../types';
+import type { GenerateEmbeddingsOptions, StructuredResponse, TokenUsage, ValidationResult } from '../../types';
 import { hasNonTextModality } from '../../utils/modelFilters';
 import { sanitizeProviderErrorMessage } from '../../utils/sanitizeSensitiveData';
 import { fromChatCompletionUsage, type ChatCompletionUsage } from '../../utils/usage';
@@ -11,12 +11,17 @@ import { OPENAI_BASE_URL, OPENAI_EMBEDDING_MODEL } from '../../embeddings/models
 export class FreeOpenAIClient extends BaseFreeClient {
   override readonly supportsEmbeddings: boolean = true;
 
-  protected override embedWithProvider(apiKey: string, text: string): Promise<number[]> {
+  protected override embedWithProvider(
+    apiKey: string,
+    text: string,
+    options?: GenerateEmbeddingsOptions,
+  ): Promise<number[]> {
     return requestOpenAICompatibleEmbedding({
       baseURL: OPENAI_BASE_URL,
       apiKey,
       model: OPENAI_EMBEDDING_MODEL,
       input: text,
+      ...(options?.signal ? { signal: options.signal } : {}),
     });
   }
 
@@ -96,7 +101,7 @@ export class FreeOpenAIClient extends BaseFreeClient {
         },
       },
       ...openAISamplingParams(options.model, options.options?.temperature),
-    });
+    }, { signal: options.signal });
 
     const raw = response.choices[0]?.message?.content ?? '';
     if (!raw) {
@@ -131,7 +136,7 @@ export class FreeOpenAIClient extends BaseFreeClient {
       ...(options.streamOptions?.seed !== undefined && {
         seed: options.streamOptions.seed,
       }),
-    });
+    }, { signal: options.signal });
 
     for await (const chunk of stream as AsyncIterable<{
       choices?: { delta?: { content?: unknown }; finish_reason?: string | null }[];

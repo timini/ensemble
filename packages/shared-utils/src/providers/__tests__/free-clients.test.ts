@@ -296,6 +296,7 @@ describe('Free mode provider clients', () => {
           stream: true,
           messages: [{ role: 'user', content: 'prompt' }],
         }),
+        expect.objectContaining({ signal: expect.any(AbortSignal) }),
       );
       expect(onChunk).toHaveBeenNthCalledWith(1, 'Hello');
       expect(onChunk).toHaveBeenNthCalledWith(2, ' world');
@@ -438,6 +439,7 @@ describe('Free mode provider clients', () => {
             json_schema: expect.objectContaining({ name: 'mcq_answer', strict: true }),
           }),
         }),
+        { signal: undefined },
       );
     });
 
@@ -478,6 +480,7 @@ describe('Free mode provider clients', () => {
           ]),
           tool_choice: { type: 'tool', name: 'mcq_answer' },
         }),
+        { signal: undefined },
       );
     });
 
