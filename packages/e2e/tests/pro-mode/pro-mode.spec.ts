@@ -7,6 +7,7 @@ import {
   paidSession,
   refundedCharge,
   sendStripeEvent,
+  onboardingFinished,
   setBalance,
   signInWithEmailLink,
   startProFromLanding,
@@ -82,6 +83,7 @@ async function signInToPro(page: Page, label: string) {
   await signInWithEmailLink(page, sheet, email);
   await sheet.getByTestId('onboarding-start').click();
   await expect(composerChips(page)).toHaveCount(3);
+  await onboardingFinished(page);
   return { email, uid: await uidFor(page.request, email) };
 }
 

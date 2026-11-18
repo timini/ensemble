@@ -173,6 +173,15 @@ export async function startProFromLanding(page: Page, email: string) {
   await expect(sheet.getByTestId('onboarding-start')).toBeEnabled();
   await sheet.getByTestId('onboarding-start').click();
   await expect(sheet).toBeHidden();
+  await onboardingFinished(page);
+}
+
+/**
+ * Wait until onboarding has dropped `?start=` from the URL. A reload before
+ * that opens onboarding again and replaces what the test typed.
+ */
+export async function onboardingFinished(page: Page) {
+  await expect(page).not.toHaveURL(/[?&]start=/);
 }
 
 /** The models in the composer. */
