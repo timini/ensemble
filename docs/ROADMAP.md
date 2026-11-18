@@ -171,28 +171,28 @@ Done when: an untrained tester reaches a first answer in under 60 seconds, measu
 Goal: a user can sign in, buy credits and run ensembles with no provider keys.
 
 Auth:
-- [ ] Firebase Auth on the client (Google and email link). Pass the ID token to tRPC. The server already verifies it (`app/src/server/auth/firebaseAdmin.ts`, `protectedProcedure`).
-- [ ] Account menu in the header. Sign-in is only required for Pro, sharing and synced history.
+- [x] Firebase Auth on the client (Google and email link). Pass the ID token to tRPC. The server already verifies it (`app/src/server/auth/firebaseAdmin.ts`, `protectedProcedure`).
+- [x] Account menu in the header. Sign-in is only required for Pro, sharing and synced history.
 
 Server streaming:
-- [ ] `ProAPIClient` implementing `AIProvider` over the existing `streamTextEvents` tRPC subscription (SSE). Remove the buffered `streamText` path or make it stream.
-- [ ] Wire `mode === 'pro'` in `createProviderClient` and the registry.
-- [ ] Route calls through OpenRouter with the server key (Decision 6). Consensus and embeddings run server-side in Pro so they are billed too.
-- [ ] Real cancellation (the current cancel is a no-op).
+- [x] `ProAPIClient` implementing `AIProvider` over the existing `streamTextEvents` tRPC subscription (SSE). Remove the buffered `streamText` path or make it stream.
+- [x] Wire `mode === 'pro'` in `createProviderClient` and the registry.
+- [x] Route calls through OpenRouter with the server key (Decision 6). Consensus and embeddings run server-side in Pro so they are billed too.
+- [x] Real cancellation (the current cancel is a no-op).
 
 Credits and billing:
-- [ ] Firestore data model and security rules (users, creditLedger, usage). Server writes only.
-- [ ] Credit service: estimate before the run, reserve credits, settle with actual tokens after, refund on failure. Block submission when the balance is too low (FR-036) and warn under a threshold (FR-038).
-- [ ] Stripe Checkout session route and webhook route (`/api/stripe/checkout`, `/api/stripe/webhook`), with signature verification and idempotency. Credit packs defined in config.
-- [ ] Usage dashboard (`/account`): balance, purchases, usage by model, recent runs (FR-041).
-- [ ] Abuse controls: per-user rate limit, a maximum token budget per run, Firebase App Check, and a hard monthly spend cap on the OpenRouter key.
-- [ ] Switching between Free and Pro keeps presets and history (FR-030).
+- [x] Firestore data model and security rules (users, creditLedger, usage). Server writes only.
+- [x] Credit service: estimate before the run, reserve credits, settle with actual tokens after, refund on failure. Block submission when the balance is too low (FR-036) and warn under a threshold (FR-038).
+- [x] Stripe Checkout session route and webhook route (`/api/stripe/checkout`, `/api/stripe/webhook`), with signature verification and idempotency. Credit packs defined in config.
+- [x] Usage dashboard (`/account`): balance, purchases, usage by model, recent runs (FR-041).
+- [x] Abuse controls: per-user rate limit, a maximum token budget per run, Firebase App Check, and a hard monthly spend cap on the OpenRouter key.
+- [x] Switching between Free and Pro keeps presets and history (FR-030).
 
 Tests:
-- [ ] Unit and integration tests for the credit service and webhook (Stripe test mode, Firestore emulator).
-- [ ] E2E `pro-mode` suite: sign in, buy credits in test mode, run, check the deduction (replaces T297, T298).
+- [x] Unit and integration tests for the credit service and webhook (Stripe test mode, Firestore emulator).
+- [x] E2E `pro-mode` suite: sign in, buy credits in test mode, run, check the deduction (replaces T297, T298).
 
-Done when: in production with Stripe live keys, a new user signs in, buys the smallest pack, runs an ensemble, and sees the deduction on the dashboard.
+Done when (code complete and tested against the Firebase emulators and Stripe test signatures on 2026-11-18; the live check needs the owner to create the secrets in docs/DEPLOYMENT.md and switch Stripe to live keys): in production with Stripe live keys, a new user signs in, buys the smallest pack, runs an ensemble, and sees the deduction on the dashboard.
 
 ### M6: Sharing, sync and launch (about 1.5 weeks)
 
