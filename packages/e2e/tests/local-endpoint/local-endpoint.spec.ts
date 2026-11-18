@@ -168,6 +168,11 @@ test.describe('First-run onboarding with a local Ollama', () => {
     await page.getByTestId('onboarding-start').click();
     await expect(sheet).toBeHidden();
     await expect(page.getByTestId('workspace-setup')).toHaveCount(0);
+    // The chat models are chosen to start with, not the embedding model.
+    for (const model of MODELS) {
+      await expect(page.locator(`[data-testid="model-chip"][data-model-id="${model}"]`)).toHaveCount(1);
+    }
+    await expect(page.getByTestId('model-chip')).toHaveCount(MODELS.length);
 
     await page.getByTestId('model-picker-trigger').click();
     for (const model of MODELS) {

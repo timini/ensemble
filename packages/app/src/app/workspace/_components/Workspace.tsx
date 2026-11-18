@@ -14,6 +14,7 @@ import { useWorkspaceRun } from "../hooks/useWorkspaceRun";
 import { useNewQuestion } from "../hooks/useNewQuestion";
 import { useWorkspacePanel } from "../hooks/useWorkspacePanel";
 import { useOnboarding } from "../hooks/useOnboarding";
+import { useStarterEnsemble } from "../hooks/useStarterEnsemble";
 import { useRunHistory } from "../hooks/useRunHistory";
 import { clearRuns } from "~/lib/runHistory";
 import { runRecordExtras } from "~/lib/runHistoryRecord";
@@ -39,7 +40,9 @@ const STORE_KEY = "ensemble-ai-store";
  * settings sheet. `?panel=settings|models|prompt` opens a part of it, which
  * is how the old wizard routes land here. On a first visit the onboarding
  * sheet asks how to run models (`?start=keys|local` from the landing page
- * picks the path).
+ * picks the path). Starting from onboarding fills the composer with a
+ * starting ensemble (`useStarterEnsemble`), so the first question needs
+ * only typing.
  */
 export function Workspace() {
   const { t } = useTranslation("common");
@@ -59,13 +62,15 @@ export function Workspace() {
     enabled: hasHydrated && keys.webCryptoSupported,
     hasValidKey: keys.validKeyCount > 0,
   });
+  const composer = useWorkspaceComposer(keys.hydratedStatuses);
+  const chooseStarterModels = useStarterEnsemble(composer.modelOptions);
   const onboarding = useOnboarding({
     hasHydrated,
     keys,
     endpoints,
     onOpenSettings: () => setSettingsOpen(true),
+    onStarted: chooseStarterModels,
   });
-  const composer = useWorkspaceComposer(keys.hydratedStatuses);
   const run = useWorkspaceRun({ onOpenSettings: () => setSettingsOpen(true) });
   const newQuestion = useNewQuestion();
   const mode = useStore((state) => state.mode);

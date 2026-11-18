@@ -51,15 +51,21 @@ test('the whole flow works with the keyboard alone', async ({ page }) => {
   await expect(page.getByTestId('onboarding-sheet')).toBeHidden();
   await expect(page.getByTestId('composer-prompt')).toBeFocused();
 
-  // Composer: pick two models with the arrows and Enter, close with Escape.
+  // Start chose a starting ensemble: the key's two models.
+  await expect(page.getByTestId('model-chip')).toHaveCount(2);
+
+  // Composer: take a model out and put it back with the arrows and Enter,
+  // close with Escape.
   await tabTo(page, 'model-picker-trigger');
   await expectVisibleFocus(page);
   await page.keyboard.press('Enter');
   await expect(page.getByTestId('model-picker-panel')).toBeVisible();
   await tabTo(page, 'model-picker-option');
   await page.keyboard.press('Enter');
-  await page.keyboard.press('ArrowDown');
+  await expect(page.getByTestId('model-chip')).toHaveCount(1);
   await page.keyboard.press('Enter');
+  await expect(page.getByTestId('model-chip')).toHaveCount(2);
+  await page.keyboard.press('ArrowDown');
   await page.keyboard.press('Escape');
   await expect(page.getByTestId('model-picker-panel')).toBeHidden();
   await expect(page.getByTestId('model-picker-trigger')).toBeFocused();

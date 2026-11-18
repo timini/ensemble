@@ -182,6 +182,18 @@ describe("useOnboarding", () => {
     expect(replace).toHaveBeenCalledWith("/workspace?mockErrors=x");
   });
 
+  it("reports Start, and not Skip, so the workspace can choose starting models", () => {
+    const onStarted = vi.fn();
+    const skipped = renderHook(() => useOnboarding(options({ onStarted })));
+    act(() => skipped.result.current.onSkip());
+    expect(onStarted).not.toHaveBeenCalled();
+
+    useStore.setState({ onboardingDone: false });
+    const started = renderHook(() => useOnboarding(options({ onStarted })));
+    act(() => started.result.current.onStart());
+    expect(onStarted).toHaveBeenCalledTimes(1);
+  });
+
   it("opens settings from the local path and finishes onboarding", () => {
     const opts = options();
     const { result } = renderHook(() => useOnboarding(opts));

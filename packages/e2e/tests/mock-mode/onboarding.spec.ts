@@ -44,6 +44,11 @@ test.describe('Onboarding', () => {
     await expect(sheet(page)).toBeHidden();
     await expect(page.getByTestId('composer-prompt')).toBeFocused();
     await expect(page.getByTestId('workspace-setup')).toHaveCount(0);
+    // A starting ensemble is chosen, so typing a question is all that is left.
+    await expect(page.locator('[data-testid="model-chip"][data-model-id^="claude"]')).toHaveCount(2);
+    await expect(page.getByTestId('composer-models-hint')).toHaveCount(0);
+    await page.getByTestId('composer-prompt').fill('Is it safe to eat raw cookie dough?');
+    await expect(page.getByTestId('composer-submit')).toBeEnabled();
     const picker = await openModelPicker(page);
     await expect(picker.locator('[data-testid="model-picker-option"][data-model-id^="claude"]').first()).toBeVisible();
 
@@ -78,6 +83,8 @@ test.describe('Onboarding', () => {
     await page.getByTestId('onboarding-skip').click();
     await expect(sheet(page)).toBeHidden();
     await expect(page.getByTestId('workspace-setup')).toBeVisible();
+    await expect(page.getByTestId('model-chip')).toHaveCount(0);
+    await expect(page.getByTestId('composer-models-hint')).toHaveText('Choose at least one model to ask');
     await page.reload();
     await expect(page.getByTestId('composer')).toBeVisible();
     await expect(sheet(page)).toHaveCount(0);
@@ -87,6 +94,15 @@ test.describe('Onboarding', () => {
     await page.goto('/config');
     await expect(page.getByTestId('settings-sheet')).toBeVisible();
     await expect(sheet(page)).toHaveCount(0);
+  });
+
+  test('follows a French browser and a dark system on a first visit', async ({ browser }) => {
+    const context = await browser.newContext({ locale: 'fr-FR', colorScheme: 'dark', storageState: { cookies: [], origins: [] } });
+    const page = await context.newPage();
+    await page.goto('/workspace');
+    await expect(page.locator('html')).toHaveClass(/\bdark\b/);
+    await expect(sheet(page).getByRole('heading', { name: 'Comment voulez-vous utiliser les modèles ?' })).toBeVisible();
+    await context.close();
   });
 
   test('is translated into French', async ({ page }) => {

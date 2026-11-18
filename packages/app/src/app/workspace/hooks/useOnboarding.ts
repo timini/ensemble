@@ -24,6 +24,8 @@ export interface UseOnboardingOptions {
   endpoints: Pick<Endpoints, "items" | "onChange" | "onRemove">;
   /** Opens the settings sheet. */
   onOpenSettings: () => void;
+  /** Called when onboarding ends with Start (not Skip or close). */
+  onStarted?: () => void;
 }
 
 /** The `start` query value the landing page sets, as a path, or null. */
@@ -42,13 +44,15 @@ export function readOnboardingStart(
  * an OpenRouter endpoint, since OpenRouter is an OpenAI-compatible service.
  * The key is checked as typed, by the same code as the settings sheet.
  * Start, Skip, closing or going to settings finish onboarding for good and
- * drop `start` from the URL.
+ * drop `start` from the URL. Start also calls `onStarted`, which the
+ * workspace uses to choose a starting ensemble.
  */
 export function useOnboarding({
   hasHydrated,
   keys,
   endpoints,
   onOpenSettings,
+  onStarted,
 }: UseOnboardingOptions) {
   const router = useRouter();
   const params = useSearchParams();
@@ -160,7 +164,10 @@ export function useOnboarding({
       ? { name: local.label, models: local.modelCount ?? 0 }
       : undefined,
     canStart: keys.canRun,
-    onStart: finish,
+    onStart: () => {
+      finish();
+      onStarted?.();
+    },
     onSkip: finish,
     onOpenChange: (next: boolean) => {
       if (!next) finish();
