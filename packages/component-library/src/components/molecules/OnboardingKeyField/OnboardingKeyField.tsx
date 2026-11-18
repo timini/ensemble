@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Check, Loader2, TriangleAlert } from 'lucide-react';
+import { Check, ExternalLink, Loader2, TriangleAlert } from 'lucide-react';
 import { cn } from '../../../lib/utils';
 
 /** Where a key in onboarding goes: OpenRouter (an endpoint) or one of the six key providers. */
@@ -29,6 +29,17 @@ const NAMES: Record<OnboardingKeyProvider, string> = {
   perplexity: 'Perplexity',
 };
 
+/** Where each provider issues API keys. */
+const KEY_PAGES: Record<OnboardingKeyProvider, string> = {
+  openrouter: 'https://openrouter.ai/keys',
+  openai: 'https://platform.openai.com/api-keys',
+  anthropic: 'https://console.anthropic.com/settings/keys',
+  google: 'https://aistudio.google.com/apikey',
+  xai: 'https://console.x.ai',
+  deepseek: 'https://platform.deepseek.com/api_keys',
+  perplexity: 'https://www.perplexity.ai/settings/api',
+};
+
 export interface OnboardingKeyFieldProps {
   provider: OnboardingKeyProvider;
   onProviderChange: (provider: OnboardingKeyProvider) => void;
@@ -48,7 +59,8 @@ const field =
 /**
  * OnboardingKeyField molecule: one API key, the provider it belongs to and
  * the result of checking it, inline. The app picks the provider from the
- * key's prefix where it can; the user can change it.
+ * key's prefix where it can; the user can change it. Until the key works, a
+ * link opens the page where the chosen provider issues keys.
  *
  * @example
  * ```tsx
@@ -132,6 +144,18 @@ export function OnboardingKeyField(props: OnboardingKeyFieldProps) {
         )}
         {status === 'idle' && <span className="text-muted-foreground">{t(`${key}.hint`)}</span>}
       </p>
+      {status !== 'valid' && (
+        <a
+          href={KEY_PAGES[provider]}
+          target="_blank"
+          rel="noopener noreferrer"
+          data-testid="onboarding-key-get"
+          className="inline-flex items-center gap-1 rounded-sm text-caption font-medium text-primary underline-offset-4 focus-ring hover:underline"
+        >
+          {t(`${key}.getKey`, { provider: name })}
+          <ExternalLink className="size-3.5" aria-hidden="true" />
+        </a>
+      )}
     </div>
   );
 }

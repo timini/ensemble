@@ -414,7 +414,8 @@
       "valid": "La clé {{provider}} fonctionne.",
       "validOpenRouter": "La clé OpenRouter fonctionne. Elle donne accès aux modèles de tous les grands fournisseurs.",
       "invalid": "{{provider}} a refusé cette clé.",
-      "invalidWithReason": "{{provider}} a refusé cette clé : {{reason}}"
+      "invalidWithReason": "{{provider}} a refusé cette clé : {{reason}}",
+      "getKey": "Obtenir une clé chez {{provider}}"
     }
   },
   "organisms": {

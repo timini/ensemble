@@ -414,7 +414,8 @@
       "valid": "The {{provider}} key works.",
       "validOpenRouter": "The OpenRouter key works. It reaches models from every major provider.",
       "invalid": "{{provider}} did not accept this key.",
-      "invalidWithReason": "{{provider}} did not accept this key: {{reason}}"
+      "invalidWithReason": "{{provider}} did not accept this key: {{reason}}",
+      "getKey": "Get a key from {{provider}}"
     }
   },
   "organisms": {

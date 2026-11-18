@@ -47,8 +47,26 @@ describe('OnboardingKeyField', () => {
     expect(screen.getByTestId('onboarding-key-input')).toHaveAttribute('aria-invalid', 'true');
   });
 
+  it('links to the page where the chosen provider issues keys, in a new tab', () => {
+    const { rerender } = renderWithI18n(<OnboardingKeyField {...base} />);
+    const link = screen.getByTestId('onboarding-key-get');
+    expect(link).toHaveTextContent('Get a key from OpenRouter');
+    expect(link).toHaveAttribute('href', 'https://openrouter.ai/keys');
+    expect(link).toHaveAttribute('target', '_blank');
+    expect(link).toHaveAttribute('rel', 'noopener noreferrer');
+    rerender(<OnboardingKeyField {...base} provider="anthropic" />);
+    expect(screen.getByTestId('onboarding-key-get')).toHaveTextContent('Get a key from Anthropic');
+    expect(screen.getByTestId('onboarding-key-get')).toHaveAttribute('href', 'https://console.anthropic.com/settings/keys');
+  });
+
+  it('drops the link once the key works', () => {
+    renderWithI18n(<OnboardingKeyField {...base} status="valid" />);
+    expect(screen.queryByTestId('onboarding-key-get')).not.toBeInTheDocument();
+  });
+
   it('renders in French', () => {
     renderWithI18n(<OnboardingKeyField {...base} />, { language: 'fr' });
     expect(screen.getByLabelText('Fournisseur')).toBeInTheDocument();
+    expect(screen.getByTestId('onboarding-key-get')).toHaveTextContent('Obtenir une clé chez OpenRouter');
   });
 });
