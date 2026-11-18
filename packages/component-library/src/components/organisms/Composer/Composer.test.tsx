@@ -66,6 +66,12 @@ describe('Composer', () => {
     expect(submit).toHaveAttribute('aria-describedby', hint.id);
   });
 
+  it('keeps the shortcut and the method on one line each', () => {
+    setup();
+    expect(screen.getByTestId('composer-shortcut')).toHaveClass('whitespace-nowrap');
+    expect(screen.getByTestId('method-menu-trigger')).toHaveClass('whitespace-nowrap');
+  });
+
   it('drops the hint once a model or a hand-written answer is in', () => {
     setup();
     expect(screen.queryByTestId('composer-models-hint')).not.toBeInTheDocument();
@@ -150,7 +156,9 @@ describe('Composer', () => {
   it('shows the keyboard shortcut and translates to French', () => {
     setup({}, 'fr');
     expect(screen.getByRole('textbox', { name: 'Votre question' })).toBeInTheDocument();
-    expect(screen.getByTestId('composer-shortcut')).toHaveTextContent('Ctrl Entrée pour demander');
+    const shortcut = screen.getByTestId('composer-shortcut');
+    expect(shortcut).toHaveTextContent(/^Ctrl Entrée$/);
+    expect(shortcut).toHaveAttribute('title', 'Ctrl Entrée pour demander');
     expect(screen.getByTestId('composer-submit')).toHaveAccessibleName('Demander');
   });
 });

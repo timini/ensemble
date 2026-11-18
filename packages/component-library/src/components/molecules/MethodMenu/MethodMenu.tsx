@@ -104,7 +104,7 @@ export function MethodMenu({
         {...popover.triggerProps}
         disabled={disabled}
         data-testid="method-menu-trigger"
-        className="focus-ring flex h-9 items-center gap-2 rounded-lg border border-border bg-card px-3 text-label shadow-sm transition-colors duration-fast hover:bg-muted disabled:opacity-50"
+        className="focus-ring flex h-9 items-center gap-2 whitespace-nowrap rounded-lg border border-border bg-card px-3 text-label shadow-sm transition-colors duration-fast hover:bg-muted disabled:opacity-50"
       >
         <span className="sr-only text-muted-foreground sm:not-sr-only">{t('molecules.methodMenu.label')}</span>
         <span className="font-medium">{name(method)}</span>

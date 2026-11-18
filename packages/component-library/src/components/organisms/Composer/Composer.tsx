@@ -78,6 +78,7 @@ export function Composer(props: ComposerProps) {
   const promptId = React.useId();
   const hintId = React.useId();
   const [modKey, setModKey] = React.useState('Ctrl');
+  const keys = `${modKey} ${t('organisms.composer.enter')}`;
   const noModels = models.length + manualResponses.length === 0;
   const canSubmit = prompt.trim().length > 0 && !noModels && !running;
 
@@ -157,9 +158,14 @@ export function Composer(props: ComposerProps) {
           disabled={running}
         />
         <div className="ml-auto flex items-center gap-1">
-          <span data-testid="composer-shortcut" className="mr-2 hidden text-caption text-muted-foreground md:inline">
-            {t('organisms.composer.shortcut', { keys: `${modKey} ${t('organisms.composer.enter')}` })}
-          </span>
+          {/* The keys alone keep the row on one line in French; the sentence is the tooltip. */}
+          <kbd
+            data-testid="composer-shortcut"
+            title={t('organisms.composer.shortcut', { keys })}
+            className="mr-2 hidden whitespace-nowrap font-sans text-caption text-muted-foreground md:inline"
+          >
+            {keys}
+          </kbd>
           {/* Answers added by hand join a run in progress, so the menu stays available. */}
           <ComposerOptions onAddManualResponse={props.onAddManualResponse} onSavePreset={props.onSavePreset} />
           <Button
