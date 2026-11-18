@@ -30,6 +30,11 @@ describe('ModelUsageList', () => {
     expect(screen.getByTestId('model-usage-empty')).toHaveTextContent('No Pro runs in the last 30 days.');
   });
 
+  it('uses the singular for a one-day period', () => {
+    renderWithI18n(<ModelUsageList items={[]} days={1} status="ready" />);
+    expect(screen.getByRole('heading', { name: 'Usage by model, last day' })).toBeInTheDocument();
+  });
+
   it('renders in French', () => {
     renderWithI18n(<ModelUsageList items={items} days={30} status="ready" />, { language: 'fr' });
     expect(screen.getByRole('heading', { name: 'Utilisation par modèle, 30 derniers jours' })).toBeInTheDocument();

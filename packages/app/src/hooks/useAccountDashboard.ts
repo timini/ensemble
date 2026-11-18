@@ -1,4 +1,3 @@
-import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import type { AccountDashboardProps } from "@/components/organisms/AccountDashboard";
 import type { AccountListStatus } from "@/components/molecules/AccountSection";
@@ -20,23 +19,25 @@ const PAGE_SIZE = 10;
 function listStatus(q: {
   isPending: boolean;
   isError: boolean;
+  data?: unknown;
 }): AccountListStatus {
-  if (q.isError) return "error";
+  // A failed "Show more" keeps the pages already loaded.
+  if (q.isError && q.data === undefined) return "error";
   return q.isPending ? "loading" : "ready";
 }
 
 /**
  * The /account dashboard (FR-041) from the credits router: balance, packs,
  * usage by model over 30 days, and purchases and runs ten at a time with
- * Show more. Queries run only while signed in and reload when the user
- * changes. Values come back formatted for AccountDashboard.
+ * Show more. Queries run only while signed in; AuthProvider drops cached
+ * credits when the user changes. Values come back formatted for
+ * AccountDashboard.
  */
 export function useAccountDashboard(): Omit<AccountDashboardProps, "email"> {
   const { i18n } = useTranslation("common");
   const lang = i18n.language;
   const auth = useAuth();
   const enabled = auth.status === "signedIn";
-  const utils = api.useUtils();
   const account = api.credits.account.useQuery(undefined, { enabled });
   const packs = api.credits.packs.useQuery(undefined, { staleTime: Infinity });
   const usage = api.credits.usageByModel.useQuery(
@@ -54,11 +55,6 @@ export function useAccountDashboard(): Omit<AccountDashboardProps, "email"> {
   );
   const runs = api.credits.runs.useInfiniteQuery({ limit: PAGE_SIZE }, paging);
   const checkout = useCreditCheckout();
-
-  const uid = auth.user?.uid ?? null;
-  useEffect(() => {
-    void utils.credits.invalidate();
-  }, [uid, utils]);
 
   const packList = packs.data ?? [];
   const more = (q: typeof runs | typeof purchases) => ({

@@ -43,7 +43,7 @@ Balances and ledger amounts are integers in micro-dollars: 1 USD is 1,000,000. A
 
 A Pro run reserves the high end of the pre-run estimate plus the margin, then settles at the actual token cost plus the margin, never more than the reservation, and gives back the difference. A failed run is refunded in full. Every step is an append-only entry in `creditLedger`, idempotent by run id.
 
-When Stripe refunds a payment or the buyer opens a dispute, the webhook takes the purchase's credits back with a `reversal` entry: the refunded or disputed amount, never more than the purchase added, however many events arrive. If the credits were already spent the balance goes below zero, the workspace and `/account` say why, and Pro runs are refused until a purchase brings it back above zero. A dispute that is later won is not credited back automatically; give the credits back by hand with `grantCredits` if you want to.
+When Stripe refunds a payment or the buyer opens a dispute, the webhook takes the purchase's credits back with a `reversal` entry: the refunded or disputed amount, never more than the purchase added, however many events arrive. If the credits were already spent the balance goes below zero, the workspace and `/account` say why, and Pro runs are refused until a purchase brings it back above zero. A dispute that is later won is not credited back automatically; give the credits back by hand with `grantCredits` if you want to. A refund or dispute whose purchase is not recorded yet (its own event still being retried) answers 500, so Stripe delivers it again; Stripe gives up after about three days, and the error log names the PaymentIntent.
 
 ## Pro mode (OpenRouter)
 

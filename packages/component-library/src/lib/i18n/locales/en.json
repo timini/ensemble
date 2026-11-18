@@ -511,8 +511,10 @@
       "dispute": "Disputed payment"
     },
     "modelUsageList": {
-      "title": "Usage by model, last {{count}} days",
-      "empty": "No Pro runs in the last {{count}} days.",
+      "title_one": "Usage by model, last day",
+      "title_other": "Usage by model, last {{count}} days",
+      "empty_one": "No Pro runs in the last day.",
+      "empty_other": "No Pro runs in the last {{count}} days.",
       "truncated": "Only your most recent runs are counted.",
       "runs_one": "{{count}} run",
       "runs_other": "{{count}} runs",

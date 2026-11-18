@@ -101,6 +101,15 @@ describe("useAccountDashboard", () => {
     expect(result.current.runs).toMatchObject({ status: "ready", items: [] });
   });
 
+  it("keeps loaded pages when the next page fails", () => {
+    m.runs = { ...page([], "run-9"), isError: true };
+    const { result } = renderHook(() => useAccountDashboard());
+    expect(result.current.runs.status).toBe("ready");
+    m.runs = { data: undefined, isPending: false, isError: true };
+    const { result: failed } = renderHook(() => useAccountDashboard());
+    expect(failed.current.runs.status).toBe("error");
+  });
+
   it("asks for nothing personal while signed out", () => {
     m.auth = { status: "signedOut", user: null };
     renderHook(() => useAccountDashboard());

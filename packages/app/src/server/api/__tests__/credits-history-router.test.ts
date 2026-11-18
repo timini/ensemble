@@ -76,6 +76,9 @@ describe("credits router: account history", () => {
     await expect(api.credits.runs({ limit: 500 })).rejects.toMatchObject({
       code: "BAD_REQUEST",
     });
+    await expect(
+      api.credits.runs({ cursor: "r".repeat(129) }),
+    ).rejects.toMatchObject({ code: "BAD_REQUEST" });
   });
 
   it("sums usage by model over the last 30 days by default", async () => {

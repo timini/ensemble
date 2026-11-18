@@ -511,8 +511,10 @@
       "dispute": "Paiement contesté"
     },
     "modelUsageList": {
-      "title": "Utilisation par modèle, {{count}} derniers jours",
-      "empty": "Aucune requête Pro ces {{count}} derniers jours.",
+      "title_one": "Utilisation par modèle, dernier jour",
+      "title_other": "Utilisation par modèle, {{count}} derniers jours",
+      "empty_one": "Aucune requête Pro depuis hier.",
+      "empty_other": "Aucune requête Pro ces {{count}} derniers jours.",
       "truncated": "Seules vos requêtes les plus récentes sont comptées.",
       "runs_one": "{{count}} requête",
       "runs_other": "{{count}} requêtes",

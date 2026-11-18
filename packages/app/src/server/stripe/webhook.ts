@@ -23,8 +23,7 @@ export type WebhookResult =
   | "unpaid"
   | "ignored"
   | "rejected"
-  | "reversed"
-  | "unmatched";
+  | "reversed";
 
 export interface WebhookResponse {
   status: number;
@@ -112,10 +111,16 @@ async function handleReversal(
   try {
     const { result } = await deps.recordReversal(input);
     if (result === "unmatched") {
-      logger.error("[Stripe] Refund or dispute matches no purchase", {
+      // The purchase may not be recorded yet (its event is still being
+      // retried): answer 500 so Stripe delivers this event again later.
+      logger.error("[Stripe] Refund or dispute matches no purchase yet", {
         eventId: event.id,
         paymentIntentId: input.paymentIntentId,
       });
+      return {
+        status: 500,
+        body: { error: "No purchase for this payment yet" },
+      };
     }
     return ok(result);
   } catch (error) {

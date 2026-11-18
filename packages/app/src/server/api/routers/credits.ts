@@ -33,13 +33,15 @@ export const runQuoteInput = z.object({
 });
 
 /** One page of a list on /account. The cursor is the last item's id. */
-const pageInput = z.object({
-  cursor: z
-    .string()
-    .regex(/^[A-Za-z0-9_-]{1,256}$/)
-    .nullish(),
-  limit: z.number().int().min(1).max(50).default(10),
-});
+const pageInput = (maxCursor: number) =>
+  z.object({
+    cursor: z
+      .string()
+      .max(maxCursor)
+      .regex(/^[A-Za-z0-9_-]+$/)
+      .nullish(),
+    limit: z.number().int().min(1).max(50).default(10),
+  });
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 /** Most runs summed for usage by model; older runs in the window are left out. */
@@ -78,14 +80,16 @@ export const creditsRouter = createTRPCRouter({
 
   /** Purchases, refunds, disputes and grants, newest first (FR-041). */
   purchases: protectedProcedure
-    .input(pageInput)
+    // A ledger entry id.
+    .input(pageInput(256))
     .query(({ ctx, input }) =>
       listPurchases(getAdminFirestore(), ctx.authUser.uid, input),
     ),
 
   /** Settled Pro runs, newest first, with their models and charge (FR-041). */
   runs: protectedProcedure
-    .input(pageInput)
+    // A run id, which assertSafeId limits to 128 characters.
+    .input(pageInput(128))
     .query(({ ctx, input }) =>
       listRuns(getAdminFirestore(), ctx.authUser.uid, input),
     ),

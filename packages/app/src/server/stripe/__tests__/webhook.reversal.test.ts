@@ -96,16 +96,25 @@ describe("handleStripeWebhook: refunds and disputes", () => {
     });
   });
 
-  it("passes on a duplicate and a charge with no matching purchase", async () => {
+  it("passes on a duplicate", async () => {
     const dup = refunded();
     expect(
       (await handleStripeWebhook(dup.body, dup.signature, deps("duplicate")))
         .body,
     ).toEqual({ received: true, result: "duplicate" });
+  });
+
+  it("asks Stripe to retry a charge whose purchase is not recorded yet", async () => {
+    const early = refunded();
     expect(
-      (await handleStripeWebhook(dup.body, dup.signature, deps("unmatched")))
-        .body,
-    ).toEqual({ received: true, result: "unmatched" });
+      (
+        await handleStripeWebhook(
+          early.body,
+          early.signature,
+          deps("unmatched"),
+        )
+      ).status,
+    ).toBe(500);
   });
 
   it("ignores a refund of a charge with no payment intent", async () => {
