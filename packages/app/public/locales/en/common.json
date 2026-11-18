@@ -362,7 +362,9 @@
     "benchmarks": {
       "title": "Benchmarks",
       "description": "Does an ensemble beat its best member? Accuracy on public benchmarks, with confidence intervals and the method that produced them.",
-      "runInfo": "Run {{runId}} on {{date}}. Cost of these results {{cost}}, cached reference answers included.",
+      "runInfo": "Run {{runId}}, summarised on {{date}}. Cost of these results {{cost}}, including the premium reference answers collected so far.",
+      "referenceComingSoon": "Premium reference ({{model}}): Coming soon. A comparison with a premium model will be added.",
+      "agreementUncalibrated": "The agreement score in the app is uncalibrated.",
       "costAtLeast": "at least {{cost}}",
       "smallSampleNotice": "{{dataset}} has {{n}} questions, below the {{min}} the method asks for before any accuracy claim. Treat its numbers as indicative.",
       "mockNotice": "These numbers come from a mock dry run of the pipeline. They are not real results.",

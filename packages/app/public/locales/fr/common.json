@@ -362,7 +362,9 @@
     "benchmarks": {
       "title": "Benchmarks",
       "description": "Un ensemble fait-il mieux que son meilleur membre ? L'exactitude sur des benchmarks publics, avec intervalles de confiance et la méthode qui les a produits.",
-      "runInfo": "Exécution {{runId}} du {{date}}. Coût de ces résultats {{cost}}, réponses de référence en cache comprises.",
+      "runInfo": "Exécution {{runId}}, résumée le {{date}}. Coût de ces résultats {{cost}}, réponses de la référence premium déjà recueillies comprises.",
+      "referenceComingSoon": "Référence premium ({{model}}) : Bientôt disponible. Une comparaison avec un modèle premium sera ajoutée.",
+      "agreementUncalibrated": "Le score d'accord de l'application n'est pas calibré.",
       "costAtLeast": "au moins {{cost}}",
       "smallSampleNotice": "{{dataset}} compte {{n}} questions, moins que les {{min}} que la méthode exige avant toute affirmation sur l'exactitude. Ses chiffres sont indicatifs.",
       "mockNotice": "Ces chiffres viennent d'un essai à blanc avec des fournisseurs simulés. Ce ne sont pas de vrais résultats.",

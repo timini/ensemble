@@ -26,6 +26,8 @@ export interface BenchmarkMethodProps {
   summarizer: string;
   /** Premium reference model. */
   reference: BenchmarkMethodModel;
+  /** True when the reference has no published results yet: it is shown as coming soon. */
+  referencePending?: boolean;
   /** Link to the full method (packages/eval/docs/BENCHMARKS.md). */
   docsUrl: string;
   className?: string;
@@ -34,7 +36,8 @@ export interface BenchmarkMethodProps {
 /**
  * BenchmarkMethod organism: how the benchmark numbers are produced, in
  * plain sentences. Shown with results and in the "not run yet" state, so
- * the method is always visible.
+ * the method is always visible. A reference with no results yet is shown as
+ * coming soon.
  *
  * @example
  * ```tsx
@@ -45,7 +48,7 @@ export interface BenchmarkMethodProps {
  */
 export const BenchmarkMethod = React.forwardRef<HTMLDivElement, BenchmarkMethodProps>(
   (
-    { datasets, sample, questionSeed, optionSeed, models, strategies, summarizer, reference, docsUrl, className },
+    { datasets, sample, questionSeed, optionSeed, models, strategies, summarizer, reference, referencePending = false, docsUrl, className },
     ref,
   ) => {
     const { t } = useTranslation();
@@ -56,7 +59,7 @@ export const BenchmarkMethod = React.forwardRef<HTMLDivElement, BenchmarkMethodP
       ['scoring', t(k('scoring'), { optionSeed })],
       ['models', t(k('models'), { list: models.map(named).join(', ') })],
       ['ensemble', t(k('ensemble'), { list: strategies.map((s) => t(k(`strategy.${s}`), { summarizer })).join(', ') })],
-      ['reference', t(k('reference'), { model: named(reference) })],
+      ['reference', t(k(referencePending ? 'referencePending' : 'reference'), { model: named(reference) })],
       ['statistics', t(k('statistics'))],
       ['cost', t(k('cost'))],
     ];

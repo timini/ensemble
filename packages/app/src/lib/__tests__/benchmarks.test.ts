@@ -3,6 +3,7 @@ import committed from "~/data/benchmark-summary.json";
 import {
   datasetLabel,
   parseBenchmarkSummary,
+  referencePending,
   shouldShowResults,
   toResultRows,
 } from "../benchmarks";
@@ -10,11 +11,56 @@ import { complete } from "./benchmarkSummaryFixture";
 
 const t = (key: string) => `t:${key}`;
 
+describe("referencePending", () => {
+  it("is false when every dataset has a reference row", () => {
+    const withReference = {
+      ...complete,
+      datasets: complete.datasets.map((d) => ({
+        ...d,
+        rows: [
+          ...d.rows,
+          { ...d.rows[0]!, id: "reference", kind: "reference" as const },
+        ],
+      })),
+    };
+    expect(referencePending(withReference)).toBe(false);
+    expect(referencePending(complete)).toBe(true);
+  });
+});
+
 describe("parseBenchmarkSummary", () => {
   it("reads the committed summary", () => {
     const summary = parseBenchmarkSummary(committed);
     expect(summary).not.toBeNull();
     expect(summary!.method.models).toHaveLength(3);
+  });
+
+  it("publishes the free M3 run with every dataset and no reference score", () => {
+    const summary = parseBenchmarkSummary(committed)!;
+    expect(summary).toMatchObject({ status: "complete", mode: "free" });
+    expect(summary.datasets.map((d) => d.dataset)).toEqual([
+      "gsm8k",
+      "mmlu_pro",
+      "gpqa",
+      "truthfulqa",
+    ]);
+    for (const dataset of summary.datasets) {
+      expect(dataset.rows.map((r) => r.id)).toEqual([
+        "single:qwen",
+        "single:llama",
+        "single:gemma",
+        "ensemble:majority",
+        "ensemble:standard",
+      ]);
+    }
+    expect(referencePending(summary)).toBe(true);
+    expect(shouldShowResults(summary, { NODE_ENV: "production" })).toBe(true);
+  });
+
+  it("publishes no reasons for the missing reference", () => {
+    expect(JSON.stringify(committed)).not.toMatch(
+      /credit|refus|billing|balance/i,
+    );
   });
 
   it("keeps a complete summary", () => {

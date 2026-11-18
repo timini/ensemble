@@ -759,6 +759,7 @@
         "council": "council"
       },
       "reference": "Premium reference, run once and cached: {{model}}.",
+      "referencePending": "Premium reference: {{model}}. Coming soon.",
       "statistics": "Accuracy has a 95% Wilson interval. Each configuration is compared with the best single open model on the same questions with a paired McNemar test (exact binomial below 25 discordant pairs).",
       "cost": "Cost comes from the shared OpenRouter price table and the token usage each provider reported.",
       "docsLink": "Full method and how to reproduce it"

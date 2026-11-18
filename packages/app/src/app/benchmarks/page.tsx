@@ -20,12 +20,20 @@ import { InlineAlert } from "@/components/atoms/InlineAlert";
 import { Heading } from "@/components/atoms/Heading";
 import { Text } from "@/components/atoms/Text";
 import summaryJson from "~/data/benchmark-summary.json";
+import calibrationJson from "~/data/agreement-calibration.json";
+
+/** True when no embedding model has fitted agreement cut-offs yet. */
+const agreementUncalibrated =
+  Object.keys(
+    (calibrationJson as { models?: Record<string, unknown> }).models ?? {},
+  ).length === 0;
 import {
   BENCHMARK_COMMAND,
   BENCHMARKS_DOCS_URL,
   datasetLabel,
   MIN_SAMPLE,
   parseBenchmarkSummary,
+  referencePending,
   shouldShowResults,
   toResultRows,
   type BenchmarkSummary,
@@ -58,6 +66,18 @@ function Results({ summary }: { summary: BenchmarkSummary }) {
         <InlineAlert variant="info" data-testid="benchmarks-partial-notice">
           {t("pages.benchmarks.partialNotice")}
         </InlineAlert>
+      )}
+      {referencePending(summary) && (
+        <Text color="muted" data-testid="benchmarks-reference-pending">
+          {t("pages.benchmarks.referenceComingSoon", {
+            model: summary.method.reference.label,
+          })}
+        </Text>
+      )}
+      {agreementUncalibrated && (
+        <Text color="muted" data-testid="benchmarks-agreement-uncalibrated">
+          {t("pages.benchmarks.agreementUncalibrated")}
+        </Text>
       )}
       {summary.datasets.map((dataset) => (
         <div key={dataset.dataset} className="space-y-2">
@@ -128,6 +148,9 @@ export default function BenchmarksPage() {
           strategies={method.strategies}
           summarizer={summarizer}
           reference={method.reference}
+          referencePending={
+            hasResults && summary ? referencePending(summary) : false
+          }
           docsUrl={BENCHMARKS_DOCS_URL}
         />
       )}
