@@ -16,8 +16,8 @@ import {
   decrypt,
   encrypt,
   EncryptionKeyUnavailableError,
-  isLegacyCiphertext,
 } from "@ensemble-ai/shared-utils/security";
+import { reencryptLegacy } from "~/lib/reencryptLegacy";
 import {
   getEndpointPreset,
   nextEndpointId,
@@ -244,9 +244,10 @@ export const createEndpointsSlice: StateCreator<EndpointsSlice> = (
           try {
             const apiKey = await decrypt(endpoint.encryptedApiKey);
             // Keys stored under the old derived key move to the device key.
-            const encryptedApiKey = isLegacyCiphertext(endpoint.encryptedApiKey)
-              ? await encrypt(apiKey)
-              : endpoint.encryptedApiKey;
+            const encryptedApiKey = await reencryptLegacy(
+              endpoint.encryptedApiKey,
+              apiKey,
+            );
             patchEndpoint(endpoint.id, () => ({ apiKey, encryptedApiKey }));
           } catch (error: unknown) {
             logger.error(
