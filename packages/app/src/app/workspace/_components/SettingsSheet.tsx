@@ -29,6 +29,8 @@ export interface SettingsSheetProps {
   ollamaOffer: OllamaDetectedNoticeProps | null;
   /** Clears everything stored in this browser. */
   onClearData: () => void | Promise<void>;
+  /** Free or Pro (ModeSettings), shown first. */
+  modeSection?: ReactNode;
 }
 
 function Section({
@@ -55,7 +57,8 @@ function Section({
  * Settings sheet of the workspace, replacing the old /config page: API keys,
  * local and hosted OpenAI-compatible endpoints (with the Ollama offer), the
  * embeddings provider for the agreement score, theme and language, and
- * clearing the data kept in this browser. /config opens it.
+ * clearing the data kept in this browser. /config opens it. `modeSection`
+ * (Free or Pro) comes first when given.
  */
 export function SettingsSheet(props: SettingsSheetProps) {
   const { keys, endpoints } = props;
@@ -86,6 +89,11 @@ export function SettingsSheet(props: SettingsSheetProps) {
           <p className="font-semibold">{t(`${key}.webCryptoTitle`)}</p>
           <p className="mt-1">{t(`${key}.webCryptoBody`)}</p>
         </InlineAlert>
+      )}
+      {props.modeSection && (
+        <Section testId="settings-mode" title={t(`${key}.mode`)}>
+          {props.modeSection}
+        </Section>
       )}
       <Section testId="settings-keys">
         <p

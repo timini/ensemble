@@ -1,7 +1,6 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { useTranslation } from "react-i18next";
 import { AppShell } from "@/components/organisms/AppShell";
 import { Composer } from "@/components/organisms/Composer";
 import { useStore } from "~/store";
@@ -16,7 +15,7 @@ import { useWorkspacePanel } from "../hooks/useWorkspacePanel";
 import { useOnboarding } from "../hooks/useOnboarding";
 import { useStarterEnsemble } from "../hooks/useStarterEnsemble";
 import { useRunHistory } from "../hooks/useRunHistory";
-import { clearRuns } from "~/lib/runHistory";
+import { clearBrowserData } from "~/lib/clearBrowserData";
 import { runRecordExtras } from "~/lib/runHistoryRecord";
 import { HistoryRunNotice } from "./HistoryRunNotice";
 import { SettingsSheet } from "./SettingsSheet";
@@ -25,14 +24,15 @@ import { SavePresetDialog } from "./SavePresetDialog";
 import { RunResult } from "./RunResult";
 import { WorkspaceOnboarding } from "./WorkspaceOnboarding";
 import { WorkspaceSidebar } from "./WorkspaceSidebar";
-import { AccountMenuContainer } from "~/app/_components/AccountMenuContainer";
+import { useAuth } from "~/app/_components/AuthProvider";
+import { useProCredits } from "~/hooks/useProCredits";
+import { ModeSettings, ProComposerNotice, WorkspaceAccount } from "./ProPanels";
 import {
+  BenchmarksNavLink,
   ExampleQuestions,
   SetupCard,
   WorkspaceHeading,
 } from "./WorkspaceIntro";
-
-const STORE_KEY = "ensemble-ai-store";
 
 /**
  * The workspace: one screen to ask, compare and read. The composer sits on
@@ -43,10 +43,10 @@ const STORE_KEY = "ensemble-ai-store";
  * sheet asks how to run models (`?start=keys|local` from the landing page
  * picks the path). Starting from onboarding fills the composer with a
  * starting ensemble (`useStarterEnsemble`), so the first question needs
- * only typing.
+ * only typing. In Pro, Ask waits for sign-in and enough credits
+ * (useProCredits) and the notice under the composer says why.
  */
 export function Workspace() {
-  const { t } = useTranslation("common");
   const hasHydrated = useHasHydrated();
   const { settingsOpen, setSettingsOpen, onSettingsChange } =
     useWorkspacePanel(hasHydrated);
@@ -64,6 +64,9 @@ export function Workspace() {
     hasValidKey: keys.validKeyCount > 0,
   });
   const composer = useWorkspaceComposer(keys.hydratedStatuses);
+  const auth = useAuth();
+  const credits = useProCredits(composer.prompt);
+  const canRun = credits.pro ? auth.status === "signedIn" : keys.canRun;
   const chooseStarterModels = useStarterEnsemble(composer.modelOptions);
   const onboarding = useOnboarding({
     hasHydrated,
@@ -71,13 +74,18 @@ export function Workspace() {
     endpoints,
     onOpenSettings: () => setSettingsOpen(true),
     onStarted: chooseStarterModels,
+    proReady: auth.status === "signedIn",
   });
   const run = useWorkspaceRun({ onOpenSettings: () => setSettingsOpen(true) });
-  const newQuestion = useNewQuestion();
-  const mode = useStore((state) => state.mode);
+  const startNewQuestion = useNewQuestion();
+  const newQuestion = () => {
+    startNewQuestion();
+    run.stop();
+  };
   const runStartedAt = useStore((state) => state.runStartedAt);
   const history = useRunHistory({
-    enabled: hasHydrated && mode === "free",
+    // History stays in this browser in both modes (FR-030).
+    enabled: hasHydrated,
     extras: runRecordExtras(run.agreement, run.consensus.cost),
     onOpen: run.stopConsensus,
   });
@@ -96,15 +104,8 @@ export function Workspace() {
       onOpenSettings={() => setSettingsOpen(true)}
       historyOpen={historyOpen}
       onHistoryOpenChange={setHistoryOpen}
-      account={<AccountMenuContainer />}
-      nav={
-        <a
-          href="/benchmarks"
-          className="hidden rounded-md px-3 py-2 text-label text-muted-foreground transition-colors duration-fast focus-ring hover:text-foreground sm:inline-block"
-        >
-          {t("pages.workspace.benchmarks")}
-        </a>
-      }
+      account={<WorkspaceAccount balance={credits.balance} />}
+      nav={<BenchmarksNavLink />}
       sidebar={
         <WorkspaceSidebar
           runPrompt={run.hasRun ? run.prompt : null}
@@ -132,6 +133,8 @@ export function Workspace() {
           {...composer}
           onSubmit={ask}
           running={run.running}
+          onStop={run.stop}
+          blockedReason={credits.blockedReason}
           onAddManualResponse={
             run.readOnly ? undefined : () => setManualOpen(true)
           }
@@ -140,14 +143,15 @@ export function Workspace() {
           }
         />
         {/* Below the composer, so nothing above it moves when the stored keys load. */}
-        {hasHydrated && !keys.canRun && (
+        {hasHydrated && <ProComposerNotice notice={credits.notice} />}
+        {hasHydrated && !credits.pro && !keys.canRun && (
           <SetupCard
             onOpenSettings={() => setSettingsOpen(true)}
             ollamaOffer={settingsOpen || onboarding.open ? null : ollamaOffer}
           />
         )}
         {empty ? (
-          keys.canRun && <ExampleQuestions onPick={composer.onPromptChange} />
+          canRun && <ExampleQuestions onPick={composer.onPromptChange} />
         ) : (
           <>
             {run.readOnly && runStartedAt !== null && (
@@ -166,6 +170,7 @@ export function Workspace() {
       <WorkspaceOnboarding
         onboarding={onboarding}
         ollamaOffer={onboarding.open ? ollamaOffer : null}
+        proBalance={credits.balance}
       />
       <SettingsSheet
         open={settingsOpen}
@@ -173,14 +178,8 @@ export function Workspace() {
         keys={keys}
         endpoints={endpoints}
         ollamaOffer={ollamaOffer}
-        onClearData={async () => {
-          await clearRuns().catch(() => undefined);
-          // Reset the store first: it persists every change, so it would
-          // otherwise write the old state back before the page reloads.
-          useStore.setState(useStore.getInitialState(), true);
-          localStorage.removeItem(STORE_KEY);
-          window.location.assign("/workspace");
-        }}
+        onClearData={clearBrowserData}
+        modeSection={<ModeSettings balance={credits.balance} />}
       />
       <ManualAnswerDialog
         open={manualOpen}

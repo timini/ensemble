@@ -201,4 +201,32 @@ describe("useOnboarding", () => {
     expect(opts.onOpenSettings).toHaveBeenCalled();
     expect(result.current.open).toBe(false);
   });
+
+  it("starts Pro once signed in, and switches the workspace to Pro", () => {
+    query = "start=pro";
+    const signedOut = renderHook(() => useOnboarding(options()));
+    expect(signedOut.result.current.path).toBe("pro");
+    expect(signedOut.result.current.canStart).toBe(false);
+
+    const { result } = renderHook(() =>
+      useOnboarding(options({ proReady: true })),
+    );
+    expect(result.current.canStart).toBe(true);
+    act(() => result.current.onPathChange("pro"));
+    act(() => result.current.onStart());
+    expect(useStore.getState().mode).toBe("pro");
+  });
+
+  it("keeps the keys path in Free mode", () => {
+    useStore.setState({ mode: "pro" });
+    const { result } = renderHook(() =>
+      useOnboarding(
+        options({
+          keys: { canRun: true, hydratedStatuses: {}, onKeyChange: vi.fn() },
+        }),
+      ),
+    );
+    act(() => result.current.onStart());
+    expect(useStore.getState().mode).toBe("free");
+  });
 });

@@ -1,4 +1,6 @@
 import type { FirebaseClientConfig } from "./firebaseConfig";
+import { startAppCheck } from "./appCheck";
+import { logger } from "~/lib/logger";
 
 /** The signed-in user as the app needs it. */
 export interface SignedInUser {
@@ -32,6 +34,10 @@ async function create(config: FirebaseClientConfig): Promise<AuthClient> {
   const app =
     getApps().find((a) => a.name === APP_NAME) ??
     initializeApp(config.options, APP_NAME);
+  // App Check protects the Pro calls; it never blocks sign-in.
+  startAppCheck(app).catch((error: unknown) =>
+    logger.warn("[App Check] Could not start", error),
+  );
   const auth = authSdk.getAuth(app);
   if (config.emulatorHost) {
     authSdk.connectAuthEmulator(auth, `http://${config.emulatorHost}`, {

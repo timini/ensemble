@@ -9,6 +9,19 @@ import {
 } from "@/components/molecules/OllamaDetectedNotice";
 
 /** Heading above the composer before the first run. */
+/** Link to the benchmarks page in the workspace header, from the small breakpoint up. */
+export function BenchmarksNavLink() {
+  const { t } = useTranslation("common");
+  return (
+    <a
+      href="/benchmarks"
+      className="hidden rounded-md px-3 py-2 text-label text-muted-foreground transition-colors duration-fast focus-ring hover:text-foreground sm:inline-block"
+    >
+      {t("pages.workspace.benchmarks")}
+    </a>
+  );
+}
+
 export function WorkspaceHeading() {
   const { t } = useTranslation("common");
   return (

@@ -26,13 +26,17 @@ export interface UseOnboardingOptions {
   onOpenSettings: () => void;
   /** Called when onboarding ends with Start (not Skip or close). */
   onStarted?: () => void;
+  /** Signed in, so the Pro path can start. */
+  proReady?: boolean;
 }
 
 /** The `start` query value the landing page sets, as a path, or null. */
 export function readOnboardingStart(
   value: string | null,
 ): OnboardingPath | null {
-  return value === "keys" || value === "local" ? value : null;
+  return value === "keys" || value === "local" || value === "pro"
+    ? value
+    : null;
 }
 
 /**
@@ -53,12 +57,14 @@ export function useOnboarding({
   endpoints,
   onOpenSettings,
   onStarted,
+  proReady = false,
 }: UseOnboardingOptions) {
   const router = useRouter();
   const params = useSearchParams();
   const start = readOnboardingStart(params.get("start"));
   const done = useStore((s) => s.onboardingDone);
   const complete = useStore((s) => s.completeOnboarding);
+  const setMode = useStore((s) => s.setMode);
   const nothingSet = useStore(
     (s) => s.endpoints.length === 0 && !Object.values(s.apiKeys).some(Boolean),
   );
@@ -73,12 +79,13 @@ export function useOnboarding({
     if (!hasHydrated || decided.current) return;
     decided.current = true;
     if (params.get("panel")) return;
-    const show = start ? !keys.canRun : !done && nothingSet;
+    const ready = start === "pro" ? proReady : keys.canRun;
+    const show = start ? !ready : !done && nothingSet;
     if (show) {
       setPath(start ?? "keys");
       setOpen(true);
     }
-  }, [hasHydrated, params, start, keys.canRun, done, nothingSet]);
+  }, [hasHydrated, params, start, keys.canRun, proReady, done, nothingSet]);
 
   const endpoint = useStore((s) =>
     openRouterId ? s.endpoints.find((e) => e.id === openRouterId) : undefined,
@@ -163,8 +170,10 @@ export function useOnboarding({
     connected: local
       ? { name: local.label, models: local.modelCount ?? 0 }
       : undefined,
-    canStart: keys.canRun,
+    canStart: path === "pro" ? proReady : keys.canRun,
     onStart: () => {
+      // Pro sends calls to our server; keys and local models are Free mode.
+      setMode(path === "pro" ? "pro" : "free");
       finish();
       onStarted?.();
     },

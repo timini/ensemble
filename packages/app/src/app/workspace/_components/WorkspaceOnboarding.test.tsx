@@ -4,6 +4,21 @@ import "~/lib/i18n";
 import { WorkspaceOnboarding } from "./WorkspaceOnboarding";
 import type { useOnboarding } from "../hooks/useOnboarding";
 
+const auth = vi.hoisted(() => ({ status: "unavailable" as string }));
+vi.mock("~/app/_components/AuthProvider", () => ({
+  useAuth: () => ({
+    status: auth.status,
+    user: null,
+    pending: false,
+    error: null,
+    emailSentTo: null,
+    confirmEmail: false,
+    signInWithGoogle: vi.fn(),
+    submitEmail: vi.fn(),
+    signOut: vi.fn(),
+  }),
+}));
+
 function onboarding(
   overrides: Partial<ReturnType<typeof useOnboarding>> = {},
 ): ReturnType<typeof useOnboarding> {
@@ -68,5 +83,30 @@ describe("WorkspaceOnboarding", () => {
     );
     await waitFor(() => expect(document.activeElement).toBe(prompt));
     prompt.remove();
+  });
+
+  it("shows Pro as coming soon when this server has no sign-in", () => {
+    auth.status = "unavailable";
+    render(
+      <WorkspaceOnboarding onboarding={onboarding()} ollamaOffer={null} />,
+    );
+    expect(screen.getByTestId("onboarding-path-pro")).toHaveAttribute(
+      "aria-disabled",
+      "true",
+    );
+  });
+
+  it("offers the sign-in panel on the Pro path while signed out", () => {
+    auth.status = "signedOut";
+    render(
+      <WorkspaceOnboarding
+        onboarding={onboarding({ path: "pro" })}
+        ollamaOffer={null}
+      />,
+    );
+    expect(screen.getByTestId("onboarding-panel-pro")).toBeInTheDocument();
+    expect(screen.getByTestId("onboarding-panel-pro").textContent).toMatch(
+      /Google/,
+    );
   });
 });

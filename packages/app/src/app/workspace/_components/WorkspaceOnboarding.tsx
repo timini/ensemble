@@ -6,11 +6,16 @@ import {
   type OllamaDetectedNoticeProps,
 } from "@/components/molecules/OllamaDetectedNotice";
 import type { useOnboarding } from "../hooks/useOnboarding";
+import type { CreditNoticeProps } from "@/components/molecules/CreditNotice";
+import { useAuth } from "~/app/_components/AuthProvider";
+import { ProPanel } from "./ProPanels";
 
 export interface WorkspaceOnboardingProps {
   onboarding: ReturnType<typeof useOnboarding>;
   /** The Ollama offer (M2 detection), shown on the local path. */
   ollamaOffer: OllamaDetectedNoticeProps | null;
+  /** The Pro balance, shown on the Pro path once signed in. */
+  proBalance?: CreditNoticeProps | null;
 }
 
 /**
@@ -20,7 +25,14 @@ export interface WorkspaceOnboardingProps {
 export function WorkspaceOnboarding({
   onboarding,
   ollamaOffer,
+  proBalance = null,
 }: WorkspaceOnboardingProps) {
+  const auth = useAuth();
+  // Without sign-in on this server, Pro shows as coming soon.
+  const pro =
+    auth.status === "unavailable"
+      ? undefined
+      : { panel: <ProPanel balance={proBalance} /> };
   return (
     <OnboardingSheet
       open={onboarding.open}
@@ -35,6 +47,7 @@ export function WorkspaceOnboarding({
         connected: onboarding.connected,
         onOpenSettings: onboarding.onOpenSettings,
       }}
+      pro={pro}
       canStart={onboarding.canStart}
       onStart={() => {
         onboarding.onStart();
