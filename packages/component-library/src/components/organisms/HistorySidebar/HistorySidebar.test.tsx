@@ -114,6 +114,11 @@ describe('HistorySidebar', () => {
     expect(screen.getByTestId('history-locked')).toHaveTextContent('Past runs open once every answer is in.');
   });
 
+  it('shows no locked note when the run in progress is the only run', () => {
+    setup({ items: [sampleHistory[0]!], activeId: sampleHistory[0]!.id, locked: true });
+    expect(screen.queryByTestId('history-locked')).not.toBeInTheDocument();
+  });
+
   it('opens runs and shows no note when not locked', () => {
     setup();
     expect(screen.queryByTestId('history-locked')).not.toBeInTheDocument();

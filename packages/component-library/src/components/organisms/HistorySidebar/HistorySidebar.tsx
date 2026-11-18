@@ -128,7 +128,7 @@ export function HistorySidebar(props: HistorySidebarProps) {
         </section>
       )}
 
-      {locked && items.length > 0 && (
+      {locked && items.some((i) => i.id !== activeId) && (
         <p data-testid="history-locked" role="status" className="px-2.5 text-caption text-muted-foreground">{t(`${key}.locked`)}</p>
       )}
 
