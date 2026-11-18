@@ -9,6 +9,12 @@ export const SITE_NAME = "Ensemble AI";
 export const SITE_DESCRIPTION =
   "Ask several AI models the same question at once, see where they agree and where they don't, and get one answer you can check against the originals.";
 
+/** The two lines of the default Open Graph image (English, like all metadata). */
+export const OG_HEADLINE = [
+  "Ask several AI models at once.",
+  "See where they agree.",
+] as const;
+
 export const PAGE_METADATA = {
   home: {
     title:

@@ -1,7 +1,7 @@
-import type { PairwiseComparison } from '@/components/organisms/AgreementAnalysis';
-import type { ManualResponse, ModelResponse } from '~/store';
+import type { PairwiseComparison } from "@/components/organisms/AgreementAnalysis";
+import type { ManualResponse, ModelResponse } from "~/store";
 
-import { normalizeSimilarity } from '@ensemble-ai/shared-utils/similarity';
+import { normalizeSimilarity } from "@ensemble-ai/shared-utils/similarity";
 
 // Re-export for use by consumers
 export { normalizeSimilarity };
@@ -12,7 +12,7 @@ export { normalizeSimilarity };
  */
 export type AgreementAnswer = Pick<
   ModelResponse,
-  'modelId' | 'model' | 'response' | 'isComplete' | 'error'
+  "modelId" | "model" | "response" | "isComplete" | "error"
 >;
 
 /** A manual answer in the shape the agreement analysis scores. */
@@ -50,7 +50,9 @@ export function buildPairwiseComparisons(
     return [];
   }
 
-  const byId = new Map(responses.map((response) => [response.modelId, response]));
+  const byId = new Map(
+    responses.map((response) => [response.modelId, response]),
+  );
   const comparisons: PairwiseComparison[] = [];
 
   for (let i = 0; i < size; i++) {
@@ -59,7 +61,7 @@ export function buildPairwiseComparisons(
     for (let j = i + 1; j < size; j++) {
       const second = byId.get(embeddedModelIds[j]!);
       const similarity = similarityMatrix[i]?.[j];
-      if (!second || typeof similarity !== 'number') continue;
+      if (!second || typeof similarity !== "number") continue;
       const normalized = normalizeSimilarity(similarity);
 
       comparisons.push({

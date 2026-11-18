@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useState } from "react";
 
 interface ManualResponseFormData {
   response: string;
@@ -29,14 +29,14 @@ export function useManualResponseModal(
   addManualResponse: (label: string, response: string) => void,
 ): ManualResponseModalHook {
   const [isOpen, setIsOpen] = useState(false);
-  const [response, setResponse] = useState('');
-  const [modelName, setModelName] = useState('');
-  const [modelProvider, setModelProvider] = useState('');
+  const [response, setResponse] = useState("");
+  const [modelName, setModelName] = useState("");
+  const [modelProvider, setModelProvider] = useState("");
 
   const reset = useCallback(() => {
-    setResponse('');
-    setModelName('');
-    setModelProvider('');
+    setResponse("");
+    setModelName("");
+    setModelProvider("");
   }, []);
 
   const closeModal = useCallback(() => {
@@ -49,7 +49,7 @@ export function useManualResponseModal(
       const labelBase = data.modelName.trim() || defaultLabel;
       const providerSuffix = data.modelProvider.trim()
         ? ` (${data.modelProvider.trim()})`
-        : '';
+        : "";
 
       addManualResponse(`${labelBase}${providerSuffix}`, data.response.trim());
       closeModal();

@@ -41,21 +41,9 @@
     }
   ],
   "similarity": [
-    [
-      1,
-      0.9669,
-      0.9295
-    ],
-    [
-      0.9669,
-      1,
-      0.9427
-    ],
-    [
-      0.9295,
-      0.9427,
-      1
-    ]
+    [1, 0.9669, 0.9295],
+    [0.9669, 1, 0.9427],
+    [0.9295, 0.9427, 1]
   ],
   "consensus": {
     "text": "At the summit of Mount Everest, water boils at approximately 70-73.5°C (158-164.3°F), which is significantly lower than the 100°C (212°F) boiling point at sea level. This phenomenon occurs because atmospheric pressure decreases with increasing altitude; at Everest's summit, the pressure is only about one-third of that at sea level. Boiling happens when a liquid's vapor pressure equals the surrounding atmospheric pressure, and with less external pressure pushing down, water molecules need less energy, and thus a lower temperature, to transition into the gaseous state.",

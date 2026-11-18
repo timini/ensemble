@@ -1,6 +1,6 @@
-import type { StateCreator } from 'zustand';
+import type { StateCreator } from "zustand";
 
-export type Theme = 'light' | 'dark';
+export type Theme = "light" | "dark";
 
 export interface ThemeSlice {
   theme: Theme;
@@ -13,8 +13,11 @@ export interface ThemeSlice {
  * where the browser cannot tell.
  */
 export function preferredTheme(): Theme {
-  if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') return 'light';
-  return window.matchMedia('(prefers-color-scheme: dark)')?.matches ? 'dark' : 'light';
+  if (typeof window === "undefined" || typeof window.matchMedia !== "function")
+    return "light";
+  return window.matchMedia("(prefers-color-scheme: dark)")?.matches
+    ? "dark"
+    : "light";
 }
 
 /**
@@ -29,17 +32,17 @@ export const createThemeSlice: StateCreator<ThemeSlice> = (set) => ({
   setTheme: (theme) => {
     set({ theme });
     // Apply theme to document root
-    if (typeof document !== 'undefined') {
-      document.documentElement.classList.remove('light', 'dark');
+    if (typeof document !== "undefined") {
+      document.documentElement.classList.remove("light", "dark");
       document.documentElement.classList.add(theme);
     }
   },
   toggleTheme: () =>
     set((state) => {
-      const newTheme = state.theme === 'light' ? 'dark' : 'light';
+      const newTheme = state.theme === "light" ? "dark" : "light";
       // Apply theme to document root
-      if (typeof document !== 'undefined') {
-        document.documentElement.classList.remove('light', 'dark');
+      if (typeof document !== "undefined") {
+        document.documentElement.classList.remove("light", "dark");
         document.documentElement.classList.add(newTheme);
       }
       return { theme: newTheme };

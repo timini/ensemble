@@ -5,7 +5,8 @@ import { Landing } from "./_components/Landing";
 export const metadata: Metadata = {
   title: { absolute: PAGE_METADATA.home.title },
   description: PAGE_METADATA.home.description,
-  openGraph: pageOpenGraph(PAGE_METADATA.home),
+  alternates: { canonical: "/" },
+  openGraph: { ...pageOpenGraph(PAGE_METADATA.home), url: "/" },
 };
 
 /** `/`: the landing page. The workspace is at /workspace. */

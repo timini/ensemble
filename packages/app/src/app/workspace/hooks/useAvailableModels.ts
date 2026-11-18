@@ -1,13 +1,16 @@
-import { useEffect, useState } from 'react';
-import type { Provider, ValidationStatus } from '@/components/molecules/ApiKeyInput';
-import type { Model } from '@/components/organisms/ModelSelectionList';
-import { FALLBACK_MODELS } from '~/lib/models';
-import { fetchProviderModels, mergeDynamicModels } from '~/lib/providerModels';
-import { toError } from '~/lib/errors';
-import { logger } from '~/lib/logger';
-import type { OperatingMode } from '~/store/slices/modeSlice';
-import { PROVIDERS } from '~/lib/ensembleConstants';
-import { fetchEndpointModels, type EndpointLabel } from '~/lib/endpointModels';
+import { useEffect, useState } from "react";
+import type {
+  Provider,
+  ValidationStatus,
+} from "@/components/molecules/ApiKeyInput";
+import type { Model } from "@/components/organisms/ModelSelectionList";
+import { FALLBACK_MODELS } from "~/lib/models";
+import { fetchProviderModels, mergeDynamicModels } from "~/lib/providerModels";
+import { toError } from "~/lib/errors";
+import { logger } from "~/lib/logger";
+import type { OperatingMode } from "~/store/slices/modeSlice";
+import { PROVIDERS } from "~/lib/ensembleConstants";
+import { fetchEndpointModels, type EndpointLabel } from "~/lib/endpointModels";
 
 interface UseAvailableModelsOptions {
   hasHydrated: boolean;
@@ -29,28 +32,35 @@ export function useAvailableModels({
     useState<Model[]>(FALLBACK_MODELS);
 
   useEffect(() => {
-    if (!hasHydrated || mode !== 'free') {
+    if (!hasHydrated || mode !== "free") {
       setAvailableModels(FALLBACK_MODELS);
       return;
     }
 
     let active = true;
     const loadModels = async () => {
-      const activeProviders = PROVIDERS.filter(provider => hydratedStatuses[provider] === 'valid');
-      logger.debug('[useAvailableModels] Fetching models for:', activeProviders);
+      const activeProviders = PROVIDERS.filter(
+        (provider) => hydratedStatuses[provider] === "valid",
+      );
+      logger.debug(
+        "[useAvailableModels] Fetching models for:",
+        activeProviders,
+      );
 
-      const overrides: Partial<Record<Provider | 'openai-compatible', Model[]>> = {};
+      const overrides: Partial<
+        Record<Provider | "openai-compatible", Model[]>
+      > = {};
 
       await Promise.all(
         PROVIDERS.map(async (provider) => {
-          if (hydratedStatuses[provider] !== 'valid') {
+          if (hydratedStatuses[provider] !== "valid") {
             return;
           }
 
           try {
             const models = await fetchProviderModels({
               provider,
-              mode: 'free',
+              mode: "free",
             });
             if (models.length > 0) {
               overrides[provider] = models;
@@ -67,12 +77,12 @@ export function useAvailableModels({
       try {
         const endpointModels = await fetchEndpointModels(endpoints);
         if (endpointModels.length > 0) {
-          overrides['openai-compatible'] = endpointModels;
+          overrides["openai-compatible"] = endpointModels;
         }
       } catch (error: unknown) {
         console.warn(
-          'Failed to load OpenAI-compatible endpoint models',
-          toError(error, 'Failed to load endpoint models'),
+          "Failed to load OpenAI-compatible endpoint models",
+          toError(error, "Failed to load endpoint models"),
         );
       }
 

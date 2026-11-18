@@ -50,10 +50,17 @@ const TS_ROOTS = [
 ];
 
 /** Functions whose string argument is shown to the user. */
-const UI_SETTERS = /^(setError|setErrorMessage|setMessage|setNotice|toast(\.\w+)?)$/;
+const UI_SETTERS =
+  /^(setError|setErrorMessage|setMessage|setNotice|toast(\.\w+)?)$/;
 
 /** Server and logging code: their strings are never shown in the UI. */
-const TS_SKIP = [/\.test\.ts$/, /__tests__/, /logger/, /[\\/]server[\\/]/, /[\\/]api[\\/]/];
+const TS_SKIP = [
+  /\.test\.ts$/,
+  /__tests__/,
+  /logger/,
+  /[\\/]server[\\/]/,
+  /[\\/]api[\\/]/,
+];
 
 /** Text that needs no translation: names, symbols, numbers, code. */
 const ALLOWED = new Set([

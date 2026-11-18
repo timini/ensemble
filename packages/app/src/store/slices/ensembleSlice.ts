@@ -4,8 +4,8 @@
  * Manages model selection and ensemble configuration
  */
 
-import type { StateCreator } from 'zustand';
-import type { EmbeddingsProviderPreference } from '@ensemble-ai/shared-utils/providers';
+import type { StateCreator } from "zustand";
+import type { EmbeddingsProviderPreference } from "@ensemble-ai/shared-utils/providers";
 
 export type { EmbeddingsProviderPreference };
 
@@ -15,17 +15,17 @@ export type { EmbeddingsProviderPreference };
  * as a prefix (`ollama/llama3.2:3b`).
  */
 export type ProviderType =
-  | 'openai'
-  | 'anthropic'
-  | 'google'
-  | 'xai'
-  | 'deepseek'
-  | 'perplexity'
-  | 'openai-compatible';
+  | "openai"
+  | "anthropic"
+  | "google"
+  | "xai"
+  | "deepseek"
+  | "perplexity"
+  | "openai-compatible";
 
 /** Providers configured with a single API key (see apiKeySlice). Endpoints live in endpointsSlice. */
-export type ApiKeyProvider = Exclude<ProviderType, 'openai-compatible'>;
-export type ConsensusMethod = 'standard' | 'elo' | 'majority' | 'council';
+export type ApiKeyProvider = Exclude<ProviderType, "openai-compatible">;
+export type ConsensusMethod = "standard" | "elo" | "majority" | "council";
 
 export interface ModelSelection {
   id: string;
@@ -42,6 +42,8 @@ export interface SavedEnsemble {
   summarizer: string;
   consensusMethod: ConsensusMethod;
   eloTopN: number;
+  /** Last save, in epoch milliseconds; synced presets keep the newest. */
+  updatedAt?: number;
 }
 
 export interface EnsembleSlice {
@@ -69,10 +71,10 @@ export interface EnsembleSlice {
 export const createEnsembleSlice: StateCreator<EnsembleSlice> = (set) => ({
   selectedModels: [],
   summarizerModel: null,
-  embeddingsProvider: 'auto',
+  embeddingsProvider: "auto",
   savedEnsembles: [],
   currentEnsembleId: null,
-  consensusMethod: 'standard',
+  consensusMethod: "standard",
   eloTopN: 3,
 
   addModel: (provider, model) => {
@@ -129,9 +131,10 @@ export const createEnsembleSlice: StateCreator<EnsembleSlice> = (set) => ({
         name: trimmedName,
         description,
         models: state.selectedModels,
-        summarizer: state.summarizerModel ?? '',
+        summarizer: state.summarizerModel ?? "",
         consensusMethod: state.consensusMethod,
         eloTopN: state.eloTopN,
+        updatedAt: Date.now(),
       };
       return {
         savedEnsembles: existing
@@ -153,7 +156,7 @@ export const createEnsembleSlice: StateCreator<EnsembleSlice> = (set) => ({
         // the first model of the run summarises, as before saving.
         summarizerModel: ensemble.summarizer || null,
         currentEnsembleId: ensembleId,
-        consensusMethod: ensemble.consensusMethod ?? 'standard',
+        consensusMethod: ensemble.consensusMethod ?? "standard",
         eloTopN: ensemble.eloTopN ?? 3,
       };
     });
@@ -163,9 +166,7 @@ export const createEnsembleSlice: StateCreator<EnsembleSlice> = (set) => ({
     set((state) => ({
       savedEnsembles: state.savedEnsembles.filter((e) => e.id !== ensembleId),
       currentEnsembleId:
-        state.currentEnsembleId === ensembleId
-          ? null
-          : state.currentEnsembleId,
+        state.currentEnsembleId === ensembleId ? null : state.currentEnsembleId,
     }));
   },
 
@@ -174,7 +175,7 @@ export const createEnsembleSlice: StateCreator<EnsembleSlice> = (set) => ({
       selectedModels: [],
       summarizerModel: null,
       currentEnsembleId: null,
-      consensusMethod: 'standard',
+      consensusMethod: "standard",
       eloTopN: 3,
     });
   },

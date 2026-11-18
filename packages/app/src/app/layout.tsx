@@ -5,6 +5,7 @@ import { Geist, Geist_Mono, Instrument_Serif } from "next/font/google";
 import { RootShell } from "./_components/RootShell";
 import { SITE_DESCRIPTION, SITE_NAME } from "~/lib/siteMetadata";
 import { THEME_SCRIPT } from "~/lib/themeScript";
+import { siteUrl } from "~/lib/siteUrl";
 
 // tokens.css reads these variables in --font-sans, --font-mono and --font-display.
 const sans = Geist({ subsets: ["latin"], variable: "--font-sans-loaded" });
@@ -17,6 +18,8 @@ const display = Instrument_Serif({
 const fontVariables = `${sans.variable} ${mono.variable} ${display.variable}`;
 
 export const metadata: Metadata = {
+  // Absolute URLs for canonical links and Open Graph images, from APP_URL.
+  metadataBase: new URL(siteUrl()),
   title: { default: SITE_NAME, template: `%s | ${SITE_NAME}` },
   description: SITE_DESCRIPTION,
   applicationName: SITE_NAME,
@@ -27,7 +30,11 @@ export const metadata: Metadata = {
     title: SITE_NAME,
     description: SITE_DESCRIPTION,
   },
-  twitter: { card: "summary", title: SITE_NAME, description: SITE_DESCRIPTION },
+  twitter: {
+    card: "summary_large_image",
+    title: SITE_NAME,
+    description: SITE_DESCRIPTION,
+  },
 };
 
 /**

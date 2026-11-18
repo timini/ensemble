@@ -1,6 +1,6 @@
 /* Tokens and base rules (fonts, focus ring, reduced motion) live in the
    component library so the app, Storybook and the wireframes share them. */
-@import '@ai-ensemble/component-library/src/styles/tokens.css';
+@import "@ai-ensemble/component-library/src/styles/tokens.css";
 
 @tailwind base;
 @tailwind components;

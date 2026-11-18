@@ -167,4 +167,44 @@ describe("useRunHistory", () => {
     expect(hook.result.current.runs.map((r) => r.id)).toEqual(["run-1000"]);
     expect(useStore.getState().runPrompt).toBe("Keep me");
   });
+
+  it("reports when the stored runs have loaded and stamps each write", async () => {
+    finishedRun("Stamped", 2_000);
+    const { hook } = setup();
+    await waitFor(() => expect(hook.result.current.loaded).toBe(true));
+    await waitFor(() => expect(hook.result.current.runs).toHaveLength(1));
+    expect(hook.result.current.runs[0]!.updatedAt).toEqual(expect.any(Number));
+  });
+
+  it("replaces the stored runs with the synced list", async () => {
+    const keep = toStoredRun(
+      {
+        ...useStore.getState(),
+        runPrompt: "Keep",
+        runStartedAt: 1,
+        responses: [answer("a")],
+        runModels: [],
+        selectedModels: [],
+        historyView: null,
+      },
+      extras,
+    )!;
+    const drop = { ...keep, id: "run-2", createdAt: 2, prompt: "Drop" };
+    await saveRun(keep);
+    await saveRun(drop);
+    const { hook } = setup();
+    await waitFor(() => expect(hook.result.current.runs).toHaveLength(2));
+    const fromAccount = {
+      ...keep,
+      id: "run-3",
+      createdAt: 3,
+      prompt: "From account",
+    };
+    await act(() => hook.result.current.replaceRuns([keep, fromAccount]));
+    expect(hook.result.current.runs.map((r) => r.prompt)).toEqual([
+      "From account",
+      "Keep",
+    ]);
+    expect((await listRuns()).map((r) => r.id)).toEqual(["run-3", "run-1"]);
+  });
 });

@@ -49,7 +49,8 @@ export function embeddingModelRef(
   provider: string | null,
   endpoints: readonly EndpointLike[] = [],
 ): ModelRef | null {
-  if (provider === "openai-compatible") return endpointEmbeddingModelRef(endpoints);
+  if (provider === "openai-compatible")
+    return endpointEmbeddingModelRef(endpoints);
   const modelId = provider ? EMBEDDING_MODELS[provider] : undefined;
   return provider && modelId ? { provider, modelId } : null;
 }
@@ -90,7 +91,10 @@ export function buildEstimateInput(
     consensusMethod: options.consensusMethod,
     summarizer: summarizerRef(options.summarizerModel, options.selectedModels),
     eloTopN: options.eloTopN,
-    embeddings: embeddingModelRef(options.embeddingsProvider, options.endpoints),
+    embeddings: embeddingModelRef(
+      options.embeddingsProvider,
+      options.endpoints,
+    ),
     promptTokens: estimateTokensFromText(options.prompt),
     endpoints: endpointLocations(options.endpoints),
   };
@@ -110,7 +114,6 @@ export interface BuildRunCallUsageOptions {
   /** OpenAI-compatible endpoints, to name their embedding model. */
   endpoints?: readonly EndpointLike[];
 }
-
 
 /**
  * Every call of a finished run with its tokens: the answers (reported usage,

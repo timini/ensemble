@@ -445,6 +445,11 @@
       "signInLead": "Sign in to see your credits and Pro usage.",
       "unavailable": "Sign-in is not set up on this server, so there is no account to show. Free mode with your own keys needs none.",
       "loading": "Loading your account"
+    },
+    "sharedRun": {
+      "missingTitle": "This link has expired or was deleted",
+      "missingBody": "Shared runs stay online for 30 days, and their owner can delete them sooner.",
+      "missingCta": "Ask your own question"
     }
   },
   "apiKeys": {

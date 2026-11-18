@@ -14,9 +14,9 @@ import { useNewQuestion } from "../hooks/useNewQuestion";
 import { useWorkspacePanel } from "../hooks/useWorkspacePanel";
 import { useOnboarding } from "../hooks/useOnboarding";
 import { useStarterEnsemble } from "../hooks/useStarterEnsemble";
-import { useRunHistory } from "../hooks/useRunHistory";
+import { useWorkspaceHistory } from "../hooks/useWorkspaceHistory";
+import { ShareDialog } from "@/components/molecules/ShareDialog";
 import { clearBrowserData } from "~/lib/clearBrowserData";
-import { runRecordExtras } from "~/lib/runHistoryRecord";
 import { HistoryRunNotice } from "./HistoryRunNotice";
 import { SettingsSheet } from "./SettingsSheet";
 import { ManualAnswerDialog } from "./ManualAnswerDialog";
@@ -82,12 +82,10 @@ export function Workspace() {
     startNewQuestion();
     run.stop();
   };
-  const runStartedAt = useStore((state) => state.runStartedAt);
-  const history = useRunHistory({
-    // History stays in this browser in both modes (FR-030).
-    enabled: hasHydrated,
-    extras: runRecordExtras(run.agreement, run.consensus.cost),
-    onOpen: run.stopConsensus,
+  const { history, share, runStartedAt, syncStatus } = useWorkspaceHistory({
+    hasHydrated,
+    run,
+    auth,
   });
   const saveEnsemble = useStore((state) => state.saveEnsemble);
 
@@ -120,6 +118,8 @@ export function Workspace() {
           }}
           onDeleteRun={(id) => void history.remove(id)}
           running={run.running}
+          onShareRun={share.shareRun}
+          syncStatus={syncStatus}
         />
       }
     >
@@ -163,6 +163,7 @@ export function Workspace() {
             <RunResult
               run={run}
               showPrompt={composer.prompt.trim() !== (run.prompt ?? "")}
+              onShare={share.shareCurrent}
             />
           </>
         )}
@@ -186,6 +187,7 @@ export function Workspace() {
         onOpenChange={setManualOpen}
         onAdd={run.addManualAnswer}
       />
+      <ShareDialog {...share.dialog} />
       <SavePresetDialog
         open={presetOpen}
         onOpenChange={setPresetOpen}

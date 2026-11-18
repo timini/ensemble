@@ -21,6 +21,8 @@ export interface RunResultProps {
   >;
   /** Shows the run's question, for when the composer holds a different draft. */
   showPrompt: boolean;
+  /** Shows a share button on the consensus when set (signed in). */
+  onShare?: () => void;
 }
 
 /**
@@ -31,7 +33,7 @@ export interface RunResultProps {
  * give way to one status row, so the first answer is on the first screen.
  * The cards come back once every answer is in.
  */
-export function RunResult({ run, showPrompt }: RunResultProps) {
+export function RunResult({ run, showPrompt, onShare }: RunResultProps) {
   const { t } = useTranslation("common");
   const compact = run.running;
   return (
@@ -65,7 +67,7 @@ export function RunResult({ run, showPrompt }: RunResultProps) {
       )}
       <ConsensusPanel
         agreement={run.agreement}
-        consensus={run.consensus}
+        consensus={onShare ? { ...run.consensus, onShare } : run.consensus}
         className={compact ? "hidden lg:grid" : undefined}
       />
       <RunExclusionNote {...run.exclusion} />

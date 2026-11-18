@@ -1,22 +1,25 @@
-import type { Provider, ValidationStatus } from '@/components/molecules/ApiKeyInput';
-import type { OperatingMode } from '~/store/slices/modeSlice';
+import type {
+  Provider,
+  ValidationStatus,
+} from "@/components/molecules/ApiKeyInput";
+import type { OperatingMode } from "~/store/slices/modeSlice";
 
 const DEFAULT_STATUS: Record<Provider, ValidationStatus> = {
-  openai: 'idle',
-  anthropic: 'idle',
-  google: 'idle',
-  xai: 'idle',
-  deepseek: 'idle',
-  perplexity: 'idle',
+  openai: "idle",
+  anthropic: "idle",
+  google: "idle",
+  xai: "idle",
+  deepseek: "idle",
+  perplexity: "idle",
 };
 
 const READY_STATUS: Record<Provider, string> = {
-  openai: 'Ready',
-  anthropic: 'Ready',
-  google: 'Ready',
-  xai: 'Ready',
-  deepseek: 'Ready',
-  perplexity: 'Ready',
+  openai: "Ready",
+  anthropic: "Ready",
+  google: "Ready",
+  xai: "Ready",
+  deepseek: "Ready",
+  perplexity: "Ready",
 };
 
 export function getHydratedStatus(
@@ -31,14 +34,14 @@ export function getHydratedStatus(
 
 export function mapStatusToLabel(status: ValidationStatus): string {
   switch (status) {
-    case 'valid':
-      return 'Ready';
-    case 'validating':
-      return 'Validating...';
-    case 'invalid':
-      return 'Invalid API key';
+    case "valid":
+      return "Ready";
+    case "validating":
+      return "Validating...";
+    case "invalid":
+      return "Invalid API key";
     default:
-      return 'API key required';
+      return "API key required";
   }
 }
 
@@ -47,7 +50,7 @@ export function createProviderStatusLabels(options: {
   statuses: Record<Provider, ValidationStatus>;
   hasHydrated: boolean;
 }): Record<Provider, string> {
-  if (options.mode === 'pro') {
+  if (options.mode === "pro") {
     return READY_STATUS;
   }
 

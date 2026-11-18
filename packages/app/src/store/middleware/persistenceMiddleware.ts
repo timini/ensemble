@@ -1,6 +1,6 @@
-import type { StateCreator, StoreMutatorIdentifier } from 'zustand';
-import { toError } from '~/lib/errors';
-import { logger } from '~/lib/logger';
+import type { StateCreator, StoreMutatorIdentifier } from "zustand";
+import { toError } from "~/lib/errors";
+import { logger } from "~/lib/logger";
 
 /**
  * Persistence middleware for Zustand store
@@ -28,16 +28,11 @@ export const persist = <
   return ((set, get, api) => {
     const baseState = config(set, get, api);
 
-    if (typeof window === 'undefined') {
+    if (typeof window === "undefined") {
       return baseState;
     }
 
-    const {
-      name,
-      storage = localStorage,
-      serialize,
-      deserialize,
-    } = options;
+    const { name, storage = localStorage, serialize, deserialize } = options;
 
     let hydratedState = baseState;
 
@@ -55,8 +50,8 @@ export const persist = <
       }
     } catch (error: unknown) {
       logger.error(
-        'Failed to parse stored state:',
-        toError(error, 'Invalid persisted state'),
+        "Failed to parse stored state:",
+        toError(error, "Invalid persisted state"),
       );
     }
 
@@ -67,14 +62,12 @@ export const persist = <
     // serialisable data is stored.
     api.subscribe((state) => {
       try {
-        const stateToPersist = serialize
-          ? serialize(state)
-          : state;
+        const stateToPersist = serialize ? serialize(state) : state;
         storage.setItem(name, JSON.stringify(stateToPersist));
       } catch (error: unknown) {
         logger.error(
-          'Failed to persist state:',
-          toError(error, 'Unable to persist state'),
+          "Failed to persist state:",
+          toError(error, "Unable to persist state"),
         );
       }
     });

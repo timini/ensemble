@@ -1,6 +1,14 @@
-import type { ModelModality, ProviderName } from '@ensemble-ai/shared-utils/providers';
+import type {
+  ModelModality,
+  ProviderName,
+} from "@ensemble-ai/shared-utils/providers";
 
-const ALLOWED_MODALITIES: readonly ModelModality[] = ['text', 'image', 'audio', 'video'];
+const ALLOWED_MODALITIES: readonly ModelModality[] = [
+  "text",
+  "image",
+  "audio",
+  "video",
+];
 
 export function normalizeModelModalities(
   modalities: readonly string[] | undefined,
@@ -13,10 +21,10 @@ export function normalizeModelModalities(
 
   const deduped = Array.from(new Set(normalized));
   if (deduped.length === 0) {
-    return ['text'];
+    return ["text"];
   }
 
-  const withText = deduped.includes('text') ? deduped : ['text', ...deduped];
+  const withText = deduped.includes("text") ? deduped : ["text", ...deduped];
   return ALLOWED_MODALITIES.filter((modality) => withText.includes(modality));
 }
 
@@ -25,16 +33,16 @@ export function inferModelModalities(
   modelId: string,
 ): ModelModality[] {
   const identifier = modelId.toLowerCase();
-  const inferred = ['text'] as ModelModality[];
+  const inferred = ["text"] as ModelModality[];
 
   if (supportsImage(provider, identifier)) {
-    inferred.push('image');
+    inferred.push("image");
   }
-  if (identifier.includes('audio')) {
-    inferred.push('audio');
+  if (identifier.includes("audio")) {
+    inferred.push("audio");
   }
-  if (identifier.includes('video')) {
-    inferred.push('video');
+  if (identifier.includes("video")) {
+    inferred.push("video");
   }
 
   return normalizeModelModalities(inferred);
@@ -42,23 +50,23 @@ export function inferModelModalities(
 
 function supportsImage(provider: ProviderName, identifier: string): boolean {
   switch (provider) {
-    case 'openai':
+    case "openai":
       return (
-        identifier.includes('gpt-4o') ||
-        identifier.includes('gpt-4-turbo') ||
-        identifier.includes('gpt-4.1') ||
+        identifier.includes("gpt-4o") ||
+        identifier.includes("gpt-4-turbo") ||
+        identifier.includes("gpt-4.1") ||
         /^gpt-[5-9]/.test(identifier) ||
-        identifier.includes('vision')
+        identifier.includes("vision")
       );
-    case 'anthropic':
+    case "anthropic":
       // Every Claude model from the 3 family onward accepts image input.
-      return identifier.startsWith('claude-');
-    case 'google':
-      return identifier.startsWith('gemini-');
-    case 'xai':
-      return identifier.includes('vision') || identifier.includes('image');
-    case 'deepseek':
-    case 'perplexity':
+      return identifier.startsWith("claude-");
+    case "google":
+      return identifier.startsWith("gemini-");
+    case "xai":
+      return identifier.includes("vision") || identifier.includes("image");
+    case "deepseek":
+    case "perplexity":
       return false;
     default:
       return false;

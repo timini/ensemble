@@ -445,6 +445,11 @@
       "signInLead": "Connectez-vous pour voir vos crédits et votre utilisation de Pro.",
       "unavailable": "La connexion n'est pas configurée sur ce serveur, il n'y a donc pas de compte à afficher. Le mode Gratuit avec vos propres clés n'en a pas besoin.",
       "loading": "Chargement de votre compte"
+    },
+    "sharedRun": {
+      "missingTitle": "Ce lien a expiré ou a été supprimé",
+      "missingBody": "Les exécutions partagées restent en ligne 30 jours, et leur auteur peut les supprimer plus tôt.",
+      "missingCta": "Posez votre propre question"
     }
   },
   "apiKeys": {

@@ -5,9 +5,9 @@
  * Mock mode is development-only and not exposed to users
  */
 
-import type { StateCreator } from 'zustand';
+import type { StateCreator } from "zustand";
 
-export type OperatingMode = 'free' | 'pro';
+export type OperatingMode = "free" | "pro";
 
 export interface ModeSlice {
   mode: OperatingMode;
@@ -20,7 +20,7 @@ export interface ModeSlice {
 }
 
 export const createModeSlice: StateCreator<ModeSlice> = (set) => ({
-  mode: 'free',
+  mode: "free",
   isModeConfigured: false,
   onboardingDone: false,
 

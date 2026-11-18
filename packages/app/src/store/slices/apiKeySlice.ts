@@ -5,12 +5,12 @@
  * Keys are encrypted before localStorage persistence
  */
 
-import type { StateCreator } from 'zustand';
-import { decrypt, encrypt } from '@ensemble-ai/shared-utils/security';
-import type { ValidationStatus } from '@/components/molecules/ApiKeyInput';
-import type { ApiKeyProvider } from './ensembleSlice';
-import { toError } from '~/lib/errors';
-import { logger } from '~/lib/logger';
+import type { StateCreator } from "zustand";
+import { decrypt, encrypt } from "@ensemble-ai/shared-utils/security";
+import type { ValidationStatus } from "@/components/molecules/ApiKeyInput";
+import type { ApiKeyProvider } from "./ensembleSlice";
+import { toError } from "~/lib/errors";
+import { logger } from "~/lib/logger";
 
 export interface ApiKeyData {
   encrypted: string | null;
@@ -61,7 +61,14 @@ export const createApiKeySlice: StateCreator<ApiKeySlice> = (set, get) => ({
       return;
     }
 
-    const providers: ApiKeyProvider[] = ['openai', 'anthropic', 'google', 'xai', 'deepseek', 'perplexity'];
+    const providers: ApiKeyProvider[] = [
+      "openai",
+      "anthropic",
+      "google",
+      "xai",
+      "deepseek",
+      "perplexity",
+    ];
 
     await Promise.all(
       providers.map(async (provider) => {
@@ -78,13 +85,13 @@ export const createApiKeySlice: StateCreator<ApiKeySlice> = (set, get) => ({
               ? {
                   ...currentEntry,
                   key: decrypted,
-                  status: currentEntry.status ?? 'idle',
+                  status: currentEntry.status ?? "idle",
                 }
               : {
                   key: decrypted,
                   encrypted: null,
                   visible: false,
-                  status: 'idle',
+                  status: "idle",
                 };
 
             return {
@@ -99,7 +106,10 @@ export const createApiKeySlice: StateCreator<ApiKeySlice> = (set, get) => ({
             error,
             `Failed to decrypt ${provider} API key`,
           );
-          logger.error(`Failed to decrypt ${provider} API key`, normalizedError);
+          logger.error(
+            `Failed to decrypt ${provider} API key`,
+            normalizedError,
+          );
           set((state) => {
             const currentEntry = state.apiKeys[provider];
             return {
@@ -108,9 +118,9 @@ export const createApiKeySlice: StateCreator<ApiKeySlice> = (set, get) => ({
                 [provider]: currentEntry
                   ? {
                       ...currentEntry,
-                      key: '',
+                      key: "",
                       encrypted: null,
-                      status: 'idle',
+                      status: "idle",
                     }
                   : null,
               },
@@ -152,7 +162,7 @@ export const createApiKeySlice: StateCreator<ApiKeySlice> = (set, get) => ({
               key: trimmedKey,
               encrypted,
               visible: current?.visible ?? previousVisibility,
-              status: sameKey ? current.status : 'idle',
+              status: sameKey ? current.status : "idle",
               ...(sameKey && current.error ? { error: current.error } : {}),
             },
           },
@@ -187,7 +197,14 @@ export const createApiKeySlice: StateCreator<ApiKeySlice> = (set, get) => ({
 
   hideAllApiKeys: () => {
     set((state) => {
-      const providers: ApiKeyProvider[] = ['openai', 'anthropic', 'google', 'xai', 'deepseek', 'perplexity'];
+      const providers: ApiKeyProvider[] = [
+        "openai",
+        "anthropic",
+        "google",
+        "xai",
+        "deepseek",
+        "perplexity",
+      ];
       const updatedKeys = { ...state.apiKeys };
       for (const provider of providers) {
         const entry = updatedKeys[provider];

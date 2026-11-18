@@ -1,15 +1,15 @@
-import i18n from 'i18next';
-import { initReactI18next } from 'react-i18next';
+import i18n from "i18next";
+import { initReactI18next } from "react-i18next";
 
 // Import translation files from app's public/locales
-import enAppTranslations from '../../public/locales/en/common.json';
-import frAppTranslations from '../../public/locales/fr/common.json';
+import enAppTranslations from "../../public/locales/en/common.json";
+import frAppTranslations from "../../public/locales/fr/common.json";
 
 // Import translation files from component library
-import enComponentTranslations from '@/lib/i18n/locales/en.json';
-import frComponentTranslations from '@/lib/i18n/locales/fr.json';
-import { toError } from './errors';
-import { logger } from './logger';
+import enComponentTranslations from "@/lib/i18n/locales/en.json";
+import frComponentTranslations from "@/lib/i18n/locales/fr.json";
+import { toError } from "./errors";
+import { logger } from "./logger";
 
 /**
  * i18next configuration for Ensemble AI
@@ -31,11 +31,11 @@ i18n
         translation: frComponentTranslations,
       },
     },
-    lng: 'en',
-    fallbackLng: 'en',
+    lng: "en",
+    fallbackLng: "en",
     initImmediate: false,
-    defaultNS: 'translation', // Component library uses 'translation' namespace
-    ns: ['translation', 'common'],
+    defaultNS: "translation", // Component library uses 'translation' namespace
+    ns: ["translation", "common"],
     debug: false,
     interpolation: {
       escapeValue: false, // React already escapes
@@ -46,8 +46,8 @@ i18n
   })
   .catch((error: unknown) => {
     logger.error(
-      'i18n initialization failed:',
-      toError(error, 'i18n initialization failed'),
+      "i18n initialization failed:",
+      toError(error, "i18n initialization failed"),
     );
   });
 

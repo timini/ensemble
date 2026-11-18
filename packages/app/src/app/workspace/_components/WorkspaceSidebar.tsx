@@ -34,6 +34,10 @@ export interface WorkspaceSidebarProps {
    * opened then, so the live run is not lost before it is stored.
    */
   running?: boolean;
+  /** Shares a stored run; shows a share button on each run when set. */
+  onShareRun?: (id: string) => void;
+  /** Where history is kept, for the line at the bottom of the sidebar. */
+  syncStatus?: "synced" | "local";
 }
 
 const LIVE_ID = "last-run";
@@ -64,6 +68,8 @@ export function WorkspaceSidebar({
   onOpenRun,
   onDeleteRun,
   running = false,
+  onShareRun,
+  syncStatus,
 }: WorkspaceSidebarProps) {
   const hasHydrated = useHasHydrated();
   const savedEnsembles = useStore((state) => state.savedEnsembles);
@@ -104,6 +110,15 @@ export function WorkspaceSidebar({
       presets={presets}
       activeId={activeId}
       locked={running}
+      syncStatus={syncStatus}
+      onShare={
+        onShareRun && !running
+          ? (id) => {
+              onShareRun(id);
+              onDone();
+            }
+          : undefined
+      }
       onSelect={(id) => {
         if (id !== activeId && !running) onOpenRun?.(id);
         onDone();

@@ -37,6 +37,9 @@ export function useRunHistory({
   onOpen,
 }: UseRunHistoryOptions) {
   const [runs, setRuns] = useState<StoredRun[]>([]);
+  const [loaded, setLoaded] = useState(false);
+  const runsRef = useRef(runs);
+  runsRef.current = runs;
   const writes = useRef<Promise<void>>(Promise.resolve());
   const startedAt = useStore((s) => s.runStartedAt);
   const historyView = useStore((s) => s.historyView);
@@ -54,7 +57,9 @@ export function useRunHistory({
     writes.current = writes.current
       .then(listRuns)
       .then((stored) => {
-        if (live) setRuns(stored);
+        if (!live) return;
+        setRuns(stored);
+        setLoaded(true);
       })
       .catch(warn("loading"));
     return () => {
@@ -67,12 +72,13 @@ export function useRunHistory({
   // Writes are chained so they reach IndexedDB in order.
   useEffect(() => {
     if (!enabled) return;
-    const record = toStoredRun(useStore.getState(), {
+    const built = toStoredRun(useStore.getState(), {
       agreementScore,
       agreementLevel,
       costUsd,
     });
-    if (!record) return;
+    if (!built) return;
+    const record: StoredRun = { ...built, updatedAt: Date.now() };
     writes.current = writes.current
       .then(() => saveRun(record))
       .then(() =>
@@ -130,5 +136,23 @@ export function useRunHistory({
     [currentId],
   );
 
-  return { runs, currentId, open, remove };
+  /**
+   * Replaces the stored runs with `next` (synced history after sign-in):
+   * runs not in it are deleted, new or changed ones are written.
+   */
+  const replaceRuns = useCallback((next: StoredRun[]) => {
+    const keep = new Set(next.map((r) => r.id));
+    const previous = runsRef.current;
+    setRuns([...next].sort((a, b) => b.createdAt - a.createdAt));
+    writes.current = writes.current
+      .then(async () => {
+        const before = new Map(previous.map((r) => [r.id, r]));
+        for (const r of previous) if (!keep.has(r.id)) await deleteRun(r.id);
+        for (const r of next) if (before.get(r.id) !== r) await saveRun(r);
+      })
+      .catch(warn("syncing"));
+    return writes.current;
+  }, []);
+
+  return { runs, loaded, currentId, open, remove, replaceRuns };
 }

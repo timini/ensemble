@@ -23,6 +23,11 @@ export interface StoredRun {
   id: string;
   /** When the run started, in epoch milliseconds. */
   createdAt: number;
+  /**
+   * Last time this record was written, in epoch milliseconds. Synced
+   * history keeps the newest copy. Missing in runs stored before sync.
+   */
+  updatedAt?: number;
   prompt: string;
   models: ModelSelection[];
   consensusMethod: ConsensusMethod;

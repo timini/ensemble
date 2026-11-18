@@ -1,39 +1,30 @@
-import { create } from 'zustand';
-import { persist } from './middleware/persistenceMiddleware';
-import {
-  createThemeSlice,
-  type ThemeSlice,
-} from './slices/themeSlice';
+import { create } from "zustand";
+import { persist } from "./middleware/persistenceMiddleware";
+import { createThemeSlice, type ThemeSlice } from "./slices/themeSlice";
 import {
   createLanguageSlice,
   type LanguageSlice,
-} from './slices/languageSlice';
+} from "./slices/languageSlice";
 import {
   createWorkflowSlice,
   type WorkflowSlice,
-} from './slices/workflowSlice';
-import {
-  createModeSlice,
-  type ModeSlice,
-} from './slices/modeSlice';
-import {
-  createApiKeySlice,
-  type ApiKeySlice,
-} from './slices/apiKeySlice';
+} from "./slices/workflowSlice";
+import { createModeSlice, type ModeSlice } from "./slices/modeSlice";
+import { createApiKeySlice, type ApiKeySlice } from "./slices/apiKeySlice";
 import {
   createEndpointsSlice,
   sanitizeEndpointsForPersist,
   type EndpointsSlice,
-} from './slices/endpointsSlice';
+} from "./slices/endpointsSlice";
 import {
   createEnsembleSlice,
   type EnsembleSlice,
-} from './slices/ensembleSlice';
+} from "./slices/ensembleSlice";
 import {
   createResponseSlice,
   type ResponseSlice,
-} from './slices/responseSlice';
-import { markInterruptedStreams } from './slices/responseErrorState';
+} from "./slices/responseSlice";
+import { markInterruptedStreams } from "./slices/responseErrorState";
 
 /**
  * Root Zustand store combining all slices
@@ -61,13 +52,13 @@ export type StoreState = ThemeSlice &
 
 const sanitizeStateForPersist = (state: StoreState): StoreState => {
   const sanitized = { ...state };
-  const providers: Array<keyof StoreState['apiKeys']> = [
-    'openai',
-    'anthropic',
-    'google',
-    'xai',
-    'deepseek',
-    'perplexity',
+  const providers: Array<keyof StoreState["apiKeys"]> = [
+    "openai",
+    "anthropic",
+    "google",
+    "xai",
+    "deepseek",
+    "perplexity",
   ];
 
   sanitized.apiKeys = {
@@ -86,11 +77,11 @@ const sanitizeStateForPersist = (state: StoreState): StoreState => {
         ...sanitized.apiKeys,
         [provider]: {
           encrypted: entry.encrypted,
-          key: '',
+          key: "",
           visible: false,
           // A validation in flight dies with the page; store it as idle so
           // the next load validates the key again instead of waiting forever.
-          status: entry.status === 'validating' ? 'idle' : entry.status,
+          status: entry.status === "validating" ? "idle" : entry.status,
         },
       };
     }
@@ -117,7 +108,7 @@ export const useStore = create<StoreState>()(
       ...createResponseSlice(...a),
     }),
     {
-      name: 'ensemble-ai-store',
+      name: "ensemble-ai-store",
       serialize: serializeStoreState,
       deserialize: markInterruptedStreams,
     },
@@ -125,11 +116,23 @@ export const useStore = create<StoreState>()(
 );
 
 // Export individual slice types for convenience
-export type { Theme } from './slices/themeSlice';
-export type { Language } from './slices/languageSlice';
-export type { WorkflowStep } from './slices/workflowSlice';
-export type { OperatingMode } from './slices/modeSlice';
-export type { ProviderType, ApiKeyProvider, ModelSelection, SavedEnsemble } from './slices/ensembleSlice';
-export type { EndpointEntry } from './slices/endpointsSlice';
-export type { ModelResponse, ManualResponse, AgreementStats } from './slices/responseSlice';
-export type { ResponseErrorKind, ResponseErrorDetails } from './slices/responseErrorState';
+export type { Theme } from "./slices/themeSlice";
+export type { Language } from "./slices/languageSlice";
+export type { WorkflowStep } from "./slices/workflowSlice";
+export type { OperatingMode } from "./slices/modeSlice";
+export type {
+  ProviderType,
+  ApiKeyProvider,
+  ModelSelection,
+  SavedEnsemble,
+} from "./slices/ensembleSlice";
+export type { EndpointEntry } from "./slices/endpointsSlice";
+export type {
+  ModelResponse,
+  ManualResponse,
+  AgreementStats,
+} from "./slices/responseSlice";
+export type {
+  ResponseErrorKind,
+  ResponseErrorDetails,
+} from "./slices/responseErrorState";

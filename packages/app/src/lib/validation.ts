@@ -2,20 +2,20 @@
  * Validation utilities for API keys
  */
 
-import type { Provider } from '@/components/molecules/ApiKeyInput';
-import type { ValidationStatus } from '@/components/molecules/ApiKeyInput';
+import type { Provider } from "@/components/molecules/ApiKeyInput";
+import type { ValidationStatus } from "@/components/molecules/ApiKeyInput";
 import {
   ProviderRegistry,
   sanitizeProviderErrorMessage,
-} from '@ensemble-ai/shared-utils/providers';
-import { initializeProviders } from '~/providers';
-import { toError } from '~/lib/errors';
-import { logger } from '~/lib/logger';
+} from "@ensemble-ai/shared-utils/providers";
+import { initializeProviders } from "~/providers";
+import { toError } from "~/lib/errors";
+import { logger } from "~/lib/logger";
 
 export interface ValidateApiKeyOptions {
   provider: Provider;
   apiKey: string;
-  userMode: 'free' | 'pro';
+  userMode: "free" | "pro";
   onStatusChange: (
     provider: Provider,
     status: ValidationStatus,
@@ -28,10 +28,10 @@ export interface ValidateApiKeyOptions {
  * - Uses MOCK_MODE environment variable if set (for testing/UI development)
  * - Otherwise uses the actual user mode (free/pro)
  */
-function getClientMode(userMode: 'free' | 'pro'): 'mock' | 'free' | 'pro' {
+function getClientMode(userMode: "free" | "pro"): "mock" | "free" | "pro" {
   // Check if MOCK_MODE is enabled via environment variable
-  if (process.env.NEXT_PUBLIC_MOCK_MODE === 'true') {
-    return 'mock';
+  if (process.env.NEXT_PUBLIC_MOCK_MODE === "true") {
+    return "mock";
   }
   // Otherwise use actual user mode
   return userMode;
@@ -55,12 +55,12 @@ export async function validateApiKey({
 }: ValidateApiKeyOptions): Promise<void> {
   // If no API key, set to idle
   if (!apiKey || apiKey.length === 0) {
-    onStatusChange(provider, 'idle');
+    onStatusChange(provider, "idle");
     return;
   }
 
   // Set validating status
-  onStatusChange(provider, 'validating');
+  onStatusChange(provider, "validating");
 
   try {
     const providerRegistry = ProviderRegistry.getInstance();
@@ -74,43 +74,43 @@ export async function validateApiKey({
     if (!providerRegistry.hasProvider(provider, clientMode)) {
       const msg = `Provider '${provider}' not registered for mode '${clientMode}'`;
       console.warn(`Skipping validation: ${msg}`);
-      onStatusChange(provider, 'invalid', msg);
+      onStatusChange(provider, "invalid", msg);
       return;
     }
     const providerInstance = providerRegistry.getProvider(provider, clientMode);
     const result = await providerInstance.validateApiKey(apiKey);
 
     if (result.valid) {
-      onStatusChange(provider, 'valid');
+      onStatusChange(provider, "valid");
     } else {
       const providerError = sanitizeProviderErrorMessage(
-        result.error ?? 'Invalid API key',
-        'Invalid API key',
+        result.error ?? "Invalid API key",
+        "Invalid API key",
       );
       // Pass specific error message from provider if available, or generic message
-      onStatusChange(provider, 'invalid', providerError);
+      onStatusChange(provider, "invalid", providerError);
     }
   } catch (error: unknown) {
     const normalizedMessage = sanitizeProviderErrorMessage(
-      toError(
-        error,
-        `Error validating ${provider} API key`,
-      ).message,
+      toError(error, `Error validating ${provider} API key`).message,
       `Error validating ${provider} API key`,
     );
     logger.error(`Error validating ${provider} API key: ${normalizedMessage}`);
 
     // Try to extract a user-friendly message
     let userMessage = normalizedMessage;
-    if (userMessage.includes('401')) {
-      userMessage = 'Invalid API key (401 Unauthorized)';
-    } else if (userMessage.includes('429')) {
-      userMessage = 'Rate limit exceeded (429)';
-    } else if (userMessage.includes('fetch failed') || userMessage.includes('Network error')) {
-      userMessage = 'Network error - check connection';
+    if (userMessage.includes("401")) {
+      userMessage = "Invalid API key (401 Unauthorized)";
+    } else if (userMessage.includes("429")) {
+      userMessage = "Rate limit exceeded (429)";
+    } else if (
+      userMessage.includes("fetch failed") ||
+      userMessage.includes("Network error")
+    ) {
+      userMessage = "Network error - check connection";
     }
 
-    onStatusChange(provider, 'invalid', userMessage);
+    onStatusChange(provider, "invalid", userMessage);
   }
 }
 
@@ -127,7 +127,7 @@ export function createDebouncedValidator(
   return (
     provider: Provider,
     apiKey: string,
-    userMode: 'free' | 'pro',
+    userMode: "free" | "pro",
     onStatusChange: (
       provider: Provider,
       status: ValidationStatus,
