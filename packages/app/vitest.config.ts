@@ -46,6 +46,7 @@ export default defineConfig({
     alias: {
       '@': resolve(__dirname, '../component-library/src'),
       '~': resolve(__dirname, './src'),
+      'server-only': resolve(__dirname, './src/server/testing/serverOnlyStub.ts'),
     },
   },
 });

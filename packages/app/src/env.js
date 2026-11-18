@@ -17,6 +17,11 @@ export const env = createEnv({
     XAI_API_KEY: z.string().optional(),
     DEEPSEEK_API_KEY: z.string().optional(),
     PERPLEXITY_API_KEY: z.string().optional(),
+    CREDIT_MARGIN_PERCENT: z.string().optional(),
+    CREDIT_LOW_BALANCE_USD: z.string().optional(),
+    CREDIT_PACKS_USD: z.string().optional(),
+    STRIPE_SECRET_KEY: z.string().optional(),
+    STRIPE_WEBHOOK_SECRET: z.string().optional(),
   },
 
   /**
@@ -27,6 +32,11 @@ export const env = createEnv({
   client: {
     NEXT_PUBLIC_SENTRY_DSN: z.string().url().optional(),
     NEXT_PUBLIC_SENTRY_RELEASE: z.string().optional(),
+    NEXT_PUBLIC_FIREBASE_API_KEY: z.string().optional(),
+    NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN: z.string().optional(),
+    NEXT_PUBLIC_FIREBASE_PROJECT_ID: z.string().optional(),
+    NEXT_PUBLIC_FIREBASE_APP_ID: z.string().optional(),
+    NEXT_PUBLIC_FIREBASE_AUTH_EMULATOR_HOST: z.string().optional(),
   },
 
   /**
@@ -44,8 +54,18 @@ export const env = createEnv({
     XAI_API_KEY: process.env.XAI_API_KEY,
     DEEPSEEK_API_KEY: process.env.DEEPSEEK_API_KEY,
     PERPLEXITY_API_KEY: process.env.PERPLEXITY_API_KEY,
+    CREDIT_MARGIN_PERCENT: process.env.CREDIT_MARGIN_PERCENT,
+    CREDIT_LOW_BALANCE_USD: process.env.CREDIT_LOW_BALANCE_USD,
+    CREDIT_PACKS_USD: process.env.CREDIT_PACKS_USD,
+    STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY,
+    STRIPE_WEBHOOK_SECRET: process.env.STRIPE_WEBHOOK_SECRET,
     NEXT_PUBLIC_SENTRY_DSN: process.env.NEXT_PUBLIC_SENTRY_DSN,
     NEXT_PUBLIC_SENTRY_RELEASE: process.env.NEXT_PUBLIC_SENTRY_RELEASE,
+    NEXT_PUBLIC_FIREBASE_API_KEY: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+    NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+    NEXT_PUBLIC_FIREBASE_PROJECT_ID: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+    NEXT_PUBLIC_FIREBASE_APP_ID: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
+    NEXT_PUBLIC_FIREBASE_AUTH_EMULATOR_HOST: process.env.NEXT_PUBLIC_FIREBASE_AUTH_EMULATOR_HOST,
   },
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially
