@@ -34,3 +34,5 @@ Captured for review of the M4 wireframes and visual refresh, at 375, 768 and 144
 | `history-open` | Same, the first run reopened from history | A saved run on screen read only, with the note that nothing is sent again |
 
 The `app-*` captures show the app's workspace wired to the store in mock mode, so answers and the consensus are placeholder text and their length is not realistic. The `cl-*` captures show the workspace components in Storybook with sample data, before the app is wired to them.
+
+The 1440 px `app-running`, `app-done`, `history`, `history-open`, `cl-running`, `cl-workspace`, `cl-method` and `cl-models` captures were retaken after the agreement card stopped stretching to the height of the consensus. The `wf-*` captures were not retaken: they come from the wireframes app, which does not use `ConsensusPanel`. Below 1024 px the two cards stack, so the 375 and 768 px captures did not change.
