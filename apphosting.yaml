@@ -177,3 +177,10 @@ env:
     availability:
       - BUILD
       - RUNTIME
+
+  # Basic consent-denied pageviews; enhanced measurement must remain disabled.
+  - variable: NEXT_PUBLIC_GA_MEASUREMENT_ID
+    value: G-RY1YJ98B9Z
+    availability:
+      - BUILD
+      - RUNTIME
