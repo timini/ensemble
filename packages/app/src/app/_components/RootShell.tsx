@@ -1,5 +1,6 @@
 "use client";
 
+import { trackPageview } from "~/lib/pageview";
 import "~/lib/i18n"; // Initialize i18next
 
 import { useEffect, useState } from "react";
@@ -25,7 +26,8 @@ import { hasAppShell } from "~/lib/workspaceRoutes";
  */
 export function RootShell({
   children,
-}: Readonly<{ children: React.ReactNode }>) {
+  nonce,
+}: Readonly<{ children: React.ReactNode; nonce?: string }>) {
   const { theme, language, setTheme, setLanguage } = useStore();
   const initializeEncryption = useStore((state) => state.initializeEncryption);
   const initializeEndpointKeys = useStore(
@@ -33,6 +35,10 @@ export function RootShell({
   );
   const { i18n, t } = useTranslation("common");
   const pathname = usePathname();
+  useEffect(() => {
+    if (process.env.NODE_ENV === "production")
+      trackPageview(pathname, process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID, nonce);
+  }, [pathname, nonce]);
   const [settingsOpen, setSettingsOpen] = useState(false);
   // The workspace and /account have their own frame (AppShell).
   const isWorkspace = hasAppShell(pathname);
