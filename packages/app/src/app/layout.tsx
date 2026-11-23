@@ -65,7 +65,7 @@ export default async function RootLayout({
         />
       </head>
       <body>
-        <RootShell>{children}</RootShell>
+        <RootShell nonce={nonce}>{children}</RootShell>
       </body>
     </html>
   );
